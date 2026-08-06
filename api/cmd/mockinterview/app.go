@@ -104,6 +104,7 @@ func (a *App) Routes(r chi.Router) {
 		r.Post("/sessions/{id}/workspace", interviewSvc.SaveWorkspace)
 		r.Post("/sessions/{id}/behavior", interviewSvc.Ingest)
 		r.Post("/sessions/{id}/finish", interviewSvc.Finish)
+		r.Get("/sessions/{id}/transcript", interviewSvc.Transcript)
 		r.Get("/sessions/{id}/report", interviewSvc.Report)
 	})
 }

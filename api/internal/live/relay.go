@@ -30,6 +30,7 @@ type Store interface {
 	GetSession(ctx context.Context, id string) (store.Session, error)
 	UpdateSessionStatus(ctx context.Context, id, status string) error
 	AddTurn(ctx context.Context, sessionID, role, text string, tsMs int64, meta json.RawMessage) error
+	Transcript(ctx context.Context, sessionID string) ([]store.Turn, error)
 	LatestResume(ctx context.Context, userID string) (store.Resume, error)
 }
 
@@ -301,11 +302,37 @@ func (r *Relay) runGemini(conn *websocket.Conn, sessionID string, q corpus.Quest
 		}
 	}()
 
-	// Kick off the interviewer's opening turn.
-	_ = session.SendClientContent(genai.LiveClientContentInput{
-		Turns:        []*genai.Content{genai.NewContentFromText("Please begin the interview now with a brief introduction.", genai.RoleUser)},
-		TurnComplete: genai.Ptr(true),
-	})
+	// Kick off the interviewer's turn. If there's already a transcript, this is a
+	// RESUME (reconnect after a drop, or the candidate returning) — feed the
+	// conversation so far and tell the interviewer to CONTINUE, never restart or
+	// re-greet. Otherwise it's a fresh start.
+	prior, _ := r.store.Transcript(ctx, sessionID)
+	if len(prior) == 0 {
+		_ = session.SendClientContent(genai.LiveClientContentInput{
+			Turns:        []*genai.Content{genai.NewContentFromText("Please begin the interview now: greet the candidate warmly and make a little genuine small talk before any question.", genai.RoleUser)},
+			TurnComplete: genai.Ptr(true),
+		})
+	} else {
+		var b strings.Builder
+		b.WriteString("IMPORTANT: This interview is ALREADY IN PROGRESS — you just reconnected after a brief network drop. Do NOT restart, do NOT greet again, do NOT re-introduce yourself or repeat the opening. Here is the conversation so far:\n\n")
+		for _, t := range prior {
+			role := "You (interviewer)"
+			if t.Role == "candidate" {
+				role = "Candidate"
+			}
+			fmt.Fprintf(&b, "%s: %s\n", role, t.Text)
+		}
+		// Context only (no reply).
+		_ = session.SendClientContent(genai.LiveClientContentInput{
+			Turns:        []*genai.Content{genai.NewContentFromText(b.String(), genai.RoleUser)},
+			TurnComplete: genai.Ptr(false),
+		})
+		// Now prompt one continuing turn.
+		_ = session.SendClientContent(genai.LiveClientContentInput{
+			Turns:        []*genai.Content{genai.NewContentFromText("(Reconnected.) Continue the interview naturally from the last exchange above — pick up exactly where you left off. No greeting, no restart.", genai.RoleUser)},
+			TurnComplete: genai.Ptr(true),
+		})
+	}
 
 	// Browser → Gemini: audio (binary) + control (JSON).
 	for {

@@ -195,20 +195,43 @@ func (s *Service) Finish(w http.ResponseWriter, r *http.Request) {
 
 	result, err := s.scorer.Evaluate(r.Context(), q, transcript, workspace)
 	if err != nil {
-		// Don't strand the session in "scoring" — reset so Finish can be retried.
-		_ = s.store.UpdateSessionStatus(r.Context(), sess.ID, "active")
-		httpx.WriteProblem(w, http.StatusBadGateway, "scoring failed: "+err.Error())
-		return
+		result, err = s.scorer.Evaluate(r.Context(), q, transcript, workspace) // one retry
+	}
+	if err != nil {
+		// The evaluator was unavailable. NEVER strand the candidate without a
+		// report — save a graceful not-scored report built from what we have so the
+		// report page always renders (transcript + workspace are still shown).
+		result = scoring.Result{
+			Scored: false,
+			Note:   "We couldn't fully score this interview automatically (the evaluator was temporarily unavailable). Your transcript and workspace are saved below — you can retry scoring by finishing again.",
+		}
 	}
 	// Behavioral summary is attached by the behavior package if present.
 	behavioral, _ := s.store.BehavioralSummary(r.Context(), sess.ID)
-	if err := s.scorer.Persist(r.Context(), s.store, sess.ID, result, behavioral); err != nil {
-		_ = s.store.UpdateSessionStatus(r.Context(), sess.ID, "active")
-		httpx.WriteProblem(w, http.StatusInternalServerError, "persist failed")
+	// Best-effort persist — a failure here still marks the session complete so the
+	// user isn't stuck; the report endpoint will surface whatever was saved.
+	_ = s.scorer.Persist(r.Context(), s.store, sess.ID, result, behavioral)
+	_ = s.store.UpdateSessionStatus(r.Context(), sess.ID, "complete")
+	httpx.WriteJSON(w, http.StatusOK, map[string]any{"ok": true, "overall": result.Overall, "scored": result.Scored})
+}
+
+// Transcript returns the session's conversation so far so a resumed interview
+// can reload the chat where the candidate left off.
+func (s *Service) Transcript(w http.ResponseWriter, r *http.Request) {
+	sess, ok := s.owned(w, r)
+	if !ok {
 		return
 	}
-	_ = s.store.UpdateSessionStatus(r.Context(), sess.ID, "complete")
-	httpx.WriteJSON(w, http.StatusOK, map[string]any{"ok": true, "overall": result.Overall})
+	turns, _ := s.store.Transcript(r.Context(), sess.ID)
+	out := make([]map[string]any, 0, len(turns))
+	for _, t := range turns {
+		role := "interviewer"
+		if t.Role == "candidate" {
+			role = "candidate"
+		}
+		out = append(out, map[string]any{"role": role, "text": t.Text, "ts_ms": t.TsMs})
+	}
+	httpx.WriteJSON(w, http.StatusOK, out)
 }
 
 // Report assembles the client-facing report from stored scores + report row.
