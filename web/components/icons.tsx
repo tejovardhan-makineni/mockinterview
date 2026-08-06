@@ -65,6 +65,9 @@ export const IconReconnect = (p: IconProps) => (
 export const IconStop = (p: IconProps) => (
   <Svg {...p}><rect x="6" y="6" width="12" height="12" rx="2" /></Svg>
 );
+export const IconPlay = (p: IconProps) => (
+  <Svg {...p}><path d="M7 5.5v13a1 1 0 0 0 1.5.87l11-6.5a1 1 0 0 0 0-1.74l-11-6.5A1 1 0 0 0 7 5.5Z" /></Svg>
+);
 export const IconClock = (p: IconProps) => (
   <Svg {...p}><circle cx="12" cy="12" r="9" /><path d="M12 7v5l3 2" /></Svg>
 );

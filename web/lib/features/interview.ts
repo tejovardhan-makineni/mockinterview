@@ -85,6 +85,7 @@ export interface InterviewSlice {
   ingestBehavior(sessionId: string, payload: unknown): Promise<void>;
   finishSession(id: string): Promise<void>;
   getReport(sessionId: string): Promise<Report>;
+  getTranscript(sessionId: string): Promise<TranscriptTurn[]>; // to reload chat on resume
   listSessions(): Promise<SessionHistoryItem[]>;
   // Short-lived ticket for the live WebSocket (so the long-lived JWT never rides
   // in the URL). Empty string in mock mode.
@@ -109,6 +110,7 @@ export const interviewHttp: InterviewSlice = {
   },
   finishSession(id) { return req<void>(`/api/v1/sessions/${id}/finish`, { method: "POST" }); },
   getReport(sessionId) { return req<Report>(`/api/v1/sessions/${sessionId}/report`); },
+  getTranscript(sessionId) { return req<TranscriptTurn[]>(`/api/v1/sessions/${sessionId}/transcript`); },
   listSessions() { return req<SessionHistoryItem[]>("/api/v1/sessions"); },
   async wsTicket() { return (await req<{ ticket: string }>("/api/v1/ws-ticket")).ticket; },
   liveUrl(sessionId, token, minutes) {
@@ -170,6 +172,7 @@ export const interviewMock: InterviewSlice = {
   async ingestBehavior() { /* no-op */ },
   async finishSession() { /* no-op */ },
   async getReport(sessionId) { return { ...MOCK_REPORT, session_id: sessionId }; },
+  async getTranscript() { return []; },
   async listSessions() {
     return [{ id: "mock-session", title: "Design a URL Shortener (TinyURL)", question_id: "url-shortener", modality: "system_design", track: "engineering", status: "complete", created_at: new Date().toISOString(), overall: 2.9, scored: true }];
   },

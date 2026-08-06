@@ -58,6 +58,7 @@ export class LiveSession {
   private attempts = 0;
   private reconnectTimer?: number;
   private connState: ConnState = "connecting";
+  private candidateIdle?: number; // voice-mode: fires when the candidate pauses
 
   constructor(private sessionId: string, questionTags: string[] = [], private voiceId: string = "aoede") {
     this.questionTags = questionTags;
@@ -186,9 +187,18 @@ export class LiveSession {
         this.touch();
         const role = m.role === "candidate" ? "candidate" : "interviewer";
         this.emit("caption", { role, text: m.text ?? "", streaming: !!m.streaming });
+        // Candidate speaking → drives "listening"; when they pause, the interviewer
+        // is "thinking" (until its audio arrives). Lets the HUD show real state in
+        // voice mode (where there's no SpeechRecognition).
+        if (role === "candidate") {
+          this.emit("userSpeaking", true);
+          if (this.candidateIdle) clearTimeout(this.candidateIdle);
+          this.candidateIdle = window.setTimeout(() => this.emit("userSpeaking", false), 1500);
+        }
         break;
       }
       case "interrupted": this.cancelSpeech(); break;
+      case "turn_complete": if (this.candidateIdle) { clearTimeout(this.candidateIdle); this.candidateIdle = undefined; } break;
       case "ended": this.emit("ended"); break;
     }
   }
@@ -377,6 +387,7 @@ export class LiveSession {
   end() {
     this.stopped = true;
     if (this.reconnectTimer) { clearTimeout(this.reconnectTimer); this.reconnectTimer = undefined; }
+    if (this.candidateIdle) { clearTimeout(this.candidateIdle); this.candidateIdle = undefined; }
     try { this.recog?.stop(); } catch { /* ignore */ }
     if (this.pauseTimer) clearInterval(this.pauseTimer);
     if (this.nudgeTimer) clearInterval(this.nudgeTimer);

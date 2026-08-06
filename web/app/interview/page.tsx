@@ -9,7 +9,7 @@ import { BehaviorTracker } from "@/lib/behavior";
 import { Avatar3D, type AvatarDrive } from "@/components/studio/Avatar3D";
 import { Workspace } from "@/components/studio/Workspace";
 import { Webcam } from "@/components/studio/Webcam";
-import { LiveHUD, type AiState } from "@/components/studio/LiveHUD";
+import { LiveHUD, ConnChip, type AiState } from "@/components/studio/LiveHUD";
 import { Button } from "@/components/ui";
 
 function StudioInner() {
@@ -49,6 +49,15 @@ function StudioInner() {
       const s = await api.getSession(sid);
       if (cancelled) return;
       setSession(s);
+
+      // Resuming a session: reload the conversation so far so the candidate sees
+      // where they left off (the interviewer also resumes without restarting).
+      try {
+        const prior = await api.getTranscript(sid);
+        if (!cancelled && prior.length) {
+          setCaptions(prior.slice(-60).map((t) => ({ role: t.role === "candidate" ? "candidate" : "interviewer", text: t.text })));
+        }
+      } catch { /* fresh session — no transcript yet */ }
 
       const ls = new LiveSession(sid, [], s.config?.voice_id ?? "aoede");
       localLive = ls;
@@ -149,6 +158,7 @@ function StudioInner() {
           <span className="hidden text-xs text-[var(--color-faint)] sm:inline">{modality.replace("_", " ")}</span>
         </div>
         <div className="flex items-center gap-3">
+          <ConnChip conn={conn} onReconnect={() => { setConn("reconnecting"); live.current?.reconnect(); }} />
           {remainingMs !== null && (
             <span className={`rounded-full border px-3 py-1 font-mono text-sm ${remainingMs < 120000 ? "border-[var(--color-bad)] text-[var(--color-bad)]" : "border-[var(--color-line)] text-[var(--color-muted)]"}`}>
               ⏱ {fmtTime(remainingMs)}
@@ -165,7 +175,7 @@ function StudioInner() {
             <Avatar3D faceId={faceId} drive={avatar} />
           </div>
           <div className="mt-3">
-            <LiveHUD micRef={micRef} aiState={aiState} conn={conn} mode={mode} onReconnect={() => { setConn("reconnecting"); live.current?.reconnect(); }} />
+            <LiveHUD micRef={micRef} aiState={aiState} conn={conn} mode={mode} />
           </div>
           <div className="mi-panel mt-3 max-h-[40vh] flex-1 overflow-y-auto rounded-xl border border-[var(--color-line)] bg-[var(--color-panel)] p-3 text-sm lg:max-h-none">
             {captions.length === 0 && <p className="text-[var(--color-faint)]">The interviewer will begin shortly…</p>}

@@ -7,6 +7,7 @@ import type { Face, InterviewConfig, Personality, Resume, Voice } from "@/lib/ty
 import { Badge, Button, Field, Panel } from "@/components/ui";
 import { Avatar3D, type AvatarDrive } from "@/components/studio/Avatar3D";
 import { previewVoiceSample, stopPreview } from "@/lib/voicePreview";
+import { IconPlay, IconStop } from "@/components/icons";
 
 const PERSONAS: { id: Personality; label: string; desc: string }[] = [
   { id: "supportive", label: "Supportive", desc: "Warm, encouraging, gives hints." },
@@ -112,16 +113,19 @@ function SetupInner() {
           <div className="text-sm">
             <div className="font-semibold">{faces.find((f) => f.id === cfg.face_id)?.label ?? cfg.face_id}</div>
             <div className="text-[var(--color-muted)]">Voice: {voices.find((v) => v.id === cfg.voice_id)?.label ?? cfg.voice_id} · {cfg.personality}, intensity {cfg.intensity}/5</div>
-            <button onClick={() => toggleVoice(cfg.voice_id)} className="mt-1 text-xs text-[var(--color-accent)] hover:brightness-125">{previewing ? "■ Stop" : "🔊 Hear this interviewer"}</button>
+            <button onClick={() => toggleVoice(cfg.voice_id)} className="mt-1 inline-flex items-center gap-1.5 rounded-md border border-[var(--color-line)] px-2 py-1 text-xs font-medium text-[var(--color-accent)] transition hover:bg-[var(--color-panel)]">
+              {previewing ? <IconStop className="h-3.5 w-3.5" /> : <IconPlay className="h-3.5 w-3.5" />}
+              {previewing ? "Stop" : "Hear this interviewer"}
+            </button>
           </div>
         </div>
         <div className="mt-5 grid gap-6 md:grid-cols-2">
           <Field label="Voice">
             <div className="grid grid-cols-3 gap-2">
               {voices.map((v) => (
-                <button key={v.id} onClick={() => { setCfg({ ...cfg, voice_id: v.id }); setPreviewing(true); previewVoiceSample(v.id, pv, () => setPreviewing(false)); }}
+                <button key={v.id} onClick={() => { if (previewing) { stopPreview(pv); setPreviewing(false); } setCfg({ ...cfg, voice_id: v.id }); }}
                   className={`rounded-xl border px-3 py-2 text-sm transition ${cfg.voice_id === v.id ? "border-[var(--color-accent)] bg-[var(--color-panel-2)]" : "border-[var(--color-line)] hover:bg-[var(--color-panel-2)]"}`}>
-                  {v.label} 🔊<span className="block text-xs text-[var(--color-faint)]">{v.gender}</span>
+                  {v.label}<span className="block text-xs text-[var(--color-faint)]">{v.gender}</span>
                 </button>
               ))}
             </div>

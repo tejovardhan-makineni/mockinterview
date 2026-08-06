@@ -94,28 +94,31 @@ export default function DashboardPage() {
             </Panel>
           </div>
 
-          {/* Strong / weak */}
-          {byMod.length > 0 && (
-            <div className="mt-4 grid gap-4 md:grid-cols-2">
-              <Panel className="p-5">
-                <h2 className="mb-3 font-semibold"><Badge tone="good">Strong areas</Badge></h2>
-                <ul className="space-y-2 text-sm">
-                  {byMod.slice(0, 3).map((m) => (
-                    <li key={m.modality} className="flex justify-between"><span className="text-[var(--color-muted)]">{MOD_LABEL[m.modality] ?? m.modality}</span><span className="font-mono">{m.avg.toFixed(1)}/4</span></li>
-                  ))}
-                </ul>
-              </Panel>
-              <Panel className="p-5">
-                <h2 className="mb-3 font-semibold"><Badge tone="warn">To prepare</Badge></h2>
-                <ul className="space-y-2 text-sm">
-                  {[...byMod].reverse().slice(0, 3).map((m) => (
-                    <li key={m.modality} className="flex justify-between"><span className="text-[var(--color-muted)]">{MOD_LABEL[m.modality] ?? m.modality}</span><span className="font-mono">{m.avg.toFixed(1)}/4</span></li>
-                  ))}
-                </ul>
-                <Button href="/interviews" className="mt-4">Practice a weak area →</Button>
-              </Panel>
-            </div>
-          )}
+          {/* Strong / weak — split the ranked list so an area never appears in
+              both columns (top half = strong, bottom half = to prepare). */}
+          {byMod.length > 0 && (() => {
+            const mid = Math.ceil(byMod.length / 2);
+            const strong = byMod.slice(0, Math.min(mid, 3));
+            const weak = byMod.slice(mid).slice(0, 3); // the lower-ranked half, no overlap
+            const Row = (m: { modality: string; avg: number }) => (
+              <li key={m.modality} className="flex justify-between"><span className="text-[var(--color-muted)]">{MOD_LABEL[m.modality] ?? m.modality}</span><span className="font-mono">{m.avg.toFixed(1)}/4</span></li>
+            );
+            return (
+              <div className="mt-4 grid gap-4 md:grid-cols-2">
+                <Panel className="p-5">
+                  <h2 className="mb-3 font-semibold"><Badge tone="good">Strong areas</Badge></h2>
+                  <ul className="space-y-2 text-sm">{strong.map(Row)}</ul>
+                </Panel>
+                <Panel className="p-5">
+                  <h2 className="mb-3 font-semibold"><Badge tone="warn">To prepare</Badge></h2>
+                  {weak.length > 0
+                    ? <ul className="space-y-2 text-sm">{weak.map(Row)}</ul>
+                    : <p className="text-sm text-[var(--color-muted)]">Take interviews in more formats to see where to focus.</p>}
+                  <Button href="/interviews" className="mt-4">Practice interview →</Button>
+                </Panel>
+              </div>
+            );
+          })()}
         </>
       )}
     </AppShell>

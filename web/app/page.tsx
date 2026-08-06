@@ -1,7 +1,7 @@
 import { Badge, Button, Panel } from "@/components/ui";
 
 const FEATURES = [
-  { t: "A human-like interviewer", d: "A configurable face and voice that speaks, reacts, and interrupts in real time — powered by Gemini's native-audio live model." },
+  { t: "A human-like interviewer", d: "A configurable face and voice that speaks, reacts, and interrupts in real time — powered by a native-audio live AI model." },
   { t: "It watches you draw", d: "Sketch your architecture on a live canvas. The interviewer sees it and probes: \"you drew Postgres — how do you capture changes, CDC/Debezium?\"" },
   { t: "Scored like the real thing", d: "Requirements, estimations, HLD, API, deep-dives, scaling, reliability, observability, security — each rated with evidence and coverage." },
   { t: "Reads the room", d: "Eye contact, posture, lighting, filler words, long pauses, and how often you asked for help — tracked in-browser, reported honestly." },
@@ -24,7 +24,7 @@ export default function Home() {
       </nav>
 
       <section className="mx-auto mt-24 max-w-3xl text-center">
-        <Badge tone="accent">Powered by Gemini · Live voice &amp; face</Badge>
+        <Badge tone="accent">Powered by AI · Live voice &amp; face</Badge>
         <h1 className="mt-6 text-5xl font-extrabold leading-[1.05] tracking-tight md:text-6xl">
           Practice system design with an AI that feels like a{" "}
           <span className="text-[var(--color-accent)]">real interviewer</span>.

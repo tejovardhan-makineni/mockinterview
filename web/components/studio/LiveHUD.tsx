@@ -14,13 +14,12 @@ export type AiState = "idle" | "listening" | "thinking" | "speaking";
 const BARS = 7;
 
 export function LiveHUD({
-  micRef, aiState, conn, mode, onReconnect,
+  micRef, aiState, conn, mode,
 }: {
   micRef: MutableRefObject<number>;
   aiState: AiState;
   conn: ConnState;
   mode: "voice" | "text" | "local";
-  onReconnect: () => void;
 }) {
   const barRefs = useRef<(HTMLSpanElement | null)[]>([]);
   const labelRef = useRef<HTMLSpanElement>(null);
@@ -75,16 +74,11 @@ export function LiveHUD({
       <span className="h-5 w-px bg-[var(--color-line)]" />
 
       {/* Interviewer state */}
-      <div className="flex min-w-0 items-center gap-1.5" aria-live="polite">
+      <div className="ml-auto flex min-w-0 items-center gap-1.5" aria-live="polite">
         <span className={ai.color}>{ai.icon}</span>
         <span className={`truncate text-[11px] font-medium ${ai.color}`}>{ai.label}</span>
         {aiState === "thinking" && <ThinkingDots />}
       </div>
-
-      <span className="ml-auto" />
-
-      {/* Connection health */}
-      <ConnChip conn={conn} onReconnect={onReconnect} />
     </div>
   );
 }
@@ -106,7 +100,7 @@ function ThinkingDots() {
   );
 }
 
-function ConnChip({ conn, onReconnect }: { conn: ConnState; onReconnect: () => void }) {
+export function ConnChip({ conn, onReconnect }: { conn: ConnState; onReconnect: () => void }) {
   if (conn === "connected") {
     return (
       <span className="flex items-center gap-1.5 rounded-full border border-[color-mix(in_srgb,var(--color-good)_40%,transparent)] px-2 py-0.5 text-[11px] font-medium text-[var(--color-good)]" title="Connected to the interviewer">

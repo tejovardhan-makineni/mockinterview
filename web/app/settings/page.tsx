@@ -8,6 +8,7 @@ import { Badge, Button, Field, Input, Panel } from "@/components/ui";
 import { AppShell } from "@/components/AppShell";
 import { Avatar3D, type AvatarDrive } from "@/components/studio/Avatar3D";
 import { previewVoiceSample, stopPreview } from "@/lib/voicePreview";
+import { IconPlay, IconStop } from "@/components/icons";
 
 const DOMAINS = [
   "system_design", "ml_system_design", "coding", "behavioral", "medicine", "medical_residency",
@@ -93,7 +94,10 @@ export default function SettingsPage() {
             <div className="aspect-square w-full overflow-hidden rounded-xl bg-[var(--color-panel-2)]">
               <Avatar3D faceId={cfg.face_id} drive={pv} />
             </div>
-            <button onClick={() => previewVoice()} className="mt-2 w-full text-center text-xs text-[var(--color-accent)] hover:brightness-125">{previewing ? "■ Stop" : "🔊 Hear this voice & face"}</button>
+            <button onClick={() => previewVoice()} className="mt-2 inline-flex w-full items-center justify-center gap-1.5 rounded-md border border-[var(--color-line)] px-2 py-1.5 text-xs font-medium text-[var(--color-accent)] transition hover:bg-[var(--color-panel-2)]">
+              {previewing ? <IconStop className="h-3.5 w-3.5" /> : <IconPlay className="h-3.5 w-3.5" />}
+              {previewing ? "Stop" : "Hear this voice & face"}
+            </button>
           </div>
           <div className="space-y-4">
             <Field label="Face (humans + fun characters)">
@@ -109,8 +113,8 @@ export default function SettingsPage() {
             <Field label="Voice">
               <div className="grid grid-cols-3 gap-2">
                 {voices.map((v) => (
-                  <button key={v.id} onClick={() => { setCfg({ ...cfg, voice_id: v.id }); previewVoice(v.id); }}
-                    className={`rounded-xl border px-3 py-2 text-sm transition ${cfg.voice_id === v.id ? "border-[var(--color-accent)] bg-[var(--color-panel-2)]" : "border-[var(--color-line)] hover:bg-[var(--color-panel-2)]"}`}>{v.label} 🔊</button>
+                  <button key={v.id} onClick={() => { if (previewing) { stopPreview(pv); setPreviewing(false); } setCfg({ ...cfg, voice_id: v.id }); }}
+                    className={`rounded-xl border px-3 py-2 text-sm transition ${cfg.voice_id === v.id ? "border-[var(--color-accent)] bg-[var(--color-panel-2)]" : "border-[var(--color-line)] hover:bg-[var(--color-panel-2)]"}`}>{v.label}</button>
                 ))}
               </div>
             </Field>
