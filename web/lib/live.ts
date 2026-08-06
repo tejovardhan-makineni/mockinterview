@@ -8,7 +8,7 @@
 // Either way it emits caption/speaking/amplitude/filler/pause events the studio
 // UI + avatar + behavioral tracker consume.
 
-import { api, IS_MOCK, getToken } from "./api";
+import { api, IS_MOCK } from "./api";
 
 export type Caption = { role: "interviewer" | "candidate"; text: string; streaming?: boolean };
 
@@ -112,10 +112,13 @@ export class LiveSession {
     this.connect();
   }
 
-  private connect() {
+  private async connect() {
     this.setConn(this.attempts > 0 ? "reconnecting" : "connecting");
-    const url = api.liveUrl(this.sessionId, getToken(), this.minutes);
     try {
+      // Fetch a short-lived ticket so the long-lived JWT never rides in the URL.
+      const ticket = await api.wsTicket();
+      if (this.stopped) return;
+      const url = api.liveUrl(this.sessionId, ticket, this.minutes);
       const ws = new WebSocket(url);
       this.ws = ws;
       ws.binaryType = "arraybuffer";

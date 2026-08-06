@@ -2,8 +2,10 @@ package main
 
 import (
 	"net/http"
+	"time"
 
 	"github.com/go-chi/chi/v5"
+	"github.com/go-chi/httprate"
 
 	"github.com/tejo/mockinterview-api/internal/auth"
 	"github.com/tejo/mockinterview-api/internal/config"
@@ -35,8 +37,15 @@ func (a *App) Routes(r chi.Router) {
 		httpx.WriteJSON(w, 200, map[string]string{"pong": "ok"})
 	})
 
-	// Public auth endpoints.
+	// Per-user limiter for paid LLM/TTS endpoints (keyed by the authenticated
+	// user id, so one account can't loop them to burn tokens).
+	perUser := httprate.Limit(30, time.Hour, httprate.WithKeyFuncs(func(req *http.Request) (string, error) {
+		return auth.UserID(req.Context()), nil
+	}))
+
+	// Public auth endpoints — throttled per-IP to blunt brute force / spam.
 	r.Route("/auth", func(r chi.Router) {
+		r.Use(httprate.LimitByIP(20, time.Minute))
 		r.Post("/register", authSvc.Register)
 		r.Post("/login", authSvc.Login)
 		r.With(authSvc.Required).Get("/me", authSvc.Me)
@@ -57,16 +66,21 @@ func (a *App) Routes(r chi.Router) {
 	r.Group(func(r chi.Router) {
 		r.Use(authSvc.Required)
 
-		// Resume upload / parse / review.
+		// Short-lived ticket to open the interview WebSocket (keeps the long-lived
+		// JWT out of the WS URL).
+		r.Get("/ws-ticket", authSvc.WSTicket)
+
+		// Resume upload / parse / review. Review calls the LLM, so it's per-user
+		// rate-limited.
 		r.Post("/resume", resumeSvc.Upload)
 		r.Get("/resume", resumeSvc.Get)
-		r.Post("/resume/review", resumeSvc.Review)
+		r.With(perUser).Post("/resume/review", resumeSvc.Review)
 
 		// Interviewer configuration + catalogs.
 		r.Get("/config", profileSvc.Get)
 		r.Put("/config", profileSvc.Save)
 		r.Get("/voices", profileSvc.ListVoices)
-		r.Get("/voices/preview", profileSvc.PreviewVoice)
+		r.With(perUser).Get("/voices/preview", profileSvc.PreviewVoice) // TTS costs money
 		r.Get("/faces", profileSvc.ListFaces)
 		r.Get("/personalities", profileSvc.ListPersonalities)
 

@@ -172,10 +172,17 @@ on boot.
 
 ## 6. Security
 
-- Email/password with bcrypt + short-lived JWT (`internal/auth`); optional
-  Firebase-verifier seam behind the same middleware.
-- The live WebSocket authenticates via `?token=` (browsers can't set WS headers);
-  it's a bearer credential and validated by the same auth code.
+- Email/password with bcrypt + short-lived JWT (`internal/auth`), signing method
+  pinned to HMAC; optional Firebase-verifier seam behind the same middleware.
+- The live WebSocket authenticates with a **short-lived (90s) ws ticket** fetched
+  from `GET /ws-ticket`, not the long-lived JWT — so a token leaked from a URL or
+  proxy log can't open a socket. The full JWT is only ever sent in the
+  `Authorization` header.
+- **Abuse controls:** per-IP rate limit on `/auth/*`; per-user rate limit on the
+  paid LLM/TTS endpoints (`/resume/review`, `/voices/preview`); a 1 MB JSON body
+  cap and a bounded behavior-batch; a decompression-bomb guard on DOCX; a
+  `SetReadLimit` on the live socket. In production the server refuses to boot with
+  the default `JWT_SECRET`.
 - Secrets only in gitignored `.env` / `deploy/*.env`. The API key never reaches
   the browser — the server proxies Gemini Live.
 - Tiering: free users get `FREE_DAILY_LIMIT` interviews/day (429 past it); admin

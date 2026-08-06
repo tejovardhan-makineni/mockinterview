@@ -22,7 +22,8 @@ import (
 	"github.com/tejo/mockinterview-api/internal/store"
 )
 
-const maxUpload = 6 << 20 // 6 MB
+const maxUpload = 6 << 20  // 6 MB — the uploaded file
+const maxDocXML = 20 << 20 // 20 MB — the decompressed DOCX document.xml (bomb guard)
 
 // Repo is the persistence resume review needs. *store.Store satisfies it; tests
 // supply a fake.
@@ -83,7 +84,7 @@ func (s *Service) Upload(w http.ResponseWriter, r *http.Request) {
 
 	text := extractText(header.Filename, data)
 	if strings.TrimSpace(text) == "" {
-		httpx.WriteProblem(w, http.StatusBadRequest, "could not extract text from file (use PDF or .txt/.md)")
+		httpx.WriteProblem(w, http.StatusBadRequest, "could not extract text from file (use PDF, DOCX, or .txt/.md)")
 		return
 	}
 
@@ -204,11 +205,16 @@ func extractDocx(data []byte) string {
 		if f.Name != "word/document.xml" {
 			continue
 		}
+		// Guard against a decompression bomb: the 6 MB upload cap bounds the
+		// COMPRESSED zip, but document.xml can inflate far beyond that.
+		if f.UncompressedSize64 > maxDocXML {
+			return ""
+		}
 		rc, err := f.Open()
 		if err != nil {
 			return ""
 		}
-		raw, _ := io.ReadAll(rc)
+		raw, _ := io.ReadAll(io.LimitReader(rc, maxDocXML))
 		_ = rc.Close()
 		xml := string(raw)
 		xml = strings.ReplaceAll(xml, "</w:p>", "\n")

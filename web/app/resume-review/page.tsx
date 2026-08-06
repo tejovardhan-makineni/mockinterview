@@ -95,8 +95,7 @@ export default function ResumeReviewPage() {
 
   return (
     <AppShell active="resume">
-
-      <h1 className="mt-6 text-3xl font-bold">Resume review</h1>
+      <h1 className="text-3xl font-extrabold tracking-tight">Resume review</h1>
       <p className="mt-1 text-[var(--color-muted)]">Upload a resume (PDF, DOCX, TXT, or MD). Get a score, see exactly what to change highlighted in your document, apply fixes, and download the revised version.</p>
 
       <div className="mt-5 flex flex-wrap items-center gap-3">

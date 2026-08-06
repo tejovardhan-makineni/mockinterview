@@ -32,14 +32,24 @@ export function Webcam({ onReady }: { onReady: (v: HTMLVideoElement) => void }) 
   }, [onReady]);
 
   useEffect(() => {
+    // Clamp within the viewport so the tile can't be dragged off-screen and lost.
+    const clamp = (x: number, y: number) => {
+      const w = 220, h = 180;
+      return {
+        x: Math.min(Math.max(8, x), Math.max(8, window.innerWidth - w)),
+        y: Math.min(Math.max(8, y), Math.max(8, window.innerHeight - h)),
+      };
+    };
     const move = (e: PointerEvent) => {
       if (!drag.current) return;
-      setPos({ x: Math.max(8, e.clientX - drag.current.dx), y: Math.max(8, e.clientY - drag.current.dy) });
+      setPos(clamp(e.clientX - drag.current.dx, e.clientY - drag.current.dy));
     };
     const up = () => { drag.current = null; };
+    const onResize = () => setPos((p) => clamp(p.x, p.y)); // keep it on-screen when the window shrinks
     window.addEventListener("pointermove", move);
     window.addEventListener("pointerup", up);
-    return () => { window.removeEventListener("pointermove", move); window.removeEventListener("pointerup", up); };
+    window.addEventListener("resize", onResize);
+    return () => { window.removeEventListener("pointermove", move); window.removeEventListener("pointerup", up); window.removeEventListener("resize", onResize); };
   }, []);
 
   return (

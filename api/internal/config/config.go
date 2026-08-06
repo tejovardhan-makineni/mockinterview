@@ -7,6 +7,7 @@ package config
 
 import (
 	"fmt"
+	"log/slog"
 	"os"
 	"strconv"
 	"strings"
@@ -98,6 +99,17 @@ func Load() (*Config, error) {
 
 	if c.Mode != "api" {
 		return nil, fmt.Errorf("unsupported MODE %q", c.Mode)
+	}
+
+	// Never let a production deploy run with the public default JWT secret — any
+	// reader of the repo could forge tokens. In production also require length.
+	insecure := c.JWTSecret == "" || c.JWTSecret == "dev-insecure-change-me"
+	if strings.EqualFold(env("APP_ENV", ""), "production") {
+		if insecure || len(c.JWTSecret) < 32 {
+			return nil, fmt.Errorf("JWT_SECRET must be set to a strong value (>=32 chars) in production")
+		}
+	} else if insecure {
+		slog.Warn("using the insecure default JWT_SECRET — set JWT_SECRET before deploying")
 	}
 	return c, nil
 }

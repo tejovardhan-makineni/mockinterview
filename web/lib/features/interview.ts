@@ -86,6 +86,9 @@ export interface InterviewSlice {
   finishSession(id: string): Promise<void>;
   getReport(sessionId: string): Promise<Report>;
   listSessions(): Promise<SessionHistoryItem[]>;
+  // Short-lived ticket for the live WebSocket (so the long-lived JWT never rides
+  // in the URL). Empty string in mock mode.
+  wsTicket(): Promise<string>;
   // WebSocket URL for the live interviewer relay (empty in mock mode).
   liveUrl(sessionId: string, token: string, minutes: number): string;
 }
@@ -107,6 +110,7 @@ export const interviewHttp: InterviewSlice = {
   finishSession(id) { return req<void>(`/api/v1/sessions/${id}/finish`, { method: "POST" }); },
   getReport(sessionId) { return req<Report>(`/api/v1/sessions/${sessionId}/report`); },
   listSessions() { return req<SessionHistoryItem[]>("/api/v1/sessions"); },
+  async wsTicket() { return (await req<{ ticket: string }>("/api/v1/ws-ticket")).ticket; },
   liveUrl(sessionId, token, minutes) {
     return `${wsBase()}/api/v1/sessions/${sessionId}/live?token=${encodeURIComponent(token)}&minutes=${minutes}`;
   },
@@ -152,11 +156,14 @@ export const MOCK_REPORT: Report = {
 
 export const interviewMock: InterviewSlice = {
   async createSession(questionId, cfg) {
-    return { id: "mock-session", question_id: questionId, modality: "system_design", track: "engineering", status: "active", phase: "intro", config: cfg };
+    // Mirror the real backend defaults (status "created", phase "lobby") so UI
+    // that branches on status/phase behaves the same in mock and live modes.
+    const q = MOCK_QUESTIONS.find((x) => x.id === questionId);
+    return { id: "mock-session", question_id: questionId, modality: q?.modality ?? "system_design", track: q?.track ?? "engineering", status: "created", phase: "lobby", config: cfg };
   },
   async getSession(id) {
     const cfg = await profileMock.getConfig();
-    return { id, question_id: MOCK_QUESTIONS[0].id, modality: "system_design", track: "engineering", status: "active", phase: "intro", config: cfg };
+    return { id, question_id: MOCK_QUESTIONS[0].id, modality: MOCK_QUESTIONS[0].modality, track: MOCK_QUESTIONS[0].track, status: "active", phase: "intro", config: cfg };
   },
   async saveWorkspace() { /* no-op */ },
   async sendTurn() { /* no-op */ },
@@ -166,5 +173,6 @@ export const interviewMock: InterviewSlice = {
   async listSessions() {
     return [{ id: "mock-session", title: "Design a URL Shortener (TinyURL)", question_id: "url-shortener", modality: "system_design", track: "engineering", status: "complete", created_at: new Date().toISOString(), overall: 2.9, scored: true }];
   },
+  async wsTicket() { return ""; },
   liveUrl() { return ""; },
 };

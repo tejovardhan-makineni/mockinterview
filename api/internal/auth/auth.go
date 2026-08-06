@@ -44,6 +44,11 @@ func (s *Service) hash(pw string) (string, error) {
 	return string(b), err
 }
 
+// wsAudience marks a short-lived ticket that may ride in a WebSocket URL. The
+// long-lived session JWT never carries it, so a JWT leaked from a URL/log is not
+// accepted on the socket, and a ticket is useless after ~90s.
+const wsAudience = "ws"
+
 func (s *Service) issue(userID string) (string, error) {
 	claims := jwt.RegisteredClaims{
 		Subject:   userID,
@@ -53,13 +58,39 @@ func (s *Service) issue(userID string) (string, error) {
 	return jwt.NewWithClaims(jwt.SigningMethodHS256, claims).SignedString(s.secret)
 }
 
+// issueTicket mints a short-TTL, ws-audience token for the WebSocket handshake.
+func (s *Service) issueTicket(userID string) (string, error) {
+	claims := jwt.RegisteredClaims{
+		Subject:   userID,
+		Audience:  jwt.ClaimStrings{wsAudience},
+		ExpiresAt: jwt.NewNumericDate(time.Now().Add(90 * time.Second)),
+		IssuedAt:  jwt.NewNumericDate(time.Now()),
+	}
+	return jwt.NewWithClaims(jwt.SigningMethodHS256, claims).SignedString(s.secret)
+}
+
+func (s *Service) keyFunc(t *jwt.Token) (any, error) {
+	if _, ok := t.Method.(*jwt.SigningMethodHMAC); !ok {
+		return nil, errors.New("unexpected signing method")
+	}
+	return s.secret, nil
+}
+
+// parseTicket validates a WebSocket ticket (must carry the ws audience).
+func (s *Service) parseTicket(tokenStr string) (string, error) {
+	tok, err := jwt.ParseWithClaims(tokenStr, &jwt.RegisteredClaims{}, s.keyFunc, jwt.WithAudience(wsAudience))
+	if err != nil || !tok.Valid {
+		return "", errors.New("invalid ticket")
+	}
+	claims, ok := tok.Claims.(*jwt.RegisteredClaims)
+	if !ok || claims.Subject == "" {
+		return "", errors.New("invalid ticket claims")
+	}
+	return claims.Subject, nil
+}
+
 func (s *Service) parse(tokenStr string) (string, error) {
-	tok, err := jwt.ParseWithClaims(tokenStr, &jwt.RegisteredClaims{}, func(t *jwt.Token) (any, error) {
-		if _, ok := t.Method.(*jwt.SigningMethodHMAC); !ok {
-			return nil, errors.New("unexpected signing method")
-		}
-		return s.secret, nil
-	})
+	tok, err := jwt.ParseWithClaims(tokenStr, &jwt.RegisteredClaims{}, s.keyFunc)
 	if err != nil || !tok.Valid {
 		return "", errors.New("invalid token")
 	}
@@ -166,23 +197,36 @@ func (s *Service) Required(next http.Handler) http.Handler {
 	})
 }
 
-// authFromRequest accepts the token from the Authorization header or, for the
-// WebSocket path (which can't set headers), a ?token= query param.
+// authFromRequest authenticates a normal HTTP request via the Authorization
+// bearer header (the full session JWT).
 func (s *Service) authFromRequest(r *http.Request) (string, error) {
-	raw := ""
-	if h := r.Header.Get("Authorization"); strings.HasPrefix(h, "Bearer ") {
-		raw = strings.TrimPrefix(h, "Bearer ")
-	} else if q := r.URL.Query().Get("token"); q != "" {
-		raw = q
-	}
-	if raw == "" {
+	h := r.Header.Get("Authorization")
+	if !strings.HasPrefix(h, "Bearer ") {
 		return "", errors.New("no token")
 	}
-	return s.parse(raw)
+	return s.parse(strings.TrimPrefix(h, "Bearer "))
 }
 
-// AuthFromRequest is exported for the WebSocket relay to authenticate upgrades.
-func (s *Service) AuthFromRequest(r *http.Request) (string, error) { return s.authFromRequest(r) }
+// AuthFromRequest authenticates a WebSocket upgrade. Browsers can't set headers
+// on a WebSocket, so it accepts a short-lived ws TICKET via ?token= — never the
+// long-lived session JWT — obtained from GET /ws-ticket. Exported for the relay.
+func (s *Service) AuthFromRequest(r *http.Request) (string, error) {
+	if q := r.URL.Query().Get("token"); q != "" {
+		return s.parseTicket(q)
+	}
+	// Also allow a header (non-browser clients / tests).
+	return s.authFromRequest(r)
+}
+
+// WSTicket issues a short-lived ticket for opening the interview WebSocket.
+func (s *Service) WSTicket(w http.ResponseWriter, r *http.Request) {
+	t, err := s.issueTicket(UserID(r.Context()))
+	if err != nil {
+		httpx.WriteProblem(w, http.StatusInternalServerError, "could not issue ticket")
+		return
+	}
+	httpx.WriteJSON(w, http.StatusOK, map[string]string{"ticket": t})
+}
 
 // UserID returns the authenticated user id from a request context.
 func UserID(ctx context.Context) string {

@@ -16,20 +16,26 @@ type Resume struct {
 }
 
 // SaveResume upserts the user's resume (we keep only the latest per user for
-// simplicity — a new upload replaces the old).
+// simplicity — a new upload replaces the old). The delete+insert run in one
+// transaction so a mid-way failure can't leave the user with no resume at all.
 func (s *Store) SaveResume(ctx context.Context, userID, filename, parsedText string, parsedJSON json.RawMessage) (Resume, error) {
 	if len(parsedJSON) == 0 {
 		parsedJSON = json.RawMessage(`{}`)
 	}
-	// Delete previous resumes for this user, then insert.
-	if _, err := s.Pool.Exec(ctx, `DELETE FROM resumes WHERE user_id=$1`, userID); err != nil {
+	r := Resume{ID: NewID(), Filename: filename, ParsedText: parsedText, ParsedJSON: parsedJSON}
+	err := pgx.BeginFunc(ctx, s.Pool, func(tx pgx.Tx) error {
+		if _, err := tx.Exec(ctx, `DELETE FROM resumes WHERE user_id=$1`, userID); err != nil {
+			return err
+		}
+		_, err := tx.Exec(ctx,
+			`INSERT INTO resumes (id, user_id, filename, parsed_text, parsed_json) VALUES ($1,$2,$3,$4,$5)`,
+			r.ID, userID, filename, parsedText, parsedJSON)
+		return err
+	})
+	if err != nil {
 		return Resume{}, err
 	}
-	r := Resume{ID: NewID(), Filename: filename, ParsedText: parsedText, ParsedJSON: parsedJSON}
-	_, err := s.Pool.Exec(ctx,
-		`INSERT INTO resumes (id, user_id, filename, parsed_text, parsed_json) VALUES ($1,$2,$3,$4,$5)`,
-		r.ID, userID, filename, parsedText, parsedJSON)
-	return r, err
+	return r, nil
 }
 
 func (s *Store) LatestResume(ctx context.Context, userID string) (Resume, error) {

@@ -67,6 +67,11 @@
   --color-accent: #4a5bd6;
   --color-accent-2: #0f9e92;
   --color-live: #e0574a;
+  /* Semantic colors must be re-darkened for light backgrounds, or scoring
+     signals (Badges, stat numbers, highlighted edits) fail contrast on white. */
+  --color-good: #15803d;
+  --color-warn: #b45309;
+  --color-bad: #dc2626;
 }
 
 html, body {
@@ -74,6 +79,7 @@ html, body {
   color: var(--color-ink);
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
+  overflow-x: hidden; /* contain incidental overflow instead of scrolling the page sideways */
 }
 
 * { box-sizing: border-box; }

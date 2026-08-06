@@ -54,3 +54,24 @@ func TestExpiredTokenRejected(t *testing.T) {
 		t.Error("expired token must be rejected")
 	}
 }
+
+// The long-lived session JWT must NOT be accepted as a WebSocket ticket, and a
+// ws ticket must carry the right subject — this is what keeps a JWT leaked from
+// a URL/log from opening a socket.
+func TestWSTicketAudienceSeparation(t *testing.T) {
+	s := New(nil, "test-secret", time.Hour)
+
+	jwtTok, _ := s.issue("user-123")
+	if _, err := s.parseTicket(jwtTok); err == nil {
+		t.Error("a normal session JWT must be rejected as a ws ticket (no ws audience)")
+	}
+
+	ticket, err := s.issueTicket("user-123")
+	if err != nil {
+		t.Fatal(err)
+	}
+	uid, err := s.parseTicket(ticket)
+	if err != nil || uid != "user-123" {
+		t.Errorf("valid ws ticket should parse to its subject, got uid=%q err=%v", uid, err)
+	}
+}

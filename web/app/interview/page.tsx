@@ -136,12 +136,12 @@ function StudioInner() {
   return (
     <main className="flex h-screen flex-col bg-[var(--color-studio)]">
       {/* top bar */}
-      <header className="flex items-center justify-between border-b border-[var(--color-line)] px-5 py-2.5">
-        <div className="flex items-center gap-3 text-sm">
+      <header className="flex flex-wrap items-center justify-between gap-2 border-b border-[var(--color-line)] px-4 py-2.5 sm:px-5">
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm">
           <span className="live-dot inline-block h-2 w-2 rounded-full bg-[var(--color-live)]" />
           <span className="font-semibold">Interview in progress</span>
-          <span className="rounded-full border border-[var(--color-line)] px-2 py-0.5 text-xs text-[var(--color-muted)]">{status}</span>
-          <span className="text-xs text-[var(--color-faint)]">{modality.replace("_", " ")}</span>
+          <span className="hidden rounded-full border border-[var(--color-line)] px-2 py-0.5 text-xs text-[var(--color-muted)] sm:inline">{status}</span>
+          <span className="hidden text-xs text-[var(--color-faint)] sm:inline">{modality.replace("_", " ")}</span>
           {(conn === "reconnecting" || conn === "failed") && (
             <span className={`flex items-center gap-1.5 rounded-full border px-2 py-0.5 text-xs ${conn === "failed" ? "border-[var(--color-bad)] text-[var(--color-bad)]" : "border-[var(--color-warn)] text-[var(--color-warn)]"}`}>
               {conn === "reconnecting"
@@ -160,13 +160,13 @@ function StudioInner() {
         </div>
       </header>
 
-      <div className="flex min-h-0 flex-1">
+      <div className="flex min-h-0 flex-1 flex-col lg:flex-row">
         {/* interviewer panel */}
-        <aside className="flex w-[340px] flex-col border-r border-[var(--color-line)] p-4">
-          <div className="aspect-square w-full overflow-hidden rounded-xl bg-[var(--color-panel)]">
+        <aside className="flex w-full flex-col border-b border-[var(--color-line)] p-4 lg:w-[340px] lg:border-b-0 lg:border-r">
+          <div className="mx-auto aspect-square w-full max-w-[260px] overflow-hidden rounded-xl bg-[var(--color-panel)] lg:max-w-none">
             <Avatar3D faceId={faceId} drive={avatar} />
           </div>
-          <div className="mt-3 flex-1 overflow-y-auto rounded-xl border border-[var(--color-line)] bg-[var(--color-panel)] p-3 text-sm">
+          <div className="mi-panel mt-3 max-h-[40vh] flex-1 overflow-y-auto rounded-xl border border-[var(--color-line)] bg-[var(--color-panel)] p-3 text-sm lg:max-h-none">
             {captions.length === 0 && <p className="text-[var(--color-faint)]">The interviewer will begin shortly…</p>}
             {captions.map((c, i) => (
               <p key={i} className={`mb-2 ${c.role === "interviewer" ? "text-[var(--color-ink)]" : "text-[var(--color-muted)]"}`}>
@@ -183,6 +183,7 @@ function StudioInner() {
             <input
               value={typed} onChange={(e) => setTyped(e.target.value)}
               placeholder="Type an answer…"
+              aria-label="Type an answer to the interviewer"
               className="min-w-0 flex-1 rounded-lg border border-[var(--color-line)] bg-[var(--color-studio)] px-3 py-2 text-sm outline-none focus:border-[var(--color-accent)]"
             />
             <Button type="submit" variant="ghost">Send</Button>

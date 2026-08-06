@@ -32,13 +32,29 @@ function useDebouncedEmit(onContent: (t: string) => void, delay = 1200) {
   };
 }
 
+// Track the active theme so the embedded editors (Excalidraw/Monaco) match the
+// rest of the app. Light theme uses light editors; dark and quantum are
+// dark-based. Re-reads when ThemeToggle stamps data-theme on <html>.
+function useIsLightTheme() {
+  const [light, setLight] = useState(false);
+  useEffect(() => {
+    const read = () => setLight(document.documentElement.dataset.theme === "light");
+    read();
+    const obs = new MutationObserver(read);
+    obs.observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
+    return () => obs.disconnect();
+  }, []);
+  return light;
+}
+
 // ---- Excalidraw canvas (system design) ----
 function CanvasWs({ onContent }: { onContent: (t: string) => void }) {
   const emit = useDebouncedEmit(onContent);
+  const light = useIsLightTheme();
   return (
     <div className="h-full w-full overflow-hidden rounded-xl border border-[var(--color-line)]">
       <Excalidraw
-        theme="dark"
+        theme={light ? "light" : "dark"}
         onChange={(elements: readonly unknown[]) => emit(summarizeDiagram(elements))}
         UIOptions={{ canvasActions: { toggleTheme: false, loadScene: false, saveToActiveFile: false } }}
       />
@@ -68,11 +84,12 @@ function summarizeDiagram(elements: readonly unknown[]): string {
 function CodeWs({ onContent }: { onContent: (t: string) => void }) {
   const emit = useDebouncedEmit(onContent);
   const [lang, setLang] = useState("python");
+  const light = useIsLightTheme();
   return (
-    <div className="flex h-full w-full flex-col overflow-hidden rounded-xl border border-[var(--color-line)] bg-[#0d1017]">
+    <div className="flex h-full w-full flex-col overflow-hidden rounded-xl border border-[var(--color-line)] bg-[var(--color-panel)]">
       <div className="flex items-center gap-2 border-b border-[var(--color-line)] px-3 py-1.5 text-xs text-[var(--color-muted)]">
-        <span>Language</span>
-        <select value={lang} onChange={(e) => setLang(e.target.value)} className="rounded bg-[var(--color-panel-2)] px-2 py-1 text-[var(--color-ink)]">
+        <label htmlFor="ws-lang">Language</label>
+        <select id="ws-lang" value={lang} onChange={(e) => setLang(e.target.value)} className="rounded bg-[var(--color-panel-2)] px-2 py-1 text-[var(--color-ink)]">
           {["python", "javascript", "typescript", "go", "java", "cpp"].map((l) => <option key={l} value={l}>{l}</option>)}
         </select>
       </div>
@@ -80,7 +97,7 @@ function CodeWs({ onContent }: { onContent: (t: string) => void }) {
         <MonacoEditor
           height="100%"
           language={lang}
-          theme="vs-dark"
+          theme={light ? "light" : "vs-dark"}
           defaultValue={`# Write your solution here\n`}
           onChange={(v) => emit(`# language: ${lang}\n${v ?? ""}`)}
           options={{ fontSize: 14, minimap: { enabled: false }, scrollBeyondLastLine: false }}
@@ -105,7 +122,8 @@ function TextWs({ modality, onContent }: { modality: Modality; onContent: (t: st
         value={val}
         onChange={(e) => setVal(e.target.value)}
         placeholder={placeholder}
-        className="h-full w-full resize-none bg-[#0d1017] p-5 text-[15px] leading-relaxed text-[#e8eaf0] outline-none placeholder:text-[#8791a6]"
+        aria-label={modality === "written" ? "Your written response" : "Scratchpad notes"}
+        className="h-full w-full resize-none bg-[var(--color-panel)] p-5 text-[15px] leading-relaxed text-[var(--color-ink)] outline-none placeholder:text-[var(--color-faint)]"
       />
     </div>
   );

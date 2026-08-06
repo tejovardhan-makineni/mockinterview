@@ -11,6 +11,9 @@ import (
 // gaze/pose/lighting + VAD) and discrete events (filler words, long pauses, help
 // requests) and POSTs them here. Aggregation happens at report time.
 
+// maxBehaviorBatch bounds how many samples/events one ingest request may carry.
+const maxBehaviorBatch = 500
+
 type behaviorBatch struct {
 	Samples []behaviorSample `json:"samples"`
 	Events  []behaviorEvent  `json:"events"`
@@ -41,6 +44,12 @@ func (s *Service) Ingest(w http.ResponseWriter, r *http.Request) {
 	}
 	var batch behaviorBatch
 	if !httpx.DecodeJSON(w, r, &batch) {
+		return
+	}
+	// Cap the batch: a well-behaved client sends a handful of samples every few
+	// seconds. This bounds the per-request write work regardless of input.
+	if len(batch.Samples) > maxBehaviorBatch || len(batch.Events) > maxBehaviorBatch {
+		httpx.WriteProblem(w, http.StatusBadRequest, "behavior batch too large")
 		return
 	}
 	ctx := r.Context()

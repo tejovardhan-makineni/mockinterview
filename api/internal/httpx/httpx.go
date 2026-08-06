@@ -5,6 +5,7 @@ package httpx
 
 import (
 	"encoding/json"
+	"errors"
 	"log/slog"
 	"net/http"
 )
@@ -40,17 +41,28 @@ func WriteJSON(w http.ResponseWriter, status int, v any) {
 	}
 }
 
+// MaxJSONBody caps the size of a JSON request body (1 MB) to prevent an
+// authenticated client from buffering unbounded data into memory.
+const MaxJSONBody = 1 << 20
+
 // DecodeJSON reads and validates a JSON request body. Returns false (and writes
-// a 400 problem) on failure.
+// a 400 problem) on failure. The body is capped at MaxJSONBody, and decode
+// errors are not echoed verbatim (they can leak internal field names).
 func DecodeJSON(w http.ResponseWriter, r *http.Request, dst any) bool {
 	if r.Body == nil {
 		WriteProblem(w, http.StatusBadRequest, "empty body")
 		return false
 	}
+	r.Body = http.MaxBytesReader(w, r.Body, MaxJSONBody)
 	dec := json.NewDecoder(r.Body)
 	dec.DisallowUnknownFields()
 	if err := dec.Decode(dst); err != nil {
-		WriteProblem(w, http.StatusBadRequest, "invalid JSON: "+err.Error())
+		var maxErr *http.MaxBytesError
+		if errors.As(err, &maxErr) {
+			WriteProblem(w, http.StatusRequestEntityTooLarge, "request body too large")
+			return false
+		}
+		WriteProblem(w, http.StatusBadRequest, "invalid or malformed JSON body")
 		return false
 	}
 	return true

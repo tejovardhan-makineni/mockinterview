@@ -95,6 +95,9 @@ func (r *Relay) Handle(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 	defer conn.Close()
+	// Bound a single inbound frame (mic PCM chunk or JSON control) so a client
+	// can't stream an unbounded message up. 1 MB is far above any real frame.
+	conn.SetReadLimit(1 << 20)
 
 	persona, intensity, voice := parseConfig(sess.Config)
 	resumeSummary := r.resumeSummary(req.Context(), uid)

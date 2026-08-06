@@ -4,7 +4,7 @@
 // / Settings, with sign-out bottom-left) + an ambient-glass main area. Every
 // signed-in page renders its content inside <AppShell>. Matches the Quantum
 // design; adapts to Light/Dark themes via CSS vars.
-import { useEffect, useState, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { api } from "@/lib/api";
@@ -24,8 +24,18 @@ export function AppShell({ active, children }: { active: NavKey; children: React
   const router = useRouter();
   const [email, setEmail] = useState<string>("");
   const [open, setOpen] = useState(false); // mobile drawer
+  const drawerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => { api.me().then((u) => setEmail(u?.email ?? "")); }, []);
+
+  // Drawer a11y: close on Escape and move focus into the panel when it opens.
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") setOpen(false); };
+    window.addEventListener("keydown", onKey);
+    drawerRef.current?.focus();
+    return () => window.removeEventListener("keydown", onKey);
+  }, [open]);
 
   const NavLinks = (
     <nav className="flex flex-1 flex-col gap-1">
@@ -76,12 +86,12 @@ export function AppShell({ active, children }: { active: NavKey; children: React
           <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-[var(--color-accent)] text-sm font-extrabold text-[var(--color-studio)]">m</span>
           mockinterview<span className="text-[var(--color-accent)]">.live</span>
         </Link>
-        <button onClick={() => setOpen(!open)} className="rounded-lg border border-[var(--color-line)] px-3 py-1.5 text-sm">☰</button>
+        <button onClick={() => setOpen(!open)} aria-label={open ? "Close menu" : "Open menu"} aria-expanded={open} aria-controls="mobile-nav-drawer" className="rounded-lg border border-[var(--color-line)] px-3 py-1.5 text-sm">☰</button>
       </div>
       {open && (
         <div className="fixed inset-0 z-50 md:hidden" onClick={() => setOpen(false)}>
           <div className="absolute inset-0 bg-black/50" />
-          <div className="absolute left-0 top-0 h-full w-[264px] border-r border-[var(--color-line)] bg-[var(--color-studio)]" onClick={(e) => e.stopPropagation()}>
+          <div ref={drawerRef} id="mobile-nav-drawer" role="dialog" aria-modal="true" aria-label="Navigation menu" tabIndex={-1} className="absolute left-0 top-0 h-full w-[264px] border-r border-[var(--color-line)] bg-[var(--color-studio)] outline-none" onClick={(e) => e.stopPropagation()}>
             {Sidebar}
           </div>
         </div>
