@@ -2,20 +2,65 @@
   "id": "legal-ethics-conflict",
   "title": "Professional Responsibility: Conflict of Interest & Confidentiality",
   "track": "professional",
-  "domain": "law",
+  "domain": "legal_practice",
+  "areas": [
+    "law"
+  ],
   "modality": "conversational",
   "difficulty": "mid",
-  "tags": ["professional-responsibility", "legal-ethics", "conflict-of-interest", "confidentiality", "model-rules", "informed-consent"],
+  "tags": [
+    "professional-responsibility",
+    "legal-ethics",
+    "conflict-of-interest",
+    "confidentiality",
+    "model-rules",
+    "informed-consent"
+  ],
   "prompt": "You are an associate at a small firm. A long-standing business client, Acme LLC, asks the firm to draft an operating agreement for a new venture Acme is forming with a second person, Blair. Blair is also an individual client of yours — you drafted Blair's will last year — and Blair separately mentions to you, in confidence, that Blair is worried Acme is 'over-promising' and privately intends to keep an exit option Acme doesn't know about. Acme now wants you to represent 'the deal' and draft terms favorable to getting it done. Walk me through the professional-responsibility issues and how you would handle this. This is a spoken discussion.",
   "blurb": "A professional-responsibility roleplay — spot the concurrent conflict and the confidentiality trap, apply the Model Rules, and reason to a defensible course of action.",
   "rubric": [
-    { "key": "issue_spotting", "label": "Issue spotting", "description": "Identifies the concurrent conflict of interest between two current clients (Acme and Blair) whose interests in the venture are directly adverse or materially limited, AND the separate confidentiality problem created by Blair's private disclosure. Recognizes the joint-representation dimension.", "weight": 1.3 },
-    { "key": "rule_command", "label": "Command of the rules", "description": "Correctly invokes the governing standards: Model Rule 1.7 (concurrent conflicts, informed consent confirmed in writing, non-consentable conflicts), 1.6 (confidentiality), 1.9 (duties to former clients if applicable), 1.4 (communication), and the 'reasonable lawyer' consentability limit.", "weight": 1.3 },
-    { "key": "analysis", "label": "Analysis & application", "description": "Applies the rules to facts: whether the conflict is consentable, why Blair's secret exit intent makes joint representation untenable (the lawyer cannot use or reveal it to Acme yet cannot keep it from a client it jointly represents), and the informed-consent/waiver mechanics.", "weight": 1.2 },
-    { "key": "confidentiality", "label": "Confidentiality reasoning", "description": "Reasons carefully about Rule 1.6: the lawyer may not disclose Blair's confidence to Acme, but also cannot draft against Blair's undisclosed interest or mislead Acme; recognizes the 'no secrets' premise of joint representation and the resulting impasse.", "weight": 1.2 },
-    { "key": "resolution", "label": "Sound course of action", "description": "Reaches a defensible resolution: decline the joint 'represent the deal' engagement or obtain informed written consent only if permissible; more likely advise both to seek separate counsel; do not proceed in a way that harms either client or misuses confidences. Avoids just 'getting the deal done.'", "weight": 1.2 },
-    { "key": "professionalism", "label": "Professional judgment", "description": "Prioritizes duties to clients over the firm's business interest in the fee, documents consents, and considers screening/withdrawal where required; shows candor.", "weight": 1.0 },
-    { "key": "communication", "label": "Communication & clarity", "description": "Explains the issues clearly and in an organized way, distinguishing the conflict question from the confidentiality question rather than blurring them.", "weight": 0.9 }
+    {
+      "key": "issue_spotting",
+      "label": "Issue spotting",
+      "description": "Identifies the concurrent conflict of interest between two current clients (Acme and Blair) whose interests in the venture are directly adverse or materially limited, AND the separate confidentiality problem created by Blair's private disclosure. Recognizes the joint-representation dimension.",
+      "weight": 1.3
+    },
+    {
+      "key": "rule_command",
+      "label": "Command of the rules",
+      "description": "Correctly invokes the governing standards: Model Rule 1.7 (concurrent conflicts, informed consent confirmed in writing, non-consentable conflicts), 1.6 (confidentiality), 1.9 (duties to former clients if applicable), 1.4 (communication), and the 'reasonable lawyer' consentability limit.",
+      "weight": 1.3
+    },
+    {
+      "key": "analysis",
+      "label": "Analysis & application",
+      "description": "Applies the rules to facts: whether the conflict is consentable, why Blair's secret exit intent makes joint representation untenable (the lawyer cannot use or reveal it to Acme yet cannot keep it from a client it jointly represents), and the informed-consent/waiver mechanics.",
+      "weight": 1.2
+    },
+    {
+      "key": "confidentiality",
+      "label": "Confidentiality reasoning",
+      "description": "Reasons carefully about Rule 1.6: the lawyer may not disclose Blair's confidence to Acme, but also cannot draft against Blair's undisclosed interest or mislead Acme; recognizes the 'no secrets' premise of joint representation and the resulting impasse.",
+      "weight": 1.2
+    },
+    {
+      "key": "resolution",
+      "label": "Sound course of action",
+      "description": "Reaches a defensible resolution: decline the joint 'represent the deal' engagement or obtain informed written consent only if permissible; more likely advise both to seek separate counsel; do not proceed in a way that harms either client or misuses confidences. Avoids just 'getting the deal done.'",
+      "weight": 1.2
+    },
+    {
+      "key": "professionalism",
+      "label": "Professional judgment",
+      "description": "Prioritizes duties to clients over the firm's business interest in the fee, documents consents, and considers screening/withdrawal where required; shows candor.",
+      "weight": 1.0
+    },
+    {
+      "key": "communication",
+      "label": "Communication & clarity",
+      "description": "Explains the issues clearly and in an organized way, distinguishing the conflict question from the confidentiality question rather than blurring them.",
+      "weight": 0.9
+    }
   ],
   "reference": {
     "scenario": "A concurrent conflict of interest layered on top of a confidentiality trap. The firm currently represents both Acme and Blair (Blair is a current client from the will matter, or at minimum a former client whose confidences persist). Acme and Blair are forming a venture and their interests are potentially adverse; Acme's request to draft terms 'favorable to getting it done' and Blair's secret intent to keep an undisclosed exit option make the adversity concrete. Under Model Rule 1.7, this is a concurrent conflict: representing one client will be directly adverse to, or materially limited by duties to, the other. A 1.7 conflict is consentable only if the lawyer reasonably believes she can competently and diligently represent both, it is not prohibited by law, the clients are not asserting claims against each other in the same proceeding, and each gives informed consent confirmed in writing. The confidentiality wrinkle is decisive: Blair disclosed, in confidence, an intent adverse to the very deal. Under Rule 1.6 the lawyer cannot reveal that to Acme; but joint representation runs on a 'no secrets among jointly represented clients' premise, and the lawyer cannot draft a deal for Acme while sitting on Blair's material, adverse secret — that makes the conflict effectively non-consentable here, because the lawyer cannot provide competent, diligent, candid representation to Acme without using or revealing Blair's confidence. The sound resolution: the lawyer should not accept the joint 'represent the deal' engagement on these facts; she should decline or limit the engagement, keep Blair's confidence, avoid drafting against either client, and advise the parties to obtain separate counsel — and consider whether she must withdraw from or wall off aspects of the existing relationships. She must not prioritize the fee or 'getting the deal done.' A weak candidate blesses the joint representation with a boilerplate waiver, ignores the confidentiality impasse, or suggests quietly using or revealing Blair's secret.",
@@ -34,12 +79,30 @@
       "Document everything: the conflict analysis, any declination, and advice to seek separate counsel."
     ],
     "probes": [
-      { "trigger": "candidate says 'just get a conflict waiver and proceed'", "question": "Walk me through the informed-consent disclosure you'd give Acme. Can you actually make full disclosure without revealing what Blair told you in confidence?" },
-      { "trigger": "candidate suggests telling Acme about Blair's secret exit plan", "question": "You'd disclose Blair's confidence to Acme? What does Rule 1.6 say about that, and where does the authority to reveal come from here?" },
-      { "trigger": "candidate proceeds and just drafts neutral terms", "question": "You know Blair intends an undisclosed exit that Acme would care about. Can you draft this deal for Acme in good conscience while sitting on that? What rule governs?" },
-      { "trigger": "candidate treats it purely as a confidentiality issue and misses the conflict", "question": "Set the secret aside for a second — is there a conflict-of-interest problem just from representing both sides of this venture? Which rule?" },
-      { "trigger": "candidate treats it purely as a conflict and misses confidentiality", "question": "Even if you got written consents, does Blair's private disclosure create a separate problem that consent doesn't solve?" },
-      { "trigger": "candidate prioritizes the client relationship or the fee", "question": "Acme is a major client and this is a nice fee. How much weight does that get in your analysis, and why?" }
+      {
+        "trigger": "candidate says 'just get a conflict waiver and proceed'",
+        "question": "Walk me through the informed-consent disclosure you'd give Acme. Can you actually make full disclosure without revealing what Blair told you in confidence?"
+      },
+      {
+        "trigger": "candidate suggests telling Acme about Blair's secret exit plan",
+        "question": "You'd disclose Blair's confidence to Acme? What does Rule 1.6 say about that, and where does the authority to reveal come from here?"
+      },
+      {
+        "trigger": "candidate proceeds and just drafts neutral terms",
+        "question": "You know Blair intends an undisclosed exit that Acme would care about. Can you draft this deal for Acme in good conscience while sitting on that? What rule governs?"
+      },
+      {
+        "trigger": "candidate treats it purely as a confidentiality issue and misses the conflict",
+        "question": "Set the secret aside for a second — is there a conflict-of-interest problem just from representing both sides of this venture? Which rule?"
+      },
+      {
+        "trigger": "candidate treats it purely as a conflict and misses confidentiality",
+        "question": "Even if you got written consents, does Blair's private disclosure create a separate problem that consent doesn't solve?"
+      },
+      {
+        "trigger": "candidate prioritizes the client relationship or the fee",
+        "question": "Acme is a major client and this is a nice fee. How much weight does that get in your analysis, and why?"
+      }
     ],
     "red_flags": [
       "Blesses the joint representation with a boilerplate waiver, ignoring that the conflict is effectively non-consentable here.",

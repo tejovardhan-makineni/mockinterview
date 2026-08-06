@@ -3,23 +3,89 @@
   "title": "Design an In-Memory Key-Value Store / Cache — Object Model",
   "track": "engineering",
   "domain": "low_level_design",
+  "areas": [
+    "engineering"
+  ],
   "modality": "system_design",
   "difficulty": "mid",
-  "tags": ["ood", "lld", "strategy-pattern", "eviction", "ttl", "cache", "concurrency"],
+  "tags": [
+    "ood",
+    "lld",
+    "strategy-pattern",
+    "eviction",
+    "ttl",
+    "cache",
+    "concurrency"
+  ],
   "prompt": "Design the object model for an in-memory key-value store / cache (like a simplified Redis or Guava Cache). It supports get and put, per-entry TTL expiration, a bounded capacity with a pluggable eviction policy (LRU, LFU, FIFO), and must be thread-safe. Design the core classes, the eviction-policy abstraction, the TTL mechanism, and the concurrency approach. Sketch the class diagram.",
   "blurb": "Bounded cache with pluggable eviction (LRU/LFU/FIFO) via Strategy, TTL expiry, and a real thread-safety story.",
   "rubric": [
-    { "key": "requirements_clarification", "label": "Requirements clarification", "description": "Separates functional (get/put/delete, TTL, bounded capacity, eviction) from non-functional (O(1) ops, thread-safety, pluggable policy).", "weight": 1.0 },
-    { "key": "core_entities", "label": "Core entities", "description": "Cache, Entry (value+metadata), EvictionPolicy, TTL/Clock, Store/backing map — cleanly separated.", "weight": 1.1 },
-    { "key": "class_design", "label": "Class design & responsibilities", "description": "Eviction policy is decoupled from the store; Entry carries expiry + access metadata; Cache coordinates.", "weight": 1.2 },
-    { "key": "relationships", "label": "Relationships & cardinality", "description": "Cache has one Store and one EvictionPolicy; Store maps key→Entry; policy tracks ordering over keys. Composition reasoned.", "weight": 1.0 },
-    { "key": "design_patterns", "label": "Design patterns", "description": "Strategy for eviction policy, optional Observer/callbacks for eviction/expiry notifications, Factory for policy creation, Decorator for stats/loading cache.", "weight": 1.1 },
-    { "key": "solid_principles", "label": "SOLID / OCP", "description": "Adding a new eviction policy plugs in without touching Cache; TTL and eviction concerns separated (SRP).", "weight": 1.1 },
-    { "key": "api_methods", "label": "API / method design", "description": "get(k), put(k,v,ttl), delete(k), size, and policy hooks onAccess/onInsert/evictCandidate — clear signatures.", "weight": 1.0 },
-    { "key": "concurrency", "label": "Concurrency & performance", "description": "Thread-safe get/put with good throughput; O(1) LRU via hashmap+doubly-linked-list; lock granularity/striping. THE core challenge.", "weight": 1.3 },
-    { "key": "edge_cases", "label": "Edge cases", "description": "Expired-but-not-evicted lazy vs active expiry, capacity 1, update existing key, evict vs expire ordering, negative TTL.", "weight": 1.0 },
-    { "key": "extensibility", "label": "Extensibility", "description": "New policies, size-based (weight) eviction, write-through/read-through loader, stats, persistence added cleanly.", "weight": 0.9 },
-    { "key": "communication", "label": "Communication", "description": "Narrates the data-structure choice and locking strategy, states tradeoffs, reasons about O(1) LRU.", "weight": 0.8 }
+    {
+      "key": "requirements_clarification",
+      "label": "Requirements clarification",
+      "description": "Separates functional (get/put/delete, TTL, bounded capacity, eviction) from non-functional (O(1) ops, thread-safety, pluggable policy).",
+      "weight": 1.0
+    },
+    {
+      "key": "core_entities",
+      "label": "Core entities",
+      "description": "Cache, Entry (value+metadata), EvictionPolicy, TTL/Clock, Store/backing map — cleanly separated.",
+      "weight": 1.1
+    },
+    {
+      "key": "class_design",
+      "label": "Class design & responsibilities",
+      "description": "Eviction policy is decoupled from the store; Entry carries expiry + access metadata; Cache coordinates.",
+      "weight": 1.2
+    },
+    {
+      "key": "relationships",
+      "label": "Relationships & cardinality",
+      "description": "Cache has one Store and one EvictionPolicy; Store maps key→Entry; policy tracks ordering over keys. Composition reasoned.",
+      "weight": 1.0
+    },
+    {
+      "key": "design_patterns",
+      "label": "Design patterns",
+      "description": "Strategy for eviction policy, optional Observer/callbacks for eviction/expiry notifications, Factory for policy creation, Decorator for stats/loading cache.",
+      "weight": 1.1
+    },
+    {
+      "key": "solid_principles",
+      "label": "SOLID / OCP",
+      "description": "Adding a new eviction policy plugs in without touching Cache; TTL and eviction concerns separated (SRP).",
+      "weight": 1.1
+    },
+    {
+      "key": "api_methods",
+      "label": "API / method design",
+      "description": "get(k), put(k,v,ttl), delete(k), size, and policy hooks onAccess/onInsert/evictCandidate — clear signatures.",
+      "weight": 1.0
+    },
+    {
+      "key": "concurrency",
+      "label": "Concurrency & performance",
+      "description": "Thread-safe get/put with good throughput; O(1) LRU via hashmap+doubly-linked-list; lock granularity/striping. THE core challenge.",
+      "weight": 1.3
+    },
+    {
+      "key": "edge_cases",
+      "label": "Edge cases",
+      "description": "Expired-but-not-evicted lazy vs active expiry, capacity 1, update existing key, evict vs expire ordering, negative TTL.",
+      "weight": 1.0
+    },
+    {
+      "key": "extensibility",
+      "label": "Extensibility",
+      "description": "New policies, size-based (weight) eviction, write-through/read-through loader, stats, persistence added cleanly.",
+      "weight": 0.9
+    },
+    {
+      "key": "communication",
+      "label": "Communication",
+      "description": "Narrates the data-structure choice and locking strategy, states tradeoffs, reasons about O(1) LRU.",
+      "weight": 0.8
+    }
   ],
   "reference": {
     "functional_requirements": [
@@ -44,16 +110,125 @@
       "Do we need eviction/expiry notifications or stats?"
     ],
     "core_classes": [
-      { "name": "Cache<K,V>", "responsibility": "Facade coordinating store, eviction policy, and TTL; exposes get/put/delete.", "key_fields": ["int capacity", "Store<K,V> store", "EvictionPolicy<K> policy", "Clock clock", "locks"], "key_methods": ["get(K)", "put(K,V,ttl)", "delete(K)", "size()"] },
-      { "name": "CacheEntry<V>", "responsibility": "Wraps a value with metadata for TTL and eviction bookkeeping.", "key_fields": ["V value", "long expiryAt", "long lastAccess", "int frequency", "long insertedAt"], "key_methods": ["isExpired(now)"] },
-      { "name": "Store<K,V>", "responsibility": "Backing map key→CacheEntry; O(1) lookup.", "key_fields": ["Map<K, CacheEntry<V>> map"], "key_methods": ["get(K)", "put(K, entry)", "remove(K)", "containsKey(K)"] },
-      { "name": "EvictionPolicy<K> (abstract)", "responsibility": "Strategy: tracks usage order and names the next eviction candidate.", "key_fields": [], "key_methods": ["onAccess(K)", "onInsert(K)", "onRemove(K)", "evictCandidate() -> K"] },
-      { "name": "LruPolicy", "responsibility": "Recency order via HashMap + doubly-linked list; evicts the tail (LRU) in O(1).", "key_fields": ["Map<K,Node> index", "DoublyLinkedList order"], "key_methods": ["onAccess (move to head)", "evictCandidate (remove tail)"] },
-      { "name": "LfuPolicy", "responsibility": "Frequency buckets; evicts the least-frequently-used (ties broken by recency).", "key_fields": ["Map<K,freq>", "Map<freq, LinkedHashSet<K>>", "minFreq"], "key_methods": ["onAccess (bump freq)", "evictCandidate (min-freq bucket)"] },
-      { "name": "FifoPolicy", "responsibility": "Insertion-order queue; evicts the oldest inserted.", "key_fields": ["Queue<K> order"], "key_methods": ["onInsert (enqueue)", "evictCandidate (dequeue)"] },
-      { "name": "ExpirationManager", "responsibility": "Handles TTL: lazy check on access and/or an active background sweeper.", "key_fields": ["DelayQueue / min-heap by expiry", "sweeper thread"], "key_methods": ["isExpired(entry)", "scheduleSweep()"] },
-      { "name": "EvictionPolicyFactory", "responsibility": "Creates a policy by name/config.", "key_fields": [], "key_methods": ["create(type) -> EvictionPolicy"] },
-      { "name": "RemovalListener (optional)", "responsibility": "Observer callback fired on eviction/expiry (reason).", "key_fields": [], "key_methods": ["onRemoval(K, V, reason)"] }
+      {
+        "name": "Cache<K,V>",
+        "responsibility": "Facade coordinating store, eviction policy, and TTL; exposes get/put/delete.",
+        "key_fields": [
+          "int capacity",
+          "Store<K,V> store",
+          "EvictionPolicy<K> policy",
+          "Clock clock",
+          "locks"
+        ],
+        "key_methods": [
+          "get(K)",
+          "put(K,V,ttl)",
+          "delete(K)",
+          "size()"
+        ]
+      },
+      {
+        "name": "CacheEntry<V>",
+        "responsibility": "Wraps a value with metadata for TTL and eviction bookkeeping.",
+        "key_fields": [
+          "V value",
+          "long expiryAt",
+          "long lastAccess",
+          "int frequency",
+          "long insertedAt"
+        ],
+        "key_methods": [
+          "isExpired(now)"
+        ]
+      },
+      {
+        "name": "Store<K,V>",
+        "responsibility": "Backing map key→CacheEntry; O(1) lookup.",
+        "key_fields": [
+          "Map<K, CacheEntry<V>> map"
+        ],
+        "key_methods": [
+          "get(K)",
+          "put(K, entry)",
+          "remove(K)",
+          "containsKey(K)"
+        ]
+      },
+      {
+        "name": "EvictionPolicy<K> (abstract)",
+        "responsibility": "Strategy: tracks usage order and names the next eviction candidate.",
+        "key_fields": [],
+        "key_methods": [
+          "onAccess(K)",
+          "onInsert(K)",
+          "onRemove(K)",
+          "evictCandidate() -> K"
+        ]
+      },
+      {
+        "name": "LruPolicy",
+        "responsibility": "Recency order via HashMap + doubly-linked list; evicts the tail (LRU) in O(1).",
+        "key_fields": [
+          "Map<K,Node> index",
+          "DoublyLinkedList order"
+        ],
+        "key_methods": [
+          "onAccess (move to head)",
+          "evictCandidate (remove tail)"
+        ]
+      },
+      {
+        "name": "LfuPolicy",
+        "responsibility": "Frequency buckets; evicts the least-frequently-used (ties broken by recency).",
+        "key_fields": [
+          "Map<K,freq>",
+          "Map<freq, LinkedHashSet<K>>",
+          "minFreq"
+        ],
+        "key_methods": [
+          "onAccess (bump freq)",
+          "evictCandidate (min-freq bucket)"
+        ]
+      },
+      {
+        "name": "FifoPolicy",
+        "responsibility": "Insertion-order queue; evicts the oldest inserted.",
+        "key_fields": [
+          "Queue<K> order"
+        ],
+        "key_methods": [
+          "onInsert (enqueue)",
+          "evictCandidate (dequeue)"
+        ]
+      },
+      {
+        "name": "ExpirationManager",
+        "responsibility": "Handles TTL: lazy check on access and/or an active background sweeper.",
+        "key_fields": [
+          "DelayQueue / min-heap by expiry",
+          "sweeper thread"
+        ],
+        "key_methods": [
+          "isExpired(entry)",
+          "scheduleSweep()"
+        ]
+      },
+      {
+        "name": "EvictionPolicyFactory",
+        "responsibility": "Creates a policy by name/config.",
+        "key_fields": [],
+        "key_methods": [
+          "create(type) -> EvictionPolicy"
+        ]
+      },
+      {
+        "name": "RemovalListener (optional)",
+        "responsibility": "Observer callback fired on eviction/expiry (reason).",
+        "key_fields": [],
+        "key_methods": [
+          "onRemoval(K, V, reason)"
+        ]
+      }
     ],
     "relationships": [
       "Cache composes one Store, one EvictionPolicy, one Clock, and optionally an ExpirationManager and RemovalListener.",
@@ -63,10 +238,26 @@
       "EvictionPolicyFactory decouples Cache from concrete policy classes (DIP)."
     ],
     "design_patterns": [
-      { "pattern": "Strategy", "where": "EvictionPolicy with LRU/LFU/FIFO implementations", "why": "Eviction algorithm varies independently; new policies plug in without editing Cache (OCP)." },
-      { "pattern": "Factory", "where": "EvictionPolicyFactory", "why": "Constructs the configured policy and decouples Cache from concretes." },
-      { "pattern": "Observer", "where": "RemovalListener notified on eviction/expiry", "why": "Decouples side effects (metrics, write-back) from cache mutation." },
-      { "pattern": "Decorator", "where": "StatsCache / LoadingCache wrapping the base Cache", "why": "Adds hit/miss stats or read-through loading without changing the core cache." }
+      {
+        "pattern": "Strategy",
+        "where": "EvictionPolicy with LRU/LFU/FIFO implementations",
+        "why": "Eviction algorithm varies independently; new policies plug in without editing Cache (OCP)."
+      },
+      {
+        "pattern": "Factory",
+        "where": "EvictionPolicyFactory",
+        "why": "Constructs the configured policy and decouples Cache from concretes."
+      },
+      {
+        "pattern": "Observer",
+        "where": "RemovalListener notified on eviction/expiry",
+        "why": "Decouples side effects (metrics, write-back) from cache mutation."
+      },
+      {
+        "pattern": "Decorator",
+        "where": "StatsCache / LoadingCache wrapping the base Cache",
+        "why": "Adds hit/miss stats or read-through loading without changing the core cache."
+      }
     ],
     "apis": [
       "V get(K key)  // returns null/miss if absent or expired; updates policy",
@@ -105,18 +296,48 @@
       "Persistence/snapshotting → an optional writer, orthogonal to the core"
     ],
     "deep_dives": [
-      { "topic": "o1_lru", "probe": "How do you make LRU get and evict both O(1)? Walk me through the HashMap + doubly-linked-list and exactly what happens on a get." },
-      { "topic": "eviction_strategy", "probe": "Show the EvictionPolicy interface and how the Cache stays unaware of whether it's LRU, LFU, or FIFO. Add LFU — what's the data structure and the tie-break rule?" },
-      { "topic": "ttl_mechanism", "probe": "Lazy vs active expiration — what are the tradeoffs? If you use a background sweeper, what structure orders entries by expiry, and how does it coexist with lazy checks on read?" },
-      { "topic": "thread_safety", "probe": "A single global lock kills throughput. How do you reduce contention while keeping the LRU list consistent — striping, per-segment LRU, or approximate LRU? Defend the tradeoff." },
-      { "topic": "policy_coupling", "probe": "Every get must notify the policy to update recency/frequency. How do you keep that hook clean without leaking policy internals into the Store?" }
+      {
+        "topic": "o1_lru",
+        "probe": "How do you make LRU get and evict both O(1)? Walk me through the HashMap + doubly-linked-list and exactly what happens on a get."
+      },
+      {
+        "topic": "eviction_strategy",
+        "probe": "Show the EvictionPolicy interface and how the Cache stays unaware of whether it's LRU, LFU, or FIFO. Add LFU — what's the data structure and the tie-break rule?"
+      },
+      {
+        "topic": "ttl_mechanism",
+        "probe": "Lazy vs active expiration — what are the tradeoffs? If you use a background sweeper, what structure orders entries by expiry, and how does it coexist with lazy checks on read?"
+      },
+      {
+        "topic": "thread_safety",
+        "probe": "A single global lock kills throughput. How do you reduce contention while keeping the LRU list consistent — striping, per-segment LRU, or approximate LRU? Defend the tradeoff."
+      },
+      {
+        "topic": "policy_coupling",
+        "probe": "Every get must notify the policy to update recency/frequency. How do you keep that hook clean without leaking policy internals into the Store?"
+      }
     ],
     "followup_bank": [
-      { "trigger": "mentions lru or eviction", "question": "Make both get and evict O(1) for LRU. What two data structures do you combine, and what happens on a cache hit?" },
-      { "trigger": "mentions policy or strategy", "question": "Swap LRU for LFU. How much of Cache changes? If any, your policy isn't properly decoupled." },
-      { "trigger": "mentions ttl or expire or expiry", "question": "Lazy or active expiration? If active, what orders entries by expiry time and how does it coexist with lazy checks?" },
-      { "trigger": "mentions lock or synchronized or thread", "question": "A single global lock serializes every get. How do you get concurrency while keeping the LRU list correct?" },
-      { "trigger": "mentions concurrenthashmap or segment or stripe", "question": "With striping, how do you maintain a globally-correct LRU order, or do you settle for approximate LRU? What do you lose?" }
+      {
+        "trigger": "mentions lru or eviction",
+        "question": "Make both get and evict O(1) for LRU. What two data structures do you combine, and what happens on a cache hit?"
+      },
+      {
+        "trigger": "mentions policy or strategy",
+        "question": "Swap LRU for LFU. How much of Cache changes? If any, your policy isn't properly decoupled."
+      },
+      {
+        "trigger": "mentions ttl or expire or expiry",
+        "question": "Lazy or active expiration? If active, what orders entries by expiry time and how does it coexist with lazy checks?"
+      },
+      {
+        "trigger": "mentions lock or synchronized or thread",
+        "question": "A single global lock serializes every get. How do you get concurrency while keeping the LRU list correct?"
+      },
+      {
+        "trigger": "mentions concurrenthashmap or segment or stripe",
+        "question": "With striping, how do you maintain a globally-correct LRU order, or do you settle for approximate LRU? What do you lose?"
+      }
     ],
     "tradeoffs": [
       "Global lock (simple, correct, low throughput) vs lock striping (high throughput, weaker global ordering)",

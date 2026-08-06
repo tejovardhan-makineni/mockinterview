@@ -1,0 +1,125 @@
+{
+  "id": "law-issue-spotting-property",
+  "title": "Issue-Spotting: Property (Easements & Adverse Possession)",
+  "track": "professional",
+  "domain": "issue_spotting",
+  "areas": [
+    "law"
+  ],
+  "modality": "written",
+  "difficulty": "mid",
+  "tags": [
+    "property",
+    "easements",
+    "adverse-possession",
+    "prescriptive-easement",
+    "issue-spotting",
+    "IRAC"
+  ],
+  "prompt": "Read the fact pattern and write a multi-issue IRAC analysis identifying the property-law issues and the parties' best arguments. Facts: In 1998, Owner subdivided a large parcel and sold the rear lot to Priya, keeping the front lot for himself; the rear lot has no road access except over a gravel driveway that crosses the front lot, and the deed to Priya says nothing about a right of way. Priya has driven over that same gravel strip to reach her house every day since 1998, has graded and re-graveled it twice at her own expense, and has parked on a small dirt turnaround at the edge of the front lot. Owner watched all of this for years and never objected or gave permission. In 2023, Owner sells the front lot to Nkosi, who erects a locked gate across the driveway and tells Priya she has no right to cross and must remove her belongings from the turnaround. The jurisdiction's statutory period for adverse possession and prescription is ten years. Analyze Priya's rights in the driveway and the turnaround, Nkosi's position as a subsequent purchaser, and the likely outcome. Write a structured multi-issue IRAC response addressing each easement theory and the adverse-possession claim in turn.",
+  "blurb": "A disputed driveway and turnaround that raise easement by implication, easement by necessity, prescriptive easements, and adverse possession — plus a notice problem for the new owner — all to be run through disciplined IRAC.",
+  "rubric": [
+    {
+      "key": "issue_spotting",
+      "label": "Issue spotting",
+      "description": "Identifies the distinct issues: easement by implication (prior use) from the 1998 severance, easement by necessity for the landlocked rear lot, prescriptive easement from the open and continuous use of the driveway, adverse possession of the turnaround, and whether Nkosi as a subsequent purchaser takes subject to these interests (notice — actual, constructive/record, and inquiry from the visible driveway). Distinguishes the driveway (use = easement) from the turnaround (exclusive possession = possible adverse possession).",
+      "weight": 1.3
+    },
+    {
+      "key": "rule_statement",
+      "label": "Rule statement",
+      "description": "States the governing rules accurately: easement by implication (common ownership severed, prior apparent and continuous use, reasonable necessity); easement by necessity (common ownership + strict necessity, typically landlocking, at severance); prescriptive easement (open and notorious, continuous, adverse/hostile, for the statutory period — no exclusivity required); adverse possession (actual, open and notorious, exclusive, continuous, and hostile/adverse for the statutory period); and the recording-act/notice doctrine for subsequent purchasers.",
+      "weight": 1.2
+    },
+    {
+      "key": "application",
+      "label": "Application to facts",
+      "description": "Ties each rule to specific facts — the 1998 subdivision as the common-ownership severance, the pre-existing gravel drive as apparent prior use, the rear lot's lack of road access as necessity, the 25 years of daily un-permitted crossing satisfying the ten-year prescriptive period, the exclusive parking/belongings on the turnaround as adverse possession, and the visible driveway plus Priya's open use putting Nkosi on inquiry/constructive notice.",
+      "weight": 1.3
+    },
+    {
+      "key": "counterarguments",
+      "label": "Counterarguments",
+      "description": "Argues both sides: Owner's years of silent acquiescence as permission (defeating the 'hostile/adverse' element of prescription and adverse possession) vs. Priya's claim of right; whether the necessity was strict or merely reasonable; whether the turnaround use was truly exclusive; and Nkosi's bona-fide-purchaser argument against the notice a visible, well-worn driveway provides.",
+      "weight": 1.2
+    },
+    {
+      "key": "conclusion",
+      "label": "Conclusion",
+      "description": "Reaches a defensible bottom line — Priya very likely has access to the driveway on multiple independent theories (implication, necessity, and/or prescription), the turnaround adverse-possession claim is closer and turns on exclusivity and hostility, and Nkosi almost certainly takes subject to the easement because the visible driveway supplied inquiry notice — while acknowledging the permission-versus-hostility uncertainty.",
+      "weight": 1.0
+    },
+    {
+      "key": "structure",
+      "label": "IRAC structure & organization",
+      "description": "Uses clear multi-issue IRAC (or CRAC) organization, one issue per section with headings or signposting, no fact-dump; each easement theory, the adverse-possession claim, and the notice issue are analyzed self-containedly.",
+      "weight": 1.0
+    },
+    {
+      "key": "legal_writing",
+      "label": "Precision & legal writing",
+      "description": "Uses terms of art correctly (dominant/servient estate, severance, apparent and continuous prior use, strict vs. reasonable necessity, open and notorious, hostile/adverse under claim of right, tacking, inquiry/constructive notice, bona fide purchaser), avoids conclusory leaps, and hedges appropriately.",
+      "weight": 0.9
+    }
+  ],
+  "reference": {
+    "scenario": "A land-access dispute arising from a 1998 subdivision. Priya's rear lot is landlocked and reachable only over a gravel driveway crossing what is now Nkosi's front lot; the deed granted no express easement. The analysis runs on parallel, independent tracks. First, easement by implication from prior existing use: at the 1998 severance there was common ownership, the driveway was an apparent and continuous quasi-easement serving the rear parcel, and continued use is reasonably necessary — strong. Second, easement by necessity: common ownership plus strict necessity because the rear lot is landlocked, arising at the moment of severance — also strong, though it typically lasts only while the necessity persists. Third, prescriptive easement: 25 years of open, notorious, continuous, un-permitted daily crossing easily exceeds the ten-year period; the fighting element is adversity/hostility, which Owner's passive acquiescence does NOT defeat (mere failure to object is not permission), though an express permission would. Fourth, the turnaround presents adverse possession rather than an easement because Priya exclusively possessed it (parking and storing belongings); it requires actual, open, exclusive, continuous, and hostile possession for ten years, and the exclusivity and hostility elements are the closest calls. Fifth, the subsequent-purchaser/notice issue: Nkosi cannot be a bona fide purchaser who takes free of these interests because the visible, well-worn gravel driveway and Priya's open use put him on inquiry notice (and easements by necessity/implication bind successors regardless of recording). A strong answer keeps the driveway (use → easement) analytically distinct from the turnaround (possession → adverse possession), reaches driveway access for Priya on multiple theories, treats the turnaround as genuinely contestable, and concludes Nkosi takes subject to the easement.",
+    "model_points": [
+      "Threshold framing: separate the driveway (a use, analyzed as an easement) from the turnaround (exclusive possession, analyzed as adverse possession), and note that the deed's silence forecloses only an EXPRESS easement, not implied ones.",
+      "Issue 1 — Easement by implication (prior use): requires (a) common ownership later severed, (b) an existing, apparent, and continuous use at severance (a quasi-easement), and (c) reasonable necessity. The 1998 subdivision severed common ownership; the pre-existing gravel drive served the rear lot and was apparent and continuous; access is reasonably necessary. Strong claim.",
+      "Issue 2 — Easement by necessity: requires common ownership and strict necessity (typically a landlocked parcel) at the time of severance. The rear lot has no road access except over the front lot, so strict necessity is met; the easement arises at severance and generally endures only while the necessity does.",
+      "Issue 3 — Prescriptive easement: requires use that is open and notorious, continuous, and adverse/hostile (under a claim of right) for the statutory period; exclusivity is NOT required for a prescriptive easement. Priya's 25 years of daily, un-permitted use far exceeds the ten-year period.",
+      "Issue 3 (adversity fight): The contested element is hostility. Owner's silent failure to object is mere acquiescence, which does NOT defeat adversity — but if Owner had granted permission, the use would be permissive and no prescriptive easement (or adverse possession) could arise. On these facts (no permission given), adversity is satisfied.",
+      "Issue 4 — Adverse possession of the turnaround: requires actual, open and notorious, exclusive, continuous, and hostile possession for the statutory period. Parking and storing belongings for 25 years is actual and open; exclusivity and hostility are the close questions (was the possession exclusive of Owner, and under a claim of right?).",
+      "Issue 4 (distinction): The turnaround is an adverse-possession (title) question, not an easement question, because Priya's use looks like possession/ownership rather than a limited right to cross; a court could alternatively treat regular parking as within a prescriptive easement's scope.",
+      "Issue 5 — Subsequent purchaser / notice: Nkosi argues he is a bona fide purchaser who took free of unrecorded interests. But the open, visible, well-worn gravel driveway and Priya's continuing use give inquiry notice (a reasonable buyer would investigate who uses the drive); easements by implication and necessity bind successors regardless of recording. Nkosi is therefore not a protected BFP as to the driveway.",
+      "Remedy: Nkosi's locked gate is an unlawful interference with Priya's easement; Priya can seek an injunction to remove the gate and a declaration of her rights, and quiet title to the turnaround if adverse possession succeeds. Nkosi retains the servient estate subject to Priya's reasonable use.",
+      "Conclusion: Priya very likely has driveway access on implication, necessity, and prescription grounds; the turnaround adverse-possession claim is genuinely contestable on exclusivity/hostility; and Nkosi takes subject to the easement because the visible driveway supplied inquiry notice."
+    ],
+    "probes": [
+      {
+        "trigger": "candidate says the deed's silence means Priya has no easement at all",
+        "question": "The deed granted no express easement — but does that end the inquiry? What implied easement theories survive a silent deed, and why?"
+      },
+      {
+        "trigger": "candidate treats Owner's years of silence as permission that defeats the claim",
+        "question": "Owner watched for years and never objected. Is passive acquiescence the same as granting permission for prescription and adverse-possession purposes?"
+      },
+      {
+        "trigger": "candidate analyzes the turnaround the same way as the driveway",
+        "question": "Priya crosses the driveway but parks and stores belongings on the turnaround. Why might those two strips be governed by different doctrines?"
+      },
+      {
+        "trigger": "candidate lets Nkosi take free as a bona fide purchaser",
+        "question": "Nkosi never saw a recorded easement. Does a visible, rutted gravel driveway in daily use give him any kind of notice — and what kind?"
+      },
+      {
+        "trigger": "candidate conflates easement by necessity with easement by implication",
+        "question": "Easement by necessity and easement by implication from prior use have different elements. Which does this fact pattern satisfy, and where do they diverge?"
+      },
+      {
+        "trigger": "candidate requires exclusivity for the prescriptive easement",
+        "question": "Is exclusivity an element of a prescriptive easement the way it is for adverse possession? How does that change the driveway analysis?"
+      }
+    ],
+    "red_flags": [
+      "Concludes Priya has no rights because the deed is silent, missing every implied-easement and prescription theory.",
+      "Treats Owner's failure to object as permission and uses it to defeat adversity without discussing the acquiescence-vs-permission distinction.",
+      "Analyzes the turnaround as an easement only, missing the adverse-possession (exclusive possession) angle — or vice versa.",
+      "Lets Nkosi take free as a bona fide purchaser, ignoring inquiry notice from the visible driveway and that implied/necessity easements bind successors.",
+      "Confuses easement by necessity (strict necessity, landlocked) with easement by implication (prior apparent use, reasonable necessity).",
+      "Imports exclusivity into the prescriptive-easement test, or drops hostility from adverse possession.",
+      "Fact-dump with no element-by-element rule statement, or rules with no application to the 1998 severance, the 25-year use, or the gate.",
+      "Ignores remedy — no mention of injunction, quiet title, or the scope of the servient owner's remaining rights."
+    ],
+    "follow_ups": [
+      "Suppose Owner had told Priya in 1999, 'You're welcome to use the drive, neighbor.' How does that single sentence change the prescriptive-easement and adverse-possession analyses?",
+      "Assume a public road is later built along the rear boundary of Priya's lot, giving her direct access. What happens to an easement by necessity versus an easement by implication?",
+      "If Priya had used the driveway for only eight years before Nkosi bought, could she 'tack' onto a prior owner's use to reach ten years — and what would that require?",
+      "The turnaround claim turns on exclusivity. If Owner also occasionally parked a trailer there, how does that affect Priya's adverse-possession claim?",
+      "How would the recording act change the outcome if this were a race-notice jurisdiction and Priya had recorded an affidavit of her use in 2015?"
+    ],
+    "exemplar_answer": "The deed's silence forecloses only an express easement, so I analyze the implied theories, then the turnaround, then Nkosi's notice. Issue 1 (Easement by implication from prior use): Rule: an implied easement arises where a commonly owned parcel is severed, a use existing at severance was apparent and continuous (a quasi-easement), and the easement is reasonably necessary. Application: the 1998 subdivision severed common ownership; the gravel drive already served the rear lot and was plainly apparent and continuous; access to a landlocked lot is at least reasonably necessary. Conclusion: strong implied easement. Issue 2 (Easement by necessity): Rule: requires common ownership and strict necessity (a landlocked parcel) at severance, and it lasts while the necessity persists. Application: the rear lot has no access except over the front lot, so strict necessity existed at the 1998 severance. Conclusion: an easement by necessity also arose. Issue 3 (Prescriptive easement): Rule: open and notorious, continuous, and adverse (under a claim of right) use for the statutory period; exclusivity is not required. Application: Priya used the drive openly and daily for 25 years, far beyond the ten-year period; the fighting element is adversity, and Owner's silent failure to object is mere acquiescence, which does not make the use permissive — so adversity holds (it would fail only if Owner had actually granted permission). Conclusion: a prescriptive easement is also established. Issue 4 (Adverse possession of the turnaround): Rule: actual, open and notorious, exclusive, continuous, and hostile possession for the statutory period. Application: parking and storing belongings for 25 years is actual, open, and continuous; the close questions are exclusivity (did Priya possess to the exclusion of Owner?) and hostility (claim of right). Counterargument: if the turnaround use was shared or permissive, the claim fails and the parking might instead fall within the scope of the prescriptive easement. Conclusion: the turnaround title claim is genuinely contestable. Issue 5 (Subsequent purchaser / notice): Rule: a bona fide purchaser takes free of unrecorded interests only without actual, constructive, or inquiry notice; easements by implication and necessity bind successors regardless of recording. Application: the visible, well-worn driveway in daily use gave Nkosi inquiry notice — a reasonable buyer would ask who uses it — so he is not a protected BFP as to the easement, and his locked gate unlawfully interferes with it. Conclusion/remedy: Priya can obtain a declaration of her easement and an injunction removing the gate, and quiet title to the turnaround if adverse possession succeeds; Nkosi keeps the servient estate subject to Priya's reasonable use. Overall: Priya almost certainly retains driveway access on multiple independent theories, the turnaround is a closer call, and Nkosi takes subject to the easement."
+  },
+  "interviewer_notes": "This is a written multi-issue IRAC exercise; the candidate types the analysis. Score primarily on issue-spotting breadth and IRAC discipline, not on a single 'right' verdict. The strongest candidates keep two analytically different questions apart: the driveway is a USE, so it is analyzed as an easement (implication, necessity, prescription), while the turnaround is EXCLUSIVE POSSESSION, so it is analyzed as adverse possession — pushing candidates who blur them is the central move. Watch for three classic errors: (1) concluding the silent deed leaves Priya with no rights — press with the implied-easement probe; (2) treating Owner's years of silence as 'permission' that defeats adversity, when passive acquiescence is not permission (a single sentence of actual permission would flip it, which is the first follow-up); and (3) letting Nkosi take free as a bona fide purchaser, ignoring the inquiry notice a visible, rutted driveway provides and that implied/necessity easements bind successors regardless of recording. Reward candidates who correctly note that exclusivity is required for adverse possession but NOT for a prescriptive easement, who distinguish strict necessity (necessity easement) from reasonable necessity plus prior apparent use (implication), and who reach a remedy (injunction/quiet title). Strong (senior-leaning) answers raise tacking and how a later-built public road would terminate a necessity easement but not a prescriptive or implied one. Press conclusory writers to state each element before applying it."
+}

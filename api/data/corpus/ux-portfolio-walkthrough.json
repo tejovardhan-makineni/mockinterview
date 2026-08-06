@@ -2,19 +2,59 @@
   "id": "ux-portfolio-walkthrough",
   "title": "Portfolio Walkthrough: A Design Decision and Its Tradeoffs",
   "track": "professional",
-  "domain": "ux_design",
+  "domain": "product_sense",
+  "areas": [
+    "product_management"
+  ],
   "modality": "conversational",
   "difficulty": "mid",
-  "tags": ["ux", "portfolio", "design-process", "tradeoffs", "storytelling", "impact"],
+  "tags": [
+    "ux",
+    "portfolio",
+    "design-process",
+    "tradeoffs",
+    "storytelling",
+    "impact"
+  ],
   "prompt": "Walk me through a project from your portfolio — pick one where you made a meaningful design decision that involved a real tradeoff. Tell me the problem, your process, the decision you made and what you chose against, and how it turned out. I'll dig in as you go.",
   "blurb": "A portfolio walkthrough — assessed for a clear problem-to-impact narrative, sound process, and honest reasoning about a real design tradeoff.",
   "rubric": [
-    { "key": "problem_framing", "label": "Problem & context framing", "description": "Sets up the user problem, business context, constraints, and their specific role concisely — what they were solving and why it mattered — without drowning in backstory.", "weight": 1.1 },
-    { "key": "process", "label": "Design process", "description": "Shows a real, appropriate process: research/insight, framing, ideation, iteration, and testing — matched to the constraints, not a rote 'double-diamond' recital, and grounded in evidence about users.", "weight": 1.2 },
-    { "key": "decision_tradeoffs", "label": "Decision & tradeoffs", "description": "Articulates the actual decision, the alternatives considered, what was traded off and why, and the criteria used — demonstrating judgment rather than presenting the outcome as obvious.", "weight": 1.3 },
-    { "key": "user_evidence", "label": "User & data evidence", "description": "Backs the decision and outcome with evidence (usability findings, metrics, qualitative signal) rather than asserting it worked; ties the design back to user needs.", "weight": 1.1 },
-    { "key": "impact_reflection", "label": "Impact & reflection", "description": "States a concrete outcome/impact and reflects honestly on what they'd do differently or what didn't work — showing growth, not just a success story.", "weight": 1.1 },
-    { "key": "communication", "label": "Communication & ownership", "description": "Clear narrative arc, uses 'I' for their own contribution while crediting collaborators, handles probes without getting defensive, and stays concise.", "weight": 1.0 }
+    {
+      "key": "problem_framing",
+      "label": "Problem & context framing",
+      "description": "Sets up the user problem, business context, constraints, and their specific role concisely — what they were solving and why it mattered — without drowning in backstory.",
+      "weight": 1.1
+    },
+    {
+      "key": "process",
+      "label": "Design process",
+      "description": "Shows a real, appropriate process: research/insight, framing, ideation, iteration, and testing — matched to the constraints, not a rote 'double-diamond' recital, and grounded in evidence about users.",
+      "weight": 1.2
+    },
+    {
+      "key": "decision_tradeoffs",
+      "label": "Decision & tradeoffs",
+      "description": "Articulates the actual decision, the alternatives considered, what was traded off and why, and the criteria used — demonstrating judgment rather than presenting the outcome as obvious.",
+      "weight": 1.3
+    },
+    {
+      "key": "user_evidence",
+      "label": "User & data evidence",
+      "description": "Backs the decision and outcome with evidence (usability findings, metrics, qualitative signal) rather than asserting it worked; ties the design back to user needs.",
+      "weight": 1.1
+    },
+    {
+      "key": "impact_reflection",
+      "label": "Impact & reflection",
+      "description": "States a concrete outcome/impact and reflects honestly on what they'd do differently or what didn't work — showing growth, not just a success story.",
+      "weight": 1.1
+    },
+    {
+      "key": "communication",
+      "label": "Communication & ownership",
+      "description": "Clear narrative arc, uses 'I' for their own contribution while crediting collaborators, handles probes without getting defensive, and stays concise.",
+      "weight": 1.0
+    }
   ],
   "reference": {
     "scenario": "Conversational portfolio walkthrough at the mid bar. There is no correct project; the interviewer assesses whether the candidate can tell a coherent problem-to-impact story, show a real design process, and — most importantly — reason honestly about a genuine tradeoff. A strong walkthrough frames the user problem and business context tightly, states the candidate's specific role, and then centers on a real decision: what they chose, the alternatives they weighed, what they deliberately traded off (e.g. simplicity vs power, speed to ship vs completeness, one user segment's needs vs another's, discoverability vs screen real estate), and the criteria that drove the call. They back it with evidence — research insights that framed the problem, usability testing that shaped iterations, and outcome metrics or qualitative signal — and tie everything back to user needs. Crucially, they reflect honestly: what didn't work, what they'd change, what they learned. They use 'I' for their own work while crediting the team, and they handle the interviewer's probes (why not the alternative? how did you know it worked? what would you do differently?) with curiosity rather than defensiveness. Weak walkthroughs are a feature tour with no decision or tradeoff, a rote process recital detached from the actual project, a flawless-hero narrative with no honest reflection, claims of impact with no evidence, or 'we' throughout with no clear personal contribution.",
@@ -30,13 +70,34 @@
       "Handle probes with curiosity: engage seriously with 'why not the alternative?' rather than defending the decision as obviously correct."
     ],
     "probes": [
-      { "trigger": "candidate tours features without a decision", "question": "Stop me at the hardest decision in this project — what were the real options and why did you pick the one you did?" },
-      { "trigger": "candidate presents the choice as obvious", "question": "What did you give up by going that way? What's the strongest case for the alternative you rejected?" },
-      { "trigger": "candidate recites a generic process", "question": "Skip the framework — what did you actually do on THIS project, and what did the research or testing actually tell you?" },
-      { "trigger": "candidate claims success with no evidence", "question": "How did you know it worked? What did you measure or observe, and what would have told you it failed?" },
-      { "trigger": "candidate says 'we' throughout", "question": "What was YOUR specific contribution versus the rest of the team's?" },
-      { "trigger": "candidate gives a flawless success story", "question": "What didn't work, or what would you do differently if you ran it again?" },
-      { "trigger": "candidate gets defensive under questioning", "question": "Fair enough — but if a teammate pushed back with that alternative, how would you weigh it now?" }
+      {
+        "trigger": "candidate tours features without a decision",
+        "question": "Stop me at the hardest decision in this project — what were the real options and why did you pick the one you did?"
+      },
+      {
+        "trigger": "candidate presents the choice as obvious",
+        "question": "What did you give up by going that way? What's the strongest case for the alternative you rejected?"
+      },
+      {
+        "trigger": "candidate recites a generic process",
+        "question": "Skip the framework — what did you actually do on THIS project, and what did the research or testing actually tell you?"
+      },
+      {
+        "trigger": "candidate claims success with no evidence",
+        "question": "How did you know it worked? What did you measure or observe, and what would have told you it failed?"
+      },
+      {
+        "trigger": "candidate says 'we' throughout",
+        "question": "What was YOUR specific contribution versus the rest of the team's?"
+      },
+      {
+        "trigger": "candidate gives a flawless success story",
+        "question": "What didn't work, or what would you do differently if you ran it again?"
+      },
+      {
+        "trigger": "candidate gets defensive under questioning",
+        "question": "Fair enough — but if a teammate pushed back with that alternative, how would you weigh it now?"
+      }
     ],
     "red_flags": [
       "A feature tour with no real decision or tradeoff",

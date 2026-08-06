@@ -3,23 +3,88 @@
   "title": "Design a Chess Game — Object Model",
   "track": "engineering",
   "domain": "low_level_design",
+  "areas": [
+    "engineering"
+  ],
   "modality": "system_design",
   "difficulty": "senior",
-  "tags": ["ood", "lld", "strategy-pattern", "factory-pattern", "state-machine", "game"],
+  "tags": [
+    "ood",
+    "lld",
+    "strategy-pattern",
+    "factory-pattern",
+    "state-machine",
+    "game"
+  ],
   "prompt": "Design the object model for a two-player chess game. Model the board, the pieces with their distinct movement rules, move validation (including special moves like castling, en passant, and promotion), check/checkmate/stalemate detection, and the overall game state. Design the core classes and key methods. Focus on the object design, not a chess AI. Sketch the class diagram.",
   "blurb": "Per-piece movement via Strategy/polymorphism, special-move rules, and check/checkmate detection with a clean game state machine.",
   "rubric": [
-    { "key": "requirements_clarification", "label": "Requirements clarification", "description": "Separates functional (legal moves per piece, special moves, check/mate/stalemate, turns) from non-functional (rule correctness, extensibility to variants, undo).", "weight": 1.0 },
-    { "key": "core_entities", "label": "Core entities", "description": "Board, Cell/Square, Piece (+ subtypes), Move, Player, Game, MoveValidator — cleanly separated, no god class.", "weight": 1.1 },
-    { "key": "class_design", "label": "Class design & responsibilities", "description": "Piece movement is polymorphic/Strategy, not a switch on type; Board holds state; Game orchestrates turns and end conditions.", "weight": 1.3 },
-    { "key": "relationships", "label": "Relationships & cardinality", "description": "Board composes 64 Cells; Cell holds 0..1 Piece; Piece has a color/owner; Game has two Players and a Board and move history.", "weight": 1.0 },
-    { "key": "design_patterns", "label": "Design patterns", "description": "Strategy/polymorphism for movement, Factory for piece creation/promotion, State for game phase, Command/Memento for move + undo, Singleton for board optional.", "weight": 1.2 },
-    { "key": "solid_principles", "label": "SOLID / OCP", "description": "Adding a variant piece or rule requires new classes, not editing existing pieces; validation composed, not a monolith.", "weight": 1.2 },
-    { "key": "api_methods", "label": "API / method design", "description": "getValidMoves(piece), makeMove(move), isCheck/isCheckmate/isStalemate, promote, undo — clear signatures.", "weight": 1.0 },
-    { "key": "state_machine", "label": "Game state & rules engine", "description": "Turn alternation, game phases (active/check/checkmate/stalemate/draw), and legal-move filtering that respects check.", "weight": 1.2 },
-    { "key": "edge_cases", "label": "Edge cases / special moves", "description": "Castling (rights, path, not through check), en passant, promotion, pinned pieces, self-check prevention, draw conditions.", "weight": 1.2 },
-    { "key": "extensibility", "label": "Extensibility", "description": "Chess variants (Chess960, custom pieces), undo/redo, move notation, network/AI players added cleanly.", "weight": 0.9 },
-    { "key": "communication", "label": "Communication", "description": "Narrates the class diagram and move-validation flow, states tradeoffs, reasons about check filtering.", "weight": 0.8 }
+    {
+      "key": "requirements_clarification",
+      "label": "Requirements clarification",
+      "description": "Separates functional (legal moves per piece, special moves, check/mate/stalemate, turns) from non-functional (rule correctness, extensibility to variants, undo).",
+      "weight": 1.0
+    },
+    {
+      "key": "core_entities",
+      "label": "Core entities",
+      "description": "Board, Cell/Square, Piece (+ subtypes), Move, Player, Game, MoveValidator — cleanly separated, no god class.",
+      "weight": 1.1
+    },
+    {
+      "key": "class_design",
+      "label": "Class design & responsibilities",
+      "description": "Piece movement is polymorphic/Strategy, not a switch on type; Board holds state; Game orchestrates turns and end conditions.",
+      "weight": 1.3
+    },
+    {
+      "key": "relationships",
+      "label": "Relationships & cardinality",
+      "description": "Board composes 64 Cells; Cell holds 0..1 Piece; Piece has a color/owner; Game has two Players and a Board and move history.",
+      "weight": 1.0
+    },
+    {
+      "key": "design_patterns",
+      "label": "Design patterns",
+      "description": "Strategy/polymorphism for movement, Factory for piece creation/promotion, State for game phase, Command/Memento for move + undo, Singleton for board optional.",
+      "weight": 1.2
+    },
+    {
+      "key": "solid_principles",
+      "label": "SOLID / OCP",
+      "description": "Adding a variant piece or rule requires new classes, not editing existing pieces; validation composed, not a monolith.",
+      "weight": 1.2
+    },
+    {
+      "key": "api_methods",
+      "label": "API / method design",
+      "description": "getValidMoves(piece), makeMove(move), isCheck/isCheckmate/isStalemate, promote, undo — clear signatures.",
+      "weight": 1.0
+    },
+    {
+      "key": "state_machine",
+      "label": "Game state & rules engine",
+      "description": "Turn alternation, game phases (active/check/checkmate/stalemate/draw), and legal-move filtering that respects check.",
+      "weight": 1.2
+    },
+    {
+      "key": "edge_cases",
+      "label": "Edge cases / special moves",
+      "description": "Castling (rights, path, not through check), en passant, promotion, pinned pieces, self-check prevention, draw conditions.",
+      "weight": 1.2
+    },
+    {
+      "key": "extensibility",
+      "label": "Extensibility",
+      "description": "Chess variants (Chess960, custom pieces), undo/redo, move notation, network/AI players added cleanly.",
+      "weight": 0.9
+    },
+    {
+      "key": "communication",
+      "label": "Communication",
+      "description": "Narrates the class diagram and move-validation flow, states tradeoffs, reasons about check filtering.",
+      "weight": 0.8
+    }
   ],
   "reference": {
     "functional_requirements": [
@@ -45,16 +110,124 @@
       "Do we auto-detect draws (threefold repetition, 50-move, insufficient material)?"
     ],
     "core_classes": [
-      { "name": "Board", "responsibility": "Holds the 8x8 grid of Cells and provides piece placement/lookup and path queries.", "key_fields": ["Cell[8][8] cells"], "key_methods": ["getCell(row,col)", "getPiece(pos)", "movePiece(from,to)", "isPathClear(from,to)", "findKing(color)"] },
-      { "name": "Cell / Square", "responsibility": "One square; holds 0..1 Piece and its coordinates.", "key_fields": ["row", "col", "Piece piece"], "key_methods": ["isEmpty()", "getPiece()"] },
-      { "name": "Piece (abstract)", "responsibility": "Base for all pieces; defines movement contract polymorphically.", "key_fields": ["Color color", "boolean hasMoved", "Position position"], "key_methods": ["canMove(Board, from, to) -> bool", "getCandidateMoves(Board, from) -> List<Move>"] },
-      { "name": "Pawn / Knight / Bishop / Rook / Queen / King", "responsibility": "Concrete movement rules; Pawn handles double-step/en-passant/promotion, King handles castling/one-square, sliders handle path.", "key_fields": [], "key_methods": ["canMove(...)", "getCandidateMoves(...)"] },
-      { "name": "Move", "responsibility": "Command object: a reversible move with metadata for special moves and undo.", "key_fields": ["from", "to", "Piece moved", "Piece captured", "MoveType type (NORMAL/CASTLE/EN_PASSANT/PROMOTION)", "promotionPiece"], "key_methods": ["execute(Board)", "undo(Board)"] },
-      { "name": "MoveValidator / RulesEngine", "responsibility": "Filters piece candidate moves to fully legal ones — path clear, turn, and does-not-leave-own-king-in-check.", "key_fields": [], "key_methods": ["isLegal(Board, Move, color)", "legalMoves(Board, color)", "isSquareAttacked(Board, pos, byColor)"] },
-      { "name": "Player", "responsibility": "A participant with a color; may be human/AI/network.", "key_fields": ["name", "Color color"], "key_methods": ["makeMove()"] },
-      { "name": "Game", "responsibility": "Orchestrates turns, applies moves via the validator, tracks state, detects end conditions.", "key_fields": ["Board board", "Player[] players", "Player currentTurn", "GameState state", "List<Move> history"], "key_methods": ["makeMove(from,to)", "isCheck(color)", "isCheckmate(color)", "isStalemate(color)", "undo()"] },
-      { "name": "PieceFactory", "responsibility": "Creates pieces for setup and promotion.", "key_fields": [], "key_methods": ["create(type, color) -> Piece"] },
-      { "name": "GameState (enum/state)", "responsibility": "ACTIVE, CHECK, CHECKMATE, STALEMATE, DRAW, RESIGNED.", "key_fields": [], "key_methods": [] }
+      {
+        "name": "Board",
+        "responsibility": "Holds the 8x8 grid of Cells and provides piece placement/lookup and path queries.",
+        "key_fields": [
+          "Cell[8][8] cells"
+        ],
+        "key_methods": [
+          "getCell(row,col)",
+          "getPiece(pos)",
+          "movePiece(from,to)",
+          "isPathClear(from,to)",
+          "findKing(color)"
+        ]
+      },
+      {
+        "name": "Cell / Square",
+        "responsibility": "One square; holds 0..1 Piece and its coordinates.",
+        "key_fields": [
+          "row",
+          "col",
+          "Piece piece"
+        ],
+        "key_methods": [
+          "isEmpty()",
+          "getPiece()"
+        ]
+      },
+      {
+        "name": "Piece (abstract)",
+        "responsibility": "Base for all pieces; defines movement contract polymorphically.",
+        "key_fields": [
+          "Color color",
+          "boolean hasMoved",
+          "Position position"
+        ],
+        "key_methods": [
+          "canMove(Board, from, to) -> bool",
+          "getCandidateMoves(Board, from) -> List<Move>"
+        ]
+      },
+      {
+        "name": "Pawn / Knight / Bishop / Rook / Queen / King",
+        "responsibility": "Concrete movement rules; Pawn handles double-step/en-passant/promotion, King handles castling/one-square, sliders handle path.",
+        "key_fields": [],
+        "key_methods": [
+          "canMove(...)",
+          "getCandidateMoves(...)"
+        ]
+      },
+      {
+        "name": "Move",
+        "responsibility": "Command object: a reversible move with metadata for special moves and undo.",
+        "key_fields": [
+          "from",
+          "to",
+          "Piece moved",
+          "Piece captured",
+          "MoveType type (NORMAL/CASTLE/EN_PASSANT/PROMOTION)",
+          "promotionPiece"
+        ],
+        "key_methods": [
+          "execute(Board)",
+          "undo(Board)"
+        ]
+      },
+      {
+        "name": "MoveValidator / RulesEngine",
+        "responsibility": "Filters piece candidate moves to fully legal ones — path clear, turn, and does-not-leave-own-king-in-check.",
+        "key_fields": [],
+        "key_methods": [
+          "isLegal(Board, Move, color)",
+          "legalMoves(Board, color)",
+          "isSquareAttacked(Board, pos, byColor)"
+        ]
+      },
+      {
+        "name": "Player",
+        "responsibility": "A participant with a color; may be human/AI/network.",
+        "key_fields": [
+          "name",
+          "Color color"
+        ],
+        "key_methods": [
+          "makeMove()"
+        ]
+      },
+      {
+        "name": "Game",
+        "responsibility": "Orchestrates turns, applies moves via the validator, tracks state, detects end conditions.",
+        "key_fields": [
+          "Board board",
+          "Player[] players",
+          "Player currentTurn",
+          "GameState state",
+          "List<Move> history"
+        ],
+        "key_methods": [
+          "makeMove(from,to)",
+          "isCheck(color)",
+          "isCheckmate(color)",
+          "isStalemate(color)",
+          "undo()"
+        ]
+      },
+      {
+        "name": "PieceFactory",
+        "responsibility": "Creates pieces for setup and promotion.",
+        "key_fields": [],
+        "key_methods": [
+          "create(type, color) -> Piece"
+        ]
+      },
+      {
+        "name": "GameState (enum/state)",
+        "responsibility": "ACTIVE, CHECK, CHECKMATE, STALEMATE, DRAW, RESIGNED.",
+        "key_fields": [],
+        "key_methods": []
+      }
     ],
     "relationships": [
       "Board composes 64 Cells; each Cell holds 0..1 Piece (composition/aggregation).",
@@ -64,10 +237,26 @@
       "MoveValidator depends only on Board + Piece abstractions (it asks pieces for candidate moves, then filters)."
     ],
     "design_patterns": [
-      { "pattern": "Strategy / Polymorphism", "where": "Each Piece subclass encapsulates its own movement rule", "why": "Movement varies per piece; new pieces are added as subclasses without touching a central switch (OCP)." },
-      { "pattern": "Factory", "where": "PieceFactory for initial setup and pawn promotion", "why": "Centralizes piece construction; promotion swaps a pawn for a chosen piece cleanly." },
-      { "pattern": "Command + Memento", "where": "Move.execute/undo capturing captured piece and prior state", "why": "Enables undo/redo and 'try move, check for self-check, revert' without duplicating board state." },
-      { "pattern": "State", "where": "GameState (Active/Check/Checkmate/Stalemate/Draw)", "why": "Game phase governs what actions are legal and drives end detection." }
+      {
+        "pattern": "Strategy / Polymorphism",
+        "where": "Each Piece subclass encapsulates its own movement rule",
+        "why": "Movement varies per piece; new pieces are added as subclasses without touching a central switch (OCP)."
+      },
+      {
+        "pattern": "Factory",
+        "where": "PieceFactory for initial setup and pawn promotion",
+        "why": "Centralizes piece construction; promotion swaps a pawn for a chosen piece cleanly."
+      },
+      {
+        "pattern": "Command + Memento",
+        "where": "Move.execute/undo capturing captured piece and prior state",
+        "why": "Enables undo/redo and 'try move, check for self-check, revert' without duplicating board state."
+      },
+      {
+        "pattern": "State",
+        "where": "GameState (Active/Check/Checkmate/Stalemate/Draw)",
+        "why": "Game phase governs what actions are legal and drives end detection."
+      }
     ],
     "apis": [
       "game.makeMove(from, to) -> MoveResult (accepts or rejects with reason)",
@@ -106,18 +295,48 @@
       "Draw-detection rules → pluggable rule objects consulted by the RulesEngine"
     ],
     "deep_dives": [
-      { "topic": "movement_polymorphism", "probe": "How does a bishop's move differ from a knight's in your model? Show me why adding a new fairy piece doesn't require editing any existing piece or a central switch." },
-      { "topic": "self_check", "probe": "A knight is pinned to its king. Its normal L-move is geometrically legal but would expose the king. Where and how do you reject that? Walk through the try-move/undo check." },
-      { "topic": "special_moves", "probe": "Model castling. What state must you track (has the king/rook moved, is the king passing through check), and where does that logic live — King, Move, or validator?" },
-      { "topic": "checkmate_detection", "probe": "How do you distinguish checkmate from stalemate? Describe the algorithm using legal-move generation." },
-      { "topic": "undo", "probe": "How do you implement undo cleanly, including undoing a capture, en passant, and promotion?" }
+      {
+        "topic": "movement_polymorphism",
+        "probe": "How does a bishop's move differ from a knight's in your model? Show me why adding a new fairy piece doesn't require editing any existing piece or a central switch."
+      },
+      {
+        "topic": "self_check",
+        "probe": "A knight is pinned to its king. Its normal L-move is geometrically legal but would expose the king. Where and how do you reject that? Walk through the try-move/undo check."
+      },
+      {
+        "topic": "special_moves",
+        "probe": "Model castling. What state must you track (has the king/rook moved, is the king passing through check), and where does that logic live — King, Move, or validator?"
+      },
+      {
+        "topic": "checkmate_detection",
+        "probe": "How do you distinguish checkmate from stalemate? Describe the algorithm using legal-move generation."
+      },
+      {
+        "topic": "undo",
+        "probe": "How do you implement undo cleanly, including undoing a capture, en passant, and promotion?"
+      }
     ],
     "followup_bank": [
-      { "trigger": "mentions piece or move rule or switch", "question": "Is movement a switch on piece type or polymorphic per subclass? Add a custom 'archbishop' piece — what changes?" },
-      { "trigger": "mentions check or king", "question": "A pinned piece's move is geometrically legal but exposes the king. Where do you reject it, and how?" },
-      { "trigger": "mentions castle or castling or en passant or promotion", "question": "Where does the special-move logic and its required state (hasMoved, last double-step) live? Defend that placement." },
-      { "trigger": "mentions checkmate or stalemate", "question": "Both have zero legal moves. What's the exact condition that separates them, and how do you compute legal moves?" },
-      { "trigger": "mentions undo or history", "question": "How do you undo a move that was a capture-plus-promotion? What does the Move need to store?" }
+      {
+        "trigger": "mentions piece or move rule or switch",
+        "question": "Is movement a switch on piece type or polymorphic per subclass? Add a custom 'archbishop' piece — what changes?"
+      },
+      {
+        "trigger": "mentions check or king",
+        "question": "A pinned piece's move is geometrically legal but exposes the king. Where do you reject it, and how?"
+      },
+      {
+        "trigger": "mentions castle or castling or en passant or promotion",
+        "question": "Where does the special-move logic and its required state (hasMoved, last double-step) live? Defend that placement."
+      },
+      {
+        "trigger": "mentions checkmate or stalemate",
+        "question": "Both have zero legal moves. What's the exact condition that separates them, and how do you compute legal moves?"
+      },
+      {
+        "trigger": "mentions undo or history",
+        "question": "How do you undo a move that was a capture-plus-promotion? What does the Move need to store?"
+      }
     ],
     "tradeoffs": [
       "Polymorphic piece movement (OCP, more classes) vs a central move table (compact, harder to extend)",

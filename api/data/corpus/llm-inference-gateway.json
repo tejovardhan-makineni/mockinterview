@@ -3,24 +3,97 @@
   "title": "Design an LLM Inference Serving Gateway",
   "track": "engineering",
   "domain": "ml_system_design",
+  "areas": [
+    "engineering",
+    "data_science"
+  ],
   "modality": "system_design",
   "difficulty": "staff",
-  "tags": ["llm", "gpu", "batching", "kv-cache", "autoscaling", "streaming", "rate-limiting", "cost"],
+  "tags": [
+    "llm",
+    "gpu",
+    "batching",
+    "kv-cache",
+    "autoscaling",
+    "streaming",
+    "rate-limiting",
+    "cost"
+  ],
   "prompt": "Design an inference gateway that serves large language models to many internal teams and external customers. It must multiplex requests across a GPU fleet with continuous batching and KV-cache management, route between models with fallback, stream tokens, enforce per-tenant rate limits and quotas, and keep GPU cost under control. Assume bursty, heterogeneous traffic and strict latency SLOs.",
   "blurb": "The GPU-serving control plane — continuous batching, KV cache, autoscaling, routing/fallback, streaming, rate limits, and cost.",
   "rubric": [
-    { "key": "requirements", "label": "Requirements gathering", "description": "Separates functional (route, batch, stream, fallback, quota) from non-functional (TTFT and inter-token latency SLOs, throughput, availability, cost per 1M tokens).", "weight": 1.0 },
-    { "key": "clarifying_questions", "label": "Clarifying questions", "description": "Asks about model sizes/mix, prompt vs generation length distribution, tenant SLO tiers, sync vs streaming, on-prem vs cloud GPUs, and cost targets.", "weight": 1.0 },
-    { "key": "estimations", "label": "Back-of-envelope estimations", "description": "Estimates tokens/s per GPU, KV-cache memory per request (layers x heads x dim x 2 x seq x dtype), max concurrent sequences per GPU, GPUs needed for peak QPS, and cost per 1M tokens.", "weight": 1.2 },
-    { "key": "batching", "label": "Continuous batching", "description": "Continuous/in-flight batching vs static batching, prefill vs decode separation, scheduling to keep GPUs saturated without hurting TTFT.", "weight": 1.3 },
-    { "key": "kv_cache", "label": "KV cache management", "description": "KV-cache memory budgeting, paged attention, eviction/preemption under pressure, prefix caching for shared system prompts.", "weight": 1.2 },
-    { "key": "routing_fallback", "label": "Routing & fallback", "description": "Model/version routing, health-aware load balancing, fallback to alternate replicas/models/regions on overload or failure, and graceful degradation.", "weight": 1.1 },
-    { "key": "autoscaling", "label": "GPU autoscaling", "description": "Scaling on queue depth/GPU utilization rather than CPU, cold-start (model load) mitigation, warm pools, scale-to-zero tradeoffs for expensive GPUs.", "weight": 1.1 },
-    { "key": "rate_limiting", "label": "Rate limiting & quotas", "description": "Token-bucket limits by requests and by tokens, per-tenant quotas, fair queueing, admission control and backpressure under overload.", "weight": 1.0 },
-    { "key": "streaming", "label": "Streaming & protocol", "description": "SSE/gRPC streaming, cancellation freeing GPU slots, TTFT vs inter-token latency, timeouts and partial-response handling.", "weight": 0.9 },
-    { "key": "cost", "label": "Cost efficiency", "description": "Maximizing tokens/GPU-hour via batching and quantization, spot/preemptible GPUs, semantic/prefix caching, right-sizing models per request.", "weight": 1.0 },
-    { "key": "ml_specifics", "label": "ML serving specifics", "description": "Quantization (INT8/FP8) and tensor/pipeline parallelism tradeoffs, speculative decoding, prefix-cache reuse, model versioning and canary.", "weight": 1.1 },
-    { "key": "observability", "label": "Observability", "description": "TTFT/ITL/throughput SLOs, GPU utilization and KV-cache occupancy, queue depth, per-tenant token accounting, and cost dashboards.", "weight": 0.9 }
+    {
+      "key": "requirements",
+      "label": "Requirements gathering",
+      "description": "Separates functional (route, batch, stream, fallback, quota) from non-functional (TTFT and inter-token latency SLOs, throughput, availability, cost per 1M tokens).",
+      "weight": 1.0
+    },
+    {
+      "key": "clarifying_questions",
+      "label": "Clarifying questions",
+      "description": "Asks about model sizes/mix, prompt vs generation length distribution, tenant SLO tiers, sync vs streaming, on-prem vs cloud GPUs, and cost targets.",
+      "weight": 1.0
+    },
+    {
+      "key": "estimations",
+      "label": "Back-of-envelope estimations",
+      "description": "Estimates tokens/s per GPU, KV-cache memory per request (layers x heads x dim x 2 x seq x dtype), max concurrent sequences per GPU, GPUs needed for peak QPS, and cost per 1M tokens.",
+      "weight": 1.2
+    },
+    {
+      "key": "batching",
+      "label": "Continuous batching",
+      "description": "Continuous/in-flight batching vs static batching, prefill vs decode separation, scheduling to keep GPUs saturated without hurting TTFT.",
+      "weight": 1.3
+    },
+    {
+      "key": "kv_cache",
+      "label": "KV cache management",
+      "description": "KV-cache memory budgeting, paged attention, eviction/preemption under pressure, prefix caching for shared system prompts.",
+      "weight": 1.2
+    },
+    {
+      "key": "routing_fallback",
+      "label": "Routing & fallback",
+      "description": "Model/version routing, health-aware load balancing, fallback to alternate replicas/models/regions on overload or failure, and graceful degradation.",
+      "weight": 1.1
+    },
+    {
+      "key": "autoscaling",
+      "label": "GPU autoscaling",
+      "description": "Scaling on queue depth/GPU utilization rather than CPU, cold-start (model load) mitigation, warm pools, scale-to-zero tradeoffs for expensive GPUs.",
+      "weight": 1.1
+    },
+    {
+      "key": "rate_limiting",
+      "label": "Rate limiting & quotas",
+      "description": "Token-bucket limits by requests and by tokens, per-tenant quotas, fair queueing, admission control and backpressure under overload.",
+      "weight": 1.0
+    },
+    {
+      "key": "streaming",
+      "label": "Streaming & protocol",
+      "description": "SSE/gRPC streaming, cancellation freeing GPU slots, TTFT vs inter-token latency, timeouts and partial-response handling.",
+      "weight": 0.9
+    },
+    {
+      "key": "cost",
+      "label": "Cost efficiency",
+      "description": "Maximizing tokens/GPU-hour via batching and quantization, spot/preemptible GPUs, semantic/prefix caching, right-sizing models per request.",
+      "weight": 1.0
+    },
+    {
+      "key": "ml_specifics",
+      "label": "ML serving specifics",
+      "description": "Quantization (INT8/FP8) and tensor/pipeline parallelism tradeoffs, speculative decoding, prefix-cache reuse, model versioning and canary.",
+      "weight": 1.1
+    },
+    {
+      "key": "observability",
+      "label": "Observability",
+      "description": "TTFT/ITL/throughput SLOs, GPU utilization and KV-cache occupancy, queue depth, per-tenant token accounting, and cost dashboards.",
+      "weight": 0.9
+    }
   ],
   "reference": {
     "functional_requirements": [
@@ -84,18 +157,48 @@
     ],
     "high_level_design": "Request hits the edge: authenticate, check token-bucket rate limits (by RPM and TPM) and quota, then admission control (reject/queue if the target model pool is saturated). The router picks a model version and a healthy replica by load (queue depth, KV occupancy). The inference server runs continuous/in-flight batching: new requests join the running batch at the next decode step, prefill and decode are scheduled to keep the GPU busy without starving TTFT. The KV-cache manager pages attention memory, reuses shared prefixes (system prompts), and preempts/evicts the lowest-priority sequences under memory pressure. Tokens stream back via SSE; cancellation frees the KV slot. The autoscaler scales GPU replicas on queue depth/utilization with a warm pool to hide model-load cold starts. Usage is metered per tenant for quotas and billing; overload degrades gracefully via fallback chains and load shedding of low-tier traffic.",
     "deep_dives": [
-      { "topic": "batching", "probe": "Static batching wastes GPU when sequences finish at different times. Explain continuous/in-flight batching — how do new requests join mid-flight, and how do you balance prefill spikes against decode TTFT?" },
-      { "topic": "kv_cache", "probe": "The KV cache fills up and you can't admit more sequences. Walk me through paged attention, prefix reuse for shared system prompts, and what you evict or preempt under pressure." },
-      { "topic": "autoscaling", "probe": "GPU cold start (loading tens of GB of weights) is slow. How do you autoscale on the right signal and hide cold starts — warm pools, scale-to-zero economics?" },
-      { "topic": "routing_fallback", "probe": "A model replica is overloaded or a region degrades. What's your fallback chain, and how do you avoid retry storms making it worse?" },
-      { "topic": "rate_limiting", "probe": "Rate limiting by request count is wrong for LLMs. How do you limit by tokens (TPM), enforce fairness across tenants, and apply backpressure without hurting TTFT?" },
-      { "topic": "cost", "probe": "Your cost per 1M tokens is too high. Which levers — batching, quantization, speculative decoding, prefix caching, spot GPUs — do you pull and what do they cost you?" }
+      {
+        "topic": "batching",
+        "probe": "Static batching wastes GPU when sequences finish at different times. Explain continuous/in-flight batching — how do new requests join mid-flight, and how do you balance prefill spikes against decode TTFT?"
+      },
+      {
+        "topic": "kv_cache",
+        "probe": "The KV cache fills up and you can't admit more sequences. Walk me through paged attention, prefix reuse for shared system prompts, and what you evict or preempt under pressure."
+      },
+      {
+        "topic": "autoscaling",
+        "probe": "GPU cold start (loading tens of GB of weights) is slow. How do you autoscale on the right signal and hide cold starts — warm pools, scale-to-zero economics?"
+      },
+      {
+        "topic": "routing_fallback",
+        "probe": "A model replica is overloaded or a region degrades. What's your fallback chain, and how do you avoid retry storms making it worse?"
+      },
+      {
+        "topic": "rate_limiting",
+        "probe": "Rate limiting by request count is wrong for LLMs. How do you limit by tokens (TPM), enforce fairness across tenants, and apply backpressure without hurting TTFT?"
+      },
+      {
+        "topic": "cost",
+        "probe": "Your cost per 1M tokens is too high. Which levers — batching, quantization, speculative decoding, prefix caching, spot GPUs — do you pull and what do they cost you?"
+      }
     ],
     "followup_bank": [
-      { "trigger": "mentions kv cache or cache or prefix cache", "question": "How is the KV cache / prefix cache evicted when GPU memory is exhausted — LRU by sequence, priority-based preemption, recompute-on-demand? And how do you avoid thrashing?" },
-      { "trigger": "mentions semantic cache or response cache or embeddings", "question": "For a semantic cache of responses, how do you keep it fresh (invalidate when the model version or system prompt changes), and what's the eviction policy?" },
-      { "trigger": "mentions database or registry or postgres", "question": "Model registry and usage records live in a datastore — how do you propagate a new model version or quota change to the fleet, CDC vs config push?" },
-      { "trigger": "mentions autoscaling or kubernetes or scale", "question": "What metric do you autoscale on for GPUs, and how do you handle multi-minute cold starts without SLO violations?" }
+      {
+        "trigger": "mentions kv cache or cache or prefix cache",
+        "question": "How is the KV cache / prefix cache evicted when GPU memory is exhausted — LRU by sequence, priority-based preemption, recompute-on-demand? And how do you avoid thrashing?"
+      },
+      {
+        "trigger": "mentions semantic cache or response cache or embeddings",
+        "question": "For a semantic cache of responses, how do you keep it fresh (invalidate when the model version or system prompt changes), and what's the eviction policy?"
+      },
+      {
+        "trigger": "mentions database or registry or postgres",
+        "question": "Model registry and usage records live in a datastore — how do you propagate a new model version or quota change to the fleet, CDC vs config push?"
+      },
+      {
+        "trigger": "mentions autoscaling or kubernetes or scale",
+        "question": "What metric do you autoscale on for GPUs, and how do you handle multi-minute cold starts without SLO violations?"
+      }
     ],
     "scaling": [
       "Horizontal replicas per model behind a load-aware router",

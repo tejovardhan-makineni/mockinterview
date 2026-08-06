@@ -3,20 +3,70 @@
   "title": "Find Median from a Data Stream",
   "track": "engineering",
   "domain": "coding",
+  "areas": [
+    "engineering",
+    "data_science"
+  ],
   "modality": "coding",
   "difficulty": "senior",
-  "tags": ["heap", "priority-queue", "design", "streaming", "invariant"],
+  "tags": [
+    "heap",
+    "priority-queue",
+    "design",
+    "streaming",
+    "invariant"
+  ],
   "prompt": "Design a data structure that supports two operations on a stream of integers: addNum(num) inserts an integer into the data structure, and findMedian() returns the median of all elements added so far. The median is the middle value of the sorted elements; if the count is even, it's the average of the two middle values. Optimize for many interleaved addNum and findMedian calls.",
   "blurb": "The two-heaps classic — a max-heap for the lower half and a min-heap for the upper half, kept balanced so the median is at the tops.",
   "rubric": [
-    { "key": "problem_understanding", "label": "Problem understanding", "description": "Understands it's a streaming/online problem with repeated queries, so re-sorting each query is wasteful; median definition for even vs odd counts.", "weight": 1.1 },
-    { "key": "approach", "label": "Approach", "description": "Reaches the two-heaps design: a max-heap for the lower half, a min-heap for the upper half; median from the tops. Justifies why this beats a sorted array.", "weight": 1.4 },
-    { "key": "correctness", "label": "Correctness", "description": "Maintains the size invariant (heaps differ by at most 1) AND the ordering invariant (every lower <= every upper) on each addNum; findMedian handles odd/even correctly.", "weight": 1.3 },
-    { "key": "complexity_analysis", "label": "Complexity analysis", "description": "O(log n) per addNum, O(1) per findMedian, O(n) space; contrasts with sorted-array O(n) insert or O(n log n) re-sort.", "weight": 1.1 },
-    { "key": "code_quality", "label": "Code quality", "description": "Clean push-then-rebalance logic; a single, well-defined rebalancing rule rather than scattered conditionals.", "weight": 1.0 },
-    { "key": "edge_cases", "label": "Edge cases", "description": "First element, even vs odd counts, all-equal or duplicate values, negatives, integer-overflow-safe averaging of the two middles.", "weight": 1.0 },
-    { "key": "testing", "label": "Testing", "description": "Interleaves adds and queries verifying the median after each add, including an even-count average.", "weight": 0.8 },
-    { "key": "communication", "label": "Communication", "description": "States both invariants (size and ordering) explicitly and explains the rebalance step clearly.", "weight": 0.9 }
+    {
+      "key": "problem_understanding",
+      "label": "Problem understanding",
+      "description": "Understands it's a streaming/online problem with repeated queries, so re-sorting each query is wasteful; median definition for even vs odd counts.",
+      "weight": 1.1
+    },
+    {
+      "key": "approach",
+      "label": "Approach",
+      "description": "Reaches the two-heaps design: a max-heap for the lower half, a min-heap for the upper half; median from the tops. Justifies why this beats a sorted array.",
+      "weight": 1.4
+    },
+    {
+      "key": "correctness",
+      "label": "Correctness",
+      "description": "Maintains the size invariant (heaps differ by at most 1) AND the ordering invariant (every lower <= every upper) on each addNum; findMedian handles odd/even correctly.",
+      "weight": 1.3
+    },
+    {
+      "key": "complexity_analysis",
+      "label": "Complexity analysis",
+      "description": "O(log n) per addNum, O(1) per findMedian, O(n) space; contrasts with sorted-array O(n) insert or O(n log n) re-sort.",
+      "weight": 1.1
+    },
+    {
+      "key": "code_quality",
+      "label": "Code quality",
+      "description": "Clean push-then-rebalance logic; a single, well-defined rebalancing rule rather than scattered conditionals.",
+      "weight": 1.0
+    },
+    {
+      "key": "edge_cases",
+      "label": "Edge cases",
+      "description": "First element, even vs odd counts, all-equal or duplicate values, negatives, integer-overflow-safe averaging of the two middles.",
+      "weight": 1.0
+    },
+    {
+      "key": "testing",
+      "label": "Testing",
+      "description": "Interleaves adds and queries verifying the median after each add, including an even-count average.",
+      "weight": 0.8
+    },
+    {
+      "key": "communication",
+      "label": "Communication",
+      "description": "States both invariants (size and ordering) explicitly and explains the rebalance step clearly.",
+      "weight": 0.9
+    }
   ],
   "reference": {
     "constraints": [
@@ -33,19 +83,54 @@
       }
     ],
     "test_cases": [
-      { "input": "addNum(5); findMedian()", "expected": "5.0 — single element" },
-      { "input": "addNum(2); addNum(2); addNum(2); findMedian()", "expected": "2.0 — duplicates" },
-      { "input": "addNum(-1); addNum(-2); addNum(-3); findMedian()", "expected": "-2.0 — negatives" },
-      { "input": "addNum(1); addNum(2); addNum(3); addNum(4); findMedian()", "expected": "2.5 — even count, average of 2 and 3" },
-      { "input": "add 100000, then add -100000, findMedian()", "expected": "0.0 — overflow-safe averaging of extremes" }
+      {
+        "input": "addNum(5); findMedian()",
+        "expected": "5.0 — single element"
+      },
+      {
+        "input": "addNum(2); addNum(2); addNum(2); findMedian()",
+        "expected": "2.0 — duplicates"
+      },
+      {
+        "input": "addNum(-1); addNum(-2); addNum(-3); findMedian()",
+        "expected": "-2.0 — negatives"
+      },
+      {
+        "input": "addNum(1); addNum(2); addNum(3); addNum(4); findMedian()",
+        "expected": "2.5 — even count, average of 2 and 3"
+      },
+      {
+        "input": "add 100000, then add -100000, findMedian()",
+        "expected": "0.0 — overflow-safe averaging of extremes"
+      }
     ],
     "optimal_time": "O(log n) per addNum, O(1) per findMedian",
     "optimal_space": "O(n) to hold all elements across the two heaps",
     "approaches": [
-      { "name": "brute force (sorted array, re-sort or insert)", "idea": "Keep all numbers; on findMedian sort and pick the middle (O(n log n) per query), or keep a sorted array and binary-search the insert position (O(log n) to find but O(n) to shift for the insert). Fine for few queries, poor for a heavy interleaved stream.", "time": "O(n) insert or O(n log n) per query", "space": "O(n)" },
-      { "name": "optimal: two heaps (max-heap low + min-heap high)", "idea": "Maintain a max-heap 'low' for the smaller half and a min-heap 'high' for the larger half, with two invariants: (size) len(low) is equal to or one more than len(high); (order) every element in low <= every element in high. addNum: push to low, then move low's max to high (to enforce order), then if high got bigger than low, move high's min back to low (to enforce size). findMedian: if sizes equal, average the two tops; else return low's top (the max-heap root).", "time": "O(log n) add, O(1) median", "space": "O(n)" },
-      { "name": "balanced BST / order-statistics tree", "idea": "An augmented balanced BST (subtree sizes) supports insert in O(log n) and select-kth in O(log n), giving the median directly. More general (supports removal, arbitrary rank) but heavier to implement than two heaps.", "time": "O(log n) add and median", "space": "O(n)" },
-      { "name": "bounded-range: counting/bucket histogram", "idea": "If values are integers in a small fixed range, keep a count array/Fenwick tree; find the median by prefix-sum walk. O(range) or O(log range) per query.", "time": "O(log range) with a Fenwick tree", "space": "O(range)" }
+      {
+        "name": "brute force (sorted array, re-sort or insert)",
+        "idea": "Keep all numbers; on findMedian sort and pick the middle (O(n log n) per query), or keep a sorted array and binary-search the insert position (O(log n) to find but O(n) to shift for the insert). Fine for few queries, poor for a heavy interleaved stream.",
+        "time": "O(n) insert or O(n log n) per query",
+        "space": "O(n)"
+      },
+      {
+        "name": "optimal: two heaps (max-heap low + min-heap high)",
+        "idea": "Maintain a max-heap 'low' for the smaller half and a min-heap 'high' for the larger half, with two invariants: (size) len(low) is equal to or one more than len(high); (order) every element in low <= every element in high. addNum: push to low, then move low's max to high (to enforce order), then if high got bigger than low, move high's min back to low (to enforce size). findMedian: if sizes equal, average the two tops; else return low's top (the max-heap root).",
+        "time": "O(log n) add, O(1) median",
+        "space": "O(n)"
+      },
+      {
+        "name": "balanced BST / order-statistics tree",
+        "idea": "An augmented balanced BST (subtree sizes) supports insert in O(log n) and select-kth in O(log n), giving the median directly. More general (supports removal, arbitrary rank) but heavier to implement than two heaps.",
+        "time": "O(log n) add and median",
+        "space": "O(n)"
+      },
+      {
+        "name": "bounded-range: counting/bucket histogram",
+        "idea": "If values are integers in a small fixed range, keep a count array/Fenwick tree; find the median by prefix-sum walk. O(range) or O(log range) per query.",
+        "time": "O(log range) with a Fenwick tree",
+        "space": "O(range)"
+      }
     ],
     "follow_ups": [
       "If all numbers are integers in a small fixed range [0,100], can you do better than O(log n)? (bucket/counting histogram, O(1)-ish).",

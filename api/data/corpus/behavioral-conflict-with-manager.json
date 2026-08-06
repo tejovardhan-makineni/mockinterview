@@ -3,18 +3,64 @@
   "title": "Tell me about a disagreement you had with your manager",
   "track": "professional",
   "domain": "behavioral",
+  "areas": [
+    "engineering",
+    "data_science",
+    "medicine",
+    "nursing",
+    "law",
+    "consulting",
+    "product_management",
+    "finance"
+  ],
   "modality": "conversational",
   "difficulty": "senior",
-  "tags": ["conflict", "managing-up", "leadership-principles", "candor", "star"],
+  "tags": [
+    "conflict",
+    "managing-up",
+    "leadership-principles",
+    "candor",
+    "star"
+  ],
   "prompt": "Tell me about a time you disagreed with your manager on something that mattered. What was the disagreement, how did you handle it, and how did it resolve?",
   "blurb": "Conflict with manager (senior): can they challenge up with candor and professionalism — and handle either outcome maturely?",
   "rubric": [
-    { "key": "situation_clarity", "label": "Situation & the disagreement", "description": "Clearly frames a substantive disagreement with their manager and why it mattered — a real difference of view, not a trivial gripe.", "weight": 1.0 },
-    { "key": "task_ownership", "label": "Willingness to challenge up", "description": "Shows they took the risk to raise the disagreement directly and respectfully, rather than staying silent or going around their manager.", "weight": 1.2 },
-    { "key": "action_specificity", "label": "How they handled it", "description": "Describes concretely how THEY approached it — private and direct, backed by reasoning or data, listening to the manager's view, focused on the issue not the person.", "weight": 1.3 },
-    { "key": "result_impact", "label": "Resolution & outcome", "description": "Shows a mature resolution and outcome — persuaded them, met in the middle, or committed to the manager's call — with the relationship intact. Handles 'I didn't get my way' well.", "weight": 1.2 },
-    { "key": "reflection", "label": "Reflection & professionalism", "description": "Reflects on picking battles, respecting the manager's role and context, and what they learned about disagreeing up productively.", "weight": 1.2 },
-    { "key": "communication", "label": "Communication & composure", "description": "Tells it with professionalism and no residual resentment; fair to the manager's perspective.", "weight": 0.9 }
+    {
+      "key": "situation_clarity",
+      "label": "Situation & the disagreement",
+      "description": "Clearly frames a substantive disagreement with their manager and why it mattered — a real difference of view, not a trivial gripe.",
+      "weight": 1.0
+    },
+    {
+      "key": "task_ownership",
+      "label": "Willingness to challenge up",
+      "description": "Shows they took the risk to raise the disagreement directly and respectfully, rather than staying silent or going around their manager.",
+      "weight": 1.2
+    },
+    {
+      "key": "action_specificity",
+      "label": "How they handled it",
+      "description": "Describes concretely how THEY approached it — private and direct, backed by reasoning or data, listening to the manager's view, focused on the issue not the person.",
+      "weight": 1.3
+    },
+    {
+      "key": "result_impact",
+      "label": "Resolution & outcome",
+      "description": "Shows a mature resolution and outcome — persuaded them, met in the middle, or committed to the manager's call — with the relationship intact. Handles 'I didn't get my way' well.",
+      "weight": 1.2
+    },
+    {
+      "key": "reflection",
+      "label": "Reflection & professionalism",
+      "description": "Reflects on picking battles, respecting the manager's role and context, and what they learned about disagreeing up productively.",
+      "weight": 1.2
+    },
+    {
+      "key": "communication",
+      "label": "Communication & composure",
+      "description": "Tells it with professionalism and no residual resentment; fair to the manager's perspective.",
+      "weight": 0.9
+    }
   ],
   "reference": {
     "scenario": "A senior story: the candidate had a genuine, consequential disagreement with their own manager — on strategy, priorities, a people decision, an approach, or feedback about themselves — and handled it with candor and professionalism. The signal is the ability to challenge upward respectfully AND to handle the resolution maturely whether or not they got their way, keeping the relationship strong.",
@@ -27,11 +73,26 @@
       "Reflection: judgment about which disagreements are worth raising, respect for the manager's broader context and accountability, and what they learned about disagreeing up."
     ],
     "probes": [
-      { "trigger": "went around or over the manager", "question": "Did you take this to your manager directly first, or to someone else? Why?" },
-      { "trigger": "manager overruled — probe maturity", "question": "So they made a different call than you wanted. How did you handle that, and how did you show up afterward?" },
-      { "trigger": "disagreement sounds personal / values-based", "question": "Was this a professional judgment difference or something more personal? Keep it to the substance — what were the two positions?" },
-      { "trigger": "didn't consider manager's perspective", "question": "What was your manager seeing or accountable for that you might not have had visibility into? Did that change your view?" },
-      { "trigger": "relationship cost unclear", "question": "How was your relationship with your manager afterward? Did this help or hurt your trust?" }
+      {
+        "trigger": "went around or over the manager",
+        "question": "Did you take this to your manager directly first, or to someone else? Why?"
+      },
+      {
+        "trigger": "manager overruled — probe maturity",
+        "question": "So they made a different call than you wanted. How did you handle that, and how did you show up afterward?"
+      },
+      {
+        "trigger": "disagreement sounds personal / values-based",
+        "question": "Was this a professional judgment difference or something more personal? Keep it to the substance — what were the two positions?"
+      },
+      {
+        "trigger": "didn't consider manager's perspective",
+        "question": "What was your manager seeing or accountable for that you might not have had visibility into? Did that change your view?"
+      },
+      {
+        "trigger": "relationship cost unclear",
+        "question": "How was your relationship with your manager afterward? Did this help or hurt your trust?"
+      }
     ],
     "red_flags": [
       "Went around or over the manager instead of addressing it directly.",

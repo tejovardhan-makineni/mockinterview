@@ -2,19 +2,59 @@
   "id": "nursing-scenario",
   "title": "Nursing Scenario: Prioritization and Patient Safety",
   "track": "professional",
-  "domain": "nursing",
+  "domain": "prioritization",
+  "areas": [
+    "nursing"
+  ],
   "modality": "conversational",
   "difficulty": "entry",
-  "tags": ["nursing", "prioritization", "patient-safety", "abc", "escalation", "clinical-judgment"],
+  "tags": [
+    "nursing",
+    "prioritization",
+    "patient-safety",
+    "abc",
+    "escalation",
+    "clinical-judgment"
+  ],
   "prompt": "You're a nurse starting your shift on a medical-surgical unit with four patients. At the same moment: Patient A puts on the call light saying they suddenly feel short of breath; Patient B needs their scheduled 9am antibiotic that's now 20 minutes late; Patient C is asking for help to the bathroom; and Patient D's family is at the desk upset and wants to speak with you about the discharge plan. Talk me through how you'd prioritize, what you'd do, and when you'd get help. This is educational — I'm assessing your reasoning, not medical advice.",
   "blurb": "An entry-level prioritization scenario — assessed for ABC-based triage, patient safety, appropriate escalation, and clear communication under competing demands.",
   "rubric": [
-    { "key": "prioritization", "label": "Prioritization logic", "description": "Correctly ranks the competing demands using an appropriate framework (ABCs, Maslow, acute-vs-stable, actual-vs-potential problems), and can justify why the breathing patient comes first.", "weight": 1.3 },
-    { "key": "patient_safety", "label": "Patient safety", "description": "Keeps safety central: recognizes the shortness of breath as potentially urgent, doesn't leave an unstable patient, and addresses fall risk for the patient needing the bathroom rather than ignoring it.", "weight": 1.2 },
-    { "key": "assessment", "label": "Assessment approach", "description": "Describes a focused assessment of the urgent patient (look at the patient, vitals/SpO2, position upright, apply oxygen per protocol) rather than jumping to conclusions or interventions without assessing.", "weight": 1.1 },
-    { "key": "escalation", "label": "Escalation & help-seeking", "description": "Knows when and how to call for help — delegate appropriately to a CNA/colleague, escalate to charge nurse/rapid response/provider using a structured handoff (e.g. SBAR) if the patient deteriorates.", "weight": 1.2 },
-    { "key": "delegation", "label": "Delegation & teamwork", "description": "Delegates the lower-acuity tasks appropriately (assistive personnel for the bathroom, a colleague or charge nurse to hold the family, note the antibiotic timing window) rather than trying to do everything alone.", "weight": 1.0 },
-    { "key": "communication", "label": "Communication", "description": "Communicates clearly and calmly with patients, family, and team; explains reasoning and manages expectations without dismissing anyone.", "weight": 1.0 }
+    {
+      "key": "prioritization",
+      "label": "Prioritization logic",
+      "description": "Correctly ranks the competing demands using an appropriate framework (ABCs, Maslow, acute-vs-stable, actual-vs-potential problems), and can justify why the breathing patient comes first.",
+      "weight": 1.3
+    },
+    {
+      "key": "patient_safety",
+      "label": "Patient safety",
+      "description": "Keeps safety central: recognizes the shortness of breath as potentially urgent, doesn't leave an unstable patient, and addresses fall risk for the patient needing the bathroom rather than ignoring it.",
+      "weight": 1.2
+    },
+    {
+      "key": "assessment",
+      "label": "Assessment approach",
+      "description": "Describes a focused assessment of the urgent patient (look at the patient, vitals/SpO2, position upright, apply oxygen per protocol) rather than jumping to conclusions or interventions without assessing.",
+      "weight": 1.1
+    },
+    {
+      "key": "escalation",
+      "label": "Escalation & help-seeking",
+      "description": "Knows when and how to call for help — delegate appropriately to a CNA/colleague, escalate to charge nurse/rapid response/provider using a structured handoff (e.g. SBAR) if the patient deteriorates.",
+      "weight": 1.2
+    },
+    {
+      "key": "delegation",
+      "label": "Delegation & teamwork",
+      "description": "Delegates the lower-acuity tasks appropriately (assistive personnel for the bathroom, a colleague or charge nurse to hold the family, note the antibiotic timing window) rather than trying to do everything alone.",
+      "weight": 1.0
+    },
+    {
+      "key": "communication",
+      "label": "Communication",
+      "description": "Communicates clearly and calmly with patients, family, and team; explains reasoning and manages expectations without dismissing anyone.",
+      "weight": 1.0
+    }
   ],
   "reference": {
     "scenario": "Entry-level nursing prioritization scenario. This is educational and framework-based — it assesses clinical reasoning and safety judgment, not real medical direction. The candidate faces four simultaneous demands of different acuity and must prioritize, act, delegate, and escalate. The correct first priority is Patient A (sudden shortness of breath) because airway/breathing/circulation (ABCs) outrank everything else — sudden dyspnea is a potential airway/breathing emergency and an actual, not potential, problem. A strong entry-level answer goes to Patient A first, does a rapid focused assessment (look at the patient's work of breathing and color, check SpO2 and vitals, sit them upright, apply oxygen per unit protocol), and — critically — does not leave that patient if they appear unstable, instead calling for help. It uses the team: delegate the bathroom assist to a CNA/assistive personnel while noting Patient C's fall risk (don't just tell them to wait unsupervised if they're a fall risk), recognize the antibiotic (Patient B) has a timing window and is important but not immediately life-threatening — it can be given within the acceptable window once the emergency is handled, or delegated appropriately per scope — and ask the charge nurse or a colleague to acknowledge Patient D's family and set a time to talk, since an upset family is a communication priority but the lowest clinical acuity. If Patient A deteriorates, escalate promptly via rapid response / charge nurse / provider using a structured SBAR handoff. The best answers name their framework (ABCs, acute vs stable, actual vs potential), stay calm, and keep reassessing. Weak answers do tasks in the order presented, chase the loudest voice (the family) or the easy task first, leave an unstable patient, fail to delegate, never escalate, or intervene on the dyspneic patient without assessing.",
@@ -30,13 +70,34 @@
       "Work within scope and team: know what you can delegate versus what requires the nurse's own assessment and judgment."
     ],
     "probes": [
-      { "trigger": "candidate does tasks in the order presented or picks the easy/loud one first", "question": "Which patient do you see first, and why that one? What framework are you using to rank them?" },
-      { "trigger": "candidate goes to the breathing patient but jumps to interventions", "question": "Before you do anything, what does your focused assessment of that patient look like — what are you checking?" },
-      { "trigger": "candidate leaves the unstable patient to do other tasks", "question": "The patient still looks like they're struggling to breathe. Is it safe to leave them right now, and if not, what do you do instead?" },
-      { "trigger": "candidate tries to do everything alone", "question": "You can't be in four places at once. Who on your team can help, and what would you hand off to them?" },
-      { "trigger": "candidate ignores the fall-risk patient", "question": "The patient who needs the bathroom is a fall risk. What's your responsibility there, and how do you keep them safe while you're with the other patient?" },
-      { "trigger": "candidate never escalates", "question": "The breathing patient's oxygen level is dropping despite what you've done. Who do you call, and how do you communicate what's happening?" },
-      { "trigger": "candidate dismisses the family", "question": "How do you keep the upset family from feeling ignored while you handle the emergency?" }
+      {
+        "trigger": "candidate does tasks in the order presented or picks the easy/loud one first",
+        "question": "Which patient do you see first, and why that one? What framework are you using to rank them?"
+      },
+      {
+        "trigger": "candidate goes to the breathing patient but jumps to interventions",
+        "question": "Before you do anything, what does your focused assessment of that patient look like — what are you checking?"
+      },
+      {
+        "trigger": "candidate leaves the unstable patient to do other tasks",
+        "question": "The patient still looks like they're struggling to breathe. Is it safe to leave them right now, and if not, what do you do instead?"
+      },
+      {
+        "trigger": "candidate tries to do everything alone",
+        "question": "You can't be in four places at once. Who on your team can help, and what would you hand off to them?"
+      },
+      {
+        "trigger": "candidate ignores the fall-risk patient",
+        "question": "The patient who needs the bathroom is a fall risk. What's your responsibility there, and how do you keep them safe while you're with the other patient?"
+      },
+      {
+        "trigger": "candidate never escalates",
+        "question": "The breathing patient's oxygen level is dropping despite what you've done. Who do you call, and how do you communicate what's happening?"
+      },
+      {
+        "trigger": "candidate dismisses the family",
+        "question": "How do you keep the upset family from feeling ignored while you handle the emergency?"
+      }
     ],
     "red_flags": [
       "Addresses patients in the order presented or handles the loudest/easiest first",

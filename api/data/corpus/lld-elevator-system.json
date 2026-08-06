@@ -3,24 +3,94 @@
   "title": "Design an Elevator System (OOD)",
   "track": "engineering",
   "domain": "low_level_design",
+  "areas": [
+    "engineering"
+  ],
   "modality": "system_design",
   "difficulty": "senior",
-  "tags": ["ood", "state-machine", "scheduling", "strategy-pattern", "concurrency", "machine-coding"],
+  "tags": [
+    "ood",
+    "state-machine",
+    "scheduling",
+    "strategy-pattern",
+    "concurrency",
+    "machine-coding"
+  ],
   "prompt": "Design the control system for a building with multiple elevators. Passengers press up/down buttons on each floor and floor buttons inside each car. Model the classes, the elevator state machine, and the dispatch/scheduling logic that decides which car serves a call. Sketch the class diagram and walk through what happens when two hall calls arrive at once.",
   "blurb": "The hard OOD scheduling problem — a per-car state machine plus a pluggable dispatcher that stops two cars from chasing the same call.",
   "rubric": [
-    { "key": "requirements_clarification", "label": "Requirements clarification", "description": "Distinguishes hall calls (up/down, direction-only) from car calls (specific floor), asks about car count, express floors, capacity, and the optimization goal (wait time vs throughput vs energy).", "weight": 1.0 },
-    { "key": "core_entities", "label": "Core entities", "description": "Identifies ElevatorSystem/Controller, ElevatorCar, Request (HallCall vs CarCall), Button/Panel, Floor, and Dispatcher/Scheduler.", "weight": 1.1 },
-    { "key": "class_design", "label": "Class design", "description": "Each car owns its direction, current floor, and pending-stops structure; controller separated from car; buttons modeled as request sources, not logic holders.", "weight": 1.1 },
-    { "key": "state_machine", "label": "State machine", "description": "A clean car state machine (IDLE/MOVING_UP/MOVING_DOWN/DOORS_OPEN/MAINTENANCE) with well-defined transitions and where door timing fits.", "weight": 1.2 },
-    { "key": "scheduling_strategy", "label": "Scheduling strategy", "description": "A pluggable dispatch policy (nearest-car / SCAN-LOOK / directional) with a clear cost function; explains why one car is chosen and how starvation is avoided.", "weight": 1.3 },
-    { "key": "design_patterns", "label": "Design patterns", "description": "Strategy for dispatch, State for the car, Observer/command for button events; each justified.", "weight": 1.0 },
-    { "key": "relationships", "label": "Relationships", "description": "Controller aggregates cars; car composes a request queue; correct multiplicities and ownership.", "weight": 0.9 },
-    { "key": "api_methods", "label": "API methods", "description": "requestElevator(floor, direction), selectFloor(car, floor), step/tick, and car status queries; sensible signatures.", "weight": 0.9 },
-    { "key": "concurrency", "label": "Concurrency", "description": "Two hall calls or two cars racing the same call; how the controller assigns exactly once; simulation loop vs event-driven; thread-safe request queues.", "weight": 1.1 },
-    { "key": "extensibility", "label": "Extensibility", "description": "Express elevators, service/freight modes, VIP/priority calls, or a new scheduling algorithm drop in without rewriting the controller.", "weight": 1.0 },
-    { "key": "edge_cases", "label": "Edge cases", "description": "Overloaded car, call while doors closing, direction reversal mid-travel, maintenance mode, all cars busy, idle parking.", "weight": 0.9 },
-    { "key": "communication", "label": "Communication", "description": "Reasons about the dispatch decision aloud, keeps the state machine legible, and handles the double-call probe without hand-waving.", "weight": 0.8 }
+    {
+      "key": "requirements_clarification",
+      "label": "Requirements clarification",
+      "description": "Distinguishes hall calls (up/down, direction-only) from car calls (specific floor), asks about car count, express floors, capacity, and the optimization goal (wait time vs throughput vs energy).",
+      "weight": 1.0
+    },
+    {
+      "key": "core_entities",
+      "label": "Core entities",
+      "description": "Identifies ElevatorSystem/Controller, ElevatorCar, Request (HallCall vs CarCall), Button/Panel, Floor, and Dispatcher/Scheduler.",
+      "weight": 1.1
+    },
+    {
+      "key": "class_design",
+      "label": "Class design",
+      "description": "Each car owns its direction, current floor, and pending-stops structure; controller separated from car; buttons modeled as request sources, not logic holders.",
+      "weight": 1.1
+    },
+    {
+      "key": "state_machine",
+      "label": "State machine",
+      "description": "A clean car state machine (IDLE/MOVING_UP/MOVING_DOWN/DOORS_OPEN/MAINTENANCE) with well-defined transitions and where door timing fits.",
+      "weight": 1.2
+    },
+    {
+      "key": "scheduling_strategy",
+      "label": "Scheduling strategy",
+      "description": "A pluggable dispatch policy (nearest-car / SCAN-LOOK / directional) with a clear cost function; explains why one car is chosen and how starvation is avoided.",
+      "weight": 1.3
+    },
+    {
+      "key": "design_patterns",
+      "label": "Design patterns",
+      "description": "Strategy for dispatch, State for the car, Observer/command for button events; each justified.",
+      "weight": 1.0
+    },
+    {
+      "key": "relationships",
+      "label": "Relationships",
+      "description": "Controller aggregates cars; car composes a request queue; correct multiplicities and ownership.",
+      "weight": 0.9
+    },
+    {
+      "key": "api_methods",
+      "label": "API methods",
+      "description": "requestElevator(floor, direction), selectFloor(car, floor), step/tick, and car status queries; sensible signatures.",
+      "weight": 0.9
+    },
+    {
+      "key": "concurrency",
+      "label": "Concurrency",
+      "description": "Two hall calls or two cars racing the same call; how the controller assigns exactly once; simulation loop vs event-driven; thread-safe request queues.",
+      "weight": 1.1
+    },
+    {
+      "key": "extensibility",
+      "label": "Extensibility",
+      "description": "Express elevators, service/freight modes, VIP/priority calls, or a new scheduling algorithm drop in without rewriting the controller.",
+      "weight": 1.0
+    },
+    {
+      "key": "edge_cases",
+      "label": "Edge cases",
+      "description": "Overloaded car, call while doors closing, direction reversal mid-travel, maintenance mode, all cars busy, idle parking.",
+      "weight": 0.9
+    },
+    {
+      "key": "communication",
+      "label": "Communication",
+      "description": "Reasons about the dispatch decision aloud, keeps the state machine legible, and handles the double-call probe without hand-waving.",
+      "weight": 0.8
+    }
   ],
   "reference": {
     "functional_requirements": [
@@ -46,14 +116,91 @@
       "Should idle cars return to a parking/lobby floor?"
     ],
     "core_classes": [
-      { "name": "ElevatorSystem / Controller", "responsibility": "Top coordinator: receives hall calls, runs the Dispatcher to assign a car, advances the simulation, exposes status.", "key_fields": ["List<ElevatorCar> cars", "Dispatcher dispatcher", "int floors"], "key_methods": ["void requestElevator(int floor, Direction dir)", "void step()", "List<CarStatus> status()"] },
-      { "name": "ElevatorCar", "responsibility": "One car: owns its state machine, current floor, direction, and the set of pending stops; moves one floor per tick and manages doors.", "key_fields": ["id", "int currentFloor", "Direction direction", "ElevatorState state", "TreeSet<Integer> upStops", "TreeSet<Integer> downStops", "int capacity", "int load"], "key_methods": ["void addStop(int floor)", "void step()", "int estimateCostFor(HallCall c)", "boolean canAccept(HallCall c)"] },
-      { "name": "Request (abstract)", "responsibility": "Base for a service request; HallCall(floor, direction) from a landing, CarCall(floor) from inside a car.", "key_fields": ["floor", "createdAt"], "key_methods": [] },
-      { "name": "HallCall / CarCall", "responsibility": "Concrete request subtypes; HallCall carries a desired direction, CarCall a target floor.", "key_fields": ["Direction direction (HallCall)", "int target (CarCall)"], "key_methods": [] },
-      { "name": "Dispatcher (interface)", "responsibility": "Pluggable scheduling policy: choose which car should serve a hall call.", "key_fields": [], "key_methods": ["ElevatorCar selectCar(List<ElevatorCar> cars, HallCall c)"] },
-      { "name": "ElevatorState (enum/State objects)", "responsibility": "IDLE, MOVING_UP, MOVING_DOWN, DOORS_OPEN, MAINTENANCE — encapsulate per-state behavior/transitions.", "key_fields": [], "key_methods": ["ElevatorState next(ElevatorCar car)"] },
-      { "name": "Panel / Button", "responsibility": "Input surfaces: hall panel emits HallCalls, car panel emits CarCalls; buttons hold no scheduling logic.", "key_fields": ["floor", "isLit"], "key_methods": ["void press()"] },
-      { "name": "Direction (enum)", "responsibility": "UP, DOWN, IDLE.", "key_fields": [], "key_methods": [] }
+      {
+        "name": "ElevatorSystem / Controller",
+        "responsibility": "Top coordinator: receives hall calls, runs the Dispatcher to assign a car, advances the simulation, exposes status.",
+        "key_fields": [
+          "List<ElevatorCar> cars",
+          "Dispatcher dispatcher",
+          "int floors"
+        ],
+        "key_methods": [
+          "void requestElevator(int floor, Direction dir)",
+          "void step()",
+          "List<CarStatus> status()"
+        ]
+      },
+      {
+        "name": "ElevatorCar",
+        "responsibility": "One car: owns its state machine, current floor, direction, and the set of pending stops; moves one floor per tick and manages doors.",
+        "key_fields": [
+          "id",
+          "int currentFloor",
+          "Direction direction",
+          "ElevatorState state",
+          "TreeSet<Integer> upStops",
+          "TreeSet<Integer> downStops",
+          "int capacity",
+          "int load"
+        ],
+        "key_methods": [
+          "void addStop(int floor)",
+          "void step()",
+          "int estimateCostFor(HallCall c)",
+          "boolean canAccept(HallCall c)"
+        ]
+      },
+      {
+        "name": "Request (abstract)",
+        "responsibility": "Base for a service request; HallCall(floor, direction) from a landing, CarCall(floor) from inside a car.",
+        "key_fields": [
+          "floor",
+          "createdAt"
+        ],
+        "key_methods": []
+      },
+      {
+        "name": "HallCall / CarCall",
+        "responsibility": "Concrete request subtypes; HallCall carries a desired direction, CarCall a target floor.",
+        "key_fields": [
+          "Direction direction (HallCall)",
+          "int target (CarCall)"
+        ],
+        "key_methods": []
+      },
+      {
+        "name": "Dispatcher (interface)",
+        "responsibility": "Pluggable scheduling policy: choose which car should serve a hall call.",
+        "key_fields": [],
+        "key_methods": [
+          "ElevatorCar selectCar(List<ElevatorCar> cars, HallCall c)"
+        ]
+      },
+      {
+        "name": "ElevatorState (enum/State objects)",
+        "responsibility": "IDLE, MOVING_UP, MOVING_DOWN, DOORS_OPEN, MAINTENANCE — encapsulate per-state behavior/transitions.",
+        "key_fields": [],
+        "key_methods": [
+          "ElevatorState next(ElevatorCar car)"
+        ]
+      },
+      {
+        "name": "Panel / Button",
+        "responsibility": "Input surfaces: hall panel emits HallCalls, car panel emits CarCalls; buttons hold no scheduling logic.",
+        "key_fields": [
+          "floor",
+          "isLit"
+        ],
+        "key_methods": [
+          "void press()"
+        ]
+      },
+      {
+        "name": "Direction (enum)",
+        "responsibility": "UP, DOWN, IDLE.",
+        "key_fields": [],
+        "key_methods": []
+      }
     ],
     "relationships": [
       "Controller aggregates ElevatorCar (1..*) and has-a Dispatcher (Strategy)",
@@ -63,10 +210,26 @@
       "Dispatcher depends on ElevatorCar's cost estimate but not its internals (asks car.estimateCostFor)"
     ],
     "design_patterns": [
-      { "pattern": "Strategy", "where": "Dispatcher (nearest-car, SCAN/LOOK, directional, load-aware)", "why": "Swap scheduling algorithms without touching the controller or cars; the optimization goal can change per building." },
-      { "pattern": "State", "where": "ElevatorState controlling car behavior and legal transitions", "why": "Keeps movement/door logic per-state instead of a giant conditional; illegal transitions become impossible." },
-      { "pattern": "Command / Observer", "where": "Button presses generating Request objects and displays observing car state", "why": "Decouples input surfaces and displays from the controller." },
-      { "pattern": "Singleton (optional)", "where": "Controller", "why": "One control system per building — but keep it injectable for testing/simulation." }
+      {
+        "pattern": "Strategy",
+        "where": "Dispatcher (nearest-car, SCAN/LOOK, directional, load-aware)",
+        "why": "Swap scheduling algorithms without touching the controller or cars; the optimization goal can change per building."
+      },
+      {
+        "pattern": "State",
+        "where": "ElevatorState controlling car behavior and legal transitions",
+        "why": "Keeps movement/door logic per-state instead of a giant conditional; illegal transitions become impossible."
+      },
+      {
+        "pattern": "Command / Observer",
+        "where": "Button presses generating Request objects and displays observing car state",
+        "why": "Decouples input surfaces and displays from the controller."
+      },
+      {
+        "pattern": "Singleton (optional)",
+        "where": "Controller",
+        "why": "One control system per building — but keep it injectable for testing/simulation."
+      }
     ],
     "apis": [
       "void requestElevator(int floor, Direction dir) — enqueues a HallCall, dispatcher assigns a car",
@@ -104,17 +267,44 @@
       "Multiple banks/zones: group cars into banks, each with its own dispatcher"
     ],
     "deep_dives": [
-      { "topic": "double_hall_call", "probe": "Two people on floors 3 and 7 press up at the same instant. Walk me through exactly how the controller assigns cars so two cars don't both head to floor 3 and none to 7." },
-      { "topic": "cost_function", "probe": "Your nearest-car heuristic can send a downward car to an upward call. What's the actual cost function — do you factor direction, current load, and stops already committed?" },
-      { "topic": "stop_ordering", "probe": "How does a single car order its pending stops? Why TreeSets split by direction (LOOK) rather than FIFO, and how do you avoid oscillation?" },
-      { "topic": "starvation", "probe": "Under heavy load, a top-floor down call keeps getting outbid. How do you guarantee it's eventually served?" }
+      {
+        "topic": "double_hall_call",
+        "probe": "Two people on floors 3 and 7 press up at the same instant. Walk me through exactly how the controller assigns cars so two cars don't both head to floor 3 and none to 7."
+      },
+      {
+        "topic": "cost_function",
+        "probe": "Your nearest-car heuristic can send a downward car to an upward call. What's the actual cost function — do you factor direction, current load, and stops already committed?"
+      },
+      {
+        "topic": "stop_ordering",
+        "probe": "How does a single car order its pending stops? Why TreeSets split by direction (LOOK) rather than FIFO, and how do you avoid oscillation?"
+      },
+      {
+        "topic": "starvation",
+        "probe": "Under heavy load, a top-floor down call keeps getting outbid. How do you guarantee it's eventually served?"
+      }
     ],
     "followup_bank": [
-      { "trigger": "mentions nearest or closest", "question": "Nearest-by-distance ignores direction and load. What does your full cost function look like, and where does that live — a Dispatcher Strategy?" },
-      { "trigger": "mentions queue or fifo", "question": "FIFO makes a car pass floors it should stop at. How do you order stops so the car sweeps in one direction (SCAN/LOOK)?" },
-      { "trigger": "mentions state or moving or idle", "question": "Model that as an explicit State machine — what are the legal transitions and where does door-dwell time sit?" },
-      { "trigger": "mentions thread or concurrent", "question": "If each car runs on its own thread, what stops two cars from grabbing the same call — where's the single point of assignment?" },
-      { "trigger": "mentions priority or vip or emergency", "question": "How do you inject priority/pre-emption without special-casing it throughout the controller?" }
+      {
+        "trigger": "mentions nearest or closest",
+        "question": "Nearest-by-distance ignores direction and load. What does your full cost function look like, and where does that live — a Dispatcher Strategy?"
+      },
+      {
+        "trigger": "mentions queue or fifo",
+        "question": "FIFO makes a car pass floors it should stop at. How do you order stops so the car sweeps in one direction (SCAN/LOOK)?"
+      },
+      {
+        "trigger": "mentions state or moving or idle",
+        "question": "Model that as an explicit State machine — what are the legal transitions and where does door-dwell time sit?"
+      },
+      {
+        "trigger": "mentions thread or concurrent",
+        "question": "If each car runs on its own thread, what stops two cars from grabbing the same call — where's the single point of assignment?"
+      },
+      {
+        "trigger": "mentions priority or vip or emergency",
+        "question": "How do you inject priority/pre-emption without special-casing it throughout the controller?"
+      }
     ],
     "tradeoffs": [
       "Nearest-car (simple, low latency) vs SCAN/LOOK (higher throughput, fairer) vs load-aware (best UX, more state)",

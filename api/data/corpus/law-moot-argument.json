@@ -2,20 +2,65 @@
   "id": "law-moot-argument",
   "title": "Moot Court: Defend a Legal Argument Under Appellate Questioning",
   "track": "professional",
-  "domain": "law",
+  "domain": "legal_practice",
+  "areas": [
+    "law"
+  ],
   "modality": "conversational",
   "difficulty": "senior",
-  "tags": ["moot-court", "oral-advocacy", "appellate", "hot-bench", "fourth-amendment", "standard-of-review"],
+  "tags": [
+    "moot-court",
+    "oral-advocacy",
+    "appellate",
+    "hot-bench",
+    "fourth-amendment",
+    "standard-of-review"
+  ],
   "prompt": "You are appellate counsel presenting oral argument before a 'hot bench.' The case: your client was convicted after police, without a warrant, used a drone to hover at 150 feet over the fenced backyard of the client's home for 40 minutes and photographed items later used as evidence. The trial court denied the motion to suppress; you represent the defendant-appellant, arguing the drone surveillance was a Fourth Amendment 'search' requiring a warrant. Present your core argument, then defend it under questioning. This is a spoken appellate argument — expect to be interrupted.",
   "blurb": "An appellate-style hot-bench roleplay — open crisply, concede the right points, and defend a Fourth Amendment theory against relentless questions without losing the thread.",
   "rubric": [
-    { "key": "argument_structure", "label": "Argument structure & theme", "description": "Opens with a clear roadmap and a compelling theme, states the relief sought and standard of review, and organizes around a small number of strong points rather than a scattershot list.", "weight": 1.2 },
-    { "key": "rule_command", "label": "Command of the law", "description": "Deploys the governing framework accurately — reasonable-expectation-of-privacy (Katz), curtilage, aerial-surveillance precedent (Ciraolo, Riley, Florida v. Riley), the Kyllo sense-enhancing-technology line, and Carpenter on new technology — and applies it to drone facts.", "weight": 1.3 },
-    { "key": "responsiveness", "label": "Responsiveness to questions", "description": "Answers the question actually asked directly (yes/no first where possible), then explains — rather than dodging, filibustering, or reverting to the script.", "weight": 1.3 },
-    { "key": "concessions", "label": "Judgment on concessions", "description": "Concedes what must be conceded (e.g., navigable airspace, plain-view-from-lawful-vantage cases) and holds the line on what matters, distinguishing adverse precedent instead of denying it.", "weight": 1.2 },
-    { "key": "counterarguments", "label": "Handling adverse authority & hypotheticals", "description": "Anticipates the State's best points, distinguishes contrary cases on principled grounds, and works through the judges' hypotheticals to a limiting principle rather than an absolutist claim.", "weight": 1.2 },
-    { "key": "poise", "label": "Poise & composure", "description": "Stays calm and respectful under a hostile bench, does not get flustered or argumentative, manages time, and reserves/uses rebuttal effectively.", "weight": 0.9 },
-    { "key": "communication", "label": "Clarity & advocacy", "description": "Speaks in clean, persuasive prose, avoids filler and jargon-for-its-own-sake, and returns to the theme after each interruption.", "weight": 1.0 }
+    {
+      "key": "argument_structure",
+      "label": "Argument structure & theme",
+      "description": "Opens with a clear roadmap and a compelling theme, states the relief sought and standard of review, and organizes around a small number of strong points rather than a scattershot list.",
+      "weight": 1.2
+    },
+    {
+      "key": "rule_command",
+      "label": "Command of the law",
+      "description": "Deploys the governing framework accurately — reasonable-expectation-of-privacy (Katz), curtilage, aerial-surveillance precedent (Ciraolo, Riley, Florida v. Riley), the Kyllo sense-enhancing-technology line, and Carpenter on new technology — and applies it to drone facts.",
+      "weight": 1.3
+    },
+    {
+      "key": "responsiveness",
+      "label": "Responsiveness to questions",
+      "description": "Answers the question actually asked directly (yes/no first where possible), then explains — rather than dodging, filibustering, or reverting to the script.",
+      "weight": 1.3
+    },
+    {
+      "key": "concessions",
+      "label": "Judgment on concessions",
+      "description": "Concedes what must be conceded (e.g., navigable airspace, plain-view-from-lawful-vantage cases) and holds the line on what matters, distinguishing adverse precedent instead of denying it.",
+      "weight": 1.2
+    },
+    {
+      "key": "counterarguments",
+      "label": "Handling adverse authority & hypotheticals",
+      "description": "Anticipates the State's best points, distinguishes contrary cases on principled grounds, and works through the judges' hypotheticals to a limiting principle rather than an absolutist claim.",
+      "weight": 1.2
+    },
+    {
+      "key": "poise",
+      "label": "Poise & composure",
+      "description": "Stays calm and respectful under a hostile bench, does not get flustered or argumentative, manages time, and reserves/uses rebuttal effectively.",
+      "weight": 0.9
+    },
+    {
+      "key": "communication",
+      "label": "Clarity & advocacy",
+      "description": "Speaks in clean, persuasive prose, avoids filler and jargon-for-its-own-sake, and returns to the theme after each interruption.",
+      "weight": 1.0
+    }
   ],
   "reference": {
     "scenario": "Fourth Amendment appeal on drone surveillance of a home's curtilage — an area of genuinely unsettled law, which is the point: there is no controlling drone case, so the advocate must reason by analogy and distinction. The appellant's best theory: the fenced backyard is curtilage, where privacy expectations are highest; a 40-minute, low-altitude, targeted drone hover with photography is not the fleeting, naked-eye aerial glance the Supreme Court approved in California v. Ciraolo (1986) and Florida v. Riley (1989), but rather the kind of persistent, technology-enabled, targeted intrusion the Court has grown wary of in Kyllo v. United States (2001) (sense-enhancing technology not in general public use) and Carpenter v. United States (2018) (aggregated, revealing digital surveillance defeats the third-party/analog analogies). The advocate should also invoke United States v. Jones (mosaic/persistence) as reinforcing that duration and comprehensiveness matter. The advocate must concede navigable-airspace and lawful-vantage points but distinguish them on altitude, duration, targeting, magnification, and general-public-use grounds, and offer a workable limiting principle (e.g., a warrant is required for prolonged, targeted drone surveillance of curtilage, not a one-off overflight). The bench will press on Riley (helicopter at 400 feet upheld), on whether drones are now in 'general public use,' on the absence of a bright line, and on the fenced-yard-still-visible-from-above problem. A senior advocate answers directly, concedes cleanly, distinguishes on principle, and lands a limiting principle.",
@@ -32,13 +77,34 @@
       "Relief sought: reverse the denial of suppression and remand; if evidence was fruit of the unlawful search, it should be excluded."
     ],
     "probes": [
-      { "trigger": "candidate gives a scattershot opening with no roadmap or theme", "question": "Counsel, before you go further — in one sentence, what is your best argument, and what exactly are you asking this Court to do?" },
-      { "trigger": "candidate cannot distinguish Florida v. Riley", "question": "In Florida v. Riley we upheld a helicopter observing a greenhouse from 400 feet. Your drone was at 150 feet in the same navigable airspace. Why isn't Riley dispositive against you?" },
-      { "trigger": "candidate leans hard on Kyllo", "question": "Kyllo turned on technology 'not in general public use.' Consumer drones are everywhere now. Hasn't the general-public-use rationale collapsed in your client's favor — or against you?" },
-      { "trigger": "candidate claims ALL aerial observation of a yard is a search", "question": "So if an officer glances down at your client's yard from a lawful commercial flight and sees the same thing, that's a warrantless search too? Where is your limiting principle?" },
-      { "trigger": "candidate filibusters or dodges a yes/no question", "question": "Counsel, that's not what I asked. Yes or no: was the drone in publicly navigable airspace? Then explain." },
-      { "trigger": "candidate refuses to concede an obviously losing point", "question": "You're not seriously contesting that the airspace above the home is navigable, are you? What does conceding that cost you — and what do you actually need to win?" },
-      { "trigger": "candidate ignores standard of review", "question": "What is our standard of review on the question whether a search occurred, and why does it matter to how much deference we owe the trial court?" }
+      {
+        "trigger": "candidate gives a scattershot opening with no roadmap or theme",
+        "question": "Counsel, before you go further — in one sentence, what is your best argument, and what exactly are you asking this Court to do?"
+      },
+      {
+        "trigger": "candidate cannot distinguish Florida v. Riley",
+        "question": "In Florida v. Riley we upheld a helicopter observing a greenhouse from 400 feet. Your drone was at 150 feet in the same navigable airspace. Why isn't Riley dispositive against you?"
+      },
+      {
+        "trigger": "candidate leans hard on Kyllo",
+        "question": "Kyllo turned on technology 'not in general public use.' Consumer drones are everywhere now. Hasn't the general-public-use rationale collapsed in your client's favor — or against you?"
+      },
+      {
+        "trigger": "candidate claims ALL aerial observation of a yard is a search",
+        "question": "So if an officer glances down at your client's yard from a lawful commercial flight and sees the same thing, that's a warrantless search too? Where is your limiting principle?"
+      },
+      {
+        "trigger": "candidate filibusters or dodges a yes/no question",
+        "question": "Counsel, that's not what I asked. Yes or no: was the drone in publicly navigable airspace? Then explain."
+      },
+      {
+        "trigger": "candidate refuses to concede an obviously losing point",
+        "question": "You're not seriously contesting that the airspace above the home is navigable, are you? What does conceding that cost you — and what do you actually need to win?"
+      },
+      {
+        "trigger": "candidate ignores standard of review",
+        "question": "What is our standard of review on the question whether a search occurred, and why does it matter to how much deference we owe the trial court?"
+      }
     ],
     "red_flags": [
       "No roadmap or theme; launches into facts or a case list with no destination.",

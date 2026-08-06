@@ -3,19 +3,63 @@
   "title": "MMI Ethics Station: The Impaired Colleague",
   "track": "professional",
   "domain": "medical_residency",
+  "areas": [
+    "medicine"
+  ],
   "modality": "conversational",
   "difficulty": "entry",
-  "tags": ["mmi", "ethics", "professionalism", "patient-safety", "residency"],
+  "tags": [
+    "mmi",
+    "ethics",
+    "professionalism",
+    "patient-safety",
+    "residency"
+  ],
   "prompt": "You are a medical student on a hospital rotation. Over the past two weeks you have noticed that a fellow student and close friend, Sam, has smelled of alcohol on two morning shifts and seems increasingly forgetful with patient tasks. This morning you saw Sam take a small drink from a flask in the stairwell before ward rounds. Please discuss how you would approach this situation.",
   "blurb": "A classic MMI ethics station: balancing loyalty to a friend against patient safety and professional duty.",
   "rubric": [
-    { "key": "ethical_reasoning", "label": "Ethical reasoning", "description": "Identifies the core conflict between duty to protect patients (non-maleficence) and loyalty/duty to a colleague; reasons from principles rather than gut reaction; recognizes this is a patient-safety issue, not just a personal one.", "weight": 1.3 },
-    { "key": "balance_of_perspectives", "label": "Balance of perspectives", "description": "Considers the friend's wellbeing (possible addiction/illness deserving support), patients' safety, other team members, and the institution; avoids a purely punitive or purely protective stance.", "weight": 1.2 },
-    { "key": "structure", "label": "Structure & prioritization", "description": "Organizes the response: gather facts, act on immediate safety, then escalate appropriately; sequences short-term action vs longer-term support.", "weight": 1.1 },
-    { "key": "communication", "label": "Communication", "description": "Describes a non-confrontational, private, non-judgmental conversation with Sam; clear and empathetic phrasing; avoids gossip or public accusation.", "weight": 1.0 },
-    { "key": "empathy", "label": "Empathy & compassion", "description": "Frames Sam as someone who may be struggling and needs help, not simply a wrongdoer; expresses genuine concern for his health.", "weight": 1.0 },
-    { "key": "professionalism", "label": "Professionalism & duty", "description": "Understands the obligation to escalate to a supervisor/attending; does not agree to keep it secret; knows the limits of a student's role.", "weight": 1.2 },
-    { "key": "self_awareness", "label": "Self-awareness & limits", "description": "Recognizes their own limits as a student, the risk of misjudging, and the need to act on facts; avoids diagnosing or covering up.", "weight": 0.8 }
+    {
+      "key": "ethical_reasoning",
+      "label": "Ethical reasoning",
+      "description": "Identifies the core conflict between duty to protect patients (non-maleficence) and loyalty/duty to a colleague; reasons from principles rather than gut reaction; recognizes this is a patient-safety issue, not just a personal one.",
+      "weight": 1.3
+    },
+    {
+      "key": "balance_of_perspectives",
+      "label": "Balance of perspectives",
+      "description": "Considers the friend's wellbeing (possible addiction/illness deserving support), patients' safety, other team members, and the institution; avoids a purely punitive or purely protective stance.",
+      "weight": 1.2
+    },
+    {
+      "key": "structure",
+      "label": "Structure & prioritization",
+      "description": "Organizes the response: gather facts, act on immediate safety, then escalate appropriately; sequences short-term action vs longer-term support.",
+      "weight": 1.1
+    },
+    {
+      "key": "communication",
+      "label": "Communication",
+      "description": "Describes a non-confrontational, private, non-judgmental conversation with Sam; clear and empathetic phrasing; avoids gossip or public accusation.",
+      "weight": 1.0
+    },
+    {
+      "key": "empathy",
+      "label": "Empathy & compassion",
+      "description": "Frames Sam as someone who may be struggling and needs help, not simply a wrongdoer; expresses genuine concern for his health.",
+      "weight": 1.0
+    },
+    {
+      "key": "professionalism",
+      "label": "Professionalism & duty",
+      "description": "Understands the obligation to escalate to a supervisor/attending; does not agree to keep it secret; knows the limits of a student's role.",
+      "weight": 1.2
+    },
+    {
+      "key": "self_awareness",
+      "label": "Self-awareness & limits",
+      "description": "Recognizes their own limits as a student, the risk of misjudging, and the need to act on facts; avoids diagnosing or covering up.",
+      "weight": 0.8
+    }
   ],
   "reference": {
     "scenario": "The candidate is a medical student who has directly witnessed a peer drinking alcohol before clinical duties, alongside a pattern of concerning behavior (alcohol smell, forgetfulness affecting patient tasks). The station tests whether the candidate can prioritize patient safety while treating an impaired colleague with compassion, and whether they understand the duty to escalate rather than cover up. There is no single correct answer; the interviewer probes the reasoning behind the candidate's choices.",
@@ -32,11 +76,26 @@
       "Reflects on emotional difficulty of acting against a friend but affirms the professional obligation."
     ],
     "probes": [
-      { "trigger": "candidate says they would just talk to Sam and keep it between them", "question": "Sam thanks you, promises to stop, and asks you not to tell anyone. He is caring for patients this afternoon. What do you do?" },
-      { "trigger": "candidate jumps straight to reporting without any support for Sam", "question": "Is there anything you owe Sam as a friend and colleague here, or is reporting the whole of your duty?" },
-      { "trigger": "candidate is hesitant to escalate", "question": "What are the risks of doing nothing, or of only having a quiet word? Who could be harmed?" },
-      { "trigger": "candidate assumes alcohol dependence as fact", "question": "How confident are you in your interpretation, and does your uncertainty change what you do first?" },
-      { "trigger": "candidate omits immediate patient safety", "question": "Sam is about to review a sick patient's medications right now. Does that change the urgency of your response?" }
+      {
+        "trigger": "candidate says they would just talk to Sam and keep it between them",
+        "question": "Sam thanks you, promises to stop, and asks you not to tell anyone. He is caring for patients this afternoon. What do you do?"
+      },
+      {
+        "trigger": "candidate jumps straight to reporting without any support for Sam",
+        "question": "Is there anything you owe Sam as a friend and colleague here, or is reporting the whole of your duty?"
+      },
+      {
+        "trigger": "candidate is hesitant to escalate",
+        "question": "What are the risks of doing nothing, or of only having a quiet word? Who could be harmed?"
+      },
+      {
+        "trigger": "candidate assumes alcohol dependence as fact",
+        "question": "How confident are you in your interpretation, and does your uncertainty change what you do first?"
+      },
+      {
+        "trigger": "candidate omits immediate patient safety",
+        "question": "Sam is about to review a sick patient's medications right now. Does that change the urgency of your response?"
+      }
     ],
     "red_flags": [
       "Agreeing to keep it secret or cover for Sam to preserve the friendship.",

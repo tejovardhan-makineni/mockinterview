@@ -3,23 +3,88 @@
   "title": "Design a Distributed Lock / Coordination Service",
   "track": "engineering",
   "domain": "system_design",
+  "areas": [
+    "engineering"
+  ],
   "modality": "system_design",
   "difficulty": "senior",
-  "tags": ["distributed-lock", "leases", "fencing-tokens", "consensus", "redlock", "coordination"],
+  "tags": [
+    "distributed-lock",
+    "leases",
+    "fencing-tokens",
+    "consensus",
+    "redlock",
+    "coordination"
+  ],
   "prompt": "Design a distributed locking / coordination service that lets processes across many machines acquire mutual-exclusion locks (and elect leaders) safely. Cover how a lock is acquired and released, what happens when the holder crashes or is partitioned, and how you prevent two processes from ever believing they hold the same lock.",
   "blurb": "The mutual-exclusion-across-machines problem — leases with expiry, fencing tokens against stale holders, and the Redlock-vs-consensus safety debate.",
   "rubric": [
-    { "key": "requirements", "label": "Requirements gathering", "description": "Separates functional (acquire/release, TTL, leader election, wait/notify) from non-functional (correctness/safety, liveness, availability, low latency).", "weight": 1.0 },
-    { "key": "clarifying_questions", "label": "Clarifying questions", "description": "Asks whether the lock guards correctness or is just an optimization, lock hold time, contention level, acceptable failure modes, latency tolerance.", "weight": 1.1 },
-    { "key": "safety_vs_liveness", "label": "Safety vs liveness framing", "description": "Recognizes the core tension: you cannot have a lock that is always both safe (never two holders) and live (always grantable) under partitions; picks a stance and justifies it.", "weight": 1.3 },
-    { "key": "leases", "label": "Leases & expiry", "description": "Locks as time-bounded leases (not held forever), renewal/heartbeat, why unbounded locks deadlock on crash, and clock-dependence risks.", "weight": 1.2 },
-    { "key": "fencing_tokens", "label": "Fencing tokens", "description": "Monotonic fencing tokens so a paused/stale holder's writes are rejected by the resource; why TTL alone is insufficient (GC pause / clock skew).", "weight": 1.3 },
-    { "key": "consensus", "label": "Consensus / backing store", "description": "Backing the lock on a consensus system (Raft/Paxos, ZooKeeper/etcd) for a single source of truth; ephemeral nodes/sessions; vs a single Redis or Redlock.", "weight": 1.2 },
-    { "key": "high_level_design", "label": "High-level design", "description": "Client -> lock service (consensus-backed) issuing leases + monotonic tokens; session/heartbeat; leader election via the same primitive.", "weight": 1.1 },
-    { "key": "failure_handling", "label": "Failure handling", "description": "Holder crash (auto-release on lease expiry), network partition (holder can't renew), clock skew, split-brain avoidance.", "weight": 1.2 },
-    { "key": "redlock_tradeoffs", "label": "Redlock & alternatives tradeoffs", "description": "Understands the Redlock debate (majority of independent Redis nodes) vs a single consensus system; where each is safe/unsafe and why fencing still matters.", "weight": 1.1 },
-    { "key": "bottlenecks", "label": "Bottlenecks", "description": "Consensus write throughput, lock-service availability as a dependency, herd on a hot lock, heartbeat load.", "weight": 0.9 },
-    { "key": "observability", "label": "Observability", "description": "Lock acquire/hold/wait times, expired-lease reclaims, contention/queue depth, leader-election churn, token gaps.", "weight": 0.7 }
+    {
+      "key": "requirements",
+      "label": "Requirements gathering",
+      "description": "Separates functional (acquire/release, TTL, leader election, wait/notify) from non-functional (correctness/safety, liveness, availability, low latency).",
+      "weight": 1.0
+    },
+    {
+      "key": "clarifying_questions",
+      "label": "Clarifying questions",
+      "description": "Asks whether the lock guards correctness or is just an optimization, lock hold time, contention level, acceptable failure modes, latency tolerance.",
+      "weight": 1.1
+    },
+    {
+      "key": "safety_vs_liveness",
+      "label": "Safety vs liveness framing",
+      "description": "Recognizes the core tension: you cannot have a lock that is always both safe (never two holders) and live (always grantable) under partitions; picks a stance and justifies it.",
+      "weight": 1.3
+    },
+    {
+      "key": "leases",
+      "label": "Leases & expiry",
+      "description": "Locks as time-bounded leases (not held forever), renewal/heartbeat, why unbounded locks deadlock on crash, and clock-dependence risks.",
+      "weight": 1.2
+    },
+    {
+      "key": "fencing_tokens",
+      "label": "Fencing tokens",
+      "description": "Monotonic fencing tokens so a paused/stale holder's writes are rejected by the resource; why TTL alone is insufficient (GC pause / clock skew).",
+      "weight": 1.3
+    },
+    {
+      "key": "consensus",
+      "label": "Consensus / backing store",
+      "description": "Backing the lock on a consensus system (Raft/Paxos, ZooKeeper/etcd) for a single source of truth; ephemeral nodes/sessions; vs a single Redis or Redlock.",
+      "weight": 1.2
+    },
+    {
+      "key": "high_level_design",
+      "label": "High-level design",
+      "description": "Client -> lock service (consensus-backed) issuing leases + monotonic tokens; session/heartbeat; leader election via the same primitive.",
+      "weight": 1.1
+    },
+    {
+      "key": "failure_handling",
+      "label": "Failure handling",
+      "description": "Holder crash (auto-release on lease expiry), network partition (holder can't renew), clock skew, split-brain avoidance.",
+      "weight": 1.2
+    },
+    {
+      "key": "redlock_tradeoffs",
+      "label": "Redlock & alternatives tradeoffs",
+      "description": "Understands the Redlock debate (majority of independent Redis nodes) vs a single consensus system; where each is safe/unsafe and why fencing still matters.",
+      "weight": 1.1
+    },
+    {
+      "key": "bottlenecks",
+      "label": "Bottlenecks",
+      "description": "Consensus write throughput, lock-service availability as a dependency, herd on a hot lock, heartbeat load.",
+      "weight": 0.9
+    },
+    {
+      "key": "observability",
+      "label": "Observability",
+      "description": "Lock acquire/hold/wait times, expired-lease reclaims, contention/queue depth, leader-election churn, token gaps.",
+      "weight": 0.7
+    }
   ],
   "reference": {
     "functional_requirements": [
@@ -54,8 +119,20 @@
       "latency": "Consensus commit adds a round-trip (single-digit ms intra-region); cross-region raises it and the availability question.",
       "sharding": "Partition the lock namespace across multiple consensus groups to scale write throughput."
     },
-    "core_components": ["Client library (acquire/renew/release, token handling)", "Lock service backed by consensus (Raft/Paxos; e.g. etcd/ZooKeeper-like)", "Session/heartbeat manager", "Fencing-token counter (monotonic, per lock)", "Watch/notify mechanism for waiters", "Leader-election primitive built on locks"],
-    "data_model": ["locks(lock_id, holder, lease_expiry, fencing_token, version)", "sessions(session_id, client, last_heartbeat, ephemeral_keys)", "waiters(lock_id, queued_clients) — for fair wakeup", "token_counter(lock_id, monotonic_seq)"],
+    "core_components": [
+      "Client library (acquire/renew/release, token handling)",
+      "Lock service backed by consensus (Raft/Paxos; e.g. etcd/ZooKeeper-like)",
+      "Session/heartbeat manager",
+      "Fencing-token counter (monotonic, per lock)",
+      "Watch/notify mechanism for waiters",
+      "Leader-election primitive built on locks"
+    ],
+    "data_model": [
+      "locks(lock_id, holder, lease_expiry, fencing_token, version)",
+      "sessions(session_id, client, last_heartbeat, ephemeral_keys)",
+      "waiters(lock_id, queued_clients) — for fair wakeup",
+      "token_counter(lock_id, monotonic_seq)"
+    ],
     "api_design": [
       "acquire(lock_id, ttl) -> { granted, fencing_token, lease_expiry } | queued",
       "renew(lock_id, session) -> extends lease",
@@ -64,26 +141,92 @@
     ],
     "high_level_design": "Locks live in a strongly-consistent, consensus-backed store (a Raft/Paxos group, ZooKeeper/etcd-style). A client acquires a lock as a lease with a TTL; the grant includes a monotonically increasing fencing token. The client must renew (heartbeat) before expiry or the lease auto-expires and the lock becomes reclaimable — so a crashed or partitioned holder can't hold forever. Because a holder can be paused (GC) or partitioned and not realize its lease expired, TTL alone is unsafe: the protected resource must require the fencing token and reject any write carrying a token lower than the highest it has seen. Leader election is the same primitive (whoever holds the 'leader' lock leads). Waiters watch the lock and are notified/queued for fairness. Everything routes through consensus so there is one authoritative view of who holds what.",
     "deep_dives": [
-      { "topic": "fencing_tokens", "probe": "Client A acquires the lock, then GC-pauses for 20s; its lease expires and B acquires. A wakes and writes to the resource believing it still holds the lock. TTL didn't save you. How do fencing tokens make A's write safe to reject?" },
-      { "topic": "safety_vs_liveness", "probe": "Under a network partition you can keep the lock safe (refuse to grant) or available (grant anyway). You can't have both. Which do you choose for a correctness lock, and why does that map to CP over AP?" },
-      { "topic": "leases", "probe": "Why leases with TTL rather than hold-until-release? How do you pick the TTL vs heartbeat interval, and what breaks if clocks drift between client and server?" },
-      { "topic": "redlock", "probe": "Walk through Redlock (acquire on a majority of independent Redis nodes). Where is it unsafe, and why does Kleppmann's critique say you still need fencing tokens regardless of the locking algorithm?" },
-      { "topic": "consensus", "probe": "Why back this on Raft/Paxos (etcd/ZooKeeper) instead of a single Redis? What do ephemeral nodes/sessions give you for automatic release on client death?" },
-      { "topic": "cdc_audit", "probe": "Lock state (holders, grants, token issuance) lives in the consensus store. How would you stream lock events out to an audit log, metrics, or a dashboard — change data capture / watching the store's change stream — without dual-writing and risking a divergent audit view?" }
+      {
+        "topic": "fencing_tokens",
+        "probe": "Client A acquires the lock, then GC-pauses for 20s; its lease expires and B acquires. A wakes and writes to the resource believing it still holds the lock. TTL didn't save you. How do fencing tokens make A's write safe to reject?"
+      },
+      {
+        "topic": "safety_vs_liveness",
+        "probe": "Under a network partition you can keep the lock safe (refuse to grant) or available (grant anyway). You can't have both. Which do you choose for a correctness lock, and why does that map to CP over AP?"
+      },
+      {
+        "topic": "leases",
+        "probe": "Why leases with TTL rather than hold-until-release? How do you pick the TTL vs heartbeat interval, and what breaks if clocks drift between client and server?"
+      },
+      {
+        "topic": "redlock",
+        "probe": "Walk through Redlock (acquire on a majority of independent Redis nodes). Where is it unsafe, and why does Kleppmann's critique say you still need fencing tokens regardless of the locking algorithm?"
+      },
+      {
+        "topic": "consensus",
+        "probe": "Why back this on Raft/Paxos (etcd/ZooKeeper) instead of a single Redis? What do ephemeral nodes/sessions give you for automatic release on client death?"
+      },
+      {
+        "topic": "cdc_audit",
+        "probe": "Lock state (holders, grants, token issuance) lives in the consensus store. How would you stream lock events out to an audit log, metrics, or a dashboard — change data capture / watching the store's change stream — without dual-writing and risking a divergent audit view?"
+      }
     ],
     "followup_bank": [
-      { "trigger": "mentions redis or redlock", "question": "Where is Redlock unsafe (clock skew, GC pause, lost node state), and why do you still need fencing tokens even if the lock algorithm were perfect?" },
-      { "trigger": "mentions ttl or lease or expiry", "question": "A holder GC-pauses past its TTL and another client acquires — how do you prevent the stale holder's write from corrupting the resource? (fencing)" },
-      { "trigger": "mentions cache or in-memory store", "question": "If lock state sits in an in-memory store, what's the eviction/expiry semantics on a node restart, and how do you avoid a herd when a hot lock frees and all waiters retry at once?" },
-      { "trigger": "mentions zookeeper or etcd or raft or consensus or database", "question": "How do you stream lock/leader-election state changes to audit and monitoring — CDC / the store's watch stream vs dual writes — without a divergent audit trail?" },
-      { "trigger": "mentions partition or split brain", "question": "During a partition, do you favor safety (block) or liveness (grant)? Map that decision to CP vs AP." }
+      {
+        "trigger": "mentions redis or redlock",
+        "question": "Where is Redlock unsafe (clock skew, GC pause, lost node state), and why do you still need fencing tokens even if the lock algorithm were perfect?"
+      },
+      {
+        "trigger": "mentions ttl or lease or expiry",
+        "question": "A holder GC-pauses past its TTL and another client acquires — how do you prevent the stale holder's write from corrupting the resource? (fencing)"
+      },
+      {
+        "trigger": "mentions cache or in-memory store",
+        "question": "If lock state sits in an in-memory store, what's the eviction/expiry semantics on a node restart, and how do you avoid a herd when a hot lock frees and all waiters retry at once?"
+      },
+      {
+        "trigger": "mentions zookeeper or etcd or raft or consensus or database",
+        "question": "How do you stream lock/leader-election state changes to audit and monitoring — CDC / the store's watch stream vs dual writes — without a divergent audit trail?"
+      },
+      {
+        "trigger": "mentions partition or split brain",
+        "question": "During a partition, do you favor safety (block) or liveness (grant)? Map that decision to CP vs AP."
+      }
     ],
-    "scaling": ["Shard the lock namespace across multiple consensus groups for write throughput", "Use short TTLs + heartbeats to reclaim fast; longer TTLs to cut heartbeat load", "Client-side backoff/jitter on contended locks to avoid herds", "Read-only lock status from followers where staleness is acceptable", "Batch/co-locate related locks in the same group to reduce cross-group coordination"],
-    "bottlenecks": ["Consensus write throughput (every op is a committed write)", "The lock service as a hard dependency / availability floor", "Herd on a hot lock when it frees", "Heartbeat/renew traffic at scale"],
-    "tradeoffs": ["Consensus-backed (safe, single source of truth, lower throughput) vs Redis/Redlock (fast, weaker safety)", "Short TTL (fast reclaim, more heartbeats) vs long TTL (less traffic, slow reclaim)", "Safety-first under partition (CP, may block) vs availability-first (AP, may double-grant)", "Fencing tokens (safe but resource must cooperate) vs trusting TTL alone (simpler, unsafe)"],
-    "alternative_solutions": ["ZooKeeper ephemeral sequential znodes for locks + leader election", "etcd leases + revision-as-fencing-token", "Single Redis with SET NX PX (optimization locks only)", "Redlock across independent Redis nodes (contested safety)", "Database row lock / advisory lock (simple, limited scale)"],
-    "observability": ["Acquire latency and wait/queue time", "Expired-lease reclaims (crashes/partitions)", "Contention and waiter-queue depth per lock", "Leader-election churn / flapping", "Fencing-token issuance and any out-of-order token rejections"],
-    "security": ["Authn/authz on who may acquire which locks", "Prevent forged fencing tokens (issued only by the service, verified by the resource)", "Rate-limit acquire attempts to prevent abuse/DoS on hot locks", "Audit trail of grants and leader changes"],
+    "scaling": [
+      "Shard the lock namespace across multiple consensus groups for write throughput",
+      "Use short TTLs + heartbeats to reclaim fast; longer TTLs to cut heartbeat load",
+      "Client-side backoff/jitter on contended locks to avoid herds",
+      "Read-only lock status from followers where staleness is acceptable",
+      "Batch/co-locate related locks in the same group to reduce cross-group coordination"
+    ],
+    "bottlenecks": [
+      "Consensus write throughput (every op is a committed write)",
+      "The lock service as a hard dependency / availability floor",
+      "Herd on a hot lock when it frees",
+      "Heartbeat/renew traffic at scale"
+    ],
+    "tradeoffs": [
+      "Consensus-backed (safe, single source of truth, lower throughput) vs Redis/Redlock (fast, weaker safety)",
+      "Short TTL (fast reclaim, more heartbeats) vs long TTL (less traffic, slow reclaim)",
+      "Safety-first under partition (CP, may block) vs availability-first (AP, may double-grant)",
+      "Fencing tokens (safe but resource must cooperate) vs trusting TTL alone (simpler, unsafe)"
+    ],
+    "alternative_solutions": [
+      "ZooKeeper ephemeral sequential znodes for locks + leader election",
+      "etcd leases + revision-as-fencing-token",
+      "Single Redis with SET NX PX (optimization locks only)",
+      "Redlock across independent Redis nodes (contested safety)",
+      "Database row lock / advisory lock (simple, limited scale)"
+    ],
+    "observability": [
+      "Acquire latency and wait/queue time",
+      "Expired-lease reclaims (crashes/partitions)",
+      "Contention and waiter-queue depth per lock",
+      "Leader-election churn / flapping",
+      "Fencing-token issuance and any out-of-order token rejections"
+    ],
+    "security": [
+      "Authn/authz on who may acquire which locks",
+      "Prevent forged fencing tokens (issued only by the service, verified by the resource)",
+      "Rate-limit acquire attempts to prevent abuse/DoS on hot locks",
+      "Audit trail of grants and leader changes"
+    ],
     "reference_answer": "A strong answer first asks whether the lock guards correctness or is an optimization, because that sets the safety bar. It models locks as leases with TTL + heartbeat (so crashed holders auto-release) and backs them on a consensus system (Raft/Paxos, ZooKeeper/etcd) for a single authoritative view, with ephemeral sessions for auto-release on client death. Crucially it explains why TTL alone is unsafe under GC pauses/clock skew and requires monotonic fencing tokens that the protected resource enforces. It articulates the safety-vs-liveness (CP vs AP) tradeoff under partitions and takes a stance, critiques Redlock (unsafe timing assumptions; fencing needed regardless), shards locks across consensus groups for throughput, and streams lock state to audit via CDC/watch rather than dual writes."
   },
   "interviewer_notes": "This question separates engineers who've operated distributed systems from those who haven't. The two must-hit insights are fencing tokens (TTL alone cannot prevent a GC-paused holder from writing after its lease expired) and the safety-vs-liveness/CP-vs-AP tradeoff under partitions — drive the GC-pause scenario explicitly and see if they reach for a monotonic token. Expect them to prefer a consensus-backed store over a single Redis and to engage with the Redlock debate honestly. If they mention Redis/cache, probe expiry semantics and herd on lock release; if they mention ZooKeeper/etcd/a datastore, hit the CDC/watch-stream audit probe. Reward asking whether the lock protects correctness up front."

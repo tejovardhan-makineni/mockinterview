@@ -3,20 +3,70 @@
   "title": "Design and Implement an LRU Cache",
   "track": "engineering",
   "domain": "coding",
+  "areas": [
+    "engineering",
+    "data_science"
+  ],
   "modality": "coding",
   "difficulty": "mid",
-  "tags": ["hashmap", "linked-list", "design", "cache", "o1"],
+  "tags": [
+    "hashmap",
+    "linked-list",
+    "design",
+    "cache",
+    "o1"
+  ],
   "prompt": "Design a data structure for a Least Recently Used (LRU) cache. It supports get(key) and put(key, value). get returns the value if the key exists, else -1, and marks the key as most-recently used. put inserts or updates the value; if the cache exceeds its fixed capacity, it evicts the least-recently-used key. Both operations must run in O(1) average time.",
   "blurb": "The classic O(1) cache design — a hash map for lookup plus a doubly linked list for recency ordering.",
   "rubric": [
-    { "key": "problem_understanding", "label": "Problem understanding", "description": "Restates the O(1) requirement for both get and put, and that both operations touch recency, not just get.", "weight": 1.0 },
-    { "key": "approach", "label": "Approach & data-structure choice", "description": "Reaches hashmap + doubly linked list; explains why a singly linked list or array can't hit O(1) eviction/reordering.", "weight": 1.3 },
-    { "key": "correctness", "label": "Correctness", "description": "put on an existing key updates value AND moves to front; eviction removes the true LRU node and its map entry; get reorders.", "weight": 1.3 },
-    { "key": "complexity_analysis", "label": "Complexity analysis", "description": "States O(1) time for get/put and O(capacity) space, and justifies why the DLL gives O(1) splice.", "weight": 1.0 },
-    { "key": "code_quality", "label": "Code quality", "description": "Clean node struct, sentinel head/tail dummies to avoid null checks, small helper methods (remove/addFront), no duplicated pointer surgery.", "weight": 1.1 },
-    { "key": "edge_cases", "label": "Edge cases", "description": "Capacity 1, updating an existing key at capacity (no eviction), get on missing key, put then get same key.", "weight": 1.0 },
-    { "key": "testing", "label": "Testing", "description": "Walks a sequence of ops verifying eviction order and reordering; checks the dummy-node boundaries.", "weight": 0.8 },
-    { "key": "communication", "label": "Communication", "description": "Narrates the pointer manipulation clearly and keeps the map and list in sync in the explanation.", "weight": 0.8 }
+    {
+      "key": "problem_understanding",
+      "label": "Problem understanding",
+      "description": "Restates the O(1) requirement for both get and put, and that both operations touch recency, not just get.",
+      "weight": 1.0
+    },
+    {
+      "key": "approach",
+      "label": "Approach & data-structure choice",
+      "description": "Reaches hashmap + doubly linked list; explains why a singly linked list or array can't hit O(1) eviction/reordering.",
+      "weight": 1.3
+    },
+    {
+      "key": "correctness",
+      "label": "Correctness",
+      "description": "put on an existing key updates value AND moves to front; eviction removes the true LRU node and its map entry; get reorders.",
+      "weight": 1.3
+    },
+    {
+      "key": "complexity_analysis",
+      "label": "Complexity analysis",
+      "description": "States O(1) time for get/put and O(capacity) space, and justifies why the DLL gives O(1) splice.",
+      "weight": 1.0
+    },
+    {
+      "key": "code_quality",
+      "label": "Code quality",
+      "description": "Clean node struct, sentinel head/tail dummies to avoid null checks, small helper methods (remove/addFront), no duplicated pointer surgery.",
+      "weight": 1.1
+    },
+    {
+      "key": "edge_cases",
+      "label": "Edge cases",
+      "description": "Capacity 1, updating an existing key at capacity (no eviction), get on missing key, put then get same key.",
+      "weight": 1.0
+    },
+    {
+      "key": "testing",
+      "label": "Testing",
+      "description": "Walks a sequence of ops verifying eviction order and reordering; checks the dummy-node boundaries.",
+      "weight": 0.8
+    },
+    {
+      "key": "communication",
+      "label": "Communication",
+      "description": "Narrates the pointer manipulation clearly and keeps the map and list in sync in the explanation.",
+      "weight": 0.8
+    }
   ],
   "reference": {
     "constraints": [
@@ -33,18 +83,48 @@
       }
     ],
     "test_cases": [
-      { "input": "cap=1; put(1,1); put(2,2); get(1); get(2)", "expected": "get(1)=-1 (evicted), get(2)=2" },
-      { "input": "cap=2; put(1,1); put(1,10); get(1)", "expected": "10 — update in place, no eviction" },
-      { "input": "cap=2; put(2,1); put(2,2); get(2); put(1,1); put(4,1); get(2)", "expected": "get(2)=2 then -1 — 2 evicted after 1 and 4 inserted" },
-      { "input": "cap=2; get(5)", "expected": "-1 — miss on empty cache" },
-      { "input": "cap=2; put(1,1); put(2,2); get(1); put(3,3)", "expected": "key 2 evicted, keys {1,3} remain" }
+      {
+        "input": "cap=1; put(1,1); put(2,2); get(1); get(2)",
+        "expected": "get(1)=-1 (evicted), get(2)=2"
+      },
+      {
+        "input": "cap=2; put(1,1); put(1,10); get(1)",
+        "expected": "10 — update in place, no eviction"
+      },
+      {
+        "input": "cap=2; put(2,1); put(2,2); get(2); put(1,1); put(4,1); get(2)",
+        "expected": "get(2)=2 then -1 — 2 evicted after 1 and 4 inserted"
+      },
+      {
+        "input": "cap=2; get(5)",
+        "expected": "-1 — miss on empty cache"
+      },
+      {
+        "input": "cap=2; put(1,1); put(2,2); get(1); put(3,3)",
+        "expected": "key 2 evicted, keys {1,3} remain"
+      }
     ],
     "optimal_time": "O(1) per get and put",
     "optimal_space": "O(capacity)",
     "approaches": [
-      { "name": "brute force (array/list + linear scan)", "idea": "Store entries in a list; on get, scan for the key and move it to the end; on put over capacity, pop the front. Simple but every access is a linear scan and every reorder shifts elements.", "time": "O(n) per operation", "space": "O(capacity)" },
-      { "name": "ordered map / language builtin", "idea": "Use an insertion-ordered map (e.g. Java LinkedHashMap with accessOrder, Python OrderedDict move_to_end/popitem). Correct and concise but hides the mechanism the interviewer wants to see.", "time": "O(1) amortized", "space": "O(capacity)" },
-      { "name": "optimal: hashmap + doubly linked list", "idea": "HashMap maps key -> node. A doubly linked list orders nodes by recency, most-recent at the front (next to a dummy head), least-recent at the back (next to a dummy tail). get: look up node, unlink it, re-insert at front, return value. put: if present, update value and move to front; else create node, insert at front, add to map, and if size > capacity remove the tail's predecessor and delete it from the map. Dummy head/tail sentinels remove null-boundary special cases.", "time": "O(1)", "space": "O(capacity)" }
+      {
+        "name": "brute force (array/list + linear scan)",
+        "idea": "Store entries in a list; on get, scan for the key and move it to the end; on put over capacity, pop the front. Simple but every access is a linear scan and every reorder shifts elements.",
+        "time": "O(n) per operation",
+        "space": "O(capacity)"
+      },
+      {
+        "name": "ordered map / language builtin",
+        "idea": "Use an insertion-ordered map (e.g. Java LinkedHashMap with accessOrder, Python OrderedDict move_to_end/popitem). Correct and concise but hides the mechanism the interviewer wants to see.",
+        "time": "O(1) amortized",
+        "space": "O(capacity)"
+      },
+      {
+        "name": "optimal: hashmap + doubly linked list",
+        "idea": "HashMap maps key -> node. A doubly linked list orders nodes by recency, most-recent at the front (next to a dummy head), least-recent at the back (next to a dummy tail). get: look up node, unlink it, re-insert at front, return value. put: if present, update value and move to front; else create node, insert at front, add to map, and if size > capacity remove the tail's predecessor and delete it from the map. Dummy head/tail sentinels remove null-boundary special cases.",
+        "time": "O(1)",
+        "space": "O(capacity)"
+      }
     ],
     "follow_ups": [
       "Make it thread-safe for concurrent get/put. Discuss a single mutex vs. sharding the cache into striped segments each with its own lock and DLL.",

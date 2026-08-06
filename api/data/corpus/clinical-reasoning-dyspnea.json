@@ -1,0 +1,129 @@
+{
+  "id": "clinical-reasoning-dyspnea",
+  "title": "Acute Shortness of Breath — Clinical Reasoning",
+  "track": "professional",
+  "domain": "clinical_reasoning",
+  "areas": [
+    "medicine"
+  ],
+  "modality": "conversational",
+  "difficulty": "mid",
+  "tags": [
+    "clinical-reasoning",
+    "dyspnea",
+    "differential-diagnosis",
+    "acute-care",
+    "respiratory",
+    "safety"
+  ],
+  "prompt": "A 62-year-old comes to the emergency department with shortness of breath that has worsened over the past day; walk me through your structured approach — the focused history, the differential you're weighing, the exam and workup, and your initial management. This is educational — I'm assessing clinical reasoning, not giving medical advice.",
+  "blurb": "A framework-based approach to acute dyspnea — focused history, a life-threatening-first differential, targeted exam and workup, and safe initial management.",
+  "rubric": [
+    {
+      "key": "data_gathering",
+      "label": "History & data gathering",
+      "description": "Takes a focused dyspnea history — onset and tempo (sudden vs gradual), exertional tolerance, orthopnea and paroxysmal nocturnal dyspnea, cough/sputum/hemoptysis, fever, chest pain, wheeze, leg swelling; asks about cardiac and respiratory history, smoking, VTE risk (immobility, surgery, malignancy), and medications.",
+      "weight": 1.2
+    },
+    {
+      "key": "differential_diagnosis",
+      "label": "Differential diagnosis",
+      "description": "Builds a prioritized differential that front-loads life-threatening causes (pulmonary embolism, tension pneumothorax, acute heart failure/pulmonary edema, severe pneumonia, severe asthma/COPD exacerbation, anaphylaxis) alongside common ones; reasons by likelihood and danger.",
+      "weight": 1.3
+    },
+    {
+      "key": "clinical_reasoning",
+      "label": "Clinical reasoning",
+      "description": "Uses tempo, associated features, exam findings and observations to raise or lower specific diagnoses; explains discriminators; avoids anchoring and updates as data arrives.",
+      "weight": 1.2
+    },
+    {
+      "key": "investigations",
+      "label": "Exam & investigations",
+      "description": "Does a focused exam (work of breathing, SpO2, respiratory rate, auscultation, JVP, edema, calf) and orders a justified workup — vitals/SpO2, ECG, CXR, ABG/VBG where relevant, bloods including troponin and BNP where indicated, D-dimer with a pretest score or CTPA for suspected PE.",
+      "weight": 1.1
+    },
+    {
+      "key": "management_plan",
+      "label": "Initial management",
+      "description": "Starts with ABC and controlled oxygen titrated to a target saturation, sits the patient up, gains IV access and monitors; gives condition-specific first steps appropriately (e.g. bronchodilators, diuresis, or needle decompression for tension pneumothorax) and escalates.",
+      "weight": 1.1
+    },
+    {
+      "key": "safety",
+      "label": "Safety & prioritization",
+      "description": "Treats acute dyspnea as potentially life-threatening from the start, identifies the sick patient early (silent chest, exhaustion, altered mental status, rising CO2), does time-critical steps first, and states clear escalation and safety-netting.",
+      "weight": 1.2
+    },
+    {
+      "key": "communication",
+      "label": "Communication & structure",
+      "description": "Presents reasoning in an organized, systematic way; thinks aloud; would communicate clearly with the patient and team.",
+      "weight": 0.9
+    }
+  ],
+  "reference": {
+    "scenario": "A 62-year-old with a day of worsening breathlessness in the ED. The station tests whether the candidate approaches undifferentiated dyspnea safely and systematically: a focused history anchored on tempo and associated features, a differential that leads with life-threatening causes, a targeted exam and workup, and safe initial management with controlled oxygen. The interviewer can feed observations (SpO2, respiratory rate, auscultation, JVP, ECG, CXR) to see how reasoning evolves. This is educational and generic — not a treatment protocol for real patients.",
+    "model_points": [
+      "Frames acute dyspnea as potentially life-threatening: starts with an ABC/stability check, positions the patient upright, gains IV access, attaches monitoring, and records full vitals including respiratory rate, SpO2, heart rate, blood pressure and temperature.",
+      "History anchors on tempo: sudden onset points to PE or pneumothorax; hours-to-days suggests pneumonia, heart failure, or an asthma/COPD exacerbation; asks what the patient was doing at onset.",
+      "Associated features: orthopnea and paroxysmal nocturnal dyspnea and leg swelling (heart failure); fever, productive cough and pleuritic pain (pneumonia); wheeze and known airways disease (asthma/COPD); pleuritic pain, hemoptysis and unilateral leg swelling (PE); urticaria, lip swelling and exposure (anaphylaxis).",
+      "Risk factors and background: cardiac and respiratory history, smoking, recent immobility, surgery, long travel, malignancy or prior VTE, medications and adherence, allergies and any new exposures.",
+      "Differential front-loads immediately life-threatening causes: pulmonary embolism, tension pneumothorax, acute heart failure with pulmonary edema, severe pneumonia/sepsis, life-threatening asthma or COPD exacerbation, anaphylaxis; also considers metabolic acidosis (e.g. DKA), anemia, and pericardial effusion/tamponade.",
+      "Focused exam: work of breathing and ability to speak in sentences, tracheal position and air entry, wheeze vs crackles vs a silent chest, JVP, peripheral and sacral edema, calf swelling/tenderness, and mental status as a marker of fatigue or hypercapnia.",
+      "Reasons about discriminators: raised JVP with bibasal crackles and orthopnea favors heart failure; focal crackles with fever favors pneumonia; hyperresonance with absent breath sounds and tracheal deviation signals tension pneumothorax; clear chest with hypoxia and tachycardia and VTE risk favors PE.",
+      "Investigations, time-critical first: continuous SpO2 and cardiac monitoring, 12-lead ECG, portable CXR, and a blood gas (VBG/ABG) to assess oxygenation, CO2 and pH; bloods including FBC, U&E, CRP, troponin and BNP where relevant; D-dimer only with a validated pretest probability score, or CTPA when PE is likely; bedside ultrasound/echo where available.",
+      "Initial management: ABC, controlled oxygen titrated to a target saturation (typically 94-98%, or a lower 88-92% target in those at risk of hypercapnic respiratory failure), sit the patient up; condition-specific steps — nebulized bronchodilators and steroids for airways disease, diuresis and nitrates for pulmonary edema in the appropriate context, antibiotics for pneumonia/sepsis, IM adrenaline for anaphylaxis, and immediate needle/finger decompression for a tension pneumothorax.",
+      "Continual reassessment and safety-netting: watches for the tiring patient (rising CO2, falling respiratory rate, drowsiness, silent chest), plans early escalation to critical care and consideration of ventilatory support (NIV or intubation), and keeps the patient informed."
+    ],
+    "probes": [
+      {
+        "trigger": "candidate jumps to a diagnosis or treatment before building a differential",
+        "question": "Before you treat, what's on your differential for acute breathlessness in a 62-year-old, and which of those could kill them within the hour?"
+      },
+      {
+        "trigger": "candidate does not use the tempo of onset",
+        "question": "It came on suddenly while she was sitting still. How does the speed of onset reshape your differential?"
+      },
+      {
+        "trigger": "candidate anchors on heart failure or COPD alone",
+        "question": "The chest is clear on auscultation but she's hypoxic and tachycardic and had knee surgery last week. Does that change your thinking?"
+      },
+      {
+        "trigger": "candidate reaches for high-flow oxygen reflexively",
+        "question": "She has known COPD. What oxygen target would you aim for and why does that matter here?"
+      },
+      {
+        "trigger": "candidate orders a D-dimer without a pretest probability",
+        "question": "Before you send a D-dimer, how do you decide whether it will actually help you in this patient?"
+      },
+      {
+        "trigger": "candidate misses signs of a tiring patient",
+        "question": "An hour in, her respiratory rate has dropped, she's drowsy and the chest is quiet. Is that reassuring? What do you do?"
+      },
+      {
+        "trigger": "candidate gives a normal CXR as reassurance",
+        "question": "The chest X-ray looks normal. Which dangerous diagnoses can still be present with a normal film?"
+      }
+    ],
+    "red_flags": [
+      "Jumping straight to a single diagnosis or to treatment without a differential.",
+      "Failing to include the immediately life-threatening causes (PE, tension pneumothorax, pulmonary edema, severe pneumonia, life-threatening asthma/COPD, anaphylaxis).",
+      "Ignoring the tempo of onset and other discriminators when reasoning.",
+      "Giving uncontrolled high-flow oxygen to a patient at risk of hypercapnic respiratory failure.",
+      "Ordering a D-dimer without a validated pretest probability, or treating a normal D-dimer as excluding PE in a high-probability patient.",
+      "Treating a normal CXR or normal SpO2 as ruling out serious pathology such as PE.",
+      "Missing the exhausted/tiring patient (silent chest, drowsiness, falling respiratory rate) and delaying escalation or ventilatory support.",
+      "No reassessment, escalation, or safety-netting plan."
+    ],
+    "follow_ups": [
+      "The CXR shows a large unilateral effusion — how does that reshape your differential and next steps?",
+      "How would your workup and management differ if you strongly suspected pulmonary embolism instead of heart failure?",
+      "The blood gas shows a rising CO2 with a falling pH and the patient is tiring — what are your options now?",
+      "The patient improves with initial treatment and observations normalize — how do you decide on safe disposition?",
+      "How would you explain what's happening to a frightened, breathless patient while the workup continues?"
+    ],
+    "exemplar_answer": "I'd treat acute breathlessness as potentially life-threatening from the outset. In parallel with a focused history I'd assess ABCs, sit the patient up, attach monitoring and a saturation probe, gain IV access, and record full vitals including respiratory rate. The single most useful thread in the history is tempo: sudden onset makes me think pulmonary embolism or pneumothorax, whereas a build-up over hours to days points more toward pneumonia, heart failure, or an asthma or COPD exacerbation. I'd ask about orthopnea, paroxysmal nocturnal dyspnea and leg swelling for heart failure; fever, productive cough and pleuritic pain for pneumonia; wheeze and known airways disease; and pleuritic pain, hemoptysis or a swollen calf plus VTE risk factors like recent surgery, immobility or malignancy for PE. My differential deliberately front-loads the killers — PE, tension pneumothorax, pulmonary edema, severe pneumonia or sepsis, life-threatening asthma or COPD, and anaphylaxis — then the commoner causes. On exam I'd gauge work of breathing and whether she can speak in full sentences, check tracheal position and air entry, listen for wheeze versus crackles versus a silent chest, look at the JVP and for peripheral edema, and check the calves. Findings discriminate: raised JVP with bibasal crackles and orthopnea favors heart failure; hyperresonance with absent breath sounds and tracheal deviation is a tension pneumothorax needing immediate decompression; a clear chest with hypoxia and tachycardia in someone at VTE risk pushes me toward PE. Investigations, time-critical first: continuous SpO2 and cardiac monitoring, an ECG, a portable CXR and a blood gas to read oxygenation, CO2 and pH, plus bloods including troponin and BNP where relevant, and a D-dimer only if a validated pretest score makes it useful, or a CTPA if PE is likely. Management runs alongside — controlled oxygen titrated to target, aiming 94-98% or 88-92% if she's at risk of hypercapnic failure, and condition-specific steps such as bronchodilators and steroids, diuresis for pulmonary edema, antibiotics for sepsis, IM adrenaline for anaphylaxis, or needle decompression for a tension pneumothorax. Throughout I'd reassess, watch closely for the tiring patient with a rising CO2 or falling respiratory rate, escalate early to critical care with ventilatory support in mind, and keep the patient informed."
+  },
+  "interviewer_notes": "Mid-level clinical reasoning station on undifferentiated dyspnea. Let the candidate lay out their structure, then feed observations to test adaptability: offer a sudden-onset-while-at-rest detail to see if they raise PE and pneumothorax, a clear-chest-with-hypoxia-plus-recent-surgery vignette to test whether they broaden beyond heart failure/COPD, or a known-COPD detail to check they set a controlled oxygen target rather than reflexive high-flow. The key safety behaviors are anchoring the history on tempo, leading the differential with life-threatening causes, titrating oxygen appropriately, and recognizing the tiring patient early. Reward reasoning that visibly updates as data arrives; penalize anchoring, reflexive high-flow oxygen, misuse of D-dimer, and treating a normal CXR or SpO2 as reassurance. This is a reasoning exercise, not a protocol recitation — do not require exact drug doses."
+}

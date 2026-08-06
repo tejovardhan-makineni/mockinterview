@@ -3,20 +3,70 @@
   "title": "Meeting Rooms II — Minimum Rooms Required",
   "track": "engineering",
   "domain": "coding",
+  "areas": [
+    "engineering",
+    "data_science"
+  ],
   "modality": "coding",
   "difficulty": "mid",
-  "tags": ["intervals", "heap", "sorting", "sweep-line", "greedy"],
+  "tags": [
+    "intervals",
+    "heap",
+    "sorting",
+    "sweep-line",
+    "greedy"
+  ],
   "prompt": "Given an array of meeting time intervals where intervals[i] = [start_i, end_i], return the minimum number of conference rooms required so that no two meetings sharing a room overlap. A meeting that starts exactly when another ends does NOT conflict (touching endpoints can share a room).",
   "blurb": "The maximum-overlap problem — a min-heap of end times reuses rooms as meetings finish, or split start/end events into a sweep line and track the running peak.",
   "rubric": [
-    { "key": "problem_understanding", "label": "Problem understanding", "description": "Reframes 'minimum rooms' as 'maximum number of meetings overlapping at any instant', and clarifies the touching-endpoint rule (end == start does not conflict).", "weight": 1.1 },
-    { "key": "approach", "label": "Approach", "description": "Reaches the min-heap of end times (sort by start, reuse a room when the earliest-ending meeting has finished) OR the sweep-line with separate sorted start/end arrays tracking a running counter. Recognizes counting overlaps, not pairwise checks.", "weight": 1.3 },
-    { "key": "correctness", "label": "Correctness", "description": "Heap: sort by start; for each meeting, if the min end <= current start, pop (reuse) before pushing; heap size is the answer. Sweep: two-pointer over sorted starts/ends, increment on start, decrement when start >= end, track peak. Handles the touching case with the right inequality.", "weight": 1.3 },
-    { "key": "complexity_analysis", "label": "Complexity analysis", "description": "O(n log n) — dominated by sorting (and heap ops are log n). O(n) space for the heap / event arrays. Contrasts with the O(n^2) pairwise-overlap counting.", "weight": 1.0 },
-    { "key": "code_quality", "label": "Code quality", "description": "Clean sort + single heap, or clean two-pointer sweep; the reuse condition and peak tracking are readable and not buried in special cases.", "weight": 1.0 },
-    { "key": "edge_cases", "label": "Edge cases", "description": "Empty input (0), single meeting (1), all meetings identical (n rooms), fully nested meetings, back-to-back touching meetings sharing one room, all-disjoint (1 room).", "weight": 1.1 },
-    { "key": "testing", "label": "Testing", "description": "Tests the touching-endpoint case ([[0,5],[5,10]] -> 1) and a heavy-overlap case, verifying the reuse condition uses the correct <= vs <.", "weight": 0.8 },
-    { "key": "communication", "label": "Communication", "description": "Explains the max-overlap reframing and why sorting by start plus a min-heap on ends correctly models room reuse.", "weight": 0.8 }
+    {
+      "key": "problem_understanding",
+      "label": "Problem understanding",
+      "description": "Reframes 'minimum rooms' as 'maximum number of meetings overlapping at any instant', and clarifies the touching-endpoint rule (end == start does not conflict).",
+      "weight": 1.1
+    },
+    {
+      "key": "approach",
+      "label": "Approach",
+      "description": "Reaches the min-heap of end times (sort by start, reuse a room when the earliest-ending meeting has finished) OR the sweep-line with separate sorted start/end arrays tracking a running counter. Recognizes counting overlaps, not pairwise checks.",
+      "weight": 1.3
+    },
+    {
+      "key": "correctness",
+      "label": "Correctness",
+      "description": "Heap: sort by start; for each meeting, if the min end <= current start, pop (reuse) before pushing; heap size is the answer. Sweep: two-pointer over sorted starts/ends, increment on start, decrement when start >= end, track peak. Handles the touching case with the right inequality.",
+      "weight": 1.3
+    },
+    {
+      "key": "complexity_analysis",
+      "label": "Complexity analysis",
+      "description": "O(n log n) — dominated by sorting (and heap ops are log n). O(n) space for the heap / event arrays. Contrasts with the O(n^2) pairwise-overlap counting.",
+      "weight": 1.0
+    },
+    {
+      "key": "code_quality",
+      "label": "Code quality",
+      "description": "Clean sort + single heap, or clean two-pointer sweep; the reuse condition and peak tracking are readable and not buried in special cases.",
+      "weight": 1.0
+    },
+    {
+      "key": "edge_cases",
+      "label": "Edge cases",
+      "description": "Empty input (0), single meeting (1), all meetings identical (n rooms), fully nested meetings, back-to-back touching meetings sharing one room, all-disjoint (1 room).",
+      "weight": 1.1
+    },
+    {
+      "key": "testing",
+      "label": "Testing",
+      "description": "Tests the touching-endpoint case ([[0,5],[5,10]] -> 1) and a heavy-overlap case, verifying the reuse condition uses the correct <= vs <.",
+      "weight": 0.8
+    },
+    {
+      "key": "communication",
+      "label": "Communication",
+      "description": "Explains the max-overlap reframing and why sorting by start plus a min-heap on ends correctly models room reuse.",
+      "weight": 0.8
+    }
   ],
   "reference": {
     "constraints": [
@@ -37,19 +87,52 @@
       }
     ],
     "test_cases": [
-      { "input": "intervals = [[0,5],[5,10]]", "expected": "1 — touching endpoints do not conflict; the second reuses the room freed at 5" },
-      { "input": "intervals = [[1,5],[1,5],[1,5]]", "expected": "3 — three simultaneous identical meetings need three rooms" },
-      { "input": "intervals = [[13,15],[1,13],[6,9]]", "expected": "2 — [1,13] and [6,9] overlap; [13,15] reuses the room freed exactly at 13" },
-      { "input": "intervals = [[1,10]]", "expected": "1 — single meeting" },
-      { "input": "intervals = [[1,10],[2,7],[3,19],[8,12],[10,20],[11,30]]", "expected": "4 — heavy overlap; peak concurrency is 4" },
-      { "input": "intervals = [[0,1],[2,3],[4,5]]", "expected": "1 — fully disjoint, one room reused" }
+      {
+        "input": "intervals = [[0,5],[5,10]]",
+        "expected": "1 — touching endpoints do not conflict; the second reuses the room freed at 5"
+      },
+      {
+        "input": "intervals = [[1,5],[1,5],[1,5]]",
+        "expected": "3 — three simultaneous identical meetings need three rooms"
+      },
+      {
+        "input": "intervals = [[13,15],[1,13],[6,9]]",
+        "expected": "2 — [1,13] and [6,9] overlap; [13,15] reuses the room freed exactly at 13"
+      },
+      {
+        "input": "intervals = [[1,10]]",
+        "expected": "1 — single meeting"
+      },
+      {
+        "input": "intervals = [[1,10],[2,7],[3,19],[8,12],[10,20],[11,30]]",
+        "expected": "4 — heavy overlap; peak concurrency is 4"
+      },
+      {
+        "input": "intervals = [[0,1],[2,3],[4,5]]",
+        "expected": "1 — fully disjoint, one room reused"
+      }
     ],
     "optimal_time": "O(n log n) — sorting dominates; heap operations are O(log n) each",
     "optimal_space": "O(n) — the heap or the start/end event arrays",
     "approaches": [
-      { "name": "brute force (count overlaps per meeting)", "idea": "For each meeting, count how many others overlap it, or check every pair. The maximum simultaneous overlap is the answer, but computing it pairwise is quadratic.", "time": "O(n^2)", "space": "O(1)" },
-      { "name": "min-heap of end times", "idea": "Sort meetings by start time. Maintain a min-heap of end times of meetings currently occupying rooms. For each meeting in start order: if the heap's smallest end time is <= this meeting's start, that room is free — pop it (reuse). Then push this meeting's end time. The heap's size at any point is the rooms in use; its maximum size is the answer (in practice, its final size after the reuse-then-push discipline).", "time": "O(n log n)", "space": "O(n)" },
-      { "name": "sweep-line / chronological events", "idea": "Separate all start times and all end times into two sorted arrays. Two-pointer walk: if starts[i] < ends[j], a meeting begins -> rooms++, i++ and update peak; else a meeting has ended -> rooms--, j++. Using starts[i] < ends[j] (strict) frees the room on a touching endpoint. The peak of rooms is the answer. Equivalent to +1/-1 events sorted by time.", "time": "O(n log n)", "space": "O(n)" }
+      {
+        "name": "brute force (count overlaps per meeting)",
+        "idea": "For each meeting, count how many others overlap it, or check every pair. The maximum simultaneous overlap is the answer, but computing it pairwise is quadratic.",
+        "time": "O(n^2)",
+        "space": "O(1)"
+      },
+      {
+        "name": "min-heap of end times",
+        "idea": "Sort meetings by start time. Maintain a min-heap of end times of meetings currently occupying rooms. For each meeting in start order: if the heap's smallest end time is <= this meeting's start, that room is free — pop it (reuse). Then push this meeting's end time. The heap's size at any point is the rooms in use; its maximum size is the answer (in practice, its final size after the reuse-then-push discipline).",
+        "time": "O(n log n)",
+        "space": "O(n)"
+      },
+      {
+        "name": "sweep-line / chronological events",
+        "idea": "Separate all start times and all end times into two sorted arrays. Two-pointer walk: if starts[i] < ends[j], a meeting begins -> rooms++, i++ and update peak; else a meeting has ended -> rooms--, j++. Using starts[i] < ends[j] (strict) frees the room on a touching endpoint. The peak of rooms is the answer. Equivalent to +1/-1 events sorted by time.",
+        "time": "O(n log n)",
+        "space": "O(n)"
+      }
     ],
     "follow_ups": [
       "Return WHICH meetings share each room (an actual assignment), not just the count — assign each reused room an id and track it on the heap.",

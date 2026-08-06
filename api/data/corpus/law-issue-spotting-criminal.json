@@ -1,0 +1,125 @@
+{
+  "id": "law-issue-spotting-criminal",
+  "title": "Issue-Spotting: Criminal Law (Homicide & Defenses)",
+  "track": "professional",
+  "domain": "issue_spotting",
+  "areas": [
+    "law"
+  ],
+  "modality": "written",
+  "difficulty": "mid",
+  "tags": [
+    "criminal-law",
+    "homicide",
+    "self-defense",
+    "provocation",
+    "issue-spotting",
+    "IRAC"
+  ],
+  "prompt": "Read the fact pattern and write a multi-issue IRAC analysis identifying the possible homicide charges, the available defenses, and the likely outcome. Facts: In a crowded bar, Victor repeatedly taunts Marco about Marco's recently deceased wife, then shoves Marco hard and spits in his face. Marco, enraged and shaking, does not walk away; he shouts 'I'll kill you,' grabs a heavy glass beer mug from the bar, and swings it into the side of Victor's head. Victor collapses. Marco immediately calls 911. Victor is rushed to the hospital with a skull fracture; he is stabilized but, three days later, dies after a surgical resident negligently administers a contraindicated medication during an otherwise routine follow-up procedure. There is no evidence Marco intended anything beyond that single blow. Analyze the charges the prosecution might bring against Marco, the defenses he can raise, and the most likely result. Write a structured multi-issue IRAC response, addressing each homicide theory and each defense in turn.",
+  "blurb": "A bar-fight death that turns on murder versus voluntary manslaughter, adequate provocation, the limits of self-defense, and a causation break — spot every issue and run disciplined IRAC.",
+  "rubric": [
+    {
+      "key": "issue_spotting",
+      "label": "Issue spotting",
+      "description": "Identifies the full spread of issues: intent-to-kill vs. intent-to-cause-serious-bodily-harm murder, malice and the depraved-heart alternative, voluntary manslaughter via heat of passion/adequate provocation, the self-defense/provocation distinction (Marco was the one who could not retreat), and the causation problem created by the resident's negligence and the three-day gap. Flags that words alone are traditionally not adequate provocation but the shove/spit add a battery.",
+      "weight": 1.3
+    },
+    {
+      "key": "rule_statement",
+      "label": "Rule statement",
+      "description": "States the governing rules accurately: common-law murder as unlawful killing with malice aforethought (intent to kill, intent to inflict grievous bodily harm, depraved-heart recklessness, or felony murder); voluntary manslaughter as an intentional killing mitigated by adequate provocation, heat of passion, no cooling-off, and causal connection; self-defense elements (honest and reasonable belief, imminence, proportionality, sometimes retreat); and actual (but-for) plus proximate cause, including intervening/superseding causes.",
+      "weight": 1.2
+    },
+    {
+      "key": "application",
+      "label": "Application to facts",
+      "description": "Ties each rule to specific facts — the single heavy-mug blow to the head as evidence of intent to cause grievous bodily harm (malice), the taunts-plus-shove-plus-spit as arguable adequate provocation and the immediacy negating a cooling-off period, why self-defense likely fails (no imminent deadly threat, Marco escalated), and whether the resident's negligent medication is a foreseeable intervening cause or a superseding one that breaks proximate cause.",
+      "weight": 1.3
+    },
+    {
+      "key": "counterarguments",
+      "label": "Counterarguments",
+      "description": "Argues both sides: prosecution's grievous-bodily-harm malice and 'mere words' bar to provocation vs. defense's heat-of-passion mitigation and provocation-by-battery; ordinary vs. gross medical negligence on the superseding-cause question; whether Marco's 'I'll kill you' shows the specific intent to kill or is just heat-of-the-moment bluster.",
+      "weight": 1.2
+    },
+    {
+      "key": "conclusion",
+      "label": "Conclusion",
+      "description": "Reaches a defensible bottom line — most likely voluntary manslaughter rather than murder given adequate provocation and no cooling-off, self-defense unavailable, and causation probably intact because Victim's death via ordinary medical negligence is a foreseeable consequence of the initial injury (though gross negligence could break the chain) — while acknowledging uncertainty.",
+      "weight": 1.0
+    },
+    {
+      "key": "structure",
+      "label": "IRAC structure & organization",
+      "description": "Uses clear multi-issue IRAC (or CRAC) organization, one issue per section with headings or signposting, no fact-dump; each charge and defense is analyzed self-containedly.",
+      "weight": 1.0
+    },
+    {
+      "key": "legal_writing",
+      "label": "Precision & legal writing",
+      "description": "Uses terms of art correctly (malice aforethought, grievous bodily harm, heat of passion, adequate provocation, cooling-off, imminence, proximate cause, superseding cause), avoids conclusory leaps, and hedges appropriately.",
+      "weight": 0.9
+    }
+  ],
+  "reference": {
+    "scenario": "A common-law homicide problem. Marco strikes Victor once in the head with a heavy glass mug after a course of taunting, a shove, and a spit; Victor dies three days later, but the immediate cause of death is a surgical resident's negligent administration of a contraindicated drug. The pivotal moves are: (1) the single blow with a dangerous instrument to the head supports malice on an intent-to-cause-grievous-bodily-harm theory (and possibly depraved heart), so the baseline charge is murder; (2) the taunting-plus-battery and Marco's immediate, un-cooled rage are the classic recipe for voluntary-manslaughter mitigation — heat of passion on adequate provocation — noting that words alone are traditionally NOT adequate provocation but the shove and spit are batteries that historically qualify; (3) self-defense almost certainly fails because there was no imminent threat of death or serious bodily harm when Marco swung, and Marco escalated a non-deadly confrontation with deadly force (disproportionate), and in retreat jurisdictions he had an obvious avenue to withdraw; and (4) causation is the sleeper issue — Marco is the but-for cause, and ordinary medical negligence following a wound is generally a foreseeable, non-superseding intervening cause (the chain holds), whereas grossly negligent or reckless treatment can be a superseding cause that breaks proximate causation. A strong answer reaches voluntary manslaughter as the most likely outcome, rejects self-defense, and argues both sides of the superseding-cause question rather than assuming Marco is off the hook because a doctor made a mistake.",
+    "model_points": [
+      "Threshold framing: this is a common-law homicide analysis — start from murder (unlawful killing with malice aforethought) and then test each mitigating doctrine and defense.",
+      "Issue 1 — Malice/murder: The single blow to the head with a heavy glass mug supports malice on an intent-to-inflict-grievous-bodily-harm theory even without intent to kill; a depraved-heart (extreme-recklessness) theory is also arguable. Marco's shout 'I'll kill you' is some evidence of intent to kill but is better read as heat-of-the-moment.",
+      "Issue 2 — Voluntary manslaughter / heat of passion: An intentional killing is mitigated to voluntary manslaughter if the defendant acted in the heat of passion upon adequate provocation, with no reasonable cooling-off period, and a causal link between provocation and the killing.",
+      "Issue 2 (application): The immediate shove and spit are batteries that historically constitute adequate provocation; the taunting about the dead wife, though 'mere words,' colors the provocation. Marco reacted instantly with no cooling-off. This is the strongest mitigation argument and likely reduces murder to voluntary manslaughter.",
+      "Issue 2 (counter): Words alone are traditionally insufficient provocation, and a reasonable person does not kill over taunts; the prosecution will argue the response (a lethal head strike) was disproportionate to the provocation and that provocation only mitigates, it never fully excuses.",
+      "Issue 3 — Self-defense: Requires an honest and reasonable belief in an imminent unlawful threat of death or serious bodily harm, proportional force, and (in retreat jurisdictions) no safe avenue of retreat before using deadly force.",
+      "Issue 3 (application): Self-defense likely fails — a shove and spit are not an imminent deadly threat, so answering with a potentially lethal blow is disproportionate; Marco also escalated and had an obvious ability to withdraw, defeating the imminence and retreat requirements. Imperfect self-defense (honest but unreasonable belief) could be an alternate route to manslaughter in some jurisdictions.",
+      "Issue 4 — Causation (actual): Marco is the but-for cause; without the skull fracture Victor would not have been in surgery. Actual cause is satisfied.",
+      "Issue 4 — Causation (proximate/intervening): The resident's negligent medication is an intervening cause. Ordinary medical negligence in treating an injury the defendant inflicted is generally foreseeable and does NOT break the chain; grossly negligent or reckless treatment can be a superseding cause that relieves the defendant of homicide liability (leaving battery/assault). Argue both — the facts say 'negligently,' which points to non-superseding, but 'contraindicated medication' invites a gross-negligence argument.",
+      "Conclusion: Most likely voluntary manslaughter — malice is present but mitigated by adequate provocation with no cooling-off; self-defense fails; causation probably holds because ordinary medical negligence is foreseeable, though a superseding-cause finding would drop the homicide to an aggravated battery/assault."
+    ],
+    "probes": [
+      {
+        "trigger": "candidate charges first-degree murder without addressing provocation or the single-blow context",
+        "question": "Marco was taunted about his dead wife, shoved, and spat on, then swung immediately. What doctrine could reduce a murder charge here, and are its elements met?"
+      },
+      {
+        "trigger": "candidate accepts self-defense as a complete defense",
+        "question": "When Marco swung the mug, what exactly was the threat facing him — and was deadly force a proportional, necessary response to a shove and a spit?"
+      },
+      {
+        "trigger": "candidate treats the doctor's error as automatically ending Marco's liability",
+        "question": "A surgical resident negligently gave a contraindicated drug. Is ordinary medical negligence a superseding cause, or a foreseeable intervening one — and what would it take to break the causal chain?"
+      },
+      {
+        "trigger": "candidate says the taunting alone is adequate provocation",
+        "question": "Are 'mere words' ever adequate provocation at common law? What in these facts, beyond the taunts, does the provocation analysis actually rest on?"
+      },
+      {
+        "trigger": "candidate never states a malice theory for murder",
+        "question": "Marco arguably didn't intend to kill. On what theory of malice could the prosecution still charge murder for a single blow to the head?"
+      },
+      {
+        "trigger": "candidate ignores the cooling-off requirement",
+        "question": "Heat-of-passion mitigation requires no reasonable cooling-off period. Where do the facts put Marco on that timeline?"
+      }
+    ],
+    "red_flags": [
+      "Conclusory analysis: labels the killing 'murder' or 'manslaughter' with no malice theory or element-by-element provocation analysis.",
+      "Treats self-defense as a winner despite the absence of an imminent deadly threat and the disproportionate response.",
+      "Assumes the doctor's negligence automatically breaks causation without distinguishing ordinary from gross negligence.",
+      "Says words alone are adequate provocation, ignoring the traditional 'mere words' rule and the battery that actually carries the argument.",
+      "Misses voluntary manslaughter entirely and analyzes only murder, or vice versa.",
+      "Confuses provocation (a mitigation) with self-defense (a justification) or with the causation issue.",
+      "Fact-dump with no rule statement, or a rule statement with no application to the mug, the shove, or the timeline.",
+      "Awards a full acquittal without addressing the residual battery/assault liability if causation is broken."
+    ],
+    "follow_ups": [
+      "Suppose the medication error was not just negligent but grossly reckless — the resident ignored a flashing allergy alert. How does that change your causation conclusion and the charge that survives?",
+      "Assume the jurisdiction has abolished the retreat requirement and adopted stand-your-ground. Does self-defense become viable on these facts?",
+      "If Marco had walked to the far end of the bar, brooded for ten minutes, then returned and struck Victor, how does the heat-of-passion analysis change?",
+      "How would your analysis differ under the Model Penal Code's 'extreme emotional disturbance' standard rather than the common-law adequate-provocation test?",
+      "If Victor had survived with permanent brain damage instead of dying, what charges would be on the table?"
+    ],
+    "exemplar_answer": "Issue 1 (Murder / malice): The baseline charge is common-law murder — an unlawful killing with malice aforethought. Rule: malice is satisfied by intent to kill, intent to cause grievous bodily harm, depraved-heart recklessness, or felony murder. Application: although there is no evidence Marco intended to kill, swinging a heavy glass mug into the side of a person's head manifests at least an intent to inflict grievous bodily harm, and arguably an extreme, depraved-heart disregard for life; Marco's shouted 'I'll kill you' is some evidence of intent to kill but is better read as heat-of-the-moment bluster. Conclusion: malice is present, so murder is a viable charge subject to mitigation. Issue 2 (Voluntary manslaughter — heat of passion): This is the crux. Rule: an intentional killing is reduced to voluntary manslaughter where the defendant killed in the heat of passion upon legally adequate provocation, with no reasonable opportunity to cool off, and a causal link between the provocation and the killing. Application: the taunts about Marco's deceased wife are 'mere words,' which are traditionally not adequate provocation — but Victor also shoved Marco hard and spat in his face, and a battery is a classic form of adequate provocation. Marco was 'enraged and shaking' and swung immediately, so there was no cooling-off period. Counterargument: the prosecution will argue a reasonable person does not respond to a shove and a spit with a potentially lethal head strike, and that provocation mitigates but never excuses. On balance the mitigation is strong. Conclusion: the killing most likely drops to voluntary manslaughter. Issue 3 (Self-defense): Rule: self-defense requires an honest and reasonable belief in an imminent, unlawful threat of death or serious bodily harm, a proportional response, and — in retreat jurisdictions — no safe avenue of retreat before deadly force. Application: a shove and a spit are not an imminent threat of death or serious bodily harm, so a potentially lethal blow is both unnecessary and disproportionate; Marco escalated and plainly could have withdrawn. Imperfect self-defense (an honest but unreasonable belief) might offer an alternate manslaughter route in some jurisdictions. Conclusion: self-defense fails as a complete justification. Issue 4 (Causation): Rule: the prosecution must prove actual (but-for) cause and proximate cause; an intervening act breaks the chain only if it is an unforeseeable, superseding cause. Application: Marco is the but-for cause of the skull fracture and the surgery. The resident's negligent administration of a contraindicated drug is an intervening cause, but ordinary medical negligence in treating an injury the defendant inflicted is foreseeable and does not supersede; only grossly negligent or reckless treatment breaks the chain. The facts say 'negligently,' pointing to a non-superseding cause, though 'contraindicated medication' invites a gross-negligence argument. Conclusion: causation probably holds. Overall: the most likely outcome is a conviction for voluntary manslaughter — malice mitigated by adequate provocation, self-defense unavailable, and causation intact — with the caveat that a finding of grossly negligent treatment would break proximate cause and leave Marco liable only for an aggravated battery or assault."
+  },
+  "interviewer_notes": "This is a written multi-issue IRAC exercise; the candidate types the analysis. Score primarily on issue-spotting breadth and IRAC discipline, not on reaching one 'correct' verdict. There are four distinct issues and a strong answer touches all of them: (1) a malice theory for murder despite no intent to kill — push candidates who never articulate the grievous-bodily-harm or depraved-heart theory; (2) voluntary-manslaughter mitigation, where the sophisticated point is that the taunts are 'mere words' (traditionally not adequate provocation) but the shove and spit supply a battery that carries the argument, and the immediacy negates cooling-off; (3) self-defense, which should fail on imminence and proportionality — dock candidates who treat it as a winner; and (4) the causation sleeper, where ordinary medical negligence is a foreseeable, non-superseding intervening cause but gross negligence can break the chain. The single most common error is assuming the doctor's mistake automatically clears Marco — deploy the superseding-cause probe. Reward candidates who argue BOTH sides of provocation and of the superseding-cause question, and who note the residual battery/assault liability if causation breaks. Strong (senior-leaning) answers raise imperfect self-defense and the Model Penal Code's extreme-emotional-disturbance alternative. Press conclusory writers to state a rule before applying it and to keep provocation (mitigation), self-defense (justification), and causation analytically separate."
+}

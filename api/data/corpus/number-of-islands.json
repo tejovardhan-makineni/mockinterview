@@ -3,20 +3,70 @@
   "title": "Number of Islands",
   "track": "engineering",
   "domain": "coding",
+  "areas": [
+    "engineering",
+    "data_science"
+  ],
   "modality": "coding",
   "difficulty": "mid",
-  "tags": ["grid", "dfs", "bfs", "union-find", "connected-components"],
+  "tags": [
+    "grid",
+    "dfs",
+    "bfs",
+    "union-find",
+    "connected-components"
+  ],
   "prompt": "Given an m x n 2D grid of '1's (land) and '0's (water), count the number of islands. An island is a maximal group of land cells connected 4-directionally (up, down, left, right). Cells connected only diagonally are NOT part of the same island. The grid's borders are all surrounded by water.",
   "blurb": "Counting connected components on a grid — flood-fill each unvisited land cell with DFS/BFS, or union adjacent land with union-find.",
   "rubric": [
-    { "key": "problem_understanding", "label": "Problem understanding", "description": "Confirms 4-directional (not 8) connectivity, asks whether the grid may be mutated, and whether it can be huge (which motivates BFS over deep recursion).", "weight": 1.0 },
-    { "key": "approach", "label": "Approach", "description": "Frames it as counting connected components: scan cells, and on each unvisited land cell increment the count and flood-fill (DFS or BFS) the whole component. Can articulate the union-find alternative.", "weight": 1.3 },
-    { "key": "correctness", "label": "Correctness", "description": "Marks cells visited (sink to '0' or a visited set) so a component is counted exactly once; bounds-checks the four neighbors; never revisits; only counts land.", "weight": 1.3 },
-    { "key": "complexity_analysis", "label": "Complexity analysis", "description": "O(m*n) time — each cell is visited a constant number of times. Space O(m*n) worst case for the DFS recursion stack / BFS queue (a grid that is all land), or O(m*n) for union-find structures.", "weight": 1.0 },
-    { "key": "code_quality", "label": "Code quality", "description": "A clean neighbor iteration (direction array), a single flood-fill helper, and a guard that merges bounds + water + visited checks at the top of the recursion/pop.", "weight": 1.0 },
-    { "key": "edge_cases", "label": "Edge cases", "description": "Empty grid, all water (0), all land (1), single cell, single row/column, diagonal-only touching land (still separate islands), a large all-land grid causing recursion depth concerns.", "weight": 1.1 },
-    { "key": "testing", "label": "Testing", "description": "Tests the diagonal-adjacency trap and an all-land grid; verifies the count, not just that it runs.", "weight": 0.8 },
-    { "key": "communication", "label": "Communication", "description": "Names it as connected components, states the visited strategy explicitly, and discusses the recursion-depth risk for very large grids.", "weight": 0.8 }
+    {
+      "key": "problem_understanding",
+      "label": "Problem understanding",
+      "description": "Confirms 4-directional (not 8) connectivity, asks whether the grid may be mutated, and whether it can be huge (which motivates BFS over deep recursion).",
+      "weight": 1.0
+    },
+    {
+      "key": "approach",
+      "label": "Approach",
+      "description": "Frames it as counting connected components: scan cells, and on each unvisited land cell increment the count and flood-fill (DFS or BFS) the whole component. Can articulate the union-find alternative.",
+      "weight": 1.3
+    },
+    {
+      "key": "correctness",
+      "label": "Correctness",
+      "description": "Marks cells visited (sink to '0' or a visited set) so a component is counted exactly once; bounds-checks the four neighbors; never revisits; only counts land.",
+      "weight": 1.3
+    },
+    {
+      "key": "complexity_analysis",
+      "label": "Complexity analysis",
+      "description": "O(m*n) time — each cell is visited a constant number of times. Space O(m*n) worst case for the DFS recursion stack / BFS queue (a grid that is all land), or O(m*n) for union-find structures.",
+      "weight": 1.0
+    },
+    {
+      "key": "code_quality",
+      "label": "Code quality",
+      "description": "A clean neighbor iteration (direction array), a single flood-fill helper, and a guard that merges bounds + water + visited checks at the top of the recursion/pop.",
+      "weight": 1.0
+    },
+    {
+      "key": "edge_cases",
+      "label": "Edge cases",
+      "description": "Empty grid, all water (0), all land (1), single cell, single row/column, diagonal-only touching land (still separate islands), a large all-land grid causing recursion depth concerns.",
+      "weight": 1.1
+    },
+    {
+      "key": "testing",
+      "label": "Testing",
+      "description": "Tests the diagonal-adjacency trap and an all-land grid; verifies the count, not just that it runs.",
+      "weight": 0.8
+    },
+    {
+      "key": "communication",
+      "label": "Communication",
+      "description": "Names it as connected components, states the visited strategy explicitly, and discusses the recursion-depth risk for very large grids.",
+      "weight": 0.8
+    }
   ],
   "reference": {
     "constraints": [
@@ -38,19 +88,52 @@
       }
     ],
     "test_cases": [
-      { "input": "grid = [[0]]", "expected": "0 — all water" },
-      { "input": "grid = [[1]]", "expected": "1 — single land cell" },
-      { "input": "grid = [[1,0,1,0,1]]", "expected": "3 — single row, three separated land cells" },
-      { "input": "grid = [[1,0],[0,1]]", "expected": "2 — diagonal-only touch counts as two islands, NOT one" },
-      { "input": "grid = [[1,1],[1,1]]", "expected": "1 — fully connected block" },
-      { "input": "300x300 grid, all 1s", "expected": "1 — stresses recursion depth; a naive DFS may overflow the stack, motivating BFS or an explicit stack" }
+      {
+        "input": "grid = [[0]]",
+        "expected": "0 — all water"
+      },
+      {
+        "input": "grid = [[1]]",
+        "expected": "1 — single land cell"
+      },
+      {
+        "input": "grid = [[1,0,1,0,1]]",
+        "expected": "3 — single row, three separated land cells"
+      },
+      {
+        "input": "grid = [[1,0],[0,1]]",
+        "expected": "2 — diagonal-only touch counts as two islands, NOT one"
+      },
+      {
+        "input": "grid = [[1,1],[1,1]]",
+        "expected": "1 — fully connected block"
+      },
+      {
+        "input": "300x300 grid, all 1s",
+        "expected": "1 — stresses recursion depth; a naive DFS may overflow the stack, motivating BFS or an explicit stack"
+      }
     ],
     "optimal_time": "O(m*n)",
     "optimal_space": "O(m*n) worst case (recursion stack / BFS queue / union-find arrays); O(min(m,n)) for BFS on the frontier in the best analysis",
     "approaches": [
-      { "name": "DFS flood-fill", "idea": "Scan every cell. When you hit a '1', increment the island count and recursively DFS its 4 neighbors, sinking each visited land cell to '0' (or marking a visited set) so it isn't counted again. Simple and fast, but recursion depth can reach m*n on an all-land grid and blow the stack.", "time": "O(m*n)", "space": "O(m*n) worst-case recursion depth" },
-      { "name": "BFS flood-fill", "idea": "Same scan, but flood each component with an explicit queue instead of recursion: on an unvisited '1', enqueue it, mark it water, and BFS outward marking neighbors as they are enqueued. Avoids deep recursion — preferred for very large grids.", "time": "O(m*n)", "space": "O(min(m,n)) frontier typical, O(m*n) worst" },
-      { "name": "union-find (disjoint set)", "idea": "Give each land cell an id. Union each land cell with its right and down land neighbors (two directions suffice to cover all adjacencies). The answer is the number of distinct roots among land cells. With path compression + union by rank it is near-linear; natural fit if edges arrive incrementally (see the streaming follow-up).", "time": "O(m*n * α(m*n)) ~ O(m*n)", "space": "O(m*n)" }
+      {
+        "name": "DFS flood-fill",
+        "idea": "Scan every cell. When you hit a '1', increment the island count and recursively DFS its 4 neighbors, sinking each visited land cell to '0' (or marking a visited set) so it isn't counted again. Simple and fast, but recursion depth can reach m*n on an all-land grid and blow the stack.",
+        "time": "O(m*n)",
+        "space": "O(m*n) worst-case recursion depth"
+      },
+      {
+        "name": "BFS flood-fill",
+        "idea": "Same scan, but flood each component with an explicit queue instead of recursion: on an unvisited '1', enqueue it, mark it water, and BFS outward marking neighbors as they are enqueued. Avoids deep recursion — preferred for very large grids.",
+        "time": "O(m*n)",
+        "space": "O(min(m,n)) frontier typical, O(m*n) worst"
+      },
+      {
+        "name": "union-find (disjoint set)",
+        "idea": "Give each land cell an id. Union each land cell with its right and down land neighbors (two directions suffice to cover all adjacencies). The answer is the number of distinct roots among land cells. With path compression + union by rank it is near-linear; natural fit if edges arrive incrementally (see the streaming follow-up).",
+        "time": "O(m*n * α(m*n)) ~ O(m*n)",
+        "space": "O(m*n)"
+      }
     ],
     "follow_ups": [
       "Max Area of Island — return the size of the largest component instead of the count (flood-fill returns a size).",

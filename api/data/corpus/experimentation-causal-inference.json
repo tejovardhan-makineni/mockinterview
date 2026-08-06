@@ -1,0 +1,122 @@
+{
+  "id": "experimentation-causal-inference",
+  "title": "Causal Inference Without a Clean A/B Test",
+  "track": "professional",
+  "domain": "experimentation",
+  "areas": [
+    "data_science"
+  ],
+  "modality": "conversational",
+  "difficulty": "mid",
+  "tags": [
+    "causal-inference",
+    "difference-in-differences",
+    "propensity-scores",
+    "instrumental-variables",
+    "confounding"
+  ],
+  "prompt": "Six months ago your company launched a paid loyalty program, and leadership wants to know how much extra spend it actually caused per member so they can decide whether to keep funding it. You cannot run a clean A/B test — members opted in themselves, and the program is already live for everyone who wants it. Walk me through how you'd estimate the causal impact anyway: how you'd think about confounding, which quasi-experimental methods you'd consider — difference-in-differences, matching or propensity scores, instrumental variables, regression discontinuity — what assumptions each one leans on, and how you'd land on a defensible number with honest caveats.",
+  "blurb": "A mid-level causal-inference case — pressure-tested on identifying confounding, choosing among quasi-experimental methods, stating their assumptions, and producing a defensible estimate with caveats.",
+  "rubric": [
+    {
+      "key": "confounding_framing",
+      "label": "Confounding & selection",
+      "description": "Recognizes that opt-in creates selection bias — heavy spenders self-select into loyalty — so a naive members-vs-non-members comparison is badly upward-biased, and articulates what the ideal experiment would be before reaching for observational methods.",
+      "weight": 1.3
+    },
+    {
+      "key": "method_selection",
+      "label": "Method selection",
+      "description": "Proposes appropriate quasi-experimental designs (difference-in-differences, matching/propensity scores, instrumental variables, regression discontinuity) and matches the method to the data-generating process rather than naming methods generically.",
+      "weight": 1.2
+    },
+    {
+      "key": "assumptions",
+      "label": "Assumptions & identification",
+      "description": "States the identifying assumption behind each method — parallel trends for DiD, conditional ignorability / overlap for matching, relevance + exclusion for IV, continuity at the cutoff for RD — and explains how it could fail here.",
+      "weight": 1.3
+    },
+    {
+      "key": "pitfalls",
+      "label": "Pitfalls & threats",
+      "description": "Names concrete failure modes: unobserved confounders and reverse causality, poor common support, weak or invalid instruments, differential pre-trends, anticipation, and time-varying shocks; proposes checks and placebo/falsification tests.",
+      "weight": 1.2
+    },
+    {
+      "key": "estimate_caveats",
+      "label": "Estimate & caveats",
+      "description": "Triangulates across methods, reports an effect with uncertainty and sign/magnitude of likely residual bias, and states what it would take to trust it — rather than presenting one point estimate as ground truth.",
+      "weight": 1.1
+    },
+    {
+      "key": "communication",
+      "label": "Communication & decision",
+      "description": "Explains the reasoning to non-technical leadership, is honest about what can and cannot be concluded, and connects the estimate to the keep/kill funding decision, ideally proposing a future randomized holdout.",
+      "weight": 1.0
+    }
+  ],
+  "reference": {
+    "scenario": "Conversational mid-level causal-inference case. The candidate must estimate the causal effect of a self-selected, already-live loyalty program on member spend, with no clean randomization available. The central trap is selection bias: people who join loyalty programs are disproportionately heavy, engaged spenders, so a naive members-vs-non-members difference conflates the program's effect with who chose to join and is strongly upward-biased. A strong candidate names this immediately, states the ideal experiment (randomly grant membership) as the benchmark, and only then reaches for quasi-experimental methods — matching each to the actual data-generating process rather than reciting a list. They cover the main tools and, crucially, the assumption each one buys its identification with: difference-in-differences compares member vs non-member spend change around launch and rests on PARALLEL TRENDS (absent the program the two groups would have moved together) — testable via pre-period trends and placebo periods, but threatened by the fact that joiners may already be on a different trajectory (anticipation, mean reversion). Matching / propensity scores adjust for OBSERVED confounders and rely on conditional ignorability plus overlap/common support — but can do nothing about unobserved drivers like intrinsic loyalty, and are only as good as the covariates. Instrumental variables need an instrument that drives membership but affects spend ONLY through membership (relevance + exclusion restriction) — e.g. a randomized marketing nudge or a price/eligibility quirk — and weak or invalid instruments are a real hazard. Regression discontinuity applies if membership is assigned by a threshold (a points or tenure cutoff), identifying a LOCAL effect at the cutoff under continuity of potential outcomes. The best answers triangulate — if DiD, matched DiD, and an IV roughly agree, confidence rises; they run falsification tests (pre-trends, placebo outcomes, negative controls), report an estimate WITH uncertainty and the likely direction of residual bias (probably still overstated), and recommend a forward-looking randomized holdout or staggered rollout to get a clean read next time. Weak answers compare members to non-members directly, name methods without their assumptions, ignore unobserved confounding, treat matching as if it removes all bias, use a weak instrument uncritically, or hand leadership a single confident number.",
+    "model_points": [
+      "Name the core problem: opt-in means selection bias — heavy, engaged spenders self-select into loyalty — so a raw members-vs-non-members comparison conflates the program with who joined and is biased upward.",
+      "State the ideal experiment first (randomly grant membership, or a randomized holdout) as the benchmark the observational estimate is trying to approximate; this frames every method as second-best.",
+      "Difference-in-differences: compare the change in spend for members vs non-members around launch; the identifying assumption is PARALLEL TRENDS — without the program both groups would have trended together — testable with pre-period trends and placebo periods.",
+      "DiD threats here: joiners may already be on a steeper trajectory, plus anticipation and mean reversion (people join right after a spending spike), which violate parallel trends; check multiple pre-periods.",
+      "Matching / propensity scores: balance members and non-members on OBSERVED covariates; rely on conditional ignorability and overlap/common support, and can't address unobserved confounders like intrinsic loyalty — only as good as the covariates you have.",
+      "Instrumental variables: find something that shifts membership but affects spend only through membership (relevance + exclusion restriction), e.g. a randomized promo/nudge or an eligibility quirk; beware weak instruments and exclusion violations, and note IV estimates a local effect (LATE) on compliers.",
+      "Regression discontinuity: if membership hinges on a threshold (points, tenure, spend cutoff), compare just above vs just below to identify a LOCAL effect at the cutoff under continuity; check for manipulation/bunching at the cutoff.",
+      "Run falsification and robustness checks across whichever methods apply: pre-trend/placebo tests for DiD, balance and common-support diagnostics for matching, first-stage strength and over-identification for IV, density and covariate-continuity tests for RD.",
+      "Triangulate: if independent methods with different assumptions converge, trust rises; if they diverge, understand why before reporting — and state the likely direction of residual bias (still probably overstated).",
+      "Report a range with uncertainty, be explicit about what would make it trustworthy, and recommend a forward-looking randomized holdout or staggered rollout so the next read is clean; connect the estimate to the keep/kill funding decision."
+    ],
+    "probes": [
+      {
+        "trigger": "candidate compares members to non-members directly",
+        "question": "Why is simply comparing loyalty members' spend to non-members' spend likely to overstate the program's effect, and what's really driving that gap?"
+      },
+      {
+        "trigger": "candidate proposes DiD without stating parallel trends",
+        "question": "Difference-in-differences leans on one key assumption. What is it, how would you check it here, and why might people who opt into loyalty violate it?"
+      },
+      {
+        "trigger": "candidate treats matching/propensity as removing all bias",
+        "question": "Suppose you match members and non-members on every covariate you have. What kind of confounding does that still leave untouched, and why?"
+      },
+      {
+        "trigger": "candidate suggests an instrument",
+        "question": "What exactly makes something a valid instrument for membership, and how would you argue your candidate instrument affects spend only through joining and not directly?"
+      },
+      {
+        "trigger": "candidate mentions a cutoff or threshold for joining",
+        "question": "If eligibility depends on a threshold, how would regression discontinuity help, what does it actually identify, and what would you check to make sure people aren't gaming the cutoff?"
+      },
+      {
+        "trigger": "candidate reports a single confident number",
+        "question": "You give leadership one number. How confident are you, which direction is any residual bias likely to run, and how would you communicate that uncertainty honestly?"
+      },
+      {
+        "trigger": "candidate never proposes a cleaner future design",
+        "question": "Going forward, how would you set things up so that next time you can measure this program's impact cleanly rather than fighting confounding?"
+      }
+    ],
+    "red_flags": [
+      "Compares members to non-members directly and calls the gap the program's effect",
+      "Ignores selection bias / self-selection into the program entirely",
+      "Names methods (DiD, IV, matching, RD) without stating their identifying assumptions",
+      "Treats matching or propensity scores as if they remove unobserved confounding",
+      "Proposes a weak or clearly invalid instrument and doesn't check relevance or the exclusion restriction",
+      "Asserts parallel trends for DiD without checking pre-trends, or ignores anticipation / mean reversion",
+      "Confuses correlation with causation or claims a clean causal number the data can't support",
+      "Reports a single point estimate with no uncertainty, no bias direction, and no plan for a cleaner future test"
+    ],
+    "follow_ups": [
+      "Your pre-period trends show members were already growing spend faster than non-members before launch. What does that do to your difference-in-differences estimate?",
+      "DiD gives +$40/member, matched DiD gives +$25, and an IV using a randomized promo gives +$15. How do you reconcile these and what do you tell leadership?",
+      "The only instrument you can find is 'received a marketing email.' Is that valid, and what would make you doubt the exclusion restriction?",
+      "Membership is auto-granted above a spend threshold. How would you estimate the effect, and what exactly can and can't you conclude from that design?",
+      "Leadership wants a clean number next quarter. Design the randomized holdout or staggered rollout you'd run."
+    ],
+    "exemplar_answer": "A strong candidate leads with the bias: 'The trap is self-selection — people who join a paid loyalty program are already heavy, engaged spenders, so comparing members to non-members conflates the program with who chose to join and almost certainly overstates the effect. The clean answer would be to randomly grant membership; since we can't, everything I do is trying to approximate that.' They then match methods to the data. 'Difference-in-differences is my first instinct: compare how member and non-member spend changed around launch. It identifies the effect only if parallel trends holds — that absent the program both groups would have moved together — so I'd test several pre-periods and run a placebo. The risk is that joiners were already on a steeper trajectory, or joined right after a spending spike, which breaks parallel trends through anticipation or mean reversion.' On adjustment: 'Propensity-score matching balances the groups on observed covariates under conditional ignorability and overlap, but it does nothing about unobserved drivers like intrinsic loyalty — it's only as good as my covariates.' On instruments: 'If I had something that pushes people into membership but touches spend only through membership — say a randomized sign-up promo — I could use IV, which recovers a local effect on compliers; but I'd worry about weak instruments and exclusion violations, e.g. a promo that also directly nudges spend.' On thresholds: 'If membership is granted at a points or tenure cutoff, regression discontinuity gives a clean local effect at the cutoff under continuity, and I'd check for bunching to rule out gaming.' Then triangulation and honesty: 'I'd run whichever of these the data supports, cross-check them, and if a matched DiD and an IV roughly agree I'd trust it more. I'd report a range, note the residual bias is probably still upward, and be clear about what I can't conclude. And I'd tell leadership the durable fix is a randomized holdout or staggered rollout so next quarter we get a clean number instead of arguing about confounders.' The answer is bias-aware, assumption-explicit, triangulated, and decision-oriented."
+  },
+  "interviewer_notes": "Run this as a reasoning case at the mid bar; the candidate should recognize within the first minute that opt-in creates selection bias and that a naive members-vs-non-members comparison is upward-biased — if they don't, use the first probe immediately, because everything else depends on seeing that. The key signal is not naming methods but attaching the right identifying assumption to each: parallel trends for DiD, conditional ignorability and overlap for matching, relevance plus exclusion for IV, continuity at the cutoff for RD. Push on assumptions whenever a method is named without its condition; a mid-level data scientist should be able to state and defend at least one method rigorously and know that matching cannot fix unobserved confounding. Use the pre-trend follow-up to test whether they'll revise honestly, and the divergent-estimates follow-up to see if they can triangulate rather than cherry-pick. Reward candidates who report a range with a stated bias direction, distinguish correlation from causation cleanly, and recommend a forward-looking randomized holdout for a clean future read. Penalize direct group comparisons, method-name-dropping without assumptions, treating matching as a cure-all, uncritical weak instruments, and delivering a single confident number the data can't support."
+}

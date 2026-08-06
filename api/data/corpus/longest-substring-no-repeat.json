@@ -3,20 +3,69 @@
   "title": "Longest Substring Without Repeating Characters",
   "track": "engineering",
   "domain": "coding",
+  "areas": [
+    "engineering",
+    "data_science"
+  ],
   "modality": "coding",
   "difficulty": "mid",
-  "tags": ["sliding-window", "hashmap", "strings", "two-pointer"],
+  "tags": [
+    "sliding-window",
+    "hashmap",
+    "strings",
+    "two-pointer"
+  ],
   "prompt": "Given a string s, find the length of the longest substring that contains no repeating characters. A substring is a contiguous run of characters (not a subsequence). Return just the length.",
   "blurb": "The canonical variable-size sliding window — grow the right edge, and jump the left edge past the last occurrence of any repeat.",
   "rubric": [
-    { "key": "problem_understanding", "label": "Problem understanding", "description": "Distinguishes substring (contiguous) from subsequence, confirms the return is a length not the substring, and asks about the character set (ASCII vs full Unicode).", "weight": 1.0 },
-    { "key": "approach", "label": "Approach", "description": "Reaches the sliding window with a last-seen-index map; recognizes that on a repeat the left edge can jump directly to last_seen+1 rather than crawling one step at a time.", "weight": 1.3 },
-    { "key": "correctness", "label": "Correctness", "description": "Only advances left forward (never backward) using left = max(left, last_seen[c]+1) — otherwise a stale earlier index can shrink the window incorrectly; updates last_seen[c] every step and tracks the running max.", "weight": 1.3 },
-    { "key": "complexity_analysis", "label": "Complexity analysis", "description": "O(n) time — each character enters and leaves the window at most once (amortized, not nested); O(min(n, alphabet)) space for the map.", "weight": 1.0 },
-    { "key": "code_quality", "label": "Code quality", "description": "Single loop over the right edge, one map, one max — no inner rescans; clear names for the window bounds.", "weight": 1.0 },
-    { "key": "edge_cases", "label": "Edge cases", "description": "Empty string (0), single character (1), all identical ('bbbb' -> 1), all distinct (n), repeat that is outside the current window (must not move left back), spaces/symbols.", "weight": 1.1 },
-    { "key": "testing", "label": "Testing", "description": "Tests the 'repeat outside the window' trap (e.g. 'abba') that breaks the naive left = last_seen+1 without the max, not just 'abcabcbb'.", "weight": 0.9 },
-    { "key": "communication", "label": "Communication", "description": "Names it as a sliding window up front and explains why the amortized cost is O(n) despite two moving pointers.", "weight": 0.8 }
+    {
+      "key": "problem_understanding",
+      "label": "Problem understanding",
+      "description": "Distinguishes substring (contiguous) from subsequence, confirms the return is a length not the substring, and asks about the character set (ASCII vs full Unicode).",
+      "weight": 1.0
+    },
+    {
+      "key": "approach",
+      "label": "Approach",
+      "description": "Reaches the sliding window with a last-seen-index map; recognizes that on a repeat the left edge can jump directly to last_seen+1 rather than crawling one step at a time.",
+      "weight": 1.3
+    },
+    {
+      "key": "correctness",
+      "label": "Correctness",
+      "description": "Only advances left forward (never backward) using left = max(left, last_seen[c]+1) — otherwise a stale earlier index can shrink the window incorrectly; updates last_seen[c] every step and tracks the running max.",
+      "weight": 1.3
+    },
+    {
+      "key": "complexity_analysis",
+      "label": "Complexity analysis",
+      "description": "O(n) time — each character enters and leaves the window at most once (amortized, not nested); O(min(n, alphabet)) space for the map.",
+      "weight": 1.0
+    },
+    {
+      "key": "code_quality",
+      "label": "Code quality",
+      "description": "Single loop over the right edge, one map, one max — no inner rescans; clear names for the window bounds.",
+      "weight": 1.0
+    },
+    {
+      "key": "edge_cases",
+      "label": "Edge cases",
+      "description": "Empty string (0), single character (1), all identical ('bbbb' -> 1), all distinct (n), repeat that is outside the current window (must not move left back), spaces/symbols.",
+      "weight": 1.1
+    },
+    {
+      "key": "testing",
+      "label": "Testing",
+      "description": "Tests the 'repeat outside the window' trap (e.g. 'abba') that breaks the naive left = last_seen+1 without the max, not just 'abcabcbb'.",
+      "weight": 0.9
+    },
+    {
+      "key": "communication",
+      "label": "Communication",
+      "description": "Names it as a sliding window up front and explains why the amortized cost is O(n) despite two moving pointers.",
+      "weight": 0.8
+    }
   ],
   "reference": {
     "constraints": [
@@ -42,19 +91,52 @@
       }
     ],
     "test_cases": [
-      { "input": "s = \"\"", "expected": "0 — empty string" },
-      { "input": "s = \"au\"", "expected": "2 — all distinct" },
-      { "input": "s = \"abba\"", "expected": "2 — the trap: when the final 'a' repeats, its last index (0) is behind left; left must NOT jump backward. Correct windows are 'ab' and 'ab' -> 2" },
-      { "input": "s = \"dvdf\"", "expected": "3 — 'vdf'; the earlier 'd' is outside the window when the second 'd' is processed" },
-      { "input": "s = \"tmmzuxt\"", "expected": "5 — 'mzuxt'; the repeated 't' at the end is far outside the window" },
-      { "input": "s = \" \"", "expected": "1 — a single space is a valid character" }
+      {
+        "input": "s = \"\"",
+        "expected": "0 — empty string"
+      },
+      {
+        "input": "s = \"au\"",
+        "expected": "2 — all distinct"
+      },
+      {
+        "input": "s = \"abba\"",
+        "expected": "2 — the trap: when the final 'a' repeats, its last index (0) is behind left; left must NOT jump backward. Correct windows are 'ab' and 'ab' -> 2"
+      },
+      {
+        "input": "s = \"dvdf\"",
+        "expected": "3 — 'vdf'; the earlier 'd' is outside the window when the second 'd' is processed"
+      },
+      {
+        "input": "s = \"tmmzuxt\"",
+        "expected": "5 — 'mzuxt'; the repeated 't' at the end is far outside the window"
+      },
+      {
+        "input": "s = \" \"",
+        "expected": "1 — a single space is a valid character"
+      }
     ],
     "optimal_time": "O(n) — one pass, each index visited by the right edge once and by the left edge at most once",
     "optimal_space": "O(min(n, k)) where k is the alphabet size (at most 128 for ASCII)",
     "approaches": [
-      { "name": "brute force (all substrings)", "idea": "Enumerate every start i and end j, and for each candidate check with a set whether it has all-unique characters. Cubic overall (O(n^2) substrings times O(n) uniqueness check, or O(n^2) with an incremental set).", "time": "O(n^3) naive, O(n^2) with an incremental set", "space": "O(min(n,k))" },
-      { "name": "sliding window with a set (crawling left)", "idea": "Maintain a window [left, right] and a set of its characters. Extend right; while s[right] is already in the set, remove s[left] and increment left until the duplicate is gone; then add s[right] and update max. Correct and O(n) amortized, but left crawls one step at a time.", "time": "O(n) amortized (2n)", "space": "O(min(n,k))" },
-      { "name": "optimal: sliding window with last-seen index map", "idea": "Store last_seen[c] = most recent index of c. Iterate right from 0..n-1. If s[right] is in the map AND its last index >= left, jump left = last_seen[s[right]] + 1 in one move. Always set last_seen[s[right]] = right and update max = max(max, right - left + 1). The max/guard on left is essential so a repeat that sits BEFORE the current window doesn't drag left backward.", "time": "O(n) — single pass", "space": "O(min(n,k))" }
+      {
+        "name": "brute force (all substrings)",
+        "idea": "Enumerate every start i and end j, and for each candidate check with a set whether it has all-unique characters. Cubic overall (O(n^2) substrings times O(n) uniqueness check, or O(n^2) with an incremental set).",
+        "time": "O(n^3) naive, O(n^2) with an incremental set",
+        "space": "O(min(n,k))"
+      },
+      {
+        "name": "sliding window with a set (crawling left)",
+        "idea": "Maintain a window [left, right] and a set of its characters. Extend right; while s[right] is already in the set, remove s[left] and increment left until the duplicate is gone; then add s[right] and update max. Correct and O(n) amortized, but left crawls one step at a time.",
+        "time": "O(n) amortized (2n)",
+        "space": "O(min(n,k))"
+      },
+      {
+        "name": "optimal: sliding window with last-seen index map",
+        "idea": "Store last_seen[c] = most recent index of c. Iterate right from 0..n-1. If s[right] is in the map AND its last index >= left, jump left = last_seen[s[right]] + 1 in one move. Always set last_seen[s[right]] = right and update max = max(max, right - left + 1). The max/guard on left is essential so a repeat that sits BEFORE the current window doesn't drag left backward.",
+        "time": "O(n) — single pass",
+        "space": "O(min(n,k))"
+      }
     ],
     "follow_ups": [
       "Return the substring itself, not just its length — track the best window's start index alongside the max.",

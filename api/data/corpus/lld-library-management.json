@@ -3,23 +3,88 @@
   "title": "Design a Library Management System (OOD)",
   "track": "engineering",
   "domain": "low_level_design",
+  "areas": [
+    "engineering"
+  ],
   "modality": "system_design",
   "difficulty": "mid",
-  "tags": ["ood", "class-design", "state-machine", "observer-pattern", "strategy-pattern", "machine-coding"],
+  "tags": [
+    "ood",
+    "class-design",
+    "state-machine",
+    "observer-pattern",
+    "strategy-pattern",
+    "machine-coding"
+  ],
   "prompt": "Design a library management system. Members search a catalog and borrow physical books; each book has multiple copies; loans have due dates and late fines; a member can place a hold on a copy that is currently checked out and be notified when one frees up. Model the classes, relationships, the copy/loan lifecycle, and the key APIs. Sketch the class diagram.",
   "blurb": "A CRUD-shaped OOD with real depth — the Book vs BookCopy distinction, a loan/hold state machine, fines, and notifications.",
   "rubric": [
-    { "key": "requirements_clarification", "label": "Requirements clarification", "description": "Clarifies multiple copies per title, loan period and limits, fines, holds/reservations, and notification before designing.", "weight": 1.0 },
-    { "key": "core_entities", "label": "Core entities", "description": "Distinguishes Book (title/metadata) from BookCopy (physical item); identifies Member, Loan, Hold/Reservation, Catalog, Fine.", "weight": 1.2 },
-    { "key": "class_design", "label": "Class design", "description": "Book vs BookCopy modeled correctly, Loan links member+copy+dates, Account/Member holds limits and fines; no conflation of title and item.", "weight": 1.1 },
-    { "key": "relationships", "label": "Relationships", "description": "Book has-many BookCopy; Member has-many Loan; Hold references a Book/BookCopy and a Member; correct multiplicities.", "weight": 1.1 },
-    { "key": "state_machine", "label": "State machine", "description": "BookCopy lifecycle (AVAILABLE/LOANED/ON_HOLD/LOST) and Loan lifecycle (ACTIVE/RETURNED/OVERDUE) with clean transitions.", "weight": 1.1 },
-    { "key": "design_patterns", "label": "Design patterns", "description": "Observer for hold notifications, Strategy for fine calculation, Factory/Repository for catalog access; each justified.", "weight": 1.0 },
-    { "key": "api_methods", "label": "API methods", "description": "search, checkout, returnBook, placeHold, cancelHold, renew, payFine; sensible signatures and error cases.", "weight": 1.0 },
-    { "key": "extensibility", "label": "Extensibility", "description": "New item types (DVDs, e-books), different fine policies, membership tiers, or reservation rules slot in cleanly.", "weight": 1.0 },
-    { "key": "edge_cases", "label": "Edge cases", "description": "All copies out, loan limit reached, overdue blocking new loans, hold queue ordering, lost book, double-return.", "weight": 0.9 },
-    { "key": "concurrency", "label": "Concurrency", "description": "Two members checking out the last copy or claiming a freed hold simultaneously; atomic copy allocation and hold fulfillment.", "weight": 0.9 },
-    { "key": "communication", "label": "Communication", "description": "Drives requirements, keeps the class diagram legible, and reasons about the copy/loan/hold interplay.", "weight": 0.8 }
+    {
+      "key": "requirements_clarification",
+      "label": "Requirements clarification",
+      "description": "Clarifies multiple copies per title, loan period and limits, fines, holds/reservations, and notification before designing.",
+      "weight": 1.0
+    },
+    {
+      "key": "core_entities",
+      "label": "Core entities",
+      "description": "Distinguishes Book (title/metadata) from BookCopy (physical item); identifies Member, Loan, Hold/Reservation, Catalog, Fine.",
+      "weight": 1.2
+    },
+    {
+      "key": "class_design",
+      "label": "Class design",
+      "description": "Book vs BookCopy modeled correctly, Loan links member+copy+dates, Account/Member holds limits and fines; no conflation of title and item.",
+      "weight": 1.1
+    },
+    {
+      "key": "relationships",
+      "label": "Relationships",
+      "description": "Book has-many BookCopy; Member has-many Loan; Hold references a Book/BookCopy and a Member; correct multiplicities.",
+      "weight": 1.1
+    },
+    {
+      "key": "state_machine",
+      "label": "State machine",
+      "description": "BookCopy lifecycle (AVAILABLE/LOANED/ON_HOLD/LOST) and Loan lifecycle (ACTIVE/RETURNED/OVERDUE) with clean transitions.",
+      "weight": 1.1
+    },
+    {
+      "key": "design_patterns",
+      "label": "Design patterns",
+      "description": "Observer for hold notifications, Strategy for fine calculation, Factory/Repository for catalog access; each justified.",
+      "weight": 1.0
+    },
+    {
+      "key": "api_methods",
+      "label": "API methods",
+      "description": "search, checkout, returnBook, placeHold, cancelHold, renew, payFine; sensible signatures and error cases.",
+      "weight": 1.0
+    },
+    {
+      "key": "extensibility",
+      "label": "Extensibility",
+      "description": "New item types (DVDs, e-books), different fine policies, membership tiers, or reservation rules slot in cleanly.",
+      "weight": 1.0
+    },
+    {
+      "key": "edge_cases",
+      "label": "Edge cases",
+      "description": "All copies out, loan limit reached, overdue blocking new loans, hold queue ordering, lost book, double-return.",
+      "weight": 0.9
+    },
+    {
+      "key": "concurrency",
+      "label": "Concurrency",
+      "description": "Two members checking out the last copy or claiming a freed hold simultaneously; atomic copy allocation and hold fulfillment.",
+      "weight": 0.9
+    },
+    {
+      "key": "communication",
+      "label": "Communication",
+      "description": "Drives requirements, keeps the class diagram legible, and reasons about the copy/loan/hold interplay.",
+      "weight": 0.8
+    }
   ],
   "reference": {
     "functional_requirements": [
@@ -45,15 +110,123 @@
       "What happens to a lost copy — fine + remove from circulation?"
     ],
     "core_classes": [
-      { "name": "Library", "responsibility": "Aggregate root / facade: exposes search, checkout, return, hold; coordinates catalog, members, and policies.", "key_fields": ["Catalog catalog", "Map<String, Member> members", "FineStrategy fineStrategy"], "key_methods": ["List<Book> search(Query q)", "Loan checkout(memberId, copyId)", "void returnCopy(copyId)", "void placeHold(memberId, bookId)"] },
-      { "name": "Book", "responsibility": "Title-level metadata (bibliographic record); NOT a physical item.", "key_fields": ["isbn", "title", "authors", "subjects", "List<BookCopy> copies"], "key_methods": ["List<BookCopy> availableCopies()"] },
-      { "name": "BookCopy", "responsibility": "A single physical item with its own barcode and lifecycle state.", "key_fields": ["barcode", "Book book", "CopyStatus status", "String shelfLocation"], "key_methods": ["boolean isAvailable()", "void setStatus(CopyStatus s)"] },
-      { "name": "Member / Account", "responsibility": "A borrower: active loans, fines owed, membership limits.", "key_fields": ["memberId", "name", "List<Loan> activeLoans", "double outstandingFines", "MembershipTier tier"], "key_methods": ["boolean canBorrow()", "void addLoan(Loan l)", "void addFine(double amt)"] },
-      { "name": "Loan", "responsibility": "Links a member to a borrowed copy with issue/due dates; computes overdue status.", "key_fields": ["Member member", "BookCopy copy", "LocalDate issued", "LocalDate due", "LocalDate returned", "LoanStatus status"], "key_methods": ["boolean isOverdue(LocalDate today)", "void markReturned()"] },
-      { "name": "Hold / Reservation", "responsibility": "A member's place in the waiting queue for a title; fulfilled when a copy frees.", "key_fields": ["Member member", "Book book", "Instant placedAt", "HoldStatus status"], "key_methods": ["void fulfill(BookCopy c)", "void cancel()"] },
-      { "name": "Catalog / BookRepository", "responsibility": "Indexes books for fast search and looks up copies.", "key_fields": ["Map<String, Book> byIsbn", "invertedIndex(title/author/subject)"], "key_methods": ["List<Book> search(Query q)", "BookCopy findCopy(barcode)"] },
-      { "name": "FineStrategy (interface)", "responsibility": "Pluggable late-fee computation.", "key_fields": [], "key_methods": ["double computeFine(Loan l, LocalDate today)"] },
-      { "name": "NotificationObserver (interface)", "responsibility": "Notifies a member when a held copy becomes available.", "key_fields": [], "key_methods": ["void onCopyAvailable(Hold h, BookCopy c)"] }
+      {
+        "name": "Library",
+        "responsibility": "Aggregate root / facade: exposes search, checkout, return, hold; coordinates catalog, members, and policies.",
+        "key_fields": [
+          "Catalog catalog",
+          "Map<String, Member> members",
+          "FineStrategy fineStrategy"
+        ],
+        "key_methods": [
+          "List<Book> search(Query q)",
+          "Loan checkout(memberId, copyId)",
+          "void returnCopy(copyId)",
+          "void placeHold(memberId, bookId)"
+        ]
+      },
+      {
+        "name": "Book",
+        "responsibility": "Title-level metadata (bibliographic record); NOT a physical item.",
+        "key_fields": [
+          "isbn",
+          "title",
+          "authors",
+          "subjects",
+          "List<BookCopy> copies"
+        ],
+        "key_methods": [
+          "List<BookCopy> availableCopies()"
+        ]
+      },
+      {
+        "name": "BookCopy",
+        "responsibility": "A single physical item with its own barcode and lifecycle state.",
+        "key_fields": [
+          "barcode",
+          "Book book",
+          "CopyStatus status",
+          "String shelfLocation"
+        ],
+        "key_methods": [
+          "boolean isAvailable()",
+          "void setStatus(CopyStatus s)"
+        ]
+      },
+      {
+        "name": "Member / Account",
+        "responsibility": "A borrower: active loans, fines owed, membership limits.",
+        "key_fields": [
+          "memberId",
+          "name",
+          "List<Loan> activeLoans",
+          "double outstandingFines",
+          "MembershipTier tier"
+        ],
+        "key_methods": [
+          "boolean canBorrow()",
+          "void addLoan(Loan l)",
+          "void addFine(double amt)"
+        ]
+      },
+      {
+        "name": "Loan",
+        "responsibility": "Links a member to a borrowed copy with issue/due dates; computes overdue status.",
+        "key_fields": [
+          "Member member",
+          "BookCopy copy",
+          "LocalDate issued",
+          "LocalDate due",
+          "LocalDate returned",
+          "LoanStatus status"
+        ],
+        "key_methods": [
+          "boolean isOverdue(LocalDate today)",
+          "void markReturned()"
+        ]
+      },
+      {
+        "name": "Hold / Reservation",
+        "responsibility": "A member's place in the waiting queue for a title; fulfilled when a copy frees.",
+        "key_fields": [
+          "Member member",
+          "Book book",
+          "Instant placedAt",
+          "HoldStatus status"
+        ],
+        "key_methods": [
+          "void fulfill(BookCopy c)",
+          "void cancel()"
+        ]
+      },
+      {
+        "name": "Catalog / BookRepository",
+        "responsibility": "Indexes books for fast search and looks up copies.",
+        "key_fields": [
+          "Map<String, Book> byIsbn",
+          "invertedIndex(title/author/subject)"
+        ],
+        "key_methods": [
+          "List<Book> search(Query q)",
+          "BookCopy findCopy(barcode)"
+        ]
+      },
+      {
+        "name": "FineStrategy (interface)",
+        "responsibility": "Pluggable late-fee computation.",
+        "key_fields": [],
+        "key_methods": [
+          "double computeFine(Loan l, LocalDate today)"
+        ]
+      },
+      {
+        "name": "NotificationObserver (interface)",
+        "responsibility": "Notifies a member when a held copy becomes available.",
+        "key_fields": [],
+        "key_methods": [
+          "void onCopyAvailable(Hold h, BookCopy c)"
+        ]
+      }
     ],
     "relationships": [
       "Book has-many BookCopy (composition) — the core distinction: title vs physical item",
@@ -64,10 +237,26 @@
       "BookCopy holds availability state, notified to Holds via Observer"
     ],
     "design_patterns": [
-      { "pattern": "Observer", "where": "Hold notification when a BookCopy becomes AVAILABLE", "why": "Decouple copy-return from notifying the next member in the hold queue; supports email/SMS observers." },
-      { "pattern": "Strategy", "where": "FineStrategy (flat/tiered/capped) and optionally search ranking", "why": "Change fine policy without touching checkout/return." },
-      { "pattern": "Repository", "where": "Catalog/BookRepository abstracting storage and search", "why": "Isolate persistence/indexing from domain logic." },
-      { "pattern": "Facade", "where": "Library exposing coarse operations", "why": "Give clients one clean entry point over catalog/member/policy internals." }
+      {
+        "pattern": "Observer",
+        "where": "Hold notification when a BookCopy becomes AVAILABLE",
+        "why": "Decouple copy-return from notifying the next member in the hold queue; supports email/SMS observers."
+      },
+      {
+        "pattern": "Strategy",
+        "where": "FineStrategy (flat/tiered/capped) and optionally search ranking",
+        "why": "Change fine policy without touching checkout/return."
+      },
+      {
+        "pattern": "Repository",
+        "where": "Catalog/BookRepository abstracting storage and search",
+        "why": "Isolate persistence/indexing from domain logic."
+      },
+      {
+        "pattern": "Facade",
+        "where": "Library exposing coarse operations",
+        "why": "Give clients one clean entry point over catalog/member/policy internals."
+      }
     ],
     "apis": [
       "List<Book> search(Query q)",
@@ -104,16 +293,40 @@
       "Digital lending with concurrent-license limits reuses the hold/queue concept"
     ],
     "deep_dives": [
-      { "topic": "book_vs_copy", "probe": "Why separate Book from BookCopy? What breaks if you model availability and loans on Book directly when there are five physical copies?" },
-      { "topic": "hold_fulfillment", "probe": "A copy is returned and three members hold the title. Walk me through picking the next member and notifying them — where does Observer fit and how do you keep it FIFO and race-free?" },
-      { "topic": "fine_policy", "probe": "Requirements change the fine from flat to tiered with a grace period. How does your design absorb that without editing checkout/return?" }
+      {
+        "topic": "book_vs_copy",
+        "probe": "Why separate Book from BookCopy? What breaks if you model availability and loans on Book directly when there are five physical copies?"
+      },
+      {
+        "topic": "hold_fulfillment",
+        "probe": "A copy is returned and three members hold the title. Walk me through picking the next member and notifying them — where does Observer fit and how do you keep it FIFO and race-free?"
+      },
+      {
+        "topic": "fine_policy",
+        "probe": "Requirements change the fine from flat to tiered with a grace period. How does your design absorb that without editing checkout/return?"
+      }
     ],
     "followup_bank": [
-      { "trigger": "mentions copies or copy or availability", "question": "How do you model 'a title' vs 'a physical copy'? Where do loan state and availability live?" },
-      { "trigger": "mentions hold or reserve or waitlist", "question": "When a copy is returned, how do you notify the next member fairly and without a race — Observer plus a FIFO queue?" },
-      { "trigger": "mentions fine or fee or late", "question": "How do you support flat vs tiered vs capped fines without if/else scattered through return logic — a FineStrategy?" },
-      { "trigger": "mentions dvd or ebook or media", "question": "How would you extend to non-book items without rewriting loans — a LibraryItem base type?" },
-      { "trigger": "mentions last copy or concurrent", "question": "Two members grab the last copy at once — where exactly is the atomic allocation?" }
+      {
+        "trigger": "mentions copies or copy or availability",
+        "question": "How do you model 'a title' vs 'a physical copy'? Where do loan state and availability live?"
+      },
+      {
+        "trigger": "mentions hold or reserve or waitlist",
+        "question": "When a copy is returned, how do you notify the next member fairly and without a race — Observer plus a FIFO queue?"
+      },
+      {
+        "trigger": "mentions fine or fee or late",
+        "question": "How do you support flat vs tiered vs capped fines without if/else scattered through return logic — a FineStrategy?"
+      },
+      {
+        "trigger": "mentions dvd or ebook or media",
+        "question": "How would you extend to non-book items without rewriting loans — a LibraryItem base type?"
+      },
+      {
+        "trigger": "mentions last copy or concurrent",
+        "question": "Two members grab the last copy at once — where exactly is the atomic allocation?"
+      }
     ],
     "tradeoffs": [
       "Book/BookCopy split (correct, more classes) vs a single Book with a count (simpler, loses per-copy tracking) — the split is the right call",

@@ -26,6 +26,15 @@ var validDifficulty = map[string]bool{
 	"junior": true, "mid": true, "senior": true, "staff": true, "entry": true,
 }
 
+// validAreas are the professions a question can belong to. Areas are SHARED: one
+// question may list several (e.g. a behavioral interview is valid for every
+// area; an ml_system_design interview counts for engineering AND data_science).
+// The client derives the Area->Domain catalog navigation from these.
+var validAreas = map[string]bool{
+	"engineering": true, "data_science": true, "medicine": true, "nursing": true,
+	"law": true, "consulting": true, "product_management": true, "finance": true,
+}
+
 type RubricDim struct {
 	Key         string  `json:"key"`
 	Label       string  `json:"label"`
@@ -37,7 +46,8 @@ type Question struct {
 	ID               string          `json:"id"`
 	Title            string          `json:"title"`
 	Track            string          `json:"track"`  // engineering | professional
-	Domain           string          `json:"domain"` // system_design, coding, medicine, law, ...
+	Domain           string          `json:"domain"` // system_design, coding, clinical_reasoning, ... (the sub-topic)
+	Areas            []string        `json:"areas"`  // professions this interview is valid for (shared): engineering, medicine, ...
 	Modality         string          `json:"modality"`
 	Difficulty       string          `json:"difficulty"`
 	Tags             []string        `json:"tags"`
@@ -54,6 +64,7 @@ type Summary struct {
 	Title      string   `json:"title"`
 	Track      string   `json:"track"`
 	Domain     string   `json:"domain"`
+	Areas      []string `json:"areas"`
 	Modality   string   `json:"modality"`
 	Difficulty string   `json:"difficulty"`
 	Tags       []string `json:"tags"`
@@ -63,7 +74,7 @@ type Summary struct {
 
 func (q Question) Summary() Summary {
 	return Summary{
-		ID: q.ID, Title: q.Title, Track: q.Track, Domain: q.Domain, Modality: q.Modality,
+		ID: q.ID, Title: q.Title, Track: q.Track, Domain: q.Domain, Areas: q.Areas, Modality: q.Modality,
 		Difficulty: q.Difficulty, Tags: q.Tags, Prompt: q.Prompt, Blurb: q.Blurb,
 	}
 }
@@ -86,6 +97,14 @@ func Validate(q Question) error {
 	}
 	if strings.TrimSpace(q.Domain) == "" {
 		return fmt.Errorf("%s: domain required", q.ID)
+	}
+	if len(q.Areas) == 0 {
+		return fmt.Errorf("%s: at least one area required", q.ID)
+	}
+	for _, a := range q.Areas {
+		if !validAreas[a] {
+			return fmt.Errorf("%s: unknown area %q", q.ID, a)
+		}
 	}
 	if !validDifficulty[q.Difficulty] {
 		return fmt.Errorf("%s: invalid difficulty %q", q.ID, q.Difficulty)

@@ -3,24 +3,96 @@
   "title": "Design a Real-Time ML Inference & Training-Data Pipeline",
   "track": "engineering",
   "domain": "ml_system_design",
+  "areas": [
+    "engineering",
+    "data_science"
+  ],
   "modality": "system_design",
   "difficulty": "senior",
-  "tags": ["streaming", "model-serving", "drift-detection", "shadow", "canary", "monitoring", "mlops"],
+  "tags": [
+    "streaming",
+    "model-serving",
+    "drift-detection",
+    "shadow",
+    "canary",
+    "monitoring",
+    "mlops"
+  ],
   "prompt": "Design a real-time ML system for a use case like fraud detection or abuse scoring: compute streaming features from live events, serve a model with low latency on each event, log predictions and outcomes to build training data, and detect drift while safely rolling out new models via shadow and canary. Cover the online serving path, the feedback/training-data loop, and monitoring.",
   "blurb": "The closed-loop real-time ML system — streaming features, low-latency serving, drift detection, and shadow/canary rollout.",
   "rubric": [
-    { "key": "requirements", "label": "Requirements gathering", "description": "Separates functional (compute features, score events, log outcomes, retrain, roll out) from non-functional (scoring latency, throughput, freshness, safe deploys).", "weight": 1.0 },
-    { "key": "clarifying_questions", "label": "Clarifying questions", "description": "Asks about event QPS, per-event latency budget, label availability/delay, freshness of streaming features, and consequences of false positives/negatives.", "weight": 1.0 },
-    { "key": "estimations", "label": "Back-of-envelope estimations", "description": "Estimates event QPS, streaming feature state size, model inference latency budget, prediction-log volume, and label delay window.", "weight": 1.1 },
-    { "key": "streaming_features", "label": "Streaming feature computation", "description": "Windowed aggregations over event streams, stateful stream processing, exactly-once vs at-least-once, and freshness of real-time features.", "weight": 1.2 },
-    { "key": "model_serving", "label": "Model serving", "description": "Low-latency online scoring, feature fetch + on-event features, model registry, versioning, and fallback on model/feature failure.", "weight": 1.2 },
-    { "key": "training_data_loop", "label": "Training-data / feedback loop", "description": "Logging predictions with feature snapshots, joining delayed labels/outcomes, point-in-time correctness, and closing the loop for retraining.", "weight": 1.2 },
-    { "key": "drift_detection", "label": "Drift detection", "description": "Monitoring feature/prediction/label distribution shift and performance decay; triggering retraining or alerts.", "weight": 1.2 },
-    { "key": "shadow_canary", "label": "Shadow & canary rollout", "description": "Shadow (score without acting) to compare a new model, canary/gradual rollout with guardrail metrics, and automatic rollback.", "weight": 1.1 },
-    { "key": "monitoring", "label": "Monitoring & observability", "description": "Latency/error SLOs, feature freshness, model performance metrics, drift alerts, and prediction/outcome dashboards.", "weight": 1.0 },
-    { "key": "ml_specifics", "label": "ML system specifics", "description": "Training/serving skew avoidance, label delay handling, retraining cadence, offline eval before rollout, and reproducibility.", "weight": 1.1 },
-    { "key": "reliability", "label": "Reliability", "description": "Graceful degradation when a feature source or model is unavailable, backpressure, and idempotent event processing.", "weight": 0.9 },
-    { "key": "scaling", "label": "Scaling", "description": "Partitioning the stream, scaling stateful operators, sharding the online store, and horizontally scaling serving.", "weight": 0.9 }
+    {
+      "key": "requirements",
+      "label": "Requirements gathering",
+      "description": "Separates functional (compute features, score events, log outcomes, retrain, roll out) from non-functional (scoring latency, throughput, freshness, safe deploys).",
+      "weight": 1.0
+    },
+    {
+      "key": "clarifying_questions",
+      "label": "Clarifying questions",
+      "description": "Asks about event QPS, per-event latency budget, label availability/delay, freshness of streaming features, and consequences of false positives/negatives.",
+      "weight": 1.0
+    },
+    {
+      "key": "estimations",
+      "label": "Back-of-envelope estimations",
+      "description": "Estimates event QPS, streaming feature state size, model inference latency budget, prediction-log volume, and label delay window.",
+      "weight": 1.1
+    },
+    {
+      "key": "streaming_features",
+      "label": "Streaming feature computation",
+      "description": "Windowed aggregations over event streams, stateful stream processing, exactly-once vs at-least-once, and freshness of real-time features.",
+      "weight": 1.2
+    },
+    {
+      "key": "model_serving",
+      "label": "Model serving",
+      "description": "Low-latency online scoring, feature fetch + on-event features, model registry, versioning, and fallback on model/feature failure.",
+      "weight": 1.2
+    },
+    {
+      "key": "training_data_loop",
+      "label": "Training-data / feedback loop",
+      "description": "Logging predictions with feature snapshots, joining delayed labels/outcomes, point-in-time correctness, and closing the loop for retraining.",
+      "weight": 1.2
+    },
+    {
+      "key": "drift_detection",
+      "label": "Drift detection",
+      "description": "Monitoring feature/prediction/label distribution shift and performance decay; triggering retraining or alerts.",
+      "weight": 1.2
+    },
+    {
+      "key": "shadow_canary",
+      "label": "Shadow & canary rollout",
+      "description": "Shadow (score without acting) to compare a new model, canary/gradual rollout with guardrail metrics, and automatic rollback.",
+      "weight": 1.1
+    },
+    {
+      "key": "monitoring",
+      "label": "Monitoring & observability",
+      "description": "Latency/error SLOs, feature freshness, model performance metrics, drift alerts, and prediction/outcome dashboards.",
+      "weight": 1.0
+    },
+    {
+      "key": "ml_specifics",
+      "label": "ML system specifics",
+      "description": "Training/serving skew avoidance, label delay handling, retraining cadence, offline eval before rollout, and reproducibility.",
+      "weight": 1.1
+    },
+    {
+      "key": "reliability",
+      "label": "Reliability",
+      "description": "Graceful degradation when a feature source or model is unavailable, backpressure, and idempotent event processing.",
+      "weight": 0.9
+    },
+    {
+      "key": "scaling",
+      "label": "Scaling",
+      "description": "Partitioning the stream, scaling stateful operators, sharding the online store, and horizontally scaling serving.",
+      "weight": 0.9
+    }
   ],
   "reference": {
     "functional_requirements": [
@@ -82,18 +154,48 @@
     ],
     "high_level_design": "Events land on a partitioned stream. A stateful stream processor computes windowed features per entity (counts, velocities, aggregates over sliding windows) and writes latest values to an online feature store. On each event needing a decision, the serving service fetches streaming features + computes any on-event features, scores with the current production model, returns a decision synchronously, and logs the exact feature snapshot + score + model version. Ground-truth outcomes arrive later (seconds to days) and are joined to the logged predictions by event_id to form point-in-time-correct training examples — closing the loop. Offline, models retrain on this data and are validated. New models deploy first in shadow mode (scored on live traffic but their decisions aren't acted on, compared against prod), then canary on a small traffic slice with guardrail metrics, then full rollout — with automatic rollback if guardrails breach. A monitor tracks feature/prediction/label drift and model performance to trigger retraining.",
     "deep_dives": [
-      { "topic": "streaming_features", "probe": "You need per-entity velocity over the last 1m/1h/24h with sub-second freshness. How do you compute sliding-window aggregates in a stream processor, manage that state, and handle late/out-of-order events?" },
-      { "topic": "training_data_loop", "probe": "Labels arrive days after the prediction. How do you build a leak-free training set — snapshot features at scoring time, join delayed labels, and ensure the features match exactly what serving used?" },
-      { "topic": "drift_detection", "probe": "Your model silently degrades. What do you monitor — input feature drift, prediction drift, or actual performance once labels arrive — and how do you distinguish drift from noise and decide to retrain?" },
-      { "topic": "shadow_canary", "probe": "Walk me through safely deploying a new model. What's the difference between shadow and canary, which guardrail metrics gate promotion, and how does automatic rollback work?" },
-      { "topic": "model_serving", "probe": "A feature source times out mid-request. What do you do — default/impute the feature, fall back to a simpler model, or fail open/closed? How does that depend on false-positive/negative cost?" },
-      { "topic": "ml_specifics", "probe": "How do you guarantee the streaming feature value used online is exactly what you train on offline (no skew), given late events and reprocessing?" }
+      {
+        "topic": "streaming_features",
+        "probe": "You need per-entity velocity over the last 1m/1h/24h with sub-second freshness. How do you compute sliding-window aggregates in a stream processor, manage that state, and handle late/out-of-order events?"
+      },
+      {
+        "topic": "training_data_loop",
+        "probe": "Labels arrive days after the prediction. How do you build a leak-free training set — snapshot features at scoring time, join delayed labels, and ensure the features match exactly what serving used?"
+      },
+      {
+        "topic": "drift_detection",
+        "probe": "Your model silently degrades. What do you monitor — input feature drift, prediction drift, or actual performance once labels arrive — and how do you distinguish drift from noise and decide to retrain?"
+      },
+      {
+        "topic": "shadow_canary",
+        "probe": "Walk me through safely deploying a new model. What's the difference between shadow and canary, which guardrail metrics gate promotion, and how does automatic rollback work?"
+      },
+      {
+        "topic": "model_serving",
+        "probe": "A feature source times out mid-request. What do you do — default/impute the feature, fall back to a simpler model, or fail open/closed? How does that depend on false-positive/negative cost?"
+      },
+      {
+        "topic": "ml_specifics",
+        "probe": "How do you guarantee the streaming feature value used online is exactly what you train on offline (no skew), given late events and reprocessing?"
+      }
     ],
     "followup_bank": [
-      { "trigger": "mentions feature store or online store or source data or database", "question": "When upstream/source data changes or a late event arrives, how do the online streaming features stay in sync and consistent with what you'll train on — CDC/stream reprocessing, watermarks, event-time joins? What's the staleness bound?" },
-      { "trigger": "mentions cache or caching", "question": "You cache features or model outputs per entity. What's the eviction/TTL policy, and how do you invalidate when a new event updates the entity's windowed features so you don't score on stale state?" },
-      { "trigger": "mentions kafka or stream or flink or queue", "question": "How do you handle late/out-of-order events and exactly-once vs at-least-once so features and training labels stay correct?" },
-      { "trigger": "mentions model or retrain or deploy", "question": "How do you detect drift and decide when to retrain, and how do shadow/canary guardrails gate the rollout with automatic rollback?" }
+      {
+        "trigger": "mentions feature store or online store or source data or database",
+        "question": "When upstream/source data changes or a late event arrives, how do the online streaming features stay in sync and consistent with what you'll train on — CDC/stream reprocessing, watermarks, event-time joins? What's the staleness bound?"
+      },
+      {
+        "trigger": "mentions cache or caching",
+        "question": "You cache features or model outputs per entity. What's the eviction/TTL policy, and how do you invalidate when a new event updates the entity's windowed features so you don't score on stale state?"
+      },
+      {
+        "trigger": "mentions kafka or stream or flink or queue",
+        "question": "How do you handle late/out-of-order events and exactly-once vs at-least-once so features and training labels stay correct?"
+      },
+      {
+        "trigger": "mentions model or retrain or deploy",
+        "question": "How do you detect drift and decide when to retrain, and how do shadow/canary guardrails gate the rollout with automatic rollback?"
+      }
     ],
     "scaling": [
       "Partition the stream by entity key so stateful features scale horizontally",

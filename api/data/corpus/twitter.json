@@ -3,24 +3,94 @@
   "title": "Design Twitter/X (Timeline, Follow, Trends)",
   "track": "engineering",
   "domain": "system_design",
+  "areas": [
+    "engineering"
+  ],
   "modality": "system_design",
   "difficulty": "senior",
-  "tags": ["fanout", "timeline", "social-graph", "caching", "feed-ranking", "read-heavy"],
+  "tags": [
+    "fanout",
+    "timeline",
+    "social-graph",
+    "caching",
+    "feed-ranking",
+    "read-heavy"
+  ],
   "prompt": "Design the backend for a social network like Twitter/X. Users can post short messages, follow other users, and see a home timeline of posts from people they follow. Also support trending topics. Assume hundreds of millions of daily active users and celebrity accounts with tens of millions of followers.",
   "blurb": "The canonical fanout problem — push vs pull timelines, the celebrity hot-key, and a hybrid that survives both.",
   "rubric": [
-    { "key": "requirements", "label": "Requirements gathering", "description": "Separates functional (post, follow, home timeline, user timeline, trends, likes/retweets) from non-functional (timeline read latency, eventual consistency tolerance, availability over strong consistency).", "weight": 1.0 },
-    { "key": "clarifying_questions", "label": "Clarifying questions", "description": "Asks about DAU, follower distribution (power-law/celebrities), read:write ratio, timeline freshness SLA, media support, ranking vs chronological.", "weight": 1.0 },
-    { "key": "estimations", "label": "Back-of-envelope estimations", "description": "Derives post QPS, timeline read QPS, fanout write amplification, storage for tweets + timeline cache, bandwidth.", "weight": 1.1 },
-    { "key": "api_design", "label": "API design", "description": "postTweet, getHomeTimeline (cursor pagination), follow/unfollow, getUserTimeline; idempotency and cursor semantics.", "weight": 0.9 },
-    { "key": "data_model", "label": "Data model", "description": "tweets, social graph (followers/following), timeline cache; choice of stores per access pattern.", "weight": 1.0 },
-    { "key": "high_level_design", "label": "High-level design", "description": "Write path (post → fanout) vs read path (timeline assembly); async fanout workers and queue.", "weight": 1.3 },
-    { "key": "fanout_strategy", "label": "Fanout strategy depth", "description": "Fanout-on-write vs fanout-on-read; hybrid for celebrities; how the two merge at read time. This separates senior from mid.", "weight": 1.4 },
-    { "key": "caching", "label": "Caching & hot keys", "description": "Timeline cache in Redis, hot celebrity tweet caching, eviction, stampede protection.", "weight": 1.0 },
-    { "key": "scaling", "label": "Scaling", "description": "Sharding tweets and graph, replication, timeline cache partitioning, decoupling fanout via queues.", "weight": 1.1 },
-    { "key": "bottlenecks", "label": "Bottlenecks", "description": "Identifies celebrity fanout amplification, thundering-herd on trends, timeline cache memory pressure and mitigations.", "weight": 1.0 },
-    { "key": "trends_ranking", "label": "Trends & ranking", "description": "Trending-topic computation (streaming counts, decay, sliding windows) and optional ML ranking of the timeline.", "weight": 0.9 },
-    { "key": "observability", "label": "Observability & reliability", "description": "Timeline latency SLOs, fanout lag, cache hit ratio, graceful degradation to pull mode.", "weight": 0.8 }
+    {
+      "key": "requirements",
+      "label": "Requirements gathering",
+      "description": "Separates functional (post, follow, home timeline, user timeline, trends, likes/retweets) from non-functional (timeline read latency, eventual consistency tolerance, availability over strong consistency).",
+      "weight": 1.0
+    },
+    {
+      "key": "clarifying_questions",
+      "label": "Clarifying questions",
+      "description": "Asks about DAU, follower distribution (power-law/celebrities), read:write ratio, timeline freshness SLA, media support, ranking vs chronological.",
+      "weight": 1.0
+    },
+    {
+      "key": "estimations",
+      "label": "Back-of-envelope estimations",
+      "description": "Derives post QPS, timeline read QPS, fanout write amplification, storage for tweets + timeline cache, bandwidth.",
+      "weight": 1.1
+    },
+    {
+      "key": "api_design",
+      "label": "API design",
+      "description": "postTweet, getHomeTimeline (cursor pagination), follow/unfollow, getUserTimeline; idempotency and cursor semantics.",
+      "weight": 0.9
+    },
+    {
+      "key": "data_model",
+      "label": "Data model",
+      "description": "tweets, social graph (followers/following), timeline cache; choice of stores per access pattern.",
+      "weight": 1.0
+    },
+    {
+      "key": "high_level_design",
+      "label": "High-level design",
+      "description": "Write path (post → fanout) vs read path (timeline assembly); async fanout workers and queue.",
+      "weight": 1.3
+    },
+    {
+      "key": "fanout_strategy",
+      "label": "Fanout strategy depth",
+      "description": "Fanout-on-write vs fanout-on-read; hybrid for celebrities; how the two merge at read time. This separates senior from mid.",
+      "weight": 1.4
+    },
+    {
+      "key": "caching",
+      "label": "Caching & hot keys",
+      "description": "Timeline cache in Redis, hot celebrity tweet caching, eviction, stampede protection.",
+      "weight": 1.0
+    },
+    {
+      "key": "scaling",
+      "label": "Scaling",
+      "description": "Sharding tweets and graph, replication, timeline cache partitioning, decoupling fanout via queues.",
+      "weight": 1.1
+    },
+    {
+      "key": "bottlenecks",
+      "label": "Bottlenecks",
+      "description": "Identifies celebrity fanout amplification, thundering-herd on trends, timeline cache memory pressure and mitigations.",
+      "weight": 1.0
+    },
+    {
+      "key": "trends_ranking",
+      "label": "Trends & ranking",
+      "description": "Trending-topic computation (streaming counts, decay, sliding windows) and optional ML ranking of the timeline.",
+      "weight": 0.9
+    },
+    {
+      "key": "observability",
+      "label": "Observability & reliability",
+      "description": "Timeline latency SLOs, fanout lag, cache hit ratio, graceful degradation to pull mode.",
+      "weight": 0.8
+    }
   ],
   "reference": {
     "functional_requirements": [
@@ -57,7 +127,19 @@
       "storage": "100M tweets/day × ~1KB (text+metadata) ≈ 100GB/day ≈ ~36TB/year for tweets; media in blob store/CDN separately; timeline cache holds ~800 recent entries per active user in Redis.",
       "bandwidth": "Media dominates; served from CDN. Text timeline payloads are small (~KBs per page)."
     },
-    "core_components": ["API gateway / LB", "Stateless web tier", "Tweet write service", "Fanout service + message queue", "Social graph service/store", "Timeline cache (Redis)", "Tweet store (sharded)", "Media upload + blob store + CDN", "Trends/streaming pipeline", "Search index", "Ranking service (optional)"],
+    "core_components": [
+      "API gateway / LB",
+      "Stateless web tier",
+      "Tweet write service",
+      "Fanout service + message queue",
+      "Social graph service/store",
+      "Timeline cache (Redis)",
+      "Tweet store (sharded)",
+      "Media upload + blob store + CDN",
+      "Trends/streaming pipeline",
+      "Search index",
+      "Ranking service (optional)"
+    ],
     "data_model": [
       "tweets(tweet_id PK snowflake, author_id, text, media_ids, created_at, reply_to, retweet_of)",
       "followers(followee_id, follower_id) — sharded by followee for fanout reads",
@@ -75,26 +157,91 @@
     ],
     "high_level_design": "Write path: client → API → tweet service assigns a Snowflake id (time-sortable) and persists to the sharded tweet store. A fanout event is published to a queue. Fanout workers look up the author's followers and push the tweet_id into each follower's Redis timeline (fanout-on-write) — EXCEPT for accounts above a follower threshold (celebrities), whose tweets are NOT fanned out. Read path: client → API → read the user's precomputed timeline from Redis, then merge in recent tweets from the small set of celebrities they follow (fanout-on-read), sort by Snowflake id, hydrate tweet content from tweet store/cache, and return a cursor page. This hybrid keeps write amplification bounded while keeping normal-user reads O(1) cache lookups.",
     "deep_dives": [
-      { "topic": "fanout_strategy", "probe": "A celebrity with 30M followers posts. Walk me through what happens if you fanout-on-write. What's your threshold to switch that account to pull, and how do you merge push + pull at read time so the timeline is still correctly ordered?" },
-      { "topic": "timeline_cache", "probe": "What exactly is stored per user in Redis — full tweets or just ids? How large is each user's timeline entry, what's the eviction policy for inactive users, and how do you rebuild a cold timeline on a cache miss?" },
-      { "topic": "cache_stampede", "probe": "A viral tweet's counters and a hot celebrity timeline expire at once under a spike. How do you prevent a stampede to the backing store — request coalescing, jittered TTL, or logical expiry with async refresh?" },
-      { "topic": "cdc_search_trends", "probe": "Tweets live in your primary datastore but need to reach the search index and trends pipeline. How do you propagate changes — CDC/Debezium off the tweet store, or dual writes? What are the failure modes of each?" },
-      { "topic": "ordering", "probe": "How do you guarantee stable reverse-chronological ordering across shards and across the push/pull merge? Why Snowflake ids over DB auto-increment?" },
-      { "topic": "trends", "probe": "How do you compute trending topics in near-real-time — sliding-window counts, count-min sketch for heavy hitters, and time decay? How do you resist spam inflating a trend?" }
+      {
+        "topic": "fanout_strategy",
+        "probe": "A celebrity with 30M followers posts. Walk me through what happens if you fanout-on-write. What's your threshold to switch that account to pull, and how do you merge push + pull at read time so the timeline is still correctly ordered?"
+      },
+      {
+        "topic": "timeline_cache",
+        "probe": "What exactly is stored per user in Redis — full tweets or just ids? How large is each user's timeline entry, what's the eviction policy for inactive users, and how do you rebuild a cold timeline on a cache miss?"
+      },
+      {
+        "topic": "cache_stampede",
+        "probe": "A viral tweet's counters and a hot celebrity timeline expire at once under a spike. How do you prevent a stampede to the backing store — request coalescing, jittered TTL, or logical expiry with async refresh?"
+      },
+      {
+        "topic": "cdc_search_trends",
+        "probe": "Tweets live in your primary datastore but need to reach the search index and trends pipeline. How do you propagate changes — CDC/Debezium off the tweet store, or dual writes? What are the failure modes of each?"
+      },
+      {
+        "topic": "ordering",
+        "probe": "How do you guarantee stable reverse-chronological ordering across shards and across the push/pull merge? Why Snowflake ids over DB auto-increment?"
+      },
+      {
+        "topic": "trends",
+        "probe": "How do you compute trending topics in near-real-time — sliding-window counts, count-min sketch for heavy hitters, and time decay? How do you resist spam inflating a trend?"
+      }
     ],
     "followup_bank": [
-      { "trigger": "mentions cache or redis", "question": "Eviction policy for timelines — LRU on inactive users vs TTL? And how do you prevent a stampede when a hot celebrity timeline or counter expires under load?" },
-      { "trigger": "mentions database or cassandra or store", "question": "How do changes to the tweet store reach search and the trends pipeline — CDC/Debezium vs dual writes, and how do you handle ordering/exactly-once on that stream?" },
-      { "trigger": "mentions fanout", "question": "Where's your celebrity threshold and how do you merge fanned-out entries with pulled celebrity tweets while keeping order correct?" },
-      { "trigger": "mentions snowflake or id", "question": "Why time-sortable ids? What happens to ordering on clock skew across id generators?" },
-      { "trigger": "mentions ranking or ml", "question": "If the timeline is ranked not chronological, where does ranking run — at write, at read, and how do you paginate a ranked feed consistently?" }
+      {
+        "trigger": "mentions cache or redis",
+        "question": "Eviction policy for timelines — LRU on inactive users vs TTL? And how do you prevent a stampede when a hot celebrity timeline or counter expires under load?"
+      },
+      {
+        "trigger": "mentions database or cassandra or store",
+        "question": "How do changes to the tweet store reach search and the trends pipeline — CDC/Debezium vs dual writes, and how do you handle ordering/exactly-once on that stream?"
+      },
+      {
+        "trigger": "mentions fanout",
+        "question": "Where's your celebrity threshold and how do you merge fanned-out entries with pulled celebrity tweets while keeping order correct?"
+      },
+      {
+        "trigger": "mentions snowflake or id",
+        "question": "Why time-sortable ids? What happens to ordering on clock skew across id generators?"
+      },
+      {
+        "trigger": "mentions ranking or ml",
+        "question": "If the timeline is ranked not chronological, where does ranking run — at write, at read, and how do you paginate a ranked feed consistently?"
+      }
     ],
-    "scaling": ["Shard tweets by tweet_id (Snowflake) or author_id; graph sharded by user", "Partition Redis timeline cache by user_id with replicas", "Decouple fanout with a durable queue and horizontally scaled workers", "Read replicas for tweet store; CDN for media", "Hybrid fanout caps write amplification from celebrities"],
-    "bottlenecks": ["Celebrity fanout write amplification (30M inserts/tweet)", "Timeline cache memory footprint for hundreds of millions of users", "Hot-key on viral tweet counters and celebrity timelines", "Fanout queue lag causing stale timelines during spikes"],
-    "tradeoffs": ["Fanout-on-write (fast reads, heavy writes, storage for timelines) vs fanout-on-read (cheap writes, expensive reads) — hybrid balances both", "Chronological (simple, cursorable) vs ranked (engagement, harder pagination)", "Eventual consistency (available, may show stale) vs strong (costly at this scale)", "Store tweet ids in timeline (compact, extra hydration) vs full tweets (fast, memory-heavy, stale on edits)"],
-    "alternative_solutions": ["Pure pull with aggressive caching for low-follow users", "Precomputed ranked timelines refreshed on a schedule", "Materialized per-user timelines in a wide-column store (Cassandra) instead of Redis for durability"],
-    "observability": ["Home timeline p50/p99 latency SLOs", "Fanout end-to-end lag (post → visible)", "Cache hit ratio + eviction rate", "Queue depth and worker throughput", "Trends pipeline freshness"],
-    "security": ["AuthN/Z on posting and follows", "Rate-limit posting and follows to curb spam/bots", "Abuse/spam detection feeding trends filtering", "Media scanning (malware/CSAM) on upload", "Privacy: protected accounts must not fanout to non-followers"],
+    "scaling": [
+      "Shard tweets by tweet_id (Snowflake) or author_id; graph sharded by user",
+      "Partition Redis timeline cache by user_id with replicas",
+      "Decouple fanout with a durable queue and horizontally scaled workers",
+      "Read replicas for tweet store; CDN for media",
+      "Hybrid fanout caps write amplification from celebrities"
+    ],
+    "bottlenecks": [
+      "Celebrity fanout write amplification (30M inserts/tweet)",
+      "Timeline cache memory footprint for hundreds of millions of users",
+      "Hot-key on viral tweet counters and celebrity timelines",
+      "Fanout queue lag causing stale timelines during spikes"
+    ],
+    "tradeoffs": [
+      "Fanout-on-write (fast reads, heavy writes, storage for timelines) vs fanout-on-read (cheap writes, expensive reads) — hybrid balances both",
+      "Chronological (simple, cursorable) vs ranked (engagement, harder pagination)",
+      "Eventual consistency (available, may show stale) vs strong (costly at this scale)",
+      "Store tweet ids in timeline (compact, extra hydration) vs full tweets (fast, memory-heavy, stale on edits)"
+    ],
+    "alternative_solutions": [
+      "Pure pull with aggressive caching for low-follow users",
+      "Precomputed ranked timelines refreshed on a schedule",
+      "Materialized per-user timelines in a wide-column store (Cassandra) instead of Redis for durability"
+    ],
+    "observability": [
+      "Home timeline p50/p99 latency SLOs",
+      "Fanout end-to-end lag (post → visible)",
+      "Cache hit ratio + eviction rate",
+      "Queue depth and worker throughput",
+      "Trends pipeline freshness"
+    ],
+    "security": [
+      "AuthN/Z on posting and follows",
+      "Rate-limit posting and follows to curb spam/bots",
+      "Abuse/spam detection feeding trends filtering",
+      "Media scanning (malware/CSAM) on upload",
+      "Privacy: protected accounts must not fanout to non-followers"
+    ],
     "reference_answer": "A strong answer clarifies the power-law follower distribution up front, estimates that naive fanout-on-write dies on celebrity accounts, and lands on a HYBRID: fanout-on-write to Redis timelines for normal users, fanout-on-read for a threshold set of celebrities, merged and ordered by Snowflake ids at read time. It decouples fanout via a queue + workers, stores compact tweet-id lists in a partitioned Redis cache with an inactive-user eviction and cold-rebuild story, and protects hot keys/counters against stampede with jittered TTL + coalescing. It propagates tweets to search/trends via CDC, computes trends with sliding-window heavy-hitter sketches plus decay, and calls out celebrity fanout, cache memory, and fanout lag as the top bottlenecks with concrete mitigations and graceful degradation to pull mode."
   },
   "interviewer_notes": "Let the candidate scope requirements and derive the follower distribution — if they don't ask about celebrities, prompt it, because the whole design hinges on it. The core signal is the fanout deep-dive: push vs pull, the celebrity threshold, and the read-time merge with correct ordering. Interrupt with the cache eviction/stampede probe as soon as they place Redis, and the CDC probe as soon as they place a datastore feeding search/trends. Weaker candidates pick one fanout mode and never handle celebrities; senior candidates reach the hybrid unprompted and reason about ordering and degradation. Reserve time for trends and observability."

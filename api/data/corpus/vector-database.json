@@ -3,24 +3,96 @@
   "title": "Design a Vector Database / ANN Search Service",
   "track": "engineering",
   "domain": "ml_system_design",
+  "areas": [
+    "engineering",
+    "data_science"
+  ],
   "modality": "system_design",
   "difficulty": "senior",
-  "tags": ["vector-search", "ann", "hnsw", "ivf", "sharding", "recall", "embeddings"],
+  "tags": [
+    "vector-search",
+    "ann",
+    "hnsw",
+    "ivf",
+    "sharding",
+    "recall",
+    "embeddings"
+  ],
   "prompt": "Design a vector database that stores billions of embeddings and serves approximate nearest-neighbor search with metadata filtering. It must offer tunable recall/latency, support inserts/updates/deletes without full rebuilds, scale across shards, and back workloads like semantic search and RAG retrieval.",
   "blurb": "The ANN engine — HNSW vs IVF, sharding and replication, filtered search, the recall/latency/memory tradeoff, and live updates.",
   "rubric": [
-    { "key": "requirements", "label": "Requirements gathering", "description": "Separates functional (upsert, kNN query, metadata filter, delete) from non-functional (recall target, query latency, insert throughput, freshness, durability).", "weight": 1.0 },
-    { "key": "clarifying_questions", "label": "Clarifying questions", "description": "Asks about vector count and dimension, distance metric, target recall, latency budget, update rate, filtering needs, and multi-tenancy.", "weight": 1.0 },
-    { "key": "estimations", "label": "Back-of-envelope estimations", "description": "Estimates raw vector storage (N x dim x 4B), index memory overhead (HNSW graph, IVF lists), query QPS, and per-shard fanout — deciding what fits in RAM vs needs quantization.", "weight": 1.2 },
-    { "key": "index_algorithm", "label": "Index algorithm choice", "description": "HNSW vs IVF(-PQ) vs flat; graph vs cluster tradeoffs; build cost, memory, recall/latency, and when each wins.", "weight": 1.3 },
-    { "key": "recall_latency", "label": "Recall/latency/memory tradeoff", "description": "Tuning ef/nprobe, quantization (PQ/SQ) vs recall, and how to measure and hit a recall target within a latency budget.", "weight": 1.2 },
-    { "key": "filtering", "label": "Filtered search", "description": "Combining metadata predicates with ANN — pre-filter vs post-filter vs filtered-graph traversal, and the recall collapse of naive post-filtering under selective filters.", "weight": 1.1 },
-    { "key": "sharding_replication", "label": "Sharding & replication", "description": "Partitioning vectors across shards, scatter-gather query with top-k merge, replication for QPS and HA, and rebalancing.", "weight": 1.1 },
-    { "key": "updates", "label": "Updates & deletes", "description": "Incremental inserts into graph/list indexes, tombstoning deletes, handling index degradation, and background compaction/rebuild.", "weight": 1.1 },
-    { "key": "freshness", "label": "Freshness & sync", "description": "Bounded staleness between write and searchable, and keeping vectors in sync when upstream source data changes.", "weight": 1.0 },
-    { "key": "ml_specifics", "label": "ML/embedding specifics", "description": "Embedding dimension and metric choice, normalization, handling an embedding-model change (reindex), and quantization impact on recall.", "weight": 1.0 },
-    { "key": "scaling", "label": "Scaling & performance", "description": "In-memory vs on-disk (DiskANN-style) indexes, caching hot vectors, batching queries, and horizontal scale.", "weight": 1.0 },
-    { "key": "observability", "label": "Observability", "description": "Recall sampling against exact kNN, p99 latency, index build/compaction lag, memory pressure, and per-shard skew.", "weight": 0.8 }
+    {
+      "key": "requirements",
+      "label": "Requirements gathering",
+      "description": "Separates functional (upsert, kNN query, metadata filter, delete) from non-functional (recall target, query latency, insert throughput, freshness, durability).",
+      "weight": 1.0
+    },
+    {
+      "key": "clarifying_questions",
+      "label": "Clarifying questions",
+      "description": "Asks about vector count and dimension, distance metric, target recall, latency budget, update rate, filtering needs, and multi-tenancy.",
+      "weight": 1.0
+    },
+    {
+      "key": "estimations",
+      "label": "Back-of-envelope estimations",
+      "description": "Estimates raw vector storage (N x dim x 4B), index memory overhead (HNSW graph, IVF lists), query QPS, and per-shard fanout — deciding what fits in RAM vs needs quantization.",
+      "weight": 1.2
+    },
+    {
+      "key": "index_algorithm",
+      "label": "Index algorithm choice",
+      "description": "HNSW vs IVF(-PQ) vs flat; graph vs cluster tradeoffs; build cost, memory, recall/latency, and when each wins.",
+      "weight": 1.3
+    },
+    {
+      "key": "recall_latency",
+      "label": "Recall/latency/memory tradeoff",
+      "description": "Tuning ef/nprobe, quantization (PQ/SQ) vs recall, and how to measure and hit a recall target within a latency budget.",
+      "weight": 1.2
+    },
+    {
+      "key": "filtering",
+      "label": "Filtered search",
+      "description": "Combining metadata predicates with ANN — pre-filter vs post-filter vs filtered-graph traversal, and the recall collapse of naive post-filtering under selective filters.",
+      "weight": 1.1
+    },
+    {
+      "key": "sharding_replication",
+      "label": "Sharding & replication",
+      "description": "Partitioning vectors across shards, scatter-gather query with top-k merge, replication for QPS and HA, and rebalancing.",
+      "weight": 1.1
+    },
+    {
+      "key": "updates",
+      "label": "Updates & deletes",
+      "description": "Incremental inserts into graph/list indexes, tombstoning deletes, handling index degradation, and background compaction/rebuild.",
+      "weight": 1.1
+    },
+    {
+      "key": "freshness",
+      "label": "Freshness & sync",
+      "description": "Bounded staleness between write and searchable, and keeping vectors in sync when upstream source data changes.",
+      "weight": 1.0
+    },
+    {
+      "key": "ml_specifics",
+      "label": "ML/embedding specifics",
+      "description": "Embedding dimension and metric choice, normalization, handling an embedding-model change (reindex), and quantization impact on recall.",
+      "weight": 1.0
+    },
+    {
+      "key": "scaling",
+      "label": "Scaling & performance",
+      "description": "In-memory vs on-disk (DiskANN-style) indexes, caching hot vectors, batching queries, and horizontal scale.",
+      "weight": 1.0
+    },
+    {
+      "key": "observability",
+      "label": "Observability",
+      "description": "Recall sampling against exact kNN, p99 latency, index build/compaction lag, memory pressure, and per-shard skew.",
+      "weight": 0.8
+    }
   ],
   "reference": {
     "functional_requirements": [
@@ -80,18 +152,48 @@
     ],
     "high_level_design": "Writes go to a coordinator that routes by id/namespace to a shard, appends to a WAL for durability, and inserts into the shard's in-memory index (HNSW graph or IVF list) while updating the metadata store; deletes tombstone the id. Queries: coordinator scatters the query vector to all shards (or a routed subset), each shard runs ANN with a tuned search parameter (ef for HNSW, nprobe for IVF), applies the metadata filter during traversal, returns local top-k; the coordinator merges to global top-k and optionally reranks with full-precision distances. A background worker compacts segments, purges tombstones, and rebuilds degraded indexes. Snapshots persist to object storage so any node can rebuild. Recall is monitored by periodically running exact kNN on a sample and comparing.",
     "deep_dives": [
-      { "topic": "index_algorithm", "probe": "HNSW vs IVF-PQ for 1B vectors — compare memory, build time, recall/latency, and update-friendliness. When would you pick each?" },
-      { "topic": "filtering", "probe": "A query filters to a tenant that's 0.1% of vectors. Naive post-filtering after ANN returns almost nothing. How do you do filtered ANN correctly — pre-filter, filtered graph traversal, or partitioned indexes?" },
-      { "topic": "recall_latency", "probe": "You need recall@10 ≥ 95% at p99 < 20ms. Which knobs (ef/nprobe, M, PQ codebook size) do you turn, and how do you measure recall in production without ground truth?" },
-      { "topic": "updates", "probe": "HNSW doesn't love deletes. How do you handle high update/delete churn without full rebuilds — tombstones, segment compaction, periodic rebuild?" },
-      { "topic": "sharding_replication", "probe": "How do you shard billions of vectors and merge top-k across shards? What about skew and rebalancing when one namespace grows huge?" },
-      { "topic": "quantization", "probe": "You can't fit the raw vectors in RAM. Walk me through PQ/scalar quantization, the recall hit, and rerank-with-full-precision to recover it." }
+      {
+        "topic": "index_algorithm",
+        "probe": "HNSW vs IVF-PQ for 1B vectors — compare memory, build time, recall/latency, and update-friendliness. When would you pick each?"
+      },
+      {
+        "topic": "filtering",
+        "probe": "A query filters to a tenant that's 0.1% of vectors. Naive post-filtering after ANN returns almost nothing. How do you do filtered ANN correctly — pre-filter, filtered graph traversal, or partitioned indexes?"
+      },
+      {
+        "topic": "recall_latency",
+        "probe": "You need recall@10 ≥ 95% at p99 < 20ms. Which knobs (ef/nprobe, M, PQ codebook size) do you turn, and how do you measure recall in production without ground truth?"
+      },
+      {
+        "topic": "updates",
+        "probe": "HNSW doesn't love deletes. How do you handle high update/delete churn without full rebuilds — tombstones, segment compaction, periodic rebuild?"
+      },
+      {
+        "topic": "sharding_replication",
+        "probe": "How do you shard billions of vectors and merge top-k across shards? What about skew and rebalancing when one namespace grows huge?"
+      },
+      {
+        "topic": "quantization",
+        "probe": "You can't fit the raw vectors in RAM. Walk me through PQ/scalar quantization, the recall hit, and rerank-with-full-precision to recover it."
+      }
     ],
     "followup_bank": [
-      { "trigger": "mentions embeddings or embedding model or source data", "question": "When the upstream source that produced an embedding changes, how does the vector stay in sync — CDC from the source re-embedding only changed items, versioning, tombstoning the old vector? And if you swap embedding models, how do you reindex billions without downtime?" },
-      { "trigger": "mentions cache or caching", "question": "What do you cache — hot query results or hot vectors/segments — and what's the eviction policy? How do you invalidate cached results after an upsert/delete so you don't serve stale neighbors?" },
-      { "trigger": "mentions database or metadata store or postgres", "question": "How do you keep the vector index and the metadata store consistent on writes — CDC vs transactional dual-write vs WAL replay?" },
-      { "trigger": "mentions rebuild or compaction", "question": "How do you rebuild a shard's index online without dropping queries or blocking writes?" }
+      {
+        "trigger": "mentions embeddings or embedding model or source data",
+        "question": "When the upstream source that produced an embedding changes, how does the vector stay in sync — CDC from the source re-embedding only changed items, versioning, tombstoning the old vector? And if you swap embedding models, how do you reindex billions without downtime?"
+      },
+      {
+        "trigger": "mentions cache or caching",
+        "question": "What do you cache — hot query results or hot vectors/segments — and what's the eviction policy? How do you invalidate cached results after an upsert/delete so you don't serve stale neighbors?"
+      },
+      {
+        "trigger": "mentions database or metadata store or postgres",
+        "question": "How do you keep the vector index and the metadata store consistent on writes — CDC vs transactional dual-write vs WAL replay?"
+      },
+      {
+        "trigger": "mentions rebuild or compaction",
+        "question": "How do you rebuild a shard's index online without dropping queries or blocking writes?"
+      }
     ],
     "scaling": [
       "Shard by id/namespace; scatter-gather with global top-k merge",

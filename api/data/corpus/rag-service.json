@@ -3,24 +3,96 @@
   "title": "Design a Retrieval-Augmented Generation (RAG) Service",
   "track": "engineering",
   "domain": "ml_system_design",
+  "areas": [
+    "engineering",
+    "data_science"
+  ],
   "modality": "system_design",
   "difficulty": "senior",
-  "tags": ["rag", "embeddings", "vector-search", "llm", "reranking", "hallucination", "eval"],
+  "tags": [
+    "rag",
+    "embeddings",
+    "vector-search",
+    "llm",
+    "reranking",
+    "hallucination",
+    "eval"
+  ],
   "prompt": "Design a retrieval-augmented generation service that answers user questions over a company's private documents (wikis, PDFs, tickets, code). It must ground answers in the corpus with citations, stay fresh as documents change, and control hallucination. Assume a large enterprise corpus and interactive latency.",
   "blurb": "The end-to-end RAG design — ingestion and chunking, embeddings, vector index, retrieval plus reranking, grounded generation, eval, and hallucination control.",
   "rubric": [
-    { "key": "requirements", "label": "Requirements gathering", "description": "Separates functional (ingest, chunk, retrieve, ground, cite, refresh) from non-functional (answer latency, freshness SLA, grounding/faithfulness, access control per document).", "weight": 1.0 },
-    { "key": "clarifying_questions", "label": "Clarifying questions", "description": "Asks about corpus size and modality mix, update rate, per-user document permissions, acceptable staleness, latency budget, and how quality will be measured.", "weight": 1.0 },
-    { "key": "estimations", "label": "Back-of-envelope estimations", "description": "Estimates chunk count, embedding dimension and vector index size (vectors x dim x 4 bytes plus graph overhead), embedding compute for backfill, query QPS, retrieval and LLM latency budget, token cost per answer.", "weight": 1.2 },
-    { "key": "ingestion_chunking", "label": "Ingestion & chunking", "description": "Parsing heterogeneous sources, chunk sizing and overlap, semantic vs fixed chunking, metadata/ACL capture, dedup, and an idempotent incremental pipeline.", "weight": 1.1 },
-    { "key": "retrieval_design", "label": "Retrieval & reranking", "description": "Embedding model choice, ANN vector search, hybrid lexical+dense (BM25) retrieval, metadata/ACL filtering, cross-encoder reranking, and top-k selection.", "weight": 1.3 },
-    { "key": "grounding_generation", "label": "Grounding & generation", "description": "Prompt assembly with context window budgeting, citation enforcement, abstention when context is insufficient, and streaming the answer.", "weight": 1.2 },
-    { "key": "freshness_sync", "label": "Freshness & embedding sync", "description": "Keeping the index in sync as source docs change — CDC on the source, re-embed only changed chunks, tombstone deletes, versioning; bounded staleness.", "weight": 1.1 },
-    { "key": "evaluation", "label": "Evaluation & quality", "description": "Offline retrieval metrics (recall@k, MRR/nDCG), end-to-end faithfulness/answer-relevance (LLM-as-judge + golden sets), and online feedback loops.", "weight": 1.2 },
-    { "key": "hallucination_control", "label": "Hallucination control", "description": "Faithfulness grounding, citation/attribution checks, confidence thresholds, abstention, and guardrails against unsupported claims.", "weight": 1.1 },
-    { "key": "scaling", "label": "Scaling", "description": "Sharding the vector index, separating ingest/serve, caching embeddings and answers, autoscaling the LLM and reranker tiers.", "weight": 1.0 },
-    { "key": "ml_specifics", "label": "ML system specifics", "description": "Embedding model versioning and reindex-on-model-change, hybrid retrieval tuning, reranker cost/latency tradeoff, and eval-driven iteration.", "weight": 1.1 },
-    { "key": "security", "label": "Security & access control", "description": "Per-document ACLs enforced at retrieval time, PII handling, prompt-injection defense from retrieved content, tenant isolation, and audit of sources used.", "weight": 0.9 }
+    {
+      "key": "requirements",
+      "label": "Requirements gathering",
+      "description": "Separates functional (ingest, chunk, retrieve, ground, cite, refresh) from non-functional (answer latency, freshness SLA, grounding/faithfulness, access control per document).",
+      "weight": 1.0
+    },
+    {
+      "key": "clarifying_questions",
+      "label": "Clarifying questions",
+      "description": "Asks about corpus size and modality mix, update rate, per-user document permissions, acceptable staleness, latency budget, and how quality will be measured.",
+      "weight": 1.0
+    },
+    {
+      "key": "estimations",
+      "label": "Back-of-envelope estimations",
+      "description": "Estimates chunk count, embedding dimension and vector index size (vectors x dim x 4 bytes plus graph overhead), embedding compute for backfill, query QPS, retrieval and LLM latency budget, token cost per answer.",
+      "weight": 1.2
+    },
+    {
+      "key": "ingestion_chunking",
+      "label": "Ingestion & chunking",
+      "description": "Parsing heterogeneous sources, chunk sizing and overlap, semantic vs fixed chunking, metadata/ACL capture, dedup, and an idempotent incremental pipeline.",
+      "weight": 1.1
+    },
+    {
+      "key": "retrieval_design",
+      "label": "Retrieval & reranking",
+      "description": "Embedding model choice, ANN vector search, hybrid lexical+dense (BM25) retrieval, metadata/ACL filtering, cross-encoder reranking, and top-k selection.",
+      "weight": 1.3
+    },
+    {
+      "key": "grounding_generation",
+      "label": "Grounding & generation",
+      "description": "Prompt assembly with context window budgeting, citation enforcement, abstention when context is insufficient, and streaming the answer.",
+      "weight": 1.2
+    },
+    {
+      "key": "freshness_sync",
+      "label": "Freshness & embedding sync",
+      "description": "Keeping the index in sync as source docs change — CDC on the source, re-embed only changed chunks, tombstone deletes, versioning; bounded staleness.",
+      "weight": 1.1
+    },
+    {
+      "key": "evaluation",
+      "label": "Evaluation & quality",
+      "description": "Offline retrieval metrics (recall@k, MRR/nDCG), end-to-end faithfulness/answer-relevance (LLM-as-judge + golden sets), and online feedback loops.",
+      "weight": 1.2
+    },
+    {
+      "key": "hallucination_control",
+      "label": "Hallucination control",
+      "description": "Faithfulness grounding, citation/attribution checks, confidence thresholds, abstention, and guardrails against unsupported claims.",
+      "weight": 1.1
+    },
+    {
+      "key": "scaling",
+      "label": "Scaling",
+      "description": "Sharding the vector index, separating ingest/serve, caching embeddings and answers, autoscaling the LLM and reranker tiers.",
+      "weight": 1.0
+    },
+    {
+      "key": "ml_specifics",
+      "label": "ML system specifics",
+      "description": "Embedding model versioning and reindex-on-model-change, hybrid retrieval tuning, reranker cost/latency tradeoff, and eval-driven iteration.",
+      "weight": 1.1
+    },
+    {
+      "key": "security",
+      "label": "Security & access control",
+      "description": "Per-document ACLs enforced at retrieval time, PII handling, prompt-injection defense from retrieved content, tenant isolation, and audit of sources used.",
+      "weight": 0.9
+    }
   ],
   "reference": {
     "functional_requirements": [
@@ -85,18 +157,48 @@
     ],
     "high_level_design": "Ingest path: source docs → parse → chunk (semantic, ~300-800 tokens, small overlap) → extract metadata + ACL → embed (batched on GPU) → upsert into vector index + BM25 index keyed by chunk_id. Query path: authenticate → embed query → hybrid retrieve (dense ANN + BM25) with ACL/metadata filter → merge/dedupe candidates → cross-encoder rerank top ~50 to top ~5-8 → assemble prompt within token budget → LLM generates a grounded, cited answer, streamed to the client. Feedback and citations are logged for eval. A sync worker watches source changes and re-embeds only changed chunks.",
     "deep_dives": [
-      { "topic": "retrieval_design", "probe": "Pure dense retrieval misses exact-match terms (IDs, error codes). How do you combine dense and lexical (BM25) — reciprocal rank fusion, weighted merge — and how do you tune it?" },
-      { "topic": "grounding_generation", "probe": "Your top-8 chunks don't fit the window, or none is relevant. How do you budget tokens, and how does the model decide to abstain instead of fabricating?" },
-      { "topic": "freshness_sync", "probe": "A doc is edited. Walk me through keeping the index consistent — do you re-embed the whole doc or only changed chunks, and how do you handle deletes and stale vectors?" },
-      { "topic": "evaluation", "probe": "How do you know retrieval quality and answer faithfulness didn't regress after you change the chunker or embedding model? What metrics and datasets?" },
-      { "topic": "hallucination_control", "probe": "The model cites a chunk but the claim isn't actually supported by it. How do you detect and prevent unsupported/mis-attributed statements?" },
-      { "topic": "embedding_model_change", "probe": "You upgrade the embedding model. Old and new vectors aren't comparable — how do you reindex 10M chunks with zero downtime?" }
+      {
+        "topic": "retrieval_design",
+        "probe": "Pure dense retrieval misses exact-match terms (IDs, error codes). How do you combine dense and lexical (BM25) — reciprocal rank fusion, weighted merge — and how do you tune it?"
+      },
+      {
+        "topic": "grounding_generation",
+        "probe": "Your top-8 chunks don't fit the window, or none is relevant. How do you budget tokens, and how does the model decide to abstain instead of fabricating?"
+      },
+      {
+        "topic": "freshness_sync",
+        "probe": "A doc is edited. Walk me through keeping the index consistent — do you re-embed the whole doc or only changed chunks, and how do you handle deletes and stale vectors?"
+      },
+      {
+        "topic": "evaluation",
+        "probe": "How do you know retrieval quality and answer faithfulness didn't regress after you change the chunker or embedding model? What metrics and datasets?"
+      },
+      {
+        "topic": "hallucination_control",
+        "probe": "The model cites a chunk but the claim isn't actually supported by it. How do you detect and prevent unsupported/mis-attributed statements?"
+      },
+      {
+        "topic": "embedding_model_change",
+        "probe": "You upgrade the embedding model. Old and new vectors aren't comparable — how do you reindex 10M chunks with zero downtime?"
+      }
     ],
     "followup_bank": [
-      { "trigger": "mentions vector database or vector index or embeddings", "question": "When a source document changes, how do the embeddings stay in sync — CDC on the source, re-embed only changed chunks, tombstone the old vectors? What's the staleness bound?" },
-      { "trigger": "mentions cache or semantic cache", "question": "What do you cache — query embeddings, retrieved chunks, or full answers via a semantic cache? What's the eviction policy and how do you avoid serving a stale answer after the source doc changed?" },
-      { "trigger": "mentions database or postgres or sql", "question": "How do you capture source-of-truth changes to drive re-embedding — CDC/Debezium vs polling vs dual writes?" },
-      { "trigger": "mentions reranker or cross-encoder", "question": "Reranking is expensive per candidate. How many candidates do you rerank, and how do you bound its latency and cost?" }
+      {
+        "trigger": "mentions vector database or vector index or embeddings",
+        "question": "When a source document changes, how do the embeddings stay in sync — CDC on the source, re-embed only changed chunks, tombstone the old vectors? What's the staleness bound?"
+      },
+      {
+        "trigger": "mentions cache or semantic cache",
+        "question": "What do you cache — query embeddings, retrieved chunks, or full answers via a semantic cache? What's the eviction policy and how do you avoid serving a stale answer after the source doc changed?"
+      },
+      {
+        "trigger": "mentions database or postgres or sql",
+        "question": "How do you capture source-of-truth changes to drive re-embedding — CDC/Debezium vs polling vs dual writes?"
+      },
+      {
+        "trigger": "mentions reranker or cross-encoder",
+        "question": "Reranking is expensive per candidate. How many candidates do you rerank, and how do you bound its latency and cost?"
+      }
     ],
     "scaling": [
       "Shard the vector index by tenant/namespace; replicate shards for read throughput",

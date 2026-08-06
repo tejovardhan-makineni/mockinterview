@@ -2,20 +2,64 @@
   "id": "clinical-reasoning-chest-pain",
   "title": "Clinical Reasoning: Acute Chest Pain",
   "track": "professional",
-  "domain": "medicine",
+  "domain": "clinical_reasoning",
+  "areas": [
+    "medicine"
+  ],
   "modality": "conversational",
   "difficulty": "mid",
-  "tags": ["clinical-reasoning", "chest-pain", "differential-diagnosis", "acute-care", "safety"],
+  "tags": [
+    "clinical-reasoning",
+    "chest-pain",
+    "differential-diagnosis",
+    "acute-care",
+    "safety"
+  ],
   "prompt": "A 55-year-old presents to the emergency department with chest pain that started two hours ago. Walk me through your structured approach — how you take the history, the differential you're considering, the investigations you'd order, and your initial management.",
   "blurb": "A structured approach to acute chest pain — history, life-threatening differential, focused workup, and safe initial management.",
   "rubric": [
-    { "key": "data_gathering", "label": "History & data gathering", "description": "Takes a focused, systematic pain history (site, onset, character, radiation, timing, exacerbating/relieving, severity), relevant associated symptoms, cardiac risk factors, and red-flag features; asks about medications and prior events.", "weight": 1.2 },
-    { "key": "differential_diagnosis", "label": "Differential diagnosis", "description": "Generates a prioritized differential that front-loads life-threatening causes (ACS, aortic dissection, pulmonary embolism, tension pneumothorax, esophageal rupture) alongside common ones (musculoskeletal, GERD, pericarditis); reasons about likelihood and risk.", "weight": 1.3 },
-    { "key": "clinical_reasoning", "label": "Clinical reasoning", "description": "Uses history and exam findings to raise or lower specific diagnoses; explains what discriminates them; avoids anchoring on one diagnosis; adapts as data arrives.", "weight": 1.2 },
-    { "key": "investigations", "label": "Investigations", "description": "Orders a focused, justified workup — ECG early (within 10 minutes), troponin (with serial timing), vitals/O2, CXR, bloods, and targeted tests when a specific diagnosis is suspected (e.g., D-dimer/CTPA, CT aortogram); explains rationale.", "weight": 1.1 },
-    { "key": "management_plan", "label": "Initial management", "description": "Starts with ABC/monitoring, IV access, oxygen if hypoxic, analgesia; gives safe initial ACS management appropriately and escalates; avoids inappropriate treatment before clarifying the diagnosis.", "weight": 1.1 },
-    { "key": "safety", "label": "Safety & prioritization", "description": "Treats it as potentially life-threatening from the outset, does the time-critical steps first (ECG, monitoring), and states clear safety-netting and escalation.", "weight": 1.2 },
-    { "key": "communication", "label": "Communication & structure", "description": "Presents reasoning in an organized, systematic way; thinks aloud; would communicate clearly with the patient and team.", "weight": 0.9 }
+    {
+      "key": "data_gathering",
+      "label": "History & data gathering",
+      "description": "Takes a focused, systematic pain history (site, onset, character, radiation, timing, exacerbating/relieving, severity), relevant associated symptoms, cardiac risk factors, and red-flag features; asks about medications and prior events.",
+      "weight": 1.2
+    },
+    {
+      "key": "differential_diagnosis",
+      "label": "Differential diagnosis",
+      "description": "Generates a prioritized differential that front-loads life-threatening causes (ACS, aortic dissection, pulmonary embolism, tension pneumothorax, esophageal rupture) alongside common ones (musculoskeletal, GERD, pericarditis); reasons about likelihood and risk.",
+      "weight": 1.3
+    },
+    {
+      "key": "clinical_reasoning",
+      "label": "Clinical reasoning",
+      "description": "Uses history and exam findings to raise or lower specific diagnoses; explains what discriminates them; avoids anchoring on one diagnosis; adapts as data arrives.",
+      "weight": 1.2
+    },
+    {
+      "key": "investigations",
+      "label": "Investigations",
+      "description": "Orders a focused, justified workup — ECG early (within 10 minutes), troponin (with serial timing), vitals/O2, CXR, bloods, and targeted tests when a specific diagnosis is suspected (e.g., D-dimer/CTPA, CT aortogram); explains rationale.",
+      "weight": 1.1
+    },
+    {
+      "key": "management_plan",
+      "label": "Initial management",
+      "description": "Starts with ABC/monitoring, IV access, oxygen if hypoxic, analgesia; gives safe initial ACS management appropriately and escalates; avoids inappropriate treatment before clarifying the diagnosis.",
+      "weight": 1.1
+    },
+    {
+      "key": "safety",
+      "label": "Safety & prioritization",
+      "description": "Treats it as potentially life-threatening from the outset, does the time-critical steps first (ECG, monitoring), and states clear safety-netting and escalation.",
+      "weight": 1.2
+    },
+    {
+      "key": "communication",
+      "label": "Communication & structure",
+      "description": "Presents reasoning in an organized, systematic way; thinks aloud; would communicate clearly with the patient and team.",
+      "weight": 0.9
+    }
   ],
   "reference": {
     "scenario": "A 55-year-old with two hours of chest pain in the ED. The station tests whether the candidate approaches undifferentiated chest pain safely and systematically: a focused history, a differential that puts life-threatening causes first, an appropriate time-critical workup (ECG early, serial troponin), and safe initial management. The interviewer can feed additional data (vitals, ECG findings, exam) to see how the candidate's reasoning evolves. This is educational and generic — not a treatment protocol for real patients.",
@@ -32,12 +76,30 @@
       "Continual reassessment and safety-netting; clear escalation and disposition plan; would explain to the patient what is happening."
     ],
     "probes": [
-      { "trigger": "candidate jumps to management or a diagnosis before building a differential", "question": "Before you treat, what's on your differential for a 55-year-old with chest pain, and which ones could kill them in the next hour?" },
-      { "trigger": "candidate anchors only on ACS", "question": "The pain is sudden, tearing, and radiates to the back, and the blood pressure differs between arms. Does that change your thinking?" },
-      { "trigger": "candidate delays or omits the ECG", "question": "What single investigation do you want first and how quickly, and why?" },
-      { "trigger": "candidate orders a broad panel without justification", "question": "Talk me through why each of those tests, and what result would move you toward or away from a diagnosis." },
-      { "trigger": "candidate proposes anticoagulation for presumed PE without caution", "question": "What would you want to be confident you're NOT dealing with before you anticoagulate?" },
-      { "trigger": "candidate gives a normal first troponin as reassurance", "question": "The first troponin is normal. Does that rule out ACS? What do you do next?" }
+      {
+        "trigger": "candidate jumps to management or a diagnosis before building a differential",
+        "question": "Before you treat, what's on your differential for a 55-year-old with chest pain, and which ones could kill them in the next hour?"
+      },
+      {
+        "trigger": "candidate anchors only on ACS",
+        "question": "The pain is sudden, tearing, and radiates to the back, and the blood pressure differs between arms. Does that change your thinking?"
+      },
+      {
+        "trigger": "candidate delays or omits the ECG",
+        "question": "What single investigation do you want first and how quickly, and why?"
+      },
+      {
+        "trigger": "candidate orders a broad panel without justification",
+        "question": "Talk me through why each of those tests, and what result would move you toward or away from a diagnosis."
+      },
+      {
+        "trigger": "candidate proposes anticoagulation for presumed PE without caution",
+        "question": "What would you want to be confident you're NOT dealing with before you anticoagulate?"
+      },
+      {
+        "trigger": "candidate gives a normal first troponin as reassurance",
+        "question": "The first troponin is normal. Does that rule out ACS? What do you do next?"
+      }
     ],
     "red_flags": [
       "Jumping straight to a single diagnosis or to management without a differential.",

@@ -3,24 +3,95 @@
   "title": "Design a Large-Scale Recommendation System",
   "track": "engineering",
   "domain": "ml_system_design",
+  "areas": [
+    "engineering",
+    "data_science"
+  ],
   "modality": "system_design",
   "difficulty": "senior",
-  "tags": ["recsys", "candidate-generation", "ranking", "embeddings", "feature-pipeline", "feedback-loop"],
+  "tags": [
+    "recsys",
+    "candidate-generation",
+    "ranking",
+    "embeddings",
+    "feature-pipeline",
+    "feedback-loop"
+  ],
   "prompt": "Design a recommendation system that picks personalized items (feed posts, videos, or products) for hundreds of millions of users from a catalog of tens of millions of items. Cover candidate generation, ranking, the feature pipeline, embeddings, the online/offline split, and how you handle feedback loops and freshness.",
   "blurb": "The two-stage recsys — candidate generation and ranking, feature/embedding pipelines, online serving, and the feedback loop.",
   "rubric": [
-    { "key": "requirements", "label": "Requirements gathering", "description": "Separates functional (retrieve, rank, personalize, diversify) from non-functional (serving latency, freshness, throughput) and clarifies the business objective/metric being optimized.", "weight": 1.0 },
-    { "key": "clarifying_questions", "label": "Clarifying questions", "description": "Asks about the optimization objective (engagement, revenue, retention), user/item scale, latency budget, cold-start needs, and how success is measured (online metric).", "weight": 1.0 },
-    { "key": "estimations", "label": "Back-of-envelope estimations", "description": "Estimates request QPS, candidates per stage (millions → hundreds → tens), embedding index size, feature-store read fanout, and ranking model latency budget.", "weight": 1.1 },
-    { "key": "candidate_generation", "label": "Candidate generation", "description": "Multiple retrieval sources — two-tower embeddings + ANN, collaborative filtering, popularity/recency, graph — narrowing millions of items to a few hundred cheaply.", "weight": 1.3 },
-    { "key": "ranking", "label": "Ranking", "description": "Heavy ranker scoring candidates with rich features, multi-task (click/like/dwell/convert) objectives, calibration, and re-ranking for diversity/business rules.", "weight": 1.2 },
-    { "key": "feature_pipeline", "label": "Feature pipeline", "description": "Batch + streaming features, a feature store with online/offline parity, point-in-time correctness for training, and freshness of real-time features.", "weight": 1.2 },
-    { "key": "embeddings", "label": "Embeddings", "description": "Learning user/item embeddings (two-tower), keeping item embeddings fresh for new items, and serving them via an ANN index.", "weight": 1.0 },
-    { "key": "online_offline", "label": "Online/offline split", "description": "Offline training + precompute vs online scoring; nearline updates; what's precomputed vs computed at request time.", "weight": 1.1 },
-    { "key": "feedback_loop", "label": "Feedback loops & bias", "description": "Logging impressions/labels, position/exposure bias, popularity feedback loops, exploration, and delayed/implicit labels.", "weight": 1.1 },
-    { "key": "ml_specifics", "label": "ML system specifics", "description": "Training/serving skew, model retraining cadence, cold-start strategy, offline-online metric alignment, and A/B evaluation.", "weight": 1.1 },
-    { "key": "scaling", "label": "Scaling", "description": "Sharding the ANN index and feature store, caching, precomputation, and horizontal scale of the ranking tier.", "weight": 1.0 },
-    { "key": "observability", "label": "Observability & evaluation", "description": "Online metrics + guardrails, offline replay/NDCG, feature/prediction drift, and A/B testing infrastructure.", "weight": 0.9 }
+    {
+      "key": "requirements",
+      "label": "Requirements gathering",
+      "description": "Separates functional (retrieve, rank, personalize, diversify) from non-functional (serving latency, freshness, throughput) and clarifies the business objective/metric being optimized.",
+      "weight": 1.0
+    },
+    {
+      "key": "clarifying_questions",
+      "label": "Clarifying questions",
+      "description": "Asks about the optimization objective (engagement, revenue, retention), user/item scale, latency budget, cold-start needs, and how success is measured (online metric).",
+      "weight": 1.0
+    },
+    {
+      "key": "estimations",
+      "label": "Back-of-envelope estimations",
+      "description": "Estimates request QPS, candidates per stage (millions → hundreds → tens), embedding index size, feature-store read fanout, and ranking model latency budget.",
+      "weight": 1.1
+    },
+    {
+      "key": "candidate_generation",
+      "label": "Candidate generation",
+      "description": "Multiple retrieval sources — two-tower embeddings + ANN, collaborative filtering, popularity/recency, graph — narrowing millions of items to a few hundred cheaply.",
+      "weight": 1.3
+    },
+    {
+      "key": "ranking",
+      "label": "Ranking",
+      "description": "Heavy ranker scoring candidates with rich features, multi-task (click/like/dwell/convert) objectives, calibration, and re-ranking for diversity/business rules.",
+      "weight": 1.2
+    },
+    {
+      "key": "feature_pipeline",
+      "label": "Feature pipeline",
+      "description": "Batch + streaming features, a feature store with online/offline parity, point-in-time correctness for training, and freshness of real-time features.",
+      "weight": 1.2
+    },
+    {
+      "key": "embeddings",
+      "label": "Embeddings",
+      "description": "Learning user/item embeddings (two-tower), keeping item embeddings fresh for new items, and serving them via an ANN index.",
+      "weight": 1.0
+    },
+    {
+      "key": "online_offline",
+      "label": "Online/offline split",
+      "description": "Offline training + precompute vs online scoring; nearline updates; what's precomputed vs computed at request time.",
+      "weight": 1.1
+    },
+    {
+      "key": "feedback_loop",
+      "label": "Feedback loops & bias",
+      "description": "Logging impressions/labels, position/exposure bias, popularity feedback loops, exploration, and delayed/implicit labels.",
+      "weight": 1.1
+    },
+    {
+      "key": "ml_specifics",
+      "label": "ML system specifics",
+      "description": "Training/serving skew, model retraining cadence, cold-start strategy, offline-online metric alignment, and A/B evaluation.",
+      "weight": 1.1
+    },
+    {
+      "key": "scaling",
+      "label": "Scaling",
+      "description": "Sharding the ANN index and feature store, caching, precomputation, and horizontal scale of the ranking tier.",
+      "weight": 1.0
+    },
+    {
+      "key": "observability",
+      "label": "Observability & evaluation",
+      "description": "Online metrics + guardrails, offline replay/NDCG, feature/prediction drift, and A/B testing infrastructure.",
+      "weight": 0.9
+    }
   ],
   "reference": {
     "functional_requirements": [
@@ -82,18 +153,48 @@
     ],
     "high_level_design": "On a request, the service fetches the user's features/embedding from the online feature store and recent session signals from the streaming layer. Candidate generation runs several retrievers in parallel — a two-tower model embeds the user and does ANN lookup over item embeddings, plus collaborative-filtering, recently-popular, and graph sources — union/dedupe to a few hundred candidates. The ranking service pulls rich user x item x context features (batched from the feature store), scores all candidates with a multi-task model (predicting click/like/dwell/convert, calibrated and blended into one value), and a final re-ranker applies diversity, dedup, and business rules. Impressions and subsequent actions are logged to build training labels. Offline, models and item/user embeddings are retrained on point-in-time-correct features; embeddings and popularity candidates are precomputed nearline; the online path stays light. Everything ships behind A/B experiments measuring the north-star online metric.",
     "deep_dives": [
-      { "topic": "candidate_generation", "probe": "Explain the two-tower model and why candidate generation is a separate cheap stage. How do you retrieve a few hundred from 50M in single-digit ms, and how do you blend multiple retrieval sources?" },
-      { "topic": "feature_pipeline", "probe": "How do you guarantee the features used at serving match training — online/offline parity — and get point-in-time correctness so you don't leak future information into labels?" },
-      { "topic": "feedback_loop", "probe": "Your logs are biased: users only click what you showed, and popular items get more exposure. How do you handle position/exposure bias and avoid a popularity feedback loop — exploration, inverse-propensity weighting?" },
-      { "topic": "ranking", "probe": "You optimize multiple objectives (clicks, dwell, conversions). How do you combine them, calibrate probabilities, and avoid clickbait while hitting the business metric?" },
-      { "topic": "online_offline", "probe": "What's precomputed vs computed at request time? How fresh are item embeddings for an item uploaded 2 minutes ago (cold start)?" },
-      { "topic": "ml_specifics", "probe": "How often do you retrain, how do you detect that a deployed model has degraded (drift), and how do you validate a new model before full rollout?" }
+      {
+        "topic": "candidate_generation",
+        "probe": "Explain the two-tower model and why candidate generation is a separate cheap stage. How do you retrieve a few hundred from 50M in single-digit ms, and how do you blend multiple retrieval sources?"
+      },
+      {
+        "topic": "feature_pipeline",
+        "probe": "How do you guarantee the features used at serving match training — online/offline parity — and get point-in-time correctness so you don't leak future information into labels?"
+      },
+      {
+        "topic": "feedback_loop",
+        "probe": "Your logs are biased: users only click what you showed, and popular items get more exposure. How do you handle position/exposure bias and avoid a popularity feedback loop — exploration, inverse-propensity weighting?"
+      },
+      {
+        "topic": "ranking",
+        "probe": "You optimize multiple objectives (clicks, dwell, conversions). How do you combine them, calibrate probabilities, and avoid clickbait while hitting the business metric?"
+      },
+      {
+        "topic": "online_offline",
+        "probe": "What's precomputed vs computed at request time? How fresh are item embeddings for an item uploaded 2 minutes ago (cold start)?"
+      },
+      {
+        "topic": "ml_specifics",
+        "probe": "How often do you retrain, how do you detect that a deployed model has degraded (drift), and how do you validate a new model before full rollout?"
+      }
     ],
     "followup_bank": [
-      { "trigger": "mentions embeddings or two-tower or ANN or item vectors", "question": "When an item's attributes change or a new item is added, how do its embeddings stay in sync and become retrievable — nearline re-embedding, CDC from the catalog, index upsert? What's the freshness lag for a brand-new item?" },
-      { "trigger": "mentions cache or caching or precompute", "question": "You cache per-user candidates or features. What's the eviction/TTL policy, and how do you avoid a stampede or serving stale recommendations right after the user's context changes?" },
-      { "trigger": "mentions feature store or database or warehouse", "question": "How do features get from the source-of-truth data into the online store consistently — CDC/streaming vs batch materialization — and how do you avoid online/offline skew?" },
-      { "trigger": "mentions model or retrain", "question": "How do you detect model/feature drift in production and decide when to retrain or roll back?" }
+      {
+        "trigger": "mentions embeddings or two-tower or ANN or item vectors",
+        "question": "When an item's attributes change or a new item is added, how do its embeddings stay in sync and become retrievable — nearline re-embedding, CDC from the catalog, index upsert? What's the freshness lag for a brand-new item?"
+      },
+      {
+        "trigger": "mentions cache or caching or precompute",
+        "question": "You cache per-user candidates or features. What's the eviction/TTL policy, and how do you avoid a stampede or serving stale recommendations right after the user's context changes?"
+      },
+      {
+        "trigger": "mentions feature store or database or warehouse",
+        "question": "How do features get from the source-of-truth data into the online store consistently — CDC/streaming vs batch materialization — and how do you avoid online/offline skew?"
+      },
+      {
+        "trigger": "mentions model or retrain",
+        "question": "How do you detect model/feature drift in production and decide when to retrain or roll back?"
+      }
     ],
     "scaling": [
       "Shard the ANN item index and replicate for QPS",

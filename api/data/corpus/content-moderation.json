@@ -3,24 +3,95 @@
   "title": "Design an ML Content Moderation System at Scale",
   "track": "engineering",
   "domain": "ml_system_design",
+  "areas": [
+    "engineering",
+    "data_science"
+  ],
   "modality": "system_design",
   "difficulty": "senior",
-  "tags": ["ml-serving", "multimodal", "human-in-loop", "classification", "drift", "trust-and-safety"],
+  "tags": [
+    "ml-serving",
+    "multimodal",
+    "human-in-loop",
+    "classification",
+    "drift",
+    "trust-and-safety"
+  ],
   "prompt": "Design a content moderation system for a large user-generated-content platform. It must screen text, images, and video across many policy categories (violence, hate, sexual content, spam, self-harm), combine automated ML with human reviewers, and give users an appeals process. Assume very high upload volume and strict latency needs for the publish path.",
   "blurb": "Multimodal T&S at scale: policy classifiers, human-in-the-loop routing, appeals, and keeping models aligned with shifting policy.",
   "rubric": [
-    { "key": "requirements", "label": "Requirements gathering", "description": "Separates functional (multi-category classification across modalities, block/limit/allow actions, human review, appeals, escalation) from non-functional (publish-path latency, high recall on egregious harms, reviewer throughput, auditability).", "weight": 1.0 },
-    { "key": "clarifying_questions", "label": "Clarifying questions", "description": "Asks about content types, sync-block vs async-review policy, legal/regulatory categories (CSAM, terrorism), cost of over- vs under-blocking, appeal SLAs, languages/regions.", "weight": 1.0 },
-    { "key": "estimations", "label": "Back-of-envelope estimations", "description": "Derives uploads/sec, per-modality inference cost (cheap text vs expensive video), GPU fleet sizing, human-review capacity vs auto-decision rate, storage for content + decisions.", "weight": 1.1 },
-    { "key": "multimodal_pipeline", "label": "Multimodal classification pipeline", "description": "Per-modality models (text, image, video frames, audio), hashing/matching for known-bad content, staged cheap-to-expensive cascade, fusion across signals.", "weight": 1.3 },
-    { "key": "human_in_loop", "label": "Human-in-the-loop routing", "description": "Confidence-band routing to reviewers, prioritized queues by harm severity, reviewer tooling, capturing reviewer decisions as labels, active learning on uncertain cases.", "weight": 1.2 },
-    { "key": "appeals", "label": "Appeals & feedback", "description": "Appeal workflow, re-review, overturn tracking, using appeals/overturns as a quality and label signal, avoiding feedback-loop bias.", "weight": 1.0 },
-    { "key": "training_serving_skew", "label": "Training-serving parity & labels", "description": "Consistent preprocessing across train/serve, label provenance (reviewer vs appeal vs golden set), handling policy changes that relabel old data, inter-annotator agreement.", "weight": 1.1 },
-    { "key": "ml_evaluation_drift", "label": "Evaluation & drift", "description": "Per-category precision/recall at operating points, golden sets, prevalence estimation, drift from new harmful trends/adversarial evasion, monitoring auto-decision quality.", "weight": 1.3 },
-    { "key": "high_level_design", "label": "High-level design", "description": "Ingest → hash-match → modality classifiers (cascade) → decision/policy engine → auto-action or review queue → appeals; async re-scan of published content.", "weight": 1.2 },
-    { "key": "scaling", "label": "Scaling & reliability", "description": "GPU autoscaling, batching, async video processing, backpressure, graceful degradation (default action when models unavailable), regional/language scaling.", "weight": 1.0 },
-    { "key": "observability", "label": "Observability", "description": "Category-level metrics, queue depth/latency, reviewer agreement, model version tracking, prevalence dashboards, alert on spikes of a harm category.", "weight": 0.9 },
-    { "key": "security", "label": "Safety, privacy & abuse", "description": "Handling illegal content (secure pipelines, legal reporting), reviewer wellbeing, adversarial evasion, PII/privacy, audit trail for regulators and appeals.", "weight": 0.9 }
+    {
+      "key": "requirements",
+      "label": "Requirements gathering",
+      "description": "Separates functional (multi-category classification across modalities, block/limit/allow actions, human review, appeals, escalation) from non-functional (publish-path latency, high recall on egregious harms, reviewer throughput, auditability).",
+      "weight": 1.0
+    },
+    {
+      "key": "clarifying_questions",
+      "label": "Clarifying questions",
+      "description": "Asks about content types, sync-block vs async-review policy, legal/regulatory categories (CSAM, terrorism), cost of over- vs under-blocking, appeal SLAs, languages/regions.",
+      "weight": 1.0
+    },
+    {
+      "key": "estimations",
+      "label": "Back-of-envelope estimations",
+      "description": "Derives uploads/sec, per-modality inference cost (cheap text vs expensive video), GPU fleet sizing, human-review capacity vs auto-decision rate, storage for content + decisions.",
+      "weight": 1.1
+    },
+    {
+      "key": "multimodal_pipeline",
+      "label": "Multimodal classification pipeline",
+      "description": "Per-modality models (text, image, video frames, audio), hashing/matching for known-bad content, staged cheap-to-expensive cascade, fusion across signals.",
+      "weight": 1.3
+    },
+    {
+      "key": "human_in_loop",
+      "label": "Human-in-the-loop routing",
+      "description": "Confidence-band routing to reviewers, prioritized queues by harm severity, reviewer tooling, capturing reviewer decisions as labels, active learning on uncertain cases.",
+      "weight": 1.2
+    },
+    {
+      "key": "appeals",
+      "label": "Appeals & feedback",
+      "description": "Appeal workflow, re-review, overturn tracking, using appeals/overturns as a quality and label signal, avoiding feedback-loop bias.",
+      "weight": 1.0
+    },
+    {
+      "key": "training_serving_skew",
+      "label": "Training-serving parity & labels",
+      "description": "Consistent preprocessing across train/serve, label provenance (reviewer vs appeal vs golden set), handling policy changes that relabel old data, inter-annotator agreement.",
+      "weight": 1.1
+    },
+    {
+      "key": "ml_evaluation_drift",
+      "label": "Evaluation & drift",
+      "description": "Per-category precision/recall at operating points, golden sets, prevalence estimation, drift from new harmful trends/adversarial evasion, monitoring auto-decision quality.",
+      "weight": 1.3
+    },
+    {
+      "key": "high_level_design",
+      "label": "High-level design",
+      "description": "Ingest → hash-match → modality classifiers (cascade) → decision/policy engine → auto-action or review queue → appeals; async re-scan of published content.",
+      "weight": 1.2
+    },
+    {
+      "key": "scaling",
+      "label": "Scaling & reliability",
+      "description": "GPU autoscaling, batching, async video processing, backpressure, graceful degradation (default action when models unavailable), regional/language scaling.",
+      "weight": 1.0
+    },
+    {
+      "key": "observability",
+      "label": "Observability",
+      "description": "Category-level metrics, queue depth/latency, reviewer agreement, model version tracking, prevalence dashboards, alert on spikes of a harm category.",
+      "weight": 0.9
+    },
+    {
+      "key": "security",
+      "label": "Safety, privacy & abuse",
+      "description": "Handling illegal content (secure pipelines, legal reporting), reviewer wellbeing, adversarial evasion, PII/privacy, audit trail for regulators and appeals.",
+      "weight": 0.9
+    }
   ],
   "reference": {
     "functional_requirements": [
@@ -58,8 +129,27 @@
       "review_capacity": "If 2% of content routes to humans at 17K/s that's ~340/s → infeasible manually; auto-decision the high-confidence mass, route only uncertain/severe",
       "storage": "Content refs + decision logs + feature/embedding cache; retain decisions long-term for appeals/audit; retain flagged media under strict controls"
     },
-    "core_components": ["Ingest/publish gateway", "Perceptual-hash matching service (known-bad DB)", "Text classifier service", "Image classifier service (GPU)", "Video/audio processing pipeline (async)", "Signal fusion + decision/policy engine", "Review queue + reviewer tooling", "Appeals service", "Label store + active-learning sampler", "Training/eval pipeline + model registry", "Prevalence & drift monitoring"],
-    "data_model": ["content(content_id PK, author_id, type, uri, created_at, status)", "moderation_decisions(content_id, category, score, action, decided_by, model_version, ts)", "review_tasks(task_id, content_id, priority, queue, assignee, resolution, ts)", "appeals(appeal_id, content_id, reason, outcome, ts)", "labels(content_id, category, label, source, annotator_id, agreement)", "hash_matches(content_id, matched_hash, source_db)"],
+    "core_components": [
+      "Ingest/publish gateway",
+      "Perceptual-hash matching service (known-bad DB)",
+      "Text classifier service",
+      "Image classifier service (GPU)",
+      "Video/audio processing pipeline (async)",
+      "Signal fusion + decision/policy engine",
+      "Review queue + reviewer tooling",
+      "Appeals service",
+      "Label store + active-learning sampler",
+      "Training/eval pipeline + model registry",
+      "Prevalence & drift monitoring"
+    ],
+    "data_model": [
+      "content(content_id PK, author_id, type, uri, created_at, status)",
+      "moderation_decisions(content_id, category, score, action, decided_by, model_version, ts)",
+      "review_tasks(task_id, content_id, priority, queue, assignee, resolution, ts)",
+      "appeals(appeal_id, content_id, reason, outcome, ts)",
+      "labels(content_id, category, label, source, annotator_id, agreement)",
+      "hash_matches(content_id, matched_hash, source_db)"
+    ],
     "api_design": [
       "POST /v1/moderate { content_id, type, uri|payload } → { decision, category_scores{}, action, model_version }  (sync fast-path; heavy work async)",
       "POST /v1/review/{task_id}/resolve { action, categories[] } → records reviewer label",
@@ -68,28 +158,103 @@
     ],
     "high_level_design": "On upload the gateway runs cheap synchronous checks — perceptual/hash matching against known-bad databases and a fast text classifier — to block the clearly-illegal immediately. Media goes to an async cascade: cheap models first, expensive image/video/audio models only on content that survives. A fusion/decision engine combines model scores, hash hits, author reputation, and policy rules to pick an action. High-confidence content is auto-actioned; content in the uncertain confidence band or above a severity threshold is routed to prioritized human-review queues. Reviewer decisions and appeal outcomes flow into a label store that feeds active-learning sampling and periodic retraining. A prevalence/drift monitor tracks per-category quality and emerging harmful trends, and models roll out through golden-set evaluation and shadow testing.",
     "deep_dives": [
-      { "topic": "cascade_design", "probe": "Video moderation is expensive. Design a cheap-to-expensive cascade — hash match, then light model, then heavy model — so you spend GPU only where needed. Where do you set the gates?" },
-      { "topic": "review_routing", "probe": "You can't send everything to humans. How do you decide what to auto-action vs route to review, and how do you prioritize the queue when a harm spikes?" },
-      { "topic": "label_quality", "probe": "Reviewers disagree and policy changes over time. How do you manage label quality, inter-annotator agreement, and relabeling old data when policy shifts?" },
-      { "topic": "asymmetric_cost", "probe": "For CSAM/terrorism the miss-cost is catastrophic; for borderline speech, over-removal is the risk. How do per-category operating points and actions differ, and how do you measure recall on rare egregious content?" },
-      { "topic": "appeals_feedback", "probe": "Appeals overturn some automated removals. How do you feed overturns back without creating a biased feedback loop where the model only ever learns from what it already flagged?" },
-      { "topic": "adversarial_evasion", "probe": "Bad actors mutate images/text to evade classifiers. How do you detect and adapt to evasion, and how does that change your drift monitoring?" },
-      { "topic": "cdc_policy_freshness", "probe": "Author reputation and account state (prior strikes, verified status) live in a separate service and change constantly. How do those changes propagate into the moderation decision path so you're not scoring on stale author signals?" }
+      {
+        "topic": "cascade_design",
+        "probe": "Video moderation is expensive. Design a cheap-to-expensive cascade — hash match, then light model, then heavy model — so you spend GPU only where needed. Where do you set the gates?"
+      },
+      {
+        "topic": "review_routing",
+        "probe": "You can't send everything to humans. How do you decide what to auto-action vs route to review, and how do you prioritize the queue when a harm spikes?"
+      },
+      {
+        "topic": "label_quality",
+        "probe": "Reviewers disagree and policy changes over time. How do you manage label quality, inter-annotator agreement, and relabeling old data when policy shifts?"
+      },
+      {
+        "topic": "asymmetric_cost",
+        "probe": "For CSAM/terrorism the miss-cost is catastrophic; for borderline speech, over-removal is the risk. How do per-category operating points and actions differ, and how do you measure recall on rare egregious content?"
+      },
+      {
+        "topic": "appeals_feedback",
+        "probe": "Appeals overturn some automated removals. How do you feed overturns back without creating a biased feedback loop where the model only ever learns from what it already flagged?"
+      },
+      {
+        "topic": "adversarial_evasion",
+        "probe": "Bad actors mutate images/text to evade classifiers. How do you detect and adapt to evasion, and how does that change your drift monitoring?"
+      },
+      {
+        "topic": "cdc_policy_freshness",
+        "probe": "Author reputation and account state (prior strikes, verified status) live in a separate service and change constantly. How do those changes propagate into the moderation decision path so you're not scoring on stale author signals?"
+      }
     ],
     "followup_bank": [
-      { "trigger": "mentions feature or reputation or embedding", "question": "When an author's reputation or account state changes in the source system, how does the moderation pipeline's feature/embedding store stay in sync — change-stream/CDC into the store, or scheduled recompute? What staleness is acceptable?" },
-      { "trigger": "mentions cache or embedding index", "question": "You're caching embeddings / near-duplicate signatures. What's the eviction policy, and when the underlying policy or content changes, how do you invalidate stale-after-change cache entries?" },
-      { "trigger": "mentions model or classifier", "question": "How do you roll out a new classifier safely — golden-set eval, shadow mode, per-category operating points, and rollback on what signal?" },
-      { "trigger": "mentions human or reviewer or queue", "question": "How do you prioritize the review queue during a harm spike, and how do you capture reviewer decisions as high-quality labels?" },
-      { "trigger": "mentions appeal", "question": "How do you prevent appeals/overturn feedback from biasing the model toward only re-learning what it already flags?" },
-      { "trigger": "mentions video or image", "question": "Media inference is expensive — describe your cheap-to-expensive cascade and where GPU batching helps." }
+      {
+        "trigger": "mentions feature or reputation or embedding",
+        "question": "When an author's reputation or account state changes in the source system, how does the moderation pipeline's feature/embedding store stay in sync — change-stream/CDC into the store, or scheduled recompute? What staleness is acceptable?"
+      },
+      {
+        "trigger": "mentions cache or embedding index",
+        "question": "You're caching embeddings / near-duplicate signatures. What's the eviction policy, and when the underlying policy or content changes, how do you invalidate stale-after-change cache entries?"
+      },
+      {
+        "trigger": "mentions model or classifier",
+        "question": "How do you roll out a new classifier safely — golden-set eval, shadow mode, per-category operating points, and rollback on what signal?"
+      },
+      {
+        "trigger": "mentions human or reviewer or queue",
+        "question": "How do you prioritize the review queue during a harm spike, and how do you capture reviewer decisions as high-quality labels?"
+      },
+      {
+        "trigger": "mentions appeal",
+        "question": "How do you prevent appeals/overturn feedback from biasing the model toward only re-learning what it already flags?"
+      },
+      {
+        "trigger": "mentions video or image",
+        "question": "Media inference is expensive — describe your cheap-to-expensive cascade and where GPU batching helps."
+      }
     ],
-    "scaling": ["GPU autoscaling with request batching for image/video models", "Async, queue-backed media processing decoupled from the publish path", "Shard hash-match and classifier fleets by modality/region", "Backpressure + default-action policy when models are saturated", "Per-language/per-region model deployment"],
-    "bottlenecks": ["Video/audio inference GPU cost and latency", "Human-review capacity as the hard ceiling", "Hot queues during coordinated harm spikes", "Label latency and annotator disagreement", "Embedding/near-dup index growth for duplicate detection"],
-    "tradeoffs": ["Sync block (safe, adds latency) vs allow-then-scan (fast, brief exposure)", "High recall on harm vs over-removal / free-expression cost", "Auto-decision coverage vs human-review accuracy", "Bigger multimodal model (better) vs GPU cost + latency", "Global model (consistent) vs localized models (culturally accurate)"],
-    "alternative_solutions": ["Rules + keyword lists (cheap, brittle, easily evaded)", "Single multimodal foundation model vs specialized per-category classifiers", "Fully async moderation with reactive user reporting as a safety net", "Federated hash-sharing with industry databases for known-bad media"],
-    "observability": ["Per-category precision/recall at operating points vs golden sets", "Auto-decision rate and reviewer-overturn rate", "Queue depth + review latency by severity", "Prevalence dashboards and spike alerts per category", "Model version + traffic split; embedding index freshness", "Appeal volume and overturn trends"],
-    "security": ["Secure, access-controlled pipelines for illegal content + legal reporting duties", "Reviewer wellbeing (exposure limits, blurring tooling)", "Adversarial evasion monitoring and rapid model updates", "PII minimization and privacy in stored content/decisions", "Immutable audit trail of automated + human decisions for regulators and appeals"],
+    "scaling": [
+      "GPU autoscaling with request batching for image/video models",
+      "Async, queue-backed media processing decoupled from the publish path",
+      "Shard hash-match and classifier fleets by modality/region",
+      "Backpressure + default-action policy when models are saturated",
+      "Per-language/per-region model deployment"
+    ],
+    "bottlenecks": [
+      "Video/audio inference GPU cost and latency",
+      "Human-review capacity as the hard ceiling",
+      "Hot queues during coordinated harm spikes",
+      "Label latency and annotator disagreement",
+      "Embedding/near-dup index growth for duplicate detection"
+    ],
+    "tradeoffs": [
+      "Sync block (safe, adds latency) vs allow-then-scan (fast, brief exposure)",
+      "High recall on harm vs over-removal / free-expression cost",
+      "Auto-decision coverage vs human-review accuracy",
+      "Bigger multimodal model (better) vs GPU cost + latency",
+      "Global model (consistent) vs localized models (culturally accurate)"
+    ],
+    "alternative_solutions": [
+      "Rules + keyword lists (cheap, brittle, easily evaded)",
+      "Single multimodal foundation model vs specialized per-category classifiers",
+      "Fully async moderation with reactive user reporting as a safety net",
+      "Federated hash-sharing with industry databases for known-bad media"
+    ],
+    "observability": [
+      "Per-category precision/recall at operating points vs golden sets",
+      "Auto-decision rate and reviewer-overturn rate",
+      "Queue depth + review latency by severity",
+      "Prevalence dashboards and spike alerts per category",
+      "Model version + traffic split; embedding index freshness",
+      "Appeal volume and overturn trends"
+    ],
+    "security": [
+      "Secure, access-controlled pipelines for illegal content + legal reporting duties",
+      "Reviewer wellbeing (exposure limits, blurring tooling)",
+      "Adversarial evasion monitoring and rapid model updates",
+      "PII minimization and privacy in stored content/decisions",
+      "Immutable audit trail of automated + human decisions for regulators and appeals"
+    ],
     "reference_answer": "A strong answer keeps the synchronous publish path cheap (hash-matching known-bad + a fast text model) and pushes expensive multimodal analysis into an async cheap-to-expensive cascade that spends GPU only on content that survives earlier stages. It treats humans as a scarce resource: auto-decide the high-confidence mass, route only the uncertain confidence band and high-severity items to prioritized queues, and turn reviewer and appeal decisions into labels via active learning. It sets per-category operating points reflecting asymmetric cost — very high recall for illegal/egregious harm, caution against over-removal for borderline speech — and evaluates with per-category precision/recall against golden sets plus prevalence estimation, not accuracy. It handles policy change and annotator disagreement in labeling, guards against appeal feedback-loop bias, and monitors drift from adversarial evasion and emerging harmful trends as a first-class concern, with safe golden-set/shadow model rollout and full auditability.",
     "note_on_realism": "Keep discussion educational and framework-based; do not produce operational detail about creating harmful content or evading real safety systems."
   },

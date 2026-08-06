@@ -3,23 +3,87 @@
   "title": "Design a Distributed API Rate Limiter",
   "track": "engineering",
   "domain": "system_design",
+  "areas": [
+    "engineering"
+  ],
   "modality": "system_design",
   "difficulty": "mid",
-  "tags": ["rate-limiting", "redis", "token-bucket", "sliding-window", "distributed"],
+  "tags": [
+    "rate-limiting",
+    "redis",
+    "token-bucket",
+    "sliding-window",
+    "distributed"
+  ],
   "prompt": "Design a distributed rate limiter that caps how many requests a client can make to an API — for example 1000 requests per minute per API key — enforced consistently across a fleet of API servers behind a load balancer.",
   "blurb": "Token bucket vs sliding window, Redis-backed counters, cross-node consistency, and fail-open vs fail-closed.",
   "rubric": [
-    { "key": "requirements", "label": "Requirements gathering", "description": "Separates functional (per-key limits, multiple tiers, response headers) from non-functional (low added latency, accuracy, availability, fail-mode).", "weight": 1.0 },
-    { "key": "clarifying_questions", "label": "Clarifying questions", "description": "Asks about limit granularity (key/IP/user/endpoint), accuracy tolerance, distributed vs per-node, latency budget, fail-open vs closed.", "weight": 1.0 },
-    { "key": "algorithms", "label": "Algorithm choice", "description": "Token bucket, leaky bucket, fixed window, sliding window log, sliding window counter — tradeoffs of burst handling, memory, accuracy.", "weight": 1.3 },
-    { "key": "estimations", "label": "Estimations", "description": "Estimates QPS, number of keys, memory per counter, Redis ops/sec, added latency budget.", "weight": 0.9 },
-    { "key": "api_design", "label": "API & placement", "description": "Where the limiter sits (gateway/middleware/sidecar), the check contract, 429 responses and Retry-After/rate-limit headers.", "weight": 1.0 },
-    { "key": "data_model", "label": "State model", "description": "Counter/bucket keys, TTLs, per-window structure in Redis; atomic update via Lua/INCR.", "weight": 1.0 },
-    { "key": "high_level_design", "label": "High-level design", "description": "Request → limiter middleware → shared counter store → allow/deny; how counters are shared across nodes.", "weight": 1.2 },
-    { "key": "distributed_consistency", "label": "Cross-node consistency", "description": "Shared Redis vs local counters, atomic increments, race conditions, and the accuracy/latency tradeoff of centralization.", "weight": 1.2 },
-    { "key": "fail_mode", "label": "Fail-open vs fail-closed", "description": "What happens when the counter store is unreachable; graceful degradation, local fallback limits.", "weight": 1.1 },
-    { "key": "scaling", "label": "Scaling & hot keys", "description": "Sharding counters, hot-key (one abusive key) contention, local token pre-fetch, replication.", "weight": 1.0 },
-    { "key": "observability", "label": "Observability", "description": "Throttle rate, near-limit clients, limiter latency, store errors.", "weight": 0.8 }
+    {
+      "key": "requirements",
+      "label": "Requirements gathering",
+      "description": "Separates functional (per-key limits, multiple tiers, response headers) from non-functional (low added latency, accuracy, availability, fail-mode).",
+      "weight": 1.0
+    },
+    {
+      "key": "clarifying_questions",
+      "label": "Clarifying questions",
+      "description": "Asks about limit granularity (key/IP/user/endpoint), accuracy tolerance, distributed vs per-node, latency budget, fail-open vs closed.",
+      "weight": 1.0
+    },
+    {
+      "key": "algorithms",
+      "label": "Algorithm choice",
+      "description": "Token bucket, leaky bucket, fixed window, sliding window log, sliding window counter — tradeoffs of burst handling, memory, accuracy.",
+      "weight": 1.3
+    },
+    {
+      "key": "estimations",
+      "label": "Estimations",
+      "description": "Estimates QPS, number of keys, memory per counter, Redis ops/sec, added latency budget.",
+      "weight": 0.9
+    },
+    {
+      "key": "api_design",
+      "label": "API & placement",
+      "description": "Where the limiter sits (gateway/middleware/sidecar), the check contract, 429 responses and Retry-After/rate-limit headers.",
+      "weight": 1.0
+    },
+    {
+      "key": "data_model",
+      "label": "State model",
+      "description": "Counter/bucket keys, TTLs, per-window structure in Redis; atomic update via Lua/INCR.",
+      "weight": 1.0
+    },
+    {
+      "key": "high_level_design",
+      "label": "High-level design",
+      "description": "Request → limiter middleware → shared counter store → allow/deny; how counters are shared across nodes.",
+      "weight": 1.2
+    },
+    {
+      "key": "distributed_consistency",
+      "label": "Cross-node consistency",
+      "description": "Shared Redis vs local counters, atomic increments, race conditions, and the accuracy/latency tradeoff of centralization.",
+      "weight": 1.2
+    },
+    {
+      "key": "fail_mode",
+      "label": "Fail-open vs fail-closed",
+      "description": "What happens when the counter store is unreachable; graceful degradation, local fallback limits.",
+      "weight": 1.1
+    },
+    {
+      "key": "scaling",
+      "label": "Scaling & hot keys",
+      "description": "Sharding counters, hot-key (one abusive key) contention, local token pre-fetch, replication.",
+      "weight": 1.0
+    },
+    {
+      "key": "observability",
+      "label": "Observability",
+      "description": "Throttle rate, near-limit clients, limiter latency, store errors.",
+      "weight": 0.8
+    }
   ],
   "reference": {
     "functional_requirements": [
@@ -51,7 +115,13 @@
       "latency": "Limiter must stay within a ~1-5ms budget; a same-AZ Redis round trip is sub-ms",
       "sharding": "1M ops/s exceeds a single Redis node's comfort — shard by key or use a cluster"
     },
-    "core_components": ["Limiter middleware/library in each API node (or API gateway)", "Shared counter store (Redis/Redis Cluster)", "Config service for limit rules", "Metrics/alerting", "Optional local token cache per node"],
+    "core_components": [
+      "Limiter middleware/library in each API node (or API gateway)",
+      "Shared counter store (Redis/Redis Cluster)",
+      "Config service for limit rules",
+      "Metrics/alerting",
+      "Optional local token cache per node"
+    ],
     "data_model": [
       "Token bucket: key → {tokens, last_refill_ts}; refill computed lazily on access",
       "Sliding-window counter: key → two fixed-window counts (current, previous) with weighting",
@@ -65,21 +135,60 @@
     ],
     "high_level_design": "The limiter runs as middleware in each API node (or at the API gateway). On each request it derives the client key and rule, then executes an atomic update against a shared Redis store — ideally a Lua script that reads the bucket, refills tokens by elapsed time, decrements, and returns allow/deny in one round trip (avoiding read-modify-write races). If allowed, the request proceeds; if not, it returns 429 with headers. Counters carry TTLs to self-expire. To cut Redis load and latency, each node can pre-fetch a batch of tokens locally (approximate) and reconcile periodically. On Redis failure the limiter falls open (or to a conservative local limit) so the API stays up.",
     "deep_dives": [
-      { "topic": "algorithms", "probe": "Compare fixed-window vs sliding-window vs token bucket. Fixed window allows a 2x burst at the boundary — show me why, and how sliding-window-counter fixes it cheaply." },
-      { "topic": "distributed_consistency", "probe": "Ten API nodes hit the same key concurrently. How do you avoid a read-modify-write race so two nodes don't both admit the last token? Walk me through the atomic operation." },
-      { "topic": "fail_mode", "probe": "Redis is unreachable for 30 seconds. What does the limiter do — fail open, fail closed, or fall back to a local per-node limit? Justify the choice for an API." },
-      { "topic": "hot_key", "probe": "One abusive key sends 500K req/s, all hashing to one Redis shard. That shard is now hot. How do you handle a single hot counter — local pre-decrement, sharded sub-counters, or shed early?" },
-      { "topic": "cache_stampede", "probe": "You cache limit-rule config locally with a TTL. When a popular rule's cache entry expires under load, how do you avoid every node stampeding the config store at once?" },
-      { "topic": "cdc_config", "probe": "Limit rules live in a config database. How do you propagate a rule change to every node quickly — CDC/Debezium to a stream, pub/sub invalidation, or polling — and how fresh must it be?" }
+      {
+        "topic": "algorithms",
+        "probe": "Compare fixed-window vs sliding-window vs token bucket. Fixed window allows a 2x burst at the boundary — show me why, and how sliding-window-counter fixes it cheaply."
+      },
+      {
+        "topic": "distributed_consistency",
+        "probe": "Ten API nodes hit the same key concurrently. How do you avoid a read-modify-write race so two nodes don't both admit the last token? Walk me through the atomic operation."
+      },
+      {
+        "topic": "fail_mode",
+        "probe": "Redis is unreachable for 30 seconds. What does the limiter do — fail open, fail closed, or fall back to a local per-node limit? Justify the choice for an API."
+      },
+      {
+        "topic": "hot_key",
+        "probe": "One abusive key sends 500K req/s, all hashing to one Redis shard. That shard is now hot. How do you handle a single hot counter — local pre-decrement, sharded sub-counters, or shed early?"
+      },
+      {
+        "topic": "cache_stampede",
+        "probe": "You cache limit-rule config locally with a TTL. When a popular rule's cache entry expires under load, how do you avoid every node stampeding the config store at once?"
+      },
+      {
+        "topic": "cdc_config",
+        "probe": "Limit rules live in a config database. How do you propagate a rule change to every node quickly — CDC/Debezium to a stream, pub/sub invalidation, or polling — and how fresh must it be?"
+      }
     ],
     "followup_bank": [
-      { "trigger": "mentions fixed window", "question": "Fixed window lets a client send 2x the limit across a window boundary. How do you fix that without the memory of a full sliding-window log?" },
-      { "trigger": "mentions token bucket", "question": "How do you make token-bucket refill atomic across nodes so two servers don't both spend the last token?" },
-      { "trigger": "mentions redis or counter", "question": "How do you make the read-refill-decrement atomic — Lua script, INCR+EXPIRE, or WATCH/MULTI — and what are the race risks of each?" },
-      { "trigger": "mentions cache or config", "question": "For cached limit rules, what's the eviction policy and how do you avoid a stampede on the config store when a hot rule expires?" },
-      { "trigger": "mentions database or config store", "question": "How do rule changes propagate to nodes — CDC/Debezium to a stream vs pub/sub invalidation vs polling — and what staleness is acceptable?" },
-      { "trigger": "mentions failure or unavailable", "question": "Fail-open vs fail-closed when the counter store is down — which do you pick for a public API and why?" },
-      { "trigger": "mentions hot key or abusive", "question": "One key saturates a single shard. How do you spread or absorb that hot counter without losing accuracy?" }
+      {
+        "trigger": "mentions fixed window",
+        "question": "Fixed window lets a client send 2x the limit across a window boundary. How do you fix that without the memory of a full sliding-window log?"
+      },
+      {
+        "trigger": "mentions token bucket",
+        "question": "How do you make token-bucket refill atomic across nodes so two servers don't both spend the last token?"
+      },
+      {
+        "trigger": "mentions redis or counter",
+        "question": "How do you make the read-refill-decrement atomic — Lua script, INCR+EXPIRE, or WATCH/MULTI — and what are the race risks of each?"
+      },
+      {
+        "trigger": "mentions cache or config",
+        "question": "For cached limit rules, what's the eviction policy and how do you avoid a stampede on the config store when a hot rule expires?"
+      },
+      {
+        "trigger": "mentions database or config store",
+        "question": "How do rule changes propagate to nodes — CDC/Debezium to a stream vs pub/sub invalidation vs polling — and what staleness is acceptable?"
+      },
+      {
+        "trigger": "mentions failure or unavailable",
+        "question": "Fail-open vs fail-closed when the counter store is down — which do you pick for a public API and why?"
+      },
+      {
+        "trigger": "mentions hot key or abusive",
+        "question": "One key saturates a single shard. How do you spread or absorb that hot counter without losing accuracy?"
+      }
     ],
     "scaling": [
       "Shard counters across a Redis Cluster by client key",

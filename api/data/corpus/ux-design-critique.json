@@ -2,19 +2,59 @@
   "id": "ux-design-critique",
   "title": "UX Critique & Redesign: A Broken Signup Flow",
   "track": "professional",
-  "domain": "ux_design",
+  "domain": "product_sense",
+  "areas": [
+    "product_management"
+  ],
   "modality": "conversational",
   "difficulty": "mid",
-  "tags": ["ux", "usability", "heuristic-evaluation", "critique", "redesign", "user-flow"],
+  "tags": [
+    "ux",
+    "usability",
+    "heuristic-evaluation",
+    "critique",
+    "redesign",
+    "user-flow"
+  ],
   "prompt": "A mobile app has a signup flow that users are dropping out of. It's a single long screen that asks, in order, for full name, email, password, phone number, date of birth, home address, and how you heard about us — with a generic 'Please fill all fields' error at the bottom if anything is wrong, and no way to see the password you typed. Walk me through how you'd critique this flow and how you'd redesign it. What's wrong, and what would you change?",
   "blurb": "A design-critique exercise — evaluate a flow against usability heuristics and real user needs, then redesign it with clear rationale and tradeoffs.",
   "rubric": [
-    { "key": "user_empathy", "label": "User empathy & needs", "description": "Grounds the critique in the user's goal and context (a motivated new user on mobile who wants to get in fast) and the emotional/cognitive cost of the current flow, not just aesthetic opinions.", "weight": 1.2 },
-    { "key": "heuristics", "label": "Heuristic rigor", "description": "Systematically applies usability principles (visibility of system status, error prevention, clear error messaging, recognition over recall, minimal user input, match to real world) rather than ad-hoc reactions.", "weight": 1.3 },
-    { "key": "prioritization", "label": "Problem prioritization", "description": "Separates the high-impact problems (asking for too much up front, unusable error handling) from minor ones, and reasons about which changes move the drop-off metric most.", "weight": 1.1 },
-    { "key": "redesign", "label": "Redesign quality", "description": "Proposes concrete, defensible changes (progressive disclosure / defer non-essential fields, inline field-level validation, show-password toggle, sensible input types/autofill, social/SSO option) tied to the problems found.", "weight": 1.2 },
-    { "key": "tradeoffs", "label": "Tradeoffs & constraints", "description": "Acknowledges the business/data tradeoffs (the company wants phone/address/attribution) and negotiates them (defer, make optional, ask post-signup) rather than just deleting fields, and considers accessibility.", "weight": 1.0 },
-    { "key": "communication", "label": "Communication & process", "description": "Structured critique, would validate with users/data (usability testing, funnel analytics, A/B test) rather than asserting, and communicates rationale clearly.", "weight": 1.0 }
+    {
+      "key": "user_empathy",
+      "label": "User empathy & needs",
+      "description": "Grounds the critique in the user's goal and context (a motivated new user on mobile who wants to get in fast) and the emotional/cognitive cost of the current flow, not just aesthetic opinions.",
+      "weight": 1.2
+    },
+    {
+      "key": "heuristics",
+      "label": "Heuristic rigor",
+      "description": "Systematically applies usability principles (visibility of system status, error prevention, clear error messaging, recognition over recall, minimal user input, match to real world) rather than ad-hoc reactions.",
+      "weight": 1.3
+    },
+    {
+      "key": "prioritization",
+      "label": "Problem prioritization",
+      "description": "Separates the high-impact problems (asking for too much up front, unusable error handling) from minor ones, and reasons about which changes move the drop-off metric most.",
+      "weight": 1.1
+    },
+    {
+      "key": "redesign",
+      "label": "Redesign quality",
+      "description": "Proposes concrete, defensible changes (progressive disclosure / defer non-essential fields, inline field-level validation, show-password toggle, sensible input types/autofill, social/SSO option) tied to the problems found.",
+      "weight": 1.2
+    },
+    {
+      "key": "tradeoffs",
+      "label": "Tradeoffs & constraints",
+      "description": "Acknowledges the business/data tradeoffs (the company wants phone/address/attribution) and negotiates them (defer, make optional, ask post-signup) rather than just deleting fields, and considers accessibility.",
+      "weight": 1.0
+    },
+    {
+      "key": "communication",
+      "label": "Communication & process",
+      "description": "Structured critique, would validate with users/data (usability testing, funnel analytics, A/B test) rather than asserting, and communicates rationale clearly.",
+      "weight": 1.0
+    }
   ],
   "reference": {
     "scenario": "Conversational design-critique at the mid bar. The candidate is given a deliberately bad mobile signup flow and asked to critique and redesign it. A strong candidate starts from the user and the goal — a motivated new user on a phone who wants to get into the product with minimal friction — then critiques systematically against usability heuristics rather than reacting aesthetically. The core problems: (1) it asks for far too much up front (seven fields, several not needed to create an account — phone, DOB, address, attribution), raising cognitive load and abandonment; (2) error handling violates 'help users recognize and recover from errors' — a single generic 'Please fill all fields' at the bottom gives no field-level guidance and no inline validation; (3) the hidden password with no show toggle causes entry errors (visibility of system status / error prevention); (4) likely missing input-type and autofill affordances (email keyboard, autocomplete), and no SSO/social option to skip typing entirely. The redesign applies progressive disclosure: ask only what's essential to create the account (email + password, or SSO), defer or make optional the marketing/profile fields to after signup or a later step, add inline field-level validation with specific messages, a show-password toggle and clear password rules, correct input types and autofill, and consider social login. Critically, a strong candidate negotiates the business's reasons for those fields (attribution, phone verification, compliance for DOB) rather than just deleting them — deferring, making optional, or explaining value — and mentions accessibility (labels, contrast, tap targets, screen readers). They close by wanting to validate: funnel analytics to see where drop-off actually happens, usability testing, and an A/B test of the redesign. Weak answers give surface aesthetic opinions, list random changes without heuristics or prioritization, delete fields without acknowledging why they exist, or never mention validating with users/data.",
@@ -31,13 +71,34 @@
       "Validate, don't assert: look at funnel analytics to see exactly which field/step drops users, run quick usability tests, and A/B test the redesign against the current flow rather than trusting opinion."
     ],
     "probes": [
-      { "trigger": "candidate gives only aesthetic opinions", "question": "Set aside how it looks — walk me through it against usability principles. Which heuristics is it violating and where?" },
-      { "trigger": "candidate just deletes fields", "question": "The business added phone, date of birth, and address for real reasons — verification, compliance, shipping. How do you handle those instead of just removing them?" },
-      { "trigger": "candidate doesn't prioritize", "question": "If you could only change two things to reduce drop-off, which two and why?" },
-      { "trigger": "candidate ignores the error handling", "question": "A user leaves one field blank and gets 'Please fill all fields.' What's wrong with that, and how would you redesign the validation and messaging?" },
-      { "trigger": "candidate never mentions the user's context", "question": "Who is this user and what are they trying to do in this moment? How should that shape the flow?" },
-      { "trigger": "candidate asserts the redesign is better with no validation plan", "question": "How would you know your redesign actually works and isn't just your preference? What would you measure or test?" },
-      { "trigger": "candidate never mentions accessibility", "question": "How does this flow work for someone using a screen reader or with low vision? What would you change?" }
+      {
+        "trigger": "candidate gives only aesthetic opinions",
+        "question": "Set aside how it looks — walk me through it against usability principles. Which heuristics is it violating and where?"
+      },
+      {
+        "trigger": "candidate just deletes fields",
+        "question": "The business added phone, date of birth, and address for real reasons — verification, compliance, shipping. How do you handle those instead of just removing them?"
+      },
+      {
+        "trigger": "candidate doesn't prioritize",
+        "question": "If you could only change two things to reduce drop-off, which two and why?"
+      },
+      {
+        "trigger": "candidate ignores the error handling",
+        "question": "A user leaves one field blank and gets 'Please fill all fields.' What's wrong with that, and how would you redesign the validation and messaging?"
+      },
+      {
+        "trigger": "candidate never mentions the user's context",
+        "question": "Who is this user and what are they trying to do in this moment? How should that shape the flow?"
+      },
+      {
+        "trigger": "candidate asserts the redesign is better with no validation plan",
+        "question": "How would you know your redesign actually works and isn't just your preference? What would you measure or test?"
+      },
+      {
+        "trigger": "candidate never mentions accessibility",
+        "question": "How does this flow work for someone using a screen reader or with low vision? What would you change?"
+      }
     ],
     "red_flags": [
       "Surface aesthetic critique with no reference to usability heuristics or user goals",

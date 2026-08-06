@@ -3,22 +3,82 @@
   "title": "Design the Snake Game (OOD)",
   "track": "engineering",
   "domain": "low_level_design",
+  "areas": [
+    "engineering"
+  ],
   "modality": "system_design",
   "difficulty": "mid",
-  "tags": ["ood", "class-design", "game-loop", "data-structures", "state-machine", "machine-coding"],
+  "tags": [
+    "ood",
+    "class-design",
+    "game-loop",
+    "data-structures",
+    "state-machine",
+    "machine-coding"
+  ],
   "prompt": "Design the classic Snake game. A snake moves on a grid in a direction the player controls; it grows when it eats food and the game ends when it hits a wall or itself. Model the classes, the game loop, and — importantly — the data structures that make each move O(1) rather than scanning the whole snake. Sketch the class diagram.",
   "blurb": "Deceptively simple OOD where the data structures matter — an O(1) move using a deque plus a position set for self-collision.",
   "rubric": [
-    { "key": "requirements_clarification", "label": "Requirements clarification", "description": "Clarifies grid size, controls, wall behavior (die vs wrap), food spawning, growth rule, and win condition before designing.", "weight": 1.0 },
-    { "key": "core_entities", "label": "Core entities", "description": "Identifies Game, Board/Grid, Snake, Food, Cell/Point, Direction, and a game-loop/engine.", "weight": 1.0 },
-    { "key": "class_design", "label": "Class design", "description": "Snake owns its body and movement, Board owns dimensions and food, Game orchestrates ticks; no god class with a raw 2D array holding everything.", "weight": 1.1 },
-    { "key": "data_structures", "label": "Data structures", "description": "Deque for the snake body plus a HashSet of occupied cells so each move (head add / tail remove / self-collision check) is O(1), not O(length).", "weight": 1.3 },
-    { "key": "game_loop", "label": "Game loop / movement", "description": "A tick model: read direction, compute new head, detect collision/food, grow or move, spawn food; deterministic and testable.", "weight": 1.1 },
-    { "key": "state_machine", "label": "State machine", "description": "Game states (RUNNING/PAUSED/GAME_OVER/WON) and transitions; rejecting input after game over; illegal 180-degree reversal.", "weight": 1.0 },
-    { "key": "api_methods", "label": "API methods", "description": "move(direction)/tick(), changeDirection, spawnFood, isGameOver, getScore; clean signatures.", "weight": 0.9 },
-    { "key": "edge_cases", "label": "Edge cases", "description": "Wall hit, self-collision, food on the snake, reversing into itself, board full (win), simultaneous grow-and-move at start.", "weight": 1.0 },
-    { "key": "extensibility", "label": "Extensibility", "description": "Wrap-around walls, obstacles, multiple food types/power-ups, or multiplayer slot in without rewriting movement.", "weight": 0.9 },
-    { "key": "communication", "label": "Communication", "description": "Explains the O(1) move data structures clearly and reasons about the game-loop timing/collision order.", "weight": 0.8 }
+    {
+      "key": "requirements_clarification",
+      "label": "Requirements clarification",
+      "description": "Clarifies grid size, controls, wall behavior (die vs wrap), food spawning, growth rule, and win condition before designing.",
+      "weight": 1.0
+    },
+    {
+      "key": "core_entities",
+      "label": "Core entities",
+      "description": "Identifies Game, Board/Grid, Snake, Food, Cell/Point, Direction, and a game-loop/engine.",
+      "weight": 1.0
+    },
+    {
+      "key": "class_design",
+      "label": "Class design",
+      "description": "Snake owns its body and movement, Board owns dimensions and food, Game orchestrates ticks; no god class with a raw 2D array holding everything.",
+      "weight": 1.1
+    },
+    {
+      "key": "data_structures",
+      "label": "Data structures",
+      "description": "Deque for the snake body plus a HashSet of occupied cells so each move (head add / tail remove / self-collision check) is O(1), not O(length).",
+      "weight": 1.3
+    },
+    {
+      "key": "game_loop",
+      "label": "Game loop / movement",
+      "description": "A tick model: read direction, compute new head, detect collision/food, grow or move, spawn food; deterministic and testable.",
+      "weight": 1.1
+    },
+    {
+      "key": "state_machine",
+      "label": "State machine",
+      "description": "Game states (RUNNING/PAUSED/GAME_OVER/WON) and transitions; rejecting input after game over; illegal 180-degree reversal.",
+      "weight": 1.0
+    },
+    {
+      "key": "api_methods",
+      "label": "API methods",
+      "description": "move(direction)/tick(), changeDirection, spawnFood, isGameOver, getScore; clean signatures.",
+      "weight": 0.9
+    },
+    {
+      "key": "edge_cases",
+      "label": "Edge cases",
+      "description": "Wall hit, self-collision, food on the snake, reversing into itself, board full (win), simultaneous grow-and-move at start.",
+      "weight": 1.0
+    },
+    {
+      "key": "extensibility",
+      "label": "Extensibility",
+      "description": "Wrap-around walls, obstacles, multiple food types/power-ups, or multiplayer slot in without rewriting movement.",
+      "weight": 0.9
+    },
+    {
+      "key": "communication",
+      "label": "Communication",
+      "description": "Explains the O(1) move data structures clearly and reasons about the game-loop timing/collision order.",
+      "weight": 0.8
+    }
   ],
   "reference": {
     "functional_requirements": [
@@ -43,13 +103,91 @@
       "Single player, or is multiplayer in scope?"
     ],
     "core_classes": [
-      { "name": "Game / GameEngine", "responsibility": "Orchestrates the tick loop: reads input, advances the snake, resolves collisions/food, updates score and game state.", "key_fields": ["Board board", "Snake snake", "GameState state", "int score", "Direction pendingDirection"], "key_methods": ["void tick()", "void changeDirection(Direction d)", "GameState getState()", "int getScore()"] },
-      { "name": "Board / Grid", "responsibility": "Owns dimensions and current food; validates bounds; spawns food on free cells.", "key_fields": ["int width", "int height", "Point food", "Set<Point> obstacles"], "key_methods": ["boolean inBounds(Point p)", "Point spawnFood(Set<Point> occupied)", "boolean isObstacle(Point p)"] },
-      { "name": "Snake", "responsibility": "Owns the body as an ordered deque plus a set of occupied cells; moves in O(1) and detects self-collision in O(1).", "key_fields": ["Deque<Point> body (head..tail)", "Set<Point> occupied", "Direction direction"], "key_methods": ["Point nextHead()", "void move(Point newHead, boolean grow)", "boolean collidesWith(Point p)", "int length()"] },
-      { "name": "Point / Cell", "responsibility": "Immutable (row, col) coordinate; used as map/set key.", "key_fields": ["row", "col"], "key_methods": ["equals/hashCode", "Point translate(Direction d)"] },
-      { "name": "Direction (enum)", "responsibility": "UP/DOWN/LEFT/RIGHT with (dr, dc) deltas and an opposite() for the no-reversal rule.", "key_fields": ["dRow", "dCol"], "key_methods": ["Direction opposite()"] },
-      { "name": "Food", "responsibility": "Location and effect (normal grows by 1; power-ups could grow more or change speed).", "key_fields": ["Point position", "int growth"], "key_methods": [] },
-      { "name": "GameState (enum)", "responsibility": "RUNNING, PAUSED, GAME_OVER, WON.", "key_fields": [], "key_methods": [] }
+      {
+        "name": "Game / GameEngine",
+        "responsibility": "Orchestrates the tick loop: reads input, advances the snake, resolves collisions/food, updates score and game state.",
+        "key_fields": [
+          "Board board",
+          "Snake snake",
+          "GameState state",
+          "int score",
+          "Direction pendingDirection"
+        ],
+        "key_methods": [
+          "void tick()",
+          "void changeDirection(Direction d)",
+          "GameState getState()",
+          "int getScore()"
+        ]
+      },
+      {
+        "name": "Board / Grid",
+        "responsibility": "Owns dimensions and current food; validates bounds; spawns food on free cells.",
+        "key_fields": [
+          "int width",
+          "int height",
+          "Point food",
+          "Set<Point> obstacles"
+        ],
+        "key_methods": [
+          "boolean inBounds(Point p)",
+          "Point spawnFood(Set<Point> occupied)",
+          "boolean isObstacle(Point p)"
+        ]
+      },
+      {
+        "name": "Snake",
+        "responsibility": "Owns the body as an ordered deque plus a set of occupied cells; moves in O(1) and detects self-collision in O(1).",
+        "key_fields": [
+          "Deque<Point> body (head..tail)",
+          "Set<Point> occupied",
+          "Direction direction"
+        ],
+        "key_methods": [
+          "Point nextHead()",
+          "void move(Point newHead, boolean grow)",
+          "boolean collidesWith(Point p)",
+          "int length()"
+        ]
+      },
+      {
+        "name": "Point / Cell",
+        "responsibility": "Immutable (row, col) coordinate; used as map/set key.",
+        "key_fields": [
+          "row",
+          "col"
+        ],
+        "key_methods": [
+          "equals/hashCode",
+          "Point translate(Direction d)"
+        ]
+      },
+      {
+        "name": "Direction (enum)",
+        "responsibility": "UP/DOWN/LEFT/RIGHT with (dr, dc) deltas and an opposite() for the no-reversal rule.",
+        "key_fields": [
+          "dRow",
+          "dCol"
+        ],
+        "key_methods": [
+          "Direction opposite()"
+        ]
+      },
+      {
+        "name": "Food",
+        "responsibility": "Location and effect (normal grows by 1; power-ups could grow more or change speed).",
+        "key_fields": [
+          "Point position",
+          "int growth"
+        ],
+        "key_methods": []
+      },
+      {
+        "name": "GameState (enum)",
+        "responsibility": "RUNNING, PAUSED, GAME_OVER, WON.",
+        "key_fields": [],
+        "key_methods": []
+      }
     ],
     "relationships": [
       "Game composes a Board and a Snake and owns the GameState",
@@ -59,9 +197,21 @@
       "Direction and GameState are enums"
     ],
     "design_patterns": [
-      { "pattern": "State (light)", "where": "GameState gating input and ticks", "why": "Cleanly stop movement/input after GAME_OVER or during PAUSED." },
-      { "pattern": "Strategy (optional)", "where": "Wall behavior (die vs wrap) and food/power-up effects", "why": "Swap rules without editing the movement core." },
-      { "pattern": "Observer (optional)", "where": "Renderer/score display subscribing to game events", "why": "Decouple game logic from rendering." }
+      {
+        "pattern": "State (light)",
+        "where": "GameState gating input and ticks",
+        "why": "Cleanly stop movement/input after GAME_OVER or during PAUSED."
+      },
+      {
+        "pattern": "Strategy (optional)",
+        "where": "Wall behavior (die vs wrap) and food/power-up effects",
+        "why": "Swap rules without editing the movement core."
+      },
+      {
+        "pattern": "Observer (optional)",
+        "where": "Renderer/score display subscribing to game events",
+        "why": "Decouple game logic from rendering."
+      }
     ],
     "apis": [
       "void tick() — advance one step",
@@ -98,16 +248,40 @@
       "Multiplayer: multiple Snake instances sharing a Board with per-snake occupied sets merged for collision"
     ],
     "deep_dives": [
-      { "topic": "o1_move", "probe": "What data structure holds the snake body, and how do you make each move O(1) — head add, tail remove, and checking self-collision without scanning the whole snake?" },
-      { "topic": "tail_chase_subtlety", "probe": "The snake's head moves into the cell its tail currently occupies. Is that a collision? Walk me through the order of tail-remove vs collision-check so it's correct whether or not the snake is growing." },
-      { "topic": "food_spawn", "probe": "How do you spawn food on a random free cell efficiently as the snake fills the board — random-retry vs maintaining a free-cell set?" }
+      {
+        "topic": "o1_move",
+        "probe": "What data structure holds the snake body, and how do you make each move O(1) — head add, tail remove, and checking self-collision without scanning the whole snake?"
+      },
+      {
+        "topic": "tail_chase_subtlety",
+        "probe": "The snake's head moves into the cell its tail currently occupies. Is that a collision? Walk me through the order of tail-remove vs collision-check so it's correct whether or not the snake is growing."
+      },
+      {
+        "topic": "food_spawn",
+        "probe": "How do you spawn food on a random free cell efficiently as the snake fills the board — random-retry vs maintaining a free-cell set?"
+      }
     ],
     "followup_bank": [
-      { "trigger": "mentions array or scan or loop through body", "question": "Checking self-collision by scanning the body is O(length) per tick. What structure gives you O(1) collision checks plus O(1) grow/move?" },
-      { "trigger": "mentions deque or queue or list for body", "question": "Good — pair the deque with what so self-collision is O(1) instead of a linear search?" },
-      { "trigger": "mentions food or spawn", "question": "How do you place food only on empty cells, and does your approach degrade when the snake nearly fills the board?" },
-      { "trigger": "mentions direction or turn", "question": "How do you prevent a 180-degree reversal, and how do you handle several direction inputs arriving within one tick?" },
-      { "trigger": "mentions wall or edge or collision", "question": "Where does wall-vs-wrap behavior live so you can switch it without touching the movement code?" }
+      {
+        "trigger": "mentions array or scan or loop through body",
+        "question": "Checking self-collision by scanning the body is O(length) per tick. What structure gives you O(1) collision checks plus O(1) grow/move?"
+      },
+      {
+        "trigger": "mentions deque or queue or list for body",
+        "question": "Good — pair the deque with what so self-collision is O(1) instead of a linear search?"
+      },
+      {
+        "trigger": "mentions food or spawn",
+        "question": "How do you place food only on empty cells, and does your approach degrade when the snake nearly fills the board?"
+      },
+      {
+        "trigger": "mentions direction or turn",
+        "question": "How do you prevent a 180-degree reversal, and how do you handle several direction inputs arriving within one tick?"
+      },
+      {
+        "trigger": "mentions wall or edge or collision",
+        "question": "Where does wall-vs-wrap behavior live so you can switch it without touching the movement code?"
+      }
     ],
     "tradeoffs": [
       "Deque + HashSet (O(1) move, extra memory for the set) vs array/list only (simpler, O(length) collision) — the set is the key insight",

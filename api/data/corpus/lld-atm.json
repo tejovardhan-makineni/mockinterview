@@ -3,23 +3,88 @@
   "title": "Design an ATM (OOD)",
   "track": "engineering",
   "domain": "low_level_design",
+  "areas": [
+    "engineering"
+  ],
   "modality": "system_design",
   "difficulty": "mid",
-  "tags": ["ood", "state-pattern", "state-machine", "chain-of-responsibility", "transaction", "machine-coding"],
+  "tags": [
+    "ood",
+    "state-pattern",
+    "state-machine",
+    "chain-of-responsibility",
+    "transaction",
+    "machine-coding"
+  ],
   "prompt": "Design an ATM. A customer inserts a card, authenticates with a PIN, then withdraws or deposits cash, checks balance, and takes their card back. Model the classes and, importantly, the ATM's state machine (card inserted, authenticated, transaction, dispensing). Show how cash is dispensed from the machine's bill denominations. Sketch the class diagram.",
   "blurb": "The State-pattern classic with a twist — model the ATM flow as states and solve cash dispensing across bill denominations.",
   "rubric": [
-    { "key": "requirements_clarification", "label": "Requirements clarification", "description": "Clarifies transaction types (withdraw/deposit/balance/transfer), auth flow, bill denominations, and whether the bank backend is in scope before designing.", "weight": 1.0 },
-    { "key": "core_entities", "label": "Core entities", "description": "Identifies ATM, Card, Account, the State hierarchy, Transaction types, CashDispenser, and a BankService boundary.", "weight": 1.0 },
-    { "key": "state_machine", "label": "State machine", "description": "A clean ATM state machine (Idle/CardInserted/Authenticated/SelectingTransaction/Dispensing) with well-defined transitions and per-state guards.", "weight": 1.3 },
-    { "key": "class_design", "label": "Class design", "description": "State as objects, CashDispenser separated, Transaction modeled polymorphically, no god ATM class with a mega-switch.", "weight": 1.1 },
-    { "key": "cash_dispensing", "label": "Cash dispensing", "description": "Dispenses an amount across denominations (greedy or Chain-of-Responsibility per bill), handles insufficient bills / non-dispensable amounts.", "weight": 1.1 },
-    { "key": "design_patterns", "label": "Design patterns", "description": "State for the flow, Chain-of-Responsibility for denomination dispensing, Strategy/polymorphism for transaction types; each justified.", "weight": 1.0 },
-    { "key": "api_methods", "label": "API methods", "description": "insertCard, enterPin, selectTransaction, withdraw, deposit, ejectCard; routed through the current state.", "weight": 0.9 },
-    { "key": "edge_cases", "label": "Edge cases", "description": "Wrong PIN / lockout, insufficient funds, ATM out of cash, amount not dispensable, card left behind / timeout, cancel mid-flow.", "weight": 1.0 },
-    { "key": "concurrency", "label": "Concurrency", "description": "Balance updates against the bank backend, avoiding double-debit; the ATM's cash inventory updated atomically with dispensing.", "weight": 0.9 },
-    { "key": "extensibility", "label": "Extensibility", "description": "New transaction types, new denominations, multi-currency, or a new auth method slot in cleanly.", "weight": 0.9 },
-    { "key": "communication", "label": "Communication", "description": "Draws the state diagram, walks a full withdrawal, and reasons about the dispensing and consistency edge cases.", "weight": 0.8 }
+    {
+      "key": "requirements_clarification",
+      "label": "Requirements clarification",
+      "description": "Clarifies transaction types (withdraw/deposit/balance/transfer), auth flow, bill denominations, and whether the bank backend is in scope before designing.",
+      "weight": 1.0
+    },
+    {
+      "key": "core_entities",
+      "label": "Core entities",
+      "description": "Identifies ATM, Card, Account, the State hierarchy, Transaction types, CashDispenser, and a BankService boundary.",
+      "weight": 1.0
+    },
+    {
+      "key": "state_machine",
+      "label": "State machine",
+      "description": "A clean ATM state machine (Idle/CardInserted/Authenticated/SelectingTransaction/Dispensing) with well-defined transitions and per-state guards.",
+      "weight": 1.3
+    },
+    {
+      "key": "class_design",
+      "label": "Class design",
+      "description": "State as objects, CashDispenser separated, Transaction modeled polymorphically, no god ATM class with a mega-switch.",
+      "weight": 1.1
+    },
+    {
+      "key": "cash_dispensing",
+      "label": "Cash dispensing",
+      "description": "Dispenses an amount across denominations (greedy or Chain-of-Responsibility per bill), handles insufficient bills / non-dispensable amounts.",
+      "weight": 1.1
+    },
+    {
+      "key": "design_patterns",
+      "label": "Design patterns",
+      "description": "State for the flow, Chain-of-Responsibility for denomination dispensing, Strategy/polymorphism for transaction types; each justified.",
+      "weight": 1.0
+    },
+    {
+      "key": "api_methods",
+      "label": "API methods",
+      "description": "insertCard, enterPin, selectTransaction, withdraw, deposit, ejectCard; routed through the current state.",
+      "weight": 0.9
+    },
+    {
+      "key": "edge_cases",
+      "label": "Edge cases",
+      "description": "Wrong PIN / lockout, insufficient funds, ATM out of cash, amount not dispensable, card left behind / timeout, cancel mid-flow.",
+      "weight": 1.0
+    },
+    {
+      "key": "concurrency",
+      "label": "Concurrency",
+      "description": "Balance updates against the bank backend, avoiding double-debit; the ATM's cash inventory updated atomically with dispensing.",
+      "weight": 0.9
+    },
+    {
+      "key": "extensibility",
+      "label": "Extensibility",
+      "description": "New transaction types, new denominations, multi-currency, or a new auth method slot in cleanly.",
+      "weight": 0.9
+    },
+    {
+      "key": "communication",
+      "label": "Communication",
+      "description": "Draws the state diagram, walks a full withdrawal, and reasons about the dispensing and consistency edge cases.",
+      "weight": 0.8
+    }
   ],
   "reference": {
     "functional_requirements": [
@@ -46,15 +111,110 @@
       "Do we handle card capture on timeout / left-behind card?"
     ],
     "core_classes": [
-      { "name": "ATM", "responsibility": "Context: holds current State, the CashDispenser, the current session (card/account), and delegates each action to the state.", "key_fields": ["ATMState currentState", "CashDispenser dispenser", "BankService bank", "Card currentCard", "Account currentAccount"], "key_methods": ["void insertCard(Card c)", "void enterPin(String pin)", "void selectTransaction(TxnType t)", "void withdraw(int amount)", "void ejectCard()", "void setState(ATMState s)"] },
-      { "name": "ATMState (interface)", "responsibility": "Encapsulates behavior for one step of the flow; illegal actions are guarded per state.", "key_fields": [], "key_methods": ["void insertCard(ATM m, Card c)", "void enterPin(ATM m, String pin)", "void selectTransaction(ATM m, TxnType t)", "void withdraw(ATM m, int amount)", "void ejectCard(ATM m)"] },
-      { "name": "IdleState / CardInsertedState / AuthenticatedState / SelectingTransactionState / DispensingState", "responsibility": "Concrete states implementing only their legal transitions.", "key_fields": [], "key_methods": ["(override ATMState methods)"] },
-      { "name": "Card", "responsibility": "Card data: number, expiry, linked account reference; no PIN stored in clear.", "key_fields": ["cardNumber", "expiry", "String accountId"], "key_methods": [] },
-      { "name": "Account", "responsibility": "Bank account balance operations (usually via BankService, not local).", "key_fields": ["accountId", "double balance"], "key_methods": ["boolean debit(double amt)", "void credit(double amt)", "double getBalance()"] },
-      { "name": "BankService (interface)", "responsibility": "External boundary: authenticate PIN, check/debit/credit the real account atomically.", "key_fields": [], "key_methods": ["boolean authenticate(Card c, String pin)", "boolean withdraw(String accountId, double amt)", "void deposit(String accountId, double amt)"] },
-      { "name": "Transaction (abstract) / WithdrawTxn, DepositTxn, BalanceTxn", "responsibility": "Polymorphic transaction executed against the account; records amount and outcome.", "key_fields": ["Account account", "double amount", "TxnStatus status"], "key_methods": ["void execute()"] },
-      { "name": "CashDispenser", "responsibility": "Tracks bill inventory and computes/dispenses a payout across denominations.", "key_fields": ["Map<Denomination, Integer> billCount", "CashDispenser next (chain)"], "key_methods": ["boolean canDispense(int amount)", "List<Bill> dispense(int amount)"] },
-      { "name": "Denomination / Bill (enum)", "responsibility": "Bill values the ATM stocks (e.g., 100/50/20/10).", "key_fields": ["value"], "key_methods": [] }
+      {
+        "name": "ATM",
+        "responsibility": "Context: holds current State, the CashDispenser, the current session (card/account), and delegates each action to the state.",
+        "key_fields": [
+          "ATMState currentState",
+          "CashDispenser dispenser",
+          "BankService bank",
+          "Card currentCard",
+          "Account currentAccount"
+        ],
+        "key_methods": [
+          "void insertCard(Card c)",
+          "void enterPin(String pin)",
+          "void selectTransaction(TxnType t)",
+          "void withdraw(int amount)",
+          "void ejectCard()",
+          "void setState(ATMState s)"
+        ]
+      },
+      {
+        "name": "ATMState (interface)",
+        "responsibility": "Encapsulates behavior for one step of the flow; illegal actions are guarded per state.",
+        "key_fields": [],
+        "key_methods": [
+          "void insertCard(ATM m, Card c)",
+          "void enterPin(ATM m, String pin)",
+          "void selectTransaction(ATM m, TxnType t)",
+          "void withdraw(ATM m, int amount)",
+          "void ejectCard(ATM m)"
+        ]
+      },
+      {
+        "name": "IdleState / CardInsertedState / AuthenticatedState / SelectingTransactionState / DispensingState",
+        "responsibility": "Concrete states implementing only their legal transitions.",
+        "key_fields": [],
+        "key_methods": [
+          "(override ATMState methods)"
+        ]
+      },
+      {
+        "name": "Card",
+        "responsibility": "Card data: number, expiry, linked account reference; no PIN stored in clear.",
+        "key_fields": [
+          "cardNumber",
+          "expiry",
+          "String accountId"
+        ],
+        "key_methods": []
+      },
+      {
+        "name": "Account",
+        "responsibility": "Bank account balance operations (usually via BankService, not local).",
+        "key_fields": [
+          "accountId",
+          "double balance"
+        ],
+        "key_methods": [
+          "boolean debit(double amt)",
+          "void credit(double amt)",
+          "double getBalance()"
+        ]
+      },
+      {
+        "name": "BankService (interface)",
+        "responsibility": "External boundary: authenticate PIN, check/debit/credit the real account atomically.",
+        "key_fields": [],
+        "key_methods": [
+          "boolean authenticate(Card c, String pin)",
+          "boolean withdraw(String accountId, double amt)",
+          "void deposit(String accountId, double amt)"
+        ]
+      },
+      {
+        "name": "Transaction (abstract) / WithdrawTxn, DepositTxn, BalanceTxn",
+        "responsibility": "Polymorphic transaction executed against the account; records amount and outcome.",
+        "key_fields": [
+          "Account account",
+          "double amount",
+          "TxnStatus status"
+        ],
+        "key_methods": [
+          "void execute()"
+        ]
+      },
+      {
+        "name": "CashDispenser",
+        "responsibility": "Tracks bill inventory and computes/dispenses a payout across denominations.",
+        "key_fields": [
+          "Map<Denomination, Integer> billCount",
+          "CashDispenser next (chain)"
+        ],
+        "key_methods": [
+          "boolean canDispense(int amount)",
+          "List<Bill> dispense(int amount)"
+        ]
+      },
+      {
+        "name": "Denomination / Bill (enum)",
+        "responsibility": "Bill values the ATM stocks (e.g., 100/50/20/10).",
+        "key_fields": [
+          "value"
+        ],
+        "key_methods": []
+      }
     ],
     "relationships": [
       "ATM (Context) has-a current ATMState and delegates all actions to it",
@@ -65,10 +225,26 @@
       "CashDispenser handlers can be chained per denomination (Chain of Responsibility)"
     ],
     "design_patterns": [
-      { "pattern": "State", "where": "ATM flow across Idle/CardInserted/Authenticated/SelectingTransaction/Dispensing", "why": "Each step allows only its legal actions; replaces a fragile flag-based switch and prevents, e.g., withdrawing before auth." },
-      { "pattern": "Chain of Responsibility", "where": "CashDispenser as a chain of per-denomination handlers (100 -> 50 -> 20 -> 10)", "why": "Each handler dispenses as many of its bill as possible and passes the remainder down; adding a denomination is a new link." },
-      { "pattern": "Strategy / Command", "where": "Transaction types executed polymorphically", "why": "Add transaction types without editing the ATM." },
-      { "pattern": "Facade / Adapter", "where": "BankService boundary", "why": "Isolate the ATM from the real banking backend and make it testable." }
+      {
+        "pattern": "State",
+        "where": "ATM flow across Idle/CardInserted/Authenticated/SelectingTransaction/Dispensing",
+        "why": "Each step allows only its legal actions; replaces a fragile flag-based switch and prevents, e.g., withdrawing before auth."
+      },
+      {
+        "pattern": "Chain of Responsibility",
+        "where": "CashDispenser as a chain of per-denomination handlers (100 -> 50 -> 20 -> 10)",
+        "why": "Each handler dispenses as many of its bill as possible and passes the remainder down; adding a denomination is a new link."
+      },
+      {
+        "pattern": "Strategy / Command",
+        "where": "Transaction types executed polymorphically",
+        "why": "Add transaction types without editing the ATM."
+      },
+      {
+        "pattern": "Facade / Adapter",
+        "where": "BankService boundary",
+        "why": "Isolate the ATM from the real banking backend and make it testable."
+      }
     ],
     "apis": [
       "void insertCard(Card c)",
@@ -108,15 +284,36 @@
       "Cardless/QR withdrawal: an alternate entry state feeding the same Authenticated flow"
     ],
     "deep_dives": [
-      { "topic": "state_machine", "probe": "Why model the flow as State objects rather than boolean flags and a switch? Show me what prevents a withdraw call before authentication in each approach." },
-      { "topic": "cash_dispensing", "probe": "Dispense $180 from 100/50/20/10 bills. How does your dispenser choose bills, what if it's out of 20s, and how do you detect a non-dispensable amount? Why Chain of Responsibility?" },
-      { "topic": "debit_dispense_consistency", "probe": "The account debits but the cash jams and doesn't come out. How do you avoid charging the customer — ordering, confirmation, and compensation?" }
+      {
+        "topic": "state_machine",
+        "probe": "Why model the flow as State objects rather than boolean flags and a switch? Show me what prevents a withdraw call before authentication in each approach."
+      },
+      {
+        "topic": "cash_dispensing",
+        "probe": "Dispense $180 from 100/50/20/10 bills. How does your dispenser choose bills, what if it's out of 20s, and how do you detect a non-dispensable amount? Why Chain of Responsibility?"
+      },
+      {
+        "topic": "debit_dispense_consistency",
+        "probe": "The account debits but the cash jams and doesn't come out. How do you avoid charging the customer — ordering, confirmation, and compensation?"
+      }
     ],
     "followup_bank": [
-      { "trigger": "mentions flag or boolean or switch on state", "question": "Boolean flags for authenticated/hasCard get tangled fast. How does the State pattern make illegal steps impossible, and what does adding a step cost?" },
-      { "trigger": "mentions dispense or cash or bills", "question": "How do you break an amount into bills across denominations, and what happens when you're out of a denomination — greedy, or a Chain of Responsibility?" },
-      { "trigger": "mentions debit or balance or withdraw", "question": "If the debit succeeds but the cash doesn't dispense, how do you keep the customer's balance correct — where's the compensation?" },
-      { "trigger": "mentions pin or auth", "question": "Where does PIN verification happen and how do you handle retries/lockout without storing the PIN on the ATM?" }
+      {
+        "trigger": "mentions flag or boolean or switch on state",
+        "question": "Boolean flags for authenticated/hasCard get tangled fast. How does the State pattern make illegal steps impossible, and what does adding a step cost?"
+      },
+      {
+        "trigger": "mentions dispense or cash or bills",
+        "question": "How do you break an amount into bills across denominations, and what happens when you're out of a denomination — greedy, or a Chain of Responsibility?"
+      },
+      {
+        "trigger": "mentions debit or balance or withdraw",
+        "question": "If the debit succeeds but the cash doesn't dispense, how do you keep the customer's balance correct — where's the compensation?"
+      },
+      {
+        "trigger": "mentions pin or auth",
+        "question": "Where does PIN verification happen and how do you handle retries/lockout without storing the PIN on the ATM?"
+      }
     ],
     "tradeoffs": [
       "State objects (safe, extensible) vs flags+switch (fewer classes, error-prone) — State wins as steps grow",

@@ -3,22 +3,82 @@
   "title": "Design a Deck of Cards and a Card Game (OOD)",
   "track": "engineering",
   "domain": "low_level_design",
+  "areas": [
+    "engineering"
+  ],
   "modality": "system_design",
   "difficulty": "junior",
-  "tags": ["ood", "enums", "class-design", "strategy-pattern", "template-method", "machine-coding"],
+  "tags": [
+    "ood",
+    "enums",
+    "class-design",
+    "strategy-pattern",
+    "template-method",
+    "machine-coding"
+  ],
   "prompt": "Design a deck of cards that you can shuffle and deal from, then show how you would build a generic card game (say Blackjack) on top of it. Model the classes — Card, Deck, Player, Game — their relationships, and the key methods. Sketch the class diagram.",
   "blurb": "The OOD fundamentals check — clean Card/Deck modeling, a correct shuffle, and a game layered on top without hard-coding one game's rules.",
   "rubric": [
-    { "key": "requirements_clarification", "label": "Requirements clarification", "description": "Asks whether it's a generic deck or a specific game, how many players, jokers, multiple decks, and what 'deal' means before coding.", "weight": 1.0 },
-    { "key": "core_entities", "label": "Core entities", "description": "Identifies Card, Suit/Rank (enums), Deck, Hand, Player, and a Game abstraction.", "weight": 1.1 },
-    { "key": "class_design", "label": "Class design", "description": "Card immutable with Suit+Rank enums (not magic ints/strings), Deck owns the list and deal/shuffle, Hand separate from Player.", "weight": 1.2 },
-    { "key": "relationships", "label": "Relationships", "description": "Deck composes Cards, Player has-a Hand, Game aggregates Players and a Deck; correct ownership/multiplicity.", "weight": 1.0 },
-    { "key": "api_methods", "label": "API methods", "description": "shuffle(), deal(n)/dealCard(), Hand.add/value; sensible return types and empty-deck handling.", "weight": 1.0 },
-    { "key": "design_patterns", "label": "Design patterns", "description": "Strategy or Template Method to make the Game generic; Factory for deck construction; each justified, not forced.", "weight": 1.0 },
-    { "key": "extensibility", "label": "Extensibility", "description": "A different game (Poker) or variant (jokers, multiple decks, custom scoring) reuses Card/Deck without changes.", "weight": 1.1 },
-    { "key": "solid_principles", "label": "SOLID principles", "description": "Single-responsibility (Deck deals, Game rules, Hand scores) and open/closed for new games/scoring.", "weight": 0.9 },
-    { "key": "edge_cases", "label": "Edge cases", "description": "Dealing from an empty deck, reshuffle, duplicate-card prevention, uniform shuffle correctness.", "weight": 0.8 },
-    { "key": "communication", "label": "Communication", "description": "Explains the shuffle algorithm, separates deck mechanics from game rules, and reasons about the generic-game boundary.", "weight": 0.8 }
+    {
+      "key": "requirements_clarification",
+      "label": "Requirements clarification",
+      "description": "Asks whether it's a generic deck or a specific game, how many players, jokers, multiple decks, and what 'deal' means before coding.",
+      "weight": 1.0
+    },
+    {
+      "key": "core_entities",
+      "label": "Core entities",
+      "description": "Identifies Card, Suit/Rank (enums), Deck, Hand, Player, and a Game abstraction.",
+      "weight": 1.1
+    },
+    {
+      "key": "class_design",
+      "label": "Class design",
+      "description": "Card immutable with Suit+Rank enums (not magic ints/strings), Deck owns the list and deal/shuffle, Hand separate from Player.",
+      "weight": 1.2
+    },
+    {
+      "key": "relationships",
+      "label": "Relationships",
+      "description": "Deck composes Cards, Player has-a Hand, Game aggregates Players and a Deck; correct ownership/multiplicity.",
+      "weight": 1.0
+    },
+    {
+      "key": "api_methods",
+      "label": "API methods",
+      "description": "shuffle(), deal(n)/dealCard(), Hand.add/value; sensible return types and empty-deck handling.",
+      "weight": 1.0
+    },
+    {
+      "key": "design_patterns",
+      "label": "Design patterns",
+      "description": "Strategy or Template Method to make the Game generic; Factory for deck construction; each justified, not forced.",
+      "weight": 1.0
+    },
+    {
+      "key": "extensibility",
+      "label": "Extensibility",
+      "description": "A different game (Poker) or variant (jokers, multiple decks, custom scoring) reuses Card/Deck without changes.",
+      "weight": 1.1
+    },
+    {
+      "key": "solid_principles",
+      "label": "SOLID principles",
+      "description": "Single-responsibility (Deck deals, Game rules, Hand scores) and open/closed for new games/scoring.",
+      "weight": 0.9
+    },
+    {
+      "key": "edge_cases",
+      "label": "Edge cases",
+      "description": "Dealing from an empty deck, reshuffle, duplicate-card prevention, uniform shuffle correctness.",
+      "weight": 0.8
+    },
+    {
+      "key": "communication",
+      "label": "Communication",
+      "description": "Explains the shuffle algorithm, separates deck mechanics from game rules, and reasons about the generic-game boundary.",
+      "weight": 0.8
+    }
   ],
   "reference": {
     "functional_requirements": [
@@ -42,14 +102,97 @@
       "Do we need a discard pile / return cards to the deck?"
     ],
     "core_classes": [
-      { "name": "Card", "responsibility": "Immutable value object: a Suit and a Rank; knows its game-agnostic identity, not its point value.", "key_fields": ["Suit suit", "Rank rank"], "key_methods": ["Suit getSuit()", "Rank getRank()", "toString()"] },
-      { "name": "Suit (enum)", "responsibility": "HEARTS, DIAMONDS, CLUBS, SPADES.", "key_fields": [], "key_methods": [] },
-      { "name": "Rank (enum)", "responsibility": "TWO..TEN, JACK, QUEEN, KING, ACE — may carry a default nominal value, but game-specific scoring lives in the game.", "key_fields": ["nominalValue"], "key_methods": ["int getNominalValue()"] },
-      { "name": "Deck", "responsibility": "Owns an ordered list of Cards; shuffles and deals from the top; tracks remaining cards.", "key_fields": ["List<Card> cards", "int position"], "key_methods": ["void shuffle()", "Card dealCard()", "List<Card> deal(int n)", "int remaining()", "void reset()"] },
-      { "name": "Hand", "responsibility": "A collection of cards held by a player; can be scored by a game's rules.", "key_fields": ["List<Card> cards"], "key_methods": ["void add(Card c)", "List<Card> getCards()", "void clear()"] },
-      { "name": "Player", "responsibility": "A participant with a Hand (and, for gambling games, a balance).", "key_fields": ["name", "Hand hand", "int balance"], "key_methods": ["void receive(Card c)", "Hand getHand()"] },
-      { "name": "Game (abstract) / BlackjackGame", "responsibility": "Orchestrates a round: deals, applies game-specific rules and scoring, decides the winner. Template Method for the round flow.", "key_fields": ["Deck deck", "List<Player> players", "ScoringStrategy scoring"], "key_methods": ["void playRound()", "int scoreHand(Hand h)", "Player determineWinner()"] },
-      { "name": "ScoringStrategy (interface, optional)", "responsibility": "Pluggable per-game card valuation (Blackjack vs Poker).", "key_fields": [], "key_methods": ["int score(Hand h)"] }
+      {
+        "name": "Card",
+        "responsibility": "Immutable value object: a Suit and a Rank; knows its game-agnostic identity, not its point value.",
+        "key_fields": [
+          "Suit suit",
+          "Rank rank"
+        ],
+        "key_methods": [
+          "Suit getSuit()",
+          "Rank getRank()",
+          "toString()"
+        ]
+      },
+      {
+        "name": "Suit (enum)",
+        "responsibility": "HEARTS, DIAMONDS, CLUBS, SPADES.",
+        "key_fields": [],
+        "key_methods": []
+      },
+      {
+        "name": "Rank (enum)",
+        "responsibility": "TWO..TEN, JACK, QUEEN, KING, ACE — may carry a default nominal value, but game-specific scoring lives in the game.",
+        "key_fields": [
+          "nominalValue"
+        ],
+        "key_methods": [
+          "int getNominalValue()"
+        ]
+      },
+      {
+        "name": "Deck",
+        "responsibility": "Owns an ordered list of Cards; shuffles and deals from the top; tracks remaining cards.",
+        "key_fields": [
+          "List<Card> cards",
+          "int position"
+        ],
+        "key_methods": [
+          "void shuffle()",
+          "Card dealCard()",
+          "List<Card> deal(int n)",
+          "int remaining()",
+          "void reset()"
+        ]
+      },
+      {
+        "name": "Hand",
+        "responsibility": "A collection of cards held by a player; can be scored by a game's rules.",
+        "key_fields": [
+          "List<Card> cards"
+        ],
+        "key_methods": [
+          "void add(Card c)",
+          "List<Card> getCards()",
+          "void clear()"
+        ]
+      },
+      {
+        "name": "Player",
+        "responsibility": "A participant with a Hand (and, for gambling games, a balance).",
+        "key_fields": [
+          "name",
+          "Hand hand",
+          "int balance"
+        ],
+        "key_methods": [
+          "void receive(Card c)",
+          "Hand getHand()"
+        ]
+      },
+      {
+        "name": "Game (abstract) / BlackjackGame",
+        "responsibility": "Orchestrates a round: deals, applies game-specific rules and scoring, decides the winner. Template Method for the round flow.",
+        "key_fields": [
+          "Deck deck",
+          "List<Player> players",
+          "ScoringStrategy scoring"
+        ],
+        "key_methods": [
+          "void playRound()",
+          "int scoreHand(Hand h)",
+          "Player determineWinner()"
+        ]
+      },
+      {
+        "name": "ScoringStrategy (interface, optional)",
+        "responsibility": "Pluggable per-game card valuation (Blackjack vs Poker).",
+        "key_fields": [],
+        "key_methods": [
+          "int score(Hand h)"
+        ]
+      }
     ],
     "relationships": [
       "Deck composes Card (1..52) — cards are created and owned by the deck",
@@ -59,9 +202,21 @@
       "Suit and Rank are enums referenced by Card"
     ],
     "design_patterns": [
-      { "pattern": "Template Method", "where": "Game.playRound() defines the round skeleton; subclasses fill in deal/score/decide-winner", "why": "Reuse the round flow across games while varying the rules." },
-      { "pattern": "Strategy", "where": "ScoringStrategy for hand valuation", "why": "Different games score the same cards differently without editing Deck or Card." },
-      { "pattern": "Factory", "where": "DeckFactory building a standard 52, a jokers deck, or a multi-deck shoe", "why": "Vary deck composition without callers knowing the details." }
+      {
+        "pattern": "Template Method",
+        "where": "Game.playRound() defines the round skeleton; subclasses fill in deal/score/decide-winner",
+        "why": "Reuse the round flow across games while varying the rules."
+      },
+      {
+        "pattern": "Strategy",
+        "where": "ScoringStrategy for hand valuation",
+        "why": "Different games score the same cards differently without editing Deck or Card."
+      },
+      {
+        "pattern": "Factory",
+        "where": "DeckFactory building a standard 52, a jokers deck, or a multi-deck shoe",
+        "why": "Vary deck composition without callers knowing the details."
+      }
     ],
     "apis": [
       "void shuffle()",
@@ -92,15 +247,36 @@
       "Discard pile / draw-and-return: add a discard collection the game manages"
     ],
     "deep_dives": [
-      { "topic": "shuffle_correctness", "probe": "How exactly do you shuffle? Why is Fisher-Yates uniform and why is sorting by a random key or repeated random swaps biased?" },
-      { "topic": "value_placement", "probe": "Where does a card's point value live — on Card, on Rank, or in the game? Why does putting Blackjack's Ace=1/11 on Card hurt reuse?" },
-      { "topic": "generic_game", "probe": "How do you make Game reusable for Poker without editing Blackjack — Template Method skeleton plus a scoring Strategy?" }
+      {
+        "topic": "shuffle_correctness",
+        "probe": "How exactly do you shuffle? Why is Fisher-Yates uniform and why is sorting by a random key or repeated random swaps biased?"
+      },
+      {
+        "topic": "value_placement",
+        "probe": "Where does a card's point value live — on Card, on Rank, or in the game? Why does putting Blackjack's Ace=1/11 on Card hurt reuse?"
+      },
+      {
+        "topic": "generic_game",
+        "probe": "How do you make Game reusable for Poker without editing Blackjack — Template Method skeleton plus a scoring Strategy?"
+      }
     ],
     "followup_bank": [
-      { "trigger": "mentions shuffle or random", "question": "Walk me through the exact shuffle algorithm — is it Fisher-Yates? Why not Collections.shuffle-by-random-sort or naive swaps?" },
-      { "trigger": "mentions value or points or score", "question": "Should the point value live on the Card or in the game? What breaks if Card knows Blackjack's Ace rule?" },
-      { "trigger": "mentions int or string for suit or rank", "question": "Why enums for Suit and Rank instead of ints/strings — what safety and iteration benefits do you get?" },
-      { "trigger": "mentions blackjack or poker or game", "question": "How do you share the round flow across games — Template Method — while letting each game score differently?" }
+      {
+        "trigger": "mentions shuffle or random",
+        "question": "Walk me through the exact shuffle algorithm — is it Fisher-Yates? Why not Collections.shuffle-by-random-sort or naive swaps?"
+      },
+      {
+        "trigger": "mentions value or points or score",
+        "question": "Should the point value live on the Card or in the game? What breaks if Card knows Blackjack's Ace rule?"
+      },
+      {
+        "trigger": "mentions int or string for suit or rank",
+        "question": "Why enums for Suit and Rank instead of ints/strings — what safety and iteration benefits do you get?"
+      },
+      {
+        "trigger": "mentions blackjack or poker or game",
+        "question": "How do you share the round flow across games — Template Method — while letting each game score differently?"
+      }
     ],
     "tradeoffs": [
       "Value on Rank (convenient) vs value in Game/Strategy (reusable) — keep game-specific scoring out of Card",

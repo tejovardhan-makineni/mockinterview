@@ -3,18 +3,64 @@
   "title": "Tell me about a time you mentored or developed someone",
   "track": "professional",
   "domain": "behavioral",
+  "areas": [
+    "engineering",
+    "data_science",
+    "medicine",
+    "nursing",
+    "law",
+    "consulting",
+    "product_management",
+    "finance"
+  ],
   "modality": "conversational",
   "difficulty": "mid",
-  "tags": ["mentoring", "leadership-principles", "coaching", "people-development", "star"],
+  "tags": [
+    "mentoring",
+    "leadership-principles",
+    "coaching",
+    "people-development",
+    "star"
+  ],
   "prompt": "Tell me about a time you mentored or helped develop someone. Who were they, what did they need, what did you actually do, and how did they grow?",
   "blurb": "Mentoring: did they invest in someone's growth and see real development — or just answer questions?",
   "rubric": [
-    { "key": "situation_clarity", "label": "The person & their need", "description": "Clearly identifies who they mentored and the specific gap or growth need — a skill, a confidence issue, a career step — not a vague 'I help juniors'.", "weight": 1.0 },
-    { "key": "task_ownership", "label": "Investing in their growth", "description": "Shows they genuinely took on the other person's development as something they cared about, tailored to that individual, not a one-size checklist.", "weight": 1.1 },
-    { "key": "action_specificity", "label": "Concrete coaching actions", "description": "Describes what THEY specifically did — stretch assignments, feedback, pairing, creating opportunities, adjusting their approach to the person — and notably teaching vs doing it for them.", "weight": 1.3 },
-    { "key": "result_impact", "label": "The person's growth", "description": "Shows a real, ideally measurable outcome for the MENTEE — promotion, skill mastered, took on a role, gained confidence — centered on their growth, not the mentor's glory.", "weight": 1.3 },
-    { "key": "reflection", "label": "Reflection & adapting", "description": "Reflects on adjusting their approach to the individual, what worked or didn't, and what they learned about developing people.", "weight": 1.1 },
-    { "key": "communication", "label": "Communication & structure", "description": "Structured, concise, and generous — credit centered on the mentee.", "weight": 0.8 }
+    {
+      "key": "situation_clarity",
+      "label": "The person & their need",
+      "description": "Clearly identifies who they mentored and the specific gap or growth need — a skill, a confidence issue, a career step — not a vague 'I help juniors'.",
+      "weight": 1.0
+    },
+    {
+      "key": "task_ownership",
+      "label": "Investing in their growth",
+      "description": "Shows they genuinely took on the other person's development as something they cared about, tailored to that individual, not a one-size checklist.",
+      "weight": 1.1
+    },
+    {
+      "key": "action_specificity",
+      "label": "Concrete coaching actions",
+      "description": "Describes what THEY specifically did — stretch assignments, feedback, pairing, creating opportunities, adjusting their approach to the person — and notably teaching vs doing it for them.",
+      "weight": 1.3
+    },
+    {
+      "key": "result_impact",
+      "label": "The person's growth",
+      "description": "Shows a real, ideally measurable outcome for the MENTEE — promotion, skill mastered, took on a role, gained confidence — centered on their growth, not the mentor's glory.",
+      "weight": 1.3
+    },
+    {
+      "key": "reflection",
+      "label": "Reflection & adapting",
+      "description": "Reflects on adjusting their approach to the individual, what worked or didn't, and what they learned about developing people.",
+      "weight": 1.1
+    },
+    {
+      "key": "communication",
+      "label": "Communication & structure",
+      "description": "Structured, concise, and generous — credit centered on the mentee.",
+      "weight": 0.8
+    }
   ],
   "reference": {
     "scenario": "The candidate should recall a specific person they helped grow — a junior teammate, a struggling peer, a new hire, an intern, someone they weren't even required to help — with a concrete development need. The signal is deliberate, tailored investment in that person's growth (especially teaching rather than doing the work for them) and a real outcome for the mentee.",
@@ -27,11 +73,26 @@
       "Reflection: what they learned about developing people, the difference between helping and enabling, and how they've mentored differently since."
     ],
     "probes": [
-      { "trigger": "just answered questions / did the work for them", "question": "Did you solve it for them or help them learn to solve it themselves? How did you resist just taking over?" },
-      { "trigger": "outcome centers on the mentor", "question": "What changed for THEM — their skills, role, or confidence? How did you measure that they'd actually grown?" },
-      { "trigger": "one-size-fits-all approach", "question": "How did you tailor your approach to this specific person? Did you have to adjust when something wasn't working?" },
-      { "trigger": "vague 'I mentor lots of people'", "question": "Pick one specific person. Who were they, and walk me through exactly what you did for them." },
-      { "trigger": "gave feedback but unclear it landed", "question": "How did you deliver the hard feedback, and how did you know it actually changed their behavior?" }
+      {
+        "trigger": "just answered questions / did the work for them",
+        "question": "Did you solve it for them or help them learn to solve it themselves? How did you resist just taking over?"
+      },
+      {
+        "trigger": "outcome centers on the mentor",
+        "question": "What changed for THEM — their skills, role, or confidence? How did you measure that they'd actually grown?"
+      },
+      {
+        "trigger": "one-size-fits-all approach",
+        "question": "How did you tailor your approach to this specific person? Did you have to adjust when something wasn't working?"
+      },
+      {
+        "trigger": "vague 'I mentor lots of people'",
+        "question": "Pick one specific person. Who were they, and walk me through exactly what you did for them."
+      },
+      {
+        "trigger": "gave feedback but unclear it landed",
+        "question": "How did you deliver the hard feedback, and how did you know it actually changed their behavior?"
+      }
     ],
     "red_flags": [
       "Vague 'I always help juniors' with no specific person or outcome.",

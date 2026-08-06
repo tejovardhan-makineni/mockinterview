@@ -1,0 +1,122 @@
+{
+  "id": "experimentation-ranking-ab-test",
+  "title": "Designing an A/B Test for a New Ranking Model",
+  "track": "professional",
+  "domain": "experimentation",
+  "areas": [
+    "data_science"
+  ],
+  "modality": "conversational",
+  "difficulty": "senior",
+  "tags": [
+    "ab-testing",
+    "ranking",
+    "experiment-design",
+    "interference",
+    "power-analysis"
+  ],
+  "prompt": "Your team trained a new machine-learning model to rank the home feed, and offline it beats the current model on NDCG. The head of product wants to launch it and asks you to design the online A/B test that decides whether it ships. Walk me through how you'd design the experiment end to end — the primary metric versus guardrails, the randomization unit and any network or interference effects, how you'd size the test and set the MDE and power, how long to run it and why, and how you'd handle novelty effects and counterfactual logging — and land on a concrete decision framework.",
+  "blurb": "A senior experiment-design case — pressure-tested on metric strategy, randomization and interference, power, run duration, and building a defensible ship decision for a ranking model.",
+  "rubric": [
+    {
+      "key": "metric_strategy",
+      "label": "Metric strategy",
+      "description": "Picks one primary success metric aligned to long-term value (e.g. engagement or retention), distinguishes it from a large offline gain in NDCG that may not transfer, and defines a tiered set of secondary and guardrail metrics (latency, revenue, complaints, diversity, integrity) rather than optimizing a single click proxy.",
+      "weight": 1.3
+    },
+    {
+      "key": "randomization_interference",
+      "label": "Randomization & interference",
+      "description": "Chooses a sensible unit (user/cluster, not request), reasons about network and marketplace interference — shared content pools, creator-side effects, congestion — and proposes cluster/creator-side or budget-split designs when SUTVA is violated instead of assuming independence.",
+      "weight": 1.3
+    },
+    {
+      "key": "power_sizing",
+      "label": "Power & sizing",
+      "description": "Sets MDE, alpha, and power before the test; computes sample size / traffic and run length from baseline rate and variance; uses variance-reduction (CUPED) and cluster-adjusted variance where relevant; avoids an underpowered test on a small true effect.",
+      "weight": 1.2
+    },
+    {
+      "key": "duration_novelty",
+      "label": "Duration & novelty",
+      "description": "Runs at least full weekly cycles, accounts for novelty/primacy effects that inflate or depress early reads, plans to inspect the treatment-effect trend over time, and considers a longer holdback to measure durable rather than transient impact.",
+      "weight": 1.1
+    },
+    {
+      "key": "logging_counterfactual",
+      "label": "Triggering & counterfactual logging",
+      "description": "Analyzes only triggered/exposed users, logs counterfactual scores or the ranked slate so exposure and the ranking difference are measurable, and avoids dilution from users who never saw a changed ranking.",
+      "weight": 1.0
+    },
+    {
+      "key": "decision_framework",
+      "label": "Decision framework",
+      "description": "Synthesizes into a clear ship / iterate / hold rule with pre-registered thresholds — primary metric significant and positive, guardrails within bounds, no SRM, effect stable over time — and communicates it decisively to a non-technical stakeholder.",
+      "weight": 1.1
+    }
+  ],
+  "reference": {
+    "scenario": "Conversational senior experimentation case. The candidate must design, from scratch, the online A/B test that decides whether a new feed-ranking model ships, knowing only that it wins offline on NDCG. The core tension is that offline metric wins routinely fail to translate online, so the whole exercise is about designing an online test rigorous enough to make a real launch decision. A strong candidate refuses to optimize a single click-through proxy: they name one primary metric tied to durable value (e.g. logged-in engagement or retention), then a tiered stack of secondary drivers and guardrails — latency/p99, revenue per user, complaint/hide/report rate, content diversity, and integrity. They think hard about the randomization unit and interference: a feed sits in a marketplace, so user-level randomization can still leak through shared content supply, creator-side feedback loops, and engagement congestion, violating SUTVA; they propose cluster-randomization, creator/budget-split, or two-sided designs and at minimum flag the bias direction. They set MDE, alpha, and power before running, size traffic from the baseline rate and variance, and reach for variance reduction (CUPED, stratification) and cluster-robust variance when needed. They insist on full weekly cycles, reason explicitly about novelty and primacy effects (early reads can be optimistic or pessimistic and decay), and plan to read the treatment effect over time rather than a single endpoint. They analyze only triggered users and log counterfactuals (the model would have re-ranked only some sessions), avoiding dilution. The best answers close with a pre-registered decision rule: ship if the primary metric is significantly positive, guardrails are within pre-set bounds, there's no sample-ratio mismatch, and the effect is stable — otherwise iterate or hold, possibly with a long-term holdback. Weak answers equate the offline NDCG win with success, randomize on requests, ignore interference, skip power, run a few days, or never define what 'win' means.",
+    "model_points": [
+      "Offline NDCG improvements often don't transfer online — position bias, presentation, and feedback loops differ — so the online test is the real decision, not a confirmation; state that explicitly.",
+      "Pick ONE primary metric tied to long-term value (e.g. engaged sessions or retention proxy), not raw CTR, which is easily gamed by clickbait and rarely reflects durable satisfaction.",
+      "Define tiered secondary and guardrail metrics: latency/p99, revenue or ads per user, complaint/hide/report/unfollow rate, content diversity, and integrity/policy violations — a ranking win that spikes complaints or latency isn't a win.",
+      "Choose the randomization unit deliberately: user (or cluster) rather than request/session, so a user gets a consistent experience and outcomes aren't contaminated across arms.",
+      "Interference / SUTVA: a feed is a shared marketplace — treatment can change the content pool, creator behavior, and engagement congestion, so user-level randomization can bias the estimate; consider cluster-randomization, creator/supply-side split, or budget-split designs and at least name the bias direction.",
+      "Set MDE, alpha, and power BEFORE running; compute required traffic/duration from the baseline rate and metric variance, and use variance reduction (CUPED, stratification) to shrink the needed sample or run time.",
+      "Run at least full weekly cycles (weekday/weekend, paydays) and long enough to see the effect stabilize; a few days of data conflates day-of-week with treatment.",
+      "Novelty and primacy effects: users react to change itself, so early reads can be inflated or depressed and then decay — inspect the treatment-effect time series and, if needed, keep a long-term holdback to measure durable impact.",
+      "Triggering and counterfactual logging: only analyze users the new model actually re-ranked differently, and log the counterfactual slate/scores so exposure is measurable — otherwise untriggered users dilute the effect toward zero.",
+      "Pre-register a decision rule: ship if the primary metric is significantly positive, all guardrails are within bounds, no sample-ratio mismatch, and the effect is stable over time; otherwise iterate or hold, and validate with a holdback rather than shipping on a single endpoint read."
+    ],
+    "probes": [
+      {
+        "trigger": "candidate treats the offline NDCG win as sufficient",
+        "question": "The model already wins on NDCG offline. Why bother with an online test at all, and what commonly goes wrong when an offline ranking win meets real traffic?"
+      },
+      {
+        "trigger": "candidate optimizes CTR or a single click metric",
+        "question": "You've picked clicks as the metric. How could this model win on clicks while making the product worse, and what would your primary metric and guardrails be instead?"
+      },
+      {
+        "trigger": "candidate randomizes on requests/sessions or assumes independence",
+        "question": "What's your randomization unit, and since this feed pulls from a shared content pool with creators reacting to exposure, why might user-level randomization still give you a biased estimate?"
+      },
+      {
+        "trigger": "candidate skips power / sizing",
+        "question": "Suppose the true lift is small. How did you decide the test is even big enough to detect it — what MDE, alpha, power, and run length did you set, and how would you shrink the needed sample?"
+      },
+      {
+        "trigger": "candidate proposes a very short run",
+        "question": "You want to read it after three days. What does that risk given weekly seasonality and the fact that users are reacting to a brand-new experience?"
+      },
+      {
+        "trigger": "candidate analyzes all users equally",
+        "question": "Most users' feeds barely change under the new model. If you average over everyone, what happens to your measured effect, and how would triggering and counterfactual logging fix it?"
+      },
+      {
+        "trigger": "candidate never states a ship rule",
+        "question": "The head of product wants a launch decision. What's the exact rule — which metrics, which thresholds, which checks — that makes this a ship versus a hold?"
+      }
+    ],
+    "red_flags": [
+      "Equates the offline NDCG win with online success or skips the online test",
+      "Optimizes raw CTR / a single click proxy with no guardrails for satisfaction, latency, or integrity",
+      "Randomizes on requests or assumes independent users; ignores network/marketplace interference and SUTVA",
+      "No power analysis — MDE, alpha, and power not set before running, or an underpowered test on a small effect",
+      "Runs for a few days, ignoring weekly seasonality and novelty/primacy dynamics",
+      "Analyzes all users instead of triggered/exposed users; no counterfactual logging, so the effect is diluted",
+      "Confuses statistical with practical significance or never quantifies business/guardrail trade-offs",
+      "Gives no pre-registered decision rule, or ships on a single endpoint read with no stability or SRM check"
+    ],
+    "follow_ups": [
+      "The primary engagement metric is up 1.5% and significant, but the hide/report rate and p99 latency are both up. What's your call?",
+      "The lift is strong in week one and fades to near zero by week three. What do you conclude and what do you do next?",
+      "You suspect interference through the shared content pool. Concretely, how would you redesign the randomization to get an unbiased estimate?",
+      "You have limited traffic and the test would take two months at your current MDE. How do you make it feasible without lowering the bar?",
+      "After launch, how would you use a long-term holdback to confirm the model is still helping six months later?"
+    ],
+    "exemplar_answer": "A strong candidate starts by reframing the offline win: 'NDCG up offline is a reason to test, not to ship — position bias and feedback loops mean online results routinely diverge, so this A/B test IS the decision.' On metrics: 'I'd choose one primary metric tied to durable value — engaged sessions or a retention proxy — not raw CTR, which clickbait can inflate. Around it I'd set guardrails: p99 latency, revenue per user, complaint/hide/report rate, content diversity, and integrity violations. A ranking that lifts engagement but spikes complaints or latency is not a win.' On design: 'I'd randomize on users, not requests, for a consistent experience. But a feed is a marketplace — the new model changes which content and creators get exposure, and creators react — so user-level randomization can leak through the shared supply and bias the estimate. If interference looks material I'd move to cluster-randomization or a creator/supply-side split, and at minimum I'd state which way the bias runs.' On sizing: 'I'd fix MDE, alpha=0.05, and 80% power up front, size traffic from the baseline rate and variance, and use CUPED and stratification to cut the required sample and run time.' On duration and novelty: 'I'd run at least full weekly cycles and watch the treatment-effect time series — users react to novelty, so early reads can be optimistic and decay; I'd want the effect to stabilize, and I'd keep a long-term holdback for durable impact.' On analysis: 'I'd only analyze triggered users and log the counterfactual slate, because most users barely get re-ranked and averaging over them dilutes the effect toward zero.' Then the decision rule: 'Ship if the primary metric is significantly positive, all guardrails are within pre-set bounds, there's no sample-ratio mismatch, and the effect is stable over the run — otherwise iterate or hold, and confirm with a holdback rather than shipping on one endpoint.' The answer is metric-disciplined, interference-aware, correctly powered, and ends in a concrete, communicable rule."
+  },
+  "interviewer_notes": "Run this as an open-ended design case at the senior bar; the candidate should drive the structure while you probe depth. The strongest signal is refusing to treat the offline NDCG win as the answer and instead designing an online test capable of making a launch decision. Listen early for a single, value-aligned primary metric plus a real guardrail stack — if they anchor on CTR, use the click-gaming probe. The differentiating senior signal is interference: a feed is a shared marketplace, so push hard on whether user-level randomization is actually unbiased and whether they can name cluster or supply-side designs; junior candidates assume independent users. Confirm they set MDE, alpha, and power before running and can reason about variance reduction and run length over full weekly cycles, not days. Probe triggering and counterfactual logging, which weaker candidates skip, and make sure they understand dilution from untriggered users. Reserve the guardrail-conflict and fading-effect follow-ups to see whether they revise honestly and reason about novelty. Reward a pre-registered, decisive ship rule communicated in plain terms; penalize optimizing a single click proxy, ignoring interference, underpowering, and never committing to a decision framework."
+}

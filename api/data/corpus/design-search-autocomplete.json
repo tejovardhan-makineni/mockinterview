@@ -3,20 +3,71 @@
   "title": "Design Search Autocomplete (Trie + Top-K)",
   "track": "engineering",
   "domain": "coding",
+  "areas": [
+    "engineering",
+    "data_science"
+  ],
   "modality": "coding",
   "difficulty": "senior",
-  "tags": ["trie", "heap", "design", "top-k", "strings", "prefix-search"],
+  "tags": [
+    "trie",
+    "heap",
+    "design",
+    "top-k",
+    "strings",
+    "prefix-search"
+  ],
   "prompt": "Design an autocomplete system. You're given historical sentences and their usage counts. Implement input(c): the user types characters one at a time; each call returns the top 3 historical sentences that start with the prefix typed so far, ordered by descending frequency, ties broken by ASCII (lexicographic) order. A special character '#' ends the current sentence, saving it (or incrementing its count) and resetting the prefix. Return fewer than 3 if fewer match.",
   "blurb": "A trie over sentences with frequency-aware top-k retrieval per prefix — plus how you'd scale the ranking beyond a single machine.",
   "rubric": [
-    { "key": "problem_understanding", "label": "Problem understanding", "description": "Grasps the streaming input(c) contract, the '#' save-and-reset semantics, and the exact ranking rule (freq desc, then lexicographic).", "weight": 1.1 },
-    { "key": "approach", "label": "Approach", "description": "Chooses a trie keyed by characters with frequency stored at sentence-terminal nodes; retrieves candidates under the current prefix and selects top-3.", "weight": 1.3 },
-    { "key": "correctness", "label": "Correctness", "description": "Maintains the growing prefix across input calls; on '#' inserts/increments and resets; correct tie-break (higher freq first, then smaller string); once a prefix has no matches, all further chars in that sentence also have none.", "weight": 1.3 },
-    { "key": "complexity_analysis", "label": "Complexity analysis", "description": "Insert O(L); per-keystroke retrieval O(p + m log 3) where p=prefix len, m=matches under prefix; discusses the cost of collecting all matches vs caching top-k at nodes.", "weight": 1.2 },
-    { "key": "code_quality", "label": "Code quality", "description": "Clean TrieNode (children map, sentence->count at terminals or a counts map), a prefix pointer advanced per keystroke, a heap/partial-sort for top-k.", "weight": 1.0 },
-    { "key": "edge_cases", "label": "Edge cases", "description": "Prefix with no matches (return []), fewer than 3 matches, duplicate sentence (increment), ties resolved lexicographically, empty/reset after '#', spaces as valid characters.", "weight": 1.1 },
-    { "key": "testing", "label": "Testing", "description": "Drives a full type-then-'#' cycle and verifies ranking, tie-breaks, and that a new sentence becomes searchable next time.", "weight": 0.9 },
-    { "key": "communication", "label": "Communication", "description": "States the ranking contract and the trie design before coding, and reasons about the retrieval-vs-precompute tradeoff.", "weight": 0.9 }
+    {
+      "key": "problem_understanding",
+      "label": "Problem understanding",
+      "description": "Grasps the streaming input(c) contract, the '#' save-and-reset semantics, and the exact ranking rule (freq desc, then lexicographic).",
+      "weight": 1.1
+    },
+    {
+      "key": "approach",
+      "label": "Approach",
+      "description": "Chooses a trie keyed by characters with frequency stored at sentence-terminal nodes; retrieves candidates under the current prefix and selects top-3.",
+      "weight": 1.3
+    },
+    {
+      "key": "correctness",
+      "label": "Correctness",
+      "description": "Maintains the growing prefix across input calls; on '#' inserts/increments and resets; correct tie-break (higher freq first, then smaller string); once a prefix has no matches, all further chars in that sentence also have none.",
+      "weight": 1.3
+    },
+    {
+      "key": "complexity_analysis",
+      "label": "Complexity analysis",
+      "description": "Insert O(L); per-keystroke retrieval O(p + m log 3) where p=prefix len, m=matches under prefix; discusses the cost of collecting all matches vs caching top-k at nodes.",
+      "weight": 1.2
+    },
+    {
+      "key": "code_quality",
+      "label": "Code quality",
+      "description": "Clean TrieNode (children map, sentence->count at terminals or a counts map), a prefix pointer advanced per keystroke, a heap/partial-sort for top-k.",
+      "weight": 1.0
+    },
+    {
+      "key": "edge_cases",
+      "label": "Edge cases",
+      "description": "Prefix with no matches (return []), fewer than 3 matches, duplicate sentence (increment), ties resolved lexicographically, empty/reset after '#', spaces as valid characters.",
+      "weight": 1.1
+    },
+    {
+      "key": "testing",
+      "label": "Testing",
+      "description": "Drives a full type-then-'#' cycle and verifies ranking, tie-breaks, and that a new sentence becomes searchable next time.",
+      "weight": 0.9
+    },
+    {
+      "key": "communication",
+      "label": "Communication",
+      "description": "States the ranking contract and the trie design before coding, and reasons about the retrieval-vs-precompute tradeoff.",
+      "weight": 0.9
+    }
   ],
   "reference": {
     "constraints": [
@@ -33,18 +84,48 @@
       }
     ],
     "test_cases": [
-      { "input": "input('i') with the data above", "expected": "['i love you','island','i love leetcode'] — tie at freq 2 broken lexicographically" },
-      { "input": "type a prefix matching nothing, e.g. input('z')", "expected": "[] — and every subsequent char before '#' also returns []" },
-      { "input": "type an existing sentence fully then '#', then type it again", "expected": "its count increments; it ranks higher on the next round" },
-      { "input": "only 2 sentences match the prefix", "expected": "returns just those 2 (fewer than 3 allowed)" },
-      { "input": "two sentences same freq and one is a prefix of the other", "expected": "shorter string sorts first lexicographically (ASCII)" }
+      {
+        "input": "input('i') with the data above",
+        "expected": "['i love you','island','i love leetcode'] — tie at freq 2 broken lexicographically"
+      },
+      {
+        "input": "type a prefix matching nothing, e.g. input('z')",
+        "expected": "[] — and every subsequent char before '#' also returns []"
+      },
+      {
+        "input": "type an existing sentence fully then '#', then type it again",
+        "expected": "its count increments; it ranks higher on the next round"
+      },
+      {
+        "input": "only 2 sentences match the prefix",
+        "expected": "returns just those 2 (fewer than 3 allowed)"
+      },
+      {
+        "input": "two sentences same freq and one is a prefix of the other",
+        "expected": "shorter string sorts first lexicographically (ASCII)"
+      }
     ],
     "optimal_time": "input(c): O(p + m log k) where p = current prefix length, m = matches under the prefix, k = 3; insert on '#': O(L). With top-k cached at nodes: O(1) amortized per keystroke.",
     "optimal_space": "O(total characters across all sentences) for the trie; O(distinct sentences) for the counts",
     "approaches": [
-      { "name": "brute force (scan all sentences per keystroke)", "idea": "Keep a hashmap sentence->count. On each input(c) build the prefix and linearly scan every stored sentence for those starting with it, then sort/partial-sort for top 3. Simple but O(total data) per keystroke.", "time": "O(N * L) per keystroke", "space": "O(N * L)" },
-      { "name": "optimal: trie + per-query top-k", "idea": "Insert each sentence into a character trie; store the sentence's frequency at its terminal node (or a map at the node). Maintain a pointer to the trie node for the current prefix, advancing one edge per input(c). To answer, DFS the subtree under the current node collecting (freq, sentence) for all terminals, and take the top 3 with a heap or partial sort using the (freq desc, sentence asc) comparator. On a missing edge, the prefix has no matches and stays 'dead' until '#'.", "time": "O(p) to walk + O(m) to gather + O(m log k) to select", "space": "O(total chars)" },
-      { "name": "optimization: cache top-k at each trie node", "idea": "Store, at every node, a precomputed list of the top-k sentences passing through it. Retrieval becomes O(1) per keystroke. Updates on '#' cost O(L * k) to refresh top-k along the inserted path. Trades write cost and memory for very fast reads — the right call for read-heavy autocomplete.", "time": "O(1) read, O(L*k) write", "space": "O(total chars * k)" }
+      {
+        "name": "brute force (scan all sentences per keystroke)",
+        "idea": "Keep a hashmap sentence->count. On each input(c) build the prefix and linearly scan every stored sentence for those starting with it, then sort/partial-sort for top 3. Simple but O(total data) per keystroke.",
+        "time": "O(N * L) per keystroke",
+        "space": "O(N * L)"
+      },
+      {
+        "name": "optimal: trie + per-query top-k",
+        "idea": "Insert each sentence into a character trie; store the sentence's frequency at its terminal node (or a map at the node). Maintain a pointer to the trie node for the current prefix, advancing one edge per input(c). To answer, DFS the subtree under the current node collecting (freq, sentence) for all terminals, and take the top 3 with a heap or partial sort using the (freq desc, sentence asc) comparator. On a missing edge, the prefix has no matches and stays 'dead' until '#'.",
+        "time": "O(p) to walk + O(m) to gather + O(m log k) to select",
+        "space": "O(total chars)"
+      },
+      {
+        "name": "optimization: cache top-k at each trie node",
+        "idea": "Store, at every node, a precomputed list of the top-k sentences passing through it. Retrieval becomes O(1) per keystroke. Updates on '#' cost O(L * k) to refresh top-k along the inserted path. Trades write cost and memory for very fast reads — the right call for read-heavy autocomplete.",
+        "time": "O(1) read, O(L*k) write",
+        "space": "O(total chars * k)"
+      }
     ],
     "follow_ups": [
       "Cache top-k at each node for O(1) retrieval — how do you update the cached lists on insert/frequency change without a full re-DFS?",

@@ -3,25 +3,100 @@
   "title": "Design a File Sync & Storage Service (Dropbox/Google Drive)",
   "track": "engineering",
   "domain": "system_design",
+  "areas": [
+    "engineering"
+  ],
   "modality": "system_design",
   "difficulty": "senior",
-  "tags": ["chunking", "deduplication", "sync", "conflict-resolution", "metadata", "blob-storage"],
+  "tags": [
+    "chunking",
+    "deduplication",
+    "sync",
+    "conflict-resolution",
+    "metadata",
+    "blob-storage"
+  ],
   "prompt": "Design a file storage and sync service like Dropbox or Google Drive. Users store files that sync across their devices; edits on one device propagate to others. Cover chunking, deduplication, efficient sync of changed bytes, conflict resolution when two devices edit offline, and the metadata layer. Assume many users with large files and multiple devices each.",
   "blurb": "Content-defined chunking, block dedup, delta sync, and the offline-edit conflict problem — the metadata plane is the real system.",
   "rubric": [
-    { "key": "requirements", "label": "Requirements gathering", "description": "Separates functional (upload/download, multi-device sync, sharing, versioning, offline edits) from non-functional (sync latency, durability, bandwidth efficiency, consistency model).", "weight": 1.0 },
-    { "key": "clarifying_questions", "label": "Clarifying questions", "description": "Asks about file sizes, number of devices, edit frequency, offline support, sharing/collab, storage quotas.", "weight": 1.0 },
-    { "key": "estimations", "label": "Back-of-envelope estimations", "description": "Storage with/without dedup, upload/download bandwidth, metadata QPS, notification fan-out.", "weight": 1.0 },
-    { "key": "chunking_dedup", "label": "Chunking & deduplication depth", "description": "Fixed vs content-defined chunking (rolling hash), block hashing, global vs per-user dedup, and only uploading changed chunks. Key senior signal.", "weight": 1.4 },
-    { "key": "sync_protocol", "label": "Sync protocol depth", "description": "How a client detects changes and syncs deltas: local watcher, chunk-diff, upload changed blocks, metadata commit, notify other devices (long-poll/push). Key senior signal.", "weight": 1.4 },
-    { "key": "conflict_resolution", "label": "Conflict resolution", "description": "Two devices edit the same file offline: versioning, conflicted copies, last-writer-wins vs merge, causal ordering (version vectors).", "weight": 1.2 },
-    { "key": "api_design", "label": "API design", "description": "list/mutate metadata, block upload/download, commit, subscribe to changes; separation of metadata vs block APIs.", "weight": 0.9 },
-    { "key": "data_model", "label": "Data model", "description": "files/folders metadata tree, file→ordered blocks, block store (hash→data), device cursors/namespaces.", "weight": 1.1 },
-    { "key": "high_level_design", "label": "High-level design", "description": "Split metadata service from block storage; upload path (chunk→dedup→commit) vs download/sync path (diff→fetch).", "weight": 1.2 },
-    { "key": "scaling", "label": "Scaling", "description": "Sharding metadata by user/namespace, block store on object storage + CDN, notification fan-out scaling.", "weight": 1.0 },
-    { "key": "bottlenecks", "label": "Bottlenecks", "description": "Metadata hot namespaces, notification storm on shared folders, dedup index size, large-file sync amplification.", "weight": 1.0 },
-    { "key": "consistency", "label": "Consistency & durability", "description": "Atomic metadata commits, ordering guarantees per namespace, durable blocks, crash recovery mid-sync.", "weight": 0.9 },
-    { "key": "observability", "label": "Observability & security", "description": "Sync lag, conflict rate, dedup ratio; encryption at rest/in transit, sharing ACLs.", "weight": 0.8 }
+    {
+      "key": "requirements",
+      "label": "Requirements gathering",
+      "description": "Separates functional (upload/download, multi-device sync, sharing, versioning, offline edits) from non-functional (sync latency, durability, bandwidth efficiency, consistency model).",
+      "weight": 1.0
+    },
+    {
+      "key": "clarifying_questions",
+      "label": "Clarifying questions",
+      "description": "Asks about file sizes, number of devices, edit frequency, offline support, sharing/collab, storage quotas.",
+      "weight": 1.0
+    },
+    {
+      "key": "estimations",
+      "label": "Back-of-envelope estimations",
+      "description": "Storage with/without dedup, upload/download bandwidth, metadata QPS, notification fan-out.",
+      "weight": 1.0
+    },
+    {
+      "key": "chunking_dedup",
+      "label": "Chunking & deduplication depth",
+      "description": "Fixed vs content-defined chunking (rolling hash), block hashing, global vs per-user dedup, and only uploading changed chunks. Key senior signal.",
+      "weight": 1.4
+    },
+    {
+      "key": "sync_protocol",
+      "label": "Sync protocol depth",
+      "description": "How a client detects changes and syncs deltas: local watcher, chunk-diff, upload changed blocks, metadata commit, notify other devices (long-poll/push). Key senior signal.",
+      "weight": 1.4
+    },
+    {
+      "key": "conflict_resolution",
+      "label": "Conflict resolution",
+      "description": "Two devices edit the same file offline: versioning, conflicted copies, last-writer-wins vs merge, causal ordering (version vectors).",
+      "weight": 1.2
+    },
+    {
+      "key": "api_design",
+      "label": "API design",
+      "description": "list/mutate metadata, block upload/download, commit, subscribe to changes; separation of metadata vs block APIs.",
+      "weight": 0.9
+    },
+    {
+      "key": "data_model",
+      "label": "Data model",
+      "description": "files/folders metadata tree, file→ordered blocks, block store (hash→data), device cursors/namespaces.",
+      "weight": 1.1
+    },
+    {
+      "key": "high_level_design",
+      "label": "High-level design",
+      "description": "Split metadata service from block storage; upload path (chunk→dedup→commit) vs download/sync path (diff→fetch).",
+      "weight": 1.2
+    },
+    {
+      "key": "scaling",
+      "label": "Scaling",
+      "description": "Sharding metadata by user/namespace, block store on object storage + CDN, notification fan-out scaling.",
+      "weight": 1.0
+    },
+    {
+      "key": "bottlenecks",
+      "label": "Bottlenecks",
+      "description": "Metadata hot namespaces, notification storm on shared folders, dedup index size, large-file sync amplification.",
+      "weight": 1.0
+    },
+    {
+      "key": "consistency",
+      "label": "Consistency & durability",
+      "description": "Atomic metadata commits, ordering guarantees per namespace, durable blocks, crash recovery mid-sync.",
+      "weight": 0.9
+    },
+    {
+      "key": "observability",
+      "label": "Observability & security",
+      "description": "Sync lag, conflict rate, dedup ratio; encryption at rest/in transit, sharing ACLs.",
+      "weight": 0.8
+    }
   ],
   "reference": {
     "functional_requirements": [
@@ -59,7 +134,17 @@
       "bandwidth": "Delta sync means only changed ~4MB chunks move, not whole files — a 1-byte change in a 1GB file transfers one chunk, not 1GB.",
       "notifications": "A shared folder with 1000 members changing → fan-out notifications to up to 1000 devices; must batch/coalesce."
     },
-    "core_components": ["Client agent (FS watcher, chunker, local index)", "Metadata service (namespaces, file tree, commits)", "Block service (hash-addressed store)", "Object storage for blocks", "Dedup index (hash → block)", "Notification service (long-poll/push)", "Sharing/ACL service", "Version store", "CDN for downloads"],
+    "core_components": [
+      "Client agent (FS watcher, chunker, local index)",
+      "Metadata service (namespaces, file tree, commits)",
+      "Block service (hash-addressed store)",
+      "Object storage for blocks",
+      "Dedup index (hash → block)",
+      "Notification service (long-poll/push)",
+      "Sharing/ACL service",
+      "Version store",
+      "CDN for downloads"
+    ],
     "data_model": [
       "namespaces(ns_id, owner, type) — a user's root or a shared folder; unit of ordering/sharing",
       "files(file_id, ns_id, path, size, latest_version, is_dir, updated_at)",
@@ -78,27 +163,98 @@
     ],
     "high_level_design": "The system is split into a METADATA plane and a BLOCK plane. Client agent: a local file watcher detects a change, splits the file into chunks using content-defined chunking (rolling hash so an insert only shifts one chunk boundary), hashes each chunk, and asks the block service which hashes are missing (dedup — unchanged/duplicate blocks aren't re-uploaded). It uploads only missing blocks to the block store (object storage), then commits new metadata (ordered block list + parent version) to the metadata service. The metadata service assigns a monotonic per-namespace sequence number, appends to that namespace's change log, and notifies other devices via the notification service. Other devices long-poll /delta with their cursor, learn which files changed, fetch only the missing blocks, and reassemble. Downloads come from object storage/CDN. Conflicts are detected at commit by comparing parent_version / version vectors.",
     "deep_dives": [
-      { "topic": "chunking_dedup", "probe": "Why content-defined chunking with a rolling hash instead of fixed-size blocks? Show me what happens to the chunk boundaries and the upload set when a user inserts one byte at the start of a large file. How does the missing-block negotiation work, and do you dedup globally or per user — what's the security concern with global dedup?" },
-      { "topic": "sync_protocol", "probe": "Walk me end to end through syncing an edit from device A to device B: local detection, chunk diff, block upload, metadata commit, sequencing, and how B learns and pulls only the changed blocks. How do devices resume after being offline for a week?" },
-      { "topic": "conflict_resolution", "probe": "Two devices edit the same file offline, then both come online. How do you detect the conflict at commit, and what do you do — last-writer-wins, a conflicted copy, or merge? How do version vectors / parent_version give you causal ordering rather than guessing by timestamp?" },
-      { "topic": "notification_fanout", "probe": "A shared team folder has 1000 members. One person adds a file. How do you notify all their devices without a thundering herd, and how do long-poll subscribers scale to millions of idle connections?" },
-      { "topic": "cache_stampede", "probe": "You cache namespace metadata / delta responses and popular block locations. A widely-shared folder's cache entry expires while thousands of devices are polling it. How do you avoid a stampede recomputing the delta — coalescing, jittered TTL, logical expiry?" },
-      { "topic": "cdc_search_index", "probe": "File metadata lives in your transactional metadata store but needs to feed full-text search and sharing/audit systems. How do you propagate changes — CDC/Debezium off the metadata DB vs dual writes — while preserving per-namespace ordering?" }
+      {
+        "topic": "chunking_dedup",
+        "probe": "Why content-defined chunking with a rolling hash instead of fixed-size blocks? Show me what happens to the chunk boundaries and the upload set when a user inserts one byte at the start of a large file. How does the missing-block negotiation work, and do you dedup globally or per user — what's the security concern with global dedup?"
+      },
+      {
+        "topic": "sync_protocol",
+        "probe": "Walk me end to end through syncing an edit from device A to device B: local detection, chunk diff, block upload, metadata commit, sequencing, and how B learns and pulls only the changed blocks. How do devices resume after being offline for a week?"
+      },
+      {
+        "topic": "conflict_resolution",
+        "probe": "Two devices edit the same file offline, then both come online. How do you detect the conflict at commit, and what do you do — last-writer-wins, a conflicted copy, or merge? How do version vectors / parent_version give you causal ordering rather than guessing by timestamp?"
+      },
+      {
+        "topic": "notification_fanout",
+        "probe": "A shared team folder has 1000 members. One person adds a file. How do you notify all their devices without a thundering herd, and how do long-poll subscribers scale to millions of idle connections?"
+      },
+      {
+        "topic": "cache_stampede",
+        "probe": "You cache namespace metadata / delta responses and popular block locations. A widely-shared folder's cache entry expires while thousands of devices are polling it. How do you avoid a stampede recomputing the delta — coalescing, jittered TTL, logical expiry?"
+      },
+      {
+        "topic": "cdc_search_index",
+        "probe": "File metadata lives in your transactional metadata store but needs to feed full-text search and sharing/audit systems. How do you propagate changes — CDC/Debezium off the metadata DB vs dual writes — while preserving per-namespace ordering?"
+      }
     ],
     "followup_bank": [
-      { "trigger": "mentions chunk or block", "question": "Fixed vs content-defined chunking? Show the boundary behavior when a byte is inserted mid-file, and how the missing-block negotiation avoids re-uploading unchanged data." },
-      { "trigger": "mentions conflict", "question": "How do you detect the conflict deterministically (version vectors / parent_version) rather than relying on wall-clock timestamps, and what's the user-visible resolution?" },
-      { "trigger": "mentions cache or redis", "question": "Eviction policy for delta/metadata cache — TTL vs LRU? How do you prevent a stampede when a widely-shared folder's cached delta expires under many polling clients?" },
-      { "trigger": "mentions database or metadata store or sql", "question": "How do metadata changes reach search/audit — CDC/Debezium vs dual writes — while keeping per-namespace ordering intact?" },
-      { "trigger": "mentions dedup", "question": "Global vs per-user dedup — what's the privacy/security tradeoff, and how do you refcount blocks so deleting one file doesn't drop shared blocks?" },
-      { "trigger": "mentions notification or poll or push", "question": "How do you fan out change notifications to a 1000-member shared folder without a thundering herd, and scale millions of idle long-poll connections?" }
+      {
+        "trigger": "mentions chunk or block",
+        "question": "Fixed vs content-defined chunking? Show the boundary behavior when a byte is inserted mid-file, and how the missing-block negotiation avoids re-uploading unchanged data."
+      },
+      {
+        "trigger": "mentions conflict",
+        "question": "How do you detect the conflict deterministically (version vectors / parent_version) rather than relying on wall-clock timestamps, and what's the user-visible resolution?"
+      },
+      {
+        "trigger": "mentions cache or redis",
+        "question": "Eviction policy for delta/metadata cache — TTL vs LRU? How do you prevent a stampede when a widely-shared folder's cached delta expires under many polling clients?"
+      },
+      {
+        "trigger": "mentions database or metadata store or sql",
+        "question": "How do metadata changes reach search/audit — CDC/Debezium vs dual writes — while keeping per-namespace ordering intact?"
+      },
+      {
+        "trigger": "mentions dedup",
+        "question": "Global vs per-user dedup — what's the privacy/security tradeoff, and how do you refcount blocks so deleting one file doesn't drop shared blocks?"
+      },
+      {
+        "trigger": "mentions notification or poll or push",
+        "question": "How do you fan out change notifications to a 1000-member shared folder without a thundering herd, and scale millions of idle long-poll connections?"
+      }
     ],
-    "scaling": ["Shard metadata by namespace/user; ordering guaranteed per namespace", "Blocks on horizontally scalable object storage + CDN for downloads", "Batch/coalesce notifications; scale long-poll with lightweight connection servers", "Dedup index sharded by block-hash prefix", "Delta sync minimizes bandwidth"],
-    "bottlenecks": ["Notification fan-out storm on large shared folders", "Metadata hot namespaces (busy team folders)", "Dedup index size and lookup cost at exabyte scale", "Many idle long-poll connections", "Large-file sync amplification without good chunking"],
-    "tradeoffs": ["Content-defined chunking (insert-resilient, variable size, more CPU) vs fixed-size (simple, shifts on insert)", "Global dedup (max storage savings, cross-user privacy risk / confirmation attacks) vs per-user dedup (safer, less savings)", "Last-writer-wins (simple, data loss) vs conflicted copies (safe, user friction) vs merge (best UX, only for known formats)", "Strong per-namespace consistency vs cross-namespace eventual", "Push notifications (instant, connection cost) vs long-poll (simpler, latency)"],
-    "alternative_solutions": ["Operational Transform / CRDTs for real-time collaborative editing (vs file-level sync)", "rsync-style delta encoding within a chunk for fine-grained diffs", "Merkle-tree file manifests to diff directory trees quickly", "Client-side end-to-end encryption with per-user (not global) dedup"],
-    "observability": ["Sync end-to-end lag (edit → visible on other device)", "Conflict rate and conflicted-copy count", "Dedup ratio and storage saved", "Notification delivery latency and long-poll connection counts", "Block upload/download success + retry rates"],
-    "security": ["Encryption in transit and at rest", "ACL enforcement on sharing; capability tokens for shared links", "Per-user dedup or careful design to avoid cross-user existence leaks", "Virus/malware scanning; ransomware detection via version history", "Rate limiting; audit logs on shares"],
+    "scaling": [
+      "Shard metadata by namespace/user; ordering guaranteed per namespace",
+      "Blocks on horizontally scalable object storage + CDN for downloads",
+      "Batch/coalesce notifications; scale long-poll with lightweight connection servers",
+      "Dedup index sharded by block-hash prefix",
+      "Delta sync minimizes bandwidth"
+    ],
+    "bottlenecks": [
+      "Notification fan-out storm on large shared folders",
+      "Metadata hot namespaces (busy team folders)",
+      "Dedup index size and lookup cost at exabyte scale",
+      "Many idle long-poll connections",
+      "Large-file sync amplification without good chunking"
+    ],
+    "tradeoffs": [
+      "Content-defined chunking (insert-resilient, variable size, more CPU) vs fixed-size (simple, shifts on insert)",
+      "Global dedup (max storage savings, cross-user privacy risk / confirmation attacks) vs per-user dedup (safer, less savings)",
+      "Last-writer-wins (simple, data loss) vs conflicted copies (safe, user friction) vs merge (best UX, only for known formats)",
+      "Strong per-namespace consistency vs cross-namespace eventual",
+      "Push notifications (instant, connection cost) vs long-poll (simpler, latency)"
+    ],
+    "alternative_solutions": [
+      "Operational Transform / CRDTs for real-time collaborative editing (vs file-level sync)",
+      "rsync-style delta encoding within a chunk for fine-grained diffs",
+      "Merkle-tree file manifests to diff directory trees quickly",
+      "Client-side end-to-end encryption with per-user (not global) dedup"
+    ],
+    "observability": [
+      "Sync end-to-end lag (edit → visible on other device)",
+      "Conflict rate and conflicted-copy count",
+      "Dedup ratio and storage saved",
+      "Notification delivery latency and long-poll connection counts",
+      "Block upload/download success + retry rates"
+    ],
+    "security": [
+      "Encryption in transit and at rest",
+      "ACL enforcement on sharing; capability tokens for shared links",
+      "Per-user dedup or careful design to avoid cross-user existence leaks",
+      "Virus/malware scanning; ransomware detection via version history",
+      "Rate limiting; audit logs on shares"
+    ],
     "reference_answer": "A strong answer cleanly separates the metadata plane from the block plane and makes the client agent do content-defined chunking (rolling hash) so a mid-file insert only re-uploads one chunk. It negotiates missing blocks against a content-addressed, refcounted, deduped block store, then commits an ordered block-list version to the metadata service, which assigns a per-namespace monotonic sequence and notifies other devices that pull only changed blocks via a cursor-based /delta. Conflicts are detected at commit via parent_version / version vectors (causal, not timestamp-based) and resolved with conflicted copies or merge. The candidate scales notifications with batching/coalescing and lightweight long-poll servers, shards metadata by namespace with strict per-namespace ordering, handles the shared-folder cache stampede, propagates metadata to search/audit via CDC, and reasons about the global-vs-per-user dedup privacy tradeoff. Top bottlenecks: notification fan-out, hot namespaces, and dedup index size, each with mitigations."
   },
   "interviewer_notes": "The trap is treating this as 'upload files to S3' — the depth is in chunking/dedup, delta sync, and conflict resolution. Push the chunking deep-dive with the one-byte-insert scenario to see if they know why content-defined chunking beats fixed blocks. Drive the sync protocol end-to-end (missing-block negotiation, per-namespace sequencing, cursor delta) and force a real conflict-resolution answer using version vectors, not timestamps. Use the cache/stampede probe on shared-folder deltas and the CDC probe when metadata feeds search/audit. Bonus signal: refcounting blocks for deletes, global-vs-per-user dedup privacy, and notification fan-out on large shared folders. Reserve time for consistency/durability and security."

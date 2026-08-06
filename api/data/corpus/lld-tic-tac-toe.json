@@ -3,22 +3,82 @@
   "title": "Design Tic-Tac-Toe / a Generic Board Game (OOD)",
   "track": "engineering",
   "domain": "low_level_design",
+  "areas": [
+    "engineering"
+  ],
   "modality": "system_design",
   "difficulty": "junior",
-  "tags": ["ood", "class-design", "state-machine", "strategy-pattern", "win-detection", "machine-coding"],
+  "tags": [
+    "ood",
+    "class-design",
+    "state-machine",
+    "strategy-pattern",
+    "win-detection",
+    "machine-coding"
+  ],
   "prompt": "Design Tic-Tac-Toe, then generalize it toward an N x N board (Connect-style) game. Model the Board, Player, Move, and Game classes, the turn/state flow, and the win-detection logic. Make the win check efficient rather than scanning the whole board every move. Sketch the class diagram.",
   "blurb": "A small board game done cleanly — legal-move validation, an efficient incremental win check, and a design that generalizes to N x N.",
   "rubric": [
-    { "key": "requirements_clarification", "label": "Requirements clarification", "description": "Clarifies board size (3x3 vs NxN), number of players/symbols, win condition (full line vs K-in-a-row), and human-vs-AI before designing.", "weight": 1.0 },
-    { "key": "core_entities", "label": "Core entities", "description": "Identifies Board, Cell, Player, Piece/Symbol, Move, and Game/GameController.", "weight": 1.0 },
-    { "key": "class_design", "label": "Class design", "description": "Board owns the grid and validation, Player holds a symbol, Move is a value object; no god-class Game holding raw arrays.", "weight": 1.1 },
-    { "key": "win_detection", "label": "Win detection", "description": "Efficient incremental win check (row/col/diag counters updated per move, O(1)) rather than O(N^2) full scan each turn.", "weight": 1.2 },
-    { "key": "state_machine", "label": "State machine", "description": "Clear game state flow: IN_PROGRESS -> WIN / DRAW, turn alternation, and rejecting moves after game over.", "weight": 1.0 },
-    { "key": "relationships", "label": "Relationships", "description": "Game aggregates Players and composes a Board; Board composes Cells; correct ownership/multiplicity.", "weight": 0.9 },
-    { "key": "api_methods", "label": "API methods", "description": "makeMove(player, row, col), isValidMove, currentPlayer, getStatus/getWinner; clean signatures.", "weight": 1.0 },
-    { "key": "extensibility", "label": "Extensibility", "description": "Generalizes to NxN / K-in-a-row / more players, and to an AI player, without rewriting the core.", "weight": 1.1 },
-    { "key": "edge_cases", "label": "Edge cases", "description": "Occupied cell, out-of-bounds move, move out of turn, move after game over, full-board draw.", "weight": 0.9 },
-    { "key": "communication", "label": "Communication", "description": "Explains the incremental win check clearly and reasons about the NxN generalization.", "weight": 0.8 }
+    {
+      "key": "requirements_clarification",
+      "label": "Requirements clarification",
+      "description": "Clarifies board size (3x3 vs NxN), number of players/symbols, win condition (full line vs K-in-a-row), and human-vs-AI before designing.",
+      "weight": 1.0
+    },
+    {
+      "key": "core_entities",
+      "label": "Core entities",
+      "description": "Identifies Board, Cell, Player, Piece/Symbol, Move, and Game/GameController.",
+      "weight": 1.0
+    },
+    {
+      "key": "class_design",
+      "label": "Class design",
+      "description": "Board owns the grid and validation, Player holds a symbol, Move is a value object; no god-class Game holding raw arrays.",
+      "weight": 1.1
+    },
+    {
+      "key": "win_detection",
+      "label": "Win detection",
+      "description": "Efficient incremental win check (row/col/diag counters updated per move, O(1)) rather than O(N^2) full scan each turn.",
+      "weight": 1.2
+    },
+    {
+      "key": "state_machine",
+      "label": "State machine",
+      "description": "Clear game state flow: IN_PROGRESS -> WIN / DRAW, turn alternation, and rejecting moves after game over.",
+      "weight": 1.0
+    },
+    {
+      "key": "relationships",
+      "label": "Relationships",
+      "description": "Game aggregates Players and composes a Board; Board composes Cells; correct ownership/multiplicity.",
+      "weight": 0.9
+    },
+    {
+      "key": "api_methods",
+      "label": "API methods",
+      "description": "makeMove(player, row, col), isValidMove, currentPlayer, getStatus/getWinner; clean signatures.",
+      "weight": 1.0
+    },
+    {
+      "key": "extensibility",
+      "label": "Extensibility",
+      "description": "Generalizes to NxN / K-in-a-row / more players, and to an AI player, without rewriting the core.",
+      "weight": 1.1
+    },
+    {
+      "key": "edge_cases",
+      "label": "Edge cases",
+      "description": "Occupied cell, out-of-bounds move, move out of turn, move after game over, full-board draw.",
+      "weight": 0.9
+    },
+    {
+      "key": "communication",
+      "label": "Communication",
+      "description": "Explains the incremental win check clearly and reasons about the NxN generalization.",
+      "weight": 0.8
+    }
   ],
   "reference": {
     "functional_requirements": [
@@ -42,14 +102,88 @@
       "Console/UI or just the engine?"
     ],
     "core_classes": [
-      { "name": "Game / GameController", "responsibility": "Orchestrates the match: whose turn, applies moves via the board, checks status, ends the game.", "key_fields": ["Board board", "List<Player> players", "int currentPlayerIdx", "GameStatus status"], "key_methods": ["GameStatus makeMove(Player p, int row, int col)", "Player currentPlayer()", "GameStatus getStatus()"] },
-      { "name": "Board", "responsibility": "Owns the grid and move validation; applies a piece and delegates/holds incremental win-check counters.", "key_fields": ["int size", "int k (win length)", "Piece[][] grid", "int[] rowCount, colCount; int diag, antiDiag (per symbol)"], "key_methods": ["boolean isValid(int r, int c)", "boolean place(Piece piece, int r, int c)", "boolean isWinningMove(Piece piece, int r, int c)", "boolean isFull()"] },
-      { "name": "Cell", "responsibility": "One grid position; empty or holding a Piece (can be modeled implicitly by the grid array).", "key_fields": ["row", "col", "Piece piece"], "key_methods": [] },
-      { "name": "Player", "responsibility": "A participant bound to a Piece/symbol; may be human or AI.", "key_fields": ["name", "Piece piece"], "key_methods": ["Move nextMove(Board b) (for AI)"] },
-      { "name": "Piece / Symbol (enum)", "responsibility": "X, O (extend for more players).", "key_fields": [], "key_methods": [] },
-      { "name": "Move", "responsibility": "Immutable value object: which player placed which piece where.", "key_fields": ["Player player", "int row", "int col"], "key_methods": [] },
-      { "name": "GameStatus (enum)", "responsibility": "IN_PROGRESS, WIN, DRAW.", "key_fields": [], "key_methods": [] },
-      { "name": "PlayerStrategy (interface, optional)", "responsibility": "Human input vs AI move selection (minimax), pluggable.", "key_fields": [], "key_methods": ["Move chooseMove(Board b, Piece piece)"] }
+      {
+        "name": "Game / GameController",
+        "responsibility": "Orchestrates the match: whose turn, applies moves via the board, checks status, ends the game.",
+        "key_fields": [
+          "Board board",
+          "List<Player> players",
+          "int currentPlayerIdx",
+          "GameStatus status"
+        ],
+        "key_methods": [
+          "GameStatus makeMove(Player p, int row, int col)",
+          "Player currentPlayer()",
+          "GameStatus getStatus()"
+        ]
+      },
+      {
+        "name": "Board",
+        "responsibility": "Owns the grid and move validation; applies a piece and delegates/holds incremental win-check counters.",
+        "key_fields": [
+          "int size",
+          "int k (win length)",
+          "Piece[][] grid",
+          "int[] rowCount, colCount; int diag, antiDiag (per symbol)"
+        ],
+        "key_methods": [
+          "boolean isValid(int r, int c)",
+          "boolean place(Piece piece, int r, int c)",
+          "boolean isWinningMove(Piece piece, int r, int c)",
+          "boolean isFull()"
+        ]
+      },
+      {
+        "name": "Cell",
+        "responsibility": "One grid position; empty or holding a Piece (can be modeled implicitly by the grid array).",
+        "key_fields": [
+          "row",
+          "col",
+          "Piece piece"
+        ],
+        "key_methods": []
+      },
+      {
+        "name": "Player",
+        "responsibility": "A participant bound to a Piece/symbol; may be human or AI.",
+        "key_fields": [
+          "name",
+          "Piece piece"
+        ],
+        "key_methods": [
+          "Move nextMove(Board b) (for AI)"
+        ]
+      },
+      {
+        "name": "Piece / Symbol (enum)",
+        "responsibility": "X, O (extend for more players).",
+        "key_fields": [],
+        "key_methods": []
+      },
+      {
+        "name": "Move",
+        "responsibility": "Immutable value object: which player placed which piece where.",
+        "key_fields": [
+          "Player player",
+          "int row",
+          "int col"
+        ],
+        "key_methods": []
+      },
+      {
+        "name": "GameStatus (enum)",
+        "responsibility": "IN_PROGRESS, WIN, DRAW.",
+        "key_fields": [],
+        "key_methods": []
+      },
+      {
+        "name": "PlayerStrategy (interface, optional)",
+        "responsibility": "Human input vs AI move selection (minimax), pluggable.",
+        "key_fields": [],
+        "key_methods": [
+          "Move chooseMove(Board b, Piece piece)"
+        ]
+      }
     ],
     "relationships": [
       "Game composes a Board and aggregates Players (2..*)",
@@ -59,9 +193,21 @@
       "Piece and GameStatus are enums"
     ],
     "design_patterns": [
-      { "pattern": "Strategy", "where": "PlayerStrategy for human vs AI (minimax) move selection", "why": "Add an AI opponent without changing the game loop." },
-      { "pattern": "State (light)", "where": "GameStatus governing whether moves are accepted", "why": "Cleanly reject moves after WIN/DRAW." },
-      { "pattern": "Factory (optional)", "where": "GameFactory building 3x3 vs NxN/K-in-a-row configs", "why": "Vary board setup without caller knowledge." }
+      {
+        "pattern": "Strategy",
+        "where": "PlayerStrategy for human vs AI (minimax) move selection",
+        "why": "Add an AI opponent without changing the game loop."
+      },
+      {
+        "pattern": "State (light)",
+        "where": "GameStatus governing whether moves are accepted",
+        "why": "Cleanly reject moves after WIN/DRAW."
+      },
+      {
+        "pattern": "Factory (optional)",
+        "where": "GameFactory building 3x3 vs NxN/K-in-a-row configs",
+        "why": "Vary board setup without caller knowledge."
+      }
     ],
     "apis": [
       "GameStatus makeMove(Player p, int row, int col)",
@@ -95,15 +241,36 @@
       "Other line games (Connect Four): reuse Board/win-check with a gravity rule on placement"
     ],
     "deep_dives": [
-      { "topic": "incremental_win_check", "probe": "Scanning the whole board every move is O(N^2). How do you check for a win in O(1) using per-row/col/diagonal counters, and how do you extend that to K-in-a-row?" },
-      { "topic": "nxn_generalization", "probe": "What changes moving from fixed 3x3 to N x N with K-in-a-row? Which classes stay untouched?" },
-      { "topic": "ai_player", "probe": "How would you add an unbeatable AI without touching the game loop — where does minimax live?" }
+      {
+        "topic": "incremental_win_check",
+        "probe": "Scanning the whole board every move is O(N^2). How do you check for a win in O(1) using per-row/col/diagonal counters, and how do you extend that to K-in-a-row?"
+      },
+      {
+        "topic": "nxn_generalization",
+        "probe": "What changes moving from fixed 3x3 to N x N with K-in-a-row? Which classes stay untouched?"
+      },
+      {
+        "topic": "ai_player",
+        "probe": "How would you add an unbeatable AI without touching the game loop — where does minimax live?"
+      }
     ],
     "followup_bank": [
-      { "trigger": "mentions scan or loop or check all", "question": "Checking every row/col/diagonal each move is O(N^2). Can you keep counters per line and detect a win in O(1) per move?" },
-      { "trigger": "mentions 3x3 or fixed", "question": "Now generalize to N x N with K-in-a-row — what changes, and which classes stay the same?" },
-      { "trigger": "mentions ai or bot or computer", "question": "Where does the AI live so the game loop doesn't change — a PlayerStrategy with minimax?" },
-      { "trigger": "mentions array or grid in game", "question": "Should the raw grid live in Game or in a Board class? Why does that separation matter?" }
+      {
+        "trigger": "mentions scan or loop or check all",
+        "question": "Checking every row/col/diagonal each move is O(N^2). Can you keep counters per line and detect a win in O(1) per move?"
+      },
+      {
+        "trigger": "mentions 3x3 or fixed",
+        "question": "Now generalize to N x N with K-in-a-row — what changes, and which classes stay the same?"
+      },
+      {
+        "trigger": "mentions ai or bot or computer",
+        "question": "Where does the AI live so the game loop doesn't change — a PlayerStrategy with minimax?"
+      },
+      {
+        "trigger": "mentions array or grid in game",
+        "question": "Should the raw grid live in Game or in a Board class? Why does that separation matter?"
+      }
     ],
     "tradeoffs": [
       "Incremental counters (O(1) check, more state to maintain) vs full scan (simple, O(N^2))",

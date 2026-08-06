@@ -2,19 +2,66 @@
   "id": "teacher-classroom",
   "title": "Teaching Scenario: Classroom Management & Differentiated Instruction",
   "track": "professional",
-  "domain": "education",
+  "domain": "behavioral",
+  "areas": [
+    "engineering",
+    "data_science",
+    "medicine",
+    "nursing",
+    "law",
+    "consulting",
+    "product_management",
+    "finance"
+  ],
   "modality": "conversational",
   "difficulty": "entry",
-  "tags": ["teaching", "classroom-management", "differentiation", "engagement", "equity", "scenario"],
+  "tags": [
+    "teaching",
+    "classroom-management",
+    "differentiation",
+    "engagement",
+    "equity",
+    "scenario"
+  ],
   "prompt": "You're teaching a mixed-ability class of 28 students. During a lesson, one student keeps calling out and distracting others, a small group in the back has clearly finished the work and is getting bored, and two students look completely lost and disengaged. It's the middle of the lesson and you have to keep it moving. Walk me through how you'd handle the moment and how you'd design the lesson so this goes better next time.",
   "blurb": "An entry-level teaching scenario — assessed for in-the-moment classroom management, differentiated instruction, and a proactive, relationship-based approach.",
   "rubric": [
-    { "key": "classroom_management", "label": "Classroom management", "description": "Handles the disruption calmly and proportionately, using low-key redirection and clear expectations rather than escalating or stopping the whole lesson, and keeps learning moving.", "weight": 1.2 },
-    { "key": "differentiation", "label": "Differentiated instruction", "description": "Addresses the range of readiness: extension/challenge for the finished group and scaffolding/support for the lost students, showing they can meet different learners' needs at once.", "weight": 1.3 },
-    { "key": "engagement", "label": "Engagement & motivation", "description": "Diagnoses WHY students are acting out or disengaging (bored, lost, needs attention) and adjusts to re-engage them, rather than treating behavior purely as a discipline issue.", "weight": 1.1 },
-    { "key": "proactive_design", "label": "Proactive lesson design", "description": "Moves from reaction to prevention: how they'd design the lesson (tiered tasks, checks for understanding, routines, seating, anchor/extension activities) so these problems are less likely.", "weight": 1.2 },
-    { "key": "relationships_equity", "label": "Relationships & equity", "description": "Shows respect for students and dignity in handling behavior, builds relationships, avoids public shaming, and considers equitable access so no group is left behind.", "weight": 1.0 },
-    { "key": "communication", "label": "Communication & reflection", "description": "Explains reasoning clearly, is organized, and reflects on what they'd adjust — including follow-up with individual students or families where appropriate.", "weight": 1.0 }
+    {
+      "key": "classroom_management",
+      "label": "Classroom management",
+      "description": "Handles the disruption calmly and proportionately, using low-key redirection and clear expectations rather than escalating or stopping the whole lesson, and keeps learning moving.",
+      "weight": 1.2
+    },
+    {
+      "key": "differentiation",
+      "label": "Differentiated instruction",
+      "description": "Addresses the range of readiness: extension/challenge for the finished group and scaffolding/support for the lost students, showing they can meet different learners' needs at once.",
+      "weight": 1.3
+    },
+    {
+      "key": "engagement",
+      "label": "Engagement & motivation",
+      "description": "Diagnoses WHY students are acting out or disengaging (bored, lost, needs attention) and adjusts to re-engage them, rather than treating behavior purely as a discipline issue.",
+      "weight": 1.1
+    },
+    {
+      "key": "proactive_design",
+      "label": "Proactive lesson design",
+      "description": "Moves from reaction to prevention: how they'd design the lesson (tiered tasks, checks for understanding, routines, seating, anchor/extension activities) so these problems are less likely.",
+      "weight": 1.2
+    },
+    {
+      "key": "relationships_equity",
+      "label": "Relationships & equity",
+      "description": "Shows respect for students and dignity in handling behavior, builds relationships, avoids public shaming, and considers equitable access so no group is left behind.",
+      "weight": 1.0
+    },
+    {
+      "key": "communication",
+      "label": "Communication & reflection",
+      "description": "Explains reasoning clearly, is organized, and reflects on what they'd adjust — including follow-up with individual students or families where appropriate.",
+      "weight": 1.0
+    }
   ],
   "reference": {
     "scenario": "Entry-level teaching scenario assessing classroom management and differentiated instruction. The candidate must handle three simultaneous needs — a disruptive caller-outer, a bored high-readiness group, and two lost/disengaged students — in the middle of a live lesson, then reflect on preventive design. A strong answer separates the in-the-moment response from the systemic fix. In the moment: manage the disruption with the least intervention that works (proximity, a non-verbal cue, a quiet private redirect, re-stating the expectation) rather than a public showdown that derails the class — and diagnose the behavior (attention-seeking, boredom, or masking that the student is lost). Re-engage the finished group with a meaningful extension or challenge task (not busywork) and give the two lost students a quick scaffold — a check for understanding, a simpler entry point, pairing, or a brief small-group pull-aside while others work. The strongest candidates treat behavior and engagement as linked: the bored and the lost students are both at risk of acting out, and differentiation is classroom management. For prevention, they describe designing the lesson for a mixed-ability class up front: tiered/leveled tasks, built-in extension and anchor activities, frequent low-stakes checks for understanding, clear routines and expectations established early, thoughtful seating/grouping, and knowing their students' data. They handle behavior with dignity — no public shaming — build relationships, and follow up individually or with families as appropriate, keeping equity in mind so no group is consistently left behind. Weak answers reach straight for punishment, stop the whole lesson to deal with one student, ignore the bored or the lost group (only managing the disruption), give the finished group busywork, treat behavior purely as defiance rather than diagnosing cause, or offer no preventive design.",
@@ -31,13 +78,34 @@
       "Keep equity central: ensure the same students aren't always the ones left behind or always the ones extended, and that support is distributed fairly."
     ],
     "probes": [
-      { "trigger": "candidate reaches straight for punishment", "question": "Before consequences — why do you think that student is calling out? Could the behavior be telling you something about the lesson?" },
-      { "trigger": "candidate stops the whole lesson to deal with the disruptive student", "question": "What happens to the other 27 students while you handle that one? How do you keep learning moving?" },
-      { "trigger": "candidate only manages the disruption", "question": "What about the group that's bored and the two who are lost — what are you doing for them in this same moment?" },
-      { "trigger": "candidate gives the finished group busywork", "question": "Is 'more of the same' going to engage the students who already get it? What would actually challenge them?" },
-      { "trigger": "candidate ignores the lost students' cause", "question": "How do you find out WHY those two are lost before you decide how to help them?" },
-      { "trigger": "candidate offers no prevention", "question": "How would you design this lesson from the start so a mixed-ability class doesn't split into bored, lost, and disruptive?" },
-      { "trigger": "candidate corrects behavior publicly / harshly", "question": "How do you address the behavior without embarrassing the student or damaging your relationship with them?" }
+      {
+        "trigger": "candidate reaches straight for punishment",
+        "question": "Before consequences — why do you think that student is calling out? Could the behavior be telling you something about the lesson?"
+      },
+      {
+        "trigger": "candidate stops the whole lesson to deal with the disruptive student",
+        "question": "What happens to the other 27 students while you handle that one? How do you keep learning moving?"
+      },
+      {
+        "trigger": "candidate only manages the disruption",
+        "question": "What about the group that's bored and the two who are lost — what are you doing for them in this same moment?"
+      },
+      {
+        "trigger": "candidate gives the finished group busywork",
+        "question": "Is 'more of the same' going to engage the students who already get it? What would actually challenge them?"
+      },
+      {
+        "trigger": "candidate ignores the lost students' cause",
+        "question": "How do you find out WHY those two are lost before you decide how to help them?"
+      },
+      {
+        "trigger": "candidate offers no prevention",
+        "question": "How would you design this lesson from the start so a mixed-ability class doesn't split into bored, lost, and disruptive?"
+      },
+      {
+        "trigger": "candidate corrects behavior publicly / harshly",
+        "question": "How do you address the behavior without embarrassing the student or damaging your relationship with them?"
+      }
     ],
     "red_flags": [
       "Reaches straight for punishment or removal without diagnosing the behavior",

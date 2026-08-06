@@ -2,20 +2,66 @@
   "id": "marketing-gtm",
   "title": "Go-To-Market Brief: Launching a New Product",
   "track": "professional",
-  "domain": "marketing",
+  "domain": "product_sense",
+  "areas": [
+    "product_management"
+  ],
   "modality": "written",
   "difficulty": "senior",
-  "tags": ["marketing", "go-to-market", "positioning", "segmentation", "launch", "written", "metrics"],
+  "tags": [
+    "marketing",
+    "go-to-market",
+    "positioning",
+    "segmentation",
+    "launch",
+    "written",
+    "metrics"
+  ],
   "prompt": "Write a go-to-market brief for a product launch. The company is an established project-management SaaS whose new product is an AI-powered meeting-notes and action-item assistant that integrates with its existing tool. It will launch in one quarter. Produce a concise, leadership-ready GTM brief: target segment(s) and buyer, positioning and messaging, pricing and packaging approach, channel and launch plan, key metrics and goals, and the main risks and how you'd mitigate them. Write it as you would for a launch review with the exec team.",
   "blurb": "A written GTM exercise — produce a crisp, leadership-ready launch brief with sharp positioning, a focused segment, a channel plan, and honest metrics and risks.",
   "rubric": [
-    { "key": "segmentation", "label": "Segment & buyer", "description": "Identifies a focused target segment and the specific buyer/user, their pain, and buying behavior — and why to lead there — rather than 'everyone', distinguishing the economic buyer from the end user.", "weight": 1.2 },
-    { "key": "positioning", "label": "Positioning & messaging", "description": "Articulates sharp positioning (category, target, key benefit, differentiation vs alternatives incl. standalone AI-notetakers) and a clear value message, not a feature list.", "weight": 1.3 },
-    { "key": "pricing_packaging", "label": "Pricing & packaging", "description": "Proposes a defensible pricing/packaging approach (add-on vs bundled vs new tier, free trial/PLG vs sales-led) tied to value and the existing base, with rationale and tradeoffs.", "weight": 1.1 },
-    { "key": "channel_launch", "label": "Channel & launch plan", "description": "Lays out how it reaches the market — leveraging the installed base first, plus the channel mix (in-product, lifecycle, content, sales, PR/partners) and a phased launch (beta → GA) with sequencing.", "weight": 1.2 },
-    { "key": "metrics_goals", "label": "Metrics & goals", "description": "Sets a north-star and funnel metrics (awareness, activation, attach/adoption rate on the base, retention, revenue) with rough targets and guardrails, and how success is judged.", "weight": 1.1 },
-    { "key": "risks_tradeoffs", "label": "Risks & tradeoffs", "description": "Names real risks (AI trust/accuracy, privacy, cannibalization, competitive standalone tools, low attach) and credible mitigations, and the tradeoffs the plan accepts.", "weight": 1.0 },
-    { "key": "communication", "label": "Structure & writing", "description": "Reads like a real leadership brief: top-down, tight sections, scannable, concise, with a clear recommendation — no rambling or filler.", "weight": 1.0 }
+    {
+      "key": "segmentation",
+      "label": "Segment & buyer",
+      "description": "Identifies a focused target segment and the specific buyer/user, their pain, and buying behavior — and why to lead there — rather than 'everyone', distinguishing the economic buyer from the end user.",
+      "weight": 1.2
+    },
+    {
+      "key": "positioning",
+      "label": "Positioning & messaging",
+      "description": "Articulates sharp positioning (category, target, key benefit, differentiation vs alternatives incl. standalone AI-notetakers) and a clear value message, not a feature list.",
+      "weight": 1.3
+    },
+    {
+      "key": "pricing_packaging",
+      "label": "Pricing & packaging",
+      "description": "Proposes a defensible pricing/packaging approach (add-on vs bundled vs new tier, free trial/PLG vs sales-led) tied to value and the existing base, with rationale and tradeoffs.",
+      "weight": 1.1
+    },
+    {
+      "key": "channel_launch",
+      "label": "Channel & launch plan",
+      "description": "Lays out how it reaches the market — leveraging the installed base first, plus the channel mix (in-product, lifecycle, content, sales, PR/partners) and a phased launch (beta → GA) with sequencing.",
+      "weight": 1.2
+    },
+    {
+      "key": "metrics_goals",
+      "label": "Metrics & goals",
+      "description": "Sets a north-star and funnel metrics (awareness, activation, attach/adoption rate on the base, retention, revenue) with rough targets and guardrails, and how success is judged.",
+      "weight": 1.1
+    },
+    {
+      "key": "risks_tradeoffs",
+      "label": "Risks & tradeoffs",
+      "description": "Names real risks (AI trust/accuracy, privacy, cannibalization, competitive standalone tools, low attach) and credible mitigations, and the tradeoffs the plan accepts.",
+      "weight": 1.0
+    },
+    {
+      "key": "communication",
+      "label": "Structure & writing",
+      "description": "Reads like a real leadership brief: top-down, tight sections, scannable, concise, with a clear recommendation — no rambling or filler.",
+      "weight": 1.0
+    }
   ],
   "reference": {
     "scenario": "Written GTM deliverable at the senior bar. The candidate submits a leadership-ready launch brief for an AI meeting-notes/action-item add-on to an established project-management SaaS. There's no single correct plan, but strong briefs share: a focused lead segment rather than 'everyone' (the natural wedge is the existing customer base — teams already living in the tool who run lots of meetings), a clear view of the buyer vs user (admin/team lead or economic buyer vs the individual note-taker), and sharp positioning that differentiates from both standalone AI-notetaker tools and doing-nothing — the key differentiator is that notes turn directly into tracked action items inside the PM tool the team already uses (closed loop from meeting to task), not just a transcript. Pricing/packaging is reasoned, not arbitrary: options like a paid add-on, a new higher tier, or bundling into existing plans to drive adoption, with a trial/PLG motion given the installed base, each with tradeoffs (attach revenue vs adoption vs cannibalization). The channel/launch plan leverages the installed base first (in-product prompts, lifecycle email, CSMs) before broad awareness, with a phased beta → GA sequence and a mix of in-product, content, PR, sales, and partner/integration channels. Metrics include a north-star (e.g. weekly active teams using AI notes that convert to action items) plus funnel metrics — awareness, activation, attach/adoption rate on the base, retention, and revenue — with rough targets and guardrails (e.g. AI accuracy/trust, support load, churn). Risks are honest and specific to an AI launch: accuracy/hallucination eroding trust, privacy/security of meeting content, competitive standalone notetakers, cannibalization or low attach, and over-promising AI — each with a credible mitigation. The writing is top-down, scannable, and concise, opening with a one-line recommendation. Weak briefs target 'everyone', give a feature list instead of positioning, set arbitrary pricing with no rationale, ignore the installed-base advantage, use vanity or missing metrics, hand-wave the AI trust/privacy risks, or ramble like notes rather than a leadership one-pager.",
@@ -30,13 +76,34 @@
       "State the tradeoffs the plan deliberately accepts (e.g. base-first over broad awareness this quarter; add-on revenue over fastest adoption) and the disconfirming signals that would trigger a pivot."
     ],
     "probes": [
-      { "trigger": "brief targets 'everyone' / no focused segment", "question": "Who exactly do you launch to FIRST and why them? What's your wedge into the market this quarter?" },
-      { "trigger": "positioning is a feature list", "question": "What's the one-sentence positioning — for whom, what category, what key benefit, and how is it different from a standalone AI notetaker?" },
-      { "trigger": "pricing is arbitrary", "question": "Why that pricing/packaging? What does an add-on versus a bundle trade off in terms of revenue, adoption, and cannibalization?" },
-      { "trigger": "ignores the installed base", "question": "You already have a large customer base living in the tool. How does the plan exploit that advantage before spending on cold awareness?" },
-      { "trigger": "metrics are vague or vanity", "question": "What's the north-star metric and a rough target, and what guardrail tells you the launch is succeeding on quality, not just signups?" },
-      { "trigger": "hand-waves AI risks", "question": "What happens to trust the first time the AI mangles someone's action items or mishandles a sensitive meeting? How do you mitigate accuracy and privacy risk?" },
-      { "trigger": "no phasing", "question": "What's the sequence from beta to GA, and what does each phase have to prove before you widen it?" }
+      {
+        "trigger": "brief targets 'everyone' / no focused segment",
+        "question": "Who exactly do you launch to FIRST and why them? What's your wedge into the market this quarter?"
+      },
+      {
+        "trigger": "positioning is a feature list",
+        "question": "What's the one-sentence positioning — for whom, what category, what key benefit, and how is it different from a standalone AI notetaker?"
+      },
+      {
+        "trigger": "pricing is arbitrary",
+        "question": "Why that pricing/packaging? What does an add-on versus a bundle trade off in terms of revenue, adoption, and cannibalization?"
+      },
+      {
+        "trigger": "ignores the installed base",
+        "question": "You already have a large customer base living in the tool. How does the plan exploit that advantage before spending on cold awareness?"
+      },
+      {
+        "trigger": "metrics are vague or vanity",
+        "question": "What's the north-star metric and a rough target, and what guardrail tells you the launch is succeeding on quality, not just signups?"
+      },
+      {
+        "trigger": "hand-waves AI risks",
+        "question": "What happens to trust the first time the AI mangles someone's action items or mishandles a sensitive meeting? How do you mitigate accuracy and privacy risk?"
+      },
+      {
+        "trigger": "no phasing",
+        "question": "What's the sequence from beta to GA, and what does each phase have to prove before you widen it?"
+      }
     ],
     "red_flags": [
       "Targets 'everyone' or lists many segments with no focused lead / wedge",

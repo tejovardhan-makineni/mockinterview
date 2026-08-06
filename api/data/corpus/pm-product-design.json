@@ -2,19 +2,58 @@
   "id": "pm-product-design",
   "title": "Product Design: Design a Product for a User Segment",
   "track": "professional",
-  "domain": "product_management",
+  "domain": "product_sense",
+  "areas": [
+    "product_management"
+  ],
   "modality": "conversational",
   "difficulty": "mid",
-  "tags": ["product-sense", "product-design", "user-needs", "prioritization", "tradeoffs"],
+  "tags": [
+    "product-sense",
+    "product-design",
+    "user-needs",
+    "prioritization",
+    "tradeoffs"
+  ],
   "prompt": "Design a product to help recent immigrants build credit history in a new country. Walk me through how you'd approach it — who you'd build for, what you'd build, and why.",
   "blurb": "A product-sense case — pick a user, uncover real needs and pain points, prioritize a solution, and reason about tradeoffs and success.",
   "rubric": [
-    { "key": "user_empathy", "label": "User empathy", "description": "Segments the broad user group, picks a specific target, and articulates their goals, contexts, and concrete pain points from the user's point of view — not generic personas.", "weight": 1.3 },
-    { "key": "prioritization", "label": "Prioritization", "description": "Generates multiple solution ideas, then narrows to a focused MVP using an explicit rationale (impact vs effort, severity of pain, reach) rather than trying to build everything.", "weight": 1.2 },
-    { "key": "product_thinking", "label": "Solution & product thinking", "description": "Proposes a concrete, coherent solution that maps directly to the chosen user's top pain point, and describes the core experience end to end.", "weight": 1.1 },
-    { "key": "metrics", "label": "Success metrics", "description": "Defines what success looks like with a clear primary metric tied to the user goal, plus guardrail/counter metrics.", "weight": 1.0 },
-    { "key": "tradeoffs", "label": "Tradeoffs & risks", "description": "Surfaces the key tradeoffs (e.g. inclusivity vs risk, speed vs trust), regulatory/abuse risks, and how they'd validate the riskiest assumption.", "weight": 1.1 },
-    { "key": "communication", "label": "Communication & structure", "description": "Lays out a clear structure (user -> needs -> solutions -> prioritize -> metrics/tradeoffs), signposts, and stays organized under follow-ups.", "weight": 0.9 }
+    {
+      "key": "user_empathy",
+      "label": "User empathy",
+      "description": "Segments the broad user group, picks a specific target, and articulates their goals, contexts, and concrete pain points from the user's point of view — not generic personas.",
+      "weight": 1.3
+    },
+    {
+      "key": "prioritization",
+      "label": "Prioritization",
+      "description": "Generates multiple solution ideas, then narrows to a focused MVP using an explicit rationale (impact vs effort, severity of pain, reach) rather than trying to build everything.",
+      "weight": 1.2
+    },
+    {
+      "key": "product_thinking",
+      "label": "Solution & product thinking",
+      "description": "Proposes a concrete, coherent solution that maps directly to the chosen user's top pain point, and describes the core experience end to end.",
+      "weight": 1.1
+    },
+    {
+      "key": "metrics",
+      "label": "Success metrics",
+      "description": "Defines what success looks like with a clear primary metric tied to the user goal, plus guardrail/counter metrics.",
+      "weight": 1.0
+    },
+    {
+      "key": "tradeoffs",
+      "label": "Tradeoffs & risks",
+      "description": "Surfaces the key tradeoffs (e.g. inclusivity vs risk, speed vs trust), regulatory/abuse risks, and how they'd validate the riskiest assumption.",
+      "weight": 1.1
+    },
+    {
+      "key": "communication",
+      "label": "Communication & structure",
+      "description": "Lays out a clear structure (user -> needs -> solutions -> prioritize -> metrics/tradeoffs), signposts, and stays organized under follow-ups.",
+      "weight": 0.9
+    }
   ],
   "reference": {
     "scenario": "Open-ended product-design prompt. There is no single right product; the interviewer assesses whether the candidate structures the problem, grounds the design in a real user need, prioritizes, and reasons about metrics and tradeoffs. Context the candidate should surface themselves: recent immigrants often arrive with no domestic credit file, so they're locked out of housing, phone plans, car loans, and cards despite being creditworthy abroad; they may lack an SSN initially, distrust or not understand the local credit system, and face language barriers. Sub-segments differ sharply: students, skilled-visa workers with income, refugees/asylees with little income, family-reunification arrivals. Good candidates pick ONE segment and design for its specific pain. Plausible solutions: a secured card or 'credit-builder' account that reports rent/utility/telecom payments to bureaus; leveraging alternative or cross-border credit data; a deposit-backed card that graduates to unsecured. Real tensions: inclusivity vs default risk, regulatory/KYC constraints, trust-building with a wary user, and unit economics on a thin-file, low-balance population.",
@@ -28,12 +67,30 @@
       "Name the key tradeoffs and risks — inclusivity vs default risk, KYC/regulatory limits, unit economics on low balances — and state the single riskiest assumption and how you'd test it (e.g. a pilot measuring whether reported payments actually lift scores and whether defaults stay acceptable)."
     ],
     "probes": [
-      { "trigger": "candidate jumps to a solution before choosing a user", "question": "Who exactly is this for? These users are not one group — pick a segment and tell me why that one." },
-      { "trigger": "candidate lists needs generically", "question": "Put yourself in that user's shoes on day one in the country — what's the single most painful moment, and does your product hit it?" },
-      { "trigger": "candidate tries to build many features", "question": "If you could ship only one thing first, what is it and why — what's your prioritization rationale?" },
-      { "trigger": "candidate never defines success", "question": "How would you know this product is working? What's your primary metric, and what guardrail would stop you from gaming it?" },
-      { "trigger": "candidate ignores risk", "question": "You're extending credit to thin-file users. What's the tension between being inclusive and managing default, and how do you handle it?" },
-      { "trigger": "candidate is confident but untested", "question": "What is the riskiest assumption in this design, and how would you validate it before a full build?" }
+      {
+        "trigger": "candidate jumps to a solution before choosing a user",
+        "question": "Who exactly is this for? These users are not one group — pick a segment and tell me why that one."
+      },
+      {
+        "trigger": "candidate lists needs generically",
+        "question": "Put yourself in that user's shoes on day one in the country — what's the single most painful moment, and does your product hit it?"
+      },
+      {
+        "trigger": "candidate tries to build many features",
+        "question": "If you could ship only one thing first, what is it and why — what's your prioritization rationale?"
+      },
+      {
+        "trigger": "candidate never defines success",
+        "question": "How would you know this product is working? What's your primary metric, and what guardrail would stop you from gaming it?"
+      },
+      {
+        "trigger": "candidate ignores risk",
+        "question": "You're extending credit to thin-file users. What's the tension between being inclusive and managing default, and how do you handle it?"
+      },
+      {
+        "trigger": "candidate is confident but untested",
+        "question": "What is the riskiest assumption in this design, and how would you validate it before a full build?"
+      }
     ],
     "red_flags": [
       "Jumps straight to a feature/solution without choosing or understanding a user",

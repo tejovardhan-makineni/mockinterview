@@ -1,0 +1,126 @@
+{
+  "id": "law-negotiation-counsel",
+  "title": "Settlement Negotiation & Client Counseling",
+  "track": "professional",
+  "domain": "legal_practice",
+  "areas": [
+    "law"
+  ],
+  "modality": "conversational",
+  "difficulty": "mid",
+  "tags": [
+    "client-counseling",
+    "settlement",
+    "batna",
+    "expected-value",
+    "legal-ethics",
+    "communication"
+  ],
+  "prompt": "You are the lawyer for Jordan, who was injured when a delivery van ran a red light and hit Jordan's car; liability is fairly clear but damages are disputed. The defendant's insurer has just offered $60,000 to settle. Jordan says: 'I don't know — my friend says I should hold out and take them to court for way more, but honestly I just want this over with, and I can't afford to lose everything on a gamble. What should I do — just tell me what to do.' Conduct the counseling conversation: help Jordan understand the offer against the realistic trial alternative, work through the risk and expected value in plain language, and reach a decision the right way. This is a spoken conversation, not a written memo.",
+  "blurb": "A settlement-counseling roleplay — frame the offer against the client's BATNA, reason through risk and expected value without gambling with the client's money, and respect that the settle-or-try decision is the client's alone.",
+  "rubric": [
+    {
+      "key": "fact_gathering",
+      "label": "Fact & goals elicitation",
+      "description": "Draws out what matters to the decision: the realistic full value of the claim if it went well at trial, the strength of liability and the disputed damages, medical bills and lost wages actually incurred, Jordan's financial pressure and appetite for risk, timeline needs, and any liens or fee/cost arrangement that affects net recovery.",
+      "weight": 1.2
+    },
+    {
+      "key": "batna_framing",
+      "label": "BATNA & alternatives",
+      "description": "Frames the settlement offer against the best alternative to a negotiated agreement — going to trial — including a realistic range of trial outcomes (win big, win modestly, lose), the time to trial, and the possibility of negotiating the $60,000 upward rather than a binary take-it-or-court choice.",
+      "weight": 1.3
+    },
+    {
+      "key": "expected_value",
+      "label": "Risk & expected-value reasoning",
+      "description": "Reasons quantitatively but accessibly: weighs the certain $60,000 now against a probability-weighted range of trial results net of fees, costs, and time; explains variance/downside risk and why a risk-averse, cash-strapped client may rationally prefer certainty even at a discount. Does not pretend precision the facts don't support.",
+      "weight": 1.2
+    },
+    {
+      "key": "client_autonomy",
+      "label": "Client autonomy & the ethical line",
+      "description": "Honors the professional-conduct rule that the client alone decides whether to settle; the lawyer advises and recommends but does not decide or pressure. Resists Jordan's 'just tell me what to do' by giving a clear recommendation with reasons while making explicit the choice is Jordan's.",
+      "weight": 1.3
+    },
+    {
+      "key": "expectation_management",
+      "label": "Managing expectations",
+      "description": "Corrects the friend's 'hold out for way more' framing with candor: no guaranteed trial windfall, litigation risk and cost are real, verdicts are uncertain and collectible amounts differ from headline numbers — without either cheerleading the settlement or the trial.",
+      "weight": 1.1
+    },
+    {
+      "key": "communication",
+      "label": "Communication & clarity",
+      "description": "Explains BATNA, expected value, and risk in plain language, avoids or defines jargon, stays organized, checks for understanding, and closes with concrete next steps and a clear path to Jordan's decision.",
+      "weight": 1.0
+    },
+    {
+      "key": "professionalism",
+      "label": "Professionalism & rapport",
+      "description": "Acknowledges Jordan's stress and desire for closure, avoids guaranteeing outcomes, discloses how the contingency fee and costs affect the net comparison, and builds trust without steamrolling or abdicating the advisory role.",
+      "weight": 1.0
+    }
+  ],
+  "reference": {
+    "scenario": "A personal-injury settlement-counseling session. The defendant's insurer has offered $60,000 on a claim where liability is fairly clear but damages are disputed. The client, Jordan, is risk-averse and financially stretched, wants closure, and is being pulled by a friend's 'hold out for way more' advice — and explicitly asks the lawyer to just make the decision. The sound approach: first elicit the inputs that make the decision tractable — the realistic full trial value, the strength of the damages case, the actual out-of-pocket losses (medical bills, lost wages), any liens, the contingency-fee and cost structure that determines NET recovery, Jordan's timeline and risk tolerance. Then frame the offer against Jordan's BATNA (going to trial): a range of outcomes from a large verdict, to a modest one, to a loss or a below-offer verdict, discounted by probability and reduced by fees, costs, and the year-plus of delay. A clear, plain-language expected-value comparison follows: a certain $60,000 now (net of fee) versus a probability-weighted, riskier, delayed, and fee-reduced trial recovery — noting that a cash-strapped, risk-averse client may rationally take a certain sum even if the raw expected value of trial is somewhat higher, because of variance and downside risk. Crucially, the lawyer must honor the ethical rule (Model Rule 1.2(a)) that the client alone decides whether to settle: the lawyer gives a candid recommendation with reasons but does NOT make the decision or pressure Jordan, and explicitly says so in response to 'just tell me what to do.' The lawyer should also try to negotiate the number up rather than treating it as take-it-or-litigate, and manage expectations against the friend's windfall talk. A weak candidate simply tells Jordan what to do (usurping the decision), guarantees a trial result, ignores fees/costs and net recovery, treats it as a binary with no counter-offer, or runs pure math with no attention to Jordan's risk aversion and need for closure.",
+    "model_points": [
+      "Open by acknowledging Jordan's stress and the pull of the friend's advice, then reframe: the goal is to make a good decision together, and that decision is ultimately Jordan's.",
+      "Elicit the realistic full value of the claim if trial went well, and how strong the disputed-damages case actually is (medical records, treatment, permanency, lost wages).",
+      "Nail down actual documented losses and any liens (medical/insurance subrogation) that come off the top of any recovery.",
+      "Clarify the fee and cost structure — e.g., a contingency fee and litigation costs — so the comparison is on NET dollars in Jordan's pocket, not headline numbers.",
+      "Frame the BATNA explicitly: the alternative to settling is trial, so lay out a realistic range — a strong verdict, a modest verdict, and a loss or below-offer result — plus the added time (often a year or more) and stress.",
+      "Do the expected-value reasoning in plain language: compare the certain $60,000 (net) now against a probability-weighted trial recovery net of fees, costs, and delay; show how even a higher 'possible' number shrinks once you weight it by the chance of winning and subtract costs.",
+      "Explain risk and variance honestly: trial is higher-variance; for a risk-averse client who cannot afford a bad outcome and values certainty and closure, taking a certain sum at some discount to expected value can be entirely rational.",
+      "Correct the friend's 'hold out for way more' framing: there is no guaranteed windfall, verdicts are uncertain, and a jury could award less than $60,000 or nothing — without swinging to over-selling the settlement.",
+      "Treat the number as negotiable, not binary: recommend testing whether the insurer will move up (e.g., a counter), so the real choice may be a higher settlement vs. trial rather than $60,000 vs. trial.",
+      "Give a clear, reasoned recommendation — but explicitly state that whether to settle is Jordan's decision to make, not the lawyer's, and decline to simply 'decide' in response to 'just tell me what to do.'",
+      "Check for understanding and close with concrete next steps: gather the outstanding damages documentation, confirm the lien picture, authorize a counter-offer, and set a follow-up so Jordan can decide without being rushed."
+    ],
+    "probes": [
+      {
+        "trigger": "candidate simply tells Jordan what to do and makes the decision for them",
+        "question": "Jordan says 'Okay, so you're deciding for me — we settle, right?' Is the settle-or-try decision yours to make as the lawyer, and how should you handle that?"
+      },
+      {
+        "trigger": "candidate compares $60,000 to a headline trial number without netting out fees and costs",
+        "question": "You mentioned trial 'could be worth $150,000.' After your contingency fee, litigation costs, and any medical liens, how much of that would actually reach Jordan — and how does that reshape the comparison?"
+      },
+      {
+        "trigger": "candidate ignores Jordan's risk aversion and runs pure expected-value math",
+        "question": "Suppose trial's expected value is a bit higher than $60,000 on paper. Jordan is cash-strapped and terrified of losing. Does the higher number automatically mean 'go to trial'?"
+      },
+      {
+        "trigger": "candidate validates the friend's 'hold out for way more' without qualification",
+        "question": "Jordan's friend says juries hand out huge awards. How do you counsel Jordan on what a trial realistically could — and could not — produce?"
+      },
+      {
+        "trigger": "candidate treats it as a binary $60,000-or-court choice",
+        "question": "Is $60,000 the insurer's last word? What could you do before framing this as settle-versus-trial?"
+      },
+      {
+        "trigger": "candidate uses jargon like 'BATNA' or 'expected value' without explaining",
+        "question": "Jordan looks lost and asks what you mean by 'expected value.' Explain it in plain English with these numbers."
+      }
+    ],
+    "red_flags": [
+      "Makes the settle-or-try decision for Jordan or pressures Jordan into one path, violating the client's right to decide whether to settle.",
+      "Guarantees a trial outcome or a specific recovery amount.",
+      "Compares the $60,000 to headline trial figures without netting out attorney fees, litigation costs, and liens.",
+      "Runs pure expected-value math while ignoring Jordan's risk aversion, cash constraints, and desire for closure.",
+      "Uncritically endorses the friend's 'hold out for way more' advice, or conversely stampedes Jordan into settling out of the lawyer's own convenience.",
+      "Treats the choice as a fixed binary and never considers negotiating the offer upward.",
+      "Buries the analysis in jargon (BATNA, expected value, variance) without explaining it.",
+      "Gives no recommendation at all, hiding behind 'it's your call' without actually advising — the opposite failure from deciding for the client."
+    ],
+    "follow_ups": [
+      "Suppose you learn Jordan's documented medical bills and lost wages already total $70,000. How does that reshape your view of a $60,000 offer and your advice?",
+      "Jordan's contingency fee is one-third plus $8,000 in expected costs. Walk through what Jordan actually nets from $60,000 versus a $120,000 verdict.",
+      "The insurer says $60,000 is 'final.' How do you test that, and what's your negotiation move before Jordan has to choose?",
+      "Jordan decides, against your recommendation, to reject the offer and go to trial. What are your obligations, and how do you proceed?",
+      "Midway, Jordan asks you to accept the offer on the phone right now without seeing the release. How do you respond?"
+    ],
+    "exemplar_answer": "The candidate opens with empathy and reframes the ask: 'I hear you — you want this over with and you're scared of gambling, and your friend is in your ear. My job is to lay this out clearly so YOU can make a good decision; I'll give you my honest recommendation, but the choice to settle or go to trial is legally yours, not mine.' The candidate then gathers the inputs: how strong the damages case is, the documented medical bills and lost wages, any medical or insurance liens, and the fee and cost structure, so the comparison is on net dollars. The candidate frames Jordan's BATNA in plain terms: 'The alternative to taking this offer is trial. Realistically that could go a few ways — a strong verdict, a middling one, or a loss or an award below $60,000 — and it would likely take a year or more and cost money to get there.' Then the expected-value explanation without jargon: 'Say the best realistic verdict is around $120,000, but there's maybe a 60 percent chance we win at all, and after my fee, costs, and your liens, even a good result shrinks. When I weigh the chances and subtract what comes off the top, the likely value of going to trial isn't dramatically more than the $60,000 in hand — and it's far less certain.' The candidate addresses risk aversion honestly: 'Because you can't afford a bad outcome and you value being done, it can be completely rational to take a certain amount now even if trial might, on paper, average a little higher.' The candidate corrects the friend's framing ('there's no guaranteed windfall — a jury could award less than this or nothing') without over-selling the settlement, and treats the number as negotiable: 'Before you decide, I'd like to counter and see if they'll come up — so your real choice may be a higher number versus trial, not $60,000 versus trial.' The candidate gives a clear recommendation with reasons, then hands the decision back: 'My recommendation, given your finances and the risk, is to counter and likely settle if they move up — but I want you to sit with it; you decide, and I'll support whatever you choose.' The candidate closes with next steps: gather the remaining damages records, confirm the liens, authorize a counter, and set a follow-up so Jordan isn't rushed."
+  },
+  "interviewer_notes": "Conversational roleplay: the AI plays Jordan, an anxious, financially stretched personal-injury plaintiff who wants closure, is influenced by a friend's 'hold out for way more' talk, and repeatedly pushes the lawyer to 'just tell me what to do.' The single most important thing being tested is the ethical line under Model Rule 1.2(a): the client, not the lawyer, decides whether to settle. Dock candidates who cave to 'just tell me what to do' and simply make the decision or pressure Jordan — but ALSO dock the opposite failure, hiding behind 'it's your call' and refusing to give any recommendation; the skilled move is a clear, reasoned recommendation coupled with an explicit statement that the choice is Jordan's. Test the money reasoning: many candidates compare $60,000 to a headline trial figure and forget to net out the contingency fee, litigation costs, and liens — deploy the net-recovery probe. Test risk reasoning: if a candidate runs pure expected-value math and concludes 'higher number, so go to trial,' press on Jordan's risk aversion and inability to absorb a loss. Reward candidates who translate BATNA and expected value into plain language, who correct the friend's windfall framing without over-selling the settlement, and who treat the offer as negotiable rather than a fixed binary (a counter-offer). If the candidate leans on jargon, have Jordan ask 'what does that mean?' Keep Jordan cooperative once the lawyer explains clearly, but persistently anxious and pushing for the lawyer to decide until the candidate handles the autonomy issue head-on. Strong candidates surface liens and the fee structure unprompted and set concrete next steps rather than forcing an on-the-spot decision."
+}

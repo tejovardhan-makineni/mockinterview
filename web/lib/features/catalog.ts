@@ -11,7 +11,8 @@ export interface QuestionSummary {
   id: string;
   title: string;
   track: string;       // engineering | professional
-  domain: string;      // system_design | coding | medicine | law | ...
+  domain: string;      // sub-topic: system_design | coding | clinical_reasoning | ...
+  areas: string[];     // professions this interview is valid for (shared): engineering, medicine, ...
   modality: Modality;
   difficulty: "junior" | "mid" | "senior" | "staff" | "entry";
   tags: string[];
@@ -50,12 +51,13 @@ export function matchScore(q: QuestionSummary, query: string): number {
 
 // ---- mock ----
 export const MOCK_QUESTIONS: QuestionSummary[] = [
-  { id: "url-shortener", title: "Design a URL Shortener (TinyURL)", track: "engineering", domain: "system_design", modality: "system_design", difficulty: "mid", tags: ["hashing", "kv-store", "caching"], prompt: "Design a service that turns long URLs into short links and redirects users.", blurb: "The classic read-heavy KV design — hashing, collisions, cache, analytics." },
-  { id: "rag-service", title: "Design a RAG Service (LLM + Retrieval)", track: "engineering", domain: "ml_system_design", modality: "system_design", difficulty: "senior", tags: ["ai", "vector-db", "embeddings"], prompt: "Design a retrieval-augmented generation service answering over private docs.", blurb: "Chunking, embeddings, vector search, reranking, and grounding an LLM." },
-  { id: "lru-cache", title: "Implement an LRU Cache", track: "engineering", domain: "coding", modality: "coding", difficulty: "mid", tags: ["hashmap", "linked-list", "O(1)"], prompt: "Implement an LRU cache with O(1) get and put. Code it in the editor — no compiler, walk me through it.", blurb: "Doc-style coding (no run/compile) — hashmap + doubly linked list." },
-  { id: "clinical-reasoning-chest-pain", title: "Acute Chest Pain — Clinical Reasoning", track: "professional", domain: "medicine", modality: "conversational", difficulty: "mid", tags: ["differential", "SOCRATES", "safety"], prompt: "A patient presents with acute chest pain. Talk me through your approach.", blurb: "Spoken station — history, life-threatening-first differential, workup." },
-  { id: "law-issue-spotting-contract", title: "Contract Issue-Spotting (IRAC)", track: "professional", domain: "law", modality: "written", difficulty: "mid", tags: ["IRAC", "contracts"], prompt: "Read the fact pattern and write an IRAC analysis of the contract-formation issues.", blurb: "Written doc — spot issues, state rules, apply, conclude." },
-  { id: "case-market-entry", title: "Market Entry Case", track: "professional", domain: "consulting_case", modality: "conversational", difficulty: "senior", tags: ["structure", "hypothesis", "quant"], prompt: "Should our client enter a new market? Structure your approach.", blurb: "Spoken case — MECE structure, hypothesis, back-of-envelope math." },
+  { id: "url-shortener", title: "Design a URL Shortener (TinyURL)", track: "engineering", domain: "system_design", areas: ["engineering"], modality: "system_design", difficulty: "mid", tags: ["hashing", "kv-store", "caching"], prompt: "Design a service that turns long URLs into short links and redirects users.", blurb: "The classic read-heavy KV design — hashing, collisions, cache, analytics." },
+  { id: "rag-service", title: "Design a RAG Service (LLM + Retrieval)", track: "engineering", domain: "ml_system_design", areas: ["engineering", "data_science"], modality: "system_design", difficulty: "senior", tags: ["ai", "vector-db", "embeddings"], prompt: "Design a retrieval-augmented generation service answering over private docs.", blurb: "Chunking, embeddings, vector search, reranking, and grounding an LLM." },
+  { id: "lru-cache", title: "Implement an LRU Cache", track: "engineering", domain: "coding", areas: ["engineering", "data_science"], modality: "coding", difficulty: "mid", tags: ["hashmap", "linked-list", "O(1)"], prompt: "Implement an LRU cache with O(1) get and put. Code it in the editor — no compiler, walk me through it.", blurb: "Doc-style coding (no run/compile) — hashmap + doubly linked list." },
+  { id: "behavioral-ownership", title: "Behavioral: Ownership", track: "professional", domain: "behavioral", areas: ["engineering", "data_science", "medicine", "nursing", "law", "consulting", "product_management", "finance"], modality: "conversational", difficulty: "mid", tags: ["ownership", "STAR", "leadership"], prompt: "Tell me about a time you took ownership of a problem outside your formal responsibilities.", blurb: "Shared behavioral station — valid for every profession; STAR structure and real impact." },
+  { id: "clinical-reasoning-chest-pain", title: "Acute Chest Pain — Clinical Reasoning", track: "professional", domain: "clinical_reasoning", areas: ["medicine"], modality: "conversational", difficulty: "mid", tags: ["differential", "SOCRATES", "safety"], prompt: "A patient presents with acute chest pain. Talk me through your approach.", blurb: "Spoken station — history, life-threatening-first differential, workup." },
+  { id: "law-issue-spotting-contract", title: "Contract Issue-Spotting (IRAC)", track: "professional", domain: "issue_spotting", areas: ["law"], modality: "written", difficulty: "mid", tags: ["IRAC", "contracts"], prompt: "Read the fact pattern and write an IRAC analysis of the contract-formation issues.", blurb: "Written doc — spot issues, state rules, apply, conclude." },
+  { id: "case-market-entry", title: "Market Entry Case", track: "professional", domain: "case", areas: ["consulting"], modality: "conversational", difficulty: "senior", tags: ["structure", "hypothesis", "quant"], prompt: "Should our client enter a new market? Structure your approach.", blurb: "Spoken case — MECE structure, hypothesis, back-of-envelope math." },
 ];
 
 export const catalogMock: CatalogSlice = {

@@ -1,0 +1,123 @@
+{
+  "id": "finance-accretion-dilution",
+  "title": "Accretion / Dilution in an M&A Deal",
+  "track": "professional",
+  "domain": "valuation",
+  "areas": [
+    "finance"
+  ],
+  "modality": "conversational",
+  "difficulty": "mid",
+  "tags": [
+    "accretion-dilution",
+    "mergers",
+    "eps",
+    "financing-mix",
+    "synergies",
+    "m-and-a"
+  ],
+  "prompt": "An acquirer is buying a target and wants to know whether the deal is accretive or dilutive to its EPS. Walk me through how you'd analyze it — combining the two companies' net incomes, the financing mix and its cost, the new share count, and synergies — and give me the rule-of-thumb intuition and breakeven.",
+  "blurb": "An M&A accretion/dilution interview — combine the two companies' earnings, layer in financing costs by mix (cash, debt, stock), compute new pro-forma EPS, factor synergies, and reason to the breakeven and the cheap-vs-expensive rule of thumb.",
+  "rubric": [
+    {
+      "key": "framework",
+      "label": "Accretion/dilution framework",
+      "description": "Lays out the analysis correctly: build pro-forma net income (acquirer + target net income + after-tax synergies - after-tax cost of financing), compute the pro-forma share count (existing + new shares issued in a stock deal), divide to get pro-forma EPS, and compare it to the acquirer's standalone EPS — in the right order.",
+      "weight": 1.3
+    },
+    {
+      "key": "quantitative_rigor",
+      "label": "Quantitative rigor",
+      "description": "Carries the arithmetic: adjusts financing cost to an after-tax basis (foregone interest on cash, after-tax interest on new debt), converts a stock deal's purchase price into new shares at the acquirer's price, computes pro-forma EPS, and determines accretion/dilution as a percentage without errors.",
+      "weight": 1.3
+    },
+    {
+      "key": "financing_mix",
+      "label": "Financing mix & cost",
+      "description": "Understands how cash, debt, and stock each hit EPS differently — foregone after-tax interest on cash, after-tax cost of new debt, and the acquirer's earnings yield (inverse P/E) as the cost of stock — and can say which financing is 'cheapest' to EPS and why that isn't the whole story.",
+      "weight": 1.2
+    },
+    {
+      "key": "rule_of_thumb",
+      "label": "Rule of thumb & breakeven",
+      "description": "States and explains the cheap/expensive intuition: a stock deal is accretive when the acquirer's P/E exceeds the target's effective P/E (or the deal's cost of financing is below the target's earnings yield), and can solve for the breakeven synergy or price at which EPS is unchanged.",
+      "weight": 1.2
+    },
+    {
+      "key": "judgment",
+      "label": "Judgment & limitations",
+      "description": "Recognizes that accretion/dilution measures EPS impact, not value creation — a deal can be accretive yet value-destructive (and vice versa) — and flags what it ignores: the control premium, integration risk, dilution over time, and one-time deal costs.",
+      "weight": 1.1
+    },
+    {
+      "key": "communication",
+      "label": "Communication",
+      "description": "Explains each step clearly and in order, defines terms, and reasons out loud about the drivers rather than reciting a memorized rule.",
+      "weight": 0.9
+    }
+  ],
+  "reference": {
+    "scenario": "Conceptual + numeric accretion/dilution walkthrough at the mid bar. The interviewer hands round numbers to test the mechanics, e.g.: Acquirer has net income $500M, 250M shares, so EPS $2.00, and trades at $40 (P/E 20x). Target has net income $100M and is bought for $2,000M (an effective P/E of 20x on target earnings). In an all-stock deal at the acquirer's $40 price, that's 50M new shares. Pro-forma net income = $500M + $100M = $600M (ignoring synergies); pro-forma shares = 250M + 50M = 300M; pro-forma EPS = $2.00 — exactly neutral, because the two P/Es are equal. If instead financed with cash or debt at an after-tax cost below the target's ~5% earnings yield, the deal turns accretive; layering after-tax synergies pushes it further accretive. The interviewer probes the after-tax treatment of financing, the stock-deal share conversion, the P/E rule of thumb, the breakeven synergy, and the key judgment that accretion is an EPS metric, not a value-creation metric. Exact figures matter less than correct mechanics, clean after-tax reasoning, and the intuition connecting relative P/Es to accretion.",
+    "model_points": [
+      "State the goal: accretion/dilution asks whether the acquirer's pro-forma EPS after the deal is higher (accretive) or lower (dilutive) than its standalone EPS — a first-pass check on how a deal affects reported earnings, not a valuation.",
+      "Build pro-forma net income: acquirer net income + target net income + after-tax synergies - after-tax cost of financing. Everything must be on an after-tax, apples-to-apples basis.",
+      "Cash financing cost: the acquirer gives up interest income on the cash used, so subtract the foregone interest x (1 - tax rate). Cheap when the cash earns very little.",
+      "Debt financing cost: subtract the new interest expense x (1 - tax rate). The tax shield makes debt cheaper than its coupon suggests, which is why debt-financed deals are often accretive when rates are low.",
+      "Stock financing cost: convert the purchase equity value into new shares at the acquirer's share price (offer equity value / acquirer price = new shares), which dilutes the denominator. The implicit cost is the acquirer's earnings yield (1 / P/E).",
+      "Compute pro-forma share count: acquirer's existing diluted shares + new shares issued (only in a stock deal; cash/debt deals don't add shares). Then pro-forma EPS = pro-forma net income / pro-forma shares.",
+      "Accretion/dilution % = (pro-forma EPS / standalone EPS) - 1. Positive is accretive, negative is dilutive.",
+      "Rule of thumb: in an all-stock deal, it's accretive when the acquirer's P/E is higher than the target's effective (deal) P/E, dilutive when lower, neutral when equal. More generally, accretive when the after-tax cost of financing (foregone cash yield, after-tax debt cost, or acquirer's earnings yield for stock) is below the target's earnings yield — i.e. you're 'buying' earnings more cheaply than they cost.",
+      "Breakeven: solve for the synergies (or maximum price, or stock/cash mix) that make pro-forma EPS equal standalone EPS — the amount of after-tax synergy needed to offset dilution tells you how hard the deal has to work.",
+      "Key limitation: accretion/dilution is an EPS-impact metric, not a value-creation metric. A deal can be EPS-accretive yet destroy value (e.g. overpaying, funded with cheap debt) or dilutive yet value-creating; it ignores the control premium, integration risk, and long-run strategic fit."
+    ],
+    "probes": [
+      {
+        "trigger": "candidate uses pre-tax financing cost",
+        "question": "You subtracted the interest on the new debt — is that the right number, or should it be after-tax? Why does the tax shield matter here?"
+      },
+      {
+        "trigger": "candidate forgets to issue new shares in a stock deal",
+        "question": "This is an all-stock deal — how do you get the new share count, and what's the acquirer's EPS denominator after the deal?"
+      },
+      {
+        "trigger": "candidate can't state the P/E rule of thumb",
+        "question": "Is there a quick way to know whether an all-stock deal is accretive before you run any numbers? How do the two companies' P/Es tell you the answer?"
+      },
+      {
+        "trigger": "candidate treats accretion as value creation",
+        "question": "The deal is accretive to EPS — does that mean it created value for shareholders? Give me a case where accretive and value-destructive both hold."
+      },
+      {
+        "trigger": "candidate ignores synergies or treats them pre-tax",
+        "question": "Where do synergies enter the pro-forma net income, and are they added pre-tax or after-tax? How would you find the breakeven synergy?"
+      },
+      {
+        "trigger": "candidate says stock is always cheaper because no cash goes out",
+        "question": "Why isn't stock 'free' just because no cash leaves the company? What's the real cost of paying with your own shares?"
+      },
+      {
+        "trigger": "candidate never quantifies the impact",
+        "question": "Give me the pro-forma EPS and the accretion/dilution percentage with the numbers on the table — is this deal accretive, dilutive, or neutral, and by how much?"
+      }
+    ],
+    "red_flags": [
+      "Uses pre-tax financing costs — forgets the tax shield on new debt or the after-tax treatment of foregone interest",
+      "In a stock deal, fails to issue new shares or converts the purchase price into shares incorrectly",
+      "Can't state or explain the P/E rule of thumb (acquirer P/E vs target effective P/E)",
+      "Treats stock as free financing because no cash leaves the company",
+      "Confuses accretion with value creation — assumes accretive automatically means a good deal",
+      "Omits synergies or adds them on a pre-tax basis inconsistent with the rest of the build",
+      "Can't compute the accretion/dilution percentage or solve for a breakeven",
+      "Ignores what the analysis leaves out — control premium, integration risk, one-time costs, dilution over time"
+    ],
+    "follow_ups": [
+      "The acquirer trades at 20x and the target at 12x — before any math, is an all-stock deal likely accretive or dilutive, and why?",
+      "How much in after-tax synergies would you need for a dilutive deal to break even to EPS?",
+      "If rates are low and the acquirer can borrow cheaply, why might a cash/debt deal look accretive even when it's overpriced?",
+      "The CEO wants an accretive deal above all else — what's dangerous about optimizing for accretion, and what would you look at instead?",
+      "How does a mix of cash and stock change the analysis, and how would you choose the mix?"
+    ],
+    "exemplar_answer": "A strong candidate frames it as an EPS-impact test, not a valuation: 'I'm checking whether the acquirer's pro-forma EPS after the deal beats its standalone EPS — accretive if higher, dilutive if lower.' They build pro-forma net income as acquirer plus target net income, plus after-tax synergies, minus the after-tax cost of financing, insisting every piece is on an after-tax basis. With the scenario numbers — acquirer $500M net income, 250M shares, $2.00 EPS at a 20x P/E and $40 price, buying a $100M-net-income target for $2,000M — they note the target's effective P/E is also 20x. In an all-stock deal at $40, that's 50M new shares, so pro-forma net income is $600M over 300M shares, giving $2.00 EPS: exactly neutral, and they immediately connect it to the rule of thumb — equal P/Es mean neutral, because you're buying earnings at the same multiple you trade at. They then flex the financing: fund it with debt at, say, a 5% coupon and a 25% tax rate and the after-tax cost is well below the target's 5% earnings yield, so the deal turns accretive; add after-tax synergies and it's more accretive still, and they can solve for the breakeven synergy that offsets any dilution. They explain why stock isn't free — its cost is the acquirer's earnings yield, the inverse of its P/E — and why debt often looks cheap thanks to the tax shield. Crucially, they close on judgment: accretion is an EPS metric, not value creation — a deal can be accretive yet destroy value if the acquirer overpays and simply funds it with cheap debt, and dilutive yet value-creating — and the analysis ignores the control premium, integration risk, one-time deal costs, and how dilution can build over time. That separation of EPS impact from value is the mid-level signal."
+  },
+  "interviewer_notes": "This is a mechanics-and-intuition M&A question; the mid bar is a clean pro-forma EPS build plus the judgment to distinguish accretion from value creation. Let the candidate lay out the framework, then interrupt to test the after-tax discipline — the two most common failures are using pre-tax financing costs (forgetting the debt tax shield and the after-tax treatment of foregone cash interest) and, in a stock deal, botching or omitting the new-share issuance. Hand them the round numbers in the scenario and make them carry pro-forma net income, the new share count, pro-forma EPS, and the accretion/dilution percentage without a spreadsheet; the neutral all-stock case at equal P/Es is a clean way to surface whether they really understand the rule of thumb. Push on the P/E intuition (accretive when the acquirer's P/E tops the target's effective P/E) and make them explain why stock isn't 'free.' The differentiating question is judgment: does the candidate recognize that an accretive deal can still destroy value and a dilutive one can create it, and can they name what the metric ignores — control premium, integration risk, one-time costs? Reserve the end for a breakeven-synergy or financing-mix follow-up, and reward candidates who quantify the impact and reason like an investor rather than reciting the rule."
+}

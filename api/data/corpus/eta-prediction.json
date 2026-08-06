@@ -3,24 +3,95 @@
   "title": "Design an ETA / Delivery-Time Prediction System",
   "track": "engineering",
   "domain": "ml_system_design",
+  "areas": [
+    "engineering",
+    "data_science"
+  ],
   "modality": "system_design",
   "difficulty": "senior",
-  "tags": ["spatiotemporal", "regression", "ml-serving", "feature-store", "streaming", "drift"],
+  "tags": [
+    "spatiotemporal",
+    "regression",
+    "ml-serving",
+    "feature-store",
+    "streaming",
+    "drift"
+  ],
   "prompt": "Design a system that predicts estimated time of arrival for rides or deliveries. Given an origin, destination, and current conditions, it must return an accurate ETA within tight latency, using spatiotemporal features (traffic, road network, historical patterns) and a model that stays accurate as conditions change through the day.",
   "blurb": "Spatiotemporal ML at scale: routing + traffic features, low-latency regression serving, real-time conditions, and drift across time-of-day/weather.",
   "rubric": [
-    { "key": "requirements", "label": "Requirements gathering", "description": "Separates functional (predict ETA, update en route, per-segment vs end-to-end, uncertainty) from non-functional (low-latency serving, accuracy targets, availability, freshness of traffic).", "weight": 1.0 },
-    { "key": "clarifying_questions", "label": "Clarifying questions", "description": "Asks about request volume, latency budget, accuracy metric/target, coverage regions, how ETA is used (pricing, dispatch, UX), en-route re-estimation.", "weight": 1.0 },
-    { "key": "estimations", "label": "Back-of-envelope estimations", "description": "Derives QPS, latency budget, feature fetch cost, model inference cost, storage for trips/traffic history, GPS/telemetry ingest rate.", "weight": 1.1 },
-    { "key": "spatiotemporal_features", "label": "Spatiotemporal feature pipeline", "description": "Road-graph/route features, real-time traffic (speeds per segment), historical time-of-day/day-of-week patterns, weather/events, geohash/segment aggregation, freshness.", "weight": 1.3 },
-    { "key": "model_serving", "label": "Model & low-latency serving", "description": "Route-based vs learned end-to-end model, segment-level prediction + aggregation vs holistic, feature fetch + inference path, batching, timeout/fallback.", "weight": 1.2 },
-    { "key": "training_serving_skew", "label": "Training-serving parity", "description": "Same feature computation offline/online, point-in-time-correct traffic snapshots (no future leakage), logging served features, backtesting on historical conditions.", "weight": 1.1 },
-    { "key": "feedback_labels", "label": "Feedback & labels", "description": "Actual trip durations as labels, censored/incomplete trips, per-segment ground truth from GPS traces, retraining cadence, seasonality.", "weight": 1.0 },
-    { "key": "ml_evaluation_drift", "label": "Evaluation & drift", "description": "Regression metrics (MAE/MAPE, quantile/pinball loss, calibration of uncertainty), sliced by region/time-of-day, drift from traffic-pattern shifts, weather, events.", "weight": 1.3 },
-    { "key": "high_level_design", "label": "High-level design", "description": "Request → routing/candidate path → feature fetch (real-time traffic + historical + context) → model → ETA + uncertainty; async telemetry stream updating traffic features and labels.", "weight": 1.2 },
-    { "key": "scaling", "label": "Scaling & reliability", "description": "Horizontal serving, geo-sharded feature store, caching per segment/route, graceful fallback (historical baseline) when real-time features stale, regional deploys.", "weight": 1.0 },
-    { "key": "observability", "label": "Observability", "description": "Latency SLOs, prediction error tracking vs actuals, feature freshness (traffic staleness), calibration monitoring, drift alerts by region/time.", "weight": 0.9 },
-    { "key": "security", "label": "Privacy & integrity", "description": "GPS/location privacy, anonymization/aggregation of traces, preventing manipulation of ETA for pricing/dispatch abuse.", "weight": 0.8 }
+    {
+      "key": "requirements",
+      "label": "Requirements gathering",
+      "description": "Separates functional (predict ETA, update en route, per-segment vs end-to-end, uncertainty) from non-functional (low-latency serving, accuracy targets, availability, freshness of traffic).",
+      "weight": 1.0
+    },
+    {
+      "key": "clarifying_questions",
+      "label": "Clarifying questions",
+      "description": "Asks about request volume, latency budget, accuracy metric/target, coverage regions, how ETA is used (pricing, dispatch, UX), en-route re-estimation.",
+      "weight": 1.0
+    },
+    {
+      "key": "estimations",
+      "label": "Back-of-envelope estimations",
+      "description": "Derives QPS, latency budget, feature fetch cost, model inference cost, storage for trips/traffic history, GPS/telemetry ingest rate.",
+      "weight": 1.1
+    },
+    {
+      "key": "spatiotemporal_features",
+      "label": "Spatiotemporal feature pipeline",
+      "description": "Road-graph/route features, real-time traffic (speeds per segment), historical time-of-day/day-of-week patterns, weather/events, geohash/segment aggregation, freshness.",
+      "weight": 1.3
+    },
+    {
+      "key": "model_serving",
+      "label": "Model & low-latency serving",
+      "description": "Route-based vs learned end-to-end model, segment-level prediction + aggregation vs holistic, feature fetch + inference path, batching, timeout/fallback.",
+      "weight": 1.2
+    },
+    {
+      "key": "training_serving_skew",
+      "label": "Training-serving parity",
+      "description": "Same feature computation offline/online, point-in-time-correct traffic snapshots (no future leakage), logging served features, backtesting on historical conditions.",
+      "weight": 1.1
+    },
+    {
+      "key": "feedback_labels",
+      "label": "Feedback & labels",
+      "description": "Actual trip durations as labels, censored/incomplete trips, per-segment ground truth from GPS traces, retraining cadence, seasonality.",
+      "weight": 1.0
+    },
+    {
+      "key": "ml_evaluation_drift",
+      "label": "Evaluation & drift",
+      "description": "Regression metrics (MAE/MAPE, quantile/pinball loss, calibration of uncertainty), sliced by region/time-of-day, drift from traffic-pattern shifts, weather, events.",
+      "weight": 1.3
+    },
+    {
+      "key": "high_level_design",
+      "label": "High-level design",
+      "description": "Request → routing/candidate path → feature fetch (real-time traffic + historical + context) → model → ETA + uncertainty; async telemetry stream updating traffic features and labels.",
+      "weight": 1.2
+    },
+    {
+      "key": "scaling",
+      "label": "Scaling & reliability",
+      "description": "Horizontal serving, geo-sharded feature store, caching per segment/route, graceful fallback (historical baseline) when real-time features stale, regional deploys.",
+      "weight": 1.0
+    },
+    {
+      "key": "observability",
+      "label": "Observability",
+      "description": "Latency SLOs, prediction error tracking vs actuals, feature freshness (traffic staleness), calibration monitoring, drift alerts by region/time.",
+      "weight": 0.9
+    },
+    {
+      "key": "security",
+      "label": "Privacy & integrity",
+      "description": "GPS/location privacy, anonymization/aggregation of traces, preventing manipulation of ETA for pricing/dispatch abuse.",
+      "weight": 0.8
+    }
   ],
   "reference": {
     "functional_requirements": [
@@ -57,8 +128,27 @@
       "storage": "Trip history + per-segment speed time series: many TB; retain 13+ months for seasonality; hot store for recent traffic",
       "model": "GBM or spatiotemporal NN; segment-level + route aggregation; CPU inference feasible, GPU if deep sequence model"
     },
-    "core_components": ["Request/gateway service", "Routing / path service (road graph)", "Real-time traffic aggregation (segment speeds from telemetry)", "Online feature store (segment/route features)", "Offline feature + trip history store", "Model serving (ETA + uncertainty)", "Telemetry ingestion (GPS traces)", "Label/actuals pipeline (completed-trip durations)", "Training + backtesting pipeline", "Model registry + drift monitoring", "Historical-baseline fallback service"],
-    "data_model": ["trips(trip_id PK, origin, dest, route, predicted_eta, actual_duration, model_version, ts)", "segment_speeds(segment_id, geohash, speed, updated_at) — real-time online store", "segment_history(segment_id, tod_bucket, dow, historical_speed) — offline patterns", "route_features(route_id, segments[], distance, turns, road_types)", "telemetry(device_id, lat, lon, speed, ts)", "context(weather, events, holidays by region/time)"],
+    "core_components": [
+      "Request/gateway service",
+      "Routing / path service (road graph)",
+      "Real-time traffic aggregation (segment speeds from telemetry)",
+      "Online feature store (segment/route features)",
+      "Offline feature + trip history store",
+      "Model serving (ETA + uncertainty)",
+      "Telemetry ingestion (GPS traces)",
+      "Label/actuals pipeline (completed-trip durations)",
+      "Training + backtesting pipeline",
+      "Model registry + drift monitoring",
+      "Historical-baseline fallback service"
+    ],
+    "data_model": [
+      "trips(trip_id PK, origin, dest, route, predicted_eta, actual_duration, model_version, ts)",
+      "segment_speeds(segment_id, geohash, speed, updated_at) — real-time online store",
+      "segment_history(segment_id, tod_bucket, dow, historical_speed) — offline patterns",
+      "route_features(route_id, segments[], distance, turns, road_types)",
+      "telemetry(device_id, lat, lon, speed, ts)",
+      "context(weather, events, holidays by region/time)"
+    ],
     "api_design": [
       "GET /v1/eta?origin=..&dest=..&depart_at=..&ctx=.. → { eta_seconds, p50, p90, model_version }",
       "GET /v1/eta/enroute?trip_id=..&pos=.. → updated { eta_seconds }",
@@ -67,28 +157,102 @@
     ],
     "high_level_design": "A request resolves a route over the road graph (or candidate paths), then fetches features: real-time per-segment speeds from an online store fed by GPS telemetry, historical time-of-day/day-of-week speed patterns from an offline store, and context (weather, events). The model predicts either per-segment travel times aggregated over the route or an end-to-end duration, returning a point ETA plus quantiles for uncertainty. En route, the system re-estimates using current position and updated traffic. Telemetry streams continuously into a real-time aggregation job that maintains fresh segment speeds; completed trips produce actual durations that join to predictions as labels. A training pipeline retrains on historical trips with point-in-time-correct traffic snapshots, backtests across time-of-day/weather regimes, and rolls out via shadow + A/B, while a drift monitor watches error by region and time bucket. If real-time traffic features are stale or the model is unavailable, the system falls back to a historical-baseline ETA.",
     "deep_dives": [
-      { "topic": "segment_vs_endtoend", "probe": "Do you predict per-segment travel times and sum them, or learn one end-to-end model? What are the accuracy, latency, and en-route-update tradeoffs?" },
-      { "topic": "realtime_traffic", "probe": "How do you turn millions of GPS pings into fresh per-segment speeds at low latency? Handle sparse segments, outliers, and freshness." },
-      { "topic": "training_serving_skew", "probe": "When you train on historical trips, how do you reconstruct the traffic state as it was at prediction time — point-in-time snapshots — so you don't leak future traffic into training?" },
-      { "topic": "uncertainty", "probe": "Dispatch and SLAs care about being late, not just the mean. How do you predict and calibrate uncertainty (quantiles), and why is that better than a point ETA?" },
-      { "topic": "drift", "probe": "Traffic patterns shift with time-of-day, weather, events, and seasonality. How do you detect drift and decide when to retrain, and how do you evaluate sliced by region/time?" },
-      { "topic": "fallback", "probe": "Real-time segment speeds go stale or the model server is down. What ETA do you return, and how does the historical baseline work?" },
-      { "topic": "cdc_feature_freshness", "probe": "The road network and segment attributes (closures, new roads, speed limits) change in a source map system. How do those changes propagate into the routing graph and feature store so ETAs aren't computed on a stale map?" }
+      {
+        "topic": "segment_vs_endtoend",
+        "probe": "Do you predict per-segment travel times and sum them, or learn one end-to-end model? What are the accuracy, latency, and en-route-update tradeoffs?"
+      },
+      {
+        "topic": "realtime_traffic",
+        "probe": "How do you turn millions of GPS pings into fresh per-segment speeds at low latency? Handle sparse segments, outliers, and freshness."
+      },
+      {
+        "topic": "training_serving_skew",
+        "probe": "When you train on historical trips, how do you reconstruct the traffic state as it was at prediction time — point-in-time snapshots — so you don't leak future traffic into training?"
+      },
+      {
+        "topic": "uncertainty",
+        "probe": "Dispatch and SLAs care about being late, not just the mean. How do you predict and calibrate uncertainty (quantiles), and why is that better than a point ETA?"
+      },
+      {
+        "topic": "drift",
+        "probe": "Traffic patterns shift with time-of-day, weather, events, and seasonality. How do you detect drift and decide when to retrain, and how do you evaluate sliced by region/time?"
+      },
+      {
+        "topic": "fallback",
+        "probe": "Real-time segment speeds go stale or the model server is down. What ETA do you return, and how does the historical baseline work?"
+      },
+      {
+        "topic": "cdc_feature_freshness",
+        "probe": "The road network and segment attributes (closures, new roads, speed limits) change in a source map system. How do those changes propagate into the routing graph and feature store so ETAs aren't computed on a stale map?"
+      }
     ],
     "followup_bank": [
-      { "trigger": "mentions feature store or segment or traffic features", "question": "When the road network or segment attributes change in the source map DB (closures, new roads), how does the routing graph and feature store stay in sync — CDC/change-stream driven update, or scheduled rebuild? What staleness do you tolerate?" },
-      { "trigger": "mentions cache", "question": "You cache segment speeds or route ETAs — what's the eviction/TTL, and when traffic or the map changes how do you invalidate stale-after-change entries so you don't serve an outdated ETA?" },
-      { "trigger": "mentions model", "question": "How do you roll out a new ETA model — shadow scoring against actuals, A/B, and rollback on which error metric?" },
-      { "trigger": "mentions telemetry or GPS or streaming", "question": "How do you handle late/out-of-order or sparse GPS data in your real-time segment-speed aggregation, and what freshness do you guarantee?" },
-      { "trigger": "mentions MAE or MAPE or accuracy or error", "question": "Why slice error by region and time-of-day, and how do you monitor calibration of your uncertainty estimates?" },
-      { "trigger": "mentions historical or baseline", "question": "How is the historical-baseline fallback computed, and when exactly do you switch to it?" }
+      {
+        "trigger": "mentions feature store or segment or traffic features",
+        "question": "When the road network or segment attributes change in the source map DB (closures, new roads), how does the routing graph and feature store stay in sync — CDC/change-stream driven update, or scheduled rebuild? What staleness do you tolerate?"
+      },
+      {
+        "trigger": "mentions cache",
+        "question": "You cache segment speeds or route ETAs — what's the eviction/TTL, and when traffic or the map changes how do you invalidate stale-after-change entries so you don't serve an outdated ETA?"
+      },
+      {
+        "trigger": "mentions model",
+        "question": "How do you roll out a new ETA model — shadow scoring against actuals, A/B, and rollback on which error metric?"
+      },
+      {
+        "trigger": "mentions telemetry or GPS or streaming",
+        "question": "How do you handle late/out-of-order or sparse GPS data in your real-time segment-speed aggregation, and what freshness do you guarantee?"
+      },
+      {
+        "trigger": "mentions MAE or MAPE or accuracy or error",
+        "question": "Why slice error by region and time-of-day, and how do you monitor calibration of your uncertainty estimates?"
+      },
+      {
+        "trigger": "mentions historical or baseline",
+        "question": "How is the historical-baseline fallback computed, and when exactly do you switch to it?"
+      }
     ],
-    "scaling": ["Geo-sharded feature store keyed by segment/geohash", "Horizontally scaled stateless serving with route/segment caches", "Partitioned real-time traffic aggregation by geo region", "Regional model deployments; historical baseline as always-available fallback", "Batch precompute of common routes / popular OD pairs"],
-    "bottlenecks": ["Real-time traffic aggregation lag hurting freshness", "Feature fetch for long multi-segment routes", "Telemetry ingest volume", "Sparse-data segments with unreliable speeds", "Retraining cost across seasonality regimes"],
-    "tradeoffs": ["Segment-level (flexible, en-route updates) vs end-to-end (simpler, sometimes more accurate)", "Fresher traffic (fine-grained aggregation) vs cost/latency", "Richer spatiotemporal model vs inference budget", "Point estimate (simple) vs quantiles (better decisions, more complexity)", "Global model vs per-city models"],
-    "alternative_solutions": ["Pure routing-engine ETA with speed profiles (no ML) as baseline/fallback", "Graph neural network over the road network for spatial correlation", "Sequence models over the route for en-route updates", "Hybrid: physics/routing prior + ML residual correction"],
-    "observability": ["Latency SLOs per stage", "Live prediction error vs actuals (MAE/MAPE) sliced by region/time", "Uncertainty calibration (coverage of p90)", "Feature/traffic freshness + null segment rate", "Drift alerts on error by segment/region/time bucket", "Model version + fallback-rate tracking"],
-    "security": ["Location/GPS privacy — aggregate and anonymize traces", "Access control on telemetry and trip data", "Prevent ETA manipulation that games pricing/dispatch", "Rate limiting and anti-scraping on the ETA API"],
+    "scaling": [
+      "Geo-sharded feature store keyed by segment/geohash",
+      "Horizontally scaled stateless serving with route/segment caches",
+      "Partitioned real-time traffic aggregation by geo region",
+      "Regional model deployments; historical baseline as always-available fallback",
+      "Batch precompute of common routes / popular OD pairs"
+    ],
+    "bottlenecks": [
+      "Real-time traffic aggregation lag hurting freshness",
+      "Feature fetch for long multi-segment routes",
+      "Telemetry ingest volume",
+      "Sparse-data segments with unreliable speeds",
+      "Retraining cost across seasonality regimes"
+    ],
+    "tradeoffs": [
+      "Segment-level (flexible, en-route updates) vs end-to-end (simpler, sometimes more accurate)",
+      "Fresher traffic (fine-grained aggregation) vs cost/latency",
+      "Richer spatiotemporal model vs inference budget",
+      "Point estimate (simple) vs quantiles (better decisions, more complexity)",
+      "Global model vs per-city models"
+    ],
+    "alternative_solutions": [
+      "Pure routing-engine ETA with speed profiles (no ML) as baseline/fallback",
+      "Graph neural network over the road network for spatial correlation",
+      "Sequence models over the route for en-route updates",
+      "Hybrid: physics/routing prior + ML residual correction"
+    ],
+    "observability": [
+      "Latency SLOs per stage",
+      "Live prediction error vs actuals (MAE/MAPE) sliced by region/time",
+      "Uncertainty calibration (coverage of p90)",
+      "Feature/traffic freshness + null segment rate",
+      "Drift alerts on error by segment/region/time bucket",
+      "Model version + fallback-rate tracking"
+    ],
+    "security": [
+      "Location/GPS privacy — aggregate and anonymize traces",
+      "Access control on telemetry and trip data",
+      "Prevent ETA manipulation that games pricing/dispatch",
+      "Rate limiting and anti-scraping on the ETA API"
+    ],
     "reference_answer": "A strong answer builds a spatiotemporal pipeline: resolve a route on the road graph, fetch fresh per-segment speeds (from streaming GPS telemetry) plus historical time-of-day/day-of-week patterns and context, and predict either per-segment times aggregated over the route or end-to-end — returning calibrated quantiles, not just a mean, because dispatch/SLAs care about lateness. It enforces training-serving parity with point-in-time-correct traffic snapshots so training never leaks future traffic, logs served features, and backtests across time/weather regimes. It uses completed-trip actuals as labels, retrains on a seasonality-aware cadence, and evaluates MAE/MAPE/pinball sliced by region and time-of-day. It keeps traffic and the road graph fresh via a change-driven update pipeline, degrades to a historical baseline when real-time features are stale or the model is down, and monitors error and drift by region/time as a first-class concern.",
     "meta": "canonical strong response is reference_answer"
   },

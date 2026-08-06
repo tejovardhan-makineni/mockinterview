@@ -2,21 +2,70 @@
   "id": "mmi-communication-bad-news",
   "title": "Breaking Bad News with SPIKES",
   "track": "professional",
-  "domain": "medicine",
+  "domain": "medical_residency",
+  "areas": [
+    "medicine"
+  ],
   "modality": "conversational",
   "difficulty": "mid",
-  "tags": ["communication", "spikes", "breaking-bad-news", "empathy", "patient-centered"],
+  "tags": [
+    "communication",
+    "spikes",
+    "breaking-bad-news",
+    "empathy",
+    "patient-centered"
+  ],
   "prompt": "A 58-year-old patient has come in to discuss the results of a CT scan performed after several weeks of abdominal symptoms. The scan shows a mass in the pancreas that is very likely to be cancer, with signs suggesting it may not be curable. The patient came alone and is expecting the results today. Walk me through how you would conduct this conversation.",
   "blurb": "A breaking-bad-news station structured around the SPIKES framework — delivering a serious diagnosis with clarity and compassion.",
   "rubric": [
-    { "key": "structure_spikes", "label": "Structure (SPIKES)", "description": "Uses a recognizable framework — Setting, Perception, Invitation, Knowledge, Emotions, Strategy/Summary — to organize the encounter rather than improvising.", "weight": 1.3 },
-    { "key": "setting_preparation", "label": "Setting & preparation", "description": "Ensures privacy, adequate time, sitting down, minimizing interruptions; checks who the patient wants present; prepares by knowing the facts.", "weight": 1.0 },
-    { "key": "perception_invitation", "label": "Perception & invitation", "description": "Asks what the patient already understands and how much they want to know before disclosing (ask-before-tell); calibrates to the patient.", "weight": 1.1 },
-    { "key": "delivering_knowledge", "label": "Delivering the news", "description": "Gives a warning shot, uses plain language (avoids jargon and euphemism), delivers information in small chunks, checks understanding.", "weight": 1.2 },
-    { "key": "empathy", "label": "Empathy & responding to emotion", "description": "Names and acknowledges emotions, uses silence, responds to distress with empathic statements (NURSE-type responses) before rushing to plans.", "weight": 1.3 },
-    { "key": "communication", "label": "Communication skills", "description": "Clear, paced, honest without being blunt; avoids false reassurance and premature detail; checks in throughout.", "weight": 1.1 },
-    { "key": "strategy_followup", "label": "Strategy, summary & follow-up", "description": "Offers hope realistically, outlines next steps (MDT, specialist, further staging, support), does not abandon the patient, arranges follow-up and support person.", "weight": 1.0 },
-    { "key": "professionalism", "label": "Professionalism & honesty", "description": "Honest about uncertainty and prognosis without removing all hope; maintains dignity; avoids withholding or over-disclosing.", "weight": 0.9 }
+    {
+      "key": "structure_spikes",
+      "label": "Structure (SPIKES)",
+      "description": "Uses a recognizable framework — Setting, Perception, Invitation, Knowledge, Emotions, Strategy/Summary — to organize the encounter rather than improvising.",
+      "weight": 1.3
+    },
+    {
+      "key": "setting_preparation",
+      "label": "Setting & preparation",
+      "description": "Ensures privacy, adequate time, sitting down, minimizing interruptions; checks who the patient wants present; prepares by knowing the facts.",
+      "weight": 1.0
+    },
+    {
+      "key": "perception_invitation",
+      "label": "Perception & invitation",
+      "description": "Asks what the patient already understands and how much they want to know before disclosing (ask-before-tell); calibrates to the patient.",
+      "weight": 1.1
+    },
+    {
+      "key": "delivering_knowledge",
+      "label": "Delivering the news",
+      "description": "Gives a warning shot, uses plain language (avoids jargon and euphemism), delivers information in small chunks, checks understanding.",
+      "weight": 1.2
+    },
+    {
+      "key": "empathy",
+      "label": "Empathy & responding to emotion",
+      "description": "Names and acknowledges emotions, uses silence, responds to distress with empathic statements (NURSE-type responses) before rushing to plans.",
+      "weight": 1.3
+    },
+    {
+      "key": "communication",
+      "label": "Communication skills",
+      "description": "Clear, paced, honest without being blunt; avoids false reassurance and premature detail; checks in throughout.",
+      "weight": 1.1
+    },
+    {
+      "key": "strategy_followup",
+      "label": "Strategy, summary & follow-up",
+      "description": "Offers hope realistically, outlines next steps (MDT, specialist, further staging, support), does not abandon the patient, arranges follow-up and support person.",
+      "weight": 1.0
+    },
+    {
+      "key": "professionalism",
+      "label": "Professionalism & honesty",
+      "description": "Honest about uncertainty and prognosis without removing all hope; maintains dignity; avoids withholding or over-disclosing.",
+      "weight": 0.9
+    }
   ],
   "reference": {
     "scenario": "The candidate must break the news of a probable, possibly incurable pancreatic malignancy to a patient who came alone and expects results today. The station tests use of a structured framework (SPIKES) combined with genuine empathy — the ability to be honest about a devastating diagnosis while responding to the patient as a person. The interviewer may role-play the patient's reactions to probe empathy and adaptability.",
@@ -33,12 +82,30 @@
       "Reflects on self-care and debriefing after difficult conversations (briefly)."
     ],
     "probes": [
-      { "trigger": "candidate starts listing the diagnosis and treatment immediately", "question": "Before you tell them the results, is there anything you'd want to establish first?" },
-      { "trigger": "candidate uses jargon or euphemism (e.g., 'a shadow', 'a growth', 'neoplasm')", "question": "The patient looks confused and asks, 'So is it cancer or not?' How do you answer?" },
-      { "trigger": "candidate rushes past the emotional reaction to the plan", "question": "The patient goes silent, then starts crying and says 'I can't believe this.' What do you do in this moment?" },
-      { "trigger": "candidate gives a specific prognosis or timeline", "question": "The patient asks 'How long have I got?' You don't yet have full staging. How do you respond?" },
-      { "trigger": "candidate offers false reassurance", "question": "The patient asks 'But you can cure it, right?' The scan suggests it may not be curable. What do you say?" },
-      { "trigger": "candidate omits support/next steps", "question": "The patient came alone and has to drive home. How do you close the conversation safely?" }
+      {
+        "trigger": "candidate starts listing the diagnosis and treatment immediately",
+        "question": "Before you tell them the results, is there anything you'd want to establish first?"
+      },
+      {
+        "trigger": "candidate uses jargon or euphemism (e.g., 'a shadow', 'a growth', 'neoplasm')",
+        "question": "The patient looks confused and asks, 'So is it cancer or not?' How do you answer?"
+      },
+      {
+        "trigger": "candidate rushes past the emotional reaction to the plan",
+        "question": "The patient goes silent, then starts crying and says 'I can't believe this.' What do you do in this moment?"
+      },
+      {
+        "trigger": "candidate gives a specific prognosis or timeline",
+        "question": "The patient asks 'How long have I got?' You don't yet have full staging. How do you respond?"
+      },
+      {
+        "trigger": "candidate offers false reassurance",
+        "question": "The patient asks 'But you can cure it, right?' The scan suggests it may not be curable. What do you say?"
+      },
+      {
+        "trigger": "candidate omits support/next steps",
+        "question": "The patient came alone and has to drive home. How do you close the conversation safely?"
+      }
     ],
     "red_flags": [
       "Blurting the diagnosis without setting, perception, or a warning shot.",

@@ -1,0 +1,123 @@
+{
+  "id": "finance-lbo-analysis",
+  "title": "Paper LBO: Can This Deal Work?",
+  "track": "professional",
+  "domain": "valuation",
+  "areas": [
+    "finance"
+  ],
+  "modality": "conversational",
+  "difficulty": "senior",
+  "tags": [
+    "lbo",
+    "private-equity",
+    "irr",
+    "moic",
+    "leverage",
+    "returns-attribution"
+  ],
+  "prompt": "Walk me through a paper LBO of a company bought at 10x EBITDA. Set the entry price and financing structure, project cash flow and debt paydown over the hold, exit at an assumed multiple, and compute the sponsor's IRR and MOIC — then tell me what actually drove the returns.",
+  "blurb": "A private-equity paper-LBO interview — size the purchase and financing, project deleveraging, exit, compute IRR / MOIC without a spreadsheet, and attribute returns to deleveraging, multiple expansion, and EBITDA growth.",
+  "rubric": [
+    {
+      "key": "framework",
+      "label": "LBO framework",
+      "description": "Lays out the full paper-LBO sequence: entry EV from an entry multiple, split into debt and equity (sources & uses), project EBITDA and free cash flow, sweep cash to pay down debt, compute exit equity from exit multiple less remaining net debt, then derive IRR and MOIC — in the right order.",
+      "weight": 1.3
+    },
+    {
+      "key": "quantitative_rigor",
+      "label": "Quantitative rigor",
+      "description": "Carries the arithmetic without a spreadsheet: computes entry EV and sponsor equity, projects EBITDA and cash available for debt paydown net of interest, cash taxes and capex, tracks the debt balance year by year, and computes MOIC and a defensible IRR (including the rule-of-72 / doubling logic) without errors.",
+      "weight": 1.3
+    },
+    {
+      "key": "capital_structure",
+      "label": "Capital structure & financing",
+      "description": "Builds a realistic sources & uses: leverage of roughly 5-6x EBITDA across a debt stack, understands the cost and seniority of term loan vs high-yield, the effect of a cash sweep and mandatory amortization, and why more leverage amplifies equity returns and risk.",
+      "weight": 1.2
+    },
+    {
+      "key": "returns_attribution",
+      "label": "Returns attribution",
+      "description": "Decomposes the equity return into its three drivers — debt paydown / deleveraging, EBITDA growth (revenue and margin), and multiple expansion — and can say which dominates and why a sponsor prefers to underwrite to operational improvement rather than multiple expansion.",
+      "weight": 1.3
+    },
+    {
+      "key": "judgment",
+      "label": "Judgment & deal sense",
+      "description": "Sanity-checks whether the deal clears a ~20-25% IRR hurdle, stress-tests the downside (can the company service debt in a soft year?), and reasons about what makes a good LBO candidate: stable cash flows, low capex, defensible margins, and a credible exit.",
+      "weight": 1.1
+    },
+    {
+      "key": "communication",
+      "label": "Communication",
+      "description": "Narrates the build clearly and in order, states assumptions explicitly, and reasons out loud about the drivers rather than reciting a memorized template.",
+      "weight": 0.9
+    }
+  ],
+  "reference": {
+    "scenario": "Conceptual + numeric paper-LBO walkthrough at the senior bar, done without a spreadsheet. The interviewer hands the candidate round numbers to test the mechanics, e.g.: entry EBITDA $100M, entry multiple 10x, so entry enterprise value $1,000M; finance with 6x debt ($600M) and $400M sponsor equity (assume it's bought at EV with a clean balance sheet). EBITDA grows ~5%/yr to ~$128M over a 5-year hold; the business generates free cash flow that sweeps down debt so net debt falls from $600M toward, say, ~$300M by exit. Exit at 10x (flat multiple) on ~$128M EBITDA gives ~$1,280M enterprise value; less ~$300M remaining net debt is ~$980M equity value versus $400M invested — a ~2.45x MOIC over five years, roughly a 20% IRR (2.5x in 5 years is about a 20% IRR; the money more than doubles). The interviewer probes the sources & uses, the cash-flow-to-debt-paydown mechanics (interest and taxes come first), the IRR/MOIC arithmetic, and the returns attribution across deleveraging, EBITDA growth, and multiple expansion. Exact figures matter less than correct structure, clean arithmetic under pressure, and the judgment to attribute returns and stress the downside.",
+    "model_points": [
+      "State the goal: a sponsor buys a company mostly with debt, uses the company's own cash flow to pay that debt down, and sells in ~3-7 years; the equity return comes from deleveraging, EBITDA growth, and any change in the exit multiple.",
+      "Entry: entry enterprise value = entry multiple x entry EBITDA (e.g. 10x x $100M = $1,000M). Build sources & uses — uses are the purchase EV plus fees; sources are the debt tranches plus the sponsor's equity plug.",
+      "Financing structure: lever roughly 5-6x EBITDA across a stack (senior term loan, then high-yield/subordinated), with the equity as the residual. Senior debt is cheaper and amortizes; junior debt is costlier and often bullet. More leverage means a smaller equity check and amplified returns — and amplified risk.",
+      "Project EBITDA over the hold from revenue growth and margin assumptions (e.g. ~5%/yr), grounded in the business rather than plucked from air.",
+      "Build free cash flow available for debt paydown: EBITDA - cash interest - cash taxes - capex - change in working capital. Interest and taxes are paid before any sweep; a cash sweep applies excess cash to reduce the debt balance each year.",
+      "Track the debt schedule year by year: opening balance, mandatory amortization plus sweep, closing balance; falling debt means falling interest, which frees more cash the next year (the deleveraging flywheel).",
+      "Exit: exit enterprise value = exit multiple x exit EBITDA; exit equity value = exit EV - remaining net debt. Conservative underwriting assumes a flat or lower exit multiple than entry, so returns must be earned operationally.",
+      "Compute returns: MOIC = exit equity / initial equity; IRR is the annualized rate linking them (2.0x in ~5 years ≈ 15% IRR, 2.5x ≈ 20%, 3.0x ≈ 25%; rule of 72 for doubling). State both — MOIC for absolute cash-on-cash, IRR for time-adjusted.",
+      "Attribute the return to its three levers — deleveraging (equity grows as debt is repaid even at a flat multiple and flat EBITDA), EBITDA growth (revenue and margin expansion), and multiple expansion (buying low and selling high) — and note that sponsors prefer underwriting to deleveraging and operational improvement because multiple expansion is outside their control.",
+      "Judgment: check the IRR against a ~20-25% hurdle, stress the downside (a soft year that pressures the interest-coverage and leverage covenants), and describe an ideal LBO target: stable, predictable cash flows, low capex intensity, defensible margins, and a credible exit path."
+    ],
+    "probes": [
+      {
+        "trigger": "candidate jumps to returns without a sources & uses",
+        "question": "Before you get to IRR — lay out the sources and uses. At 10x on $100M of EBITDA, how much debt and how much equity, and where does the equity number come from?"
+      },
+      {
+        "trigger": "candidate sweeps all EBITDA to debt",
+        "question": "You're paying down debt with EBITDA — but what has to come out of EBITDA before any cash is available to sweep? Walk me from EBITDA to cash available for debt paydown."
+      },
+      {
+        "trigger": "candidate can't get from MOIC to IRR",
+        "question": "You've got roughly a 2.5x on your money over five years — what's the approximate IRR, and how are you getting there without a calculator?"
+      },
+      {
+        "trigger": "candidate assumes a higher exit multiple than entry",
+        "question": "You exited at a higher multiple than you paid — how much of your return is that, and why is underwriting to multiple expansion risky?"
+      },
+      {
+        "trigger": "candidate doesn't decompose the return",
+        "question": "Break the equity gain into its pieces for me — how much came from paying down debt, how much from EBITDA growth, and how much from the multiple? Which do you control?"
+      },
+      {
+        "trigger": "candidate ignores leverage's effect on returns",
+        "question": "If you'd used 4x debt instead of 6x, what happens to your IRR and your risk? Why does leverage cut both ways?"
+      },
+      {
+        "trigger": "candidate never checks the deal clears a hurdle",
+        "question": "Does this deal actually work for a PE fund? What IRR does a sponsor typically need, and what would you stress-test before signing?"
+      }
+    ],
+    "red_flags": [
+      "Never builds a sources & uses — can't say how the purchase price splits into debt and equity",
+      "Sweeps EBITDA directly to debt without subtracting cash interest, cash taxes, and capex first",
+      "Confuses MOIC and IRR, or can't approximate an IRR from a MOIC and hold period",
+      "Assumes aggressive multiple expansion to make the deal work and doesn't flag it as the riskiest driver",
+      "Can't decompose returns into deleveraging, EBITDA growth, and multiple expansion",
+      "Doesn't understand that more leverage amplifies both returns and risk, or ignores debt covenants entirely",
+      "Never checks the deal against a return hurdle or stress-tests a downside year",
+      "Mishandles the debt schedule — forgets that falling debt lowers interest and frees more cash to sweep"
+    ],
+    "follow_ups": [
+      "If the exit multiple compresses from 10x to 8x, roughly what happens to your IRR, and does the deal still clear the hurdle?",
+      "The company hits a recession year and EBITDA drops 20% — what breaks first, and how do covenants come into play?",
+      "You could add a dividend recap in year three — how does that change the sponsor's IRR versus MOIC, and what's the trade-off?",
+      "What kind of business is a great LBO candidate, and what kind should you never lever up?",
+      "How would management's rollover equity and an options pool change the sponsor's returns?"
+    ],
+    "exemplar_answer": "A strong candidate frames the engine first: 'In an LBO the sponsor buys mostly with debt, the company's own cash flow pays that debt down, and the equity return comes from deleveraging, EBITDA growth, and multiple change.' They start with sources & uses: 10x x $100M EBITDA is a $1,000M entry enterprise value; lever it ~6x for $600M of debt across a senior term loan and some high-yield, leaving a $400M sponsor equity check. They project EBITDA growing ~5%/yr to ~$128M, then build cash available for debt paydown properly — EBITDA less cash interest, less cash taxes, less capex and working-capital investment — and sweep the excess against the debt, so net debt falls from $600M toward ~$300M by year five, with interest dropping each year as the balance amortizes. At exit they hold the multiple flat at 10x (conservative), so exit EV is ~$1,280M; less ~$300M remaining net debt gives ~$980M of equity against $400M invested — about a 2.45x MOIC, which over five years is roughly a 20% IRR (the money more than doubles; 2.5x in five years is ~20%). Crucially, they attribute the return: a big chunk came from deleveraging (equity rises as debt is repaid even at a flat multiple), some from EBITDA growth, and — because they held the multiple flat — none from multiple expansion, which they note is the right way to underwrite because the exit multiple is outside the sponsor's control. They close with judgment: the ~20% IRR is around the fund's hurdle, so they'd want either more operational upside or a modest multiple tailwind for cushion, they'd stress a downside year against interest-coverage and leverage covenants, and they describe the ideal target as a stable, low-capex, defensible-margin business with a credible exit."
+  },
+  "interviewer_notes": "This is the classic PE paper-LBO, run entirely in the candidate's head; the senior bar is clean arithmetic under pressure plus the deal judgment to attribute returns and stress the downside. Insist on a sources & uses before any talk of IRR — a candidate who can't split the purchase price into debt and equity isn't ready. Hand them the round numbers in the scenario and make them carry EBITDA growth, the debt paydown, exit equity, MOIC, and an approximate IRR without a spreadsheet; watch specifically for the two most common failures — sweeping EBITDA to debt without first taking out interest, taxes, and capex, and confusing MOIC with IRR or being unable to approximate the IRR from the money multiple and hold period. Once they have a number, the differentiating question is returns attribution: push them to decompose the equity gain into deleveraging, EBITDA growth, and multiple expansion, and to say which a sponsor actually controls. Reserve the end for a stress test — compress the exit multiple or drop EBITDA in a recession year and bring in covenants — and reward candidates who check the deal against a ~20-25% hurdle and reason like an investor rather than reciting a template."
+}

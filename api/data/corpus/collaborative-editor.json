@@ -3,23 +3,89 @@
   "title": "Design a Real-Time Collaborative Editor (Google Docs)",
   "track": "engineering",
   "domain": "system_design",
+  "areas": [
+    "engineering"
+  ],
   "modality": "system_design",
   "difficulty": "staff",
-  "tags": ["ot", "crdt", "real-time", "concurrency", "presence", "websockets", "consistency"],
+  "tags": [
+    "ot",
+    "crdt",
+    "real-time",
+    "concurrency",
+    "presence",
+    "websockets",
+    "consistency"
+  ],
   "prompt": "Design a Google-Docs-style real-time collaborative editor: many users edit the same document simultaneously, everyone sees each other's changes within a fraction of a second, edits never get lost, and everyone converges to the same final document. Cover the concurrency-control model, the sync protocol, and presence.",
   "blurb": "The convergence problem — Operational Transformation vs CRDTs, ordering concurrent edits so everyone ends up identical, plus presence, cursors, and offline.",
   "rubric": [
-    { "key": "requirements", "label": "Requirements gathering", "description": "Separates functional (concurrent edit, live sync, cursors/presence, history/undo, offline) from non-functional (convergence/consistency, low latency, no lost edits, availability).", "weight": 1.0 },
-    { "key": "clarifying_questions", "label": "Clarifying questions", "description": "Asks about concurrent editors per doc, latency target, offline support, rich text vs plain, undo semantics, document size.", "weight": 1.0 },
-    { "key": "concurrency_model", "label": "Concurrency-control model", "description": "OT vs CRDT: how concurrent edits are reconciled, why last-write-wins on the whole doc is wrong, guaranteeing convergence and intention preservation.", "weight": 1.4 },
-    { "key": "ot_crdt_depth", "label": "OT / CRDT depth", "description": "For OT: transform functions, central server ordering, TP1/TP2. For CRDT: unique positional identifiers, tombstones, commutative merges, metadata overhead.", "weight": 1.3 },
-    { "key": "sync_protocol", "label": "Sync protocol", "description": "Client-server op exchange over websockets, versioning/revision numbers, acknowledgements, rebasing client ops against server history, buffering unacked ops.", "weight": 1.2 },
-    { "key": "high_level_design", "label": "High-level design", "description": "Clients <-> websocket gateway <-> per-document server/actor applying and broadcasting ops -> op log + snapshots persisted; presence channel.", "weight": 1.2 },
-    { "key": "consistency", "label": "Consistency & convergence", "description": "Guarantees all replicas converge; ordering, causality, and how history/undo/redo stay coherent across users.", "weight": 1.2 },
-    { "key": "presence_offline", "label": "Presence & offline", "description": "Live cursors/selections/awareness, ephemeral vs durable state, and reconciling edits made while offline on reconnect.", "weight": 1.0 },
-    { "key": "scaling", "label": "Scaling", "description": "Routing all editors of one doc to one authority (single-writer per doc), sharding docs across servers, hot documents, op-log compaction/snapshots.", "weight": 1.1 },
-    { "key": "bottlenecks", "label": "Bottlenecks", "description": "The per-document server as a serialization point, unbounded op-log growth, large documents, many cursors broadcasting.", "weight": 1.0 },
-    { "key": "observability", "label": "Observability", "description": "Op apply latency, convergence/divergence detection, unacked-op backlog, presence channel load, snapshot lag.", "weight": 0.7 }
+    {
+      "key": "requirements",
+      "label": "Requirements gathering",
+      "description": "Separates functional (concurrent edit, live sync, cursors/presence, history/undo, offline) from non-functional (convergence/consistency, low latency, no lost edits, availability).",
+      "weight": 1.0
+    },
+    {
+      "key": "clarifying_questions",
+      "label": "Clarifying questions",
+      "description": "Asks about concurrent editors per doc, latency target, offline support, rich text vs plain, undo semantics, document size.",
+      "weight": 1.0
+    },
+    {
+      "key": "concurrency_model",
+      "label": "Concurrency-control model",
+      "description": "OT vs CRDT: how concurrent edits are reconciled, why last-write-wins on the whole doc is wrong, guaranteeing convergence and intention preservation.",
+      "weight": 1.4
+    },
+    {
+      "key": "ot_crdt_depth",
+      "label": "OT / CRDT depth",
+      "description": "For OT: transform functions, central server ordering, TP1/TP2. For CRDT: unique positional identifiers, tombstones, commutative merges, metadata overhead.",
+      "weight": 1.3
+    },
+    {
+      "key": "sync_protocol",
+      "label": "Sync protocol",
+      "description": "Client-server op exchange over websockets, versioning/revision numbers, acknowledgements, rebasing client ops against server history, buffering unacked ops.",
+      "weight": 1.2
+    },
+    {
+      "key": "high_level_design",
+      "label": "High-level design",
+      "description": "Clients <-> websocket gateway <-> per-document server/actor applying and broadcasting ops -> op log + snapshots persisted; presence channel.",
+      "weight": 1.2
+    },
+    {
+      "key": "consistency",
+      "label": "Consistency & convergence",
+      "description": "Guarantees all replicas converge; ordering, causality, and how history/undo/redo stay coherent across users.",
+      "weight": 1.2
+    },
+    {
+      "key": "presence_offline",
+      "label": "Presence & offline",
+      "description": "Live cursors/selections/awareness, ephemeral vs durable state, and reconciling edits made while offline on reconnect.",
+      "weight": 1.0
+    },
+    {
+      "key": "scaling",
+      "label": "Scaling",
+      "description": "Routing all editors of one doc to one authority (single-writer per doc), sharding docs across servers, hot documents, op-log compaction/snapshots.",
+      "weight": 1.1
+    },
+    {
+      "key": "bottlenecks",
+      "label": "Bottlenecks",
+      "description": "The per-document server as a serialization point, unbounded op-log growth, large documents, many cursors broadcasting.",
+      "weight": 1.0
+    },
+    {
+      "key": "observability",
+      "label": "Observability",
+      "description": "Op apply latency, convergence/divergence detection, unacked-op backlog, presence channel load, snapshot lag.",
+      "weight": 0.7
+    }
   ],
   "reference": {
     "functional_requirements": [
@@ -55,8 +121,21 @@
       "presence": "Cursor/selection updates are high-frequency but ephemeral — coalesce and send at ~10Hz, not per keystroke.",
       "fanout": "Each op fans out to (editors-1) clients; a 50-editor doc at 200 ops/s is ~10K messages/s on that doc's channel."
     },
-    "core_components": ["Client editor + local buffer", "WebSocket gateway + session registry", "Per-document server/actor (single-writer authority)", "Concurrency engine (OT transform or CRDT merge)", "Op log + snapshot store", "Presence/awareness channel", "Document metadata + permissions service"],
-    "data_model": ["documents(doc_id, latest_revision, snapshot_ref, owner, acl)", "ops(doc_id, revision, author, op, parent_revision, ts) — ordered op log", "snapshots(doc_id, revision, content) — periodic compaction", "presence(doc_id, user_id, cursor, selection, last_seen) — ephemeral"],
+    "core_components": [
+      "Client editor + local buffer",
+      "WebSocket gateway + session registry",
+      "Per-document server/actor (single-writer authority)",
+      "Concurrency engine (OT transform or CRDT merge)",
+      "Op log + snapshot store",
+      "Presence/awareness channel",
+      "Document metadata + permissions service"
+    ],
+    "data_model": [
+      "documents(doc_id, latest_revision, snapshot_ref, owner, acl)",
+      "ops(doc_id, revision, author, op, parent_revision, ts) — ordered op log",
+      "snapshots(doc_id, revision, content) — periodic compaction",
+      "presence(doc_id, user_id, cursor, selection, last_seen) — ephemeral"
+    ],
     "api_design": [
       "WS connect doc -> server sends snapshot + revision",
       "client -> { op, baseRevision }; server transforms/merges, assigns revision, acks + broadcasts",
@@ -65,26 +144,91 @@
     ],
     "high_level_design": "All editors of a document connect (via websocket gateways) to a single per-document authority (an actor/process that owns that doc), so there is one serialization point that assigns a total order of revisions. A client applies edits locally for responsiveness and sends each op tagged with the revision it was based on. The server transforms (OT) or merges (CRDT) the incoming op against any ops it has accepted since that base, assigns the next revision, appends to the op log, acks the sender, and broadcasts the transformed op to other editors, who transform their own in-flight ops against it. Presence (cursors/selections) rides a separate ephemeral channel. The op log is periodically compacted into snapshots to bound replay and storage. On reconnect after offline editing, the client rebases its buffered ops against the server's newer history before they're accepted.",
     "deep_dives": [
-      { "topic": "concurrency_model", "probe": "Two users insert text at the same position simultaneously. Walk through how OT transforms the operations vs how a CRDT assigns positional identifiers so both converge — and why naive last-write-wins on the document is wrong." },
-      { "topic": "ot_crdt_depth", "probe": "OT vs CRDT: what does OT need from a central server (ordering, transform correctness / TP1-TP2), and what does a CRDT pay in per-character metadata and tombstones? When would you choose each?" },
-      { "topic": "sync_protocol", "probe": "How does a client reconcile its optimistically-applied local ops when the server acks a different revision order — buffering unacked ops and rebasing? What revision/versioning scheme do you use?" },
-      { "topic": "single_writer", "probe": "Why route all editors of a doc to one authority, and how do you fail over that authority without losing ops or double-applying? What happens to in-flight ops during failover?" },
-      { "topic": "history_snapshots", "probe": "The op log grows without bound and undo/history must work. How do you snapshot/compact while keeping undo/redo and version history coherent?" },
-      { "topic": "cdc_indexing", "probe": "Documents and ops live in a datastore. Search, activity feeds, and analytics need to know about edits. How do you propagate changes out — change data capture / Debezium off the op/document store, or emitting domain events on commit?" }
+      {
+        "topic": "concurrency_model",
+        "probe": "Two users insert text at the same position simultaneously. Walk through how OT transforms the operations vs how a CRDT assigns positional identifiers so both converge — and why naive last-write-wins on the document is wrong."
+      },
+      {
+        "topic": "ot_crdt_depth",
+        "probe": "OT vs CRDT: what does OT need from a central server (ordering, transform correctness / TP1-TP2), and what does a CRDT pay in per-character metadata and tombstones? When would you choose each?"
+      },
+      {
+        "topic": "sync_protocol",
+        "probe": "How does a client reconcile its optimistically-applied local ops when the server acks a different revision order — buffering unacked ops and rebasing? What revision/versioning scheme do you use?"
+      },
+      {
+        "topic": "single_writer",
+        "probe": "Why route all editors of a doc to one authority, and how do you fail over that authority without losing ops or double-applying? What happens to in-flight ops during failover?"
+      },
+      {
+        "topic": "history_snapshots",
+        "probe": "The op log grows without bound and undo/history must work. How do you snapshot/compact while keeping undo/redo and version history coherent?"
+      },
+      {
+        "topic": "cdc_indexing",
+        "probe": "Documents and ops live in a datastore. Search, activity feeds, and analytics need to know about edits. How do you propagate changes out — change data capture / Debezium off the op/document store, or emitting domain events on commit?"
+      }
     ],
     "followup_bank": [
-      { "trigger": "mentions ot or operational transform", "question": "How do you guarantee transform correctness (TP1/TP2) and intention preservation, and why does OT typically need a central server?" },
-      { "trigger": "mentions crdt", "question": "What's the per-character metadata and tombstone cost of your CRDT, and how do you garbage-collect tombstones without breaking convergence?" },
-      { "trigger": "mentions cache or redis or presence", "question": "Presence is ephemeral and high-frequency — what's its TTL/eviction, and how do you avoid a stampede/broadcast storm when a hot doc reconnects many clients at once?" },
-      { "trigger": "mentions database or postgres or sql or oplog", "question": "How do you stream document/op changes to search, activity feeds, and analytics — CDC/Debezium off the store vs dual writes? And how do snapshots bound the op log?" },
-      { "trigger": "mentions websocket or gateway", "question": "How do all editors of one doc get routed to the same per-document authority, and how does failover of that authority avoid losing or double-applying in-flight ops?" }
+      {
+        "trigger": "mentions ot or operational transform",
+        "question": "How do you guarantee transform correctness (TP1/TP2) and intention preservation, and why does OT typically need a central server?"
+      },
+      {
+        "trigger": "mentions crdt",
+        "question": "What's the per-character metadata and tombstone cost of your CRDT, and how do you garbage-collect tombstones without breaking convergence?"
+      },
+      {
+        "trigger": "mentions cache or redis or presence",
+        "question": "Presence is ephemeral and high-frequency — what's its TTL/eviction, and how do you avoid a stampede/broadcast storm when a hot doc reconnects many clients at once?"
+      },
+      {
+        "trigger": "mentions database or postgres or sql or oplog",
+        "question": "How do you stream document/op changes to search, activity feeds, and analytics — CDC/Debezium off the store vs dual writes? And how do snapshots bound the op log?"
+      },
+      {
+        "trigger": "mentions websocket or gateway",
+        "question": "How do all editors of one doc get routed to the same per-document authority, and how does failover of that authority avoid losing or double-applying in-flight ops?"
+      }
     ],
-    "scaling": ["Single-writer authority per document; shard documents across servers by doc_id", "Route by doc so all editors converge on one serialization point", "Compact op logs into periodic snapshots (snapshot + op tail)", "Separate ephemeral presence channel; coalesce cursor updates", "Horizontal websocket gateways with a session registry keyed by doc"],
-    "bottlenecks": ["Per-document authority as the serialization point / hot-doc limit", "Unbounded op-log growth", "Large documents (snapshot size, transform cost)", "Presence broadcast storms on very active docs"],
-    "tradeoffs": ["OT (compact ops, needs central server + correct transforms) vs CRDT (peer-friendly, metadata/tombstone overhead)", "Optimistic local apply (responsive, needs rebasing) vs server-confirmed (simpler, laggy)", "Frequent snapshots (fast load, write cost) vs infrequent (cheap, slow replay)", "Central authority (simple convergence) vs decentralized (available offline, harder to reason about)"],
-    "alternative_solutions": ["OT with a central document server (Google-Docs-style)", "CRDT (e.g. RGA/Yjs-style) for offline-first / P2P", "Diff-sync (periodic 3-way merge) for lower-concurrency needs", "Locking / section-level check-out (avoids merge, poor UX for prose)"],
-    "observability": ["Op apply + broadcast latency", "Divergence detection (checksum/hash of converged state across clients)", "Unacked-op backlog per client", "Snapshot/compaction lag and op-log size", "Presence channel message rate per doc"],
-    "security": ["Per-document ACLs enforced on connect and per op", "Sanitize/validate ops (no privilege escalation via crafted ops)", "Rate-limit ops per client to prevent abuse", "Audit trail via the op log; encryption in transit and at rest"],
+    "scaling": [
+      "Single-writer authority per document; shard documents across servers by doc_id",
+      "Route by doc so all editors converge on one serialization point",
+      "Compact op logs into periodic snapshots (snapshot + op tail)",
+      "Separate ephemeral presence channel; coalesce cursor updates",
+      "Horizontal websocket gateways with a session registry keyed by doc"
+    ],
+    "bottlenecks": [
+      "Per-document authority as the serialization point / hot-doc limit",
+      "Unbounded op-log growth",
+      "Large documents (snapshot size, transform cost)",
+      "Presence broadcast storms on very active docs"
+    ],
+    "tradeoffs": [
+      "OT (compact ops, needs central server + correct transforms) vs CRDT (peer-friendly, metadata/tombstone overhead)",
+      "Optimistic local apply (responsive, needs rebasing) vs server-confirmed (simpler, laggy)",
+      "Frequent snapshots (fast load, write cost) vs infrequent (cheap, slow replay)",
+      "Central authority (simple convergence) vs decentralized (available offline, harder to reason about)"
+    ],
+    "alternative_solutions": [
+      "OT with a central document server (Google-Docs-style)",
+      "CRDT (e.g. RGA/Yjs-style) for offline-first / P2P",
+      "Diff-sync (periodic 3-way merge) for lower-concurrency needs",
+      "Locking / section-level check-out (avoids merge, poor UX for prose)"
+    ],
+    "observability": [
+      "Op apply + broadcast latency",
+      "Divergence detection (checksum/hash of converged state across clients)",
+      "Unacked-op backlog per client",
+      "Snapshot/compaction lag and op-log size",
+      "Presence channel message rate per doc"
+    ],
+    "security": [
+      "Per-document ACLs enforced on connect and per op",
+      "Sanitize/validate ops (no privilege escalation via crafted ops)",
+      "Rate-limit ops per client to prevent abuse",
+      "Audit trail via the op log; encryption in transit and at rest"
+    ],
     "reference_answer": "A staff-level answer frames the crux as convergence of concurrent edits and chooses a concurrency-control model deliberately: OT with a central per-document authority that assigns a total order and transforms ops (addressing TP1/TP2 and intention preservation), or a CRDT with unique positional ids and tombstones for offline/P2P, naming each model's costs. It applies edits optimistically on the client and rebases unacked ops against server-assigned revisions, routes all editors of a doc to one serialization authority with a clear failover story, compacts the op log via snapshots, and runs presence on a separate ephemeral channel. It streams op/document changes to search and analytics via CDC, and identifies the per-doc authority and op-log growth as the main bottlenecks."
   },
   "interviewer_notes": "This is a staff-level question; the whole interview lives or dies on the concurrency-control model. Do not accept 'sync the text' or whole-document last-write-wins — force a concrete story for two simultaneous inserts at the same position, and make them commit to OT or CRDT and defend it (transform correctness/TP1-TP2 for OT; positional ids and tombstone GC for CRDT). Probe the sync protocol: optimistic local apply plus rebasing unacked ops against server revisions. If they place an op/document store, hit the CDC/Debezium probe; if they mention presence/Redis, probe ephemeral TTL and reconnect broadcast storms. Reserve time for the single-writer authority and its failover, and for op-log compaction/snapshots keeping undo/history coherent."

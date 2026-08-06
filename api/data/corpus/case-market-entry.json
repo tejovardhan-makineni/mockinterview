@@ -2,19 +2,58 @@
   "id": "case-market-entry",
   "title": "Market Entry: Should the Client Enter a New Market?",
   "track": "professional",
-  "domain": "consulting_case",
+  "domain": "case",
+  "areas": [
+    "consulting"
+  ],
   "modality": "conversational",
   "difficulty": "senior",
-  "tags": ["market-entry", "structure", "hypothesis", "market-sizing", "go-to-market"],
+  "tags": [
+    "market-entry",
+    "structure",
+    "hypothesis",
+    "market-sizing",
+    "go-to-market"
+  ],
   "prompt": "Our client is a mid-sized North American manufacturer of premium pet food. Their board is considering entering the European market for the first time. They want to know: should they enter, and if so, how? Take a few minutes to structure your approach, then walk me through it.",
   "blurb": "A classic market-entry case — structure the decision, size the prize, and reach an entry recommendation with a real go-to-market path.",
   "rubric": [
-    { "key": "structure", "label": "Structure (MECE)", "description": "Lays out a MECE framework covering the market (size, growth, segments), competition, the client's ability to win/right-to-win, and entry economics/mode — not a generic memorized list but tailored to a market-entry decision.", "weight": 1.3 },
-    { "key": "hypothesis", "label": "Hypothesis-driven", "description": "States an upfront hypothesis (e.g. 'attractive market but entry only makes sense via acquisition/partnership') and uses the analysis to confirm or reject it rather than boiling the ocean.", "weight": 1.1 },
-    { "key": "quantitative", "label": "Quantitative rigor", "description": "Sizes the market with an explicit calculation, estimates attainable share and profitability, and does breakeven/payback math — carries units and sanity-checks the result.", "weight": 1.2 },
-    { "key": "business_judgment", "label": "Business judgment", "description": "Weighs entry modes (organic, acquisition, JV, licensing), reads competitive dynamics and barriers (regulation, brand, distribution), and connects the answer to the client's objective and risk tolerance.", "weight": 1.2 },
-    { "key": "synthesis", "label": "Synthesis & recommendation", "description": "Delivers a clear go/no-go recommendation up front with 2-3 supporting reasons, the key risk, and a next step — not a wishy-washy 'it depends'.", "weight": 1.1 },
-    { "key": "communication", "label": "Communication", "description": "Top-down, signposted, concise; checks in with the interviewer, listens to data given, and adapts the structure instead of reciting it.", "weight": 0.9 }
+    {
+      "key": "structure",
+      "label": "Structure (MECE)",
+      "description": "Lays out a MECE framework covering the market (size, growth, segments), competition, the client's ability to win/right-to-win, and entry economics/mode — not a generic memorized list but tailored to a market-entry decision.",
+      "weight": 1.3
+    },
+    {
+      "key": "hypothesis",
+      "label": "Hypothesis-driven",
+      "description": "States an upfront hypothesis (e.g. 'attractive market but entry only makes sense via acquisition/partnership') and uses the analysis to confirm or reject it rather than boiling the ocean.",
+      "weight": 1.1
+    },
+    {
+      "key": "quantitative",
+      "label": "Quantitative rigor",
+      "description": "Sizes the market with an explicit calculation, estimates attainable share and profitability, and does breakeven/payback math — carries units and sanity-checks the result.",
+      "weight": 1.2
+    },
+    {
+      "key": "business_judgment",
+      "label": "Business judgment",
+      "description": "Weighs entry modes (organic, acquisition, JV, licensing), reads competitive dynamics and barriers (regulation, brand, distribution), and connects the answer to the client's objective and risk tolerance.",
+      "weight": 1.2
+    },
+    {
+      "key": "synthesis",
+      "label": "Synthesis & recommendation",
+      "description": "Delivers a clear go/no-go recommendation up front with 2-3 supporting reasons, the key risk, and a next step — not a wishy-washy 'it depends'.",
+      "weight": 1.1
+    },
+    {
+      "key": "communication",
+      "label": "Communication",
+      "description": "Top-down, signposted, concise; checks in with the interviewer, listens to data given, and adapts the structure instead of reciting it.",
+      "weight": 0.9
+    }
   ],
   "reference": {
     "scenario": "Client: premium pet food maker, ~$400M North American revenue, healthy ~15% operating margin, strong brand at home but unknown in Europe. European premium pet food market is large (~$8-10B) and growing ~6%/yr, but fragmented and dominated by two large incumbents plus many local brands. Regulatory approval and country-by-country distribution are the main friction. The board's real objective is growth: NA is maturing (~3%/yr) and they want a second growth engine. Interviewer has these facts to feed on request: EU market ~$9B, growing 6%; premium segment ~30% of that and growing faster (~9%); top 2 players hold ~45% share; the client could realistically reach ~2-3% share in 5 years organically; building a plant + distribution costs ~$150M; a mid-sized EU brand is available to acquire for ~$300M at ~2x revenue.",
@@ -28,12 +67,30 @@
       "Synthesize into a recommendation with the decision, the two or three reasons, the biggest risk, and the immediate next step (e.g. commission due diligence on the acquisition target)."
     ],
     "probes": [
-      { "trigger": "candidate lists a generic 3C/4P framework with no tailoring", "question": "That's a lot of buckets — which two matter most for THIS decision, and why? Where would you spend your time first?" },
-      { "trigger": "candidate asks how big the market is", "question": "The EU premium pet food segment is about $2.7B and growing ~9% a year. What share could the client realistically capture, and what revenue does that imply in five years?" },
-      { "trigger": "candidate estimates a reachable share", "question": "Walk me through the math to a revenue and profit number — and tell me whether that's big enough to matter to a $400M company." },
-      { "trigger": "candidate recommends organic entry", "question": "Building a plant and distribution runs about $150M. A local brand is for sale at $300M for roughly its revenue. Which path do you prefer and how would you decide between them?" },
-      { "trigger": "candidate never mentions how they'd enter", "question": "Suppose the numbers say 'go' — organic build, acquisition, JV, or licensing? What drives that choice?" },
-      { "trigger": "candidate ignores risk", "question": "What is the single biggest risk to this recommendation, and how would you de-risk it before the board commits capital?" }
+      {
+        "trigger": "candidate lists a generic 3C/4P framework with no tailoring",
+        "question": "That's a lot of buckets — which two matter most for THIS decision, and why? Where would you spend your time first?"
+      },
+      {
+        "trigger": "candidate asks how big the market is",
+        "question": "The EU premium pet food segment is about $2.7B and growing ~9% a year. What share could the client realistically capture, and what revenue does that imply in five years?"
+      },
+      {
+        "trigger": "candidate estimates a reachable share",
+        "question": "Walk me through the math to a revenue and profit number — and tell me whether that's big enough to matter to a $400M company."
+      },
+      {
+        "trigger": "candidate recommends organic entry",
+        "question": "Building a plant and distribution runs about $150M. A local brand is for sale at $300M for roughly its revenue. Which path do you prefer and how would you decide between them?"
+      },
+      {
+        "trigger": "candidate never mentions how they'd enter",
+        "question": "Suppose the numbers say 'go' — organic build, acquisition, JV, or licensing? What drives that choice?"
+      },
+      {
+        "trigger": "candidate ignores risk",
+        "question": "What is the single biggest risk to this recommendation, and how would you de-risk it before the board commits capital?"
+      }
     ],
     "red_flags": [
       "Reciting a memorized framework (Porter's, 3C, 4P) without adapting it to the market-entry decision",

@@ -2,19 +2,58 @@
   "id": "case-profitability",
   "title": "Profitability Decline: Diagnose Why Profits Are Falling",
   "track": "professional",
-  "domain": "consulting_case",
+  "domain": "case",
+  "areas": [
+    "consulting"
+  ],
   "modality": "conversational",
   "difficulty": "mid",
-  "tags": ["profitability", "profit-tree", "revenue-cost", "diagnosis", "hypothesis"],
+  "tags": [
+    "profitability",
+    "profit-tree",
+    "revenue-cost",
+    "diagnosis",
+    "hypothesis"
+  ],
   "prompt": "Our client is a regional coffee-shop chain with about 200 stores. Over the last two years their total profit has fallen roughly 20% even though revenue is flat. The CEO wants to understand why and what to do. How would you approach this?",
   "blurb": "A profit-decline diagnosis — break profit into a clean revenue/cost tree, isolate the driver, and recommend a fix.",
   "rubric": [
-    { "key": "structure", "label": "Profit-tree structure", "description": "Decomposes profit = revenue - cost and breaks each side down cleanly (revenue = # customers x avg ticket, or price x volume; cost = fixed vs variable, by line item) in a MECE way before diving in.", "weight": 1.3 },
-    { "key": "hypothesis", "label": "Hypothesis-driven isolation", "description": "Uses the 'revenue flat but profit down' clue to hypothesize the problem is on the cost side (or a revenue mix shift), and drives the diagnosis to isolate the specific driver rather than exploring randomly.", "weight": 1.2 },
-    { "key": "quantitative", "label": "Quantitative rigor", "description": "Reads the numbers given, does the arithmetic to quantify each driver's contribution to the 20% decline, and identifies the biggest lever — carries units and percentages.", "weight": 1.2 },
-    { "key": "business_judgment", "label": "Business judgment", "description": "Interprets the root cause in business terms (e.g. commodity input inflation, wage pressure, a per-store fixed-cost problem) and proposes actionable, prioritized fixes with tradeoffs.", "weight": 1.1 },
-    { "key": "synthesis", "label": "Synthesis & recommendation", "description": "Summarizes the diagnosis and a prioritized recommendation clearly, tying the fix back to the CEO's question.", "weight": 1.0 },
-    { "key": "communication", "label": "Communication", "description": "Signposts each branch of the tree, states what they'd check and why, and adapts as data arrives.", "weight": 0.9 }
+    {
+      "key": "structure",
+      "label": "Profit-tree structure",
+      "description": "Decomposes profit = revenue - cost and breaks each side down cleanly (revenue = # customers x avg ticket, or price x volume; cost = fixed vs variable, by line item) in a MECE way before diving in.",
+      "weight": 1.3
+    },
+    {
+      "key": "hypothesis",
+      "label": "Hypothesis-driven isolation",
+      "description": "Uses the 'revenue flat but profit down' clue to hypothesize the problem is on the cost side (or a revenue mix shift), and drives the diagnosis to isolate the specific driver rather than exploring randomly.",
+      "weight": 1.2
+    },
+    {
+      "key": "quantitative",
+      "label": "Quantitative rigor",
+      "description": "Reads the numbers given, does the arithmetic to quantify each driver's contribution to the 20% decline, and identifies the biggest lever — carries units and percentages.",
+      "weight": 1.2
+    },
+    {
+      "key": "business_judgment",
+      "label": "Business judgment",
+      "description": "Interprets the root cause in business terms (e.g. commodity input inflation, wage pressure, a per-store fixed-cost problem) and proposes actionable, prioritized fixes with tradeoffs.",
+      "weight": 1.1
+    },
+    {
+      "key": "synthesis",
+      "label": "Synthesis & recommendation",
+      "description": "Summarizes the diagnosis and a prioritized recommendation clearly, tying the fix back to the CEO's question.",
+      "weight": 1.0
+    },
+    {
+      "key": "communication",
+      "label": "Communication",
+      "description": "Signposts each branch of the tree, states what they'd check and why, and adapts as data arrives.",
+      "weight": 0.9
+    }
   ],
   "reference": {
     "scenario": "Client: 200-store regional coffee chain. Revenue flat ~$200M/yr over two years; profit down ~20% (from ~$24M to ~$19M, i.e. ~12% to ~9.5% margin). Interviewer facts to reveal on request: revenue is flat in dollars but transaction VOLUME is down ~8% while average ticket is UP ~9% (they raised prices to offset inflation); on the cost side, cost of goods (coffee beans, milk, cups) rose ~15% driven by a coffee-bean commodity spike, and labor cost per store rose ~10% from wage increases; rent and other fixed costs are flat. Store count is unchanged. So: they held revenue by raising prices, but volume erosion plus input and wage inflation compressed margin. The bean spike is partly cyclical; wage increases are structural.",
@@ -29,12 +68,30 @@
       "Synthesize: the CEO's profit fell because input and wage inflation outran the price increases, and price hikes are now costing volume — recommend supply-cost action plus a traffic/retention play."
     ],
     "probes": [
-      { "trigger": "candidate starts listing costs without a tree", "question": "Before we dig in, give me the structure — how does profit break down, and given the clue that revenue is flat but profit is down, where would you look first?" },
-      { "trigger": "candidate asks about revenue", "question": "Revenue is flat in dollars — but transaction volume is down about 8% while average ticket is up about 9%. What does that tell you, and does it change where the problem is?" },
-      { "trigger": "candidate asks about costs", "question": "Cost of goods rose about 15% and labor per store about 10%; rent is flat. Which of these is doing more damage to profit — show me the math." },
-      { "trigger": "candidate quantifies one driver but not both", "question": "Roughly how much of the ~$5M profit decline comes from COGS versus labor? Which do you attack first?" },
-      { "trigger": "candidate blames only the bean price", "question": "The bean spike may be cyclical. Which of these cost pressures is structural, and how does that change your recommendation?" },
-      { "trigger": "candidate recommends only cutting cost", "question": "You've raised prices and lost 8% of traffic. What would you do about volume before pushing price further?" }
+      {
+        "trigger": "candidate starts listing costs without a tree",
+        "question": "Before we dig in, give me the structure — how does profit break down, and given the clue that revenue is flat but profit is down, where would you look first?"
+      },
+      {
+        "trigger": "candidate asks about revenue",
+        "question": "Revenue is flat in dollars — but transaction volume is down about 8% while average ticket is up about 9%. What does that tell you, and does it change where the problem is?"
+      },
+      {
+        "trigger": "candidate asks about costs",
+        "question": "Cost of goods rose about 15% and labor per store about 10%; rent is flat. Which of these is doing more damage to profit — show me the math."
+      },
+      {
+        "trigger": "candidate quantifies one driver but not both",
+        "question": "Roughly how much of the ~$5M profit decline comes from COGS versus labor? Which do you attack first?"
+      },
+      {
+        "trigger": "candidate blames only the bean price",
+        "question": "The bean spike may be cyclical. Which of these cost pressures is structural, and how does that change your recommendation?"
+      },
+      {
+        "trigger": "candidate recommends only cutting cost",
+        "question": "You've raised prices and lost 8% of traffic. What would you do about volume before pushing price further?"
+      }
     ],
     "red_flags": [
       "No structure — dives into random cost items without a profit tree",

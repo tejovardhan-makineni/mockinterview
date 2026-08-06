@@ -3,19 +3,63 @@
   "title": "MMI Teamwork Station: Conflict Over a Shared Project",
   "track": "professional",
   "domain": "medical_residency",
+  "areas": [
+    "medicine"
+  ],
   "modality": "conversational",
   "difficulty": "entry",
-  "tags": ["mmi", "teamwork", "conflict-resolution", "communication", "residency"],
+  "tags": [
+    "mmi",
+    "teamwork",
+    "conflict-resolution",
+    "communication",
+    "residency"
+  ],
   "prompt": "You are one of four students assigned to a graded group presentation due in three days. One team member, Jordan, has missed the last two planning meetings and has not completed the section everyone agreed they would prepare. Two of your teammates are frustrated and want to report Jordan and exclude them from the credit. Jordan has just messaged the group saying they can meet tonight. How would you handle this situation?",
   "blurb": "A teamwork/conflict MMI station: resolving a group conflict fairly while protecting the shared goal.",
   "rubric": [
-    { "key": "conflict_resolution", "label": "Conflict resolution", "description": "Seeks to understand the cause before judging; de-escalates the frustrated teammates; aims for a constructive resolution rather than punishment; distinguishes the immediate task from the interpersonal issue.", "weight": 1.3 },
-    { "key": "communication", "label": "Communication", "description": "Proposes a direct, private, non-accusatory conversation with Jordan; uses open questions; communicates clearly with the wider group without taking sides prematurely.", "weight": 1.2 },
-    { "key": "empathy", "label": "Empathy", "description": "Considers that Jordan may have a legitimate reason (illness, personal crisis, misunderstanding of the task); treats them charitably while still addressing the problem.", "weight": 1.1 },
-    { "key": "structure", "label": "Structure & problem-solving", "description": "Separates the urgent goal (finishing the presentation in 3 days) from the accountability question; makes a concrete plan; assigns/redistributes work realistically.", "weight": 1.1 },
-    { "key": "fairness", "label": "Fairness & accountability", "description": "Balances fairness to the teammates who did the work against giving Jordan a chance to contribute; avoids both a cover-up and an unfair exclusion; knows when escalation to a supervisor is warranted.", "weight": 1.0 },
-    { "key": "leadership", "label": "Leadership & initiative", "description": "Takes initiative to keep the group functioning without being domineering; brings people together toward the shared objective.", "weight": 1.0 },
-    { "key": "professionalism", "label": "Professionalism", "description": "Keeps the matter within the group where possible, avoids gossip, models collegial behavior, and recognizes team dynamics as a core clinical skill.", "weight": 0.9 }
+    {
+      "key": "conflict_resolution",
+      "label": "Conflict resolution",
+      "description": "Seeks to understand the cause before judging; de-escalates the frustrated teammates; aims for a constructive resolution rather than punishment; distinguishes the immediate task from the interpersonal issue.",
+      "weight": 1.3
+    },
+    {
+      "key": "communication",
+      "label": "Communication",
+      "description": "Proposes a direct, private, non-accusatory conversation with Jordan; uses open questions; communicates clearly with the wider group without taking sides prematurely.",
+      "weight": 1.2
+    },
+    {
+      "key": "empathy",
+      "label": "Empathy",
+      "description": "Considers that Jordan may have a legitimate reason (illness, personal crisis, misunderstanding of the task); treats them charitably while still addressing the problem.",
+      "weight": 1.1
+    },
+    {
+      "key": "structure",
+      "label": "Structure & problem-solving",
+      "description": "Separates the urgent goal (finishing the presentation in 3 days) from the accountability question; makes a concrete plan; assigns/redistributes work realistically.",
+      "weight": 1.1
+    },
+    {
+      "key": "fairness",
+      "label": "Fairness & accountability",
+      "description": "Balances fairness to the teammates who did the work against giving Jordan a chance to contribute; avoids both a cover-up and an unfair exclusion; knows when escalation to a supervisor is warranted.",
+      "weight": 1.0
+    },
+    {
+      "key": "leadership",
+      "label": "Leadership & initiative",
+      "description": "Takes initiative to keep the group functioning without being domineering; brings people together toward the shared objective.",
+      "weight": 1.0
+    },
+    {
+      "key": "professionalism",
+      "label": "Professionalism",
+      "description": "Keeps the matter within the group where possible, avoids gossip, models collegial behavior, and recognizes team dynamics as a core clinical skill.",
+      "weight": 0.9
+    }
   ],
   "reference": {
     "scenario": "The candidate is part of a four-person graded group project. A teammate (Jordan) has been absent and has not delivered their agreed section three days before the deadline. Two teammates want to report and exclude Jordan. Jordan has just offered to meet tonight. The station tests conflict resolution, empathy, fairness, and the ability to keep a team focused on a shared goal under time pressure. There is no single right answer; the interviewer probes the trade-offs.",
@@ -32,11 +76,26 @@
       "Frames teamwork and conflict management as a core clinical competency, not just an academic annoyance."
     ],
     "probes": [
-      { "trigger": "candidate immediately sides with reporting/excluding Jordan", "question": "Before you decide, is there anything you'd want to know first? What might explain Jordan's absence?" },
-      { "trigger": "candidate is overly lenient and ignores the frustrated teammates", "question": "Your two teammates say they've done Jordan's share already and it isn't fair. How do you respond to them?" },
-      { "trigger": "candidate offers only a conversation with no plan for the deadline", "question": "It's three days out. Concretely, how does the presentation actually get finished?" },
-      { "trigger": "candidate never considers escalation", "question": "Suppose Jordan doesn't show up tonight either. Is there a point where you involve the supervisor, and how would you do it fairly?" },
-      { "trigger": "candidate proposes confronting Jordan in front of the whole group", "question": "How do you think Jordan would respond to that, and is there a better setting for the conversation?" }
+      {
+        "trigger": "candidate immediately sides with reporting/excluding Jordan",
+        "question": "Before you decide, is there anything you'd want to know first? What might explain Jordan's absence?"
+      },
+      {
+        "trigger": "candidate is overly lenient and ignores the frustrated teammates",
+        "question": "Your two teammates say they've done Jordan's share already and it isn't fair. How do you respond to them?"
+      },
+      {
+        "trigger": "candidate offers only a conversation with no plan for the deadline",
+        "question": "It's three days out. Concretely, how does the presentation actually get finished?"
+      },
+      {
+        "trigger": "candidate never considers escalation",
+        "question": "Suppose Jordan doesn't show up tonight either. Is there a point where you involve the supervisor, and how would you do it fairly?"
+      },
+      {
+        "trigger": "candidate proposes confronting Jordan in front of the whole group",
+        "question": "How do you think Jordan would respond to that, and is there a better setting for the conversation?"
+      }
     ],
     "red_flags": [
       "Immediately agreeing to report and exclude Jordan without seeking any explanation.",

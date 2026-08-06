@@ -1,0 +1,123 @@
+{
+  "id": "nursing-prioritization-telemetry",
+  "title": "Telemetry Unit: Competing Cardiac Priorities",
+  "track": "professional",
+  "domain": "prioritization",
+  "areas": [
+    "nursing"
+  ],
+  "modality": "conversational",
+  "difficulty": "mid",
+  "tags": [
+    "nursing",
+    "telemetry",
+    "prioritization",
+    "arrhythmia",
+    "fall-risk",
+    "sbar"
+  ],
+  "prompt": "You're a nurse on a telemetry/cardiac step-down unit. At the same moment: Patient A's monitor shows a new irregular rhythm and they're reporting chest discomfort; Patient B is scheduled for a cardiac catheterization soon and still needs their pre-procedure teaching and consent confirmed; Patient C's IV site has infiltrated and their infusion needs attention; and Patient D, a known fall risk, is climbing over the bed rail. Walk me through how you'd prioritize, what you'd assess, what you'd delegate, and when you'd escalate. This is educational — I'm assessing your clinical reasoning, not giving medical advice.",
+  "blurb": "A mid-level telemetry prioritization scenario — assessed for recognizing a symptomatic new arrhythmia, ABC-based triage, focused assessment, fall-risk safety, delegation, and structured escalation.",
+  "rubric": [
+    {
+      "key": "prioritization",
+      "label": "Prioritization logic",
+      "description": "Ranks the four demands with an explicit framework (ABCs, acute-vs-stable, actual-vs-potential), and justifies why a new irregular rhythm with chest discomfort — a circulation/cardiac emergency — comes first over the fall risk, the infiltrated IV, and the teaching.",
+      "weight": 1.3
+    },
+    {
+      "key": "recognition",
+      "label": "Recognizing the cardiac priority",
+      "description": "Reads the new irregular rhythm plus chest discomfort as a symptomatic arrhythmia and a potential acute coronary/hemodynamic event rather than an isolated monitor artifact, and treats it as the actual emergency.",
+      "weight": 1.2
+    },
+    {
+      "key": "assessment",
+      "label": "Assessment approach",
+      "description": "Describes a focused cardiac assessment of Patient A (confirm the rhythm is real not artifact, get a full set of vitals, assess the chest discomfort and the patient's overall look/level of consciousness, obtain a 12-lead per protocol) before drawing conclusions.",
+      "weight": 1.1
+    },
+    {
+      "key": "escalation",
+      "label": "Escalation & help-seeking",
+      "description": "Escalates early to charge nurse/provider/rapid response with a structured SBAR handoff for a symptomatic new arrhythmia, and knows this warrants a provider call rather than watchful waiting.",
+      "weight": 1.2
+    },
+    {
+      "key": "delegation",
+      "label": "Delegation & teamwork",
+      "description": "Delegates lower-acuity work appropriately — assistive personnel to help keep the fall-risk patient safe immediately, a colleague to attend the infiltrated IV or begin teaching — while retaining the cardiac assessment and escalation.",
+      "weight": 1.0
+    },
+    {
+      "key": "communication",
+      "label": "Communication",
+      "description": "Communicates calmly with patients and team, keeps the pre-cath patient informed without letting teaching displace the emergency, and documents the rhythm change, actions, and handoff clearly.",
+      "weight": 1.0
+    }
+  ],
+  "reference": {
+    "scenario": "Mid-level telemetry/cardiac step-down prioritization scenario. This is educational and framework-based — it assesses clinical reasoning and safety judgment, not real medical direction. The candidate faces four simultaneous demands of differing acuity and must prioritize, assess, delegate, and escalate. The correct first priority is Patient A: a new irregular rhythm accompanied by chest discomfort is a symptomatic arrhythmia and a potential acute cardiac/hemodynamic event — under the ABCs it is a circulation problem and an actual, not potential, emergency that outranks everything else. A strong mid-level answer names the framework, goes to Patient A, and assesses before concluding: first confirm the rhythm is real and not a lead/artifact issue by looking at the patient and the tracing together, get a full set of vitals (including blood pressure and oxygen saturation), evaluate the chest discomfort and the patient's overall appearance and level of consciousness, and obtain a 12-lead ECG per protocol — while not leaving the patient if they look unstable. The very close second priority is Patient D, the known fall risk climbing over the rail: this is an imminent safety event that could cause serious injury in seconds, so it cannot simply wait. The skilled move is to make that patient safe immediately by delegating — call assistive personnel or a colleague to go to Patient D and keep them from climbing/falling — rather than choosing between the heart patient and the fall in a way that leaves one unprotected; safety for Patient D is delegated for hands-on supervision while the nurse holds the cardiac assessment that requires nursing judgment. Patient C's infiltrated IV is a real problem that needs prompt attention — stop/assess the infiltration, protect the site, and restart access as needed — but in a stable patient it is urgent-not-emergent and can be delegated within scope or handled after the emergency; if the infiltrated line were delivering a critical or vesicant medication that raises its urgency, which a good candidate may flag. Patient B's pre-cath teaching and consent confirmation is important and time-linked to the schedule but is the lowest acuity here — it can be delegated to or started by a colleague, or briefly deferred and then completed before the patient leaves for the procedure; the candidate should ensure it isn't forgotten but should not let it displace the emergency. Escalation should be early and structured: for a symptomatic new arrhythmia, notify the charge nurse and provider or activate rapid response and hand off with SBAR. The best answers name their framework (ABCs, acute vs stable, confirm-before-conclude), assess before acting, use delegation to cover the simultaneous safety risk, and escalate with structure. Weak answers address demands in the order presented, chase the teaching or the IV first, treat the rhythm as artifact without checking, leave the fall-risk patient to climb unsupervised, intervene without assessing, never delegate, or never escalate.",
+    "model_points": [
+      "Prioritize with a framework and say it out loud: ABCs and acute-vs-stable put Patient A first — a new irregular rhythm with chest discomfort is a symptomatic arrhythmia and a circulation emergency, outranking the fall risk, the infiltrated IV, and the pre-cath teaching.",
+      "Recognize the cardiac priority: read the new rhythm plus chest discomfort together as a potential acute cardiac/hemodynamic event and an actual problem, not an isolated monitor blip.",
+      "Cover the simultaneous safety risk by delegating: the known fall risk climbing over the rail could be seriously hurt in seconds, so immediately send assistive personnel or a colleague to keep that patient safe while you take the cardiac emergency — don't leave either patient unprotected.",
+      "Go to Patient A and assess before concluding: first confirm the rhythm is real and not artifact by looking at the patient and the tracing, get a full set of vitals including blood pressure and oxygen saturation, evaluate the chest discomfort and the patient's overall look and level of consciousness, and obtain a 12-lead per protocol.",
+      "Do not leave an unstable cardiac patient: if Patient A looks unstable or deteriorates, stay, call for help, and get another set of hands rather than walking off to lower-acuity tasks.",
+      "Handle Patient C's infiltrated IV promptly but proportionally: stop and assess the infiltration, protect the site, and restart access as needed — urgent but not emergent in a stable patient, so delegate within scope or address after the emergency, and flag it higher if a critical or vesicant medication is involved.",
+      "Ensure Patient B's pre-cath teaching and consent aren't forgotten: important and schedule-linked but lowest acuity — delegate or start it with a colleague, or briefly defer and complete it before the patient leaves for the cath lab.",
+      "Escalate early and with structure: for a symptomatic new arrhythmia, notify the charge nurse and provider or activate rapid response and hand off with SBAR (Situation, Background, Assessment, Recommendation).",
+      "Delegate deliberately across the whole picture: assistive personnel for immediate fall-risk supervision, a colleague for the IV or the teaching, while you retain the cardiac assessment, interpretation, and escalation.",
+      "Reassess continuously and document clearly: keep re-checking Patient A's rhythm and vitals, and record the rhythm change, your actions, and the handoff."
+    ],
+    "probes": [
+      {
+        "trigger": "candidate prioritizes the teaching or the IV first",
+        "question": "Which patient do you go to first, and what framework are you using to rank a new symptomatic rhythm against a fall risk and an infiltrated IV?"
+      },
+      {
+        "trigger": "candidate assumes the rhythm is artifact without checking",
+        "question": "How do you tell whether that new irregular rhythm is real or a monitor artifact, and does the chest discomfort change how you treat it?"
+      },
+      {
+        "trigger": "candidate jumps to an intervention on Patient A without assessing",
+        "question": "Before you conclude anything, what does your focused cardiac assessment look like — what are you checking?"
+      },
+      {
+        "trigger": "candidate leaves the fall-risk patient climbing while they go to Patient A",
+        "question": "The fall-risk patient is halfway over the rail. You can't be in two rooms at once — how do you keep them safe while you take the cardiac patient?"
+      },
+      {
+        "trigger": "candidate treats the infiltrated IV as an emergency equal to the rhythm",
+        "question": "Where does the infiltrated IV fall in your ranking, and what would raise or lower its urgency?"
+      },
+      {
+        "trigger": "candidate never escalates the arrhythmia",
+        "question": "The rhythm persists, the blood pressure is dropping, and the chest discomfort is worse. Who do you call, and exactly how do you communicate it?"
+      },
+      {
+        "trigger": "candidate forgets the pre-cath patient entirely",
+        "question": "The cath lab is going to call for Patient B soon. How do you make sure the teaching and consent still happen safely?"
+      }
+    ],
+    "red_flags": [
+      "Addresses the demands in the order presented or handles the teaching or the IV first",
+      "Fails to recognize the new irregular rhythm with chest discomfort as the top priority (ABCs)",
+      "Assumes the rhythm is artifact and dismisses it without confirming or looking at the patient",
+      "Intervenes on the cardiac patient without any focused assessment",
+      "Leaves the known fall-risk patient climbing over the rail unsupervised",
+      "Treats the infiltrated IV as an emergency equal to the symptomatic arrhythmia, or ignores a vesicant/critical-drug consideration",
+      "Never escalates a symptomatic new arrhythmia, or escalates with no structured handoff",
+      "Lets the pre-cath teaching displace the emergency, or forgets it entirely before the procedure"
+    ],
+    "follow_ups": [
+      "The 12-lead confirms a new rapid irregular rhythm, the blood pressure is dropping, and the chest discomfort is worsening. What now?",
+      "How would you hand this off to the provider or rapid response team in SBAR format?",
+      "The only assistive personnel available is already helping another nurse. How do you keep the fall-risk patient safe?",
+      "The infiltrated IV was running a medication that can damage tissue if it leaks. How does that change its priority?",
+      "The cath lab calls to take Patient B while you're still managing the cardiac emergency. How do you handle the teaching and consent?"
+    ],
+    "exemplar_answer": "A strong mid-level answer leads with the framework: 'I'd prioritize by ABCs and acute-versus-stable. A new irregular rhythm with chest discomfort is a symptomatic arrhythmia and a circulation emergency, so Patient A comes first — ahead of the fall risk, the infiltrated IV, and the pre-cath teaching.' Covering the simultaneous safety risk through delegation: 'But I can't ignore Patient D climbing over the rail — a known fall risk could be seriously hurt in seconds — so on my way I'd immediately send assistive personnel or a colleague to that room to keep them safe. That way neither patient is left unprotected.' Assessment before conclusions: 'At Patient A, I'd first confirm the rhythm is real and not a lead artifact by looking at the patient and the tracing together, get a full set of vitals including blood pressure and oxygen saturation, assess the chest discomfort and how the patient looks and responds, and obtain a 12-lead per protocol. I would not leave them if they look unstable — I'd call for help and get another set of hands.' The rest of the picture: 'Patient C's infiltrated IV is a real problem — I'd have a colleague stop and assess the infiltration, protect the site, and restart access — but in a stable patient it's urgent, not emergent, so it can be delegated within scope or handled once the emergency is controlled; if that line were running a vesicant or critical drug I'd bump its urgency and address the leak right away. Patient B's teaching and consent matter and are tied to the schedule, but they're the lowest acuity here, so I'd delegate or start them with a colleague, or briefly defer and make sure they're completed before the patient goes to the cath lab — I wouldn't let them displace the emergency, and I wouldn't forget them.' Escalation: 'For a symptomatic new arrhythmia — especially if the pressure is dropping and the chest discomfort is worsening — I'd notify the charge nurse and provider or activate rapid response and hand off with SBAR: the situation, relevant background, my assessment, and what I'm recommending.' Throughout, I'd keep reassessing Patient A's rhythm and vitals, stay calm, keep each patient informed, and document the change, actions, and handoff. It ranks by acuity, confirms before concluding, uses delegation to cover the simultaneous fall risk, and escalates with structure."
+  },
+  "interviewer_notes": "This is a mid-level educational scenario — reward sound prioritization, delegation, and safety judgment over encyclopedic clinical detail, and never coach real medical treatment. The single must-have is recognizing the new irregular rhythm with chest discomfort as a symptomatic arrhythmia and the top priority via ABCs; if the candidate opens with the teaching or the IV, or waves off the rhythm as artifact without checking, probe for their framework and how they'd confirm the rhythm. The distinctive test here is the simultaneous imminent fall risk: the best candidates don't choose between the heart patient and the climbing patient — they delegate immediate hands-on supervision of the fall risk to assistive personnel while they hold the cardiac assessment. Then look for confirm-before-conclude assessment (rhythm real vs artifact, full vitals, chest discomfort, 12-lead), not leaving an unstable patient, proportional handling of the infiltrated IV (with a vesicant/critical-drug caveat), keeping the pre-cath teaching from being forgotten or from displacing the emergency, and early, structured SBAR escalation to the provider or rapid response. Use the deterioration follow-up (confirmed rhythm, dropping pressure, worsening discomfort) and the no-CNA-available follow-up to test escalation and delegation under constraint. Strong mid candidates name a framework, confirm before concluding, delegate to cover the second safety risk, and escalate promptly. Penalize order-as-presented, dismissing the rhythm as artifact, intervening without assessing, leaving the fall-risk patient climbing, over-ranking the IV, and failing to escalate on deterioration."
+}

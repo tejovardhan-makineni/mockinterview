@@ -3,18 +3,64 @@
   "title": "Tell me about a time you took ownership beyond your role",
   "track": "professional",
   "domain": "behavioral",
+  "areas": [
+    "engineering",
+    "data_science",
+    "medicine",
+    "nursing",
+    "law",
+    "consulting",
+    "product_management",
+    "finance"
+  ],
   "modality": "conversational",
   "difficulty": "mid",
-  "tags": ["ownership", "leadership-principles", "initiative", "accountability", "star"],
+  "tags": [
+    "ownership",
+    "leadership-principles",
+    "initiative",
+    "accountability",
+    "star"
+  ],
   "prompt": "Tell me about a time you took ownership of a problem that wasn't really yours to solve — something outside your assigned role or team. What made you step in, what did you do, and how did it turn out?",
   "blurb": "Ownership: did the candidate act like the problem was theirs — end to end — or wait for someone else to own it?",
   "rubric": [
-    { "key": "situation_clarity", "label": "Situation & stakes", "description": "Sets up a concrete situation with enough context to judge why the problem mattered and why it was ambiguous who owned it.", "weight": 1.0 },
-    { "key": "task_ownership", "label": "Why they owned it", "description": "Explains what pulled them in — customer impact, a gap no one was filling, a risk they saw — rather than being told to. Shows the decision to step up was theirs.", "weight": 1.3 },
-    { "key": "action_specificity", "label": "Specific actions (I not we)", "description": "Describes the concrete steps THEY personally took, including navigating the fact that it wasn't their remit, without excessive 'we'.", "weight": 1.3 },
-    { "key": "result_impact", "label": "Result & quantified impact", "description": "States a measurable outcome and ties it to their intervention — incident resolved, metric moved, launch unblocked.", "weight": 1.2 },
-    { "key": "reflection", "label": "Reflection & judgment", "description": "Shows awareness of when stepping in is right vs overstepping; what they learned about ownership and follow-through.", "weight": 1.0 },
-    { "key": "communication", "label": "Communication & structure", "description": "Answer is structured (roughly STAR), concise, and easy to follow under follow-up probing.", "weight": 0.8 }
+    {
+      "key": "situation_clarity",
+      "label": "Situation & stakes",
+      "description": "Sets up a concrete situation with enough context to judge why the problem mattered and why it was ambiguous who owned it.",
+      "weight": 1.0
+    },
+    {
+      "key": "task_ownership",
+      "label": "Why they owned it",
+      "description": "Explains what pulled them in — customer impact, a gap no one was filling, a risk they saw — rather than being told to. Shows the decision to step up was theirs.",
+      "weight": 1.3
+    },
+    {
+      "key": "action_specificity",
+      "label": "Specific actions (I not we)",
+      "description": "Describes the concrete steps THEY personally took, including navigating the fact that it wasn't their remit, without excessive 'we'.",
+      "weight": 1.3
+    },
+    {
+      "key": "result_impact",
+      "label": "Result & quantified impact",
+      "description": "States a measurable outcome and ties it to their intervention — incident resolved, metric moved, launch unblocked.",
+      "weight": 1.2
+    },
+    {
+      "key": "reflection",
+      "label": "Reflection & judgment",
+      "description": "Shows awareness of when stepping in is right vs overstepping; what they learned about ownership and follow-through.",
+      "weight": 1.0
+    },
+    {
+      "key": "communication",
+      "label": "Communication & structure",
+      "description": "Answer is structured (roughly STAR), concise, and easy to follow under follow-up probing.",
+      "weight": 0.8
+    }
   ],
   "reference": {
     "scenario": "The candidate should recall a moment where a problem fell through the cracks between teams or roles — a broken build no one owned, a customer escalation outside their area, a launch blocked by a dependency team, a data-quality issue upstream — and they chose to drive it to resolution rather than route it away or wait. Strong answers show they owned the outcome, not just their slice.",
@@ -27,11 +73,26 @@
       "Reflection: recognized ownership as owning the result end-to-end; also learned where the line is between initiative and overstepping, and set up a durable owner so it wouldn't recur."
     ],
     "probes": [
-      { "trigger": "candidate stays in 'we' / describes team effort", "question": "What specifically did YOU do here, versus what the rest of the team did? Walk me through your individual contribution." },
-      { "trigger": "no measurable outcome given", "question": "How did you know it worked? What actually changed — a metric, a timeline, an incident count?" },
-      { "trigger": "claims they just took over", "question": "How did you handle the fact that this wasn't your job — did the actual owner or their manager know? How did you avoid stepping on toes?" },
-      { "trigger": "problem was solved but recurred / no handoff", "question": "After you fixed it, who owned it going forward? How did you make sure it didn't just land back on you or fall through again?" },
-      { "trigger": "vague on decision to step in", "question": "At the moment you noticed this, what were your options? Why step in yourself instead of escalating or flagging it?" }
+      {
+        "trigger": "candidate stays in 'we' / describes team effort",
+        "question": "What specifically did YOU do here, versus what the rest of the team did? Walk me through your individual contribution."
+      },
+      {
+        "trigger": "no measurable outcome given",
+        "question": "How did you know it worked? What actually changed — a metric, a timeline, an incident count?"
+      },
+      {
+        "trigger": "claims they just took over",
+        "question": "How did you handle the fact that this wasn't your job — did the actual owner or their manager know? How did you avoid stepping on toes?"
+      },
+      {
+        "trigger": "problem was solved but recurred / no handoff",
+        "question": "After you fixed it, who owned it going forward? How did you make sure it didn't just land back on you or fall through again?"
+      },
+      {
+        "trigger": "vague on decision to step in",
+        "question": "At the moment you noticed this, what were your options? Why step in yourself instead of escalating or flagging it?"
+      }
     ],
     "red_flags": [
       "Only ever says 'we' and never isolates a personal action or decision.",

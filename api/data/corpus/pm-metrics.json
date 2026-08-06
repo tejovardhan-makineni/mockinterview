@@ -2,19 +2,58 @@
   "id": "pm-metrics",
   "title": "Metrics & Diagnosis: A Feature's Engagement Dropped",
   "track": "professional",
-  "domain": "product_management",
+  "domain": "product_sense",
+  "areas": [
+    "product_management"
+  ],
   "modality": "conversational",
   "difficulty": "mid",
-  "tags": ["metrics", "analytics", "diagnosis", "product-sense", "root-cause"],
+  "tags": [
+    "metrics",
+    "analytics",
+    "diagnosis",
+    "product-sense",
+    "root-cause"
+  ],
   "prompt": "You're the PM for the 'Groups' feature in a large social app. Daily messages sent in Groups dropped 15% week-over-week. The eng and data teams are looking at you. How would you define the right metrics for this feature and figure out what happened?",
   "blurb": "A metrics + diagnosis case — define the feature's success metrics, then run a structured root-cause investigation of a sudden drop.",
   "rubric": [
-    { "key": "metrics", "label": "Metric definition", "description": "Defines a sensible metric framework for the feature — a primary success metric tied to the feature's goal, plus input/engagement, quality, and guardrail/counter metrics — not just the one number that moved.", "weight": 1.3 },
-    { "key": "structure", "label": "Structured diagnosis", "description": "Runs a MECE root-cause investigation: is the drop real (instrumentation/logging), internal (a release, experiment, or dependency), external (seasonality, a competitor, an event), and which segment/dimension is it concentrated in.", "weight": 1.3 },
-    { "key": "hypothesis", "label": "Hypothesis prioritization", "description": "Forms hypotheses and prioritizes which to check first by likelihood and ease of ruling out, rather than checking everything at random.", "weight": 1.1 },
-    { "key": "quantitative", "label": "Quantitative reasoning", "description": "Decomposes the 15% drop by dimension (platform, geo, cohort, new vs existing, funnel step) to localize it, and reasons about magnitude and whether it's within normal variance.", "weight": 1.1 },
-    { "key": "judgment", "label": "Judgment & next steps", "description": "Distinguishes symptom from root cause, knows a metric drop can be good or benign, and lands on a concrete next action (rollback, fix, monitor, or escalate).", "weight": 1.0 },
-    { "key": "communication", "label": "Communication", "description": "Explains the framework and investigation clearly and calmly, signposts, and adapts as evidence comes in.", "weight": 0.9 }
+    {
+      "key": "metrics",
+      "label": "Metric definition",
+      "description": "Defines a sensible metric framework for the feature — a primary success metric tied to the feature's goal, plus input/engagement, quality, and guardrail/counter metrics — not just the one number that moved.",
+      "weight": 1.3
+    },
+    {
+      "key": "structure",
+      "label": "Structured diagnosis",
+      "description": "Runs a MECE root-cause investigation: is the drop real (instrumentation/logging), internal (a release, experiment, or dependency), external (seasonality, a competitor, an event), and which segment/dimension is it concentrated in.",
+      "weight": 1.3
+    },
+    {
+      "key": "hypothesis",
+      "label": "Hypothesis prioritization",
+      "description": "Forms hypotheses and prioritizes which to check first by likelihood and ease of ruling out, rather than checking everything at random.",
+      "weight": 1.1
+    },
+    {
+      "key": "quantitative",
+      "label": "Quantitative reasoning",
+      "description": "Decomposes the 15% drop by dimension (platform, geo, cohort, new vs existing, funnel step) to localize it, and reasons about magnitude and whether it's within normal variance.",
+      "weight": 1.1
+    },
+    {
+      "key": "judgment",
+      "label": "Judgment & next steps",
+      "description": "Distinguishes symptom from root cause, knows a metric drop can be good or benign, and lands on a concrete next action (rollback, fix, monitor, or escalate).",
+      "weight": 1.0
+    },
+    {
+      "key": "communication",
+      "label": "Communication",
+      "description": "Explains the framework and investigation clearly and calmly, signposts, and adapts as evidence comes in.",
+      "weight": 0.9
+    }
   ],
   "reference": {
     "scenario": "Diagnostic + metrics case. 'Daily messages sent in Groups' fell 15% WoW. There is no single right cause — the interviewer evaluates the metric framework and a disciplined, MECE diagnosis. Plausible causes to steer toward if the candidate localizes well: (a) a release regression — a recent app update broke the 'send' button on Android, so the drop is concentrated on Android and at the compose/send funnel step (a real, actionable cause); alternative branches the interviewer can also run: a logging/instrumentation change undercounting messages (the drop is not real), a change that moved users to a different surface (e.g. Groups content now shown in the main feed, so engagement shifted, not lost — a benign/good drop), or seasonality/an external event. A strong candidate defines metrics first, then narrows by dimension to localize the drop before naming a cause, and treats the number as a symptom.",
@@ -28,12 +67,30 @@
       "Land on a next action tied to the finding: roll back or hotfix a regression, correct instrumentation, keep monitoring if within variance, or escalate with a clear readout."
     ],
     "probes": [
-      { "trigger": "candidate immediately guesses a cause", "question": "Before theories — is this drop even real? What would you check first to rule out measurement error?" },
-      { "trigger": "candidate only tracks 'messages sent'", "question": "Is messages-sent the right success metric for Groups, or an input? What would your primary metric and guardrails be?" },
-      { "trigger": "candidate lists causes without localizing", "question": "How would you narrow this down fast? What dimensions would you cut the 15% by to localize where it's happening?" },
-      { "trigger": "candidate finds it's Android-only", "question": "It's concentrated on Android and at the send step after a recent release. What's your hypothesis and your next move?" },
-      { "trigger": "candidate assumes the drop is bad", "question": "Could a 15% drop in messages actually be fine or even good? Under what scenario, and how would you tell?" },
-      { "trigger": "candidate never prioritizes checks", "question": "You have five hypotheses and limited time — which do you check first and why?" }
+      {
+        "trigger": "candidate immediately guesses a cause",
+        "question": "Before theories — is this drop even real? What would you check first to rule out measurement error?"
+      },
+      {
+        "trigger": "candidate only tracks 'messages sent'",
+        "question": "Is messages-sent the right success metric for Groups, or an input? What would your primary metric and guardrails be?"
+      },
+      {
+        "trigger": "candidate lists causes without localizing",
+        "question": "How would you narrow this down fast? What dimensions would you cut the 15% by to localize where it's happening?"
+      },
+      {
+        "trigger": "candidate finds it's Android-only",
+        "question": "It's concentrated on Android and at the send step after a recent release. What's your hypothesis and your next move?"
+      },
+      {
+        "trigger": "candidate assumes the drop is bad",
+        "question": "Could a 15% drop in messages actually be fine or even good? Under what scenario, and how would you tell?"
+      },
+      {
+        "trigger": "candidate never prioritizes checks",
+        "question": "You have five hypotheses and limited time — which do you check first and why?"
+      }
     ],
     "red_flags": [
       "Panics and guesses a root cause before verifying the drop is real",

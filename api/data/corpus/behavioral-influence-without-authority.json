@@ -3,18 +3,64 @@
   "title": "Tell me about a time you influenced people without formal authority",
   "track": "professional",
   "domain": "behavioral",
+  "areas": [
+    "engineering",
+    "data_science",
+    "medicine",
+    "nursing",
+    "law",
+    "consulting",
+    "product_management",
+    "finance"
+  ],
   "modality": "conversational",
   "difficulty": "senior",
-  "tags": ["influence", "leadership-principles", "cross-functional", "persuasion", "star"],
+  "tags": [
+    "influence",
+    "leadership-principles",
+    "cross-functional",
+    "persuasion",
+    "star"
+  ],
   "prompt": "Tell me about a time you needed to get people or teams you had no authority over to change direction or adopt your approach. What did you want, why did they resist, and how did you actually move them?",
   "blurb": "Influence without authority (senior): did they persuade with evidence, empathy and trust — or just escalate?",
   "rubric": [
-    { "key": "situation_clarity", "label": "Situation & the ask", "description": "Clearly frames what they needed, from whom, and why those people had no obligation to say yes — the authority gap is real.", "weight": 1.0 },
-    { "key": "task_ownership", "label": "Owning the outcome", "description": "Shows they took responsibility for driving alignment across boundaries, understanding the other parties' incentives and objections.", "weight": 1.1 },
-    { "key": "action_specificity", "label": "Influence tactics", "description": "Describes the concrete tactics THEY used — data, a compelling narrative, finding shared goals, addressing the other side's incentives, building coalitions, trading, prototyping — rather than mandating or escalating.", "weight": 1.4 },
-    { "key": "result_impact", "label": "Result & durability", "description": "Shows the other parties actually changed course and stayed bought-in, with a measurable outcome — not grudging compliance that unravels.", "weight": 1.2 },
-    { "key": "reflection", "label": "Reflection & relationships", "description": "Reflects on preserving the relationship for the long run, when to escalate as a last resort, and what they learned about persuasion.", "weight": 1.1 },
-    { "key": "communication", "label": "Communication & structure", "description": "Structured, concise, and shows they can articulate another party's viewpoint fairly.", "weight": 0.9 }
+    {
+      "key": "situation_clarity",
+      "label": "Situation & the ask",
+      "description": "Clearly frames what they needed, from whom, and why those people had no obligation to say yes — the authority gap is real.",
+      "weight": 1.0
+    },
+    {
+      "key": "task_ownership",
+      "label": "Owning the outcome",
+      "description": "Shows they took responsibility for driving alignment across boundaries, understanding the other parties' incentives and objections.",
+      "weight": 1.1
+    },
+    {
+      "key": "action_specificity",
+      "label": "Influence tactics",
+      "description": "Describes the concrete tactics THEY used — data, a compelling narrative, finding shared goals, addressing the other side's incentives, building coalitions, trading, prototyping — rather than mandating or escalating.",
+      "weight": 1.4
+    },
+    {
+      "key": "result_impact",
+      "label": "Result & durability",
+      "description": "Shows the other parties actually changed course and stayed bought-in, with a measurable outcome — not grudging compliance that unravels.",
+      "weight": 1.2
+    },
+    {
+      "key": "reflection",
+      "label": "Reflection & relationships",
+      "description": "Reflects on preserving the relationship for the long run, when to escalate as a last resort, and what they learned about persuasion.",
+      "weight": 1.1
+    },
+    {
+      "key": "communication",
+      "label": "Communication & structure",
+      "description": "Structured, concise, and shows they can articulate another party's viewpoint fairly.",
+      "weight": 0.9
+    }
   ],
   "reference": {
     "scenario": "A senior story: the candidate needed another team, a peer, or a more senior stakeholder — over whom they had no authority — to adopt a standard, reprioritize, change an interface, or back a direction, and those people had their own goals and initially resisted. They won them over through influence, not org power, and the change stuck. The signal is earning alignment across boundaries and keeping the relationship intact.",
@@ -27,11 +73,26 @@
       "Reflection: understands influence compounds through trust and reciprocity over time; knows when to escalate and how to do it without burning bridges; what they'd do differently to get to yes faster."
     ],
     "probes": [
-      { "trigger": "just escalated to a manager", "question": "Did you win them over, or did someone above force the decision? What did YOU do to change their minds before escalating?" },
-      { "trigger": "doesn't mention the other side's incentives", "question": "Why were they resisting — what did the situation look like from their side? How did you address their actual concerns?" },
-      { "trigger": "vague on tactics", "question": "What specifically moved them — data, a pilot, a trade, a coalition? Walk me through the moment they said yes." },
-      { "trigger": "compliance may be shallow", "question": "Did they actually buy in, or just comply? How do you know it held up after the meeting?" },
-      { "trigger": "relationship cost ignored", "question": "How was your relationship with that team afterward? Did winning cost you anything long-term?" }
+      {
+        "trigger": "just escalated to a manager",
+        "question": "Did you win them over, or did someone above force the decision? What did YOU do to change their minds before escalating?"
+      },
+      {
+        "trigger": "doesn't mention the other side's incentives",
+        "question": "Why were they resisting — what did the situation look like from their side? How did you address their actual concerns?"
+      },
+      {
+        "trigger": "vague on tactics",
+        "question": "What specifically moved them — data, a pilot, a trade, a coalition? Walk me through the moment they said yes."
+      },
+      {
+        "trigger": "compliance may be shallow",
+        "question": "Did they actually buy in, or just comply? How do you know it held up after the meeting?"
+      },
+      {
+        "trigger": "relationship cost ignored",
+        "question": "How was your relationship with that team afterward? Did winning cost you anything long-term?"
+      }
     ],
     "red_flags": [
       "'Influence' was really just escalating to a shared boss to force the outcome.",

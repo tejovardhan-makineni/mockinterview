@@ -3,23 +3,88 @@
   "title": "Design a Parking Lot (OOD)",
   "track": "engineering",
   "domain": "low_level_design",
+  "areas": [
+    "engineering"
+  ],
   "modality": "system_design",
   "difficulty": "mid",
-  "tags": ["ood", "class-design", "strategy-pattern", "factory-pattern", "state-machine", "machine-coding"],
+  "tags": [
+    "ood",
+    "class-design",
+    "strategy-pattern",
+    "factory-pattern",
+    "state-machine",
+    "machine-coding"
+  ],
   "prompt": "Design the object model for a multi-level parking lot. It parks different vehicle types (motorcycle, car, bus/truck) into appropriately sized spots, issues a ticket on entry, and charges a fee on exit based on how long the vehicle stayed. Walk me through your classes, their relationships, and the key APIs. Sketch the class diagram on the whiteboard.",
   "blurb": "The canonical OOD warm-up — vehicle/spot hierarchies, spot allocation, ticketing, and pluggable pricing without a wall of if/else.",
   "rubric": [
-    { "key": "requirements_clarification", "label": "Requirements clarification", "description": "Nails down vehicle types, spot sizes, multi-level vs single, pricing model (hourly/flat/tiered), payment methods, and capacity queries before drawing classes.", "weight": 1.0 },
-    { "key": "core_entities", "label": "Core entities", "description": "Identifies the right nouns: ParkingLot, Level, ParkingSpot, Vehicle, Ticket, Payment, and the entry/exit gates or terminals.", "weight": 1.1 },
-    { "key": "class_design", "label": "Class design", "description": "Clean fields/methods per class, Vehicle and ParkingSpot modeled as hierarchies or by size enum, encapsulated state (spot occupied/free) rather than public mutable data.", "weight": 1.2 },
-    { "key": "relationships", "label": "Relationships", "description": "Correct composition/aggregation: ParkingLot composes Levels, Level aggregates ParkingSpots, Ticket references Vehicle + Spot; multiplicities are explicit.", "weight": 1.1 },
-    { "key": "design_patterns", "label": "Design patterns", "description": "Strategy for pricing, Factory for spot/vehicle creation, optional Singleton for the lot; each justified, not name-dropped.", "weight": 1.0 },
-    { "key": "solid_principles", "label": "SOLID principles", "description": "Open/closed for new vehicle types and pricing rules; single-responsibility separation of allocation, ticketing, and payment.", "weight": 1.0 },
-    { "key": "api_methods", "label": "API methods", "description": "Coherent public surface: parkVehicle, unpark/exit, computeFee, findSpot, availability; sensible return types and error signaling.", "weight": 1.0 },
-    { "key": "extensibility", "label": "Extensibility", "description": "New vehicle types, EV charging spots, reserved/handicap spots, or a new pricing scheme drop in without editing existing allocation code.", "weight": 1.1 },
-    { "key": "edge_cases", "label": "Edge cases", "description": "Lot full, oversized vehicle in undersized spot, lost ticket, double-exit, spot freed on exit, partial-hour rounding.", "weight": 0.9 },
-    { "key": "concurrency", "label": "Concurrency", "description": "Two entry gates racing for the last spot; atomic spot reservation; thread-safe availability counters.", "weight": 0.8 },
-    { "key": "communication", "label": "Communication", "description": "Drives requirements first, thinks aloud, draws a legible class diagram, and responds to probes without thrashing the design.", "weight": 0.8 }
+    {
+      "key": "requirements_clarification",
+      "label": "Requirements clarification",
+      "description": "Nails down vehicle types, spot sizes, multi-level vs single, pricing model (hourly/flat/tiered), payment methods, and capacity queries before drawing classes.",
+      "weight": 1.0
+    },
+    {
+      "key": "core_entities",
+      "label": "Core entities",
+      "description": "Identifies the right nouns: ParkingLot, Level, ParkingSpot, Vehicle, Ticket, Payment, and the entry/exit gates or terminals.",
+      "weight": 1.1
+    },
+    {
+      "key": "class_design",
+      "label": "Class design",
+      "description": "Clean fields/methods per class, Vehicle and ParkingSpot modeled as hierarchies or by size enum, encapsulated state (spot occupied/free) rather than public mutable data.",
+      "weight": 1.2
+    },
+    {
+      "key": "relationships",
+      "label": "Relationships",
+      "description": "Correct composition/aggregation: ParkingLot composes Levels, Level aggregates ParkingSpots, Ticket references Vehicle + Spot; multiplicities are explicit.",
+      "weight": 1.1
+    },
+    {
+      "key": "design_patterns",
+      "label": "Design patterns",
+      "description": "Strategy for pricing, Factory for spot/vehicle creation, optional Singleton for the lot; each justified, not name-dropped.",
+      "weight": 1.0
+    },
+    {
+      "key": "solid_principles",
+      "label": "SOLID principles",
+      "description": "Open/closed for new vehicle types and pricing rules; single-responsibility separation of allocation, ticketing, and payment.",
+      "weight": 1.0
+    },
+    {
+      "key": "api_methods",
+      "label": "API methods",
+      "description": "Coherent public surface: parkVehicle, unpark/exit, computeFee, findSpot, availability; sensible return types and error signaling.",
+      "weight": 1.0
+    },
+    {
+      "key": "extensibility",
+      "label": "Extensibility",
+      "description": "New vehicle types, EV charging spots, reserved/handicap spots, or a new pricing scheme drop in without editing existing allocation code.",
+      "weight": 1.1
+    },
+    {
+      "key": "edge_cases",
+      "label": "Edge cases",
+      "description": "Lot full, oversized vehicle in undersized spot, lost ticket, double-exit, spot freed on exit, partial-hour rounding.",
+      "weight": 0.9
+    },
+    {
+      "key": "concurrency",
+      "label": "Concurrency",
+      "description": "Two entry gates racing for the last spot; atomic spot reservation; thread-safe availability counters.",
+      "weight": 0.8
+    },
+    {
+      "key": "communication",
+      "label": "Communication",
+      "description": "Drives requirements first, thinks aloud, draws a legible class diagram, and responds to probes without thrashing the design.",
+      "weight": 0.8
+    }
   ],
   "reference": {
     "functional_requirements": [
@@ -45,14 +110,101 @@
       "What happens on a lost ticket — max daily charge?"
     ],
     "core_classes": [
-      { "name": "ParkingLot", "responsibility": "Aggregate root; owns levels, coordinates park/unpark, exposes availability. Often a Singleton.", "key_fields": ["id", "name", "List<Level> levels", "PricingStrategy pricing"], "key_methods": ["Ticket parkVehicle(Vehicle v)", "double unpark(Ticket t)", "int availableSpots(SpotSize size)"] },
-      { "name": "Level", "responsibility": "One floor; holds spots and answers allocation requests for a size.", "key_fields": ["floor", "List<ParkingSpot> spots", "Map<SpotSize, Deque<ParkingSpot>> freeBySize"], "key_methods": ["Optional<ParkingSpot> assign(SpotSize size)", "void release(ParkingSpot s)"] },
-      { "name": "ParkingSpot", "responsibility": "A single spot with a size and occupancy state; knows what it can fit.", "key_fields": ["id", "SpotSize size", "boolean occupied", "Vehicle current"], "key_methods": ["boolean canFit(Vehicle v)", "void assign(Vehicle v)", "void vacate()"] },
-      { "name": "Vehicle (abstract)", "responsibility": "Base type carrying license plate and required spot size; subclasses Motorcycle, Car, Truck.", "key_fields": ["licensePlate", "SpotSize requiredSize"], "key_methods": ["SpotSize getRequiredSize()"] },
-      { "name": "Ticket", "responsibility": "Immutable record of a parked vehicle: spot, entry time, and enough info to bill and locate.", "key_fields": ["ticketId", "Vehicle vehicle", "ParkingSpot spot", "Instant entryTime"], "key_methods": ["Duration durationUntil(Instant exit)"] },
-      { "name": "PricingStrategy (interface)", "responsibility": "Pluggable fee computation given ticket, exit time, and spot/vehicle type.", "key_fields": [], "key_methods": ["double computeFee(Ticket t, Instant exit)"] },
-      { "name": "SpotAssignmentStrategy (interface)", "responsibility": "Pluggable policy for choosing among free spots (nearest-to-entrance, best-fit).", "key_fields": [], "key_methods": ["Optional<ParkingSpot> pick(Level lvl, Vehicle v)"] },
-      { "name": "Payment", "responsibility": "Records amount, method, and status for an exit transaction.", "key_fields": ["amount", "PaymentMethod method", "PaymentStatus status"], "key_methods": ["boolean process()"] }
+      {
+        "name": "ParkingLot",
+        "responsibility": "Aggregate root; owns levels, coordinates park/unpark, exposes availability. Often a Singleton.",
+        "key_fields": [
+          "id",
+          "name",
+          "List<Level> levels",
+          "PricingStrategy pricing"
+        ],
+        "key_methods": [
+          "Ticket parkVehicle(Vehicle v)",
+          "double unpark(Ticket t)",
+          "int availableSpots(SpotSize size)"
+        ]
+      },
+      {
+        "name": "Level",
+        "responsibility": "One floor; holds spots and answers allocation requests for a size.",
+        "key_fields": [
+          "floor",
+          "List<ParkingSpot> spots",
+          "Map<SpotSize, Deque<ParkingSpot>> freeBySize"
+        ],
+        "key_methods": [
+          "Optional<ParkingSpot> assign(SpotSize size)",
+          "void release(ParkingSpot s)"
+        ]
+      },
+      {
+        "name": "ParkingSpot",
+        "responsibility": "A single spot with a size and occupancy state; knows what it can fit.",
+        "key_fields": [
+          "id",
+          "SpotSize size",
+          "boolean occupied",
+          "Vehicle current"
+        ],
+        "key_methods": [
+          "boolean canFit(Vehicle v)",
+          "void assign(Vehicle v)",
+          "void vacate()"
+        ]
+      },
+      {
+        "name": "Vehicle (abstract)",
+        "responsibility": "Base type carrying license plate and required spot size; subclasses Motorcycle, Car, Truck.",
+        "key_fields": [
+          "licensePlate",
+          "SpotSize requiredSize"
+        ],
+        "key_methods": [
+          "SpotSize getRequiredSize()"
+        ]
+      },
+      {
+        "name": "Ticket",
+        "responsibility": "Immutable record of a parked vehicle: spot, entry time, and enough info to bill and locate.",
+        "key_fields": [
+          "ticketId",
+          "Vehicle vehicle",
+          "ParkingSpot spot",
+          "Instant entryTime"
+        ],
+        "key_methods": [
+          "Duration durationUntil(Instant exit)"
+        ]
+      },
+      {
+        "name": "PricingStrategy (interface)",
+        "responsibility": "Pluggable fee computation given ticket, exit time, and spot/vehicle type.",
+        "key_fields": [],
+        "key_methods": [
+          "double computeFee(Ticket t, Instant exit)"
+        ]
+      },
+      {
+        "name": "SpotAssignmentStrategy (interface)",
+        "responsibility": "Pluggable policy for choosing among free spots (nearest-to-entrance, best-fit).",
+        "key_fields": [],
+        "key_methods": [
+          "Optional<ParkingSpot> pick(Level lvl, Vehicle v)"
+        ]
+      },
+      {
+        "name": "Payment",
+        "responsibility": "Records amount, method, and status for an exit transaction.",
+        "key_fields": [
+          "amount",
+          "PaymentMethod method",
+          "PaymentStatus status"
+        ],
+        "key_methods": [
+          "boolean process()"
+        ]
+      }
     ],
     "relationships": [
       "ParkingLot composes Level (1..*) — levels do not outlive the lot (composition)",
@@ -63,10 +215,26 @@
       "SpotSize (SMALL/MEDIUM/LARGE) is an enum shared by Vehicle and ParkingSpot"
     ],
     "design_patterns": [
-      { "pattern": "Strategy", "where": "PricingStrategy and SpotAssignmentStrategy", "why": "Swap hourly/flat/tiered pricing and nearest/best-fit allocation without touching the lot; keeps ParkingLot open for extension, closed for modification." },
-      { "pattern": "Factory", "where": "VehicleFactory / SpotFactory or a ParkingLot builder", "why": "Centralize construction of vehicle/spot subtypes so callers depend on abstractions, not concrete classes." },
-      { "pattern": "Singleton", "where": "ParkingLot instance", "why": "One physical lot; a single coordination point for availability — but discuss testability downsides and prefer dependency injection." },
-      { "pattern": "Observer (optional)", "where": "Availability display / gate signage subscribing to spot state changes", "why": "Decouple the display board from allocation logic." }
+      {
+        "pattern": "Strategy",
+        "where": "PricingStrategy and SpotAssignmentStrategy",
+        "why": "Swap hourly/flat/tiered pricing and nearest/best-fit allocation without touching the lot; keeps ParkingLot open for extension, closed for modification."
+      },
+      {
+        "pattern": "Factory",
+        "where": "VehicleFactory / SpotFactory or a ParkingLot builder",
+        "why": "Centralize construction of vehicle/spot subtypes so callers depend on abstractions, not concrete classes."
+      },
+      {
+        "pattern": "Singleton",
+        "where": "ParkingLot instance",
+        "why": "One physical lot; a single coordination point for availability — but discuss testability downsides and prefer dependency injection."
+      },
+      {
+        "pattern": "Observer (optional)",
+        "where": "Availability display / gate signage subscribing to spot state changes",
+        "why": "Decouple the display board from allocation logic."
+      }
     ],
     "apis": [
       "Ticket parkVehicle(Vehicle v) — allocates a spot or throws LotFullException",
@@ -101,17 +269,44 @@
       "Multiple lots / a chain: ParkingLot becomes one node; a LotManager routes vehicles"
     ],
     "deep_dives": [
-      { "topic": "allocation_complexity", "probe": "How do you keep findSpot near O(1) instead of scanning every spot? What data structure holds the free spots per size?" },
-      { "topic": "avoid_if_else_pricing", "probe": "Your fee logic has vehicle-type and duration branches. How do you model that without a growing if/else — where does Strategy fit and how does a new rate plug in?" },
-      { "topic": "large_vehicle_multi_spot", "probe": "A truck needs two adjacent spots. How does your model represent 'a booking that occupies multiple spots' and free them together?" },
-      { "topic": "vehicle_hierarchy_vs_enum", "probe": "Do you make Motorcycle/Car/Truck subclasses or use a SpotSize enum? What are the tradeoffs for extensibility and behavior?" }
+      {
+        "topic": "allocation_complexity",
+        "probe": "How do you keep findSpot near O(1) instead of scanning every spot? What data structure holds the free spots per size?"
+      },
+      {
+        "topic": "avoid_if_else_pricing",
+        "probe": "Your fee logic has vehicle-type and duration branches. How do you model that without a growing if/else — where does Strategy fit and how does a new rate plug in?"
+      },
+      {
+        "topic": "large_vehicle_multi_spot",
+        "probe": "A truck needs two adjacent spots. How does your model represent 'a booking that occupies multiple spots' and free them together?"
+      },
+      {
+        "topic": "vehicle_hierarchy_vs_enum",
+        "probe": "Do you make Motorcycle/Car/Truck subclasses or use a SpotSize enum? What are the tradeoffs for extensibility and behavior?"
+      }
     ],
     "followup_bank": [
-      { "trigger": "mentions pricing or fee or rate", "question": "How do you support flat, hourly, and tiered pricing without editing the lot — Strategy injected into ParkingLot?" },
-      { "trigger": "mentions if or switch or instanceof", "question": "That switch on vehicle type will grow. Can you replace it with polymorphism or a Strategy/Factory so new types don't touch this method?" },
-      { "trigger": "mentions singleton", "question": "Singleton makes testing and multi-lot support harder — how would you inject the lot instead, and when is Singleton actually justified here?" },
-      { "trigger": "mentions find or search or scan", "question": "If you scan all spots to find a free one it's O(n). What structure gives you O(1) allocation per size bucket?" },
-      { "trigger": "mentions thread or concurrent or lock", "question": "Two entry gates grab the last spot simultaneously — walk me through exactly where the lock or atomic op sits." }
+      {
+        "trigger": "mentions pricing or fee or rate",
+        "question": "How do you support flat, hourly, and tiered pricing without editing the lot — Strategy injected into ParkingLot?"
+      },
+      {
+        "trigger": "mentions if or switch or instanceof",
+        "question": "That switch on vehicle type will grow. Can you replace it with polymorphism or a Strategy/Factory so new types don't touch this method?"
+      },
+      {
+        "trigger": "mentions singleton",
+        "question": "Singleton makes testing and multi-lot support harder — how would you inject the lot instead, and when is Singleton actually justified here?"
+      },
+      {
+        "trigger": "mentions find or search or scan",
+        "question": "If you scan all spots to find a free one it's O(n). What structure gives you O(1) allocation per size bucket?"
+      },
+      {
+        "trigger": "mentions thread or concurrent or lock",
+        "question": "Two entry gates grab the last spot simultaneously — walk me through exactly where the lock or atomic op sits."
+      }
     ],
     "tradeoffs": [
       "Vehicle subclasses (richer behavior) vs SpotSize enum (fewer classes, simpler) — most designs favor the enum for size, subclasses only if behavior differs",

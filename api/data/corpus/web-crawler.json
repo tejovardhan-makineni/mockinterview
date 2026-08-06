@@ -3,23 +3,88 @@
   "title": "Design a Large-Scale Web Crawler",
   "track": "engineering",
   "domain": "system_design",
+  "areas": [
+    "engineering"
+  ],
   "modality": "system_design",
   "difficulty": "senior",
-  "tags": ["crawler", "url-frontier", "politeness", "dedup", "bloom-filter", "dns"],
+  "tags": [
+    "crawler",
+    "url-frontier",
+    "politeness",
+    "dedup",
+    "bloom-filter",
+    "dns"
+  ],
   "prompt": "Design a web crawler that fetches and stores billions of web pages for a search index. It must be polite to hosts, avoid re-crawling duplicate content, handle the scale and messiness of the open web, and keep making progress despite failures.",
   "blurb": "The URL frontier, politeness, dedup with bloom filters, DNS, and petabyte-scale storage.",
   "rubric": [
-    { "key": "requirements", "label": "Requirements gathering", "description": "Separates functional (fetch, parse, extract links, store, recrawl) from non-functional (scale, politeness, freshness, robustness, extensibility).", "weight": 1.0 },
-    { "key": "clarifying_questions", "label": "Clarifying questions", "description": "Asks about scale/pages, freshness/recrawl needs, content types, respect for robots.txt, dedup expectations.", "weight": 1.0 },
-    { "key": "estimations", "label": "Estimations", "description": "Estimates pages, fetch rate, bandwidth, storage (raw + parsed), frontier size, dedup structure size.", "weight": 1.1 },
-    { "key": "url_frontier", "label": "URL frontier", "description": "Prioritized + politeness-partitioned queue design; front/back queues, per-host queues, priority.", "weight": 1.3 },
-    { "key": "politeness", "label": "Politeness & robots", "description": "Per-host rate limiting, crawl-delay/robots.txt, avoiding hammering a host across distributed workers.", "weight": 1.2 },
-    { "key": "dedup", "label": "Deduplication", "description": "URL dedup (seen set, bloom filter) and content dedup (checksums/simhash for near-duplicates).", "weight": 1.2 },
-    { "key": "high_level_design", "label": "High-level design", "description": "Frontier → fetchers → parser → link extractor → dedup → storage, with DNS + robots caches.", "weight": 1.3 },
-    { "key": "dns_fetch", "label": "DNS & fetching", "description": "DNS resolution caching (a real bottleneck), connection reuse, timeouts, retries, trap avoidance.", "weight": 1.0 },
-    { "key": "storage", "label": "Storage", "description": "Raw page store (blob), parsed content, link graph; petabyte scale, compression.", "weight": 1.0 },
-    { "key": "scaling", "label": "Scaling & robustness", "description": "Distributed fetchers, sharding the frontier, crawler traps, spider-trap and infinite-space handling, checkpointing.", "weight": 1.1 },
-    { "key": "observability", "label": "Observability", "description": "Crawl rate, error rates by host, frontier depth, freshness, politeness violations.", "weight": 0.8 }
+    {
+      "key": "requirements",
+      "label": "Requirements gathering",
+      "description": "Separates functional (fetch, parse, extract links, store, recrawl) from non-functional (scale, politeness, freshness, robustness, extensibility).",
+      "weight": 1.0
+    },
+    {
+      "key": "clarifying_questions",
+      "label": "Clarifying questions",
+      "description": "Asks about scale/pages, freshness/recrawl needs, content types, respect for robots.txt, dedup expectations.",
+      "weight": 1.0
+    },
+    {
+      "key": "estimations",
+      "label": "Estimations",
+      "description": "Estimates pages, fetch rate, bandwidth, storage (raw + parsed), frontier size, dedup structure size.",
+      "weight": 1.1
+    },
+    {
+      "key": "url_frontier",
+      "label": "URL frontier",
+      "description": "Prioritized + politeness-partitioned queue design; front/back queues, per-host queues, priority.",
+      "weight": 1.3
+    },
+    {
+      "key": "politeness",
+      "label": "Politeness & robots",
+      "description": "Per-host rate limiting, crawl-delay/robots.txt, avoiding hammering a host across distributed workers.",
+      "weight": 1.2
+    },
+    {
+      "key": "dedup",
+      "label": "Deduplication",
+      "description": "URL dedup (seen set, bloom filter) and content dedup (checksums/simhash for near-duplicates).",
+      "weight": 1.2
+    },
+    {
+      "key": "high_level_design",
+      "label": "High-level design",
+      "description": "Frontier → fetchers → parser → link extractor → dedup → storage, with DNS + robots caches.",
+      "weight": 1.3
+    },
+    {
+      "key": "dns_fetch",
+      "label": "DNS & fetching",
+      "description": "DNS resolution caching (a real bottleneck), connection reuse, timeouts, retries, trap avoidance.",
+      "weight": 1.0
+    },
+    {
+      "key": "storage",
+      "label": "Storage",
+      "description": "Raw page store (blob), parsed content, link graph; petabyte scale, compression.",
+      "weight": 1.0
+    },
+    {
+      "key": "scaling",
+      "label": "Scaling & robustness",
+      "description": "Distributed fetchers, sharding the frontier, crawler traps, spider-trap and infinite-space handling, checkpointing.",
+      "weight": 1.1
+    },
+    {
+      "key": "observability",
+      "label": "Observability",
+      "description": "Crawl rate, error rates by host, frontier depth, freshness, politeness violations.",
+      "weight": 0.8
+    }
   ],
   "reference": {
     "functional_requirements": [
@@ -54,7 +119,18 @@
       "storage": "Raw ~1PB/month (compressed ~200-300TB); parsed text + link graph additional; store in blob + columnar",
       "dedup": "Seen-URL set for 100B+ URLs — a bloom filter at ~10 bits/URL ≈ ~125GB, vs TBs for exact sets"
     },
-    "core_components": ["URL frontier (prioritized + politeness queues)", "Fetcher workers", "DNS resolver + cache", "robots.txt fetcher + cache", "HTML parser / link extractor", "URL dedup (bloom filter + seen store)", "Content dedup (checksum/simhash)", "Raw content store (blob)", "Parsed content + link graph store", "Scheduler / recrawl planner"],
+    "core_components": [
+      "URL frontier (prioritized + politeness queues)",
+      "Fetcher workers",
+      "DNS resolver + cache",
+      "robots.txt fetcher + cache",
+      "HTML parser / link extractor",
+      "URL dedup (bloom filter + seen store)",
+      "Content dedup (checksum/simhash)",
+      "Raw content store (blob)",
+      "Parsed content + link graph store",
+      "Scheduler / recrawl planner"
+    ],
     "data_model": [
       "frontier: prioritized queues, partitioned into per-host back-queues for politeness",
       "seen_urls: bloom filter (fast negative) + backing KV of URL hashes (confirm)",
@@ -70,21 +146,60 @@
     ],
     "high_level_design": "Seeds enter the URL frontier, which is a two-level structure: front queues encode priority (importance/freshness) and back queues enforce politeness by pinning each host to a single back-queue so only one fetcher hits a host at a time, honoring its crawl-delay. Fetcher workers pull URLs, resolve DNS (via a cache — DNS is a real bottleneck), check the cached robots.txt, download the page, and hand raw bytes to the parser. The parser extracts links; each candidate URL is normalized and checked against a bloom filter (and a backing seen-store on positives) before being enqueued, avoiding re-crawls. Content is checksummed/simhashed to drop exact and near-duplicates before storage. Raw pages go to blob storage; parsed text and the link graph go to indexable stores. A scheduler decides recrawl timing per page based on change frequency.",
     "deep_dives": [
-      { "topic": "url_frontier", "probe": "Design the frontier so it's both prioritized and polite. Ten thousand fetchers, and you must never send two concurrent requests to the same host. How do the front and back queues achieve that?" },
-      { "topic": "politeness", "probe": "Politeness is per-host, but fetchers are distributed. How do you guarantee only one worker hits example.com at a time and respects its crawl-delay across the whole fleet?" },
-      { "topic": "dedup", "probe": "You've seen tens of billions of URLs. An exact set is too big for memory. How does a bloom filter help, what's the false-positive cost, and how do you also catch near-duplicate *content* (not just URLs)?" },
-      { "topic": "dns_fetch", "probe": "DNS resolution is often the crawler's hidden bottleneck. Why, and how do you cache/parallelize it? How do you handle spider traps and infinite URL spaces?" },
-      { "topic": "cache_stampede", "probe": "You cache robots.txt and DNS with TTLs. When a hugely popular host's robots/DNS cache entry expires and thousands of queued URLs need it, how do you avoid a stampede of simultaneous lookups?" },
-      { "topic": "cdc_index", "probe": "Crawled pages land in a content store. How do you feed the downstream search-index pipeline off it — change data capture with something like Debezium, or emit events from the crawler directly? How do you handle recrawl updates vs first-crawls?" }
+      {
+        "topic": "url_frontier",
+        "probe": "Design the frontier so it's both prioritized and polite. Ten thousand fetchers, and you must never send two concurrent requests to the same host. How do the front and back queues achieve that?"
+      },
+      {
+        "topic": "politeness",
+        "probe": "Politeness is per-host, but fetchers are distributed. How do you guarantee only one worker hits example.com at a time and respects its crawl-delay across the whole fleet?"
+      },
+      {
+        "topic": "dedup",
+        "probe": "You've seen tens of billions of URLs. An exact set is too big for memory. How does a bloom filter help, what's the false-positive cost, and how do you also catch near-duplicate *content* (not just URLs)?"
+      },
+      {
+        "topic": "dns_fetch",
+        "probe": "DNS resolution is often the crawler's hidden bottleneck. Why, and how do you cache/parallelize it? How do you handle spider traps and infinite URL spaces?"
+      },
+      {
+        "topic": "cache_stampede",
+        "probe": "You cache robots.txt and DNS with TTLs. When a hugely popular host's robots/DNS cache entry expires and thousands of queued URLs need it, how do you avoid a stampede of simultaneous lookups?"
+      },
+      {
+        "topic": "cdc_index",
+        "probe": "Crawled pages land in a content store. How do you feed the downstream search-index pipeline off it — change data capture with something like Debezium, or emit events from the crawler directly? How do you handle recrawl updates vs first-crawls?"
+      }
     ],
     "followup_bank": [
-      { "trigger": "mentions frontier or queue", "question": "How do you make the frontier both prioritized and polite at once — what's the role of front queues vs per-host back queues?" },
-      { "trigger": "mentions politeness or robots", "question": "Across distributed fetchers, how do you guarantee only one worker hits a host at a time and honors crawl-delay?" },
-      { "trigger": "mentions bloom filter or dedup or seen", "question": "What's the false-positive rate you target for the seen-URL bloom filter, what does a false positive cost you, and how do you also detect near-duplicate content?" },
-      { "trigger": "mentions dns", "question": "Why is DNS a crawler bottleneck, and how do you cache and parallelize resolution without overwhelming resolvers?" },
-      { "trigger": "mentions cache", "question": "For DNS/robots caches, what eviction/TTL policy, and how do you avoid a stampede when a popular host's entry expires?" },
-      { "trigger": "mentions database or store or index", "question": "How do you propagate crawled/updated pages to the search index — CDC/Debezium vs crawler-emitted events — and how do you distinguish recrawl updates from new pages?" },
-      { "trigger": "mentions trap or infinite", "question": "How do you detect and escape spider traps and infinite URL spaces (calendars, faceted params)?" }
+      {
+        "trigger": "mentions frontier or queue",
+        "question": "How do you make the frontier both prioritized and polite at once — what's the role of front queues vs per-host back queues?"
+      },
+      {
+        "trigger": "mentions politeness or robots",
+        "question": "Across distributed fetchers, how do you guarantee only one worker hits a host at a time and honors crawl-delay?"
+      },
+      {
+        "trigger": "mentions bloom filter or dedup or seen",
+        "question": "What's the false-positive rate you target for the seen-URL bloom filter, what does a false positive cost you, and how do you also detect near-duplicate content?"
+      },
+      {
+        "trigger": "mentions dns",
+        "question": "Why is DNS a crawler bottleneck, and how do you cache and parallelize resolution without overwhelming resolvers?"
+      },
+      {
+        "trigger": "mentions cache",
+        "question": "For DNS/robots caches, what eviction/TTL policy, and how do you avoid a stampede when a popular host's entry expires?"
+      },
+      {
+        "trigger": "mentions database or store or index",
+        "question": "How do you propagate crawled/updated pages to the search index — CDC/Debezium vs crawler-emitted events — and how do you distinguish recrawl updates from new pages?"
+      },
+      {
+        "trigger": "mentions trap or infinite",
+        "question": "How do you detect and escape spider traps and infinite URL spaces (calendars, faceted params)?"
+      }
     ],
     "scaling": [
       "Shard the frontier and dedup structures by URL/host hash across nodes",

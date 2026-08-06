@@ -2,20 +2,64 @@
   "id": "clinical-reasoning-abdominal-pain",
   "title": "Clinical Reasoning: Acute Abdominal Pain",
   "track": "professional",
-  "domain": "medicine",
+  "domain": "clinical_reasoning",
+  "areas": [
+    "medicine"
+  ],
   "modality": "conversational",
   "difficulty": "mid",
-  "tags": ["clinical-reasoning", "abdominal-pain", "differential-diagnosis", "acute-care", "safety"],
+  "tags": [
+    "clinical-reasoning",
+    "abdominal-pain",
+    "differential-diagnosis",
+    "acute-care",
+    "safety"
+  ],
   "prompt": "A 30-year-old presents with acute abdominal pain that began this morning. Walk me through your structured approach — how you'd take the history, how the location and features shape your differential, the investigations you'd order, and your initial management.",
   "blurb": "A structured approach to acute abdominal pain — using location and features to build a differential, plus focused workup and safe management.",
   "rubric": [
-    { "key": "data_gathering", "label": "History & data gathering", "description": "Takes a systematic pain history (site, onset, character, radiation, timing, exacerbating/relieving, severity), associated GI/GU symptoms, gynecological and sexual history where relevant, and red-flag features; asks about medications, alcohol, and past surgery.", "weight": 1.2 },
-    { "key": "differential_diagnosis", "label": "Differential diagnosis", "description": "Builds a differential organized by location/quadrant and by acuity, front-loading emergencies (ruptured ectopic, perforation, ischemic bowel, AAA, appendicitis with peritonism); always considers pregnancy in a person of childbearing potential.", "weight": 1.3 },
-    { "key": "clinical_reasoning", "label": "Clinical reasoning", "description": "Uses history and exam (localization, peritonism, guarding, specific signs) to raise or lower diagnoses; explains discriminators; avoids anchoring; updates with new data.", "weight": 1.2 },
-    { "key": "investigations", "label": "Investigations", "description": "Orders a focused, justified workup — vitals, urinalysis, pregnancy test (mandatory when relevant), bloods (FBC, U&E, LFTs, lipase/amylase, CRP, lactate, group & save), and targeted imaging (ultrasound vs CT) with rationale.", "weight": 1.1 },
-    { "key": "management_plan", "label": "Initial management", "description": "ABC, IV access and fluids, analgesia and antiemetics, keep nil by mouth if surgical, sepsis screen and antibiotics when indicated; timely surgical/gynae referral; avoids masking or delaying a surgical abdomen.", "weight": 1.1 },
-    { "key": "safety", "label": "Safety & prioritization", "description": "Screens for the unstable, peritonitic, or hemorrhaging patient early; mandatory pregnancy test; recognizes when this is a surgical emergency and escalates promptly.", "weight": 1.2 },
-    { "key": "communication", "label": "Communication & structure", "description": "Presents reasoning in an organized, systematic way; thinks aloud; would communicate clearly and sensitively with the patient (including gynecological/sexual history).", "weight": 0.9 }
+    {
+      "key": "data_gathering",
+      "label": "History & data gathering",
+      "description": "Takes a systematic pain history (site, onset, character, radiation, timing, exacerbating/relieving, severity), associated GI/GU symptoms, gynecological and sexual history where relevant, and red-flag features; asks about medications, alcohol, and past surgery.",
+      "weight": 1.2
+    },
+    {
+      "key": "differential_diagnosis",
+      "label": "Differential diagnosis",
+      "description": "Builds a differential organized by location/quadrant and by acuity, front-loading emergencies (ruptured ectopic, perforation, ischemic bowel, AAA, appendicitis with peritonism); always considers pregnancy in a person of childbearing potential.",
+      "weight": 1.3
+    },
+    {
+      "key": "clinical_reasoning",
+      "label": "Clinical reasoning",
+      "description": "Uses history and exam (localization, peritonism, guarding, specific signs) to raise or lower diagnoses; explains discriminators; avoids anchoring; updates with new data.",
+      "weight": 1.2
+    },
+    {
+      "key": "investigations",
+      "label": "Investigations",
+      "description": "Orders a focused, justified workup — vitals, urinalysis, pregnancy test (mandatory when relevant), bloods (FBC, U&E, LFTs, lipase/amylase, CRP, lactate, group & save), and targeted imaging (ultrasound vs CT) with rationale.",
+      "weight": 1.1
+    },
+    {
+      "key": "management_plan",
+      "label": "Initial management",
+      "description": "ABC, IV access and fluids, analgesia and antiemetics, keep nil by mouth if surgical, sepsis screen and antibiotics when indicated; timely surgical/gynae referral; avoids masking or delaying a surgical abdomen.",
+      "weight": 1.1
+    },
+    {
+      "key": "safety",
+      "label": "Safety & prioritization",
+      "description": "Screens for the unstable, peritonitic, or hemorrhaging patient early; mandatory pregnancy test; recognizes when this is a surgical emergency and escalates promptly.",
+      "weight": 1.2
+    },
+    {
+      "key": "communication",
+      "label": "Communication & structure",
+      "description": "Presents reasoning in an organized, systematic way; thinks aloud; would communicate clearly and sensitively with the patient (including gynecological/sexual history).",
+      "weight": 0.9
+    }
   ],
   "reference": {
     "scenario": "A 30-year-old with acute abdominal pain since this morning. The station tests a structured approach to the acute abdomen: a focused history, a differential organized by location and acuity that always includes pregnancy/ectopic in a person of childbearing potential, a justified workup, and safe initial management with appropriate escalation. The interviewer can add data (location, exam signs, a positive pregnancy test, unstable vitals) to test evolving reasoning. Content is generic and educational, not a real treatment protocol.",
@@ -32,12 +76,30 @@
       "Continual reassessment, clear escalation, and safety-netting; sensitive, private history-taking for sexual/gynecological questions."
     ],
     "probes": [
-      { "trigger": "candidate omits a pregnancy test in a person of childbearing potential", "question": "What single test would you not want to miss in a 30-year-old presenting like this, and why?" },
-      { "trigger": "candidate anchors on appendicitis without a broader differential", "question": "What else could cause right lower quadrant pain here, and how would you tell them apart?" },
-      { "trigger": "candidate lists a differential without using pain location", "question": "How does the location of the pain narrow your differential — walk me through it by quadrant." },
-      { "trigger": "candidate proposes withholding analgesia to 'not mask' the exam", "question": "Would you withhold pain relief while you assess? What does the evidence say about that?" },
-      { "trigger": "candidate gives a broad panel without justification", "question": "Justify each investigation — what would a positive or negative result tell you?" },
-      { "trigger": "candidate misses signs of instability", "question": "The heart rate is 120, blood pressure 90/60, and the abdomen is rigid. What now?" }
+      {
+        "trigger": "candidate omits a pregnancy test in a person of childbearing potential",
+        "question": "What single test would you not want to miss in a 30-year-old presenting like this, and why?"
+      },
+      {
+        "trigger": "candidate anchors on appendicitis without a broader differential",
+        "question": "What else could cause right lower quadrant pain here, and how would you tell them apart?"
+      },
+      {
+        "trigger": "candidate lists a differential without using pain location",
+        "question": "How does the location of the pain narrow your differential — walk me through it by quadrant."
+      },
+      {
+        "trigger": "candidate proposes withholding analgesia to 'not mask' the exam",
+        "question": "Would you withhold pain relief while you assess? What does the evidence say about that?"
+      },
+      {
+        "trigger": "candidate gives a broad panel without justification",
+        "question": "Justify each investigation — what would a positive or negative result tell you?"
+      },
+      {
+        "trigger": "candidate misses signs of instability",
+        "question": "The heart rate is 120, blood pressure 90/60, and the abdomen is rigid. What now?"
+      }
     ],
     "red_flags": [
       "Failing to do (or mention) a pregnancy test in a person of childbearing potential.",

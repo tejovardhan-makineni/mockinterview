@@ -3,18 +3,64 @@
   "title": "Tell me about a time you drove clarity on an ambiguous project",
   "track": "professional",
   "domain": "behavioral",
+  "areas": [
+    "engineering",
+    "data_science",
+    "medicine",
+    "nursing",
+    "law",
+    "consulting",
+    "product_management",
+    "finance"
+  ],
   "modality": "conversational",
   "difficulty": "senior",
-  "tags": ["ambiguity", "leadership-principles", "strategy", "alignment", "star"],
+  "tags": [
+    "ambiguity",
+    "leadership-principles",
+    "strategy",
+    "alignment",
+    "star"
+  ],
   "prompt": "Tell me about a time you were handed something genuinely ambiguous — an ill-defined problem, no clear goal or owner, conflicting signals — and you drove it to clarity. How did you approach it, and what did you produce?",
   "blurb": "Ambiguity (senior): did they impose structure on chaos and align others — or just wait for direction?",
   "rubric": [
-    { "key": "situation_clarity", "label": "The ambiguity", "description": "Conveys genuine ambiguity — unclear goals, no owner, conflicting stakeholders or data — and why it was hard, not just a normal under-specified task.", "weight": 1.0 },
-    { "key": "task_ownership", "label": "Taking on the ambiguity", "description": "Shows they chose to own the fog rather than wait for someone to define it, and framed what 'clarity' would even mean.", "weight": 1.2 },
-    { "key": "action_specificity", "label": "How they created structure", "description": "Describes the concrete method THEY used to reduce ambiguity — decomposing the problem, gathering data, forming hypotheses, defining scope and success metrics, sequencing.", "weight": 1.3 },
-    { "key": "result_impact", "label": "Alignment & measurable outcome", "description": "Shows they aligned stakeholders on a direction AND drove a real outcome — a decision made, a plan executed, a metric moved — not just a nice document.", "weight": 1.2 },
-    { "key": "reflection", "label": "Reflection & judgment", "description": "Reflects on decisions made under uncertainty, what they'd revisit, and how they knew when 'clear enough' was enough to act.", "weight": 1.1 },
-    { "key": "communication", "label": "Communication & structure", "description": "The answer itself is well-structured — modeling the clarity they claim to bring — and concise under probing.", "weight": 0.9 }
+    {
+      "key": "situation_clarity",
+      "label": "The ambiguity",
+      "description": "Conveys genuine ambiguity — unclear goals, no owner, conflicting stakeholders or data — and why it was hard, not just a normal under-specified task.",
+      "weight": 1.0
+    },
+    {
+      "key": "task_ownership",
+      "label": "Taking on the ambiguity",
+      "description": "Shows they chose to own the fog rather than wait for someone to define it, and framed what 'clarity' would even mean.",
+      "weight": 1.2
+    },
+    {
+      "key": "action_specificity",
+      "label": "How they created structure",
+      "description": "Describes the concrete method THEY used to reduce ambiguity — decomposing the problem, gathering data, forming hypotheses, defining scope and success metrics, sequencing.",
+      "weight": 1.3
+    },
+    {
+      "key": "result_impact",
+      "label": "Alignment & measurable outcome",
+      "description": "Shows they aligned stakeholders on a direction AND drove a real outcome — a decision made, a plan executed, a metric moved — not just a nice document.",
+      "weight": 1.2
+    },
+    {
+      "key": "reflection",
+      "label": "Reflection & judgment",
+      "description": "Reflects on decisions made under uncertainty, what they'd revisit, and how they knew when 'clear enough' was enough to act.",
+      "weight": 1.1
+    },
+    {
+      "key": "communication",
+      "label": "Communication & structure",
+      "description": "The answer itself is well-structured — modeling the clarity they claim to bring — and concise under probing.",
+      "weight": 0.9
+    }
   ],
   "reference": {
     "scenario": "A senior-level story: the candidate was given a vague mandate ('improve retention', 'figure out our data strategy', 'this system keeps breaking, fix the org problem') with no clear scope, owner, or success metric, and possibly conflicting stakeholders. They imposed structure, aligned people, and drove a concrete outcome. The signal is turning fog into a shared plan that others could execute against.",
@@ -27,11 +73,26 @@
       "Reflection: comfortable making reversible bets under uncertainty; knows when 'clear enough to act' beats waiting for certainty; would revisit specific assumptions."
     ],
     "probes": [
-      { "trigger": "produced a document but no decision/outcome", "question": "A plan is a start — what actually changed as a result? Was a decision made, did work ship, did a metric move?" },
-      { "trigger": "vague on method", "question": "Concretely, how did you go from fog to a plan? Walk me through the steps you took to reduce the ambiguity." },
-      { "trigger": "conflicting stakeholders glossed over", "question": "Who disagreed about what the goal even was, and how did you get them aligned on a single direction?" },
-      { "trigger": "waited for direction", "question": "How much of the structure did you create versus receive from your manager or a stakeholder?" },
-      { "trigger": "no success metric", "question": "How did you define success for something this open-ended? How did you know when you'd made it 'clear enough' to act?" }
+      {
+        "trigger": "produced a document but no decision/outcome",
+        "question": "A plan is a start — what actually changed as a result? Was a decision made, did work ship, did a metric move?"
+      },
+      {
+        "trigger": "vague on method",
+        "question": "Concretely, how did you go from fog to a plan? Walk me through the steps you took to reduce the ambiguity."
+      },
+      {
+        "trigger": "conflicting stakeholders glossed over",
+        "question": "Who disagreed about what the goal even was, and how did you get them aligned on a single direction?"
+      },
+      {
+        "trigger": "waited for direction",
+        "question": "How much of the structure did you create versus receive from your manager or a stakeholder?"
+      },
+      {
+        "trigger": "no success metric",
+        "question": "How did you define success for something this open-ended? How did you know when you'd made it 'clear enough' to act?"
+      }
     ],
     "red_flags": [
       "Waited for someone else to define the problem; their role was execution once it was already clear.",

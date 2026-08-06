@@ -19,7 +19,7 @@ export default function InterviewsPage() {
   const router = useRouter();
   const [questions, setQuestions] = useState<QuestionSummary[]>([]);
   const [loading, setLoading] = useState(true);
-  const [track, setTrack] = useState<"all" | "engineering" | "professional">("all");
+  const [area, setArea] = useState("all");
   const [domain, setDomain] = useState("all");
   const [query, setQuery] = useState("");
   const [recommended, setRecommended] = useState("");
@@ -30,14 +30,13 @@ export default function InterviewsPage() {
       if (!u) { router.replace("/login"); return; }
       const [qs, p] = await Promise.all([api.listQuestions(), api.getProfile()]);
       setQuestions(qs);
-      // Restore saved filters; else default to the profile domain.
+      // Restore saved filters; else default to the profile's domain if it exists in the corpus.
       const saved = typeof window !== "undefined" ? window.localStorage.getItem(FILTER_KEY) : null;
       if (saved) {
-        const f = JSON.parse(saved) as { track?: typeof track; domain?: string; query?: string };
-        setTrack(f.track ?? "all"); setDomain(f.domain ?? "all"); setQuery(f.query ?? "");
+        const f = JSON.parse(saved) as { area?: string; domain?: string; query?: string };
+        setArea(f.area ?? "all"); setDomain(f.domain ?? "all"); setQuery(f.query ?? "");
       } else if ((p as Profile)?.domain && qs.some((q) => q.domain === (p as Profile).domain)) {
         setDomain((p as Profile).domain!);
-        setTrack(qs.find((q) => q.domain === (p as Profile).domain)?.track === "professional" ? "professional" : "engineering");
       }
       if ((p as Profile)?.domain) setRecommended((p as Profile).domain!);
       setLoading(false);
@@ -47,37 +46,58 @@ export default function InterviewsPage() {
   // Persist filters for next visit.
   useEffect(() => {
     if (loading) return;
-    window.localStorage.setItem(FILTER_KEY, JSON.stringify({ track, domain, query }));
-  }, [track, domain, query, loading]);
+    window.localStorage.setItem(FILTER_KEY, JSON.stringify({ area, domain, query }));
+  }, [area, domain, query, loading]);
 
-  const domains = useMemo(
-    () => Array.from(new Set(questions.filter((q) => track === "all" || q.track === track).map((q) => q.domain))).sort(),
-    [questions, track]
+  // Areas (professions) present in the corpus — derived, not hardcoded.
+  const areas = useMemo(
+    () => Array.from(new Set(questions.flatMap((q) => q.areas ?? []))).sort(),
+    [questions]
   );
+
+  // Domains (sub-topics) available under the selected area — filtered to that area.
+  const domains = useMemo(
+    () => Array.from(new Set(
+      questions.filter((q) => area === "all" || (q.areas ?? []).includes(area)).map((q) => q.domain)
+    )).sort(),
+    [questions, area]
+  );
+
+  // Selecting an area narrows the domain options; if the current domain isn't in
+  // that area, fall back to "all" so the selection stays coherent.
+  const onArea = (a: string) => {
+    setArea(a);
+    if (a !== "all" && domain !== "all") {
+      const inArea = questions.some((q) => q.domain === domain && (q.areas ?? []).includes(a));
+      if (!inArea) setDomain("all");
+    }
+  };
 
   const filtered = useMemo(() => {
     return questions
-      .filter((q) => (track === "all" || q.track === track) && (domain === "all" || q.domain === domain))
+      .filter((q) => (area === "all" || (q.areas ?? []).includes(area)) && (domain === "all" || q.domain === domain))
       .map((q) => ({ q, score: matchScore(q, query) }))
       .filter((x) => x.score > 0.34)
       .sort((a, b) => b.score - a.score)
       .map((x) => x.q);
-  }, [questions, track, domain, query]);
+  }, [questions, area, domain, query]);
 
-  const clear = () => { setTrack("all"); setDomain("all"); setQuery(""); };
-  const hasFilters = track !== "all" || domain !== "all" || query.trim() !== "";
+  const clear = () => { setArea("all"); setDomain("all"); setQuery(""); };
+  const hasFilters = area !== "all" || domain !== "all" || query.trim() !== "";
+
+  const selectCls = "rounded-full border border-[var(--color-line)] bg-[var(--color-studio)] px-3 py-1.5 text-sm text-[var(--color-muted)] outline-none focus:border-[var(--color-accent)]";
 
   return (
     <AppShell active="interview">
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
           <h1 className="text-3xl font-extrabold tracking-tight">Interview Catalog</h1>
-          <p className="mt-1 text-[var(--color-muted)]">System design, LLD/OOD, coding (doc-style), and spoken/written professional interviews — {questions.length} to choose from.</p>
+          <p className="mt-1 text-[var(--color-muted)]">Pick an area and a domain — system design, LLD/OOD, coding, clinical, legal, case, and more. {questions.length} interviews across {areas.length} areas.</p>
         </div>
-        {recommended && <Badge tone="accent">Recommended: {pretty(recommended)}</Badge>}
+        {recommended && questions.some((q) => q.domain === recommended) && <Badge tone="accent">Recommended: {pretty(recommended)}</Badge>}
       </div>
 
-      {/* Search + filters */}
+      {/* Search + Area/Domain selects */}
       <div className="mt-6 flex flex-col gap-3">
         <input
           value={query} onChange={(e) => setQuery(e.target.value)}
@@ -85,18 +105,20 @@ export default function InterviewsPage() {
           className="w-full rounded-xl border border-[var(--color-line)] bg-[var(--color-panel)] px-4 py-3 text-sm outline-none focus:border-[var(--color-accent)]"
         />
         <div className="flex flex-wrap items-center gap-2">
-          {(["all", "engineering", "professional"] as const).map((t) => (
-            <button key={t} onClick={() => { setTrack(t); setDomain("all"); }}
-              className={`rounded-full border px-3.5 py-1.5 text-sm transition ${track === t ? "border-[var(--color-accent)] bg-[var(--color-panel-2)] text-[var(--color-ink)]" : "border-[var(--color-line)] text-[var(--color-muted)] hover:bg-[var(--color-panel-2)]"}`}>
-              {t === "all" ? "All tracks" : pretty(t)}
-            </button>
-          ))}
-          {domains.length > 1 && (
-            <select value={domain} onChange={(e) => setDomain(e.target.value)} className="rounded-full border border-[var(--color-line)] bg-[var(--color-studio)] px-3 py-1.5 text-sm text-[var(--color-muted)]">
+          <label className="flex items-center gap-2 text-sm text-[var(--color-muted)]">
+            <span className="text-[var(--color-faint)]">Area</span>
+            <select value={area} onChange={(e) => onArea(e.target.value)} className={selectCls}>
+              <option value="all">All areas</option>
+              {areas.map((a) => <option key={a} value={a}>{pretty(a)}</option>)}
+            </select>
+          </label>
+          <label className="flex items-center gap-2 text-sm text-[var(--color-muted)]">
+            <span className="text-[var(--color-faint)]">Domain</span>
+            <select value={domain} onChange={(e) => setDomain(e.target.value)} className={selectCls}>
               <option value="all">All domains</option>
               {domains.map((d) => <option key={d} value={d}>{pretty(d)}</option>)}
             </select>
-          )}
+          </label>
           {hasFilters && <button onClick={clear} className="text-sm text-[var(--color-accent)] hover:brightness-125">Clear filters</button>}
           <span className="ml-auto text-xs text-[var(--color-faint)]">{filtered.length} shown</span>
         </div>

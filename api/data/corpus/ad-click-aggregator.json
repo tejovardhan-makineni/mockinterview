@@ -3,25 +3,101 @@
   "title": "Design a Real-Time Ad Click Aggregator",
   "track": "engineering",
   "domain": "system_design",
+  "areas": [
+    "engineering"
+  ],
   "modality": "system_design",
   "difficulty": "senior",
-  "tags": ["streaming", "windowing", "exactly-once", "deduplication", "hot-partition", "analytics", "lambda-architecture"],
+  "tags": [
+    "streaming",
+    "windowing",
+    "exactly-once",
+    "deduplication",
+    "hot-partition",
+    "analytics",
+    "lambda-architecture"
+  ],
   "prompt": "Design a real-time ad click aggregation and analytics pipeline. Ad clicks arrive at massive volume; advertisers need near-real-time dashboards of clicks/impressions/spend per campaign (and per minute/hour), plus accurate totals for billing. Cover the streaming pipeline, time windowing, deduplication of duplicate/replayed events, exactly-once/accurate counting, and handling hot partitions from viral campaigns.",
   "blurb": "A streaming aggregation firehose where the dashboard can be approximate but billing must be exact — windowing, dedup, and the hot-campaign skew.",
   "rubric": [
-    { "key": "requirements", "label": "Requirements gathering", "description": "Separates functional (ingest clicks, aggregate per campaign/time window, real-time dashboard, accurate billing totals, query by dimensions) from non-functional (ingest scale, low query latency, accuracy for billing, late-data handling).", "weight": 1.0 },
-    { "key": "clarifying_questions", "label": "Clarifying questions", "description": "Asks about click volume, dashboard freshness SLA, accuracy requirement (approx dashboard vs exact billing), dimensions/cardinality, late/out-of-order events, retention.", "weight": 1.0 },
-    { "key": "estimations", "label": "Back-of-envelope estimations", "description": "Click events/s, bytes/s, aggregation cardinality (campaigns × windows × dims), storage for raw + rollups, query QPS.", "weight": 1.0 },
-    { "key": "streaming_pipeline", "label": "Streaming pipeline architecture", "description": "Ingest → queue (Kafka) → stream processor (Flink/Spark) → aggregation store → query API; why a log-backed pipeline. Central senior signal.", "weight": 1.3 },
-    { "key": "windowing", "label": "Time windowing", "description": "Tumbling/sliding/session windows, event-time vs processing-time, watermarks, allowed lateness, handling out-of-order clicks. Central senior signal.", "weight": 1.3 },
-    { "key": "dedup_exactly_once", "label": "Deduplication & exactly-once", "description": "Dedup replayed/duplicate clicks (click_id), exactly-once processing (checkpointing, idempotent sink), why at-least-once ingest + dedup, billing accuracy. Central senior signal.", "weight": 1.4 },
-    { "key": "hot_partition", "label": "Hot partition / skew handling", "description": "A viral campaign overwhelms one partition/key; salting/sub-keys + two-stage aggregation, backpressure, adaptive partitioning.", "weight": 1.2 },
-    { "key": "api_design", "label": "API design", "description": "click ingest endpoint, aggregate query (campaign, time range, granularity, dims), event schema.", "weight": 0.8 },
-    { "key": "data_model", "label": "Data model", "description": "raw event log, pre-aggregated rollups by (campaign, window, dims), dedup store; OLAP store choice.", "weight": 1.0 },
-    { "key": "accuracy_reprocessing", "label": "Accuracy, reconciliation & reprocessing", "description": "Fast approximate path vs accurate batch path (lambda/kappa), reprocessing from raw log for corrections and billing, reconciliation.", "weight": 1.0 },
-    { "key": "scaling", "label": "Scaling", "description": "Partitioning by campaign/key, scaling stream operators, OLAP store for high-cardinality queries, retention tiers.", "weight": 1.0 },
-    { "key": "bottlenecks", "label": "Bottlenecks", "description": "Hot campaign key, dedup-state memory, late-data recompute, high-cardinality query cost, checkpoint overhead.", "weight": 0.9 },
-    { "key": "observability", "label": "Observability & reliability", "description": "Pipeline lag/watermark delay, dropped/late events, dedup rate, count accuracy vs billing reconciliation, backpressure alarms.", "weight": 0.8 }
+    {
+      "key": "requirements",
+      "label": "Requirements gathering",
+      "description": "Separates functional (ingest clicks, aggregate per campaign/time window, real-time dashboard, accurate billing totals, query by dimensions) from non-functional (ingest scale, low query latency, accuracy for billing, late-data handling).",
+      "weight": 1.0
+    },
+    {
+      "key": "clarifying_questions",
+      "label": "Clarifying questions",
+      "description": "Asks about click volume, dashboard freshness SLA, accuracy requirement (approx dashboard vs exact billing), dimensions/cardinality, late/out-of-order events, retention.",
+      "weight": 1.0
+    },
+    {
+      "key": "estimations",
+      "label": "Back-of-envelope estimations",
+      "description": "Click events/s, bytes/s, aggregation cardinality (campaigns × windows × dims), storage for raw + rollups, query QPS.",
+      "weight": 1.0
+    },
+    {
+      "key": "streaming_pipeline",
+      "label": "Streaming pipeline architecture",
+      "description": "Ingest → queue (Kafka) → stream processor (Flink/Spark) → aggregation store → query API; why a log-backed pipeline. Central senior signal.",
+      "weight": 1.3
+    },
+    {
+      "key": "windowing",
+      "label": "Time windowing",
+      "description": "Tumbling/sliding/session windows, event-time vs processing-time, watermarks, allowed lateness, handling out-of-order clicks. Central senior signal.",
+      "weight": 1.3
+    },
+    {
+      "key": "dedup_exactly_once",
+      "label": "Deduplication & exactly-once",
+      "description": "Dedup replayed/duplicate clicks (click_id), exactly-once processing (checkpointing, idempotent sink), why at-least-once ingest + dedup, billing accuracy. Central senior signal.",
+      "weight": 1.4
+    },
+    {
+      "key": "hot_partition",
+      "label": "Hot partition / skew handling",
+      "description": "A viral campaign overwhelms one partition/key; salting/sub-keys + two-stage aggregation, backpressure, adaptive partitioning.",
+      "weight": 1.2
+    },
+    {
+      "key": "api_design",
+      "label": "API design",
+      "description": "click ingest endpoint, aggregate query (campaign, time range, granularity, dims), event schema.",
+      "weight": 0.8
+    },
+    {
+      "key": "data_model",
+      "label": "Data model",
+      "description": "raw event log, pre-aggregated rollups by (campaign, window, dims), dedup store; OLAP store choice.",
+      "weight": 1.0
+    },
+    {
+      "key": "accuracy_reprocessing",
+      "label": "Accuracy, reconciliation & reprocessing",
+      "description": "Fast approximate path vs accurate batch path (lambda/kappa), reprocessing from raw log for corrections and billing, reconciliation.",
+      "weight": 1.0
+    },
+    {
+      "key": "scaling",
+      "label": "Scaling",
+      "description": "Partitioning by campaign/key, scaling stream operators, OLAP store for high-cardinality queries, retention tiers.",
+      "weight": 1.0
+    },
+    {
+      "key": "bottlenecks",
+      "label": "Bottlenecks",
+      "description": "Hot campaign key, dedup-state memory, late-data recompute, high-cardinality query cost, checkpoint overhead.",
+      "weight": 0.9
+    },
+    {
+      "key": "observability",
+      "label": "Observability & reliability",
+      "description": "Pipeline lag/watermark delay, dropped/late events, dedup rate, count accuracy vs billing reconciliation, backpressure alarms.",
+      "weight": 0.8
+    }
   ],
   "reference": {
     "functional_requirements": [
@@ -58,7 +134,17 @@
       "cardinality": "Rollup cardinality = campaigns × time buckets × dimension combos; per-minute × many campaigns × geo×device can explode — pick granularities/dims deliberately.",
       "queries": "Dashboard queries are moderate QPS but hit an OLAP store; pre-aggregation keeps them cheap; ad-hoc high-cardinality slices are the expensive case."
     },
-    "core_components": ["Click ingest service (edge, lightweight, writes to log)", "Partitioned event log (Kafka)", "Stream processor (Flink/Spark Streaming) — windowed aggregation + dedup", "Dedup state store", "Aggregation/OLAP store (Druid/ClickHouse/Pinot)", "Raw event store (object storage, for reprocessing/billing)", "Batch/reprocessing job", "Query API + dashboard", "Billing reconciliation job"],
+    "core_components": [
+      "Click ingest service (edge, lightweight, writes to log)",
+      "Partitioned event log (Kafka)",
+      "Stream processor (Flink/Spark Streaming) — windowed aggregation + dedup",
+      "Dedup state store",
+      "Aggregation/OLAP store (Druid/ClickHouse/Pinot)",
+      "Raw event store (object storage, for reprocessing/billing)",
+      "Batch/reprocessing job",
+      "Query API + dashboard",
+      "Billing reconciliation job"
+    ],
     "data_model": [
       "click_event(click_id UNIQUE, campaign_id, ad_id, ts (event time), user/device, geo, cost) — raw, append-only",
       "rollups(campaign_id, window_start, granularity, dim_key, click_count, spend) — pre-aggregated, sink target",
@@ -74,27 +160,98 @@
     ],
     "high_level_design": "Lightweight edge ingest services accept clicks and append them (at-least-once) to a PARTITIONED LOG (Kafka), which absorbs spikes and durably retains raw events. A STREAM PROCESSOR (Flink/Spark) consumes the log and performs windowed aggregation: it groups by (campaign, dimension) and reduces counts/spend into TIME WINDOWS (tumbling per-minute/hour) using EVENT TIME with WATERMARKS to tolerate out-of-order arrival and a configured ALLOWED LATENESS to fold in stragglers. It DEDUPES on click_id against keyed state (bounded by a window/TTL) so replayed or retried clicks aren't double-counted. Results are written IDEMPOTENTLY (upsert by (campaign, window, dim)) into an OLAP aggregation store that serves fast dashboard queries. Because the live path favors freshness, it's treated as near-accurate; for BILLING, raw events are also archived to object storage and a periodic BATCH reprocessing job recomputes exact totals from the immutable log (lambda-style) and RECONCILES against the streaming numbers, correcting any drift from late data or dropped stream state. HOT CAMPAIGNS that would overwhelm a single partition/key are handled by SALTING the key (campaign_id + bucket) for a first-stage local aggregation, then a second stage combines the partials — two-stage aggregation avoids a single hot operator. Backpressure propagates from the processor through the log so ingest never drops billing data.",
     "deep_dives": [
-      { "topic": "windowing", "probe": "A click happens at 10:00:59 but arrives at 10:01:30 due to mobile network delay. Which minute does it count in, and how do you make that happen? Explain event-time vs processing-time, watermarks, and allowed lateness — and what you do with an event that arrives after the window has closed." },
-      { "topic": "dedup_exactly_once", "probe": "The same click gets sent twice (client retry) and later the stream reprocesses after a failure. How do you count it exactly once? Talk through the dedup key and state, why ingest is at-least-once, how checkpointing + idempotent upserts give effective exactly-once, and how you bound dedup-state memory." },
-      { "topic": "hot_partition", "probe": "A campaign goes viral and 40% of all clicks share one campaign_id, hammering one partition/operator. How do you keep the pipeline from falling over — key salting, two-stage aggregation, adaptive partitioning — and how do you recombine the partial aggregates correctly?" },
-      { "topic": "accuracy_reprocessing", "probe": "The dashboard showed 1.02M clicks but billing must be exact. How do the fast path and the accurate path coexist (lambda vs kappa), how do you reprocess from the raw log to correct late data, and how do you reconcile and expose the corrected number without confusing advertisers?" },
-      { "topic": "cache_stampede", "probe": "You cache hot dashboard query results (top campaigns' current-hour rollups). During a traffic spike those cached rollups expire while many advertisers refresh at once. How do you avoid a stampede recomputing them from the OLAP store — coalescing, jittered TTL, serving the last rollup?" },
-      { "topic": "cdc_enrichment", "probe": "Clicks must be enriched/joined with campaign and budget data that lives in an operational database (e.g., to compute spend and stop overspend). How do you get that DB's state into the stream — CDC/Debezium into a compacted topic joined against the click stream vs point lookups — and how do you handle updates to a campaign's budget mid-stream?" }
+      {
+        "topic": "windowing",
+        "probe": "A click happens at 10:00:59 but arrives at 10:01:30 due to mobile network delay. Which minute does it count in, and how do you make that happen? Explain event-time vs processing-time, watermarks, and allowed lateness — and what you do with an event that arrives after the window has closed."
+      },
+      {
+        "topic": "dedup_exactly_once",
+        "probe": "The same click gets sent twice (client retry) and later the stream reprocesses after a failure. How do you count it exactly once? Talk through the dedup key and state, why ingest is at-least-once, how checkpointing + idempotent upserts give effective exactly-once, and how you bound dedup-state memory."
+      },
+      {
+        "topic": "hot_partition",
+        "probe": "A campaign goes viral and 40% of all clicks share one campaign_id, hammering one partition/operator. How do you keep the pipeline from falling over — key salting, two-stage aggregation, adaptive partitioning — and how do you recombine the partial aggregates correctly?"
+      },
+      {
+        "topic": "accuracy_reprocessing",
+        "probe": "The dashboard showed 1.02M clicks but billing must be exact. How do the fast path and the accurate path coexist (lambda vs kappa), how do you reprocess from the raw log to correct late data, and how do you reconcile and expose the corrected number without confusing advertisers?"
+      },
+      {
+        "topic": "cache_stampede",
+        "probe": "You cache hot dashboard query results (top campaigns' current-hour rollups). During a traffic spike those cached rollups expire while many advertisers refresh at once. How do you avoid a stampede recomputing them from the OLAP store — coalescing, jittered TTL, serving the last rollup?"
+      },
+      {
+        "topic": "cdc_enrichment",
+        "probe": "Clicks must be enriched/joined with campaign and budget data that lives in an operational database (e.g., to compute spend and stop overspend). How do you get that DB's state into the stream — CDC/Debezium into a compacted topic joined against the click stream vs point lookups — and how do you handle updates to a campaign's budget mid-stream?"
+      }
     ],
     "followup_bank": [
-      { "trigger": "mentions window or windowing", "question": "Event-time vs processing-time — how do watermarks and allowed lateness place a late/out-of-order click in the right window, and what happens to events past the lateness bound?" },
-      { "trigger": "mentions dedup or exactly once or duplicate", "question": "What's your dedup key, how is the dedup state bounded, and how do checkpointing + idempotent upserts give exactly-once counting despite at-least-once ingest?" },
-      { "trigger": "mentions hot or skew or viral or partition", "question": "How do you handle a single campaign dominating one partition — key salting + two-stage aggregation — and how do you correctly recombine the partial counts?" },
-      { "trigger": "mentions cache or redis", "question": "Eviction/TTL for cached dashboard rollups, and how do you prevent a stampede recomputing hot current-hour aggregates when they expire during a spike?" },
-      { "trigger": "mentions database or campaign store or budget", "question": "How do you join click events with campaign/budget data from an operational DB — CDC/Debezium into a compacted topic vs lookups — and handle budget updates mid-stream?" },
-      { "trigger": "mentions billing or accurate or exact", "question": "How do the approximate streaming path and the exact batch/reprocessing path coexist, and how do you reconcile them for billing?" }
+      {
+        "trigger": "mentions window or windowing",
+        "question": "Event-time vs processing-time — how do watermarks and allowed lateness place a late/out-of-order click in the right window, and what happens to events past the lateness bound?"
+      },
+      {
+        "trigger": "mentions dedup or exactly once or duplicate",
+        "question": "What's your dedup key, how is the dedup state bounded, and how do checkpointing + idempotent upserts give exactly-once counting despite at-least-once ingest?"
+      },
+      {
+        "trigger": "mentions hot or skew or viral or partition",
+        "question": "How do you handle a single campaign dominating one partition — key salting + two-stage aggregation — and how do you correctly recombine the partial counts?"
+      },
+      {
+        "trigger": "mentions cache or redis",
+        "question": "Eviction/TTL for cached dashboard rollups, and how do you prevent a stampede recomputing hot current-hour aggregates when they expire during a spike?"
+      },
+      {
+        "trigger": "mentions database or campaign store or budget",
+        "question": "How do you join click events with campaign/budget data from an operational DB — CDC/Debezium into a compacted topic vs lookups — and handle budget updates mid-stream?"
+      },
+      {
+        "trigger": "mentions billing or accurate or exact",
+        "question": "How do the approximate streaming path and the exact batch/reprocessing path coexist, and how do you reconcile them for billing?"
+      }
     ],
-    "scaling": ["Partition the event log by campaign_id (salted for hot keys)", "Scale stream operators horizontally; parallelism per partition", "OLAP store (Druid/ClickHouse/Pinot) for high-cardinality aggregate queries", "Pre-aggregate to bound query cost; tier raw events to cheap storage", "Two-stage aggregation to spread hot-key load"],
-    "bottlenecks": ["Hot campaign key skewing one partition/operator", "Dedup-state memory growth over the dedup window", "Late-data recompute and window state size", "High-cardinality ad-hoc queries on the OLAP store", "Checkpoint overhead / backpressure under spikes"],
-    "tradeoffs": ["Fast approximate dashboard vs exact billing (lambda: two paths, more complexity) vs single exact path (kappa: simpler, higher latency)", "Larger allowed lateness (more accurate, more state + delayed finalization) vs smaller (fast, drops stragglers)", "Pre-aggregate fixed granularities (cheap queries, less flexible) vs raw-on-read (flexible, expensive)", "Exactly-once (accurate, checkpoint/state cost) vs at-least-once + idempotent sink (simpler, needs dedup)", "Fine dedup window (catches more dupes, more memory) vs coarse"],
-    "alternative_solutions": ["Kappa architecture: one streaming path, reprocess by replaying the log (no separate batch layer)", "Probabilistic sketches (HyperLogLog for unique users, count-min for heavy hitters) for cheap approximate dashboards", "Pre-aggregation in the ingest tier (local counters flushed periodically) to cut event volume", "Materialized views in the OLAP store for common rollups"],
-    "observability": ["Pipeline lag and watermark delay (freshness)", "Dropped/too-late event count and dedup rate", "Streaming-vs-batch count divergence (accuracy) + billing reconciliation breaks", "Per-partition throughput to spot hot keys/skew", "Backpressure and checkpoint duration alarms"],
-    "security": ["Click fraud/bot detection and filtering before billing", "AuthN on query API; advertisers see only their campaigns", "Rate limiting / validation on ingest; schema enforcement", "PII minimization on user/device fields; encryption", "Tamper-evident raw log for billing audit"],
+    "scaling": [
+      "Partition the event log by campaign_id (salted for hot keys)",
+      "Scale stream operators horizontally; parallelism per partition",
+      "OLAP store (Druid/ClickHouse/Pinot) for high-cardinality aggregate queries",
+      "Pre-aggregate to bound query cost; tier raw events to cheap storage",
+      "Two-stage aggregation to spread hot-key load"
+    ],
+    "bottlenecks": [
+      "Hot campaign key skewing one partition/operator",
+      "Dedup-state memory growth over the dedup window",
+      "Late-data recompute and window state size",
+      "High-cardinality ad-hoc queries on the OLAP store",
+      "Checkpoint overhead / backpressure under spikes"
+    ],
+    "tradeoffs": [
+      "Fast approximate dashboard vs exact billing (lambda: two paths, more complexity) vs single exact path (kappa: simpler, higher latency)",
+      "Larger allowed lateness (more accurate, more state + delayed finalization) vs smaller (fast, drops stragglers)",
+      "Pre-aggregate fixed granularities (cheap queries, less flexible) vs raw-on-read (flexible, expensive)",
+      "Exactly-once (accurate, checkpoint/state cost) vs at-least-once + idempotent sink (simpler, needs dedup)",
+      "Fine dedup window (catches more dupes, more memory) vs coarse"
+    ],
+    "alternative_solutions": [
+      "Kappa architecture: one streaming path, reprocess by replaying the log (no separate batch layer)",
+      "Probabilistic sketches (HyperLogLog for unique users, count-min for heavy hitters) for cheap approximate dashboards",
+      "Pre-aggregation in the ingest tier (local counters flushed periodically) to cut event volume",
+      "Materialized views in the OLAP store for common rollups"
+    ],
+    "observability": [
+      "Pipeline lag and watermark delay (freshness)",
+      "Dropped/too-late event count and dedup rate",
+      "Streaming-vs-batch count divergence (accuracy) + billing reconciliation breaks",
+      "Per-partition throughput to spot hot keys/skew",
+      "Backpressure and checkpoint duration alarms"
+    ],
+    "security": [
+      "Click fraud/bot detection and filtering before billing",
+      "AuthN on query API; advertisers see only their campaigns",
+      "Rate limiting / validation on ingest; schema enforcement",
+      "PII minimization on user/device fields; encryption",
+      "Tamper-evident raw log for billing audit"
+    ],
     "reference_answer": "A strong answer builds a log-backed streaming pipeline: lightweight edge ingest appends clicks at-least-once to a partitioned log, a stream processor does event-time windowed aggregation with watermarks and allowed lateness to handle out-of-order clicks, dedupes on click_id in bounded keyed state, and writes idempotent upserts into an OLAP store for fast dashboards. It distinguishes the approximate live path from exact billing, keeping raw events for a batch/reprocessing path that recomputes exact totals and reconciles drift (lambda, or kappa via log replay). It handles hot viral campaigns with key salting + two-stage aggregation and backpressure so billing data is never dropped. The candidate protects hot dashboard rollups from cache stampede, enriches clicks against campaign/budget data via CDC into a compacted topic, and names the hot key, dedup-state memory, late-data recompute, and high-cardinality queries as the top bottlenecks with mitigations. Effective exactly-once = at-least-once ingest + checkpointing + idempotent sink + dedup, and freshness/accuracy is monitored via pipeline lag, watermark delay, and streaming-vs-batch reconciliation."
   },
   "interviewer_notes": "The defining tension is approximate-dashboard vs exact-billing — strong candidates ask about it early and design two coherent paths (or a kappa replay) rather than pretending one path is both instant and perfectly exact. Push the three core deep-dives: event-time windowing with watermarks/allowed-lateness (use the late-arriving-click scenario), dedup + effective exactly-once (make them define it precisely — at-least-once ingest + checkpoint + idempotent sink + dedup, not magic), and hot-partition handling for viral campaigns (salting + two-stage aggregation with correct recombination). Use the cache/stampede probe on hot dashboard rollups and the CDC probe as enriching clicks with campaign/budget state from an operational DB. Watch for red flags: counting on the processing-time wall clock, unbounded dedup state, ignoring late data, or a single hot key with no mitigation. Reserve time for reconciliation/reprocessing and observability (lag, watermark delay, count divergence)."

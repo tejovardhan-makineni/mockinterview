@@ -3,20 +3,70 @@
   "title": "Kth Largest Element in an Array",
   "track": "engineering",
   "domain": "coding",
+  "areas": [
+    "engineering",
+    "data_science"
+  ],
   "modality": "coding",
   "difficulty": "mid",
-  "tags": ["heap", "quickselect", "partition", "selection", "divide-and-conquer"],
+  "tags": [
+    "heap",
+    "quickselect",
+    "partition",
+    "selection",
+    "divide-and-conquer"
+  ],
   "prompt": "Given an integer array nums and an integer k, return the kth LARGEST element in the array. Note this is the kth largest in sorted order, not the kth distinct element — duplicates count. Can you do better than sorting the whole array?",
   "blurb": "The selection problem — a size-k min-heap gives O(n log k), and Quickselect gives O(n) average by partitioning around a pivot without fully sorting.",
   "rubric": [
-    { "key": "problem_understanding", "label": "Problem understanding", "description": "Confirms kth largest counts duplicates (not kth distinct), clarifies 1-indexed k, and recognizes full sorting is O(n log n) — the prompt invites something better.", "weight": 1.0 },
-    { "key": "approach", "label": "Approach", "description": "Reaches at least the size-k min-heap (O(n log k)); ideally proposes Quickselect (O(n) average) and explains the partition-and-recurse-one-side insight versus quicksort recursing both sides.", "weight": 1.3 },
-    { "key": "correctness", "label": "Correctness", "description": "Heap: keeps exactly k largest by popping when size exceeds k; the root is the answer. Quickselect: maps kth largest to the (n-k)th index in ascending order (or partitions descending), recurses only the side containing the target index, and terminates when pivot lands on it.", "weight": 1.3 },
-    { "key": "complexity_analysis", "label": "Complexity analysis", "description": "Heap O(n log k) time / O(k) space. Quickselect O(n) average (n + n/2 + n/4 ... = 2n) but O(n^2) worst case; random/median-of-medians pivot mitigates. Full sort O(n log n)/O(1).", "weight": 1.1 },
-    { "key": "code_quality", "label": "Code quality", "description": "Clean partition routine (Lomuto or Hoare), in-place swaps, correct index arithmetic for the target rank, no off-by-one in the heap size check.", "weight": 1.0 },
-    { "key": "edge_cases", "label": "Edge cases", "description": "k=1 (max) and k=n (min), all-equal elements (partition must still terminate), array of length 1, negative numbers, duplicates around the pivot, k out of range validation.", "weight": 1.1 },
-    { "key": "testing", "label": "Testing", "description": "Tests duplicates (e.g. [3,3,3,3], k=2 -> 3) and both extremes of k; for Quickselect, reasons about the all-equal worst case for partition.", "weight": 0.9 },
-    { "key": "communication", "label": "Communication", "description": "Explains the average-case linear recurrence for Quickselect and the O(log k) heap tradeoff, and when a heap is preferable (streaming / k << n / worst-case guarantee).", "weight": 0.8 }
+    {
+      "key": "problem_understanding",
+      "label": "Problem understanding",
+      "description": "Confirms kth largest counts duplicates (not kth distinct), clarifies 1-indexed k, and recognizes full sorting is O(n log n) — the prompt invites something better.",
+      "weight": 1.0
+    },
+    {
+      "key": "approach",
+      "label": "Approach",
+      "description": "Reaches at least the size-k min-heap (O(n log k)); ideally proposes Quickselect (O(n) average) and explains the partition-and-recurse-one-side insight versus quicksort recursing both sides.",
+      "weight": 1.3
+    },
+    {
+      "key": "correctness",
+      "label": "Correctness",
+      "description": "Heap: keeps exactly k largest by popping when size exceeds k; the root is the answer. Quickselect: maps kth largest to the (n-k)th index in ascending order (or partitions descending), recurses only the side containing the target index, and terminates when pivot lands on it.",
+      "weight": 1.3
+    },
+    {
+      "key": "complexity_analysis",
+      "label": "Complexity analysis",
+      "description": "Heap O(n log k) time / O(k) space. Quickselect O(n) average (n + n/2 + n/4 ... = 2n) but O(n^2) worst case; random/median-of-medians pivot mitigates. Full sort O(n log n)/O(1).",
+      "weight": 1.1
+    },
+    {
+      "key": "code_quality",
+      "label": "Code quality",
+      "description": "Clean partition routine (Lomuto or Hoare), in-place swaps, correct index arithmetic for the target rank, no off-by-one in the heap size check.",
+      "weight": 1.0
+    },
+    {
+      "key": "edge_cases",
+      "label": "Edge cases",
+      "description": "k=1 (max) and k=n (min), all-equal elements (partition must still terminate), array of length 1, negative numbers, duplicates around the pivot, k out of range validation.",
+      "weight": 1.1
+    },
+    {
+      "key": "testing",
+      "label": "Testing",
+      "description": "Tests duplicates (e.g. [3,3,3,3], k=2 -> 3) and both extremes of k; for Quickselect, reasons about the all-equal worst case for partition.",
+      "weight": 0.9
+    },
+    {
+      "key": "communication",
+      "label": "Communication",
+      "description": "Explains the average-case linear recurrence for Quickselect and the O(log k) heap tradeoff, and when a heap is preferable (streaming / k << n / worst-case guarantee).",
+      "weight": 0.8
+    }
   ],
   "reference": {
     "constraints": [
@@ -37,19 +87,52 @@
       }
     ],
     "test_cases": [
-      { "input": "nums = [1], k = 1", "expected": "1 — single element" },
-      { "input": "nums = [7,6,5,4,3,2,1], k = 7", "expected": "1 — k=n asks for the minimum" },
-      { "input": "nums = [2,1], k = 1", "expected": "2 — k=1 asks for the maximum" },
-      { "input": "nums = [3,3,3,3], k = 2", "expected": "3 — all equal; duplicates count and partition must still terminate" },
-      { "input": "nums = [-1,-1,0], k = 1", "expected": "0 — negatives handled" },
-      { "input": "nums = [5,2,4,1,3,6,0], k = 4", "expected": "3 — general Quickselect case; verify recursing only one side" }
+      {
+        "input": "nums = [1], k = 1",
+        "expected": "1 — single element"
+      },
+      {
+        "input": "nums = [7,6,5,4,3,2,1], k = 7",
+        "expected": "1 — k=n asks for the minimum"
+      },
+      {
+        "input": "nums = [2,1], k = 1",
+        "expected": "2 — k=1 asks for the maximum"
+      },
+      {
+        "input": "nums = [3,3,3,3], k = 2",
+        "expected": "3 — all equal; duplicates count and partition must still terminate"
+      },
+      {
+        "input": "nums = [-1,-1,0], k = 1",
+        "expected": "0 — negatives handled"
+      },
+      {
+        "input": "nums = [5,2,4,1,3,6,0], k = 4",
+        "expected": "3 — general Quickselect case; verify recursing only one side"
+      }
     ],
     "optimal_time": "O(n) average (Quickselect); O(n log k) if using a size-k heap",
     "optimal_space": "O(1) in-place for Quickselect (O(log n) recursion), O(k) for the heap",
     "approaches": [
-      { "name": "sort and index", "idea": "Sort ascending and return nums[n-k] (or sort descending and return nums[k-1]). Trivially correct and often the right pragmatic choice, but does more work than needed by fully ordering the array.", "time": "O(n log n)", "space": "O(1) to O(n) depending on the sort" },
-      { "name": "size-k min-heap", "idea": "Maintain a min-heap of the k largest seen so far. Push each element; if the heap grows beyond k, pop the smallest. After processing all elements the heap's root (minimum of the top k) is the kth largest. Great for streaming data or when k << n, and gives a worst-case bound.", "time": "O(n log k)", "space": "O(k)" },
-      { "name": "optimal average: Quickselect", "idea": "Target rank is index target = n - k in ascending order. Randomly pick a pivot, partition so smaller elements sit left and larger right, and let p be the pivot's final index. If p == target, nums[p] is the answer. If p < target recurse on the right part, else the left part — only ONE side, unlike quicksort. Average work is n + n/2 + n/4 + ... = O(n). A random (or median-of-medians) pivot avoids the O(n^2) worst case on sorted/adversarial input.", "time": "O(n) average, O(n^2) worst (O(n) with median-of-medians pivot)", "space": "O(1) extra, O(log n) recursion (or iterative)" }
+      {
+        "name": "sort and index",
+        "idea": "Sort ascending and return nums[n-k] (or sort descending and return nums[k-1]). Trivially correct and often the right pragmatic choice, but does more work than needed by fully ordering the array.",
+        "time": "O(n log n)",
+        "space": "O(1) to O(n) depending on the sort"
+      },
+      {
+        "name": "size-k min-heap",
+        "idea": "Maintain a min-heap of the k largest seen so far. Push each element; if the heap grows beyond k, pop the smallest. After processing all elements the heap's root (minimum of the top k) is the kth largest. Great for streaming data or when k << n, and gives a worst-case bound.",
+        "time": "O(n log k)",
+        "space": "O(k)"
+      },
+      {
+        "name": "optimal average: Quickselect",
+        "idea": "Target rank is index target = n - k in ascending order. Randomly pick a pivot, partition so smaller elements sit left and larger right, and let p be the pivot's final index. If p == target, nums[p] is the answer. If p < target recurse on the right part, else the left part — only ONE side, unlike quicksort. Average work is n + n/2 + n/4 + ... = O(n). A random (or median-of-medians) pivot avoids the O(n^2) worst case on sorted/adversarial input.",
+        "time": "O(n) average, O(n^2) worst (O(n) with median-of-medians pivot)",
+        "space": "O(1) extra, O(log n) recursion (or iterative)"
+      }
     ],
     "follow_ups": [
       "Streaming / online version — KthLargest class with an add(val) that returns the current kth largest; the size-k min-heap is the natural fit and add is O(log k).",

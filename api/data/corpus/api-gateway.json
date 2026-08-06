@@ -3,23 +3,88 @@
   "title": "Design an API Gateway",
   "track": "engineering",
   "domain": "system_design",
+  "areas": [
+    "engineering"
+  ],
   "modality": "system_design",
   "difficulty": "senior",
-  "tags": ["api-gateway", "routing", "auth", "rate-limiting", "circuit-breaker", "reverse-proxy"],
+  "tags": [
+    "api-gateway",
+    "routing",
+    "auth",
+    "rate-limiting",
+    "circuit-breaker",
+    "reverse-proxy"
+  ],
   "prompt": "Design an API gateway that sits in front of hundreds of backend microservices: it terminates client requests, authenticates them, routes to the right service, enforces rate limits and quotas, and protects backends with timeouts and circuit breaking. Cover the request lifecycle, the control plane, and how it stays fast and reliable.",
   "blurb": "The front-door problem — routing, authn/z, rate limiting, and circuit breaking in the hot path, with a dynamic control plane and no added latency.",
   "rubric": [
-    { "key": "requirements", "label": "Requirements gathering", "description": "Separates functional (routing, auth, rate limit, transforms, TLS termination, aggregation) from non-functional (low added latency, high availability, dynamic config, no SPOF).", "weight": 1.0 },
-    { "key": "clarifying_questions", "label": "Clarifying questions", "description": "Asks about request volume, number of backend services, auth model (JWT/OAuth/mTLS), rate-limit granularity, north-south vs east-west, latency budget.", "weight": 1.0 },
-    { "key": "estimations", "label": "Back-of-envelope estimations", "description": "Derives request QPS, added-latency budget, connections/keep-alive, config size, and gateway node count.", "weight": 0.9 },
-    { "key": "request_lifecycle", "label": "Request lifecycle / filter chain", "description": "The ordered pipeline: TLS -> authn -> authz -> rate limit -> route match -> transform -> proxy -> response filters; where each concern belongs and short-circuiting.", "weight": 1.2 },
-    { "key": "routing", "label": "Routing & service discovery", "description": "Path/host/header-based routing, dynamic route table, integration with service discovery, load balancing to backend instances, canary/weighted routing.", "weight": 1.1 },
-    { "key": "rate_limiting", "label": "Rate limiting & quotas", "description": "Algorithms (token/leaky bucket, sliding window), local vs distributed counters, per-key/tenant/route limits, and the distributed-counter accuracy/latency tradeoff.", "weight": 1.2 },
-    { "key": "resilience", "label": "Resilience: timeouts & circuit breaking", "description": "Per-route timeouts, retries with budgets, circuit breakers, bulkheads, backpressure/load shedding so one slow backend doesn't take down the gateway.", "weight": 1.3 },
-    { "key": "control_plane", "label": "Control plane / config distribution", "description": "Separating data plane from control plane; how route/auth/limit config is updated dynamically and pushed to nodes without restarts or races.", "weight": 1.2 },
-    { "key": "high_level_design", "label": "High-level design", "description": "Client -> LB -> stateless gateway fleet (data plane) -> backends; control plane manages config; shared stores for tokens/limits.", "weight": 1.1 },
-    { "key": "bottlenecks", "label": "Bottlenecks", "description": "Gateway added latency, distributed rate-limit store as a hotspot, auth verification cost, a slow backend causing thread/connection exhaustion.", "weight": 1.0 },
-    { "key": "observability", "label": "Observability", "description": "Per-route latency/error rates, rate-limit rejections, circuit state, upstream health, distributed tracing propagation.", "weight": 0.8 }
+    {
+      "key": "requirements",
+      "label": "Requirements gathering",
+      "description": "Separates functional (routing, auth, rate limit, transforms, TLS termination, aggregation) from non-functional (low added latency, high availability, dynamic config, no SPOF).",
+      "weight": 1.0
+    },
+    {
+      "key": "clarifying_questions",
+      "label": "Clarifying questions",
+      "description": "Asks about request volume, number of backend services, auth model (JWT/OAuth/mTLS), rate-limit granularity, north-south vs east-west, latency budget.",
+      "weight": 1.0
+    },
+    {
+      "key": "estimations",
+      "label": "Back-of-envelope estimations",
+      "description": "Derives request QPS, added-latency budget, connections/keep-alive, config size, and gateway node count.",
+      "weight": 0.9
+    },
+    {
+      "key": "request_lifecycle",
+      "label": "Request lifecycle / filter chain",
+      "description": "The ordered pipeline: TLS -> authn -> authz -> rate limit -> route match -> transform -> proxy -> response filters; where each concern belongs and short-circuiting.",
+      "weight": 1.2
+    },
+    {
+      "key": "routing",
+      "label": "Routing & service discovery",
+      "description": "Path/host/header-based routing, dynamic route table, integration with service discovery, load balancing to backend instances, canary/weighted routing.",
+      "weight": 1.1
+    },
+    {
+      "key": "rate_limiting",
+      "label": "Rate limiting & quotas",
+      "description": "Algorithms (token/leaky bucket, sliding window), local vs distributed counters, per-key/tenant/route limits, and the distributed-counter accuracy/latency tradeoff.",
+      "weight": 1.2
+    },
+    {
+      "key": "resilience",
+      "label": "Resilience: timeouts & circuit breaking",
+      "description": "Per-route timeouts, retries with budgets, circuit breakers, bulkheads, backpressure/load shedding so one slow backend doesn't take down the gateway.",
+      "weight": 1.3
+    },
+    {
+      "key": "control_plane",
+      "label": "Control plane / config distribution",
+      "description": "Separating data plane from control plane; how route/auth/limit config is updated dynamically and pushed to nodes without restarts or races.",
+      "weight": 1.2
+    },
+    {
+      "key": "high_level_design",
+      "label": "High-level design",
+      "description": "Client -> LB -> stateless gateway fleet (data plane) -> backends; control plane manages config; shared stores for tokens/limits.",
+      "weight": 1.1
+    },
+    {
+      "key": "bottlenecks",
+      "label": "Bottlenecks",
+      "description": "Gateway added latency, distributed rate-limit store as a hotspot, auth verification cost, a slow backend causing thread/connection exhaustion.",
+      "weight": 1.0
+    },
+    {
+      "key": "observability",
+      "label": "Observability",
+      "description": "Per-route latency/error rates, rate-limit rejections, circuit state, upstream health, distributed tracing propagation.",
+      "weight": 0.8
+    }
   ],
   "reference": {
     "functional_requirements": [
@@ -55,8 +120,22 @@
       "config": "Hundreds of services x routes/policies = a config blob small enough to hold in memory and hot-reload on each node.",
       "rate_limit_store": "If limits are global, a shared counter store (Redis) sees ~500K incr/s — shard it or use local buckets with periodic reconciliation."
     },
-    "core_components": ["Load balancer (L4)", "Stateless gateway data plane (reverse proxy + filter chain)", "Control plane (config API + distribution)", "Service discovery integration", "Auth service / token validation (with JWKS cache)", "Distributed rate-limit store", "Circuit-breaker + health checker", "Observability pipeline (metrics/traces/logs)"],
-    "data_model": ["routes(route_id, match{host,path,header}, upstream, policies, weights)", "policies(auth, rate_limit{key,algo,limit,window}, timeout, retry, breaker)", "rate_counters(key, window) — in the limit store", "upstreams(service, instances[], health)"],
+    "core_components": [
+      "Load balancer (L4)",
+      "Stateless gateway data plane (reverse proxy + filter chain)",
+      "Control plane (config API + distribution)",
+      "Service discovery integration",
+      "Auth service / token validation (with JWKS cache)",
+      "Distributed rate-limit store",
+      "Circuit-breaker + health checker",
+      "Observability pipeline (metrics/traces/logs)"
+    ],
+    "data_model": [
+      "routes(route_id, match{host,path,header}, upstream, policies, weights)",
+      "policies(auth, rate_limit{key,algo,limit,window}, timeout, retry, breaker)",
+      "rate_counters(key, window) — in the limit store",
+      "upstreams(service, instances[], health)"
+    ],
     "api_design": [
       "Data plane: any client request -> matched, filtered, proxied",
       "Control plane: PUT /routes, PUT /policies (versioned, pushed to nodes)",
@@ -65,26 +144,92 @@
     ],
     "high_level_design": "An L4 load balancer spreads traffic across a stateless gateway fleet (the data plane). Each request flows through an ordered filter chain: TLS termination -> authentication (validate JWT against a cached JWKS, or introspect a token) -> authorization -> rate limiting -> route matching -> request transform -> proxy to a backend instance chosen via service discovery + load balancing -> response filters. Any filter can short-circuit (401, 429, etc.). A separate control plane holds the source-of-truth config (routes, policies) and distributes versioned snapshots to data-plane nodes, which hold config in memory and hot-reload — so config changes never require restarts and the data plane never blocks on the control plane in the hot path. Resilience filters (per-route timeouts, retry budgets, circuit breakers, bulkheads, load shedding) isolate slow/failing backends. Rate limits use local token buckets for speed with a shared store for global accuracy where needed.",
     "deep_dives": [
-      { "topic": "request_lifecycle", "probe": "Walk the ordered filter chain. Why must auth come before rate limiting (or the reverse)? Where do you short-circuit, and how do you keep per-request work O(1)?" },
-      { "topic": "rate_limiting", "probe": "Token bucket vs sliding window? Local per-node counters (fast, over-admits) vs a shared Redis counter (accurate, adds latency and a hotspot) — how do you get global limits without a round-trip per request?" },
-      { "topic": "resilience", "probe": "One backend gets slow. Without protection, its requests pile up and exhaust gateway connections/threads, taking everything down. How do circuit breakers, timeouts, bulkheads, and load shedding prevent that?" },
-      { "topic": "control_plane", "probe": "How do you push a new route or a tightened rate limit to 50 nodes safely — versioned config, atomic swap, staged rollout — without a race where nodes disagree?" },
-      { "topic": "auth_at_edge", "probe": "How do you validate JWTs cheaply at the edge (JWKS caching, key rotation) versus calling an introspection endpoint per request? What are the revocation tradeoffs?" },
-      { "topic": "cdc_config", "probe": "Route/policy config lives in a datastore. When an operator changes a policy, how does that propagate to every data-plane node — polling the store, or change data capture / streaming updates off the config store? How do you avoid dual-write skew between the store and what nodes run?" }
+      {
+        "topic": "request_lifecycle",
+        "probe": "Walk the ordered filter chain. Why must auth come before rate limiting (or the reverse)? Where do you short-circuit, and how do you keep per-request work O(1)?"
+      },
+      {
+        "topic": "rate_limiting",
+        "probe": "Token bucket vs sliding window? Local per-node counters (fast, over-admits) vs a shared Redis counter (accurate, adds latency and a hotspot) — how do you get global limits without a round-trip per request?"
+      },
+      {
+        "topic": "resilience",
+        "probe": "One backend gets slow. Without protection, its requests pile up and exhaust gateway connections/threads, taking everything down. How do circuit breakers, timeouts, bulkheads, and load shedding prevent that?"
+      },
+      {
+        "topic": "control_plane",
+        "probe": "How do you push a new route or a tightened rate limit to 50 nodes safely — versioned config, atomic swap, staged rollout — without a race where nodes disagree?"
+      },
+      {
+        "topic": "auth_at_edge",
+        "probe": "How do you validate JWTs cheaply at the edge (JWKS caching, key rotation) versus calling an introspection endpoint per request? What are the revocation tradeoffs?"
+      },
+      {
+        "topic": "cdc_config",
+        "probe": "Route/policy config lives in a datastore. When an operator changes a policy, how does that propagate to every data-plane node — polling the store, or change data capture / streaming updates off the config store? How do you avoid dual-write skew between the store and what nodes run?"
+      }
     ],
     "followup_bank": [
-      { "trigger": "mentions rate limit or token bucket or sliding window", "question": "Local vs distributed counters — how do you enforce a global limit without a Redis round-trip per request, and what accuracy do you sacrifice with local buckets?" },
-      { "trigger": "mentions redis or cache", "question": "The rate-limit / JWKS / token cache — what's the eviction/TTL policy, and how do you avoid a stampede when a hot key (or the JWKS) expires and all nodes refetch at once?" },
-      { "trigger": "mentions database or config store or postgres or sql", "question": "How does a config change in the store reach every node — polling vs CDC/streaming — and how do you prevent dual-write skew between the store and running config?" },
-      { "trigger": "mentions circuit breaker or timeout or retry", "question": "How do you keep retries from amplifying an outage (retry budgets), and how does a tripped breaker interact with load shedding and backpressure?" },
-      { "trigger": "mentions jwt or oauth or auth", "question": "Edge JWT validation with cached JWKS vs per-request introspection — how do you handle key rotation and token revocation?" }
+      {
+        "trigger": "mentions rate limit or token bucket or sliding window",
+        "question": "Local vs distributed counters — how do you enforce a global limit without a Redis round-trip per request, and what accuracy do you sacrifice with local buckets?"
+      },
+      {
+        "trigger": "mentions redis or cache",
+        "question": "The rate-limit / JWKS / token cache — what's the eviction/TTL policy, and how do you avoid a stampede when a hot key (or the JWKS) expires and all nodes refetch at once?"
+      },
+      {
+        "trigger": "mentions database or config store or postgres or sql",
+        "question": "How does a config change in the store reach every node — polling vs CDC/streaming — and how do you prevent dual-write skew between the store and running config?"
+      },
+      {
+        "trigger": "mentions circuit breaker or timeout or retry",
+        "question": "How do you keep retries from amplifying an outage (retry budgets), and how does a tripped breaker interact with load shedding and backpressure?"
+      },
+      {
+        "trigger": "mentions jwt or oauth or auth",
+        "question": "Edge JWT validation with cached JWKS vs per-request introspection — how do you handle key rotation and token revocation?"
+      }
     ],
-    "scaling": ["Stateless data plane scales horizontally behind an L4 LB", "Local token buckets + periodic reconciliation to avoid a global-counter hotspot", "Shard the distributed rate-limit store by key", "Cache auth material (JWKS, introspection results) at the edge", "Separate control plane so config scale doesn't affect request throughput"],
-    "bottlenecks": ["Gateway-added latency in the hot path", "Distributed rate-limit store as a write hotspot", "Auth verification cost (crypto / introspection round-trips)", "Connection/thread exhaustion from a slow backend"],
-    "tradeoffs": ["Local rate limits (fast, over-admit) vs distributed (accurate, latency + hotspot)", "Edge JWT validation (fast, weaker revocation) vs introspection (fresh, per-request cost)", "Aggressive retries (better success) vs retry storms (amplify outages)", "Rich gateway logic (fewer backend concerns) vs thin gateway (lower latency, logic pushed to services)"],
-    "alternative_solutions": ["Envoy/Nginx-based data plane with an xDS-style control plane", "Service mesh sidecars for east-west + a thin edge gateway for north-south", "Managed cloud API gateway (less control, faster to run)", "Library/framework filters in each service (no central gateway, harder to enforce uniformly)"],
-    "observability": ["Per-route latency and error rate", "Rate-limit rejection (429) counts by key", "Circuit-breaker state transitions", "Upstream health and connection pool saturation", "Distributed trace propagation (inject/forward trace headers)"],
-    "security": ["Centralized authn/authz and TLS termination/mTLS to backends", "Input validation and request size limits (DoS protection)", "Per-tenant isolation and quota enforcement", "Secrets/key management for JWKS and mTLS certs", "WAF-style filtering and abuse rate limiting at the edge"],
+    "scaling": [
+      "Stateless data plane scales horizontally behind an L4 LB",
+      "Local token buckets + periodic reconciliation to avoid a global-counter hotspot",
+      "Shard the distributed rate-limit store by key",
+      "Cache auth material (JWKS, introspection results) at the edge",
+      "Separate control plane so config scale doesn't affect request throughput"
+    ],
+    "bottlenecks": [
+      "Gateway-added latency in the hot path",
+      "Distributed rate-limit store as a write hotspot",
+      "Auth verification cost (crypto / introspection round-trips)",
+      "Connection/thread exhaustion from a slow backend"
+    ],
+    "tradeoffs": [
+      "Local rate limits (fast, over-admit) vs distributed (accurate, latency + hotspot)",
+      "Edge JWT validation (fast, weaker revocation) vs introspection (fresh, per-request cost)",
+      "Aggressive retries (better success) vs retry storms (amplify outages)",
+      "Rich gateway logic (fewer backend concerns) vs thin gateway (lower latency, logic pushed to services)"
+    ],
+    "alternative_solutions": [
+      "Envoy/Nginx-based data plane with an xDS-style control plane",
+      "Service mesh sidecars for east-west + a thin edge gateway for north-south",
+      "Managed cloud API gateway (less control, faster to run)",
+      "Library/framework filters in each service (no central gateway, harder to enforce uniformly)"
+    ],
+    "observability": [
+      "Per-route latency and error rate",
+      "Rate-limit rejection (429) counts by key",
+      "Circuit-breaker state transitions",
+      "Upstream health and connection pool saturation",
+      "Distributed trace propagation (inject/forward trace headers)"
+    ],
+    "security": [
+      "Centralized authn/authz and TLS termination/mTLS to backends",
+      "Input validation and request size limits (DoS protection)",
+      "Per-tenant isolation and quota enforcement",
+      "Secrets/key management for JWKS and mTLS certs",
+      "WAF-style filtering and abuse rate limiting at the edge"
+    ],
     "reference_answer": "A strong answer separates a stateless data plane (reverse proxy + ordered filter chain: TLS, authn, authz, rate limit, route, transform, proxy, response filters) from a control plane that distributes versioned config for hot-reload without restarts. It keeps hot-path work O(1) — cached JWKS for edge JWT validation, local token buckets reconciled against a sharded shared store for global rate limits — and protects backends with per-route timeouts, retry budgets, circuit breakers, bulkheads, and load shedding so one slow upstream can't exhaust the gateway. It propagates config via CDC/streaming to avoid dual-write skew, caches auth material with stampede protection, and names added latency and the rate-limit store hotspot as the main bottlenecks."
   },
   "interviewer_notes": "Watch for the candidate treating this as 'just a reverse proxy'. The senior signal is the ordered filter chain with correct short-circuiting, and three hard sub-problems: distributed rate limiting (local vs global counters and the latency/accuracy tradeoff), resilience (how a single slow backend cascades and how breakers/bulkheads/load-shedding stop it), and the control-plane/data-plane split (dynamic config without restarts). If they add Redis for rate limits or a JWKS/token cache, probe eviction/TTL and stampede. If they put config in a datastore, hit the CDC/dual-write-skew probe. Keep pressing that the gateway must add near-zero latency."

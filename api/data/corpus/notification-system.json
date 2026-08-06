@@ -3,23 +3,88 @@
   "title": "Design a Multi-Channel Notification System",
   "track": "engineering",
   "domain": "system_design",
+  "areas": [
+    "engineering"
+  ],
   "modality": "system_design",
   "difficulty": "mid",
-  "tags": ["notifications", "fanout", "queues", "retries", "idempotency", "providers"],
+  "tags": [
+    "notifications",
+    "fanout",
+    "queues",
+    "retries",
+    "idempotency",
+    "providers"
+  ],
   "prompt": "Design a notification system that lets services send messages to users across multiple channels — mobile push, SMS, and email. It must fan out reliably, deduplicate, respect user preferences and rate limits, retry failures, and fall back when a provider is down.",
   "blurb": "Multi-channel delivery: fanout, dedup, retries, provider fallback, and rate limiting.",
   "rubric": [
-    { "key": "requirements", "label": "Requirements gathering", "description": "Separates functional (multi-channel send, preferences, templating, scheduling) from non-functional (reliable delivery, dedup, rate limits, availability).", "weight": 1.0 },
-    { "key": "clarifying_questions", "label": "Clarifying questions", "description": "Asks about channels, volume, delivery guarantees, priority tiers, user preferences/opt-out, provider constraints.", "weight": 1.0 },
-    { "key": "estimations", "label": "Estimations", "description": "Estimates notifications/day, per-channel split, peak fanout (broadcast), queue throughput, provider rate limits.", "weight": 0.9 },
-    { "key": "api_design", "label": "API design", "description": "Send API (single + bulk), notification envelope, template refs, idempotency key, preference/opt-out endpoints.", "weight": 1.0 },
-    { "key": "data_model", "label": "Data model", "description": "Notifications, user channel/contact info, preferences, templates, delivery status log.", "weight": 1.0 },
-    { "key": "high_level_design", "label": "High-level design", "description": "Send API → queue → per-channel workers → provider adapters; preference + rate-limit + dedup checks in the path.", "weight": 1.3 },
-    { "key": "reliability_retries", "label": "Reliability & retries", "description": "At-least-once via durable queue, retry with backoff, dead-letter queue, idempotency to avoid duplicate sends.", "weight": 1.2 },
-    { "key": "dedup", "label": "Deduplication", "description": "Idempotency keys, dedup window, avoiding duplicate notifications across retries and multi-producer.", "weight": 1.1 },
-    { "key": "provider_fallback", "label": "Provider fallback", "description": "Multiple providers per channel, health checks, failover, circuit breaking, cost/deliverability routing.", "weight": 1.1 },
-    { "key": "rate_limiting", "label": "Rate limiting & preferences", "description": "Per-user throttling/quiet hours, per-provider rate caps, respecting opt-outs and channel prefs.", "weight": 1.1 },
-    { "key": "observability", "label": "Observability", "description": "Delivery/failure rates by channel/provider, queue lag, retry/DLQ metrics.", "weight": 0.8 }
+    {
+      "key": "requirements",
+      "label": "Requirements gathering",
+      "description": "Separates functional (multi-channel send, preferences, templating, scheduling) from non-functional (reliable delivery, dedup, rate limits, availability).",
+      "weight": 1.0
+    },
+    {
+      "key": "clarifying_questions",
+      "label": "Clarifying questions",
+      "description": "Asks about channels, volume, delivery guarantees, priority tiers, user preferences/opt-out, provider constraints.",
+      "weight": 1.0
+    },
+    {
+      "key": "estimations",
+      "label": "Estimations",
+      "description": "Estimates notifications/day, per-channel split, peak fanout (broadcast), queue throughput, provider rate limits.",
+      "weight": 0.9
+    },
+    {
+      "key": "api_design",
+      "label": "API design",
+      "description": "Send API (single + bulk), notification envelope, template refs, idempotency key, preference/opt-out endpoints.",
+      "weight": 1.0
+    },
+    {
+      "key": "data_model",
+      "label": "Data model",
+      "description": "Notifications, user channel/contact info, preferences, templates, delivery status log.",
+      "weight": 1.0
+    },
+    {
+      "key": "high_level_design",
+      "label": "High-level design",
+      "description": "Send API → queue → per-channel workers → provider adapters; preference + rate-limit + dedup checks in the path.",
+      "weight": 1.3
+    },
+    {
+      "key": "reliability_retries",
+      "label": "Reliability & retries",
+      "description": "At-least-once via durable queue, retry with backoff, dead-letter queue, idempotency to avoid duplicate sends.",
+      "weight": 1.2
+    },
+    {
+      "key": "dedup",
+      "label": "Deduplication",
+      "description": "Idempotency keys, dedup window, avoiding duplicate notifications across retries and multi-producer.",
+      "weight": 1.1
+    },
+    {
+      "key": "provider_fallback",
+      "label": "Provider fallback",
+      "description": "Multiple providers per channel, health checks, failover, circuit breaking, cost/deliverability routing.",
+      "weight": 1.1
+    },
+    {
+      "key": "rate_limiting",
+      "label": "Rate limiting & preferences",
+      "description": "Per-user throttling/quiet hours, per-provider rate caps, respecting opt-outs and channel prefs.",
+      "weight": 1.1
+    },
+    {
+      "key": "observability",
+      "label": "Observability",
+      "description": "Delivery/failure rates by channel/provider, queue lag, retry/DLQ metrics.",
+      "weight": 0.8
+    }
   ],
   "reference": {
     "functional_requirements": [
@@ -54,7 +119,17 @@
       "queues": "Durable queue must absorb broadcast bursts (millions enqueued in minutes) and drain within provider rate caps",
       "storage": "Delivery-status log 500M/day × ~200B ≈ ~100GB/day; retain per compliance window"
     },
-    "core_components": ["Send API / ingestion", "Durable message queue (Kafka/SQS)", "Preference & dedup service", "Rate limiter (per-user + per-provider)", "Per-channel workers (push/SMS/email)", "Provider adapters + fallback router", "Template service", "Delivery-status store", "Scheduler (delayed/quiet-hours)"],
+    "core_components": [
+      "Send API / ingestion",
+      "Durable message queue (Kafka/SQS)",
+      "Preference & dedup service",
+      "Rate limiter (per-user + per-provider)",
+      "Per-channel workers (push/SMS/email)",
+      "Provider adapters + fallback router",
+      "Template service",
+      "Delivery-status store",
+      "Scheduler (delayed/quiet-hours)"
+    ],
     "data_model": [
       "notifications(notification_id PK, user_id, channel, template_id, payload, priority, idempotency_key, created_at, status)",
       "user_channels(user_id, channel, address, verified) — device tokens, phone, email",
@@ -70,22 +145,64 @@
     ],
     "high_level_design": "A send request hits the API, which validates and writes the notification with an idempotency key, then enqueues it on a durable queue. Consumers first resolve the target channels against user preferences/opt-outs and quiet hours (dropping or deferring as needed), run a dedup check on the idempotency key, and apply per-user + per-provider rate limits. Surviving notifications route to the appropriate per-channel worker pool, which renders the template and calls a provider adapter. The adapter tries the primary provider; on failure or unhealthy circuit it fails over to a secondary provider. Failures are retried with exponential backoff; exhausted attempts go to a dead-letter queue. Every attempt is recorded in the delivery-status store, updated further by provider delivery callbacks. Broadcasts go through a bulk path that expands the audience into the same queue so all downstream logic (prefs, dedup, rate limits, retries) applies uniformly.",
     "deep_dives": [
-      { "topic": "reliability_retries", "probe": "A provider call times out — did it send or not? Walk me through at-least-once delivery with retries and how you avoid double-sending an OTP. What goes to the DLQ and when?" },
-      { "topic": "dedup", "probe": "Two services independently trigger the same alert, and retries can re-enqueue. How does the idempotency key work, what's the dedup window, and where do you store dedup state?" },
-      { "topic": "provider_fallback", "probe": "Your primary SMS provider degrades. How do you detect it and fail over — health checks, circuit breaker, error-rate thresholds? How do you avoid flapping and duplicate sends during failover?" },
-      { "topic": "rate_limiting", "probe": "A provider caps you at 100 msg/s and a user shouldn't get more than 5 pushes/hour. How do you enforce both a per-provider global cap and a per-user cap across many workers?" },
-      { "topic": "broadcast", "probe": "You broadcast to 100M users. How do you fan that out without overwhelming the queue or the providers, and how do you keep transactional OTPs low-latency during the burst?" },
-      { "topic": "cache_stampede", "probe": "You cache user preferences and templates. When a hot template's cache entry expires during a broadcast, how do you avoid a stampede on the preference/template store?" },
-      { "topic": "cdc_prefs", "probe": "User preferences and contact info live in a database. How do you propagate changes (opt-outs, new device tokens) to the sending pipeline — change data capture with Debezium, or read-through each send? What are the consistency risks of a stale opt-out?" }
+      {
+        "topic": "reliability_retries",
+        "probe": "A provider call times out — did it send or not? Walk me through at-least-once delivery with retries and how you avoid double-sending an OTP. What goes to the DLQ and when?"
+      },
+      {
+        "topic": "dedup",
+        "probe": "Two services independently trigger the same alert, and retries can re-enqueue. How does the idempotency key work, what's the dedup window, and where do you store dedup state?"
+      },
+      {
+        "topic": "provider_fallback",
+        "probe": "Your primary SMS provider degrades. How do you detect it and fail over — health checks, circuit breaker, error-rate thresholds? How do you avoid flapping and duplicate sends during failover?"
+      },
+      {
+        "topic": "rate_limiting",
+        "probe": "A provider caps you at 100 msg/s and a user shouldn't get more than 5 pushes/hour. How do you enforce both a per-provider global cap and a per-user cap across many workers?"
+      },
+      {
+        "topic": "broadcast",
+        "probe": "You broadcast to 100M users. How do you fan that out without overwhelming the queue or the providers, and how do you keep transactional OTPs low-latency during the burst?"
+      },
+      {
+        "topic": "cache_stampede",
+        "probe": "You cache user preferences and templates. When a hot template's cache entry expires during a broadcast, how do you avoid a stampede on the preference/template store?"
+      },
+      {
+        "topic": "cdc_prefs",
+        "probe": "User preferences and contact info live in a database. How do you propagate changes (opt-outs, new device tokens) to the sending pipeline — change data capture with Debezium, or read-through each send? What are the consistency risks of a stale opt-out?"
+      }
     ],
     "followup_bank": [
-      { "trigger": "mentions retry or queue", "question": "How do you guarantee at-least-once without double-sending on an ambiguous provider timeout? What triggers a move to the dead-letter queue?" },
-      { "trigger": "mentions idempotency or dedup", "question": "Where is dedup state stored, what's the dedup window, and how do you dedup across multiple producers and retries?" },
-      { "trigger": "mentions provider", "question": "How do you detect an unhealthy provider and fail over without flapping or duplicate sends — circuit breaker thresholds?" },
-      { "trigger": "mentions rate limit or throttle", "question": "How do you enforce a per-provider global cap AND a per-user cap simultaneously across a distributed worker pool?" },
-      { "trigger": "mentions cache", "question": "For cached preferences/templates, what's the eviction policy and how do you prevent a stampede when a hot entry expires mid-broadcast?" },
-      { "trigger": "mentions database or preferences or store", "question": "How do you propagate preference/opt-out and device-token changes to the pipeline — CDC/Debezium vs read-through — and what's the risk of a stale opt-out?" },
-      { "trigger": "mentions broadcast or bulk", "question": "How do you keep transactional/high-priority notifications low-latency while a mass broadcast is draining the queue?" }
+      {
+        "trigger": "mentions retry or queue",
+        "question": "How do you guarantee at-least-once without double-sending on an ambiguous provider timeout? What triggers a move to the dead-letter queue?"
+      },
+      {
+        "trigger": "mentions idempotency or dedup",
+        "question": "Where is dedup state stored, what's the dedup window, and how do you dedup across multiple producers and retries?"
+      },
+      {
+        "trigger": "mentions provider",
+        "question": "How do you detect an unhealthy provider and fail over without flapping or duplicate sends — circuit breaker thresholds?"
+      },
+      {
+        "trigger": "mentions rate limit or throttle",
+        "question": "How do you enforce a per-provider global cap AND a per-user cap simultaneously across a distributed worker pool?"
+      },
+      {
+        "trigger": "mentions cache",
+        "question": "For cached preferences/templates, what's the eviction policy and how do you prevent a stampede when a hot entry expires mid-broadcast?"
+      },
+      {
+        "trigger": "mentions database or preferences or store",
+        "question": "How do you propagate preference/opt-out and device-token changes to the pipeline — CDC/Debezium vs read-through — and what's the risk of a stale opt-out?"
+      },
+      {
+        "trigger": "mentions broadcast or bulk",
+        "question": "How do you keep transactional/high-priority notifications low-latency while a mass broadcast is draining the queue?"
+      }
     ],
     "scaling": [
       "Durable queue absorbs broadcast bursts; per-channel worker pools scale independently",

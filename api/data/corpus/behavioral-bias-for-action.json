@@ -3,18 +3,64 @@
   "title": "Tell me about a time you made a fast decision with incomplete information",
   "track": "professional",
   "domain": "behavioral",
+  "areas": [
+    "engineering",
+    "data_science",
+    "medicine",
+    "nursing",
+    "law",
+    "consulting",
+    "product_management",
+    "finance"
+  ],
   "modality": "conversational",
   "difficulty": "mid",
-  "tags": ["bias-for-action", "leadership-principles", "decision-making", "risk", "star"],
+  "tags": [
+    "bias-for-action",
+    "leadership-principles",
+    "decision-making",
+    "risk",
+    "star"
+  ],
   "prompt": "Tell me about a time you had to make an important decision quickly, without all the information you'd have liked. What was the situation, how did you decide, and what happened?",
   "blurb": "Bias for action: did they move decisively on limited info AND manage the risk — or just gamble?",
   "rubric": [
-    { "key": "situation_clarity", "label": "Situation & time pressure", "description": "Sets up a real decision under time pressure with genuine uncertainty and stakes — clear on what info was missing and why waiting was costly.", "weight": 1.0 },
-    { "key": "task_ownership", "label": "Owning the call", "description": "Shows THEY made the decision (or drove it) rather than deferring, and understood why speed mattered more than certainty here.", "weight": 1.2 },
-    { "key": "action_specificity", "label": "Decision process & risk management", "description": "Describes how they decided fast without being reckless — the data they did gather, the assumptions made, and how they made the move reversible or bounded the downside.", "weight": 1.3 },
-    { "key": "result_impact", "label": "Result & impact", "description": "States the outcome and quantifies the value of moving fast (or the cost avoided), honestly including if it went partly wrong.", "weight": 1.1 },
-    { "key": "reflection", "label": "Reflection & calibration", "description": "Shows judgment about when to move fast vs when to gather more — the reversibility test — and what they learned about calibrating speed vs certainty.", "weight": 1.2 },
-    { "key": "communication", "label": "Communication & structure", "description": "Structured, concise, and clear about the reasoning at the moment of decision.", "weight": 0.8 }
+    {
+      "key": "situation_clarity",
+      "label": "Situation & time pressure",
+      "description": "Sets up a real decision under time pressure with genuine uncertainty and stakes — clear on what info was missing and why waiting was costly.",
+      "weight": 1.0
+    },
+    {
+      "key": "task_ownership",
+      "label": "Owning the call",
+      "description": "Shows THEY made the decision (or drove it) rather than deferring, and understood why speed mattered more than certainty here.",
+      "weight": 1.2
+    },
+    {
+      "key": "action_specificity",
+      "label": "Decision process & risk management",
+      "description": "Describes how they decided fast without being reckless — the data they did gather, the assumptions made, and how they made the move reversible or bounded the downside.",
+      "weight": 1.3
+    },
+    {
+      "key": "result_impact",
+      "label": "Result & impact",
+      "description": "States the outcome and quantifies the value of moving fast (or the cost avoided), honestly including if it went partly wrong.",
+      "weight": 1.1
+    },
+    {
+      "key": "reflection",
+      "label": "Reflection & calibration",
+      "description": "Shows judgment about when to move fast vs when to gather more — the reversibility test — and what they learned about calibrating speed vs certainty.",
+      "weight": 1.2
+    },
+    {
+      "key": "communication",
+      "label": "Communication & structure",
+      "description": "Structured, concise, and clear about the reasoning at the moment of decision.",
+      "weight": 0.8
+    }
   ],
   "reference": {
     "scenario": "The candidate should recall a decision where waiting for full information was itself costly — a production incident, a fast-closing market or partnership window, a customer ultimatum, a launch go/no-go — and they moved decisively on partial data. The best answers show calibrated risk-taking: they distinguished a reversible from an irreversible decision and bounded the downside, rather than gambling.",
@@ -27,11 +73,26 @@
       "Reflection: articulates a mental model for when to move fast vs when the decision is one-way and warrants more diligence; how they calibrated after this."
     ],
     "probes": [
-      { "trigger": "decision sounds reckless / no risk mitigation", "question": "What was your downside if you were wrong, and what did you do to limit it? Was this reversible?" },
-      { "trigger": "claims they had no information at all", "question": "You had some signal — what did you gather in the time you had, and what did you decide to stop waiting for?" },
-      { "trigger": "no quantified value of speed", "question": "What would waiting have cost? How do you know moving fast was worth it?" },
-      { "trigger": "outcome was good — probe process", "question": "It worked out — but was it a good decision, or a lucky one? How would you know the difference?" },
-      { "trigger": "always moves fast", "question": "When would you deliberately slow down and gather more before deciding? How do you tell the two apart?" }
+      {
+        "trigger": "decision sounds reckless / no risk mitigation",
+        "question": "What was your downside if you were wrong, and what did you do to limit it? Was this reversible?"
+      },
+      {
+        "trigger": "claims they had no information at all",
+        "question": "You had some signal — what did you gather in the time you had, and what did you decide to stop waiting for?"
+      },
+      {
+        "trigger": "no quantified value of speed",
+        "question": "What would waiting have cost? How do you know moving fast was worth it?"
+      },
+      {
+        "trigger": "outcome was good — probe process",
+        "question": "It worked out — but was it a good decision, or a lucky one? How would you know the difference?"
+      },
+      {
+        "trigger": "always moves fast",
+        "question": "When would you deliberately slow down and gather more before deciding? How do you tell the two apart?"
+      }
     ],
     "red_flags": [
       "Reckless gamble with no attempt to bound the downside or gather cheap signal.",

@@ -1,0 +1,122 @@
+{
+  "id": "case-growth-strategy",
+  "title": "Growth Strategy Case: Doubling Revenue in Three Years",
+  "track": "professional",
+  "domain": "case",
+  "areas": [
+    "consulting"
+  ],
+  "modality": "conversational",
+  "difficulty": "senior",
+  "tags": [
+    "growth-strategy",
+    "structure",
+    "hypothesis",
+    "market-sizing",
+    "prioritization"
+  ],
+  "prompt": "Our client is a $500M consumer subscription-box company whose CEO wants to double revenue to $1B within three years; take a few minutes to structure how you'd find and prioritize the growth levers, then walk me through your approach and where you'd start.",
+  "blurb": "A growth-strategy case — structure the growth levers MECE, size the prize, prioritize by impact and feasibility, and land a recommendation on how to double revenue in three years.",
+  "rubric": [
+    {
+      "key": "structure",
+      "label": "Structure (MECE)",
+      "description": "Lays out a MECE growth framework — existing vs new (products, markets/geographies, customer segments), and organic vs inorganic — rather than a generic memorized list; disaggregates revenue into levers such as customers x retention x ARPU that map to concrete actions.",
+      "weight": 1.3
+    },
+    {
+      "key": "hypothesis",
+      "label": "Hypothesis-driven",
+      "description": "States an upfront hypothesis about where the growth most plausibly comes from (e.g. 'doubling needs retention plus adjacent products, not just new-customer acquisition') and uses the analysis to confirm or reject it rather than boiling the ocean.",
+      "weight": 1.1
+    },
+    {
+      "key": "quantitative",
+      "label": "Quantitative rigor",
+      "description": "Does back-of-envelope math to test feasibility — translates the doubling target into an implied CAGR (~26%/yr), sizes what each lever must contribute in dollars, and pressure-tests whether acquisition, ARPU, or retention gains can realistically close the gap; carries units and sanity-checks.",
+      "weight": 1.2
+    },
+    {
+      "key": "business_judgment",
+      "label": "Business judgment",
+      "description": "Prioritizes levers by impact, feasibility, time-to-payoff and risk given the 3-year clock; weighs organic build vs M&A/partnership; understands subscription economics (CAC, churn, LTV, payback) and the tension between growth and profitability.",
+      "weight": 1.2
+    },
+    {
+      "key": "synthesis",
+      "label": "Synthesis & recommendation",
+      "description": "Delivers a clear, prioritized recommendation up front — which two or three levers to pull, the rough contribution of each toward $500M of new revenue, the biggest risk, and an immediate next step — not a wishy-washy 'it depends'.",
+      "weight": 1.1
+    },
+    {
+      "key": "communication",
+      "label": "Communication",
+      "description": "Top-down, signposted, concise; checks in with the interviewer, incorporates data as it is given, and adapts the structure instead of reciting it.",
+      "weight": 0.9
+    }
+  ],
+  "reference": {
+    "scenario": "Client: a $500M-revenue consumer subscription-box company (curated monthly products) in a single home market, wanting to reach $1B in three years. It has ~2M active subscribers, average revenue per user (ARPU) of ~$250/year, monthly churn of ~4% (annual retention ~60%), blended customer acquisition cost (CAC) of ~$80, and ~12% operating margin. The core market is maturing and acquisition is getting more expensive. Adjacent opportunities exist: new product/box categories, a premium tier, international expansion, and a fragmented set of smaller subscription players that could be acquired. Interviewer has these facts to feed on request: 2M subscribers x $250 ARPU = $500M; doubling to $1B implies ~26% CAGR over three years; reducing monthly churn from 4% to 3% lifts annual retention materially and is worth roughly $60-80M/yr in retained revenue; a premium tier at +$150 ARPU adopted by 20% of the base adds ~$60M; one comparable international market could reach ~$100-150M in three years but needs ~$40M investment; a mid-sized competitor with ~$120M revenue is acquirable at ~2x revenue.",
+    "model_points": [
+      "Clarify the objective and constraints first: is the $1B target revenue-only or does margin/cash matter, is inorganic growth on the table, what's the appetite for capex and dilution, and is three years a hard deadline? A doubling implies roughly a 26% CAGR, which is aggressive for a maturing core.",
+      "Disaggregate revenue into a driver tree: revenue = number of subscribers x ARPU, and subscribers are driven by acquisition minus churn. This immediately surfaces three organic levers — acquire more, retain more, and monetize more per user — before any new-market or new-product move.",
+      "Structure the full lever set MECE: (1) existing product / existing market — win more customers and reduce churn; (2) existing product / new markets — geographic or new customer segments; (3) new products — adjacent box categories, a premium tier, add-ons/upsell; (4) inorganic — acquire a competitor or partner/license, buying subscribers and capabilities.",
+      "State a hypothesis early, e.g. 'A pure acquisition play can't close a $500M gap in a maturing market at rising CAC; the doubling most likely comes from retention plus ARPU expansion plus one or two step-change moves (a new category or an acquisition).'",
+      "Size each lever in dollars and test feasibility: retention improvement (cutting churn ~1 point) worth ~$60-80M/yr; a premium tier at +$150 ARPU on 20% of the base ~$60M; a new box category; one international market ~$100-150M over three years for ~$40M; acquiring a ~$120M competitor is instant revenue but at a control premium and integration risk.",
+      "Prioritize on a 2x2 of impact vs feasibility/time-to-payoff given the three-year clock: retention and ARPU are fast, capital-light and compounding; international and new categories are medium-term bets; acquisition is the fastest way to buy revenue but the riskiest on integration and price.",
+      "Respect subscription unit economics and the growth-vs-profit tension: watch CAC, churn, LTV and payback; buying growth by inflating CAC or discounting can hit the $1B top line while destroying the 12% margin, so screen levers on profitable growth, not revenue alone.",
+      "Sequence the plan: pull the fast, compounding organic levers (retention, premium tier, upsell) immediately to build momentum and fund the bigger moves, launch one adjacent category and evaluate one international market in parallel, and run acquisition as the step-change lever to bridge the remaining gap.",
+      "Quantify the bridge to $1B: e.g. retention/ARPU/upsell ~$150-200M, a new category and international ~$150M, and an acquisition ~$120M+ — showing the levers plausibly sum to ~$500M of new revenue rather than asserting the target is reachable.",
+      "Synthesize into a prioritized recommendation: the decision, the two or three highest-value levers with their rough dollar contribution, the biggest risk (over-reliance on expensive acquisition, or churn undermining the base), and the immediate next step (e.g. a retention deep-dive and a target screen for M&A)."
+    ],
+    "probes": [
+      {
+        "trigger": "candidate lists generic growth buckets with no tailoring",
+        "question": "That's a broad list — for a subscription business specifically, what does revenue actually break down into, and which lever would you test first?"
+      },
+      {
+        "trigger": "candidate does not translate the target into a growth rate",
+        "question": "What growth rate does doubling in three years actually require, and is that realistic for a maturing core market?"
+      },
+      {
+        "trigger": "candidate focuses only on acquiring new customers",
+        "question": "Acquisition is getting expensive and the market is maturing. Where else could half a billion dollars of new revenue come from?"
+      },
+      {
+        "trigger": "candidate proposes a lever without sizing it",
+        "question": "Cutting monthly churn from 4% to 3% — roughly how much revenue does that retain each year, and how does it compare to a new premium tier?"
+      },
+      {
+        "trigger": "candidate ignores profitability",
+        "question": "Suppose you hit $1B by doubling the marketing spend and discounting. What happens to the 12% margin, and does that still count as success?"
+      },
+      {
+        "trigger": "candidate never considers inorganic growth",
+        "question": "A competitor with about $120M in revenue is for sale at roughly 2x revenue. Where does buying versus building fit in your plan?"
+      },
+      {
+        "trigger": "candidate never prioritizes or sequences",
+        "question": "You've got a lot of levers. Given a hard three-year clock, which two do you pull first and why?"
+      }
+    ],
+    "red_flags": [
+      "Reciting a memorized framework (Ansoff, 3C, 4P) without adapting it to a subscription-growth decision.",
+      "Never disaggregating revenue into subscribers, ARPU, and churn — the levers that actually drive a subscription business.",
+      "Failing to translate the doubling target into an implied growth rate and test whether it's realistic.",
+      "No quantification — never sizes what any lever contributes toward the $500M gap.",
+      "Fixating on new-customer acquisition while ignoring retention and ARPU expansion.",
+      "Ignoring profitability and unit economics — chasing the top line via CAC inflation or discounting.",
+      "Treating every lever equally instead of prioritizing by impact, feasibility and time-to-payoff against the three-year clock.",
+      "Never stating a clear, prioritized recommendation, or hedging with 'it depends' and no criteria."
+    ],
+    "follow_ups": [
+      "If churn is structurally hard to move below 4%, how does that reshape which levers you rely on?",
+      "The CEO is nervous about a large acquisition. How would you rebuild the plan to $1B using mostly organic levers, and is it still feasible?",
+      "How would you pressure-test the international market estimate before committing $40M to it?",
+      "If hitting $1B in three years would require the margin to fall from 12% to 5%, what would you recommend to the board?",
+      "What are the top three things you'd put on a 90-day plan to build conviction before the client commits capital?"
+    ],
+    "exemplar_answer": "A strong candidate first pins down the objective — is $1B a pure top-line goal or does the 12% margin have to hold — and confirms the three-year deadline and whether M&A is allowed. They immediately note that doubling in three years implies about a 26% CAGR, which is aggressive for a maturing core, so a single lever won't do it. They disaggregate revenue rather than reaching for a generic framework: revenue equals subscribers times ARPU, and subscribers are acquisition minus churn, which surfaces three organic levers — acquire, retain, monetize — before any new-market move. They then lay out a MECE structure across existing product/existing market (win and retain more customers), existing product/new markets (geographies and segments), new products (adjacent categories, a premium tier, upsell), and inorganic (acquire or partner). They lead with a hypothesis: acquisition alone can't close a $500M gap at rising CAC, so the doubling comes from retention plus ARPU expansion plus one or two step-change moves. They size the levers explicitly — cutting monthly churn from 4% to 3% retains roughly $60-80M a year; a premium tier at +$150 ARPU adopted by 20% of 2M subscribers adds about $60M; one international market could reach $100-150M over three years for around $40M; and buying a $120M competitor at 2x revenue is instant revenue but carries a control premium and integration risk. They prioritize on impact versus feasibility given the clock — pulling the fast, compounding, capital-light retention and ARPU levers first to build momentum and fund the bigger bets, launching one adjacent category and testing one international market in parallel, and using an acquisition as the step-change lever to bridge the remainder. Crucially they guard the margin, screening levers on profitable growth rather than revenue bought by CAC inflation or discounting. They close top-down: 'Go for the doubling, but lead with retention and a premium tier for roughly $150-200M of fast organic upside, add one adjacent category and one international market for about $150M, and bridge the rest with a targeted acquisition of around $120M; the levers plausibly sum to $500M of new revenue, the biggest risk is over-reliance on an expensive acquisition, so the next step is a retention deep-dive and an M&A target screen with a walk-away price.'"
+  },
+  "interviewer_notes": "Give the candidate 60-90 seconds to structure silently, then have them present top-down. Withhold the numbers until they ask — volunteering data is a negative signal you want to test. The senior bar here is threefold: disaggregating revenue into the subscription drivers (subscribers, ARPU, churn) rather than reaching for a generic growth framework; doing the back-of-envelope math to translate the doubling into a ~26% CAGR and to size each lever's dollar contribution toward the $500M gap; and prioritizing and sequencing against a hard three-year clock while protecting the margin. Feed facts one at a time as requested and push hard on the quant — make them build a rough bridge to $1B rather than asserting it's reachable. Mid-level candidates list levers but stall on sizing and prioritization; strong candidates state a hypothesis, size the levers, respect unit economics, and land a crisp, defended recommendation with a clear risk and next step. Reserve the last two minutes for synthesis and one risk/next-step follow-up."
+}

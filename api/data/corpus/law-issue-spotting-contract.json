@@ -2,20 +2,65 @@
   "id": "law-issue-spotting-contract",
   "title": "Issue-Spotting: Contract Formation (Offer, Acceptance, Consideration)",
   "track": "professional",
-  "domain": "law",
+  "domain": "issue_spotting",
+  "areas": [
+    "law"
+  ],
   "modality": "written",
   "difficulty": "mid",
-  "tags": ["contracts", "issue-spotting", "IRAC", "offer-acceptance", "consideration", "1L"],
+  "tags": [
+    "contracts",
+    "issue-spotting",
+    "IRAC",
+    "offer-acceptance",
+    "consideration",
+    "1L"
+  ],
   "prompt": "Read the fact pattern and write an IRAC analysis identifying the contract-formation issues. Facts: On Monday, Dana emails Rowan, a freelance illustrator: 'I'll pay you $4,000 to design a logo for my bakery. I need it by Friday. Let me know.' Rowan replies Tuesday morning: 'Sounds good — I can do it for $4,000, but I'll need $500 up front for supplies.' Dana does not respond. On Wednesday, before hearing anything further, Rowan starts sketching and buys $500 of software and materials. On Thursday, Dana emails: 'Actually, my cousin will do it for free — never mind.' Rowan demands $4,000, or at least the $500 spent. Analyze whether an enforceable contract was formed and what Rowan's best arguments and likely recovery are. Write a structured IRAC (or multi-issue IRAC) response.",
   "blurb": "A classic 1L formation fact pattern — spot the counteroffer, the lapse, and the reliance angle, and analyze it with disciplined IRAC.",
   "rubric": [
-    { "key": "issue_spotting", "label": "Issue spotting", "description": "Identifies the discrete formation issues: whether Dana's email was an offer, whether Rowan's reply was an acceptance or a counteroffer (mirror-image rule), whether any contract exists to breach, and reliance/promissory-estoppel as a fallback. Flags the UCC-vs-common-law threshold (services, so common law).", "weight": 1.3 },
-    { "key": "rule_statement", "label": "Rule statement", "description": "States the governing rules accurately: offer as manifestation of present intent with definite terms; mirror-image rule and counteroffer as rejection; acceptance and the mailbox/lapse rules; consideration as bargained-for exchange; promissory estoppel elements (promise, foreseeable reliance, actual reliance, injustice).", "weight": 1.2 },
-    { "key": "application", "label": "Application to facts", "description": "Ties each rule to specific facts — the $500-up-front term as a material variation making Tuesday's reply a counteroffer, Dana's silence as non-acceptance, no meeting of the minds, then Rowan's Wednesday expenditures as the reliance hook.", "weight": 1.3 },
-    { "key": "counterarguments", "label": "Counterarguments", "description": "Argues both sides: Rowan's 'I can do it for $4,000' as arguable acceptance with a mere request for an accommodation vs. a true counteroffer; whether reliance was reasonable before any acceptance; Dana's revocation-before-acceptance defense.", "weight": 1.2 },
-    { "key": "conclusion", "label": "Conclusion", "description": "Reaches a defensible bottom line on likely recovery (no expectation damages for a $4,000 contract; best shot is $500 reliance via promissory estoppel or restitution), acknowledging uncertainty.", "weight": 1.0 },
-    { "key": "structure", "label": "IRAC structure & organization", "description": "Uses clear IRAC (or CRAC) organization, separates issues, headings or signposting, no fact-dump; each issue is self-contained.", "weight": 1.0 },
-    { "key": "legal_writing", "label": "Precision & legal writing", "description": "Uses terms of art correctly (offer, counteroffer, revocation, consideration, promissory estoppel), avoids conclusory leaps, hedges appropriately.", "weight": 0.9 }
+    {
+      "key": "issue_spotting",
+      "label": "Issue spotting",
+      "description": "Identifies the discrete formation issues: whether Dana's email was an offer, whether Rowan's reply was an acceptance or a counteroffer (mirror-image rule), whether any contract exists to breach, and reliance/promissory-estoppel as a fallback. Flags the UCC-vs-common-law threshold (services, so common law).",
+      "weight": 1.3
+    },
+    {
+      "key": "rule_statement",
+      "label": "Rule statement",
+      "description": "States the governing rules accurately: offer as manifestation of present intent with definite terms; mirror-image rule and counteroffer as rejection; acceptance and the mailbox/lapse rules; consideration as bargained-for exchange; promissory estoppel elements (promise, foreseeable reliance, actual reliance, injustice).",
+      "weight": 1.2
+    },
+    {
+      "key": "application",
+      "label": "Application to facts",
+      "description": "Ties each rule to specific facts — the $500-up-front term as a material variation making Tuesday's reply a counteroffer, Dana's silence as non-acceptance, no meeting of the minds, then Rowan's Wednesday expenditures as the reliance hook.",
+      "weight": 1.3
+    },
+    {
+      "key": "counterarguments",
+      "label": "Counterarguments",
+      "description": "Argues both sides: Rowan's 'I can do it for $4,000' as arguable acceptance with a mere request for an accommodation vs. a true counteroffer; whether reliance was reasonable before any acceptance; Dana's revocation-before-acceptance defense.",
+      "weight": 1.2
+    },
+    {
+      "key": "conclusion",
+      "label": "Conclusion",
+      "description": "Reaches a defensible bottom line on likely recovery (no expectation damages for a $4,000 contract; best shot is $500 reliance via promissory estoppel or restitution), acknowledging uncertainty.",
+      "weight": 1.0
+    },
+    {
+      "key": "structure",
+      "label": "IRAC structure & organization",
+      "description": "Uses clear IRAC (or CRAC) organization, separates issues, headings or signposting, no fact-dump; each issue is self-contained.",
+      "weight": 1.0
+    },
+    {
+      "key": "legal_writing",
+      "label": "Precision & legal writing",
+      "description": "Uses terms of art correctly (offer, counteroffer, revocation, consideration, promissory estoppel), avoids conclusory leaps, hedges appropriately.",
+      "weight": 0.9
+    }
   ],
   "reference": {
     "scenario": "Common-law services contract (logo design — not goods, so no UCC Article 2). The pivotal move is that Rowan's Tuesday reply adds a new material term ($500 up front), which under the mirror-image rule is a counteroffer and operates as a rejection of Dana's offer. Dana never accepts the counteroffer (silence is not acceptance here), so no bilateral contract forms. Dana is free to revoke/withdraw before acceptance. That kills expectation damages ($4,000). Rowan's realistic path is promissory estoppel or restitution for the $500, and even that is weak because Rowan spent the money in reliance on a deal that was never closed and on his own counteroffer. A strong answer spots all of this and argues both sides on whether the reply was acceptance-with-a-request vs. counteroffer.",
@@ -31,11 +76,26 @@
       "Conclusion: Most likely no enforceable $4,000 contract; Rowan's strongest — but still weak — claim is $500 in reliance damages under promissory estoppel."
     ],
     "probes": [
-      { "trigger": "candidate concludes a contract was formed at $4,000 without addressing the added term", "question": "Rowan's reply added a $500-up-front term. Under the mirror-image rule, is that an acceptance or a counteroffer — and what does that do to formation?" },
-      { "trigger": "candidate treats Dana's silence as acceptance of the counteroffer", "question": "Is silence ever acceptance? What would Dana have had to do to accept the counteroffer, and did that happen here?" },
-      { "trigger": "candidate awards expectation damages of $4,000", "question": "If no contract formed, on what theory could Rowan recover anything, and what would the measure of damages be?" },
-      { "trigger": "candidate ignores UCC vs common law", "question": "Which body of law governs this deal, and why does that choice matter for how you treat the varied term?" },
-      { "trigger": "candidate is conclusory on promissory estoppel", "question": "Walk me through each element of promissory estoppel on these facts — was Rowan's reliance reasonable given he had only sent a counteroffer?" }
+      {
+        "trigger": "candidate concludes a contract was formed at $4,000 without addressing the added term",
+        "question": "Rowan's reply added a $500-up-front term. Under the mirror-image rule, is that an acceptance or a counteroffer — and what does that do to formation?"
+      },
+      {
+        "trigger": "candidate treats Dana's silence as acceptance of the counteroffer",
+        "question": "Is silence ever acceptance? What would Dana have had to do to accept the counteroffer, and did that happen here?"
+      },
+      {
+        "trigger": "candidate awards expectation damages of $4,000",
+        "question": "If no contract formed, on what theory could Rowan recover anything, and what would the measure of damages be?"
+      },
+      {
+        "trigger": "candidate ignores UCC vs common law",
+        "question": "Which body of law governs this deal, and why does that choice matter for how you treat the varied term?"
+      },
+      {
+        "trigger": "candidate is conclusory on promissory estoppel",
+        "question": "Walk me through each element of promissory estoppel on these facts — was Rowan's reliance reasonable given he had only sent a counteroffer?"
+      }
     ],
     "red_flags": [
       "Conclusory analysis: states 'there was a valid offer and acceptance so a contract exists' without engaging the added term.",

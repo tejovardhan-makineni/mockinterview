@@ -1,0 +1,123 @@
+{
+  "id": "nursing-prioritization-postop",
+  "title": "Post-Op Prioritization: Four Fresh Surgical Patients",
+  "track": "professional",
+  "domain": "prioritization",
+  "areas": [
+    "nursing"
+  ],
+  "modality": "conversational",
+  "difficulty": "mid",
+  "tags": [
+    "nursing",
+    "post-op",
+    "prioritization",
+    "hemorrhage",
+    "abc",
+    "sbar"
+  ],
+  "prompt": "You're a nurse on a surgical unit and have just received four fresh post-operative patients back-to-back. At the same moment: Patient A's heart rate is climbing and their blood pressure is drifting down since the last set of vitals; Patient B is rating their incisional pain a 9 out of 10 and their PRN analgesic is due; Patient C's Foley catheter has drained only a trickle over the last two hours; and Patient D's family is at the desk insisting on an immediate update. Talk me through how you'd rank these, what you'd assess, and when and how you'd escalate. This is educational — I'm assessing your clinical reasoning, not giving medical advice.",
+  "blurb": "A mid-level post-operative prioritization scenario — assessed for recognizing early shock, ABC-based triage, focused assessment, appropriate delegation, and structured escalation.",
+  "rubric": [
+    {
+      "key": "prioritization",
+      "label": "Prioritization logic",
+      "description": "Ranks the four demands with an explicit framework (ABCs, acute-vs-stable, actual-vs-potential), and justifies why the rising-HR/falling-BP patient — a possible hemorrhage or shock — comes first as a circulation emergency.",
+      "weight": 1.3
+    },
+    {
+      "key": "recognition",
+      "label": "Recognizing deterioration",
+      "description": "Reads the trend in Patient A's vitals as an early warning of hypovolemia/hemorrhagic shock rather than an isolated number, and connects low Foley output to the same perfusion picture instead of treating it in isolation.",
+      "weight": 1.2
+    },
+    {
+      "key": "assessment",
+      "label": "Assessment approach",
+      "description": "Describes a focused post-op assessment of the unstable patient (level of consciousness, skin, repeat vitals, surgical site/dressing for bleeding, checking under the patient and drains) before intervening or drawing conclusions.",
+      "weight": 1.1
+    },
+    {
+      "key": "escalation",
+      "label": "Escalation & help-seeking",
+      "description": "Escalates early to charge nurse/surgeon/rapid response with a structured SBAR handoff when signs of shock appear, and knows a deteriorating post-op patient warrants a provider call, not watchful waiting.",
+      "weight": 1.2
+    },
+    {
+      "key": "delegation",
+      "label": "Delegation & teamwork",
+      "description": "Delegates lower-acuity work appropriately — assistive personnel to obtain a repeat vital set or comfort measures, a colleague or charge nurse to speak with the family — while retaining the tasks that require nursing judgment.",
+      "weight": 1.0
+    },
+    {
+      "key": "communication",
+      "label": "Communication",
+      "description": "Communicates calmly with patients, family, and team; manages the family's expectations and the pain patient's distress without letting either derail the emergency, and documents clearly.",
+      "weight": 1.0
+    }
+  ],
+  "reference": {
+    "scenario": "Mid-level post-operative prioritization scenario. This is educational and framework-based — it assesses clinical reasoning and safety judgment, not real medical direction. The candidate has four fresh post-op patients presenting simultaneously with different acuity and must prioritize, assess, delegate, and escalate. The correct first priority is Patient A: a rising heart rate with a falling blood pressure in a fresh post-op patient is a circulation problem and a classic early sign of hypovolemia or hemorrhagic shock — under the ABCs it outranks pain, low urine output, and the family, and it is an actual, evolving problem rather than a potential one. A strong mid-level answer names the framework, goes to Patient A first, and does a focused assessment before concluding: level of consciousness and skin (pale, cool, clammy?), a repeat full set of vitals to confirm the trend, and a hunt for the source — inspect the surgical dressing and check underneath the patient and any drains for bleeding, since post-op hemorrhage can pool unseen. Critically, the candidate does not leave a patient who looks like they're going into shock; they call for help. The low Foley output (Patient C) should not be dismissed — in the context of a possibly bleeding patient elsewhere it is a reminder that decreased urine output is itself a perfusion/hypovolemia sign, though for a single stable patient it warrants checking the catheter for kinks/obstruction and the overall fluid picture. Patient B's pain is real, time-sensitive, and deserves prompt attention, but a 9/10 incisional pain in a stable patient is urgent-comfort, not life-threat, and the PRN can be given or delegated-within-scope once the emergency is controlled; a sudden change in pain character, however, could itself signal a complication and should be reassessed. Patient D's family is the lowest clinical acuity — acknowledge them, have the charge nurse or a colleague greet them and set a specific time, and never let an upset family pull the nurse off an unstable patient. Escalation should be early and structured: as soon as shock is suspected, call the charge nurse and surgeon/rapid response and hand off with SBAR. The best answers name their framework (ABCs, acute vs stable, trends over single values), assess before acting, keep hunting for the bleeding source, delegate, and escalate with structure. Weak answers treat the vitals as one number, chase the pain or the family first, treat low urine output in isolation, intervene without assessing, leave the unstable patient, never delegate, or never escalate.",
+    "model_points": [
+      "Prioritize with a framework and say it out loud: ABCs and acute-vs-stable put Patient A first — a rising heart rate with falling blood pressure in a fresh post-op patient is a circulation emergency and a possible hemorrhage/shock, outranking pain, urine output, and the family.",
+      "Read the trend, not the single number: interpret the climbing HR and dropping BP together as compensated-to-decompensating hypovolemia rather than dismissing either value in isolation.",
+      "Go to Patient A first and do a focused post-op assessment: level of consciousness, skin color and temperature (pale, cool, clammy), a repeat full set of vitals, and inspect the surgical dressing, drains, and underneath the patient for concealed bleeding.",
+      "Do not leave a patient who looks like they're going into shock: stay, call for help, and get another set of hands rather than walking off to lower-acuity tasks.",
+      "Connect Patient C's low Foley output to perfusion: decreased urine output can itself be a sign of hypovolemia; also check the catheter for kinks/obstruction and factor it into the overall fluid picture rather than treating it as an unrelated plumbing issue.",
+      "Address Patient B's pain promptly but proportionally: 9/10 incisional pain deserves timely treatment, yet it is urgent-comfort in a stable patient — give or delegate-within-scope the PRN once the emergency is controlled, and reassess whether a change in pain character signals a complication.",
+      "Manage Patient D's family without being derailed: acknowledge them, ask the charge nurse or a colleague to greet them and set a specific time to talk, and keep respecting privacy — an upset family is the lowest clinical acuity.",
+      "Escalate early and with structure: as soon as shock is suspected, call the charge nurse and surgeon or activate rapid response, and hand off with SBAR (Situation, Background, Assessment, Recommendation).",
+      "Delegate appropriately: assistive personnel can obtain a repeat vital set or provide comfort measures while you assess; retain the assessment, the interpretation, and the escalation for yourself.",
+      "Reassess continuously and document clearly: keep re-checking Patient A's vitals and status, and record trends, actions, and communications."
+    ],
+    "probes": [
+      {
+        "trigger": "candidate treats the pain or the family as the first priority",
+        "question": "Which patient do you go to first, and what framework are you using to rank a bleeding-risk patient against a patient in severe pain?"
+      },
+      {
+        "trigger": "candidate reads Patient A's vitals as an isolated number",
+        "question": "What does a heart rate going up while the blood pressure goes down tell you in a fresh post-op patient? What's your working concern?"
+      },
+      {
+        "trigger": "candidate jumps to an intervention on Patient A without assessing",
+        "question": "Before you do anything, what does your focused assessment look like — what are you checking, and where are you looking for the source?"
+      },
+      {
+        "trigger": "candidate leaves the unstable patient to handle other tasks",
+        "question": "This patient is looking pale and their pressure is still dropping. Is it safe to leave them right now, and if not, what do you do instead?"
+      },
+      {
+        "trigger": "candidate treats the low urine output as an unrelated issue",
+        "question": "How does the low Foley output fit with what you're seeing in Patient A? Could it be part of the same picture?"
+      },
+      {
+        "trigger": "candidate never escalates or waits too long",
+        "question": "The repeat vitals confirm the trend and the patient is now clammy. Who do you call, and exactly how do you communicate what's happening?"
+      },
+      {
+        "trigger": "candidate lets the family pull them away",
+        "question": "The family is getting louder and insisting you come now. How do you keep them from derailing the emergency without dismissing them?"
+      }
+    ],
+    "red_flags": [
+      "Handles the patients in the order presented or chases the loudest demand (family) or the easiest task first",
+      "Fails to recognize rising HR with falling BP as a possible hemorrhage/shock and top priority",
+      "Treats the vital signs as isolated numbers instead of reading the trend",
+      "Intervenes on the unstable patient without any focused assessment or without looking for the bleeding source",
+      "Leaves a patient showing signs of shock unattended to do lower-acuity tasks",
+      "Dismisses the low Foley output rather than linking it to perfusion or checking the catheter",
+      "Never escalates despite clear deterioration, or escalates with no structured handoff",
+      "Lets the upset family override clinical priorities or breaches privacy to appease them"
+    ],
+    "follow_ups": [
+      "Repeat vitals show HR 128 and BP 84/50, the patient is pale and diaphoretic, and there's fresh blood soaking the dressing. What now?",
+      "How would you hand this off to the surgeon or rapid response team in SBAR format?",
+      "The only assistive personnel on the floor is tied up with another patient. How does that change how you get your repeat vitals and cover the pain patient?",
+      "The family escalates and blocks the hallway demanding answers. How do you handle it without abandoning your patient?",
+      "How do you decide whether Patient B's severe pain is 'just' post-op pain versus a sign of a developing complication?"
+    ],
+    "exemplar_answer": "A strong mid-level answer leads with the framework: 'I'd prioritize by ABCs and acute-versus-stable, and I'd read trends rather than single numbers. A rising heart rate with a falling blood pressure in a fresh post-op patient is a circulation problem and points to possible hemorrhage or early shock, so Patient A comes first — ahead of the pain, the urine output, and the family.' Then assessment before conclusions: 'I'd go straight to Patient A, check their level of consciousness and skin — pale, cool, clammy? — get a full repeat set of vitals to confirm the trend, and hunt for a source: look at the surgical dressing, the drains, and underneath the patient, because post-op bleeding can pool where you can't see it. I would not leave them if they look like they're heading into shock; I'd call for help and get another set of hands.' Using the team and the framework across patients: 'While I assess, I'd have assistive personnel grab a repeat vital set or bring what I need. The low Foley output on Patient C actually fits the same picture — decreased urine output can be a perfusion sign — so I'd note it as part of the fluid story and also check the catheter for kinks, rather than treating it as separate. Patient B's 9-out-of-10 pain is real and time-sensitive, but they're stable, so that's urgent comfort: I'd give or delegate-within-scope the PRN as soon as the emergency is controlled, and I'd reassess in case the pain change signals a complication. I'd ask the charge nurse to greet Patient D's family, let them know I'm handling an urgent situation, and set a specific time to update them, while respecting privacy.' Escalation: 'As soon as I suspect shock — say the repeat pressure is in the 80s and the dressing is soaking through — I'd call the charge nurse and the surgeon or activate rapid response and hand off with SBAR: the situation, the relevant background, my assessment, and what I'm recommending.' Throughout, I'd keep reassessing Patient A, stay calm, communicate briefly with each patient, and document the trends and actions. It ranks by acuity, reads the trend, assesses before acting, keeps the unstable patient safe, delegates, and escalates with structure."
+  },
+  "interviewer_notes": "This is a mid-level educational scenario — reward trend-reading, sound prioritization, and safety judgment over encyclopedic clinical detail, and never coach real medical treatment. The single must-have is recognizing the rising heart rate with a falling blood pressure as a possible hemorrhage/shock and the top priority via ABCs; if the candidate chases the severe pain or the family first, or reads the vitals as an isolated number, probe for their framework and what a HR-up/BP-down pattern means in a fresh post-op patient. Then look for assess-before-intervene with an active search for the bleeding source, linking the low urine output to perfusion rather than treating it in isolation, not leaving an unstable patient, appropriate delegation (repeat vitals and comfort to assistive personnel, family to the charge nurse), and early, structured SBAR escalation to the surgeon or rapid response. Use the deterioration follow-up (HR 128, BP 84/50, soaked dressing) to test escalation quality. Strong mid candidates name a framework, read trends, keep hunting for the source, delegate rather than martyring themselves, and escalate promptly. Penalize task-order-as-presented, single-number thinking, intervening without assessing, abandoning the unstable patient, dismissing the low output, letting the family derail care, and failing to escalate on clear deterioration."
+}

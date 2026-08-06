@@ -1,0 +1,123 @@
+{
+  "id": "finance-comparable-companies",
+  "title": "Comparable Companies Analysis (Trading Comps)",
+  "track": "professional",
+  "domain": "valuation",
+  "areas": [
+    "finance"
+  ],
+  "modality": "conversational",
+  "difficulty": "mid",
+  "tags": [
+    "comps",
+    "valuation",
+    "ev-ebitda",
+    "trading-multiples",
+    "peer-analysis",
+    "normalization"
+  ],
+  "prompt": "Value a mid-cap company using comparable companies analysis. Walk me through selecting the peer set, choosing and calculating the right multiples, normalizing them, and applying them to the target — then reconcile the result with an intrinsic method.",
+  "blurb": "A relative-valuation interview — build a trading-comps analysis: pick a defensible peer set, choose EV/EBITDA vs P/E, calculate and normalize multiples, adjust for growth and margins, and apply to the target.",
+  "rubric": [
+    {
+      "key": "framework",
+      "label": "Comps framework",
+      "description": "Lays out the full comps sequence: define the target, screen a peer set on the right criteria, choose appropriate multiples, calculate them consistently, normalize for one-offs, pick a central tendency (median), and apply to the target's operating metric to imply a value — in the right order.",
+      "weight": 1.3
+    },
+    {
+      "key": "peer_selection",
+      "label": "Peer selection",
+      "description": "Screens comps on business model, sector, size, growth, margins, and geography rather than just SIC code; explains why each name is in or out and recognizes that a tight, truly-comparable set of five is better than a loose set of twenty.",
+      "weight": 1.2
+    },
+    {
+      "key": "multiple_mechanics",
+      "label": "Multiple mechanics",
+      "description": "Chooses EV/EBITDA vs P/E vs EV/Revenue with a reason, computes EV correctly (market cap + debt + preferred + minorities - cash), matches numerator to denominator (equity multiples to equity metrics, EV multiples to pre-financing metrics), and uses forward vs trailing consistently on a diluted, treasury-stock-method share count.",
+      "weight": 1.3
+    },
+    {
+      "key": "normalization",
+      "label": "Normalization & adjustments",
+      "description": "Strips out non-recurring items, stock-comp and lease distortions, and calendarizes to a common period; explains why a peer trades at a premium/discount (growth, margin, returns on capital) and adjusts rather than blindly applying the mean.",
+      "weight": 1.2
+    },
+    {
+      "key": "judgment",
+      "label": "Judgment & reconciliation",
+      "description": "Uses the median not the mean, presents a range not a point, sanity-checks the implied value against a DCF and precedent transactions, and articulates that comps capture current market sentiment whereas a DCF captures intrinsic value.",
+      "weight": 1.1
+    },
+    {
+      "key": "communication",
+      "label": "Communication",
+      "description": "Explains each step clearly and in order, defines terms, and reasons out loud about why multiples differ rather than reciting a mechanical recipe.",
+      "weight": 0.9
+    }
+  ],
+  "reference": {
+    "scenario": "Conceptual + numeric trading-comps walkthrough for a mid-cap company — say a specialty-industrials or branded consumer business. The interviewer probes each step and may hand the candidate round numbers to test the mechanics, e.g.: the target has EBITDA of $200M and net debt of $300M; a screened peer set trades at a median forward EV/EBITDA of ~9.0x (range 7.5x-11x). Applying 9.0x implies enterprise value of $1,800M; subtract net debt for equity value of $1,500M, divide by shares for per-share. The interviewer will test whether the candidate can compute enterprise value correctly, match numerator to denominator, normalize a distorted peer multiple (e.g. a peer with a one-time gain or a much higher growth rate), justify using the median over the mean, and explain the choice of EV/EBITDA over P/E for a set with different capital structures. Exact figures matter less than defensible peer selection, correct multiple mechanics, thoughtful normalization, and knowing that comps give a market-sentiment range that should be triangulated against an intrinsic DCF.",
+    "model_points": [
+      "State the goal: comps value the target relative to how the market currently prices similar public businesses, giving a range of implied values from peer multiples rather than an intrinsic estimate.",
+      "Screen the peer set on business model, industry, size, growth profile, margins, and geography — not just industry code. Justify each inclusion/exclusion; a tight set of five genuine comps beats twenty loose ones.",
+      "Choose the multiple with a reason: EV/EBITDA is capital-structure-neutral and strips D&A differences (good when leverage varies); P/E reflects the equity story but is distorted by capital structure and tax; EV/Revenue for unprofitable or early-stage names; sector-specific multiples (EV/EBITDAR, EV/subscribers) where relevant.",
+      "Compute enterprise value correctly: market cap (diluted shares via treasury-stock method x price) + total debt + preferred + minority interest - cash and equivalents. This is the bridge candidates most often get wrong.",
+      "Match numerator to denominator: EV multiples pair with pre-financing, pre-tax metrics (EBITDA, EBIT, revenue); equity multiples (P/E, P/B) pair with equity metrics (net income, book value). Never put net income under EV.",
+      "Use forward multiples where available (they reflect expected performance) and be consistent trailing-vs-forward across the set; calendarize peers to a common fiscal period so you compare like with like.",
+      "Normalize the metrics and the multiples: strip non-recurring items (restructuring, one-time gains/losses, litigation), adjust for stock-based comp and lease-accounting differences, and exclude or flag outliers driven by M&A rumors or distressed pricing.",
+      "Choose a central tendency — median over mean because the mean is skewed by outliers — and understand the dispersion: a peer trades at a premium usually because of higher growth, higher margins, or better returns on capital, so adjust the applied multiple toward the target's profile rather than blindly using the group median.",
+      "Apply the chosen multiple to the target's (normalized, forward) metric to get enterprise value, then bridge EV - net debt (- preferred - minorities) = equity value, / diluted shares = value per share; present a range from the multiple range, not a single point.",
+      "Reconcile with intrinsic and transaction methods: comps reflect current market sentiment and can be collectively over- or under-valued; cross-check against a DCF and precedent-transaction multiples (which include a control premium), and explain the differences."
+    ],
+    "probes": [
+      {
+        "trigger": "candidate screens peers only by industry/SIC code",
+        "question": "You've got everyone in the sector in your set — how do you actually decide who's a true comp? What makes a company comparable beyond being in the same industry?"
+      },
+      {
+        "trigger": "candidate can't justify EV/EBITDA vs P/E",
+        "question": "Why EV/EBITDA here rather than P/E? What does each multiple control for, and when would P/E mislead you across this peer set?"
+      },
+      {
+        "trigger": "candidate computes enterprise value incorrectly",
+        "question": "Walk me through building enterprise value from market cap precisely — what gets added, what gets subtracted, and why does cash come off?"
+      },
+      {
+        "trigger": "candidate puts net income under EV or mismatches metrics",
+        "question": "You've paired that multiple with that metric — is the numerator and denominator consistent? Which claimants does each one belong to?"
+      },
+      {
+        "trigger": "candidate applies the group mean without adjustment",
+        "question": "One peer trades at 11x and the target grows slower with thinner margins — do you still apply the group average? How do you adjust for growth and margin differences?"
+      },
+      {
+        "trigger": "candidate ignores non-recurring items",
+        "question": "One comp had a big one-time gain in EBITDA this year — what does that do to its multiple, and how do you normalize it before including it?"
+      },
+      {
+        "trigger": "candidate gives a single point value and stops",
+        "question": "You've got an implied value from comps — how does it compare to what a DCF would say, and why might the two disagree?"
+      }
+    ],
+    "red_flags": [
+      "Selects peers by industry code alone with no screen on size, growth, margins, or business model",
+      "Computes enterprise value wrong — forgets to add debt/minorities or subtract cash, or uses basic instead of diluted shares",
+      "Mismatches numerator and denominator, e.g. puts net income or EPS under enterprise value",
+      "Can't articulate why EV/EBITDA is capital-structure-neutral or when P/E is distorted",
+      "Blindly applies the mean, ignoring outliers and premium/discount drivers (growth, margins, returns on capital)",
+      "Never normalizes for non-recurring items, stock comp, or leases, or fails to calendarize to a common period",
+      "Presents a single precise number instead of a range and never reconciles against a DCF or precedent transactions",
+      "Confuses trading comps with precedent transactions — misses that transaction multiples include a control premium"
+    ],
+    "follow_ups": [
+      "Your comps say the company is worth 15% more than a DCF does — which do you trust, and how do you explain the gap?",
+      "A peer just got a takeover bid and its stock jumped 30% — do you keep it in the set, and how does that affect your median?",
+      "Two peers have very different leverage — how does that change whether you lean on EV/EBITDA or P/E?",
+      "The target has a much higher growth rate than its peers — how would you adjust the applied multiple, and would a PEG-type view help?",
+      "How would trading comps differ from precedent-transaction comps for the same company, and when would you use each?"
+    ],
+    "exemplar_answer": "A strong candidate frames comps as relative valuation: 'I'm pricing the target off how the market values genuinely similar public companies, so I'll end with a range, not a point.' They build a tight peer set screened on business model, size, growth, margins, and geography — naming why each company is in or out rather than dumping the whole sector. They choose EV/EBITDA as the primary multiple because it's capital-structure-neutral and normalizes for D&A and leverage differences, noting P/E would be distorted here by different debt loads and tax positions, and they'd use forward multiples for comparability. On mechanics they build enterprise value carefully — diluted market cap via treasury-stock method plus debt, preferred, and minorities, minus cash — and they insist the numerator matches the denominator: EV over EBITDA, never net income under EV. They calendarize peers to a common period and normalize both the metrics and the multiples, stripping a one-time gain out of a peer's EBITDA and flagging a name inflated by takeover speculation. Rather than apply the raw mean, they use the median and reason about dispersion: a peer at 11x is there because it grows faster with fatter margins, so they nudge the applied multiple toward the target's own growth/margin profile — say ~9.0x. Applying 9.0x to $200M EBITDA gives $1,800M enterprise value; less $300M net debt is $1,500M equity value, divided by diluted shares for per-share, and they present the implied range from the 7.5x-11x spread. Finally they reconcile: comps capture current market sentiment and can be collectively mispriced, so they cross-check against a DCF (intrinsic) and precedent transactions (which embed a control premium), and they explain any gap rather than declaring a single 'right' number."
+  },
+  "interviewer_notes": "This is a mechanics-and-judgment relative-valuation question; the mid bar is a clean, defensible trading-comps analysis plus the judgment to normalize thoughtfully and reconcile against intrinsic value. Let the candidate lay out the framework, then interrupt to test depth: how they actually screen peers (not just by industry code), why EV/EBITDA over P/E, and the precise enterprise-value build — the EV bridge and numerator/denominator matching are where mid-level candidates most often slip. If they're strong, hand them the round numbers in the scenario and make them carry an implied enterprise value, equity value, and per-share figure, then throw in a distorted peer (one-time gain or takeover pop) to see if they normalize or blindly average. The two most common failures are botching enterprise value / metric matching and mechanically applying the group mean without adjusting for growth and margins. Reserve the end for the reconciliation probe — comps vs DCF disagreeing — and reward candidates who present a range, use the median, and can explain why market sentiment and intrinsic value diverge."
+}

@@ -2,20 +2,65 @@
   "id": "law-client-counseling",
   "title": "Client Counseling: Advising a Small-Business Client on a Broken Deal",
   "track": "professional",
-  "domain": "law",
+  "domain": "legal_practice",
+  "areas": [
+    "law"
+  ],
   "modality": "conversational",
   "difficulty": "mid",
-  "tags": ["client-counseling", "interviewing", "communication", "options-analysis", "expectation-management", "professionalism"],
+  "tags": [
+    "client-counseling",
+    "interviewing",
+    "communication",
+    "options-analysis",
+    "expectation-management",
+    "professionalism"
+  ],
   "prompt": "You are a junior lawyer meeting a new client, Sam, who runs a small catering business. Sam says: 'A supplier promised to deliver 300 custom dessert boxes for a wedding I catered last month. They cancelled two days before, I had to buy replacements at triple the price, and the wedding client is furious. I want to sue them for everything — the extra cost, the stress, and to make them pay for the reputation hit.' Conduct the counseling conversation: elicit the facts you need, explain the realistic options, and manage Sam's expectations. This is a spoken conversation, not a written memo.",
   "blurb": "A client-counseling roleplay — draw out the facts, frame options plainly, and set realistic expectations without giving false comfort or premature legal conclusions.",
   "rubric": [
-    { "key": "fact_gathering", "label": "Fact elicitation", "description": "Uses open-ended then targeted questions to draw out the facts that matter: was there a written contract/PO, the agreed terms and price, how the cancellation was communicated, documentation of the replacement cost, the timeline, and whether any deposit was paid.", "weight": 1.3 },
-    { "key": "active_listening", "label": "Active listening & rapport", "description": "Acknowledges Sam's frustration, lets Sam tell the story before problem-solving, reflects back to confirm understanding, and builds trust without being dismissive.", "weight": 1.0 },
-    { "key": "options_analysis", "label": "Options & tradeoffs", "description": "Lays out realistic paths — demand letter, negotiation/settlement, small-claims vs. civil suit, mediation — with plain-language pros, cons, cost, and time for each, rather than jumping straight to 'sue.'", "weight": 1.2 },
-    { "key": "expectation_management", "label": "Managing expectations", "description": "Gently reframes recovery: likely limited to provable direct damages (the extra cost), skepticism on 'stress' and speculative reputational damages, and the reality of cost/time/collectibility. Avoids overpromising.", "weight": 1.3 },
-    { "key": "legal_framing", "label": "Legal issue framing (plain language)", "description": "Identifies the likely breach-of-contract claim and the measure of damages (expectation/cover) in accessible terms; flags open questions (was it enforceable, any limitation-of-liability clause) without giving a premature firm opinion.", "weight": 1.1 },
-    { "key": "professionalism", "label": "Professionalism & ethics", "description": "Sets scope, does not guarantee an outcome, avoids unauthorized promises, notes need to review documents and possibly the wedding-client contract, respects that the decision is Sam's.", "weight": 1.0 },
-    { "key": "communication", "label": "Communication & clarity", "description": "Avoids jargon or explains it, is organized, checks for understanding, and closes with concrete next steps.", "weight": 1.0 }
+    {
+      "key": "fact_gathering",
+      "label": "Fact elicitation",
+      "description": "Uses open-ended then targeted questions to draw out the facts that matter: was there a written contract/PO, the agreed terms and price, how the cancellation was communicated, documentation of the replacement cost, the timeline, and whether any deposit was paid.",
+      "weight": 1.3
+    },
+    {
+      "key": "active_listening",
+      "label": "Active listening & rapport",
+      "description": "Acknowledges Sam's frustration, lets Sam tell the story before problem-solving, reflects back to confirm understanding, and builds trust without being dismissive.",
+      "weight": 1.0
+    },
+    {
+      "key": "options_analysis",
+      "label": "Options & tradeoffs",
+      "description": "Lays out realistic paths — demand letter, negotiation/settlement, small-claims vs. civil suit, mediation — with plain-language pros, cons, cost, and time for each, rather than jumping straight to 'sue.'",
+      "weight": 1.2
+    },
+    {
+      "key": "expectation_management",
+      "label": "Managing expectations",
+      "description": "Gently reframes recovery: likely limited to provable direct damages (the extra cost), skepticism on 'stress' and speculative reputational damages, and the reality of cost/time/collectibility. Avoids overpromising.",
+      "weight": 1.3
+    },
+    {
+      "key": "legal_framing",
+      "label": "Legal issue framing (plain language)",
+      "description": "Identifies the likely breach-of-contract claim and the measure of damages (expectation/cover) in accessible terms; flags open questions (was it enforceable, any limitation-of-liability clause) without giving a premature firm opinion.",
+      "weight": 1.1
+    },
+    {
+      "key": "professionalism",
+      "label": "Professionalism & ethics",
+      "description": "Sets scope, does not guarantee an outcome, avoids unauthorized promises, notes need to review documents and possibly the wedding-client contract, respects that the decision is Sam's.",
+      "weight": 1.0
+    },
+    {
+      "key": "communication",
+      "label": "Communication & clarity",
+      "description": "Avoids jargon or explains it, is organized, checks for understanding, and closes with concrete next steps.",
+      "weight": 1.0
+    }
   ],
   "reference": {
     "scenario": "New-client intake for a likely breach-of-contract matter. The commercially and legally sound analysis: Sam probably has a viable breach claim for the supplier's cancellation, and the core recoverable damages are the cover cost — the difference between the contract price and the triple-price replacement (expectation/cover damages). 'Stress' is generally not recoverable in an ordinary commercial contract case, and reputational harm is typically too speculative and not the kind of damages contemplated by a supply contract (and may run into foreseeability/Hadley v. Baxendale limits). The lawyer must first gather facts — most importantly whether there was an enforceable agreement (PO, emails, terms, price, quantity) and documentation of the extra cost — before committing to any opinion. Then present options along a cost/time/relationship spectrum: a demand letter and negotiated settlement first (fast, cheap), small-claims if the amount fits the jurisdictional cap, or a civil suit; mediation as a middle path. Throughout, the lawyer manages expectations honestly (no guarantee, collectibility risk, litigation cost may exceed the extra spend) and keeps the decision with the client. A weak candidate validates 'sue for everything,' promises a win, or dives into legal conclusions before learning whether a contract even exists.",
@@ -34,12 +79,30 @@
       "Close with concrete next steps: gather documents (PO, emails, invoices, wedding-client contract), a follow-up meeting, and confirm the client decides how to proceed."
     ],
     "probes": [
-      { "trigger": "candidate promises Sam will win or recover 'everything'", "question": "Sam brightens and says 'So you can guarantee I'll get all of it back — the stress and the reputation hit too?' How do you respond?" },
-      { "trigger": "candidate gives legal conclusions before establishing there was a contract", "question": "Before you advise on suing — do you actually know yet whether there was an enforceable agreement? What would you need to see?" },
-      { "trigger": "candidate never addresses the non-recoverable 'stress'/'reputation' demands", "question": "Sam is adamant about being paid for the stress and the damage to the business's reputation. How do you handle those two specific asks?" },
-      { "trigger": "candidate jumps straight to filing a lawsuit", "question": "Is litigation the only option here? Walk Sam through the alternatives and why you might start somewhere other than a lawsuit." },
-      { "trigger": "candidate uses heavy jargon (e.g., 'cover,' 'consequential damages') without explaining", "question": "Sam looks confused and asks what 'cover damages' means. Explain it in plain English." },
-      { "trigger": "candidate ignores cost/collectibility", "question": "The extra cost Sam paid was about $2,000. How does that figure into whether a lawsuit makes sense?" }
+      {
+        "trigger": "candidate promises Sam will win or recover 'everything'",
+        "question": "Sam brightens and says 'So you can guarantee I'll get all of it back — the stress and the reputation hit too?' How do you respond?"
+      },
+      {
+        "trigger": "candidate gives legal conclusions before establishing there was a contract",
+        "question": "Before you advise on suing — do you actually know yet whether there was an enforceable agreement? What would you need to see?"
+      },
+      {
+        "trigger": "candidate never addresses the non-recoverable 'stress'/'reputation' demands",
+        "question": "Sam is adamant about being paid for the stress and the damage to the business's reputation. How do you handle those two specific asks?"
+      },
+      {
+        "trigger": "candidate jumps straight to filing a lawsuit",
+        "question": "Is litigation the only option here? Walk Sam through the alternatives and why you might start somewhere other than a lawsuit."
+      },
+      {
+        "trigger": "candidate uses heavy jargon (e.g., 'cover,' 'consequential damages') without explaining",
+        "question": "Sam looks confused and asks what 'cover damages' means. Explain it in plain English."
+      },
+      {
+        "trigger": "candidate ignores cost/collectibility",
+        "question": "The extra cost Sam paid was about $2,000. How does that figure into whether a lawsuit makes sense?"
+      }
     ],
     "red_flags": [
       "Guarantees an outcome or tells Sam they'll recover 'everything.'",

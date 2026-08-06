@@ -2,18 +2,53 @@
   "id": "finance-dcf-valuation",
   "title": "DCF Valuation: Walk Me Through Valuing a Company",
   "track": "professional",
-  "domain": "finance",
+  "domain": "valuation",
+  "areas": [
+    "finance"
+  ],
   "modality": "conversational",
   "difficulty": "senior",
-  "tags": ["dcf", "valuation", "wacc", "terminal-value", "fcf", "sensitivity"],
+  "tags": [
+    "dcf",
+    "valuation",
+    "wacc",
+    "terminal-value",
+    "fcf",
+    "sensitivity"
+  ],
   "prompt": "Walk me through how you would value a company using a discounted cash flow analysis. Assume it's a stable, profitable mid-cap consumer-products business. Take me from projecting cash flows all the way to an equity value per share, and be explicit about your assumptions.",
   "blurb": "A core valuation interview — build a DCF end to end: unlevered FCF, WACC, terminal value, discounting, bridge to equity, and sensitivity.",
   "rubric": [
-    { "key": "framework", "label": "DCF framework", "description": "Lays out the full DCF sequence correctly: project unlevered free cash flow over an explicit horizon, discount at WACC, add a terminal value, sum to enterprise value, then bridge to equity value and per-share — in the right order.", "weight": 1.3 },
-    { "key": "quantitative_rigor", "label": "Quantitative rigor", "description": "Constructs unlevered FCF correctly (EBIT x (1-tax) + D&A - capex - change in NWC), computes WACC and terminal value with correct formulas, discounts properly, and can carry a simple numeric example without errors.", "weight": 1.3 },
-    { "key": "assumptions", "label": "Assumptions & drivers", "description": "States and justifies the key assumptions (revenue growth, margins, tax rate, capex/NWC, WACC components, terminal growth/exit multiple) and grounds them in the business rather than pulling numbers from nowhere.", "weight": 1.2 },
-    { "key": "judgment", "label": "Judgment & sensitivity", "description": "Knows where the value is concentrated (terminal value), stress-tests via sensitivity on WACC and terminal growth, sanity-checks against comps/implied multiples, and flags the model's limitations.", "weight": 1.2 },
-    { "key": "communication", "label": "Communication", "description": "Explains each step clearly and in order, defines terms, and reasons out loud rather than reciting a memorized formula list.", "weight": 0.9 }
+    {
+      "key": "framework",
+      "label": "DCF framework",
+      "description": "Lays out the full DCF sequence correctly: project unlevered free cash flow over an explicit horizon, discount at WACC, add a terminal value, sum to enterprise value, then bridge to equity value and per-share — in the right order.",
+      "weight": 1.3
+    },
+    {
+      "key": "quantitative_rigor",
+      "label": "Quantitative rigor",
+      "description": "Constructs unlevered FCF correctly (EBIT x (1-tax) + D&A - capex - change in NWC), computes WACC and terminal value with correct formulas, discounts properly, and can carry a simple numeric example without errors.",
+      "weight": 1.3
+    },
+    {
+      "key": "assumptions",
+      "label": "Assumptions & drivers",
+      "description": "States and justifies the key assumptions (revenue growth, margins, tax rate, capex/NWC, WACC components, terminal growth/exit multiple) and grounds them in the business rather than pulling numbers from nowhere.",
+      "weight": 1.2
+    },
+    {
+      "key": "judgment",
+      "label": "Judgment & sensitivity",
+      "description": "Knows where the value is concentrated (terminal value), stress-tests via sensitivity on WACC and terminal growth, sanity-checks against comps/implied multiples, and flags the model's limitations.",
+      "weight": 1.2
+    },
+    {
+      "key": "communication",
+      "label": "Communication",
+      "description": "Explains each step clearly and in order, defines terms, and reasons out loud rather than reciting a memorized formula list.",
+      "weight": 0.9
+    }
   ],
   "reference": {
     "scenario": "Conceptual + numeric DCF walkthrough for a stable mid-cap consumer-products company. The interviewer probes each step and may hand the candidate simple round numbers to test the mechanics, e.g.: Year-1 unlevered FCF ~$100M growing ~5%/yr for a 5-year explicit horizon; tax rate 25%; WACC 8%; terminal growth 2.5% (or an exit EV/EBITDA multiple); net debt $300M; 100M shares outstanding. With those, terminal value via Gordon growth ≈ FCF_year5 x (1+g) / (WACC - g), discounted back, plus the discounted explicit-period FCFs, gives enterprise value; subtract net debt for equity value; divide by shares for per-share. Exact figures matter less than correct mechanics, sound assumptions, and knowing terminal value usually drives most of the answer.",
@@ -29,13 +64,34 @@
       "Flag limitations: garbage-in-garbage-out, extreme sensitivity to WACC and g, and that a DCF is one triangulation input, not a point-precise truth."
     ],
     "probes": [
-      { "trigger": "candidate uses net income instead of EBIT for FCF", "question": "Why start free cash flow from EBIT rather than net income for an unlevered DCF? What would using net income double-count?" },
-      { "trigger": "candidate discounts FCFF at cost of equity", "question": "You're discounting free cash flow to the firm — is cost of equity the right rate, or should it be WACC? Why?" },
-      { "trigger": "candidate hand-waves the terminal value", "question": "Terminal value is often most of the answer. Give me both methods — Gordon growth and exit multiple — and how you'd pick g." },
-      { "trigger": "candidate picks a terminal growth rate above GDP", "question": "You used a terminal growth of, say, 5% — what's the ceiling on a perpetual growth rate and why can't it exceed long-run GDP?" },
-      { "trigger": "candidate stops at enterprise value", "question": "You have enterprise value — now bridge me to equity value per share. What comes off, what gets added?" },
-      { "trigger": "candidate gives a single point value", "question": "Given how sensitive this is to WACC and g, how would you present the output — and what sensitivity would you run?" },
-      { "trigger": "candidate never sanity-checks", "question": "What's your implied terminal EV/EBITDA multiple, and does it look sane versus where comparable companies trade?" }
+      {
+        "trigger": "candidate uses net income instead of EBIT for FCF",
+        "question": "Why start free cash flow from EBIT rather than net income for an unlevered DCF? What would using net income double-count?"
+      },
+      {
+        "trigger": "candidate discounts FCFF at cost of equity",
+        "question": "You're discounting free cash flow to the firm — is cost of equity the right rate, or should it be WACC? Why?"
+      },
+      {
+        "trigger": "candidate hand-waves the terminal value",
+        "question": "Terminal value is often most of the answer. Give me both methods — Gordon growth and exit multiple — and how you'd pick g."
+      },
+      {
+        "trigger": "candidate picks a terminal growth rate above GDP",
+        "question": "You used a terminal growth of, say, 5% — what's the ceiling on a perpetual growth rate and why can't it exceed long-run GDP?"
+      },
+      {
+        "trigger": "candidate stops at enterprise value",
+        "question": "You have enterprise value — now bridge me to equity value per share. What comes off, what gets added?"
+      },
+      {
+        "trigger": "candidate gives a single point value",
+        "question": "Given how sensitive this is to WACC and g, how would you present the output — and what sensitivity would you run?"
+      },
+      {
+        "trigger": "candidate never sanity-checks",
+        "question": "What's your implied terminal EV/EBITDA multiple, and does it look sane versus where comparable companies trade?"
+      }
     ],
     "red_flags": [
       "Wrong FCF construction — starts from net income for an unlevered DCF, or forgets change in NWC or capex",

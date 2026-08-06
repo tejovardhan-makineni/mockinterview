@@ -3,18 +3,64 @@
   "title": "Tell me about a time you disagreed with a decision but committed to it",
   "track": "professional",
   "domain": "behavioral",
+  "areas": [
+    "engineering",
+    "data_science",
+    "medicine",
+    "nursing",
+    "law",
+    "consulting",
+    "product_management",
+    "finance"
+  ],
   "modality": "conversational",
   "difficulty": "mid",
-  "tags": ["disagree-and-commit", "leadership-principles", "collaboration", "conviction", "star"],
+  "tags": [
+    "disagree-and-commit",
+    "leadership-principles",
+    "collaboration",
+    "conviction",
+    "star"
+  ],
   "prompt": "Tell me about a time you strongly disagreed with a decision, voiced your concerns, but the group went the other way — and you committed to it anyway. What was the decision, how did you push back, and what did you do once it was made?",
   "blurb": "Disagree & commit: did they voice a real, reasoned dissent AND then genuinely back the decision — not sandbag it?",
   "rubric": [
-    { "key": "situation_clarity", "label": "Situation & the decision", "description": "Clearly frames the decision at stake, the stakes involved, and where they stood versus the group.", "weight": 1.0 },
-    { "key": "task_ownership", "label": "Quality of the disagreement", "description": "Shows they raised a substantive, well-reasoned objection through the right channel — data or principle, not just a gut 'no' — and were heard.", "weight": 1.2 },
-    { "key": "action_specificity", "label": "How they committed", "description": "Describes concretely how THEY backed the decision once made — actively supported it, didn't undermine it or say 'I told you so', helped make it succeed.", "weight": 1.3 },
-    { "key": "result_impact", "label": "Result & impact", "description": "States what happened — the decision's outcome, and how their commitment (not just compliance) affected it. Honest even if their side was right or wrong.", "weight": 1.1 },
-    { "key": "reflection", "label": "Reflection & maturity", "description": "Shows they can separate ego from outcome — value team velocity over being right, and update their view based on how it played out.", "weight": 1.2 },
-    { "key": "communication", "label": "Communication & structure", "description": "Structured, concise, and candid about a genuinely uncomfortable situation.", "weight": 0.8 }
+    {
+      "key": "situation_clarity",
+      "label": "Situation & the decision",
+      "description": "Clearly frames the decision at stake, the stakes involved, and where they stood versus the group.",
+      "weight": 1.0
+    },
+    {
+      "key": "task_ownership",
+      "label": "Quality of the disagreement",
+      "description": "Shows they raised a substantive, well-reasoned objection through the right channel — data or principle, not just a gut 'no' — and were heard.",
+      "weight": 1.2
+    },
+    {
+      "key": "action_specificity",
+      "label": "How they committed",
+      "description": "Describes concretely how THEY backed the decision once made — actively supported it, didn't undermine it or say 'I told you so', helped make it succeed.",
+      "weight": 1.3
+    },
+    {
+      "key": "result_impact",
+      "label": "Result & impact",
+      "description": "States what happened — the decision's outcome, and how their commitment (not just compliance) affected it. Honest even if their side was right or wrong.",
+      "weight": 1.1
+    },
+    {
+      "key": "reflection",
+      "label": "Reflection & maturity",
+      "description": "Shows they can separate ego from outcome — value team velocity over being right, and update their view based on how it played out.",
+      "weight": 1.2
+    },
+    {
+      "key": "communication",
+      "label": "Communication & structure",
+      "description": "Structured, concise, and candid about a genuinely uncomfortable situation.",
+      "weight": 0.8
+    }
   ],
   "reference": {
     "scenario": "The candidate should recall a decision they genuinely opposed — an architecture choice, a product bet, a process change, a hiring or roadmap call — where they made their case, were overruled or the consensus went the other way, and then fully committed. The strongest answers show real dissent (not a token quibble) AND real commitment (not passive-aggressive compliance).",
@@ -27,11 +73,26 @@
       "Reflection: values organizational speed and trust over personal vindication; knows disagree-and-commit means fully committing, and knows the rare cases where a concern is serious enough to escalate rather than commit."
     ],
     "probes": [
-      { "trigger": "disagreement sounds trivial or performative", "question": "How strongly did you actually disagree? What was genuinely at stake — walk me through the substance of your objection." },
-      { "trigger": "committed passively / just 'went along with it'", "question": "What did committing actually look like in your day-to-day? Give me a concrete example of you actively supporting a decision you'd argued against." },
-      { "trigger": "hints at 'I told you so' or undermining", "question": "When it hit bumps, how did you talk about it with your team? Did you ever signal you'd been against it?" },
-      { "trigger": "no outcome stated", "question": "How did it turn out? Were you right, wrong, or somewhere in between — and how did you find out?" },
-      { "trigger": "claims they were right", "question": "If you were right, how did the team learn that without it becoming about who won? And if you'd been wrong, would you have known?" }
+      {
+        "trigger": "disagreement sounds trivial or performative",
+        "question": "How strongly did you actually disagree? What was genuinely at stake — walk me through the substance of your objection."
+      },
+      {
+        "trigger": "committed passively / just 'went along with it'",
+        "question": "What did committing actually look like in your day-to-day? Give me a concrete example of you actively supporting a decision you'd argued against."
+      },
+      {
+        "trigger": "hints at 'I told you so' or undermining",
+        "question": "When it hit bumps, how did you talk about it with your team? Did you ever signal you'd been against it?"
+      },
+      {
+        "trigger": "no outcome stated",
+        "question": "How did it turn out? Were you right, wrong, or somewhere in between — and how did you find out?"
+      },
+      {
+        "trigger": "claims they were right",
+        "question": "If you were right, how did the team learn that without it becoming about who won? And if you'd been wrong, would you have known?"
+      }
     ],
     "red_flags": [
       "Never actually disagreed — story is really about agreeing all along, or the disagreement is trivial.",

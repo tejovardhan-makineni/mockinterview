@@ -3,20 +3,70 @@
   "title": "Top K Frequent Elements",
   "track": "engineering",
   "domain": "coding",
+  "areas": [
+    "engineering",
+    "data_science"
+  ],
   "modality": "coding",
   "difficulty": "mid",
-  "tags": ["heap", "bucket-sort", "hashmap", "quickselect", "counting"],
+  "tags": [
+    "heap",
+    "bucket-sort",
+    "hashmap",
+    "quickselect",
+    "counting"
+  ],
   "prompt": "Given an integer array nums and an integer k, return the k most frequent elements. You may return the answer in any order. It is guaranteed the answer is unique. Can you design an algorithm that beats the O(n log n) of sorting all elements by frequency?",
   "blurb": "Count then select — a size-k min-heap gives O(n log k), and bucket sort by frequency achieves O(n) by indexing counts into an array of buckets.",
   "rubric": [
-    { "key": "problem_understanding", "label": "Problem understanding", "description": "Recognizes this is 'count frequencies, then take the k largest by count', notes the answer is unique (no tie-break needed), and that full sort by frequency is O(n log n) — the prompt asks for better.", "weight": 1.0 },
-    { "key": "approach", "label": "Approach", "description": "Builds a frequency map, then selects top k via a size-k min-heap (O(n log k)) or bucket sort by frequency (O(n)). Can articulate the Quickselect-on-unique-elements alternative for O(n) average.", "weight": 1.3 },
-    { "key": "correctness", "label": "Correctness", "description": "Heap: keeps exactly k by popping the smallest-count when size exceeds k; extracts k elements. Bucket: index = frequency (0..n), place elements in bucket[freq], scan buckets high-to-low collecting until k are gathered. No off-by-one on bucket size (n+1).", "weight": 1.3 },
-    { "key": "complexity_analysis", "label": "Complexity analysis", "description": "Heap O(n log k) time / O(n + k) space. Bucket sort O(n) time / O(n) space. Quickselect O(n) average. Explains why bucket sort escapes the log factor: frequency is bounded by n, so it can be used as an array index.", "weight": 1.1 },
-    { "key": "code_quality", "label": "Code quality", "description": "Clean Counter/hash-map build, a single heap or a clean bucket array of lists; collection loop terminates correctly at k without over-collecting.", "weight": 1.0 },
-    { "key": "edge_cases", "label": "Edge cases", "description": "k == number of distinct elements (return all), all elements identical (one bucket), single element, k=1 (the mode), negatives, and the answer-is-unique guarantee removing tie ambiguity.", "weight": 1.0 },
-    { "key": "testing", "label": "Testing", "description": "Tests k = distinct count and an all-same array; verifies the bucket scan direction (high frequency first) and that exactly k elements are returned.", "weight": 0.8 },
-    { "key": "communication", "label": "Communication", "description": "Explains the count-then-select decomposition and why frequency being bounded by n unlocks the linear bucket-sort trick.", "weight": 0.8 }
+    {
+      "key": "problem_understanding",
+      "label": "Problem understanding",
+      "description": "Recognizes this is 'count frequencies, then take the k largest by count', notes the answer is unique (no tie-break needed), and that full sort by frequency is O(n log n) — the prompt asks for better.",
+      "weight": 1.0
+    },
+    {
+      "key": "approach",
+      "label": "Approach",
+      "description": "Builds a frequency map, then selects top k via a size-k min-heap (O(n log k)) or bucket sort by frequency (O(n)). Can articulate the Quickselect-on-unique-elements alternative for O(n) average.",
+      "weight": 1.3
+    },
+    {
+      "key": "correctness",
+      "label": "Correctness",
+      "description": "Heap: keeps exactly k by popping the smallest-count when size exceeds k; extracts k elements. Bucket: index = frequency (0..n), place elements in bucket[freq], scan buckets high-to-low collecting until k are gathered. No off-by-one on bucket size (n+1).",
+      "weight": 1.3
+    },
+    {
+      "key": "complexity_analysis",
+      "label": "Complexity analysis",
+      "description": "Heap O(n log k) time / O(n + k) space. Bucket sort O(n) time / O(n) space. Quickselect O(n) average. Explains why bucket sort escapes the log factor: frequency is bounded by n, so it can be used as an array index.",
+      "weight": 1.1
+    },
+    {
+      "key": "code_quality",
+      "label": "Code quality",
+      "description": "Clean Counter/hash-map build, a single heap or a clean bucket array of lists; collection loop terminates correctly at k without over-collecting.",
+      "weight": 1.0
+    },
+    {
+      "key": "edge_cases",
+      "label": "Edge cases",
+      "description": "k == number of distinct elements (return all), all elements identical (one bucket), single element, k=1 (the mode), negatives, and the answer-is-unique guarantee removing tie ambiguity.",
+      "weight": 1.0
+    },
+    {
+      "key": "testing",
+      "label": "Testing",
+      "description": "Tests k = distinct count and an all-same array; verifies the bucket scan direction (high frequency first) and that exactly k elements are returned.",
+      "weight": 0.8
+    },
+    {
+      "key": "communication",
+      "label": "Communication",
+      "description": "Explains the count-then-select decomposition and why frequency being bounded by n unlocks the linear bucket-sort trick.",
+      "weight": 0.8
+    }
   ],
   "reference": {
     "constraints": [
@@ -38,19 +88,54 @@
       }
     ],
     "test_cases": [
-      { "input": "nums = [4,4,4,5,5,6], k = 1", "expected": "[4] — k=1 returns the mode" },
-      { "input": "nums = [1,2,3,4], k = 4", "expected": "[1,2,3,4] — k equals the distinct count, return all (any order)" },
-      { "input": "nums = [7,7,7,7], k = 1", "expected": "[7] — all identical, a single bucket at frequency 4" },
-      { "input": "nums = [-1,-1,2,2,2,3], k = 2", "expected": "[2,-1] — negatives handled; counts 3,2,1" },
-      { "input": "nums = [5,3,1,1,1,3,73,1], k = 2", "expected": "[1,3] — 1 appears 4x, 3 appears 2x" }
+      {
+        "input": "nums = [4,4,4,5,5,6], k = 1",
+        "expected": "[4] — k=1 returns the mode"
+      },
+      {
+        "input": "nums = [1,2,3,4], k = 4",
+        "expected": "[1,2,3,4] — k equals the distinct count, return all (any order)"
+      },
+      {
+        "input": "nums = [7,7,7,7], k = 1",
+        "expected": "[7] — all identical, a single bucket at frequency 4"
+      },
+      {
+        "input": "nums = [-1,-1,2,2,2,3], k = 2",
+        "expected": "[2,-1] — negatives handled; counts 3,2,1"
+      },
+      {
+        "input": "nums = [5,3,1,1,1,3,73,1], k = 2",
+        "expected": "[1,3] — 1 appears 4x, 3 appears 2x"
+      }
     ],
     "optimal_time": "O(n) with bucket sort (or Quickselect average); O(n log k) with a size-k heap",
     "optimal_space": "O(n) for the frequency map and buckets; O(n + k) for the heap variant",
     "approaches": [
-      { "name": "count + full sort by frequency", "idea": "Build a frequency map, sort the distinct elements by count descending, take the first k. Simple and correct but sorts all m distinct elements even though only k are needed.", "time": "O(n + m log m)", "space": "O(n)" },
-      { "name": "count + size-k min-heap", "idea": "Build the frequency map. Push (count, element) into a min-heap; whenever it exceeds size k, pop the smallest count. After processing all distinct elements the heap holds the k most frequent. Beats full sort when k << number of distinct elements, and is the natural streaming choice.", "time": "O(n + m log k)", "space": "O(n + k)" },
-      { "name": "optimal: bucket sort by frequency", "idea": "Build the frequency map. Create buckets indexed 0..n where bucket[f] is the list of elements that occur exactly f times (a count can be at most n). Iterate f from n down to 1, appending each bucket's elements to the result until it holds k. Because frequency is bounded by n, it serves directly as an array index, eliminating any comparison sort and giving strict O(n).", "time": "O(n)", "space": "O(n)" },
-      { "name": "Quickselect on distinct elements", "idea": "Put the distinct elements in an array and Quickselect by frequency to place the kth-most-frequent at its rank, then take one side. O(n) average like the k-th-largest problem, but with more bookkeeping than bucket sort; worth mentioning as the partition-based alternative.", "time": "O(n) average, O(n^2) worst", "space": "O(n)" }
+      {
+        "name": "count + full sort by frequency",
+        "idea": "Build a frequency map, sort the distinct elements by count descending, take the first k. Simple and correct but sorts all m distinct elements even though only k are needed.",
+        "time": "O(n + m log m)",
+        "space": "O(n)"
+      },
+      {
+        "name": "count + size-k min-heap",
+        "idea": "Build the frequency map. Push (count, element) into a min-heap; whenever it exceeds size k, pop the smallest count. After processing all distinct elements the heap holds the k most frequent. Beats full sort when k << number of distinct elements, and is the natural streaming choice.",
+        "time": "O(n + m log k)",
+        "space": "O(n + k)"
+      },
+      {
+        "name": "optimal: bucket sort by frequency",
+        "idea": "Build the frequency map. Create buckets indexed 0..n where bucket[f] is the list of elements that occur exactly f times (a count can be at most n). Iterate f from n down to 1, appending each bucket's elements to the result until it holds k. Because frequency is bounded by n, it serves directly as an array index, eliminating any comparison sort and giving strict O(n).",
+        "time": "O(n)",
+        "space": "O(n)"
+      },
+      {
+        "name": "Quickselect on distinct elements",
+        "idea": "Put the distinct elements in an array and Quickselect by frequency to place the kth-most-frequent at its rank, then take one side. O(n) average like the k-th-largest problem, but with more bookkeeping than bucket sort; worth mentioning as the partition-based alternative.",
+        "time": "O(n) average, O(n^2) worst",
+        "space": "O(n)"
+      }
     ],
     "follow_ups": [
       "Top K Frequent WORDS — same idea but ties broken lexicographically, which forces a custom comparator in the heap and a sort within each frequency bucket.",

@@ -3,20 +3,69 @@
   "title": "Two Sum and Three Sum",
   "track": "engineering",
   "domain": "coding",
+  "areas": [
+    "engineering",
+    "data_science"
+  ],
   "modality": "coding",
   "difficulty": "junior",
-  "tags": ["hashing", "two-pointer", "arrays", "sorting"],
+  "tags": [
+    "hashing",
+    "two-pointer",
+    "arrays",
+    "sorting"
+  ],
   "prompt": "Given an array of integers nums and an integer target, return the indices of the two numbers that add up to target. You may assume exactly one solution exists and you may not use the same element twice. As a follow-up: given an array nums, return all unique triplets [a, b, c] such that a + b + c == 0 (3-Sum), with no duplicate triplets in the result.",
   "blurb": "The gateway hashing problem — a one-pass hash map for Two Sum, generalized to the sort + two-pointer sweep of 3-Sum.",
   "rubric": [
-    { "key": "problem_understanding", "label": "Problem understanding", "description": "Clarifies whether the array is sorted, whether indices or values are returned, whether duplicates exist, and (for 3-Sum) that TRIPLET values must be unique, not index tuples.", "weight": 1.0 },
-    { "key": "approach", "label": "Approach", "description": "For Two Sum reaches the one-pass hash map storing value->index and looking up target-x; recognizes the O(n^2) nested loop as the naive baseline. For 3-Sum reaches sort + fix one element + two-pointer, and connects it back to Two Sum.", "weight": 1.3 },
-    { "key": "correctness", "label": "Correctness", "description": "Two Sum: checks the complement is already in the map before inserting so an element isn't used twice. 3-Sum: skips duplicate values for the fixed index AND for both pointers after a match to avoid duplicate triplets; moves both pointers only on a hit.", "weight": 1.3 },
-    { "key": "complexity_analysis", "label": "Complexity analysis", "description": "Two Sum O(n) time / O(n) space with the hash map, vs O(n^2)/O(1) brute force or O(n log n)/O(1) sort+two-pointer (which loses original indices). 3-Sum O(n^2) time / O(1) or O(n) space.", "weight": 1.0 },
-    { "key": "code_quality", "label": "Code quality", "description": "Two Sum is a tight single loop; 3-Sum factors the inner two-pointer scan cleanly and handles the duplicate-skipping with readable while-loops rather than tangled conditionals.", "weight": 1.0 },
-    { "key": "edge_cases", "label": "Edge cases", "description": "Empty/size<2 arrays, negatives, a value that is exactly half the target appearing once vs twice, all zeros for 3-Sum, fewer than 3 elements, no valid triplet.", "weight": 1.1 },
-    { "key": "testing", "label": "Testing", "description": "Tests the duplicate-value cases explicitly (e.g. [0,0,0], [-1,-1,2]) rather than only a happy path, and verifies no duplicate triplets are emitted.", "weight": 0.8 },
-    { "key": "communication", "label": "Communication", "description": "Explains why the complement-check order matters, and why sorting enables the two-pointer sweep in the follow-up.", "weight": 0.8 }
+    {
+      "key": "problem_understanding",
+      "label": "Problem understanding",
+      "description": "Clarifies whether the array is sorted, whether indices or values are returned, whether duplicates exist, and (for 3-Sum) that TRIPLET values must be unique, not index tuples.",
+      "weight": 1.0
+    },
+    {
+      "key": "approach",
+      "label": "Approach",
+      "description": "For Two Sum reaches the one-pass hash map storing value->index and looking up target-x; recognizes the O(n^2) nested loop as the naive baseline. For 3-Sum reaches sort + fix one element + two-pointer, and connects it back to Two Sum.",
+      "weight": 1.3
+    },
+    {
+      "key": "correctness",
+      "label": "Correctness",
+      "description": "Two Sum: checks the complement is already in the map before inserting so an element isn't used twice. 3-Sum: skips duplicate values for the fixed index AND for both pointers after a match to avoid duplicate triplets; moves both pointers only on a hit.",
+      "weight": 1.3
+    },
+    {
+      "key": "complexity_analysis",
+      "label": "Complexity analysis",
+      "description": "Two Sum O(n) time / O(n) space with the hash map, vs O(n^2)/O(1) brute force or O(n log n)/O(1) sort+two-pointer (which loses original indices). 3-Sum O(n^2) time / O(1) or O(n) space.",
+      "weight": 1.0
+    },
+    {
+      "key": "code_quality",
+      "label": "Code quality",
+      "description": "Two Sum is a tight single loop; 3-Sum factors the inner two-pointer scan cleanly and handles the duplicate-skipping with readable while-loops rather than tangled conditionals.",
+      "weight": 1.0
+    },
+    {
+      "key": "edge_cases",
+      "label": "Edge cases",
+      "description": "Empty/size<2 arrays, negatives, a value that is exactly half the target appearing once vs twice, all zeros for 3-Sum, fewer than 3 elements, no valid triplet.",
+      "weight": 1.1
+    },
+    {
+      "key": "testing",
+      "label": "Testing",
+      "description": "Tests the duplicate-value cases explicitly (e.g. [0,0,0], [-1,-1,2]) rather than only a happy path, and verifies no duplicate triplets are emitted.",
+      "weight": 0.8
+    },
+    {
+      "key": "communication",
+      "label": "Communication",
+      "description": "Explains why the complement-check order matters, and why sorting enables the two-pointer sweep in the follow-up.",
+      "weight": 0.8
+    }
   ],
   "reference": {
     "constraints": [
@@ -42,19 +91,52 @@
       }
     ],
     "test_cases": [
-      { "input": "Two Sum: nums=[3,2,4], target=6", "expected": "[1,2] — must not pick index 0 twice; 3+3 is invalid, 2+4=6" },
-      { "input": "Two Sum: nums=[-3,4,3,90], target=0", "expected": "[0,2] — handles negatives (-3 + 3 = 0)" },
-      { "input": "3-Sum: nums=[]", "expected": "[] — empty input" },
-      { "input": "3-Sum: nums=[0,0,0,0]", "expected": "[[0,0,0]] — a single triplet despite four zeros; duplicate-skip prevents repeats" },
-      { "input": "3-Sum: nums=[1,2,-2,-1]", "expected": "[] — no triplet sums to 0" },
-      { "input": "3-Sum: nums=[-2,0,1,1,2]", "expected": "[[-2,0,2],[-2,1,1]] — both valid, second uses the repeated 1s legitimately" }
+      {
+        "input": "Two Sum: nums=[3,2,4], target=6",
+        "expected": "[1,2] — must not pick index 0 twice; 3+3 is invalid, 2+4=6"
+      },
+      {
+        "input": "Two Sum: nums=[-3,4,3,90], target=0",
+        "expected": "[0,2] — handles negatives (-3 + 3 = 0)"
+      },
+      {
+        "input": "3-Sum: nums=[]",
+        "expected": "[] — empty input"
+      },
+      {
+        "input": "3-Sum: nums=[0,0,0,0]",
+        "expected": "[[0,0,0]] — a single triplet despite four zeros; duplicate-skip prevents repeats"
+      },
+      {
+        "input": "3-Sum: nums=[1,2,-2,-1]",
+        "expected": "[] — no triplet sums to 0"
+      },
+      {
+        "input": "3-Sum: nums=[-2,0,1,1,2]",
+        "expected": "[[-2,0,2],[-2,1,1]] — both valid, second uses the repeated 1s legitimately"
+      }
     ],
     "optimal_time": "Two Sum O(n); 3-Sum O(n^2)",
     "optimal_space": "Two Sum O(n) for the hash map; 3-Sum O(1) beyond the output (sort in place) or O(n) if the sort is not in place",
     "approaches": [
-      { "name": "brute force (nested loops)", "idea": "Two Sum: for every i, scan every j>i checking nums[i]+nums[j]==target. 3-Sum: three nested loops over all index triples plus a set to dedupe. Straightforward, no extra insight, but quadratic/cubic.", "time": "Two Sum O(n^2); 3-Sum O(n^3)", "space": "O(1) (or O(triplets) for the dedupe set)" },
-      { "name": "optimal Two Sum: one-pass hash map", "idea": "Iterate once. For each x=nums[i], compute need=target-x. If need is already a key in the map, return [map[need], i]. Otherwise store map[x]=i and continue. Checking BEFORE inserting guarantees the two indices are distinct, and the single pass is what makes it O(n).", "time": "O(n)", "space": "O(n)" },
-      { "name": "sort + two-pointer (value-return variant / 3-Sum core)", "idea": "Sort. For Two-Sum-by-value, walk a left and right pointer inward: if sum<target move left up, if sum>target move right down, else record. This is O(n log n) and O(1) but destroys original indices, so it fits when values (not indices) are wanted. 3-Sum reuses it: sort, then for each index i (skipping duplicate nums[i]), run the two-pointer sweep on the subarray to its right targeting -nums[i], skipping duplicate values on both pointers after each hit.", "time": "sort O(n log n); 3-Sum O(n^2)", "space": "O(1) beyond the sort" }
+      {
+        "name": "brute force (nested loops)",
+        "idea": "Two Sum: for every i, scan every j>i checking nums[i]+nums[j]==target. 3-Sum: three nested loops over all index triples plus a set to dedupe. Straightforward, no extra insight, but quadratic/cubic.",
+        "time": "Two Sum O(n^2); 3-Sum O(n^3)",
+        "space": "O(1) (or O(triplets) for the dedupe set)"
+      },
+      {
+        "name": "optimal Two Sum: one-pass hash map",
+        "idea": "Iterate once. For each x=nums[i], compute need=target-x. If need is already a key in the map, return [map[need], i]. Otherwise store map[x]=i and continue. Checking BEFORE inserting guarantees the two indices are distinct, and the single pass is what makes it O(n).",
+        "time": "O(n)",
+        "space": "O(n)"
+      },
+      {
+        "name": "sort + two-pointer (value-return variant / 3-Sum core)",
+        "idea": "Sort. For Two-Sum-by-value, walk a left and right pointer inward: if sum<target move left up, if sum>target move right down, else record. This is O(n log n) and O(1) but destroys original indices, so it fits when values (not indices) are wanted. 3-Sum reuses it: sort, then for each index i (skipping duplicate nums[i]), run the two-pointer sweep on the subarray to its right targeting -nums[i], skipping duplicate values on both pointers after each hit.",
+        "time": "sort O(n log n); 3-Sum O(n^2)",
+        "space": "O(1) beyond the sort"
+      }
     ],
     "follow_ups": [
       "Return VALUES instead of indices — now the sort + two-pointer approach becomes attractive (O(1) extra space).",

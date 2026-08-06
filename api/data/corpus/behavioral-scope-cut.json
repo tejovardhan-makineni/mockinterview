@@ -3,18 +3,64 @@
   "title": "Tell me about a time you had to cut scope or say no",
   "track": "professional",
   "domain": "behavioral",
+  "areas": [
+    "engineering",
+    "data_science",
+    "medicine",
+    "nursing",
+    "law",
+    "consulting",
+    "product_management",
+    "finance"
+  ],
   "modality": "conversational",
   "difficulty": "mid",
-  "tags": ["prioritization", "saying-no", "scope", "tradeoffs", "star"],
+  "tags": [
+    "prioritization",
+    "saying-no",
+    "scope",
+    "tradeoffs",
+    "star"
+  ],
   "prompt": "Tell me about a time you had to cut scope or say no to something people wanted — a feature, a request, a project. How did you make the call, and how did you handle the people who wanted it?",
   "blurb": "Scope cut / saying no: did they prioritize with clear reasoning and bring people along — or just refuse or overcommit?",
   "rubric": [
-    { "key": "situation_clarity", "label": "Situation & the pressure", "description": "Frames what was being asked, who wanted it, and the constraint (time, resources, focus) that forced a cut or a no.", "weight": 1.0 },
-    { "key": "task_ownership", "label": "Owning the decision", "description": "Shows THEY made or drove the call to cut/decline, taking responsibility for a decision that would disappoint someone, rather than deflecting it.", "weight": 1.2 },
-    { "key": "action_specificity", "label": "Prioritization reasoning", "description": "Describes the concrete basis for the decision — impact vs cost, alignment to goals, data — and specifically what they cut and what they protected.", "weight": 1.3 },
-    { "key": "result_impact", "label": "Result & stakeholder handling", "description": "Shows the outcome (focus/quality preserved, right thing shipped) AND that they handled the disappointed stakeholders well — brought them along rather than just refusing.", "weight": 1.2 },
-    { "key": "reflection", "label": "Reflection & judgment", "description": "Reflects on how they weigh trade-offs, the cost of saying yes to everything, and how to say no in a way that preserves relationships.", "weight": 1.1 },
-    { "key": "communication", "label": "Communication & structure", "description": "Structured and clear, showing they can explain a hard trade-off crisply.", "weight": 0.9 }
+    {
+      "key": "situation_clarity",
+      "label": "Situation & the pressure",
+      "description": "Frames what was being asked, who wanted it, and the constraint (time, resources, focus) that forced a cut or a no.",
+      "weight": 1.0
+    },
+    {
+      "key": "task_ownership",
+      "label": "Owning the decision",
+      "description": "Shows THEY made or drove the call to cut/decline, taking responsibility for a decision that would disappoint someone, rather than deflecting it.",
+      "weight": 1.2
+    },
+    {
+      "key": "action_specificity",
+      "label": "Prioritization reasoning",
+      "description": "Describes the concrete basis for the decision — impact vs cost, alignment to goals, data — and specifically what they cut and what they protected.",
+      "weight": 1.3
+    },
+    {
+      "key": "result_impact",
+      "label": "Result & stakeholder handling",
+      "description": "Shows the outcome (focus/quality preserved, right thing shipped) AND that they handled the disappointed stakeholders well — brought them along rather than just refusing.",
+      "weight": 1.2
+    },
+    {
+      "key": "reflection",
+      "label": "Reflection & judgment",
+      "description": "Reflects on how they weigh trade-offs, the cost of saying yes to everything, and how to say no in a way that preserves relationships.",
+      "weight": 1.1
+    },
+    {
+      "key": "communication",
+      "label": "Communication & structure",
+      "description": "Structured and clear, showing they can explain a hard trade-off crisply.",
+      "weight": 0.9
+    }
   ],
   "reference": {
     "scenario": "The candidate should recall a moment they had to decline a request or cut committed scope — a feature stakeholders wanted, a project competing for resources, a customer ask, extra scope creeping into a deadline — under a real constraint. The signal is principled prioritization (clear reasoning about what matters most) plus the interpersonal skill to bring the disappointed party along, not just refuse.",
@@ -27,11 +73,26 @@
       "Reflection: understands that saying yes to everything is a failure to prioritize; reflects on how to say no while keeping trust, and when a no should later become a yes."
     ],
     "probes": [
-      { "trigger": "just refused, no reasoning", "question": "On what basis did you decide this was the thing to cut? What was your prioritization framework — impact, effort, alignment?" },
-      { "trigger": "stakeholder handling ignored", "question": "How did the person who wanted it react, and what did you do to bring them along rather than just telling them no?" },
-      { "trigger": "actually said yes to everything", "question": "It sounds like you found a way to do it all — did you? If so, what gave, and was that the right call?" },
-      { "trigger": "no outcome", "question": "What did protecting focus actually buy you? Did the higher-priority work benefit measurably?" },
-      { "trigger": "decision made for them", "question": "Was this your call, or did someone above make it? What did YOU drive here?" }
+      {
+        "trigger": "just refused, no reasoning",
+        "question": "On what basis did you decide this was the thing to cut? What was your prioritization framework — impact, effort, alignment?"
+      },
+      {
+        "trigger": "stakeholder handling ignored",
+        "question": "How did the person who wanted it react, and what did you do to bring them along rather than just telling them no?"
+      },
+      {
+        "trigger": "actually said yes to everything",
+        "question": "It sounds like you found a way to do it all — did you? If so, what gave, and was that the right call?"
+      },
+      {
+        "trigger": "no outcome",
+        "question": "What did protecting focus actually buy you? Did the higher-priority work benefit measurably?"
+      },
+      {
+        "trigger": "decision made for them",
+        "question": "Was this your call, or did someone above make it? What did YOU drive here?"
+      }
     ],
     "red_flags": [
       "Said no bluntly with no reasoning or empathy, alienating the stakeholder.",

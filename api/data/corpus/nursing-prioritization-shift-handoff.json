@@ -1,0 +1,123 @@
+{
+  "id": "nursing-prioritization-shift-handoff",
+  "title": "Shift Handoff: Sorting Five Patients at 7am",
+  "track": "professional",
+  "domain": "prioritization",
+  "areas": [
+    "nursing"
+  ],
+  "modality": "conversational",
+  "difficulty": "entry",
+  "tags": [
+    "nursing",
+    "handoff",
+    "prioritization",
+    "maslow",
+    "time-critical-medication",
+    "sbar"
+  ],
+  "prompt": "You've just taken report at 7am and have five medical-surgical patients. Patient A was newly confused overnight and is now trying to climb out of bed; Patient B has a time-critical insulin dose due with breakfast trays arriving any minute; Patient C is medically ready for discharge and eager to leave; Patient D is refusing their morning medications; and Patient E has a lab result pending that the night nurse flagged. In what order would you do your first rounds, and why? Walk me through your reasoning. This is educational — I'm assessing your clinical reasoning, not giving medical advice.",
+  "blurb": "An entry-level start-of-shift prioritization scenario — assessed for acuity-based rounding order, recognizing new confusion and time-critical medications, patient safety, delegation, and clear reasoning.",
+  "rubric": [
+    {
+      "key": "prioritization",
+      "label": "Prioritization logic",
+      "description": "Sets a first-rounds order using an explicit framework (ABCs, Maslow, acute-vs-stable, actual-vs-potential, time-critical meds), and can justify why the newly confused, climbing patient and the time-critical insulin rank above the discharge and the refusal.",
+      "weight": 1.3
+    },
+    {
+      "key": "safety",
+      "label": "Patient safety",
+      "description": "Treats the newly confused patient climbing out of bed as an immediate fall/safety risk and a change in condition, and keeps them safe rather than assuming they're simply agitated.",
+      "weight": 1.2
+    },
+    {
+      "key": "time_critical",
+      "label": "Time-critical medication",
+      "description": "Recognizes the insulin as time-critical and coupled to the meal — must be timed with the tray, not given whenever convenient — and can explain why a mistimed dose is unsafe.",
+      "weight": 1.1
+    },
+    {
+      "key": "escalation",
+      "label": "Escalation & assessment",
+      "description": "Plans to assess the new confusion (vitals, glucose, oxygen, recent meds, baseline) and to escalate a genuine change in mental status to the charge nurse/provider with a structured SBAR handoff.",
+      "weight": 1.1
+    },
+    {
+      "key": "delegation",
+      "label": "Delegation & teamwork",
+      "description": "Delegates lower-acuity tasks appropriately — assistive personnel to stay with or supervise the confused patient safely, to begin discharge logistics, or to deliver a tray — while keeping assessment and med decisions within nursing scope.",
+      "weight": 1.0
+    },
+    {
+      "key": "communication",
+      "label": "Communication",
+      "description": "Communicates calmly with every patient, explores why the refusing patient is declining meds rather than just charting a refusal, and manages the discharge patient's expectations without dismissing anyone.",
+      "weight": 1.0
+    }
+  ],
+  "reference": {
+    "scenario": "Entry-level start-of-shift prioritization scenario. This is educational and framework-based — it assesses clinical reasoning and safety judgment, not real medical direction. Fresh off 7am report, the candidate must set a rounding order for five patients of differing acuity and justify it. The two top priorities are Patient A (new-onset confusion now climbing out of bed) and Patient B (time-critical insulin due with the arriving tray). Patient A is both a safety emergency — a confused patient climbing out of bed is an immediate, actual fall risk — and a change in condition that must be assessed, because new confusion can have reversible, dangerous causes (low blood sugar, low oxygen, infection, medication effect); under safety and Maslow, physiologic and safety needs come first. The strongest entry answers make the patient safe first (go to the room, keep them from falling, get eyes on them or assistive personnel to stay while the nurse assesses) and then do a focused assessment and escalate a true mental-status change with SBAR. Patient B's insulin is time-critical: it is tied to the meal, so it must be timed with the tray — giving insulin without the food, or long after, risks hypoglycemia; this is a high priority that is clock-driven, so the candidate should plan to get to it right around tray delivery and not let it slip. A practical, safe answer often runs to Patient A first for safety, keeps them supervised, and ensures Patient B's insulin is given at the right moment relative to the tray — sometimes by holding the tray briefly or by tightly sequencing the two. Patient C (ready discharge) is stable and low acuity — important for flow and the patient's satisfaction, and discharge logistics can be started or delegated, but it does not outrank an unstable or time-critical patient. Patient D (refusing morning meds) deserves respectful exploration — find out why (nausea, misunderstanding, side effects, a held-for-a-reason med), educate, and honor an informed refusal while notifying the provider if a critical med is involved — but a stable patient's refusal is not a physiologic emergency. Patient E (pending lab) should be checked because a flagged result could change the plan, but a not-yet-back lab is lower acuity than an active safety problem; the candidate should look it up and act on it when it results. The best entry answers name a framework, make safety the first move, protect the time-critical med's timing, delegate supervision and logistics, explore the refusal rather than just charting it, and escalate a real change in condition with structure. Weak answers round in the order presented or start with the easy discharge, ignore the fall risk of the confused patient, give or forget the insulin without regard to the meal, chart the refusal without asking why, or never plan to assess or escalate the new confusion.",
+    "model_points": [
+      "Set a rounding order with a framework and say it out loud: ABCs, Maslow, acute-vs-stable, and time-critical meds put the newly confused patient climbing out of bed and the time-critical insulin at the top, ahead of the discharge, the refusal, and the pending lab.",
+      "Make Patient A safe first: a newly confused patient climbing out of bed is an immediate, actual fall risk — get to the room, keep them from falling, and have eyes on them (yourself or assistive personnel) rather than assuming they're merely agitated.",
+      "Treat the new confusion as a change in condition: plan a focused assessment — vital signs, a point-of-care glucose, oxygen saturation, recent medications, and their baseline mental status — because new confusion can have reversible, dangerous causes.",
+      "Protect the insulin's timing: the dose is time-critical and coupled to the meal, so it must be given in the right window relative to the tray — not early without food and not long after — to avoid hypoglycemia; sequence it tightly with tray delivery or briefly hold the tray if needed.",
+      "Delegate lower-acuity work: assistive personnel can stay with or supervise the confused patient safely while you assess, begin discharge logistics for Patient C, or deliver a tray — while you keep the assessment and medication decisions within nursing scope.",
+      "Handle the discharge (Patient C) as stable/low-acuity: important for flow and satisfaction and can be started or delegated, but it does not outrank an unstable or time-critical patient; set the patient's expectations kindly.",
+      "Explore Patient D's refusal rather than just charting it: ask why they're declining (nausea, side effects, a misunderstanding, or a med being held for a reason), educate, honor an informed refusal, and notify the provider if a critical medication is involved.",
+      "Check Patient E's pending lab: look it up because a flagged result could change the plan, and act on it when it results — but a not-yet-back lab is lower acuity than an active safety problem.",
+      "Escalate a genuine change in condition: if the new confusion reflects a real deterioration or an abnormal finding (for example a very low glucose or low oxygen), notify the charge nurse/provider and hand off with SBAR.",
+      "Reassess and communicate calmly with every patient, briefly explaining priorities so no one — including the eager-to-leave and the refusing patient — feels dismissed."
+    ],
+    "probes": [
+      {
+        "trigger": "candidate rounds in the order presented or starts with the easy discharge",
+        "question": "Which patient do you see first, and what framework are you using to rank a confused patient climbing out of bed against a patient who's ready to go home?"
+      },
+      {
+        "trigger": "candidate treats the new confusion as simple agitation",
+        "question": "This patient was fine at bedtime and is now confused and climbing out of bed. What does that change tell you, and what would you want to rule out?"
+      },
+      {
+        "trigger": "candidate plans to give the insulin whenever convenient",
+        "question": "Why does the timing of that insulin dose matter, and what could go wrong if you give it without the meal or well after it?"
+      },
+      {
+        "trigger": "candidate leaves the confused patient alone to do other tasks",
+        "question": "Is it safe to leave a confused patient who's trying to climb out of bed? If not, how do you keep them safe while you get to the insulin?"
+      },
+      {
+        "trigger": "candidate just charts the medication refusal",
+        "question": "Before you document a refusal, what would you want to ask or explore with that patient?"
+      },
+      {
+        "trigger": "candidate never plans to assess or escalate the confusion",
+        "question": "Your check shows a real change in mental status. Who do you tell, and how would you communicate it?"
+      },
+      {
+        "trigger": "candidate ignores the pending lab entirely",
+        "question": "The night nurse flagged that pending lab for a reason. How and when does it fit into your plan?"
+      }
+    ],
+    "red_flags": [
+      "Rounds in the order presented or starts with the easy discharge or the pending lab",
+      "Fails to recognize the newly confused, climbing patient as the top safety priority",
+      "Leaves a confused patient trying to climb out of bed unsupervised",
+      "Gives or forgets the time-critical insulin without regard to the meal, risking hypoglycemia",
+      "Treats new-onset confusion as simple agitation with no plan to assess a cause",
+      "Charts the medication refusal without exploring why or educating the patient",
+      "Never plans to escalate a genuine change in condition, or escalates with no structured handoff",
+      "Ignores the flagged pending lab or lets the eager discharge patient dictate priorities"
+    ],
+    "follow_ups": [
+      "Your point-of-care glucose on Patient A comes back very low. How does that change what you do next, and who do you tell?",
+      "Breakfast trays arrive while you're still with the confused patient. How do you make sure Patient B's insulin is given safely and on time?",
+      "Patient D says they're refusing because the pill makes them nauseated. How do you handle it?",
+      "How would you hand off Patient A's change in condition to the provider using SBAR?",
+      "Patient C's family is at the desk pushing to leave now. How do you manage that without rushing an unsafe discharge?"
+    ],
+    "exemplar_answer": "A strong entry-level answer leads with the framework: 'I'd set my rounding order by ABCs, Maslow, and time-critical meds. The newly confused patient climbing out of bed is both a safety emergency and a change in condition, and the insulin is time-critical and tied to the meal, so those two come first — ahead of the discharge, the refusal, and the pending lab.' Safety first: 'I'd go to Patient A right away, keep them from falling, and get eyes on them — myself or assistive personnel staying at the bedside — because a confused patient climbing out of bed can hurt themselves in seconds. New confusion overnight is a change I need to work up, so I'd check vitals, a point-of-care glucose, their oxygen, recent meds, and their baseline.' Protecting the med timing: 'The insulin is coupled to the tray, so I'd sequence it tightly — if the trays land while I'm still with Patient A, I'd have the tray held a moment or delegate supervision so I can give the insulin in the right window with the food, since giving it without the meal or long after risks a low blood sugar.' Using the team and the rest: 'Assistive personnel can stay with the confused patient, start discharge logistics for Patient C, or deliver a tray, while I keep the assessment and med decisions. Patient C is stable — important for flow, and I'd set expectations kindly and begin the paperwork, but it doesn't outrank the others. For Patient D, I wouldn't just chart a refusal — I'd ask why they're declining, whether it's nausea or a misunderstanding, educate them, honor an informed refusal, and tell the provider if it's a critical med. I'd look up Patient E's flagged lab and act on it when it results.' Escalation: 'If my check on Patient A shows a real change — say a very low glucose or low oxygen — I'd notify the charge nurse and provider and hand off with SBAR: situation, background, assessment, and what I'm recommending.' Throughout, I'd stay calm, keep reassessing, and explain briefly to each patient so no one feels dismissed. It ranks by acuity, makes safety the first move, protects the med timing, delegates, explores the refusal, and escalates with structure."
+  },
+  "interviewer_notes": "This is an entry-level educational scenario — reward sound reasoning, safety instincts, and a sensible rounding order over encyclopedic clinical detail, and never coach real medical treatment. The must-haves are recognizing the newly confused patient climbing out of bed as the top safety priority and a change in condition, and treating the insulin as a time-critical, meal-coupled med; if the candidate rounds in presented order or opens with the easy discharge, probe for their framework. Then look for making the confused patient safe before leaving them, a plan to assess a cause (glucose, oxygen, vitals, baseline) and escalate a true change with SBAR, protecting the insulin's timing relative to the tray, appropriate delegation (supervision and logistics to assistive personnel), exploring the medication refusal rather than just charting it, and slotting the pending lab appropriately. Use the low-glucose and tray-timing follow-ups to test assessment and time-critical handling. Strong entry candidates name a framework, lead with safety, protect med timing, delegate rather than martyring themselves, and keep every patient — including the eager and the refusing one — feeling attended to. Penalize rounding-as-presented, leaving a confused patient unsupervised, mistiming the insulin, treating confusion as mere agitation, charting a refusal without asking why, and failing to plan assessment or escalation."
+}

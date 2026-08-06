@@ -3,24 +3,95 @@
   "title": "Design an ML Feature Store",
   "track": "engineering",
   "domain": "ml_system_design",
+  "areas": [
+    "engineering",
+    "data_science"
+  ],
   "modality": "system_design",
   "difficulty": "senior",
-  "tags": ["feature-store", "point-in-time", "online-offline", "materialization", "freshness", "mlops"],
+  "tags": [
+    "feature-store",
+    "point-in-time",
+    "online-offline",
+    "materialization",
+    "freshness",
+    "mlops"
+  ],
   "prompt": "Design a feature store that serves ML features for both model training and low-latency online inference. It must guarantee consistency between offline training features and online serving features, provide point-in-time-correct training data, materialize features from batch and streaming sources, and meet a strict online read latency budget.",
   "blurb": "The MLOps backbone — online/offline consistency, point-in-time correctness, materialization, freshness, and low-latency serving.",
   "rubric": [
-    { "key": "requirements", "label": "Requirements gathering", "description": "Separates functional (define, materialize, serve, backfill features) from non-functional (online read latency, freshness, online/offline consistency, throughput).", "weight": 1.0 },
-    { "key": "clarifying_questions", "label": "Clarifying questions", "description": "Asks about number of features/entities, online QPS and latency budget, freshness requirements per feature, batch vs streaming sources, and training data volume.", "weight": 1.0 },
-    { "key": "estimations", "label": "Back-of-envelope estimations", "description": "Estimates online store size (entities x features), read QPS and fanout per inference, write throughput from materialization, and training-set join scale.", "weight": 1.1 },
-    { "key": "point_in_time", "label": "Point-in-time correctness", "description": "Generating training data via as-of joins on event timestamps so no future information leaks into labels; handling feature/label time alignment.", "weight": 1.3 },
-    { "key": "online_offline_consistency", "label": "Online/offline consistency", "description": "Shared feature definitions and transformation logic so the value computed offline for training equals the value served online — avoiding training/serving skew.", "weight": 1.3 },
-    { "key": "materialization", "label": "Materialization & ingestion", "description": "Batch (warehouse → online store) and streaming (event → online store) materialization jobs, incremental updates, and backfills.", "weight": 1.1 },
-    { "key": "freshness", "label": "Freshness", "description": "Per-feature freshness SLAs, streaming vs batch tradeoff, staleness monitoring, and TTLs on online values.", "weight": 1.1 },
-    { "key": "serving", "label": "Online serving", "description": "Low-latency feature retrieval, batched multi-entity lookups, feature vectors assembled by feature-service/view, and caching.", "weight": 1.1 },
-    { "key": "data_model", "label": "Data model & registry", "description": "Entities, feature views/groups, feature service definitions, versioning, and a registry as the source of truth.", "weight": 1.0 },
-    { "key": "ml_specifics", "label": "ML system specifics", "description": "Feature versioning and lineage, on-demand/derived features, avoiding leakage, and reproducibility of training sets.", "weight": 1.0 },
-    { "key": "scaling", "label": "Scaling", "description": "Sharding the online store, parallelizing materialization/backfills, caching hot entities, and multi-tenant isolation.", "weight": 0.9 },
-    { "key": "observability", "label": "Observability", "description": "Freshness/staleness metrics, feature drift and null-rate monitoring, materialization lag, and serving latency SLOs.", "weight": 0.9 }
+    {
+      "key": "requirements",
+      "label": "Requirements gathering",
+      "description": "Separates functional (define, materialize, serve, backfill features) from non-functional (online read latency, freshness, online/offline consistency, throughput).",
+      "weight": 1.0
+    },
+    {
+      "key": "clarifying_questions",
+      "label": "Clarifying questions",
+      "description": "Asks about number of features/entities, online QPS and latency budget, freshness requirements per feature, batch vs streaming sources, and training data volume.",
+      "weight": 1.0
+    },
+    {
+      "key": "estimations",
+      "label": "Back-of-envelope estimations",
+      "description": "Estimates online store size (entities x features), read QPS and fanout per inference, write throughput from materialization, and training-set join scale.",
+      "weight": 1.1
+    },
+    {
+      "key": "point_in_time",
+      "label": "Point-in-time correctness",
+      "description": "Generating training data via as-of joins on event timestamps so no future information leaks into labels; handling feature/label time alignment.",
+      "weight": 1.3
+    },
+    {
+      "key": "online_offline_consistency",
+      "label": "Online/offline consistency",
+      "description": "Shared feature definitions and transformation logic so the value computed offline for training equals the value served online — avoiding training/serving skew.",
+      "weight": 1.3
+    },
+    {
+      "key": "materialization",
+      "label": "Materialization & ingestion",
+      "description": "Batch (warehouse → online store) and streaming (event → online store) materialization jobs, incremental updates, and backfills.",
+      "weight": 1.1
+    },
+    {
+      "key": "freshness",
+      "label": "Freshness",
+      "description": "Per-feature freshness SLAs, streaming vs batch tradeoff, staleness monitoring, and TTLs on online values.",
+      "weight": 1.1
+    },
+    {
+      "key": "serving",
+      "label": "Online serving",
+      "description": "Low-latency feature retrieval, batched multi-entity lookups, feature vectors assembled by feature-service/view, and caching.",
+      "weight": 1.1
+    },
+    {
+      "key": "data_model",
+      "label": "Data model & registry",
+      "description": "Entities, feature views/groups, feature service definitions, versioning, and a registry as the source of truth.",
+      "weight": 1.0
+    },
+    {
+      "key": "ml_specifics",
+      "label": "ML system specifics",
+      "description": "Feature versioning and lineage, on-demand/derived features, avoiding leakage, and reproducibility of training sets.",
+      "weight": 1.0
+    },
+    {
+      "key": "scaling",
+      "label": "Scaling",
+      "description": "Sharding the online store, parallelizing materialization/backfills, caching hot entities, and multi-tenant isolation.",
+      "weight": 0.9
+    },
+    {
+      "key": "observability",
+      "label": "Observability",
+      "description": "Freshness/staleness metrics, feature drift and null-rate monitoring, materialization lag, and serving latency SLOs.",
+      "weight": 0.9
+    }
   ],
   "reference": {
     "functional_requirements": [
@@ -82,18 +153,48 @@
     ],
     "high_level_design": "Feature definitions live in a registry that both training and serving read, so the same transformation logic produces offline and online values (this is the consistency guarantee). Batch sources are transformed and written to the offline store (event-timestamped history) and materialized into the online KV store as latest values; streaming sources update the online store in near-real-time (and are appended to offline history for training). Online serving: an inference request asks a feature service for entity keys; the service does batched multi-key lookups against the online store, assembles the vector, optionally computes on-demand features from request inputs, and returns within the latency budget. Training data is generated by an as-of (point-in-time) join: for each label row at time T, fetch each feature's value as of the latest event_ts ≤ T, guaranteeing no future leakage. Monitoring tracks per-feature freshness, materialization lag, drift, and serving latency.",
     "deep_dives": [
-      { "topic": "point_in_time", "probe": "Walk me through generating a training set without leakage. Given a label at time T, how do you fetch each feature 'as of' T, and what breaks if you just join on entity key without timestamps?" },
-      { "topic": "online_offline_consistency", "probe": "The value your model saw in training must equal what it sees in serving. How do you guarantee that when batch pipelines and the online path are different code? Where does skew creep in?" },
-      { "topic": "materialization", "probe": "How do you materialize from batch and streaming into the online store, do incremental updates, and run a backfill without overwriting fresher streaming values or hammering the read path?" },
-      { "topic": "freshness", "probe": "Some features must be seconds-fresh, others daily. How do you meet per-feature freshness SLAs, monitor staleness, and TTL out stale online values?" },
-      { "topic": "serving", "probe": "You need a 50-feature vector across 3 entities in <10ms. How do you batch reads, lay out keys, and cache without serving stale features?" },
-      { "topic": "ml_specifics", "probe": "How do you version features and compute derived/on-demand features so old models keep working and training sets stay reproducible?" }
+      {
+        "topic": "point_in_time",
+        "probe": "Walk me through generating a training set without leakage. Given a label at time T, how do you fetch each feature 'as of' T, and what breaks if you just join on entity key without timestamps?"
+      },
+      {
+        "topic": "online_offline_consistency",
+        "probe": "The value your model saw in training must equal what it sees in serving. How do you guarantee that when batch pipelines and the online path are different code? Where does skew creep in?"
+      },
+      {
+        "topic": "materialization",
+        "probe": "How do you materialize from batch and streaming into the online store, do incremental updates, and run a backfill without overwriting fresher streaming values or hammering the read path?"
+      },
+      {
+        "topic": "freshness",
+        "probe": "Some features must be seconds-fresh, others daily. How do you meet per-feature freshness SLAs, monitor staleness, and TTL out stale online values?"
+      },
+      {
+        "topic": "serving",
+        "probe": "You need a 50-feature vector across 3 entities in <10ms. How do you batch reads, lay out keys, and cache without serving stale features?"
+      },
+      {
+        "topic": "ml_specifics",
+        "probe": "How do you version features and compute derived/on-demand features so old models keep working and training sets stay reproducible?"
+      }
     ],
     "followup_bank": [
-      { "trigger": "mentions online store or materialization or source data or warehouse", "question": "When the source data changes, how do the online feature values stay in sync — CDC/streaming materialization from the source vs periodic batch — and what's the freshness lag and staleness bound?" },
-      { "trigger": "mentions cache or caching", "question": "You cache hot entity feature vectors. What's the eviction/TTL policy, and how do you invalidate a cached vector when a streaming update writes a fresher value so you don't serve stale features to the model?" },
-      { "trigger": "mentions database or kv store or postgres or dynamodb", "question": "How do writes from materialization propagate to the online store consistently — CDC vs dual-write vs stream processor — and how do you avoid a backfill clobbering fresher streaming values?" },
-      { "trigger": "mentions streaming or kafka or flink", "question": "How do you keep the streaming-materialized online value and the offline history consistent so training and serving agree?" }
+      {
+        "trigger": "mentions online store or materialization or source data or warehouse",
+        "question": "When the source data changes, how do the online feature values stay in sync — CDC/streaming materialization from the source vs periodic batch — and what's the freshness lag and staleness bound?"
+      },
+      {
+        "trigger": "mentions cache or caching",
+        "question": "You cache hot entity feature vectors. What's the eviction/TTL policy, and how do you invalidate a cached vector when a streaming update writes a fresher value so you don't serve stale features to the model?"
+      },
+      {
+        "trigger": "mentions database or kv store or postgres or dynamodb",
+        "question": "How do writes from materialization propagate to the online store consistently — CDC vs dual-write vs stream processor — and how do you avoid a backfill clobbering fresher streaming values?"
+      },
+      {
+        "trigger": "mentions streaming or kafka or flink",
+        "question": "How do you keep the streaming-materialized online value and the offline history consistent so training and serving agree?"
+      }
     ],
     "scaling": [
       "Shard the online store by entity key; replicate for read QPS",

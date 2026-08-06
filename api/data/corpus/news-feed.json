@@ -3,24 +3,94 @@
   "title": "Design a News Feed / Home Timeline (Twitter/Facebook)",
   "track": "engineering",
   "domain": "system_design",
+  "areas": [
+    "engineering"
+  ],
   "modality": "system_design",
   "difficulty": "senior",
-  "tags": ["fanout", "timeline", "caching", "ranking", "read-heavy", "celebrity-problem"],
+  "tags": [
+    "fanout",
+    "timeline",
+    "caching",
+    "ranking",
+    "read-heavy",
+    "celebrity-problem"
+  ],
   "prompt": "Design the home feed for a social network — the ranked list of posts a user sees from accounts they follow. It should load fast, stay reasonably fresh, and work for both normal users and celebrities with tens of millions of followers.",
   "blurb": "Fanout-on-write vs read, the celebrity problem, ranking, and timeline caching.",
   "rubric": [
-    { "key": "requirements", "label": "Requirements gathering", "description": "Separates functional (compose post, home feed, follow, ranking) from non-functional (fast feed load, freshness, availability, read-heavy).", "weight": 1.0 },
-    { "key": "clarifying_questions", "label": "Clarifying questions", "description": "Asks about scale, avg vs max follower counts, chronological vs ranked, freshness SLA, media.", "weight": 1.0 },
-    { "key": "estimations", "label": "Back-of-envelope estimations", "description": "Estimates read QPS, post write QPS, fanout amplification, timeline cache size, storage.", "weight": 1.1 },
-    { "key": "fanout_model", "label": "Fanout model", "description": "Fanout-on-write (push) vs fanout-on-read (pull), the tradeoffs, and the hybrid that resolves the celebrity problem.", "weight": 1.4 },
-    { "key": "api_design", "label": "API design", "description": "POST /post, GET /feed (cursor pagination), follow/unfollow; timeline read contract.", "weight": 0.9 },
-    { "key": "data_model", "label": "Data model", "description": "Posts, social graph (follows), per-user timeline cache, choice of stores.", "weight": 1.0 },
-    { "key": "high_level_design", "label": "High-level design", "description": "Write path (post → fanout → timelines) vs read path (assemble + rank + cache); where ranking sits.", "weight": 1.3 },
-    { "key": "celebrity_problem", "label": "Celebrity problem", "description": "Why pure push fails for high-follower accounts; hybrid push+pull merge at read time.", "weight": 1.2 },
-    { "key": "ranking", "label": "Ranking & freshness", "description": "Chronological vs ML-ranked feed, feature signals, candidate generation vs scoring, freshness vs cost.", "weight": 1.0 },
-    { "key": "caching", "label": "Caching", "description": "Materialized timeline cache, eviction, warming inactive users lazily, stampede on hot content.", "weight": 1.1 },
-    { "key": "scaling", "label": "Scaling & bottlenecks", "description": "Fanout write amplification, graph store hot partitions, timeline cache memory, backfill on new follows.", "weight": 1.1 },
-    { "key": "observability", "label": "Observability", "description": "Feed latency, fanout lag, cache hit ratio, freshness metrics.", "weight": 0.8 }
+    {
+      "key": "requirements",
+      "label": "Requirements gathering",
+      "description": "Separates functional (compose post, home feed, follow, ranking) from non-functional (fast feed load, freshness, availability, read-heavy).",
+      "weight": 1.0
+    },
+    {
+      "key": "clarifying_questions",
+      "label": "Clarifying questions",
+      "description": "Asks about scale, avg vs max follower counts, chronological vs ranked, freshness SLA, media.",
+      "weight": 1.0
+    },
+    {
+      "key": "estimations",
+      "label": "Back-of-envelope estimations",
+      "description": "Estimates read QPS, post write QPS, fanout amplification, timeline cache size, storage.",
+      "weight": 1.1
+    },
+    {
+      "key": "fanout_model",
+      "label": "Fanout model",
+      "description": "Fanout-on-write (push) vs fanout-on-read (pull), the tradeoffs, and the hybrid that resolves the celebrity problem.",
+      "weight": 1.4
+    },
+    {
+      "key": "api_design",
+      "label": "API design",
+      "description": "POST /post, GET /feed (cursor pagination), follow/unfollow; timeline read contract.",
+      "weight": 0.9
+    },
+    {
+      "key": "data_model",
+      "label": "Data model",
+      "description": "Posts, social graph (follows), per-user timeline cache, choice of stores.",
+      "weight": 1.0
+    },
+    {
+      "key": "high_level_design",
+      "label": "High-level design",
+      "description": "Write path (post → fanout → timelines) vs read path (assemble + rank + cache); where ranking sits.",
+      "weight": 1.3
+    },
+    {
+      "key": "celebrity_problem",
+      "label": "Celebrity problem",
+      "description": "Why pure push fails for high-follower accounts; hybrid push+pull merge at read time.",
+      "weight": 1.2
+    },
+    {
+      "key": "ranking",
+      "label": "Ranking & freshness",
+      "description": "Chronological vs ML-ranked feed, feature signals, candidate generation vs scoring, freshness vs cost.",
+      "weight": 1.0
+    },
+    {
+      "key": "caching",
+      "label": "Caching",
+      "description": "Materialized timeline cache, eviction, warming inactive users lazily, stampede on hot content.",
+      "weight": 1.1
+    },
+    {
+      "key": "scaling",
+      "label": "Scaling & bottlenecks",
+      "description": "Fanout write amplification, graph store hot partitions, timeline cache memory, backfill on new follows.",
+      "weight": 1.1
+    },
+    {
+      "key": "observability",
+      "label": "Observability",
+      "description": "Feed latency, fanout lag, cache hit ratio, freshness metrics.",
+      "weight": 0.8
+    }
   ],
   "reference": {
     "functional_requirements": [
@@ -54,7 +124,17 @@
       "fanout": "A 50M-follower celebrity post would be 50M timeline writes if pushed — untenable; must pull for those",
       "cache": "Materialize ~800 recent post-ids per active user; 100M active × 800 × 8B ≈ ~640GB of timeline id cache"
     },
-    "core_components": ["API/web tier", "Post service + post store", "Social graph service (follows)", "Fanout service (async workers)", "Timeline cache (Redis, per-user post-id lists)", "Feed assembly/ranking service", "Ranking/ML scoring service", "Media store + CDN", "Kafka fanout backbone"],
+    "core_components": [
+      "API/web tier",
+      "Post service + post store",
+      "Social graph service (follows)",
+      "Fanout service (async workers)",
+      "Timeline cache (Redis, per-user post-id lists)",
+      "Feed assembly/ranking service",
+      "Ranking/ML scoring service",
+      "Media store + CDN",
+      "Kafka fanout backbone"
+    ],
     "data_model": [
       "posts(post_id PK, author_id, body, media_ref, created_at)",
       "follows(follower_id, followee_id, created_at) PK(follower_id, followee_id) + inverse index by followee",
@@ -69,20 +149,56 @@
     ],
     "high_level_design": "Write path: a new post is stored, then a fanout worker reads the author's follower list and pushes the post_id into each follower's materialized timeline (Redis ZSET), for non-celebrity authors. Read path: GET /feed reads the user's materialized timeline post-ids, MERGES in fresh posts pulled from the accounts they follow that are celebrities (fanout-on-read), hydrates post bodies, runs ranking to score/order, and returns a page. Ranking uses candidate generation (recent + relevant) then a scoring model on features. Inactive users are not materialized eagerly — their timeline is built lazily on first load. Media is served via CDN; only post_ids flow through fanout.",
     "deep_dives": [
-      { "topic": "fanout_model", "probe": "Walk me through fanout-on-write vs fanout-on-read. For a user who follows 500 accounts and loads their feed, what does each approach cost at read and write time?" },
-      { "topic": "celebrity_problem", "probe": "An account with 50M followers posts. Pushing to 50M timelines is impossible in real time. How does your hybrid handle this at read time, and how do you decide who is a 'celebrity'?" },
-      { "topic": "ranking", "probe": "You move from chronological to ranked. Where does scoring happen — precompute or at read time? What features, and how do you keep p99 feed latency low with a model in the path?" },
-      { "topic": "caching", "probe": "Timeline caches are capped ZSETs. What's your eviction/trim policy, how do you warm a returning inactive user, and how do you avoid a stampede when a viral post drives everyone to reload?" },
-      { "topic": "backfill", "probe": "A user follows a new account. Do you backfill that account's recent posts into their timeline immediately, and how do you bound that cost?" },
-      { "topic": "cdc_search", "probe": "Posts live in your post store. How do you feed a search index and the ranking feature store off it — CDC with Debezium, or the app dual-writing to Kafka? How do you handle reordering/late events?" }
+      {
+        "topic": "fanout_model",
+        "probe": "Walk me through fanout-on-write vs fanout-on-read. For a user who follows 500 accounts and loads their feed, what does each approach cost at read and write time?"
+      },
+      {
+        "topic": "celebrity_problem",
+        "probe": "An account with 50M followers posts. Pushing to 50M timelines is impossible in real time. How does your hybrid handle this at read time, and how do you decide who is a 'celebrity'?"
+      },
+      {
+        "topic": "ranking",
+        "probe": "You move from chronological to ranked. Where does scoring happen — precompute or at read time? What features, and how do you keep p99 feed latency low with a model in the path?"
+      },
+      {
+        "topic": "caching",
+        "probe": "Timeline caches are capped ZSETs. What's your eviction/trim policy, how do you warm a returning inactive user, and how do you avoid a stampede when a viral post drives everyone to reload?"
+      },
+      {
+        "topic": "backfill",
+        "probe": "A user follows a new account. Do you backfill that account's recent posts into their timeline immediately, and how do you bound that cost?"
+      },
+      {
+        "topic": "cdc_search",
+        "probe": "Posts live in your post store. How do you feed a search index and the ranking feature store off it — CDC with Debezium, or the app dual-writing to Kafka? How do you handle reordering/late events?"
+      }
     ],
     "followup_bank": [
-      { "trigger": "mentions fanout or push", "question": "At what follower count does fanout-on-write stop making sense, and how do you switch that author to pull without losing consistency for their followers?" },
-      { "trigger": "mentions celebrity or hybrid", "question": "How do you classify an account as celebrity, and do you re-merge their posts at read time for every follower load?" },
-      { "trigger": "mentions ranking or ml", "question": "Candidate generation vs scoring — where does each run, and how do you keep the model out of the p99 latency critical path?" },
-      { "trigger": "mentions cache or redis or timeline", "question": "What's the eviction/trim policy on the timeline cache, and how do you prevent a stampede when a viral post makes everyone refresh at once?" },
-      { "trigger": "mentions database or post store", "question": "How do you propagate post changes to search and the ranking feature store — CDC/Debezium vs dual writes — and how do you deal with out-of-order CDC events?" },
-      { "trigger": "mentions follow or graph", "question": "When someone follows a huge account, how do you avoid a fanout/backfill spike, and how is the follower list stored to make fanout fast?" }
+      {
+        "trigger": "mentions fanout or push",
+        "question": "At what follower count does fanout-on-write stop making sense, and how do you switch that author to pull without losing consistency for their followers?"
+      },
+      {
+        "trigger": "mentions celebrity or hybrid",
+        "question": "How do you classify an account as celebrity, and do you re-merge their posts at read time for every follower load?"
+      },
+      {
+        "trigger": "mentions ranking or ml",
+        "question": "Candidate generation vs scoring — where does each run, and how do you keep the model out of the p99 latency critical path?"
+      },
+      {
+        "trigger": "mentions cache or redis or timeline",
+        "question": "What's the eviction/trim policy on the timeline cache, and how do you prevent a stampede when a viral post makes everyone refresh at once?"
+      },
+      {
+        "trigger": "mentions database or post store",
+        "question": "How do you propagate post changes to search and the ranking feature store — CDC/Debezium vs dual writes — and how do you deal with out-of-order CDC events?"
+      },
+      {
+        "trigger": "mentions follow or graph",
+        "question": "When someone follows a huge account, how do you avoid a fanout/backfill spike, and how is the follower list stored to make fanout fast?"
+      }
     ],
     "scaling": [
       "Async fanout workers off a Kafka queue; shard by author or follower",

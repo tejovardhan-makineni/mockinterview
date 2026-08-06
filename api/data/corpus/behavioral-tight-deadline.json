@@ -3,18 +3,64 @@
   "title": "Tell me about a time you delivered under an aggressive deadline",
   "track": "professional",
   "domain": "behavioral",
+  "areas": [
+    "engineering",
+    "data_science",
+    "medicine",
+    "nursing",
+    "law",
+    "consulting",
+    "product_management",
+    "finance"
+  ],
   "modality": "conversational",
   "difficulty": "mid",
-  "tags": ["deadlines", "prioritization", "tradeoffs", "delivery", "star"],
+  "tags": [
+    "deadlines",
+    "prioritization",
+    "tradeoffs",
+    "delivery",
+    "star"
+  ],
   "prompt": "Tell me about a time you had to deliver something important under an aggressive, non-negotiable deadline. How did you make it work, and what tradeoffs did you have to make?",
   "blurb": "Tight deadline: did they prioritize and make smart, honest tradeoffs — or just heroics and hidden debt?",
   "rubric": [
-    { "key": "situation_clarity", "label": "Situation & the deadline", "description": "Clearly frames the deliverable, why the deadline was real and tight, and what was at stake if they missed.", "weight": 1.0 },
-    { "key": "task_ownership", "label": "Owning delivery", "description": "Shows they took charge of making the date achievable — not just grinding, but shaping scope, plan, and expectations.", "weight": 1.1 },
-    { "key": "action_specificity", "label": "Prioritization & tradeoffs", "description": "Describes the concrete tradeoffs THEY made — what to cut, defer, parallelize, or simplify — and the reasoning, rather than 'we just worked harder'.", "weight": 1.4 },
-    { "key": "result_impact", "label": "Result & impact", "description": "States whether they hit the date and the outcome, quantified, including quality and any debt incurred.", "weight": 1.1 },
-    { "key": "reflection", "label": "Reflection & sustainability", "description": "Reflects on managing tradeoffs and stakeholders honestly, the cost of the crunch (debt, team burnout), and how they'd avoid repeat fire-drills.", "weight": 1.1 },
-    { "key": "communication", "label": "Communication & stakeholder management", "description": "Shows they set expectations and communicated tradeoffs/risk to stakeholders, and tells the story clearly.", "weight": 0.9 }
+    {
+      "key": "situation_clarity",
+      "label": "Situation & the deadline",
+      "description": "Clearly frames the deliverable, why the deadline was real and tight, and what was at stake if they missed.",
+      "weight": 1.0
+    },
+    {
+      "key": "task_ownership",
+      "label": "Owning delivery",
+      "description": "Shows they took charge of making the date achievable — not just grinding, but shaping scope, plan, and expectations.",
+      "weight": 1.1
+    },
+    {
+      "key": "action_specificity",
+      "label": "Prioritization & tradeoffs",
+      "description": "Describes the concrete tradeoffs THEY made — what to cut, defer, parallelize, or simplify — and the reasoning, rather than 'we just worked harder'.",
+      "weight": 1.4
+    },
+    {
+      "key": "result_impact",
+      "label": "Result & impact",
+      "description": "States whether they hit the date and the outcome, quantified, including quality and any debt incurred.",
+      "weight": 1.1
+    },
+    {
+      "key": "reflection",
+      "label": "Reflection & sustainability",
+      "description": "Reflects on managing tradeoffs and stakeholders honestly, the cost of the crunch (debt, team burnout), and how they'd avoid repeat fire-drills.",
+      "weight": 1.1
+    },
+    {
+      "key": "communication",
+      "label": "Communication & stakeholder management",
+      "description": "Shows they set expectations and communicated tradeoffs/risk to stakeholders, and tells the story clearly.",
+      "weight": 0.9
+    }
   ],
   "reference": {
     "scenario": "The candidate should recall a real crunch — a launch tied to an event, a customer commitment, a compliance date, a competitive window — with a deadline they couldn't move. The signal is smart prioritization and honest tradeoff-making (and stakeholder communication), not sustained heroics or hiding corners cut. The best answers show they shaped scope and expectations, not just effort.",
@@ -27,11 +73,26 @@
       "Reflection: recognizes crunch as a tool, not a lifestyle; reflects on team sustainability and on preventing the next avoidable fire-drill (earlier planning, better estimates, saying no sooner)."
     ],
     "probes": [
-      { "trigger": "'we just worked nights/weekends'", "question": "Beyond working harder, what did you decide NOT to do? Walk me through the specific tradeoffs and how you chose them." },
-      { "trigger": "delivered everything with no cuts", "question": "If nothing was cut and the deadline was truly aggressive, either the scope was small or something gave — what actually gave? Quality? Debt?" },
-      { "trigger": "no stakeholder communication", "question": "How did you set expectations with whoever was waiting on this? Did they know what was being deferred?" },
-      { "trigger": "debt hidden / not acknowledged", "question": "What corners did you cut, and what happened to that debt afterward — did it get paid down or bite you?" },
-      { "trigger": "recurring fire-drills", "question": "Was this avoidable? What would have prevented the crunch in the first place?" }
+      {
+        "trigger": "'we just worked nights/weekends'",
+        "question": "Beyond working harder, what did you decide NOT to do? Walk me through the specific tradeoffs and how you chose them."
+      },
+      {
+        "trigger": "delivered everything with no cuts",
+        "question": "If nothing was cut and the deadline was truly aggressive, either the scope was small or something gave — what actually gave? Quality? Debt?"
+      },
+      {
+        "trigger": "no stakeholder communication",
+        "question": "How did you set expectations with whoever was waiting on this? Did they know what was being deferred?"
+      },
+      {
+        "trigger": "debt hidden / not acknowledged",
+        "question": "What corners did you cut, and what happened to that debt afterward — did it get paid down or bite you?"
+      },
+      {
+        "trigger": "recurring fire-drills",
+        "question": "Was this avoidable? What would have prevented the crunch in the first place?"
+      }
     ],
     "red_flags": [
       "The whole answer is heroics — nights and weekends — with no prioritization or scoping.",

@@ -3,23 +3,88 @@
   "title": "Design a Logging Framework (Log4j) — Object Model",
   "track": "engineering",
   "domain": "low_level_design",
+  "areas": [
+    "engineering"
+  ],
   "modality": "system_design",
   "difficulty": "mid",
-  "tags": ["ood", "lld", "chain-of-responsibility", "strategy-pattern", "appenders", "levels"],
+  "tags": [
+    "ood",
+    "lld",
+    "chain-of-responsibility",
+    "strategy-pattern",
+    "appenders",
+    "levels"
+  ],
   "prompt": "Design the object model for a logging framework like Log4j or SLF4J. Application code logs messages at levels (DEBUG/INFO/WARN/ERROR). Messages are filtered by a configured level, formatted, and written to one or more destinations (console, file, network). Design the core classes, the level filtering, the appender/sink abstraction, the formatter abstraction, and how loggers form a hierarchy. Sketch the class diagram.",
   "blurb": "Level filtering, pluggable appenders and formatters, and a hierarchical logger tree — the canonical Chain-of-Responsibility OOD.",
   "rubric": [
-    { "key": "requirements_clarification", "label": "Requirements clarification", "description": "Separates functional (levels, multiple sinks, formatting, hierarchy, config) from non-functional (low overhead when disabled, thread-safe, extensible sinks).", "weight": 1.0 },
-    { "key": "core_entities", "label": "Core entities", "description": "Logger, LogLevel, LogRecord/LogEvent, Appender/Sink, Formatter/Layout, Filter, LoggerConfig — cleanly separated.", "weight": 1.1 },
-    { "key": "class_design", "label": "Class design & responsibilities", "description": "Logger decides whether to log; Appender decides where; Formatter decides how it looks; Filter decides fine-grained inclusion. SRP throughout.", "weight": 1.2 },
-    { "key": "relationships", "label": "Relationships & cardinality", "description": "Logger 1..* Appender; Appender 1 Formatter; Loggers form a parent/child tree with level inheritance and appender additivity.", "weight": 1.1 },
-    { "key": "design_patterns", "label": "Design patterns", "description": "Chain of Responsibility for the logger hierarchy / filter chain, Strategy for Formatter, composition for Appenders, Factory/Singleton for LoggerFactory, optional Observer.", "weight": 1.2 },
-    { "key": "solid_principles", "label": "SOLID / OCP", "description": "New appender (Kafka) or formatter (JSON) plugs in without editing Logger; level check gates work early (perf).", "weight": 1.1 },
-    { "key": "api_methods", "label": "API / method design", "description": "logger.debug/info/warn/error, isEnabled(level), addAppender, setLevel, format(record) — clear signatures.", "weight": 1.0 },
-    { "key": "extensibility", "label": "Extensibility", "description": "New sinks/formatters/filters, async logging, structured logging, MDC/context added without core rewrites.", "weight": 1.1 },
-    { "key": "edge_cases", "label": "Edge cases", "description": "Level below threshold (skip cheaply), appender I/O failure isolation, expensive-argument evaluation, recursive logging, config reload.", "weight": 1.0 },
-    { "key": "concurrency", "label": "Concurrency & performance", "description": "Thread-safe writes to a shared file/console, async queue + backpressure, avoiding lock contention on the hot path.", "weight": 1.0 },
-    { "key": "communication", "label": "Communication", "description": "Narrates the logger hierarchy and appender pipeline, states tradeoffs, reasons about the disabled-log fast path.", "weight": 0.8 }
+    {
+      "key": "requirements_clarification",
+      "label": "Requirements clarification",
+      "description": "Separates functional (levels, multiple sinks, formatting, hierarchy, config) from non-functional (low overhead when disabled, thread-safe, extensible sinks).",
+      "weight": 1.0
+    },
+    {
+      "key": "core_entities",
+      "label": "Core entities",
+      "description": "Logger, LogLevel, LogRecord/LogEvent, Appender/Sink, Formatter/Layout, Filter, LoggerConfig — cleanly separated.",
+      "weight": 1.1
+    },
+    {
+      "key": "class_design",
+      "label": "Class design & responsibilities",
+      "description": "Logger decides whether to log; Appender decides where; Formatter decides how it looks; Filter decides fine-grained inclusion. SRP throughout.",
+      "weight": 1.2
+    },
+    {
+      "key": "relationships",
+      "label": "Relationships & cardinality",
+      "description": "Logger 1..* Appender; Appender 1 Formatter; Loggers form a parent/child tree with level inheritance and appender additivity.",
+      "weight": 1.1
+    },
+    {
+      "key": "design_patterns",
+      "label": "Design patterns",
+      "description": "Chain of Responsibility for the logger hierarchy / filter chain, Strategy for Formatter, composition for Appenders, Factory/Singleton for LoggerFactory, optional Observer.",
+      "weight": 1.2
+    },
+    {
+      "key": "solid_principles",
+      "label": "SOLID / OCP",
+      "description": "New appender (Kafka) or formatter (JSON) plugs in without editing Logger; level check gates work early (perf).",
+      "weight": 1.1
+    },
+    {
+      "key": "api_methods",
+      "label": "API / method design",
+      "description": "logger.debug/info/warn/error, isEnabled(level), addAppender, setLevel, format(record) — clear signatures.",
+      "weight": 1.0
+    },
+    {
+      "key": "extensibility",
+      "label": "Extensibility",
+      "description": "New sinks/formatters/filters, async logging, structured logging, MDC/context added without core rewrites.",
+      "weight": 1.1
+    },
+    {
+      "key": "edge_cases",
+      "label": "Edge cases",
+      "description": "Level below threshold (skip cheaply), appender I/O failure isolation, expensive-argument evaluation, recursive logging, config reload.",
+      "weight": 1.0
+    },
+    {
+      "key": "concurrency",
+      "label": "Concurrency & performance",
+      "description": "Thread-safe writes to a shared file/console, async queue + backpressure, avoiding lock contention on the hot path.",
+      "weight": 1.0
+    },
+    {
+      "key": "communication",
+      "label": "Communication",
+      "description": "Narrates the logger hierarchy and appender pipeline, states tradeoffs, reasons about the disabled-log fast path.",
+      "weight": 0.8
+    }
   ],
   "reference": {
     "functional_requirements": [
@@ -45,15 +110,112 @@
       "How is configuration supplied — code, file, and is hot reload needed?"
     ],
     "core_classes": [
-      { "name": "LogLevel", "responsibility": "Ordered severity enum with comparability.", "key_fields": ["DEBUG, INFO, WARN, ERROR (int severity)"], "key_methods": ["isGreaterOrEqual(other)"] },
-      { "name": "LogRecord / LogEvent", "responsibility": "Immutable value: the log message and its metadata.", "key_fields": ["LogLevel level", "String message", "long timestamp", "String loggerName", "String threadName", "Throwable error", "Map<String,String> context (MDC)"], "key_methods": [] },
-      { "name": "Logger", "responsibility": "Client-facing entry point; guards on level then hands accepted records to appenders; part of the hierarchy.", "key_fields": ["name", "LogLevel level", "List<Appender> appenders", "Logger parent", "boolean additive"], "key_methods": ["debug/info/warn/error(msg)", "log(level, msg)", "isEnabled(level)", "addAppender(a)", "setLevel(l)"] },
-      { "name": "LoggerFactory / LogManager", "responsibility": "Creates and caches named loggers; wires the hierarchy; holds config.", "key_fields": ["Map<name, Logger> registry", "rootLogger"], "key_methods": ["getLogger(name) -> Logger", "configure(config)"] },
-      { "name": "Appender / Sink", "responsibility": "Abstraction over a destination; owns a Formatter and optional Filter; writes formatted records.", "key_fields": ["Formatter formatter", "Filter filter", "LogLevel threshold"], "key_methods": ["append(LogRecord)", "close()"] },
-      { "name": "ConsoleAppender / FileAppender / RollingFileAppender / NetworkAppender / AsyncAppender", "responsibility": "Concrete sinks; AsyncAppender wraps another appender with a queue + worker thread.", "key_fields": ["writer/stream", "(Async) BlockingQueue, worker"], "key_methods": ["append(...)"] },
-      { "name": "Formatter / Layout", "responsibility": "Strategy: turn a LogRecord into an output string.", "key_fields": [], "key_methods": ["format(LogRecord) -> String"] },
-      { "name": "PatternFormatter / JsonFormatter", "responsibility": "Concrete layouts (e.g. '%d %-5level [%thread] %logger - %msg' or JSON).", "key_fields": ["pattern"], "key_methods": ["format(...)"] },
-      { "name": "Filter", "responsibility": "Chain-of-responsibility node returning ACCEPT/DENY/NEUTRAL for a record (e.g. by marker, regex, rate).", "key_fields": ["Filter next"], "key_methods": ["decide(LogRecord) -> Decision"] }
+      {
+        "name": "LogLevel",
+        "responsibility": "Ordered severity enum with comparability.",
+        "key_fields": [
+          "DEBUG, INFO, WARN, ERROR (int severity)"
+        ],
+        "key_methods": [
+          "isGreaterOrEqual(other)"
+        ]
+      },
+      {
+        "name": "LogRecord / LogEvent",
+        "responsibility": "Immutable value: the log message and its metadata.",
+        "key_fields": [
+          "LogLevel level",
+          "String message",
+          "long timestamp",
+          "String loggerName",
+          "String threadName",
+          "Throwable error",
+          "Map<String,String> context (MDC)"
+        ],
+        "key_methods": []
+      },
+      {
+        "name": "Logger",
+        "responsibility": "Client-facing entry point; guards on level then hands accepted records to appenders; part of the hierarchy.",
+        "key_fields": [
+          "name",
+          "LogLevel level",
+          "List<Appender> appenders",
+          "Logger parent",
+          "boolean additive"
+        ],
+        "key_methods": [
+          "debug/info/warn/error(msg)",
+          "log(level, msg)",
+          "isEnabled(level)",
+          "addAppender(a)",
+          "setLevel(l)"
+        ]
+      },
+      {
+        "name": "LoggerFactory / LogManager",
+        "responsibility": "Creates and caches named loggers; wires the hierarchy; holds config.",
+        "key_fields": [
+          "Map<name, Logger> registry",
+          "rootLogger"
+        ],
+        "key_methods": [
+          "getLogger(name) -> Logger",
+          "configure(config)"
+        ]
+      },
+      {
+        "name": "Appender / Sink",
+        "responsibility": "Abstraction over a destination; owns a Formatter and optional Filter; writes formatted records.",
+        "key_fields": [
+          "Formatter formatter",
+          "Filter filter",
+          "LogLevel threshold"
+        ],
+        "key_methods": [
+          "append(LogRecord)",
+          "close()"
+        ]
+      },
+      {
+        "name": "ConsoleAppender / FileAppender / RollingFileAppender / NetworkAppender / AsyncAppender",
+        "responsibility": "Concrete sinks; AsyncAppender wraps another appender with a queue + worker thread.",
+        "key_fields": [
+          "writer/stream",
+          "(Async) BlockingQueue, worker"
+        ],
+        "key_methods": [
+          "append(...)"
+        ]
+      },
+      {
+        "name": "Formatter / Layout",
+        "responsibility": "Strategy: turn a LogRecord into an output string.",
+        "key_fields": [],
+        "key_methods": [
+          "format(LogRecord) -> String"
+        ]
+      },
+      {
+        "name": "PatternFormatter / JsonFormatter",
+        "responsibility": "Concrete layouts (e.g. '%d %-5level [%thread] %logger - %msg' or JSON).",
+        "key_fields": [
+          "pattern"
+        ],
+        "key_methods": [
+          "format(...)"
+        ]
+      },
+      {
+        "name": "Filter",
+        "responsibility": "Chain-of-responsibility node returning ACCEPT/DENY/NEUTRAL for a record (e.g. by marker, regex, rate).",
+        "key_fields": [
+          "Filter next"
+        ],
+        "key_methods": [
+          "decide(LogRecord) -> Decision"
+        ]
+      }
     ],
     "relationships": [
       "Logger composes 0..* Appenders and links to a parent Logger, forming a tree with the root at the top.",
@@ -63,10 +225,26 @@
       "LoggerFactory owns the registry and the root logger; loggers are created lazily by dotted name."
     ],
     "design_patterns": [
-      { "pattern": "Chain of Responsibility", "where": "Logger hierarchy (level lookup + appender additivity up to root) and the Filter chain in an appender", "why": "A record walks up ancestors for effective level/appenders and through filters until a decision — each node handles or delegates." },
-      { "pattern": "Strategy", "where": "Formatter/Layout (Pattern/JSON) per appender", "why": "Output format varies independently of destination; swap without editing the appender." },
-      { "pattern": "Factory + Singleton", "where": "LoggerFactory/LogManager caching one Logger per name", "why": "Centralized creation and a single shared registry/config." },
-      { "pattern": "Decorator", "where": "AsyncAppender wraps a synchronous appender with a queue/worker", "why": "Adds async behavior without changing the wrapped appender." }
+      {
+        "pattern": "Chain of Responsibility",
+        "where": "Logger hierarchy (level lookup + appender additivity up to root) and the Filter chain in an appender",
+        "why": "A record walks up ancestors for effective level/appenders and through filters until a decision — each node handles or delegates."
+      },
+      {
+        "pattern": "Strategy",
+        "where": "Formatter/Layout (Pattern/JSON) per appender",
+        "why": "Output format varies independently of destination; swap without editing the appender."
+      },
+      {
+        "pattern": "Factory + Singleton",
+        "where": "LoggerFactory/LogManager caching one Logger per name",
+        "why": "Centralized creation and a single shared registry/config."
+      },
+      {
+        "pattern": "Decorator",
+        "where": "AsyncAppender wraps a synchronous appender with a queue/worker",
+        "why": "Adds async behavior without changing the wrapped appender."
+      }
     ],
     "apis": [
       "LoggerFactory.getLogger(name) -> Logger",
@@ -104,18 +282,48 @@
       "Async wrapping and batching applied by composition (Decorator)"
     ],
     "deep_dives": [
-      { "topic": "level_fast_path", "probe": "logger.debug(\"x=\" + expensiveToString()) when DEBUG is disabled — the string still gets built. How does your API avoid paying that cost? Where does the level guard live?" },
-      { "topic": "hierarchy", "probe": "Explain how a logger named 'com.app.svc' gets its effective level and appenders from ancestors. What is appender additivity and how do you turn it off?" },
-      { "topic": "appender_formatter_split", "probe": "Why separate Appender (where) from Formatter (how it looks)? Show adding a JSON layout to the file appender and a plain layout to console without duplicating code." },
-      { "topic": "async_logging", "probe": "Design AsyncAppender: queue, worker, and what happens when the queue fills. Drop, block, or discard low-priority records — defend your choice." },
-      { "topic": "thread_safety", "probe": "Two threads log to the same FileAppender simultaneously. How do you keep lines from interleaving without killing throughput?" }
+      {
+        "topic": "level_fast_path",
+        "probe": "logger.debug(\"x=\" + expensiveToString()) when DEBUG is disabled — the string still gets built. How does your API avoid paying that cost? Where does the level guard live?"
+      },
+      {
+        "topic": "hierarchy",
+        "probe": "Explain how a logger named 'com.app.svc' gets its effective level and appenders from ancestors. What is appender additivity and how do you turn it off?"
+      },
+      {
+        "topic": "appender_formatter_split",
+        "probe": "Why separate Appender (where) from Formatter (how it looks)? Show adding a JSON layout to the file appender and a plain layout to console without duplicating code."
+      },
+      {
+        "topic": "async_logging",
+        "probe": "Design AsyncAppender: queue, worker, and what happens when the queue fills. Drop, block, or discard low-priority records — defend your choice."
+      },
+      {
+        "topic": "thread_safety",
+        "probe": "Two threads log to the same FileAppender simultaneously. How do you keep lines from interleaving without killing throughput?"
+      }
     ],
     "followup_bank": [
-      { "trigger": "mentions level or debug or filter", "question": "If DEBUG is off, does logger.debug(\"x=\"+build()) still build the string? How does your design avoid that cost?" },
-      { "trigger": "mentions appender or sink or file or console", "question": "Add a Kafka appender. What changes in Logger? And how do you keep one appender's failure from breaking the others?" },
-      { "trigger": "mentions format or layout or json", "question": "Why is formatting separate from the appender? Show a JSON layout on file and plain on console." },
-      { "trigger": "mentions hierarchy or parent or root", "question": "How does 'com.app' inherit level and appenders from its parents, and what is additivity?" },
-      { "trigger": "mentions async or queue or thread", "question": "Design the async path: what queue, what worker, and what's the policy when it's full?" }
+      {
+        "trigger": "mentions level or debug or filter",
+        "question": "If DEBUG is off, does logger.debug(\"x=\"+build()) still build the string? How does your design avoid that cost?"
+      },
+      {
+        "trigger": "mentions appender or sink or file or console",
+        "question": "Add a Kafka appender. What changes in Logger? And how do you keep one appender's failure from breaking the others?"
+      },
+      {
+        "trigger": "mentions format or layout or json",
+        "question": "Why is formatting separate from the appender? Show a JSON layout on file and plain on console."
+      },
+      {
+        "trigger": "mentions hierarchy or parent or root",
+        "question": "How does 'com.app' inherit level and appenders from its parents, and what is additivity?"
+      },
+      {
+        "trigger": "mentions async or queue or thread",
+        "question": "Design the async path: what queue, what worker, and what's the policy when it's full?"
+      }
     ],
     "tradeoffs": [
       "Synchronous (simple, ordered, blocks app) vs async (fast app threads, possible loss/reorder)",

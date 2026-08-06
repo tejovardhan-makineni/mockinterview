@@ -1,0 +1,129 @@
+{
+  "id": "clinical-reasoning-headache",
+  "title": "Severe Headache — Clinical Reasoning",
+  "track": "professional",
+  "domain": "clinical_reasoning",
+  "areas": [
+    "medicine"
+  ],
+  "modality": "conversational",
+  "difficulty": "mid",
+  "tags": [
+    "clinical-reasoning",
+    "headache",
+    "differential-diagnosis",
+    "red-flags",
+    "neurology",
+    "safety"
+  ],
+  "prompt": "A 45-year-old presents with a severe headache that came on earlier today; walk me through your structured approach — how you screen for red flags, the differential you're weighing, your exam and workup, and when you'd image or do a lumbar puncture. This is educational — I'm assessing clinical reasoning, not giving medical advice.",
+  "blurb": "A red-flag-driven approach to severe headache — separating benign primary headaches from dangerous secondary causes, and knowing when to image and when to do a lumbar puncture.",
+  "rubric": [
+    {
+      "key": "data_gathering",
+      "label": "History & red-flag screening",
+      "description": "Systematically screens for red-flag features — thunderclap/worst-ever/maximal-at-onset, focal neurological deficit, fever with neck stiffness, altered consciousness, new headache over age 50, immunosuppression or malignancy, pregnancy/postpartum, headache worse on waking or with Valsalva, trauma, and anticoagulation — while characterizing onset, tempo, severity and associated features.",
+      "weight": 1.3
+    },
+    {
+      "key": "differential_diagnosis",
+      "label": "Differential diagnosis",
+      "description": "Builds a differential that separates dangerous secondary causes (subarachnoid hemorrhage, meningitis/encephalitis, mass lesion/raised ICP, venous sinus thrombosis, giant cell/temporal arteritis, carbon monoxide, acute angle-closure glaucoma) from common primary headaches (migraine, tension-type, cluster).",
+      "weight": 1.3
+    },
+    {
+      "key": "clinical_reasoning",
+      "label": "Clinical reasoning",
+      "description": "Uses onset tempo, red flags and exam findings to raise or lower specific diagnoses; explains discriminators; avoids anchoring on migraine and updates as data arrives.",
+      "weight": 1.2
+    },
+    {
+      "key": "investigations",
+      "label": "Exam, imaging & LP",
+      "description": "Does a focused exam (vitals, neuro exam, fundoscopy, neck stiffness, temporal arteries) and articulates when to image (non-contrast CT head for suspected SAH or focal deficit) and when a lumbar puncture is indicated — including LP after a normal CT to exclude SAH and for suspected meningitis — plus ESR/CRP for suspected GCA.",
+      "weight": 1.2
+    },
+    {
+      "key": "management_plan",
+      "label": "Initial management",
+      "description": "Starts with ABC and observations, gives appropriate time-critical treatment when a dangerous cause is suspected (e.g. empirical antibiotics for suspected bacterial meningitis without delaying for imaging, urgent steroids for suspected GCA), analgesia, and escalates.",
+      "weight": 1.1
+    },
+    {
+      "key": "safety",
+      "label": "Safety & prioritization",
+      "description": "Treats sudden severe headache as potentially catastrophic until proven otherwise, does not let a normal appearance falsely reassure, prioritizes time-critical actions, and states clear escalation and safety-netting.",
+      "weight": 1.2
+    },
+    {
+      "key": "communication",
+      "label": "Communication & structure",
+      "description": "Presents reasoning in an organized, systematic way; thinks aloud; would communicate clearly with the patient and team.",
+      "weight": 0.9
+    }
+  ],
+  "reference": {
+    "scenario": "A 45-year-old with a severe headache of same-day onset. The station tests whether the candidate systematically screens for red flags, separates dangerous secondary headaches from benign primary ones, and knows the imaging and lumbar puncture pathway — particularly the sudden thunderclap presentation of subarachnoid hemorrhage and the fever-plus-neck-stiffness presentation of meningitis. The interviewer can feed features (time-to-peak, neck stiffness, fever, focal signs, fundoscopy, temporal artery tenderness) to see how reasoning evolves. This is educational and generic — not a treatment protocol for real patients.",
+    "model_points": [
+      "Frames a sudden severe headache as potentially catastrophic until proven otherwise: quick ABC/stability check, vitals including temperature and blood pressure, and a focused neurological assessment.",
+      "Screens explicitly for red flags: thunderclap or worst-ever headache reaching maximum intensity within seconds to minutes; focal neurological deficit or seizure; fever with neck stiffness or photophobia; reduced or altered consciousness; new headache over age 50; immunosuppression, HIV or known malignancy; pregnancy or postpartum state; headache worse on waking, on lying flat, or with coughing/straining; recent head trauma; and anticoagulation.",
+      "Characterizes the headache: onset and time-to-peak, location and quality, severity, duration and pattern, aggravating and relieving factors, and associated features such as nausea, aura, visual change, jaw claudication or scalp tenderness.",
+      "Differential separates dangerous secondary causes — subarachnoid hemorrhage, bacterial meningitis or encephalitis, space-occupying lesion with raised intracranial pressure, cerebral venous sinus thrombosis, giant cell (temporal) arteritis, carbon monoxide poisoning, acute angle-closure glaucoma, and hypertensive emergency/pre-eclampsia — from common primary headaches: migraine, tension-type, and cluster.",
+      "Reasons about discriminators: instant maximal thunderclap pain suggests SAH; fever, neck stiffness and photophobia suggest meningitis; a progressive headache worse on waking with a focal deficit or papilledema suggests a mass; age over 50 with scalp tenderness, jaw claudication and visual symptoms suggests giant cell arteritis; a unilateral throbbing headache with aura, photophobia and nausea that recurs suggests migraine.",
+      "Focused exam: vitals and temperature, full neurological examination including limbs and cranial nerves, fundoscopy for papilledema, neck stiffness and Kernig/Brudzinski signs, palpation of the temporal arteries, and pupils/eye for angle-closure glaucoma.",
+      "Imaging decision: a non-contrast CT head is the first-line urgent test when SAH, a focal deficit, or raised ICP is suspected; CT venography for suspected venous sinus thrombosis; CT sensitivity for SAH is highest within the first few hours and falls thereafter.",
+      "Lumbar puncture decision: if SAH is suspected and the CT is normal, an LP (timed appropriately, typically at least 12 hours from onset, looking for xanthochromia) helps exclude it; an LP is central to diagnosing meningitis — but do not delay empirical antibiotics for it, and check for contraindications (focal deficit, reduced consciousness, papilledema, coagulopathy) that warrant imaging before LP.",
+      "Time-critical treatment when indicated: empirical IV antibiotics (and consideration of aciclovir) for suspected bacterial meningitis or encephalitis without waiting for imaging or LP; urgent high-dose steroids and an ESR/CRP for suspected giant cell arteritis to protect vision; blood pressure and obstetric review for pre-eclampsia; analgesia and antiemetics for primary headache.",
+      "Continual reassessment and safety-netting: clear escalation to neurology/neurosurgery or critical care, explicit return advice for a benign-appearing headache, and communication with the patient throughout."
+    ],
+    "probes": [
+      {
+        "trigger": "candidate anchors on migraine or tension headache early",
+        "question": "What specific red-flag features would you actively ask about before you're willing to call this a benign primary headache?"
+      },
+      {
+        "trigger": "candidate does not clarify the speed of onset",
+        "question": "She says it hit maximum intensity within seconds, like being struck on the back of the head. What does that raise, and what do you do first?"
+      },
+      {
+        "trigger": "candidate suspects SAH but stops at a normal CT",
+        "question": "The non-contrast CT is normal but the story is a classic thunderclap. Are you reassured? What's your next step?"
+      },
+      {
+        "trigger": "candidate suspects meningitis but sequences antibiotics after LP/CT",
+        "question": "You're worried about bacterial meningitis. What must not be delayed while you arrange imaging or a lumbar puncture?"
+      },
+      {
+        "trigger": "candidate omits giant cell arteritis in an older patient",
+        "question": "If this were a 70-year-old with scalp tenderness, jaw claudication and blurred vision, what diagnosis must you not miss, and why is it time-critical?"
+      },
+      {
+        "trigger": "candidate proposes LP without checking for contraindications",
+        "question": "Before you do a lumbar puncture, what would make you image the head first?"
+      },
+      {
+        "trigger": "candidate treats normal observations as reassurance",
+        "question": "Her vital signs and basic neuro exam are normal. Does that let you exclude a dangerous cause here?"
+      }
+    ],
+    "red_flags": [
+      "Anchoring on migraine or tension headache without screening for red-flag features.",
+      "Missing or not clarifying a thunderclap/maximal-at-onset history and its link to subarachnoid hemorrhage.",
+      "Being falsely reassured by a normal CT in a classic thunderclap presentation and omitting the follow-up LP.",
+      "Delaying empirical antibiotics for suspected bacterial meningitis while waiting for imaging or LP.",
+      "Failing to consider giant cell arteritis in an older patient and delaying sight-saving steroids.",
+      "Performing or proposing a lumbar puncture without checking for contraindications (focal deficit, reduced GCS, papilledema, coagulopathy).",
+      "Omitting the neurological exam, fundoscopy, or neck-stiffness assessment.",
+      "No escalation or safety-netting plan for either the dangerous or the benign pathway."
+    ],
+    "follow_ups": [
+      "The CT is normal but the thunderclap history is convincing — walk me through the lumbar puncture, its timing, and what you're looking for.",
+      "How would your approach change if this were a 28-year-old woman who is six weeks postpartum?",
+      "The fundoscopy shows papilledema and there's a subtle limb weakness — what does that change about your workup and your LP decision?",
+      "If you strongly suspected bacterial meningitis, what is the order of your first actions in the next ten minutes?",
+      "How would you safety-net and explain the plan to a patient whose serious workup has come back reassuring?"
+    ],
+    "exemplar_answer": "I'd treat a sudden severe headache as potentially catastrophic until proven otherwise. Alongside a quick ABC and stability check with full vitals including temperature and blood pressure, my history is built around screening for red flags. The most important question is the speed of onset: a thunderclap headache that reaches maximum intensity within seconds to minutes makes me think subarachnoid hemorrhage until excluded. I'd also ask about fever, neck stiffness and photophobia for meningitis; any focal neurological symptoms, seizures or altered consciousness; whether it's worse on waking, lying flat or straining, which suggests raised intracranial pressure; new headache over 50 with scalp tenderness or jaw claudication for giant cell arteritis; pregnancy or the postpartum state, which raises venous sinus thrombosis and pre-eclampsia; immunosuppression or malignancy; recent trauma; and anticoagulation. My differential separates the dangerous secondary causes — SAH, meningitis or encephalitis, a mass lesion, venous sinus thrombosis, giant cell arteritis, carbon monoxide poisoning and acute angle-closure glaucoma — from the common primary headaches like migraine, tension-type and cluster, and I try hard not to anchor on migraine. On exam I'd do a full neurological examination, fundoscopy for papilledema, assess for neck stiffness with Kernig and Brudzinski signs, palpate the temporal arteries, and check the eyes. For imaging, a non-contrast CT head is my first-line urgent test if I suspect SAH, a focal deficit or raised ICP, with CT venography if I'm worried about sinus thrombosis; I'd remember that CT sensitivity for SAH is highest in the first few hours and falls after that. That's exactly why a normal CT doesn't reassure me in a classic thunderclap story — I'd proceed to a lumbar puncture, timed appropriately at least around twelve hours from onset, looking for xanthochromia, having first checked there's no contraindication such as a focal deficit, reduced consciousness, papilledema or coagulopathy that would make me image before the LP. The LP is also central to diagnosing meningitis, but crucially I would not delay empirical IV antibiotics, with aciclovir if encephalitis is possible, while arranging it. If I suspected giant cell arteritis I'd send an ESR and CRP and start high-dose steroids urgently to protect vision rather than waiting for biopsy. Throughout I'd reassess, escalate early to neurology or neurosurgery, and give clear safety-netting — including explicit return advice even when the serious workup is reassuring — while keeping the patient informed."
+  },
+  "interviewer_notes": "Mid-level clinical reasoning station on severe headache, centered on red-flag screening and the imaging/LP pathway. Let the candidate structure their approach, then feed features to test adaptability: a maximal-at-onset thunderclap detail to see if they raise SAH and pursue an LP after a normal CT; a fever-plus-neck-stiffness detail to check they give empirical antibiotics before imaging/LP; an older-patient variant with jaw claudication and visual change to test whether they catch giant cell arteritis and start steroids; and a postpartum variant to prompt venous sinus thrombosis. The key safety behaviors are refusing to anchor on migraine, not being falsely reassured by a normal CT in a thunderclap story, sequencing antibiotics ahead of the LP in meningitis, and checking LP contraindications. Reward reasoning that visibly updates; penalize anchoring, false reassurance from normal CT or normal observations, and unsafe sequencing. This is a reasoning exercise, not a protocol recitation — do not require exact drug doses."
+}

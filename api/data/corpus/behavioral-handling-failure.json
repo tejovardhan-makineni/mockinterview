@@ -3,18 +3,64 @@
   "title": "Tell me about a significant failure and what you learned",
   "track": "professional",
   "domain": "behavioral",
+  "areas": [
+    "engineering",
+    "data_science",
+    "medicine",
+    "nursing",
+    "law",
+    "consulting",
+    "product_management",
+    "finance"
+  ],
   "modality": "conversational",
   "difficulty": "mid",
-  "tags": ["failure", "leadership-principles", "learning", "accountability", "star"],
+  "tags": [
+    "failure",
+    "leadership-principles",
+    "learning",
+    "accountability",
+    "star"
+  ],
   "prompt": "Tell me about a significant failure — something you were responsible for that didn't work out. What happened, what was your role in it, and what did you take away?",
   "blurb": "Handling failure: do they own it, extract a real lesson, and show they changed — or deflect blame?",
   "rubric": [
-    { "key": "situation_clarity", "label": "Situation & real stakes", "description": "Picks a genuinely significant failure with real consequences — not a humble-brag or a trivial miss dressed as failure.", "weight": 1.0 },
-    { "key": "task_ownership", "label": "Ownership & accountability", "description": "Takes clear personal responsibility for their part — 'I' and 'my decision' — without blaming teammates, the org, or bad luck. Honest about their contribution.", "weight": 1.4 },
-    { "key": "action_specificity", "label": "Response to the failure", "description": "Describes concretely how THEY responded — contained the damage, communicated it, ran a blameless retro, made it right — not just that it happened.", "weight": 1.1 },
-    { "key": "result_impact", "label": "Impact & recovery", "description": "Honestly states the impact (cost, missed goal, damaged trust) and how they or the team recovered.", "weight": 1.0 },
-    { "key": "reflection", "label": "Lesson & lasting change", "description": "Extracts a specific, credible lesson AND shows they changed behavior since — ideally with evidence it didn't recur. This is the heart of the question.", "weight": 1.4 },
-    { "key": "communication", "label": "Communication & candor", "description": "Tells it with candor and composure, structured and without defensiveness.", "weight": 0.8 }
+    {
+      "key": "situation_clarity",
+      "label": "Situation & real stakes",
+      "description": "Picks a genuinely significant failure with real consequences — not a humble-brag or a trivial miss dressed as failure.",
+      "weight": 1.0
+    },
+    {
+      "key": "task_ownership",
+      "label": "Ownership & accountability",
+      "description": "Takes clear personal responsibility for their part — 'I' and 'my decision' — without blaming teammates, the org, or bad luck. Honest about their contribution.",
+      "weight": 1.4
+    },
+    {
+      "key": "action_specificity",
+      "label": "Response to the failure",
+      "description": "Describes concretely how THEY responded — contained the damage, communicated it, ran a blameless retro, made it right — not just that it happened.",
+      "weight": 1.1
+    },
+    {
+      "key": "result_impact",
+      "label": "Impact & recovery",
+      "description": "Honestly states the impact (cost, missed goal, damaged trust) and how they or the team recovered.",
+      "weight": 1.0
+    },
+    {
+      "key": "reflection",
+      "label": "Lesson & lasting change",
+      "description": "Extracts a specific, credible lesson AND shows they changed behavior since — ideally with evidence it didn't recur. This is the heart of the question.",
+      "weight": 1.4
+    },
+    {
+      "key": "communication",
+      "label": "Communication & candor",
+      "description": "Tells it with candor and composure, structured and without defensiveness.",
+      "weight": 0.8
+    }
   ],
   "reference": {
     "scenario": "The candidate should recall a real failure they owned — a project that missed, a bad technical or product call, an outage they caused, a hire that went wrong, a deadline blown. The signal is not the failure itself but the ownership and the learning: do they take honest accountability, extract a concrete lesson, and show durable behavior change afterward?",
@@ -27,11 +73,26 @@
       "Tone: accountable and composed, self-aware without wallowing, no scapegoating."
     ],
     "probes": [
-      { "trigger": "blames others or circumstances", "question": "Setting aside what others did — what was YOUR part in this? What would you have done differently, regardless of them?" },
-      { "trigger": "failure is actually a humble-brag", "question": "That sounds like it mostly worked out. Tell me about something that genuinely failed, where you were clearly in the wrong." },
-      { "trigger": "lesson is generic ('communicate more')", "question": "That's broad — what specifically changed in how you work? Give me a concrete example of you doing it differently since." },
-      { "trigger": "no evidence of change", "question": "How do you know you actually learned this? Has a similar situation come up since, and what happened?" },
-      { "trigger": "no impact quantified", "question": "How bad was it really — what did it cost in time, money, or trust?" }
+      {
+        "trigger": "blames others or circumstances",
+        "question": "Setting aside what others did — what was YOUR part in this? What would you have done differently, regardless of them?"
+      },
+      {
+        "trigger": "failure is actually a humble-brag",
+        "question": "That sounds like it mostly worked out. Tell me about something that genuinely failed, where you were clearly in the wrong."
+      },
+      {
+        "trigger": "lesson is generic ('communicate more')",
+        "question": "That's broad — what specifically changed in how you work? Give me a concrete example of you doing it differently since."
+      },
+      {
+        "trigger": "no evidence of change",
+        "question": "How do you know you actually learned this? Has a similar situation come up since, and what happened?"
+      },
+      {
+        "trigger": "no impact quantified",
+        "question": "How bad was it really — what did it cost in time, money, or trust?"
+      }
     ],
     "red_flags": [
       "Blames teammates, the org, leadership, or bad luck; own role is minimized or absent.",
