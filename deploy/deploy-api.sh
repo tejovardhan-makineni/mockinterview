@@ -15,7 +15,7 @@ DB_URL="postgres://${DB_USER}:${DB_PASSWORD}@/${DB_NAME}?host=/cloudsql/${CLOUDS
 
 # One --set-env-vars with a custom '|' delimiter (DATABASE_URL contains '@' and
 # CORS contains ',', so neither can be the delimiter — no value contains '|').
-ENVS="MODE=api|DB_MAX_CONNS=3|LLM_PROVIDER=${LLM_PROVIDER}|GEMINI_MODEL_LIVE=${GEMINI_MODEL_LIVE}"
+ENVS="MODE=api|APP_ENV=production|DB_MAX_CONNS=3|LLM_PROVIDER=${LLM_PROVIDER}|GEMINI_MODEL_LIVE=${GEMINI_MODEL_LIVE}"
 ENVS="${ENVS}|CORS_ALLOW=https://mockinterview-web.web.app,https://mockinterview.live"
 ENVS="${ENVS}|DATABASE_URL=${DB_URL}|JWT_SECRET=${JWT_SECRET}|GEMINI_API_KEY=${GEMINI_API_KEY}"
 [ -n "${OPENAI_API_KEY:-}" ]    && ENVS="${ENVS}|OPENAI_API_KEY=${OPENAI_API_KEY}"
