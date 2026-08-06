@@ -43,11 +43,13 @@ func (a *App) Routes(r chi.Router) {
 		return auth.UserID(req.Context()), nil
 	}))
 
-	// Public auth endpoints — throttled per-IP to blunt brute force / spam.
+	// Public auth endpoints. register/login are throttled per-IP to blunt brute
+	// force / spam; /me is NOT throttled — it's called on every page load, so a
+	// limit there would spuriously "log the user out" during normal navigation.
+	authLimit := httprate.LimitByIP(30, time.Minute)
 	r.Route("/auth", func(r chi.Router) {
-		r.Use(httprate.LimitByIP(20, time.Minute))
-		r.Post("/register", authSvc.Register)
-		r.Post("/login", authSvc.Login)
+		r.With(authLimit).Post("/register", authSvc.Register)
+		r.With(authLimit).Post("/login", authSvc.Login)
 		r.With(authSvc.Required).Get("/me", authSvc.Me)
 	})
 

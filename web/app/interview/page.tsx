@@ -9,6 +9,7 @@ import { BehaviorTracker } from "@/lib/behavior";
 import { Avatar3D, type AvatarDrive } from "@/components/studio/Avatar3D";
 import { Workspace } from "@/components/studio/Workspace";
 import { Webcam } from "@/components/studio/Webcam";
+import { LiveHUD, type AiState } from "@/components/studio/LiveHUD";
 import { Button } from "@/components/ui";
 
 function StudioInner() {
@@ -22,6 +23,9 @@ function StudioInner() {
   const [ending, setEnding] = useState(false);
   const [typed, setTyped] = useState("");
   const [remainingMs, setRemainingMs] = useState<number | null>(null);
+  const [mode, setMode] = useState<"voice" | "text" | "local">("text");
+  const [aiState, setAiState] = useState<AiState>("idle");
+  const micRef = useRef(0); // live mic level, read by the HUD via rAF (no re-render)
 
   const live = useRef<LiveSession | null>(null);
   const tracker = useRef<BehaviorTracker | null>(null);
@@ -56,10 +60,11 @@ function StudioInner() {
         if (last && last.role === c.role && last.streaming) return [...prev.slice(0, -1), c];
         return [...prev.slice(-60), c];
       }))
-        .on("speaking", (on) => { avatar.current.speaking = on; avatar.current.mood = on ? "neutral" : "listening"; })
-        .on("userSpeaking", (on) => { tracker.current?.setSpeaking(on); })
+        .on("speaking", (on) => { avatar.current.speaking = on; avatar.current.mood = on ? "neutral" : "listening"; setAiState(on ? "speaking" : "listening"); })
+        .on("userSpeaking", (on) => { tracker.current?.setSpeaking(on); setAiState((prev) => (prev === "speaking" ? prev : on ? "listening" : "thinking")); })
+        .on("micLevel", (v) => { micRef.current = v; })
         .on("amplitude", (v) => { avatar.current.amplitude = v; })
-        .on("mode", (m) => setStatus(m === "voice" ? "live voice" : m === "text" ? "voice (browser)" : "demo mode"))
+        .on("mode", (m) => { setMode(m); setStatus(m === "voice" ? "live voice" : m === "text" ? "voice (browser)" : "demo mode"); })
         .on("status", setStatus)
         .on("connection", setConn)
         .on("filler", () => { tracker.current?.addEvent("filler"); avatar.current.mood = "curious"; })
@@ -142,13 +147,6 @@ function StudioInner() {
           <span className="font-semibold">Interview in progress</span>
           <span className="hidden rounded-full border border-[var(--color-line)] px-2 py-0.5 text-xs text-[var(--color-muted)] sm:inline">{status}</span>
           <span className="hidden text-xs text-[var(--color-faint)] sm:inline">{modality.replace("_", " ")}</span>
-          {(conn === "reconnecting" || conn === "failed") && (
-            <span className={`flex items-center gap-1.5 rounded-full border px-2 py-0.5 text-xs ${conn === "failed" ? "border-[var(--color-bad)] text-[var(--color-bad)]" : "border-[var(--color-warn)] text-[var(--color-warn)]"}`}>
-              {conn === "reconnecting"
-                ? <><span className="inline-block h-2 w-2 animate-pulse rounded-full bg-[var(--color-warn)]" /> Reconnecting…</>
-                : <>⚠ Connection lost</>}
-            </span>
-          )}
         </div>
         <div className="flex items-center gap-3">
           {remainingMs !== null && (
@@ -165,6 +163,9 @@ function StudioInner() {
         <aside className="flex w-full flex-col border-b border-[var(--color-line)] p-4 lg:w-[340px] lg:border-b-0 lg:border-r">
           <div className="mx-auto aspect-square w-full max-w-[260px] overflow-hidden rounded-xl bg-[var(--color-panel)] lg:max-w-none">
             <Avatar3D faceId={faceId} drive={avatar} />
+          </div>
+          <div className="mt-3">
+            <LiveHUD micRef={micRef} aiState={aiState} conn={conn} mode={mode} onReconnect={() => { setConn("reconnecting"); live.current?.reconnect(); }} />
           </div>
           <div className="mi-panel mt-3 max-h-[40vh] flex-1 overflow-y-auto rounded-xl border border-[var(--color-line)] bg-[var(--color-panel)] p-3 text-sm lg:max-h-none">
             {captions.length === 0 && <p className="text-[var(--color-faint)]">The interviewer will begin shortly…</p>}

@@ -13,6 +13,52 @@ type Tab = "review" | "match";
 const reviewColor = (s: number) => (s >= 4 ? "var(--color-good)" : s >= 3 ? "var(--color-warn)" : "var(--color-bad)");
 const matchColor = (s: number) => (s >= 70 ? "var(--color-good)" : s >= 40 ? "var(--color-warn)" : "var(--color-bad)");
 
+// ---- localStorage cache (per resume id) so results survive reloads ----
+const REVIEW_KEY = (id: string) => `mi_resume_review_${id}`;
+const MATCH_KEY = (id: string) => `mi_resume_match_${id}`;
+const APPLIED_KEY = (id: string) => `mi_resume_applied_${id}`;
+
+function isReview(v: unknown): v is ResumeReview {
+  return !!v && typeof v === "object" && typeof (v as ResumeReview).overall_score === "number";
+}
+function isMatch(v: unknown): v is ResumeMatch {
+  return !!v && typeof v === "object" && typeof (v as ResumeMatch).match_score === "number";
+}
+function readCache<T>(key: string, validate: (v: unknown) => v is T): T | null {
+  if (typeof window === "undefined") return null;
+  try {
+    const raw = window.localStorage.getItem(key);
+    if (!raw) return null;
+    const val = JSON.parse(raw) as unknown;
+    if (validate(val)) return val;
+  } catch { /* fall through to drop */ }
+  try { window.localStorage.removeItem(key); } catch { /* ignore */ }
+  return null;
+}
+function readAppliedCache(key: string): number[] | null {
+  if (typeof window === "undefined") return null;
+  try {
+    const raw = window.localStorage.getItem(key);
+    if (!raw) return null;
+    const val = JSON.parse(raw) as unknown;
+    if (Array.isArray(val) && val.every((x) => typeof x === "number")) return val as number[];
+  } catch { /* fall through to drop */ }
+  try { window.localStorage.removeItem(key); } catch { /* ignore */ }
+  return null;
+}
+function writeCache(key: string, val: unknown) {
+  if (typeof window === "undefined") return;
+  try { window.localStorage.setItem(key, JSON.stringify(val)); } catch { /* quota/again ignore */ }
+}
+function clearCache(id: string) {
+  if (typeof window === "undefined") return;
+  try {
+    window.localStorage.removeItem(REVIEW_KEY(id));
+    window.localStorage.removeItem(MATCH_KEY(id));
+    window.localStorage.removeItem(APPLIED_KEY(id));
+  } catch { /* ignore */ }
+}
+
 export default function ResumePage() {
   const router = useRouter();
   const [tab, setTab] = useState<Tab>("review");
@@ -34,14 +80,35 @@ export default function ResumePage() {
       if (!u) { router.replace("/login"); return; }
       const r = await api.getResume();
       setResume(r);
+      if (!r) return;
+      // Hydrate previously-cached analysis so the page shows prior results
+      // immediately without re-calling the LLM. Bad/partial cache is dropped.
+      const cachedReview = readCache(REVIEW_KEY(r.id), isReview);
+      if (cachedReview) {
+        setReview(cachedReview);
+        const savedApplied = readAppliedCache(APPLIED_KEY(r.id));
+        if (savedApplied) {
+          const n = cachedReview.line_edits?.length ?? 0;
+          setApplied(new Set(savedApplied.filter((i) => i >= 0 && i < n)));
+        }
+      }
+      const cachedMatch = readCache(MATCH_KEY(r.id), isMatch);
+      if (cachedMatch) setMatch(cachedMatch);
     })();
   }, [router]);
+
+  // Persist the applied-edit set whenever it changes (only once a review exists).
+  useEffect(() => {
+    if (!resume || !review) return;
+    writeCache(APPLIED_KEY(resume.id), Array.from(applied));
+  }, [applied, resume, review]);
 
   async function ingest(file: File) {
     setUploading(true); setErr(""); setReview(null); setMatch(null); setApplied(new Set());
     try {
       const r = await api.uploadResume(file);
       setResume(r);
+      clearCache(r.id); // fresh upload — start clean even if the id is reused
     } catch (e) { setErr(e instanceof Error ? e.message : "Upload failed"); }
     finally { setUploading(false); }
   }
@@ -58,7 +125,11 @@ export default function ResumePage() {
 
   async function runReview() {
     setBusy(true); setErr("");
-    try { const rv = await api.reviewResume(); setReview(rv); setApplied(new Set()); }
+    try {
+      const rv = await api.reviewResume();
+      setReview(rv); setApplied(new Set());
+      if (resume) { writeCache(REVIEW_KEY(resume.id), rv); writeCache(APPLIED_KEY(resume.id), []); }
+    }
     catch (e) { setErr(e instanceof Error ? e.message : "Review failed"); }
     finally { setBusy(false); }
   }
@@ -67,6 +138,7 @@ export default function ResumePage() {
     try {
       const m = await api.matchResume(text);
       setMatch(m); setJd(text); setModalOpen(false);
+      if (resume) writeCache(MATCH_KEY(resume.id), m);
     } catch (e) { setErr(e instanceof Error ? e.message : "Match failed"); }
     finally { setBusy(false); }
   }
@@ -77,16 +149,16 @@ export default function ResumePage() {
   }
   function applyAll() {
     if (!review) return;
-    setApplied(new Set(review.line_edits.map((_, i) => i)));
+    setApplied(new Set((review.line_edits ?? []).map((_, i) => i)));
   }
 
   // Working (edited) copies derived from applied edits.
   const workingParsed = useMemo(
-    () => (review ? transformParsed(resume?.parsed, review.line_edits, applied) : resume?.parsed),
+    () => (review ? transformParsed(resume?.parsed, review.line_edits ?? [], applied) : resume?.parsed),
     [resume, review, applied],
   );
   const workingText = useMemo(
-    () => (review ? subAll(resume?.text ?? "", review.line_edits, applied) : resume?.text ?? ""),
+    () => (review ? subAll(resume?.text ?? "", review.line_edits ?? [], applied) : resume?.text ?? ""),
     [resume, review, applied],
   );
 
@@ -94,18 +166,18 @@ export default function ResumePage() {
   const marks: Mark[] = useMemo(() => {
     if (tab === "review" && review) {
       const m: Mark[] = [];
-      review.line_edits.forEach((e, i) => {
-        if (applied.has(i)) m.push({ str: e.improved, cls: "mi-hl-good" });
-        else m.push({ str: e.original, cls: "mi-hl-warn" });
+      (review.line_edits ?? []).forEach((e, i) => {
+        if (applied.has(i)) m.push({ str: e?.improved, cls: "mi-hl-good" });
+        else m.push({ str: e?.original, cls: "mi-hl-warn" });
       });
-      (review.quantifiable_impacts ?? []).forEach((q) => m.push({ str: q.text, cls: "mi-hl-good" }));
-      return m;
+      (review.quantifiable_impacts ?? []).forEach((q) => m.push({ str: q?.text, cls: "mi-hl-good" }));
+      return m.filter((x) => x.str);
     }
     if (tab === "match" && match) {
       const m: Mark[] = [];
-      match.matched_keywords.forEach((k) => m.push({ str: k, cls: "mi-hl-accent" }));
-      match.missing_keywords.forEach((k) => m.push({ str: k, cls: "mi-hl-bad" }));
-      return m;
+      (match.matched_keywords ?? []).forEach((k) => m.push({ str: k, cls: "mi-hl-accent" }));
+      (match.missing_keywords ?? []).forEach((k) => m.push({ str: k, cls: "mi-hl-bad" }));
+      return m.filter((x) => x.str);
     }
     return [];
   }, [tab, review, match, applied]);
@@ -226,18 +298,23 @@ function ReviewPanel({
       </Panel>
     );
   }
+  const edits = review.line_edits ?? [];
   const fixes = review.critical_fixes ?? [];
   const impacts = review.quantifiable_impacts ?? [];
+  const strengths = review.strengths ?? [];
+  const gaps = review.gaps ?? [];
+  const impactSuggestions = review.impact_suggestions ?? [];
   const ats = review.ats_breakdown;
+  const score = Number(review.overall_score) || 0;
   return (
     <>
       {/* Score card */}
       <Panel className="p-5">
         <div className="flex items-center gap-4">
-          <ScoreRing pct={Math.max(0, Math.min(1, review.overall_score / 5))} color={reviewColor(review.overall_score)} big={review.overall_score.toFixed(1)} small="/ 5" />
+          <ScoreRing pct={Math.max(0, Math.min(1, score / 5))} color={reviewColor(score)} big={score.toFixed(1)} small="/ 5" />
           <div className="flex-1">
             <div className="text-sm font-semibold">Overall score</div>
-            <p className="mt-1 text-sm text-[var(--color-muted)]">{review.summary}</p>
+            <p className="mt-1 text-sm text-[var(--color-muted)]">{review.summary ?? ""}</p>
           </div>
         </div>
       </Panel>
@@ -246,26 +323,26 @@ function ReviewPanel({
       <Panel className="p-5">
         <h3 className="mb-3 flex items-center gap-2 text-sm font-semibold">
           Critical fixes
-          <span className="rounded-full bg-[color-mix(in_srgb,var(--color-bad)_22%,transparent)] px-2 py-0.5 text-xs text-[var(--color-bad)]">{fixes.length || review.line_edits.length}</span>
-          <span className="ml-auto text-xs font-normal text-[var(--color-faint)]">{applied.size}/{review.line_edits.length} applied</span>
+          <span className="rounded-full bg-[color-mix(in_srgb,var(--color-bad)_22%,transparent)] px-2 py-0.5 text-xs text-[var(--color-bad)]">{fixes.length || edits.length}</span>
+          <span className="ml-auto text-xs font-normal text-[var(--color-faint)]">{applied.size}/{edits.length} applied</span>
         </h3>
         <div className="space-y-3">
           {fixes.map((f, i) => {
-            const edit = review.line_edits.find((e) => f.detail.includes(e.original) || f.title.includes(e.original));
+            const edit = edits.find((e) => (e?.original ? (f?.detail?.includes(e.original) || f?.title?.includes(e.original)) : false));
             return (
               <div key={`f${i}`} className="rounded-xl border border-[var(--color-line)] p-3 text-sm">
                 <div className="flex items-baseline justify-between gap-2">
-                  <span className="font-semibold">{f.title}</span>
-                  <span className="font-mono text-[10px] uppercase tracking-wide text-[var(--color-faint)]">{f.location}</span>
+                  <span className="font-semibold">{f?.title}</span>
+                  <span className="font-mono text-[10px] uppercase tracking-wide text-[var(--color-faint)]">{f?.location}</span>
                 </div>
-                <p className="mt-1 text-[var(--color-muted)]">{f.detail}</p>
-                {edit && <EditRow edit={edit} idx={review.line_edits.indexOf(edit)} applied={applied} workingText={workingText} onToggle={onToggle} />}
+                <p className="mt-1 text-[var(--color-muted)]">{f?.detail}</p>
+                {edit && <EditRow edit={edit} idx={edits.indexOf(edit)} applied={applied} workingText={workingText} onToggle={onToggle} />}
               </div>
             );
           })}
           {/* Any line edits not surfaced by a critical fix still get an apply row. */}
-          {review.line_edits.map((e, i) => {
-            const shownByFix = fixes.some((f) => f.detail.includes(e.original) || f.title.includes(e.original));
+          {edits.map((e, i) => {
+            const shownByFix = fixes.some((f) => (e?.original ? (f?.detail?.includes(e.original) || f?.title?.includes(e.original)) : false));
             if (shownByFix) return null;
             return (
               <div key={`e${i}`} className="rounded-xl border border-[var(--color-line)] p-3 text-sm">
@@ -284,7 +361,7 @@ function ReviewPanel({
             {impacts.map((q, i) => (
               <li key={i} className="flex gap-2 text-sm">
                 <span className="mt-0.5 text-[var(--color-good)]" aria-hidden="true">✓</span>
-                <span><span className="font-medium text-[var(--color-good)]">{q.text}</span><span className="text-[var(--color-muted)]"> — {q.note}</span></span>
+                <span><span className="font-medium text-[var(--color-good)]">{q?.text}</span><span className="text-[var(--color-muted)]"> — {q?.note}</span></span>
               </li>
             ))}
           </ul>
@@ -293,8 +370,8 @@ function ReviewPanel({
 
       {/* Strengths / gaps */}
       <div className="grid gap-4 sm:grid-cols-2">
-        <Panel className="p-4"><h3 className="mb-2 text-sm font-semibold"><Badge tone="good">Strengths</Badge></h3><ul className="space-y-1 text-xs text-[var(--color-muted)]">{review.strengths.map((s, i) => <li key={i}>• {s}</li>)}</ul></Panel>
-        <Panel className="p-4"><h3 className="mb-2 text-sm font-semibold"><Badge tone="warn">Gaps</Badge></h3><ul className="space-y-1 text-xs text-[var(--color-muted)]">{review.gaps.map((s, i) => <li key={i}>• {s}</li>)}</ul></Panel>
+        <Panel className="p-4"><h3 className="mb-2 text-sm font-semibold"><Badge tone="good">Strengths</Badge></h3><ul className="space-y-1 text-xs text-[var(--color-muted)]">{strengths.map((s, i) => <li key={i}>• {s}</li>)}</ul></Panel>
+        <Panel className="p-4"><h3 className="mb-2 text-sm font-semibold"><Badge tone="warn">Gaps</Badge></h3><ul className="space-y-1 text-xs text-[var(--color-muted)]">{gaps.map((s, i) => <li key={i}>• {s}</li>)}</ul></Panel>
       </div>
 
       {/* ATS compatibility */}
@@ -306,18 +383,18 @@ function ReviewPanel({
               <span className="text-[var(--color-muted)]">Formatting</span>
               <AtsBadge status={ats.formatting} />
               <span className="ml-auto text-[var(--color-muted)]">Keyword match</span>
-              <span className="font-semibold">{Math.round(ats.keyword_match)}%</span>
+              <span className="font-semibold">{Math.round(Number(ats.keyword_match) || 0)}%</span>
             </div>
-            <Bar pct={ats.keyword_match / 100} color={matchColor(ats.keyword_match)} />
+            <Bar pct={(Number(ats.keyword_match) || 0) / 100} color={matchColor(Number(ats.keyword_match) || 0)} />
             <p className="mt-2 text-xs text-[var(--color-muted)]">{ats.notes}</p>
           </>
         )}
         <h4 className="mb-1 mt-3 text-xs font-semibold text-[var(--color-faint)]">Notes</h4>
-        <p className="text-xs text-[var(--color-muted)]">{review.ats_notes}</p>
-        {review.impact_suggestions.length > 0 && (
+        <p className="text-xs text-[var(--color-muted)]">{review.ats_notes ?? ""}</p>
+        {impactSuggestions.length > 0 && (
           <>
             <h4 className="mb-1 mt-3 text-xs font-semibold text-[var(--color-faint)]">Impact suggestions</h4>
-            <ul className="space-y-1 text-xs text-[var(--color-muted)]">{review.impact_suggestions.map((s, i) => <li key={i}>• {s}</li>)}</ul>
+            <ul className="space-y-1 text-xs text-[var(--color-muted)]">{impactSuggestions.map((s, i) => <li key={i}>• {s}</li>)}</ul>
           </>
         )}
       </Panel>
@@ -361,42 +438,47 @@ function MatchPanel({ match, busy, onOpen }: { match: ResumeMatch | null; busy: 
       </Panel>
     );
   }
+  const matched = match.matched_keywords ?? [];
+  const missing = match.missing_keywords ?? [];
+  const suggestions = match.tailoring_suggestions ?? [];
+  const matchScore = Number(match.match_score) || 0;
+  const atsKeyword = Number(match.ats_keyword_match) || 0;
   return (
     <>
       <Panel className="p-5">
         <div className="flex items-center gap-4">
-          <ScoreRing pct={Math.max(0, Math.min(1, match.match_score / 100))} color={matchColor(match.match_score)} big={`${Math.round(match.match_score)}`} small="%" />
+          <ScoreRing pct={Math.max(0, Math.min(1, matchScore / 100))} color={matchColor(matchScore)} big={`${Math.round(matchScore)}`} small="%" />
           <div className="flex-1">
             <div className="text-sm font-semibold">Match score</div>
-            <p className="mt-1 text-sm text-[var(--color-muted)]">{match.verdict}</p>
+            <p className="mt-1 text-sm text-[var(--color-muted)]">{match.verdict ?? ""}</p>
           </div>
         </div>
         <div className="mt-4">
-          <div className="mb-1 flex justify-between text-xs text-[var(--color-faint)]"><span>ATS keyword coverage</span><span>{Math.round(match.ats_keyword_match)}%</span></div>
-          <Bar pct={match.ats_keyword_match / 100} color={matchColor(match.ats_keyword_match)} />
+          <div className="mb-1 flex justify-between text-xs text-[var(--color-faint)]"><span>ATS keyword coverage</span><span>{Math.round(atsKeyword)}%</span></div>
+          <Bar pct={atsKeyword / 100} color={matchColor(atsKeyword)} />
         </div>
       </Panel>
 
       <Panel className="p-5">
-        <h3 className="mb-2 text-sm font-semibold">Matched <span className="text-xs font-normal text-[var(--color-faint)]">({match.matched_keywords.length})</span></h3>
+        <h3 className="mb-2 text-sm font-semibold">Matched <span className="text-xs font-normal text-[var(--color-faint)]">({matched.length})</span></h3>
         <div className="flex flex-wrap gap-1.5">
-          {match.matched_keywords.map((k, i) => <Chip key={i} tone="good">{k}</Chip>)}
+          {matched.map((k, i) => <Chip key={i} tone="good">{k}</Chip>)}
         </div>
-        <h3 className="mb-2 mt-4 text-sm font-semibold">Missing / gaps <span className="text-xs font-normal text-[var(--color-faint)]">({match.missing_keywords.length})</span></h3>
+        <h3 className="mb-2 mt-4 text-sm font-semibold">Missing / gaps <span className="text-xs font-normal text-[var(--color-faint)]">({missing.length})</span></h3>
         <div className="flex flex-wrap gap-1.5">
-          {match.missing_keywords.map((k, i) => <Chip key={i} tone="bad">{k}</Chip>)}
+          {missing.map((k, i) => <Chip key={i} tone="bad">{k}</Chip>)}
         </div>
       </Panel>
 
-      {match.tailoring_suggestions.length > 0 && (
+      {suggestions.length > 0 && (
         <Panel className="p-5">
           <h3 className="mb-3 text-sm font-semibold">AI tailoring suggestions</h3>
           <div className="space-y-3">
-            {match.tailoring_suggestions.map((s, i) => (
+            {suggestions.map((s, i) => (
               <div key={i} className="rounded-xl border border-[var(--color-line)] p-3 text-sm">
-                <div className="font-semibold">{s.issue}</div>
-                <p className="mt-1 text-[var(--color-muted)]">{s.detail}</p>
-                <p className="mt-1.5 text-[var(--color-accent)]">→ {s.suggestion}</p>
+                <div className="font-semibold">{s?.issue}</div>
+                <p className="mt-1 text-[var(--color-muted)]">{s?.detail}</p>
+                <p className="mt-1.5 text-[var(--color-accent)]">→ {s?.suggestion}</p>
               </div>
             ))}
           </div>

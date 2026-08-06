@@ -21,6 +21,7 @@ type Events = {
   caption: (c: Caption) => void;
   speaking: (on: boolean) => void; // the INTERVIEWER is speaking (drives avatar)
   userSpeaking: (on: boolean) => void; // the CANDIDATE is speaking (drives speaking-ratio)
+  micLevel: (v: number) => void; // 0..1 live mic input level (drives the "listening" meter)
   amplitude: (v: number) => void; // 0..1, drives avatar lip-sync
   mode: (m: "voice" | "text" | "local") => void;
   filler: (word: string) => void;
@@ -195,6 +196,7 @@ export class LiveSession {
   // ---- candidate speech in (SpeechRecognition, for text/local modes) ----
 
   private beginListening() {
+    this.startMeter(); // level meter so the candidate sees the mic is live
     if (this.recog) return; // already listening (e.g. after a reconnect)
     const SR = (window as unknown as { webkitSpeechRecognition?: new () => SpeechRecognition; SpeechRecognition?: new () => SpeechRecognition });
     const Ctor = SR.SpeechRecognition || SR.webkitSpeechRecognition;
@@ -209,10 +211,48 @@ export class LiveSession {
         if (res.isFinal && text) this.handleCandidate(text);
       }
     };
+    // Keep recognition alive: it stops on its own (silence, transient errors) and
+    // must be restarted, or the candidate's voice silently stops being captured.
     r.onend = () => { if (!this.stopped) { try { r.start(); } catch { /* already started */ } } };
+    // SpeechRecognitionErrorEvent isn't in the TS DOM lib; read `error` via a cast.
+    r.onerror = (ev: Event) => {
+      const err = (ev as unknown as { error?: string }).error;
+      // "aborted"/"no-speech"/"network" are recoverable — onend restarts. Only a
+      // hard "not-allowed" (mic denied) is fatal.
+      if (err === "not-allowed" || err === "service-not-allowed") {
+        this.emit("status", "microphone blocked — type your answers");
+      }
+    };
     try { r.start(); } catch { /* ignore */ }
     this.recog = r;
     this.watchPauses();
+  }
+
+  // startMeter opens a lightweight mic stream + analyser purely to display the
+  // live input level (the voice path uses its own stream). Best-effort: if the
+  // mic is blocked the interview still works via typing.
+  private meterStop?: () => void;
+  private async startMeter() {
+    if (this.meterStop || this.stopped) return;
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true } });
+      if (this.stopped) { stream.getTracks().forEach((t) => t.stop()); return; }
+      const ctx = new AudioContext();
+      const src = ctx.createMediaStreamSource(stream);
+      const an = ctx.createAnalyser(); an.fftSize = 512;
+      src.connect(an);
+      const data = new Uint8Array(an.frequencyBinCount);
+      let raf = 0;
+      const tick = () => {
+        an.getByteTimeDomainData(data);
+        let sum = 0;
+        for (let i = 0; i < data.length; i++) { const v = (data[i] - 128) / 128; sum += v * v; }
+        this.emit("micLevel", Math.min(1, Math.sqrt(sum / data.length) * 4));
+        raf = requestAnimationFrame(tick);
+      };
+      tick();
+      this.meterStop = () => { cancelAnimationFrame(raf); src.disconnect(); stream.getTracks().forEach((t) => t.stop()); ctx.close().catch(() => {}); this.emit("micLevel", 0); };
+    } catch { /* mic blocked — no meter, typing still works */ }
   }
 
   private noteSpeech() {
@@ -285,10 +325,13 @@ export class LiveSession {
       proc.onaudioprocess = (e) => {
         const f32 = e.inputBuffer.getChannelData(0);
         const pcm = new Int16Array(f32.length);
-        for (let i = 0; i < f32.length; i++) { const s = Math.max(-1, Math.min(1, f32[i])); pcm[i] = s < 0 ? s * 0x8000 : s * 0x7fff; }
+        let sum = 0;
+        for (let i = 0; i < f32.length; i++) { const s = Math.max(-1, Math.min(1, f32[i])); pcm[i] = s < 0 ? s * 0x8000 : s * 0x7fff; sum += s * s; }
+        // Live input level so the UI can prove the mic is being heard.
+        this.emit("micLevel", Math.min(1, Math.sqrt(sum / f32.length) * 4));
         if (this.ws?.readyState === WebSocket.OPEN) this.ws.send(pcm.buffer);
       };
-      this.micStop = () => { proc.disconnect(); src.disconnect(); stream.getTracks().forEach((t) => t.stop()); ctx.close(); };
+      this.micStop = () => { proc.disconnect(); src.disconnect(); stream.getTracks().forEach((t) => t.stop()); ctx.close(); this.emit("micLevel", 0); };
     } catch { this.emit("status", "microphone blocked — enable mic for voice"); }
   }
 
@@ -339,6 +382,7 @@ export class LiveSession {
     if (this.nudgeTimer) clearInterval(this.nudgeTimer);
     if (this.ampTimer) clearInterval(this.ampTimer);
     this.micStop?.();
+    this.meterStop?.(); this.meterStop = undefined;
     this.audioCtx?.close().catch(() => {}); this.audioCtx = undefined; // free the playback context
     this.cancelSpeech();
     try { this.ws?.send(JSON.stringify({ type: "end" })); } catch { /* ignore */ }

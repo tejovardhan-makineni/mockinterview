@@ -120,6 +120,13 @@ body::before {
 .mi-doc-scroll::-webkit-scrollbar { width: 8px; }
 .mi-doc-scroll::-webkit-scrollbar-thumb { background: color-mix(in srgb, var(--color-faint) 45%, transparent); border-radius: 8px; }
 
+/* Live HUD micro-animations (interviewer "thinking" dots + reconnect spinner). */
+@keyframes mi-blink { 0%, 80%, 100% { opacity: 0.2; } 40% { opacity: 1; } }
+.mi-blink { animation: mi-blink 1.2s infinite ease-in-out; }
+@keyframes mi-spin { to { transform: rotate(360deg); } }
+.mi-spin { animation: mi-spin 1s linear infinite; }
+@media (prefers-reduced-motion: reduce) { .mi-blink, .mi-spin { animation: none; } }
+
 /* Print / Save-as-PDF: clean white page, hide chrome. */
 @media print {
   :root { --color-studio: #ffffff; --color-panel: #ffffff; --color-panel-2: #f2f4f7; --color-line: #d3d8e0; --color-ink: #111318; --color-muted: #3a4152; --color-faint: #6b7385; }

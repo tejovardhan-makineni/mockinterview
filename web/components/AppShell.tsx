@@ -4,20 +4,25 @@
 // / Settings, with sign-out bottom-left) + an ambient-glass main area. Every
 // signed-in page renders its content inside <AppShell>. Matches the Quantum
 // design; adapts to Light/Dark themes via CSS vars.
-import { useEffect, useRef, useState, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode, type ComponentType } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { api } from "@/lib/api";
 import { ThemeToggle } from "./ThemeToggle";
+import {
+  IconDashboard, IconInterview, IconResume, IconResults, IconSettings, IconSignOut, LogoM,
+} from "@/components/icons";
 
 export type NavKey = "dashboard" | "interview" | "resume" | "results" | "settings";
 
-const NAV: { key: NavKey; href: string; label: string; icon: string }[] = [
-  { key: "dashboard", href: "/dashboard", label: "Dashboard", icon: "📊" },
-  { key: "interview", href: "/interviews", label: "Interview", icon: "🎤" },
-  { key: "resume", href: "/resume-review", label: "Resume", icon: "📄" },
-  { key: "results", href: "/results", label: "Results", icon: "📈" },
-  { key: "settings", href: "/settings", label: "Settings", icon: "⚙️" },
+type IconType = ComponentType<{ className?: string }>;
+
+const NAV: { key: NavKey; href: string; label: string; Icon: IconType }[] = [
+  { key: "dashboard", href: "/dashboard", label: "Dashboard", Icon: IconDashboard },
+  { key: "interview", href: "/interviews", label: "Interview", Icon: IconInterview },
+  { key: "resume", href: "/resume-review", label: "Resume", Icon: IconResume },
+  { key: "results", href: "/results", label: "Results", Icon: IconResults },
+  { key: "settings", href: "/settings", label: "Settings", Icon: IconSettings },
 ];
 
 export function AppShell({ active, children }: { active: NavKey; children: ReactNode }) {
@@ -39,37 +44,47 @@ export function AppShell({ active, children }: { active: NavKey; children: React
 
   const NavLinks = (
     <nav className="flex flex-1 flex-col gap-1">
-      {NAV.map((n) => (
-        <Link key={n.key} href={n.href} onClick={() => setOpen(false)}
-          className={`flex items-center gap-3 rounded-lg px-4 py-3 text-sm transition ${
-            active === n.key
-              ? "border-l-2 border-[var(--color-accent)] bg-[color-mix(in_srgb,var(--color-accent)_10%,transparent)] font-semibold text-[var(--color-accent)]"
-              : "text-[var(--color-muted)] hover:bg-[var(--color-panel-2)] hover:text-[var(--color-ink)]"
-          }`}>
-          <span className="text-base">{n.icon}</span>
-          <span>{n.label}</span>
-        </Link>
-      ))}
+      {NAV.map((n) => {
+        const { Icon } = n;
+        return (
+          <Link key={n.key} href={n.href} onClick={() => setOpen(false)}
+            className={`flex items-center gap-3 rounded-lg px-4 py-3 text-sm transition ${
+              active === n.key
+                ? "border-l-2 border-[var(--color-accent)] bg-[color-mix(in_srgb,var(--color-accent)_10%,transparent)] font-semibold text-[var(--color-accent)]"
+                : "text-[var(--color-muted)] hover:bg-[var(--color-panel-2)] hover:text-[var(--color-ink)]"
+            }`}>
+            <Icon className="h-5 w-5" />
+            <span>{n.label}</span>
+          </Link>
+        );
+      })}
     </nav>
   );
 
   const Sidebar = (
     <div className="flex h-full flex-col gap-2 px-4 py-6">
       <Link href="/dashboard" className="mb-6 flex items-center gap-2.5 px-2 text-lg font-bold tracking-tight">
-        <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-[var(--color-accent)] text-sm font-extrabold text-[var(--color-studio)]">m</span>
+        <LogoM className="h-8 w-8" />
         mockinterview<span className="text-[var(--color-accent)]">.live</span>
       </Link>
       {NavLinks}
-      <div className="mt-2 flex items-center justify-between border-t border-[var(--color-line)] pt-4">
-        <div className="min-w-0">
-          <div className="truncate text-xs text-[var(--color-muted)]">{email || "Account"}</div>
+      <div className="mt-2 space-y-2 border-t border-[var(--color-line)] pt-4">
+        {/* Theme switcher — its own labeled row above the account info. */}
+        <div className="flex items-center justify-between gap-2 px-1">
+          <span className="text-xs font-medium text-[var(--color-muted)]">Theme</span>
+          <ThemeToggle />
         </div>
-        <ThemeToggle />
+        {/* Account email */}
+        <div className="min-w-0 px-1">
+          <div className="truncate text-xs text-[var(--color-muted)]" title={email || "Account"}>{email || "Account"}</div>
+        </div>
+        {/* Sign out — full-width bordered button, clearly separated. */}
+        <button onClick={() => { api.logout(); router.replace("/login"); }}
+          className="flex w-full items-center justify-center gap-2 rounded-lg border border-[var(--color-line)] px-4 py-2.5 text-sm font-medium text-[var(--color-bad)] transition hover:border-[var(--color-bad)] hover:bg-[color-mix(in_srgb,var(--color-bad)_10%,transparent)]">
+          <IconSignOut className="h-4 w-4" />
+          Sign out
+        </button>
       </div>
-      <button onClick={() => { api.logout(); router.replace("/login"); }}
-        className="mt-1 flex items-center gap-3 rounded-lg px-4 py-2.5 text-sm text-[var(--color-bad)] hover:bg-[var(--color-panel-2)]">
-        <span>↩</span> Sign out
-      </button>
     </div>
   );
 
@@ -83,7 +98,7 @@ export function AppShell({ active, children }: { active: NavKey; children: React
       {/* Mobile top bar + drawer */}
       <div className="sticky top-0 z-40 flex items-center justify-between border-b border-[var(--color-line)] bg-[color-mix(in_srgb,var(--color-studio)_88%,transparent)] px-4 py-3 backdrop-blur md:hidden">
         <Link href="/dashboard" className="flex items-center gap-2 font-bold">
-          <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-[var(--color-accent)] text-sm font-extrabold text-[var(--color-studio)]">m</span>
+          <LogoM className="h-7 w-7" />
           mockinterview<span className="text-[var(--color-accent)]">.live</span>
         </Link>
         <button onClick={() => setOpen(!open)} aria-label={open ? "Close menu" : "Open menu"} aria-expanded={open} aria-controls="mobile-nav-drawer" className="rounded-lg border border-[var(--color-line)] px-3 py-1.5 text-sm">☰</button>
@@ -99,7 +114,7 @@ export function AppShell({ active, children }: { active: NavKey; children: React
 
       {/* Main content */}
       <main className="md:ml-[264px]">
-        <div className="mx-auto max-w-6xl px-5 py-8 md:px-8">{children}</div>
+        <div className="w-full px-6 py-8 lg:px-10">{children}</div>
       </main>
     </div>
   );

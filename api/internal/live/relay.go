@@ -256,6 +256,11 @@ func (r *Relay) runGemini(conn *websocket.Conn, sessionID string, q corpus.Quest
 			msg, err := session.Receive()
 			if err != nil {
 				flush()
+				// The Gemini session dropped (error, or the 30-min cap). Close the
+				// browser socket so the client's auto-reconnect kicks in and opens a
+				// FRESH Gemini session — otherwise the candidate keeps talking into a
+				// dead session and nothing is heard. Transcript is already persisted.
+				_ = conn.Close()
 				return
 			}
 			// The interviewer decided to end the interview.
