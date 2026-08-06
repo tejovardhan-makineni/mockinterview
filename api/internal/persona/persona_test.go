@@ -43,7 +43,7 @@ func TestValidPersonality(t *testing.T) {
 // Every face must carry a kind the client understands.
 func TestFacesHaveKnownKind(t *testing.T) {
 	for _, f := range Faces {
-		if f.Kind != "human" && f.Kind != "fun" {
+		if f.Kind != "human" && f.Kind != "fun" && f.Kind != "realistic" {
 			t.Errorf("face %q has unexpected kind %q", f.ID, f.Kind)
 		}
 	}

@@ -52,13 +52,16 @@ function playReal(blob: Blob, drive: MutableRefObject<AvatarDrive>) {
   const data = new Uint8Array(analyser.frequencyBinCount);
   const tick = () => {
     analyser.getByteTimeDomainData(data);
-    let sum = 0;
-    for (let i = 0; i < data.length; i++) { const v = (data[i] - 128) / 128; sum += v * v; }
-    drive.current.amplitude = Math.min(1, Math.sqrt(sum / data.length) * 3);
+    let sum = 0, zc = 0, prev = 0;
+    for (let i = 0; i < data.length; i++) { const v = (data[i] - 128) / 128; sum += v * v; if ((v >= 0) !== (prev >= 0)) zc++; prev = v; }
+    const amp = Math.min(1, Math.sqrt(sum / data.length) * 3);
+    drive.current.amplitude = amp;
+    drive.current.level = amp;                                  // glTF viseme openness
+    drive.current.bright = Math.min(1, (zc / data.length) * 10); // vowel color
     ampRaf = requestAnimationFrame(tick);
   };
   audio.onplay = () => { drive.current.speaking = true; void ctx.resume(); tick(); };
-  audio.onended = () => { drive.current.speaking = false; drive.current.amplitude = 0; clearAmp(); URL.revokeObjectURL(url); const cb = onEndCb; onEndCb = undefined; cb?.(); };
+  audio.onended = () => { drive.current.speaking = false; drive.current.amplitude = 0; drive.current.level = 0; clearAmp(); URL.revokeObjectURL(url); const cb = onEndCb; onEndCb = undefined; cb?.(); };
   void audio.play().catch(() => { /* autoplay blocked; ignore */ });
 }
 

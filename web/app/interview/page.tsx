@@ -73,6 +73,7 @@ function StudioInner() {
         .on("userSpeaking", (on) => { tracker.current?.setSpeaking(on); setAiState((prev) => (prev === "speaking" ? prev : on ? "listening" : "thinking")); })
         .on("micLevel", (v) => { micRef.current = v; })
         .on("amplitude", (v) => { avatar.current.amplitude = v; })
+        .on("viseme", (v) => { avatar.current.level = v.level; avatar.current.bright = v.bright; })
         .on("mode", (m) => { setMode(m); setStatus(m === "voice" ? "live voice" : m === "text" ? "voice (browser)" : "demo mode"); })
         .on("status", setStatus)
         .on("connection", setConn)

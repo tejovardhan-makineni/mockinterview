@@ -15,6 +15,7 @@ type Face struct {
 // Faces is the catalog served to clients. To add a face, append one line here
 // and register a matching builder under the same ID in the web avatar registry.
 var Faces = []Face{
+	{ID: "sophia", Label: "Sophia — Realistic", Kind: "realistic", Gltf: "/avatars/rpm-female.glb"},
 	{ID: "ava", Label: "Ava", Kind: "human"},
 	{ID: "maya", Label: "Maya", Kind: "human"},
 	{ID: "leo", Label: "Leo", Kind: "human"},

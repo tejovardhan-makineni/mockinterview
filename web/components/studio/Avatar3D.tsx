@@ -3,18 +3,23 @@
 // Renders + animates any registered 3D avatar. Characters are plug-and-play
 // builders (see ./avatars/*) registered against ./avatars/kit — swap or add one
 // and it shows up everywhere. Falls back to the 2D <Avatar> if WebGL is absent.
-import { memo, useEffect, useRef, type MutableRefObject } from "react";
+import { memo, useEffect, useRef, useState, type MutableRefObject } from "react";
 import * as THREE from "three";
 import { Avatar as Avatar2D, type Mood } from "./Avatar";
-import { getBuilder, getPalette, type AvatarParts, type Mood as KitMood } from "./avatars/kit";
+import { getBuilder, getPalette, getGltf, type AvatarParts, type Mood as KitMood } from "./avatars/kit";
+import { GltfAvatar } from "./GltfAvatar";
 
-// The avatar is driven by a REF the parent mutates (speaking/amplitude/mood) —
-// so rapid amplitude updates never re-render React (which was causing flicker).
-export type AvatarDrive = { speaking: boolean; amplitude: number; mood: Mood };
-// Side-effect imports register the builders (each with its own palette).
+// The avatar is driven by a REF the parent mutates — so rapid audio updates
+// never re-render React (which was causing flicker). `level`/`bright` feed the
+// realistic glTF avatar's viseme lip-sync (openness + vowel color); the
+// procedural avatar uses `amplitude`.
+export type AvatarDrive = { speaking: boolean; amplitude: number; mood: Mood; level?: number; bright?: number };
+// Side-effect imports register the builders (each with its own palette) and the
+// realistic glTF faces.
 import "./avatars/humans";
 import "./avatars/fun-a";
 import "./avatars/fun-b";
+import "./avatars/realistic";
 
 function webglOK() {
   try {
@@ -23,7 +28,7 @@ function webglOK() {
   } catch { return false; }
 }
 
-function Avatar3DImpl({ faceId, drive }: { faceId: string; drive: MutableRefObject<AvatarDrive> }) {
+function ProceduralAvatar({ faceId, drive }: { faceId: string; drive: MutableRefObject<AvatarDrive> }) {
   const mount = useRef<HTMLDivElement>(null);
   const st = useRef({ amp: 0, blink: 0, nextBlink: 60, t: 0 });
 
@@ -98,6 +103,20 @@ function Avatar3DImpl({ faceId, drive }: { faceId: string; drive: MutableRefObje
   return <div ref={mount} className="h-full w-full" style={{ borderRadius: 12, overflow: "hidden" }} />;
 }
 
-// Memoized on faceId — the drive ref is stable, so amplitude/speaking updates
-// never re-render this component (no flicker, no churn).
+// Avatar3D routes a face to the realistic glTF renderer when one is registered
+// for that id, otherwise to the procedural builder. A glTF load failure falls
+// back to procedural so the room always has a face. Memoized on faceId + drive
+// so audio updates (via the ref) never re-render.
+function Avatar3DImpl({ faceId, drive }: { faceId: string; drive: MutableRefObject<AvatarDrive> }) {
+  const gltf = getGltf(faceId);
+  // Track which face failed to load (derived, so switching faces auto-resets the
+  // fallback without a setState-in-effect).
+  const [failedFace, setFailedFace] = useState<string | null>(null);
+
+  if (gltf && failedFace !== faceId && (typeof window === "undefined" || webglOK())) {
+    return <GltfAvatar key={faceId} url={gltf.url} drive={drive} onError={() => setFailedFace(faceId)} />;
+  }
+  return <ProceduralAvatar key={faceId} faceId={faceId} drive={drive} />;
+}
+
 export const Avatar3D = memo(Avatar3DImpl, (a, b) => a.faceId === b.faceId && a.drive === b.drive);

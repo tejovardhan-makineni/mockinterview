@@ -33,3 +33,12 @@ export function register(id: string, b: Builder, palette?: Palette) {
 export function getBuilder(id: string): Builder | undefined { return registry[id]; }
 export function hasBuilder(id: string): boolean { return !!registry[id]; }
 export function getPalette(id: string): Palette { return palettes[id] ?? DEFAULT_PALETTE; }
+
+// ---- realistic glTF avatars (Ready Player Me: Oculus visemes + ARKit rig) ----
+// A face id can instead map to a rigged glTF model rendered by GltfAvatar with
+// morph-target viseme lip-sync. Registered separately so the procedural builders
+// stay untouched; Avatar3D prefers a glTF face when one is registered.
+export type GltfFace = { url: string };
+const gltfFaces: Record<string, GltfFace> = {};
+export function registerGltf(id: string, url: string) { gltfFaces[id] = { url }; }
+export function getGltf(id: string): GltfFace | undefined { return gltfFaces[id]; }

@@ -22,7 +22,8 @@ type Events = {
   speaking: (on: boolean) => void; // the INTERVIEWER is speaking (drives avatar)
   userSpeaking: (on: boolean) => void; // the CANDIDATE is speaking (drives speaking-ratio)
   micLevel: (v: number) => void; // 0..1 live mic input level (drives the "listening" meter)
-  amplitude: (v: number) => void; // 0..1, drives avatar lip-sync
+  amplitude: (v: number) => void; // 0..1, drives the procedural avatar mouth
+  viseme: (v: { level: number; bright: number }) => void; // openness + vowel color for glTF visemes
   mode: (m: "voice" | "text" | "local") => void;
   filler: (word: string) => void;
   pause: (ms: number) => void;
@@ -317,8 +318,13 @@ export class LiveSession {
   private ampTimer?: number;
   private fakeAmplitude(on: boolean) {
     if (this.ampTimer) { clearInterval(this.ampTimer); this.ampTimer = undefined; }
-    if (!on) { this.emit("amplitude", 0); return; }
-    this.ampTimer = window.setInterval(() => this.emit("amplitude", 0.25 + Math.abs(Math.sin(Date.now() / 90)) * 0.6), 60);
+    if (!on) { this.emit("amplitude", 0); this.emit("viseme", { level: 0, bright: 0.5 }); return; }
+    // Browser TTS gives us no audio graph, so approximate mouth motion.
+    this.ampTimer = window.setInterval(() => {
+      const a = 0.25 + Math.abs(Math.sin(Date.now() / 90)) * 0.6;
+      this.emit("amplitude", a);
+      this.emit("viseme", { level: a, bright: 0.4 + Math.abs(Math.sin(Date.now() / 150)) * 0.4 });
+    }, 60);
   }
 
   // ---- real Gemini voice: mic PCM up, audio down ----
@@ -350,8 +356,14 @@ export class LiveSession {
     const ctx = this.audioCtx;
     const pcm = new Int16Array(bytes.buffer, bytes.byteOffset, Math.floor(bytes.byteLength / 2));
     const f32 = new Float32Array(pcm.length);
-    let peak = 0;
-    for (let i = 0; i < pcm.length; i++) { f32[i] = pcm[i] / 32768; peak = Math.max(peak, Math.abs(f32[i])); }
+    let peak = 0, sq = 0, zc = 0, prev = 0;
+    for (let i = 0; i < pcm.length; i++) {
+      const s = pcm[i] / 32768; f32[i] = s;
+      peak = Math.max(peak, Math.abs(s));
+      sq += s * s;
+      if ((s >= 0) !== (prev >= 0)) zc++; // zero-crossings ≈ high-frequency content
+      prev = s;
+    }
     const buf = ctx.createBuffer(1, f32.length, 24000);
     buf.copyToChannel(f32, 0);
     const node = ctx.createBufferSource(); node.buffer = buf; node.connect(ctx.destination);
@@ -360,7 +372,11 @@ export class LiveSession {
     node.start(this.playHead); this.playHead += buf.duration;
     this.aiSpeaking = true; this.touch();
     this.emit("speaking", true); this.emit("amplitude", Math.min(1, peak * 1.4));
-    node.onended = () => { if (this.playHead - ctx.currentTime < 0.05) { this.aiSpeaking = false; this.emit("speaking", false); this.emit("amplitude", 0); } };
+    // Viseme drive: RMS = mouth openness, zero-crossing rate ≈ vowel brightness
+    // (low = round/back O·U, high = spread/sibilant E·I·S).
+    const rms = Math.sqrt(sq / pcm.length);
+    this.emit("viseme", { level: Math.min(1, rms * 3), bright: Math.min(1, (zc / pcm.length) * 10) });
+    node.onended = () => { if (this.playHead - ctx.currentTime < 0.05) { this.aiSpeaking = false; this.emit("speaking", false); this.emit("amplitude", 0); this.emit("viseme", { level: 0, bright: 0.5 }); } };
   }
 
   // ---- local (mock) canned director ----
