@@ -108,6 +108,18 @@ body::before {
 ::-webkit-scrollbar-thumb { background: var(--color-line); border-radius: 8px; }
 ::-webkit-scrollbar-track { background: transparent; }
 
+/* Inline highlight marks over the rendered resume. Built from semantic tokens
+   with color-mix so they adapt across dark / light / quantum themes. */
+.mi-hl { border-radius: 4px; padding: 0 2px; color: var(--color-ink); box-decoration-break: clone; -webkit-box-decoration-break: clone; }
+.mi-hl-warn   { background: color-mix(in srgb, var(--color-warn) 30%, transparent); }
+.mi-hl-good   { background: color-mix(in srgb, var(--color-good) 28%, transparent); }
+.mi-hl-accent { background: color-mix(in srgb, var(--color-accent) 30%, transparent); }
+.mi-hl-bad    { background: color-mix(in srgb, var(--color-bad) 28%, transparent); }
+
+/* The rendered resume gets a slimmer, quieter scrollbar inside its pane. */
+.mi-doc-scroll::-webkit-scrollbar { width: 8px; }
+.mi-doc-scroll::-webkit-scrollbar-thumb { background: color-mix(in srgb, var(--color-faint) 45%, transparent); border-radius: 8px; }
+
 /* Print / Save-as-PDF: clean white page, hide chrome. */
 @media print {
   :root { --color-studio: #ffffff; --color-panel: #ffffff; --color-panel-2: #f2f4f7; --color-line: #d3d8e0; --color-ink: #111318; --color-muted: #3a4152; --color-faint: #6b7385; }

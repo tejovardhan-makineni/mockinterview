@@ -28,10 +28,30 @@ describe("resume slice (mock)", () => {
     expect(up.filename).toBe("cv.pdf");
     expect((await resumeMock.getResume())?.filename).toBe("cv.pdf");
   });
-  it("returns a structured review", async () => {
+  it("returns a structured review that still round-trips", async () => {
     const rev = await resumeMock.reviewResume();
     expect(rev.line_edits.length).toBeGreaterThan(0);
     expect(rev.overall_score).toBeGreaterThan(0);
+    expect(rev.overall_score).toBeLessThanOrEqual(5);
+    // Enriched fields present.
+    expect(rev.critical_fixes?.length).toBeGreaterThan(0);
+    expect(rev.ats_breakdown?.keyword_match).toBeGreaterThanOrEqual(0);
+  });
+  it("uploads a resume with renderable structured sections", async () => {
+    const up = await resumeMock.uploadResume(new File(["x"], "cv.pdf"));
+    expect(up.parsed.experience?.length).toBeGreaterThan(0);
+    expect((up.parsed.experience?.[0].bullets ?? []).length).toBeGreaterThan(0);
+    expect((up.parsed.skills as unknown[]).length).toBeGreaterThan(0);
+  });
+  it("returns a job match with a score in range and keyword arrays", async () => {
+    const m = await resumeMock.matchResume("Senior Go engineer, Kafka, AWS, Terraform.");
+    expect(m.match_score).toBeGreaterThanOrEqual(0);
+    expect(m.match_score).toBeLessThanOrEqual(100);
+    expect(Array.isArray(m.matched_keywords)).toBe(true);
+    expect(m.matched_keywords.length).toBeGreaterThan(0);
+    expect(Array.isArray(m.missing_keywords)).toBe(true);
+    expect(m.missing_keywords.length).toBeGreaterThan(0);
+    expect(m.tailoring_suggestions.length).toBeGreaterThan(0);
   });
 });
 

@@ -24,6 +24,8 @@ func (s *Stub) Generate(_ context.Context, req GenerateRequest) (string, error) 
 		return mustJSON(stubResume()), nil
 	case PurposeResumeReview:
 		return mustJSON(stubResumeReview()), nil
+	case PurposeResumeMatch:
+		return mustJSON(stubResumeMatch()), nil
 	case PurposeScore:
 		return mustJSON(stubScore()), nil
 	case PurposeDirector:
@@ -43,12 +45,41 @@ func stubResume() map[string]any {
 		"name":             "Alex Candidate",
 		"headline":         "Senior Software Engineer",
 		"years_experience": 7,
-		"skills":           []string{"Go", "Distributed Systems", "Postgres", "Kubernetes", "gRPC"},
+		"contact": map[string]any{
+			"location": "San Francisco, CA",
+			"email":    "alex@example.com",
+			"phone":    "(555) 123-4567",
+			"links":    []string{"github.com/alexc", "linkedin.com/in/alexc"},
+		},
+		"summary": "Backend-leaning engineer with distributed systems depth and payments experience.",
+		"experience": []map[string]any{
+			{
+				"company": "Acme Corp", "role": "Senior Software Engineer", "start": "2021", "end": "Present",
+				"bullets": []string{
+					"Worked on the payments ledger service.",
+					"Responsible for search platform.",
+					"Helped with various backend tasks and improvements.",
+				},
+			},
+			{
+				"company": "Globex", "role": "Software Engineer", "start": "2018", "end": "2021",
+				"bullets": []string{
+					"Built internal tools and APIs.",
+					"Participated in on-call rotation.",
+				},
+			},
+		},
+		"education": []map[string]any{
+			{"school": "State University", "degree": "B.S. Computer Science", "dates": "2014 – 2018"},
+		},
+		"skills": []map[string]any{
+			{"category": "Languages", "items": []string{"Go", "Python", "TypeScript"}},
+			{"category": "Infrastructure", "items": []string{"Distributed Systems", "Postgres", "Kubernetes", "gRPC", "Kafka", "Redis", "Elasticsearch"}},
+		},
 		"projects": []map[string]any{
 			{"name": "Payments Ledger", "summary": "Built an idempotent double-entry ledger handling 5k TPS.", "tech": []string{"Go", "Postgres", "Kafka"}},
 			{"name": "Search Platform", "summary": "Owned a typeahead service with p99 < 40ms across 3 regions.", "tech": []string{"Elasticsearch", "Redis"}},
 		},
-		"summary": "Backend-leaning engineer with distributed systems depth and payments experience.",
 	}
 }
 
@@ -74,6 +105,41 @@ func stubResumeReview() map[string]any {
 			"Lead each role with your single biggest result.",
 		},
 		"ats_notes": "Include role-relevant keywords (Kafka, CDC, sharding) verbatim; keep to a single-column layout for parser compatibility.",
+		"critical_fixes": []map[string]any{
+			{"title": "Vague responsibility bullet", "location": "Experience 1, bullet 1", "detail": "'Worked on the payments ledger service' states no outcome, scale, or metric."},
+			{"title": "Filler bullet dilutes impact", "location": "Experience 1, bullet 3", "detail": "'Helped with various backend tasks' says nothing measurable — cut it or replace with a result."},
+		},
+		"quantifiable_impacts": []map[string]any{
+			{"text": "5k TPS with zero reconciliation drift over 12 months", "note": "Concrete throughput + reliability window — exactly the shape recruiters scan for."},
+			{"text": "p99 from 120ms to 40ms", "note": "Clear before/after latency win."},
+		},
+		"ats_breakdown": map[string]any{
+			"formatting":    "pass",
+			"keyword_match": 72,
+			"notes":         "Single-column, standard headings. Add missing hard skills (CDC, sharding) verbatim to lift keyword match.",
+		},
+	}
+}
+
+func stubResumeMatch() map[string]any {
+	return map[string]any{
+		"match_score":      68,
+		"verdict":          "Strong backend fit; missing a few explicitly-required cloud + streaming keywords. (stub)",
+		"matched_keywords": []string{"Go", "Postgres", "Kubernetes", "distributed systems", "Kafka"},
+		"missing_keywords": []string{"AWS", "Terraform", "gRPC streaming", "observability"},
+		"strengths": []string{
+			"Direct distributed-systems and payments experience aligns with the core of the role.",
+			"Demonstrated ownership at scale (5k TPS, p99 40ms).",
+		},
+		"gaps": []string{
+			"No explicit cloud provider (AWS/GCP) named though the JD requires it.",
+			"Infrastructure-as-code (Terraform) not mentioned.",
+		},
+		"tailoring_suggestions": []map[string]any{
+			{"issue": "Cloud keywords absent", "detail": "The JD lists AWS as required; the resume never names a cloud.", "suggestion": "Add the specific AWS services you used (EKS, RDS, SQS) to the relevant role."},
+			{"issue": "IaC not surfaced", "detail": "Terraform is a listed must-have.", "suggestion": "If you've written Terraform/Pulumi, add a bullet quantifying what it provisioned."},
+		},
+		"ats_keyword_match": 64,
 	}
 }
 

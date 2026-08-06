@@ -91,9 +91,12 @@ function SetupInner() {
         {resume?.parsed?.name && (
           <div className="mt-4 rounded-xl border border-[var(--color-line)] bg-[var(--color-panel-2)] p-4 text-sm">
             <div className="font-semibold">{resume.parsed.name} · <span className="text-[var(--color-muted)]">{resume.parsed.headline}</span></div>
-            {resume.parsed.skills && <div className="mt-2 flex flex-wrap gap-1.5">{resume.parsed.skills.slice(0, 8).map((s) => (
-              <span key={s} className="rounded-md bg-[var(--color-studio)] px-2 py-0.5 text-xs text-[var(--color-faint)]">{s}</span>
-            ))}</div>}
+            {(() => {
+              const flat = (resume.parsed.skills as unknown[] | undefined ?? []).flatMap((s) => typeof s === "string" ? [s] : ((s as { items?: string[] }).items ?? []));
+              return flat.length > 0 ? <div className="mt-2 flex flex-wrap gap-1.5">{flat.slice(0, 8).map((s) => (
+                <span key={s} className="rounded-md bg-[var(--color-studio)] px-2 py-0.5 text-xs text-[var(--color-faint)]">{s}</span>
+              ))}</div> : null;
+            })()}
           </div>
         )}
       </Panel>

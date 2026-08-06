@@ -43,13 +43,51 @@ func New(st Repo, ai llm.Client, reasonModel string) *Service {
 	return &Service{store: st, llm: ai, reasonModel: reasonModel}
 }
 
+// parseSchema captures a structured, renderable resume — contact block,
+// summary, experience/education/skills/projects — so the UI can lay it out as a
+// real document (not a raw text dump). Modeled after OpenResume / Reactive
+// Resume section schemas. The LLM must stay faithful to the source text.
 var parseSchema = map[string]any{
 	"type": "object",
 	"properties": map[string]any{
 		"name":             map[string]any{"type": "string"},
-		"headline":         map[string]any{"type": "string"},
+		"headline":         map[string]any{"type": "string", "description": "professional title, e.g. 'Senior Software Engineer'"},
 		"years_experience": map[string]any{"type": "number"},
-		"skills":           map[string]any{"type": "array", "items": map[string]any{"type": "string"}},
+		"contact": map[string]any{
+			"type": "object",
+			"properties": map[string]any{
+				"location": map[string]any{"type": "string"},
+				"email":    map[string]any{"type": "string"},
+				"phone":    map[string]any{"type": "string"},
+				"links":    map[string]any{"type": "array", "items": map[string]any{"type": "string"}, "description": "LinkedIn/GitHub/portfolio URLs verbatim"},
+			},
+		},
+		"summary": map[string]any{"type": "string"},
+		"experience": map[string]any{"type": "array", "items": map[string]any{
+			"type": "object",
+			"properties": map[string]any{
+				"company": map[string]any{"type": "string"},
+				"role":    map[string]any{"type": "string"},
+				"start":   map[string]any{"type": "string"},
+				"end":     map[string]any{"type": "string", "description": "'Present' if current"},
+				"bullets": map[string]any{"type": "array", "items": map[string]any{"type": "string"}, "description": "bullet lines verbatim from the resume"},
+			},
+		}},
+		"education": map[string]any{"type": "array", "items": map[string]any{
+			"type": "object",
+			"properties": map[string]any{
+				"school": map[string]any{"type": "string"},
+				"degree": map[string]any{"type": "string"},
+				"dates":  map[string]any{"type": "string"},
+			},
+		}},
+		"skills": map[string]any{"type": "array", "items": map[string]any{
+			"type": "object",
+			"properties": map[string]any{
+				"category": map[string]any{"type": "string", "description": "e.g. 'Languages'; empty if the resume lists skills flat"},
+				"items":    map[string]any{"type": "array", "items": map[string]any{"type": "string"}},
+			},
+		}},
 		"projects": map[string]any{"type": "array", "items": map[string]any{
 			"type": "object",
 			"properties": map[string]any{
@@ -58,7 +96,6 @@ var parseSchema = map[string]any{
 				"tech":    map[string]any{"type": "array", "items": map[string]any{"type": "string"}},
 			},
 		}},
-		"summary": map[string]any{"type": "string"},
 	},
 }
 
@@ -89,9 +126,12 @@ func (s *Service) Upload(w http.ResponseWriter, r *http.Request) {
 	}
 
 	parsed, err := s.llm.Generate(r.Context(), llm.GenerateRequest{
-		Purpose:     llm.PurposeResumeParse,
-		Model:       s.reasonModel,
-		System:      "You extract structured data from a resume. Be faithful to the text; do not invent facts.",
+		Purpose: llm.PurposeResumeParse,
+		Model:   s.reasonModel,
+		System: "You extract a resume into structured JSON so it can be re-rendered faithfully. " +
+			"Copy bullet lines, titles, companies, dates, and contact details VERBATIM from the source. " +
+			"Do NOT invent, embellish, or add facts that are not present. Leave a field empty if the resume does not state it. " +
+			"Group skills by their category headings when the resume provides them; otherwise emit a single group with an empty category.",
 		Messages:    []llm.Message{{Role: "user", Text: "Resume text:\n\n" + clip(text, 20000)}},
 		JSONSchema:  parseSchema,
 		Temperature: 0.1,
@@ -133,12 +173,59 @@ var reviewSchema = map[string]any{
 		"line_edits": map[string]any{"type": "array", "items": map[string]any{
 			"type": "object",
 			"properties": map[string]any{
-				"original": map[string]any{"type": "string"},
-				"improved": map[string]any{"type": "string"},
+				"original": map[string]any{"type": "string", "description": "a phrase copied VERBATIM from the resume so it can be located"},
+				"improved": map[string]any{"type": "string", "description": "a stronger, quantified rewrite of that phrase"},
 			},
 		}},
 		"impact_suggestions": map[string]any{"type": "array", "items": map[string]any{"type": "string"}},
 		"ats_notes":          map[string]any{"type": "string"},
+		// Richer fields powering the analysis panel. Optional — older data omits them.
+		"critical_fixes": map[string]any{"type": "array", "items": map[string]any{
+			"type": "object",
+			"properties": map[string]any{
+				"title":    map[string]any{"type": "string"},
+				"location": map[string]any{"type": "string", "description": "where in the resume, e.g. 'Experience 1, bullet 2' or 'Summary'"},
+				"detail":   map[string]any{"type": "string"},
+			},
+		}},
+		"quantifiable_impacts": map[string]any{"type": "array", "items": map[string]any{
+			"type": "object",
+			"properties": map[string]any{
+				"text": map[string]any{"type": "string", "description": "the strong, quantified phrase (verbatim if it exists in the resume)"},
+				"note": map[string]any{"type": "string", "description": "why it lands"},
+			},
+		}},
+		"ats_breakdown": map[string]any{
+			"type": "object",
+			"properties": map[string]any{
+				"formatting":    map[string]any{"type": "string", "description": "pass | warn | fail"},
+				"keyword_match": map[string]any{"type": "number", "description": "0..100"},
+				"notes":         map[string]any{"type": "string"},
+			},
+		},
+	},
+}
+
+// matchSchema powers Job Match: how well the stored resume fits a pasted JD.
+// Inspired by Resume-Matcher (keyword overlap + semantic gap analysis + score).
+var matchSchema = map[string]any{
+	"type": "object",
+	"properties": map[string]any{
+		"match_score":      map[string]any{"type": "number", "description": "0..100 overall fit"},
+		"verdict":          map[string]any{"type": "string", "description": "one-line verdict"},
+		"matched_keywords": map[string]any{"type": "array", "items": map[string]any{"type": "string"}, "description": "JD skills/terms present in the resume, VERBATIM as they appear in the resume so they can be highlighted"},
+		"missing_keywords": map[string]any{"type": "array", "items": map[string]any{"type": "string"}, "description": "important JD skills/terms absent from the resume"},
+		"strengths":        map[string]any{"type": "array", "items": map[string]any{"type": "string"}},
+		"gaps":             map[string]any{"type": "array", "items": map[string]any{"type": "string"}},
+		"tailoring_suggestions": map[string]any{"type": "array", "items": map[string]any{
+			"type": "object",
+			"properties": map[string]any{
+				"issue":      map[string]any{"type": "string"},
+				"detail":     map[string]any{"type": "string"},
+				"suggestion": map[string]any{"type": "string"},
+			},
+		}},
+		"ats_keyword_match": map[string]any{"type": "number", "description": "0..100 keyword coverage of the JD"},
 	},
 }
 
@@ -154,7 +241,11 @@ func (s *Service) Review(w http.ResponseWriter, r *http.Request) {
 		Purpose: llm.PurposeResumeReview,
 		Model:   s.reasonModel,
 		System: "You are a senior engineering hiring manager and resume coach. Critique the resume honestly and " +
-			"specifically. Prefer concrete, quantified line rewrites. Score 0..5 on overall strength.",
+			"specifically. Score 0..5 on overall strength. " +
+			"For line_edits, copy each `original` VERBATIM from the resume text so it can be located and highlighted, and make `improved` a concrete, quantified rewrite (add %, latency, $, scale, or time saved — but never fabricate numbers; use placeholders like '<X>%' when the true figure is unknown). " +
+			"For critical_fixes, give the most damaging problems with a precise `location`. " +
+			"For quantifiable_impacts, surface the resume's strongest already-quantified achievements. " +
+			"For ats_breakdown, judge formatting as pass/warn/fail and estimate keyword_match 0..100.",
 		Messages:    []llm.Message{{Role: "user", Text: "Resume text:\n\n" + clip(res.ParsedText, 20000)}},
 		JSONSchema:  reviewSchema,
 		Temperature: 0.4,
@@ -166,6 +257,56 @@ func (s *Service) Review(w http.ResponseWriter, r *http.Request) {
 	result := json.RawMessage(out)
 	if !json.Valid(result) {
 		httpx.WriteProblem(w, http.StatusBadGateway, "review returned invalid data")
+		return
+	}
+	info := s.llm.Info()
+	_, _ = s.store.SaveResumeReview(r.Context(), uid, res.ID, info.Provider, info.Model, result)
+	httpx.WriteJSON(w, http.StatusOK, result)
+}
+
+// Match scores the stored resume against a pasted job description and returns
+// matched/missing keywords + tailoring suggestions. The JD is used only for
+// this analysis; it is not persisted or echoed back.
+func (s *Service) Match(w http.ResponseWriter, r *http.Request) {
+	uid := auth.UserID(r.Context())
+
+	var body struct {
+		JobDescription string `json:"job_description"`
+	}
+	if err := json.NewDecoder(io.LimitReader(r.Body, 1<<20)).Decode(&body); err != nil {
+		httpx.WriteProblem(w, http.StatusBadRequest, "invalid request body")
+		return
+	}
+	jd := strings.TrimSpace(body.JobDescription)
+	if jd == "" {
+		httpx.WriteProblem(w, http.StatusBadRequest, "paste a job description")
+		return
+	}
+
+	res, err := s.store.LatestResume(r.Context(), uid)
+	if err != nil {
+		httpx.WriteProblem(w, http.StatusBadRequest, "upload a resume first")
+		return
+	}
+
+	out, err := s.llm.Generate(r.Context(), llm.GenerateRequest{
+		Purpose: llm.PurposeResumeMatch,
+		Model:   s.reasonModel,
+		System: "You are an ATS and technical recruiter. Compare the candidate's resume to the job description. " +
+			"Do real keyword AND semantic gap analysis: match_score (0..100) reflects overall fit; matched_keywords are JD skills present in the resume (copy them VERBATIM as they appear IN THE RESUME so they can be highlighted); missing_keywords are important JD skills absent from the resume. " +
+			"Give specific, actionable tailoring_suggestions. Do NOT invent resume content or claim skills the candidate does not have.",
+		Messages: []llm.Message{{Role: "user", Text: "JOB DESCRIPTION:\n\n" + clip(jd, 8000) +
+			"\n\n---\n\nCANDIDATE RESUME:\n\n" + clip(res.ParsedText, 20000)}},
+		JSONSchema:  matchSchema,
+		Temperature: 0.3,
+	})
+	if err != nil {
+		httpx.WriteProblem(w, http.StatusBadGateway, "match failed: "+err.Error())
+		return
+	}
+	result := json.RawMessage(out)
+	if !json.Valid(result) {
+		httpx.WriteProblem(w, http.StatusBadGateway, "match returned invalid data")
 		return
 	}
 	info := s.llm.Info()

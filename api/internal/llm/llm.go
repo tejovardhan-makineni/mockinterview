@@ -17,6 +17,7 @@ const (
 	PurposeGeneric      Purpose = "generic"
 	PurposeResumeParse  Purpose = "resume_parse"
 	PurposeResumeReview Purpose = "resume_review"
+	PurposeResumeMatch  Purpose = "resume_match"
 	PurposeScore        Purpose = "score"
 	PurposeDirector     Purpose = "director"
 	PurposeSummarize    Purpose = "summarize"

@@ -75,6 +75,7 @@ func (a *App) Routes(r chi.Router) {
 		r.Post("/resume", resumeSvc.Upload)
 		r.Get("/resume", resumeSvc.Get)
 		r.With(perUser).Post("/resume/review", resumeSvc.Review)
+		r.With(perUser).Post("/resume/match", resumeSvc.Match)
 
 		// Interviewer configuration + catalogs.
 		r.Get("/config", profileSvc.Get)

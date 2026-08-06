@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"encoding/json"
+	"mime/multipart"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -160,6 +161,78 @@ func TestInterviewHappyPath(t *testing.T) {
 	_ = json.Unmarshal(body, &rep)
 	if len(rep.Scores) == 0 {
 		t.Errorf("report should include scored dimensions: %s", body)
+	}
+}
+
+// Resume flow: upload text → review (scored critique) → match against a JD.
+// Uploads use multipart; the stub returns deterministic structured data.
+func TestResumeReviewAndMatch(t *testing.T) {
+	srv := testServer(t, nil, 100)
+	c := &client{t: t, base: srv.URL}
+	c.register("resume@test.com", "password123")
+
+	// Match before uploading a resume must 400.
+	if res, _ := c.do("POST", "/api/v1/resume/match", map[string]string{"job_description": "Senior Go engineer, Kafka, AWS."}); res.StatusCode != http.StatusBadRequest {
+		t.Fatalf("match without resume should be 400, got %d", res.StatusCode)
+	}
+
+	// Upload a plain-text resume (multipart/form-data, field "file").
+	var mb bytes.Buffer
+	mw := multipart.NewWriter(&mb)
+	fw, _ := mw.CreateFormFile("file", "alex.txt")
+	_, _ = fw.Write([]byte("Alex Candidate\nSenior Software Engineer\n\nEXPERIENCE\nAcme — Worked on the payments ledger service.\n\nSKILLS\nGo, Postgres, Kafka"))
+	_ = mw.Close()
+	upReq, _ := http.NewRequest("POST", srv.URL+"/api/v1/resume", &mb)
+	upReq.Header.Set("Content-Type", mw.FormDataContentType())
+	upReq.Header.Set("Authorization", "Bearer "+c.token)
+	upRes, err := http.DefaultClient.Do(upReq)
+	if err != nil {
+		t.Fatalf("upload: %v", err)
+	}
+	if upRes.StatusCode != http.StatusOK {
+		t.Fatalf("upload should be 200, got %d", upRes.StatusCode)
+	}
+	_ = upRes.Body.Close()
+
+	// Review → scored critique with the enriched fields.
+	res, body := c.do("POST", "/api/v1/resume/review", nil)
+	if res.StatusCode != http.StatusOK {
+		t.Fatalf("review: %d %s", res.StatusCode, body)
+	}
+	var rev struct {
+		OverallScore  float64          `json:"overall_score"`
+		LineEdits     []map[string]any `json:"line_edits"`
+		CriticalFixes []map[string]any `json:"critical_fixes"`
+	}
+	_ = json.Unmarshal(body, &rev)
+	if rev.OverallScore <= 0 || rev.OverallScore > 5 {
+		t.Errorf("overall_score out of range: %v", rev.OverallScore)
+	}
+	if len(rev.LineEdits) == 0 {
+		t.Errorf("review should include line_edits: %s", body)
+	}
+
+	// Empty JD is rejected.
+	if res, _ := c.do("POST", "/api/v1/resume/match", map[string]string{"job_description": "  "}); res.StatusCode != http.StatusBadRequest {
+		t.Fatalf("empty JD should be 400, got %d", res.StatusCode)
+	}
+
+	// Match with a real JD → score in [0,100] plus keyword arrays.
+	res, body = c.do("POST", "/api/v1/resume/match", map[string]string{"job_description": "Senior Go engineer. Must have Kafka, Postgres, AWS, Terraform."})
+	if res.StatusCode != http.StatusOK {
+		t.Fatalf("match: %d %s", res.StatusCode, body)
+	}
+	var m struct {
+		MatchScore      float64  `json:"match_score"`
+		MatchedKeywords []string `json:"matched_keywords"`
+		MissingKeywords []string `json:"missing_keywords"`
+	}
+	_ = json.Unmarshal(body, &m)
+	if m.MatchScore < 0 || m.MatchScore > 100 {
+		t.Errorf("match_score out of range: %v", m.MatchScore)
+	}
+	if len(m.MatchedKeywords) == 0 || len(m.MissingKeywords) == 0 {
+		t.Errorf("match should include matched + missing keywords: %s", body)
 	}
 }
 
