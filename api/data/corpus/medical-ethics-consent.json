@@ -1,0 +1,62 @@
+{
+  "id": "medical-ethics-consent",
+  "title": "Medical Ethics: Informed Consent & Capacity",
+  "track": "professional",
+  "domain": "medicine",
+  "modality": "conversational",
+  "difficulty": "mid",
+  "tags": ["ethics", "informed-consent", "capacity", "autonomy", "communication"],
+  "prompt": "A 72-year-old patient with a treatable but serious condition is refusing a recommended operation that carries a good chance of recovery. Without it, they are likely to deteriorate. The surgical team is frustrated and asks you to 'get them to sign.' How would you approach informed consent and the question of whether this patient can refuse?",
+  "blurb": "An informed-consent and capacity scenario — balancing patient autonomy against beneficence and assessing capacity properly.",
+  "rubric": [
+    { "key": "ethical_reasoning", "label": "Ethical reasoning", "description": "Frames the core tension between autonomy and beneficence; recognizes that a capacitous adult may refuse recommended treatment even if the decision seems unwise; reasons from principles rather than pressure to 'get a signature'.", "weight": 1.3 },
+    { "key": "capacity_assessment", "label": "Capacity assessment", "description": "Assesses capacity properly and decision-specifically — can the patient understand the information, retain it, weigh it, and communicate a choice; presumes capacity; knows capacity can fluctuate and is not determined by the 'wisdom' of the choice.", "weight": 1.3 },
+    { "key": "informed_consent", "label": "Elements of informed consent", "description": "Understands valid consent needs capacity, adequate disclosure (nature, benefits, material risks, alternatives including no treatment), understanding, and voluntariness free from coercion.", "weight": 1.2 },
+    { "key": "communication", "label": "Communication & exploration", "description": "Explores the patient's reasons, fears, values and any misunderstandings before concluding; addresses misinformation; involves the patient's questions rather than lecturing.", "weight": 1.1 },
+    { "key": "autonomy_respect", "label": "Respect for autonomy & voluntariness", "description": "Protects the patient from coercion (including from the team), respects a capacitous refusal, and resists the instruction to simply 'get them to sign'.", "weight": 1.2 },
+    { "key": "professionalism", "label": "Professionalism & escalation", "description": "Handles the frustrated team appropriately, documents carefully, seeks senior/ethics/second-opinion input when needed, and knows the pathway if the patient lacks capacity (best interests, surrogate/advance directive).", "weight": 1.0 },
+    { "key": "balance_of_perspectives", "label": "Balance of perspectives", "description": "Holds the patient's autonomy, their wellbeing, the team's clinical view, and legal/ethical duties together without collapsing into paternalism or pure hands-off.", "weight": 0.9 }
+  ],
+  "reference": {
+    "scenario": "A 72-year-old is refusing a recommended, likely-beneficial operation; the surgical team pressures the candidate to obtain a signature. The station tests understanding that valid consent requires capacity, disclosure, understanding, and voluntariness; that a capacitous adult may refuse even beneficial treatment; and that the correct response is to assess capacity and explore reasons, not to coerce. If the patient lacks capacity, the candidate should know the best-interests pathway. Generic and educational, not jurisdiction-specific legal advice.",
+    "model_points": [
+      "Names the central tension: respect for autonomy versus beneficence — the wish to do what's medically best versus the patient's right to decide.",
+      "Rejects the framing of 'getting them to sign' — a signature is not consent; valid consent is a process, and coercion invalidates it.",
+      "States the elements of valid consent: the patient has capacity, has been given adequate information (nature of the procedure, benefits, material risks, alternatives including doing nothing and its consequences), understands it, and decides voluntarily free of coercion.",
+      "Presumes capacity in an adult and assesses it decision-specifically: can the patient understand the relevant information, retain it long enough to decide, weigh/use it, and communicate a choice.",
+      "Recognizes that an unwise decision does not by itself indicate a lack of capacity — a capacitous adult may refuse even life-prolonging treatment.",
+      "Explores the patient's actual reasons: fears, prior experiences, misunderstandings, values, quality-of-life priorities, religious/personal beliefs; corrects any factual misconceptions.",
+      "Ensures information was delivered understandably and the patient had a genuine chance to ask questions; addresses reversible barriers (pain, delirium, communication needs, timing).",
+      "If the patient has capacity and still refuses after a full, uncoerced conversation, respects the refusal, documents it carefully, and keeps the door open (offer to revisit, provide support and alternatives).",
+      "If the patient lacks capacity: does not simply proceed on the team's wish — follows the best-interests process, checks for an advance directive/decision or an appropriate surrogate/lasting power of attorney, involves seniors and possibly clinical ethics.",
+      "Manages the team professionally: acknowledges their concern for the patient, explains why coercion is neither ethical nor valid, suggests a joint conversation, senior review, or ethics input; documents thoroughly."
+    ],
+    "probes": [
+      { "trigger": "candidate treats the refusal as automatically invalid or a capacity failure", "question": "The patient understands they may die without the operation and still declines. Does refusing what you recommend mean they lack capacity?" },
+      { "trigger": "candidate agrees to persuade the patient to sign", "question": "The surgeon says 'just convince them, they're being irrational.' How do you respond to that request?" },
+      { "trigger": "candidate never assesses capacity", "question": "How would you actually determine whether this patient can make this decision?" },
+      { "trigger": "candidate respects refusal without exploring why", "question": "Before accepting the refusal, what would you want to understand about the patient's reasons?" },
+      { "trigger": "candidate assumes the patient lacks capacity", "question": "Suppose you concluded they genuinely can't weigh the decision — what's the correct process then, and who decides?" },
+      { "trigger": "candidate omits documentation/escalation", "question": "Whatever the outcome, what do you make sure you document and who might you involve?" }
+    ],
+    "red_flags": [
+      "Accepting the instruction to 'get them to sign' and trying to coerce or pressure the patient.",
+      "Equating an unwise or refused-treatment decision with a lack of capacity.",
+      "Failing to assess capacity at all, or assessing it based on the outcome rather than the process.",
+      "Overriding a capacitous refusal / proceeding against the patient's wishes.",
+      "Assuming incapacity and jumping to surrogate decision-making without a proper assessment.",
+      "Not exploring the patient's reasons or correcting misunderstandings.",
+      "Ignoring voluntariness — allowing family or team pressure to drive the 'consent'.",
+      "No documentation, no escalation, no offer to revisit."
+    ],
+    "follow_ups": [
+      "What are the components you check when assessing capacity for a specific decision?",
+      "If the patient clearly has capacity and refuses, what exactly do you do next?",
+      "If instead they lacked capacity, how is a decision made and by whom?",
+      "How would you handle the surgeon who keeps pushing you to obtain consent?",
+      "What if a family member insisted the operation go ahead against the patient's stated wishes?"
+    ],
+    "exemplar_answer": "I'd start by pushing back gently on the framing: our job isn't to 'get a signature,' it's to make sure any decision is a valid one, and a signature obtained by pressure isn't valid consent at all. Valid consent needs four things — the patient has capacity, they've had adequate information including the benefits, the material risks, and the alternatives such as not operating and what that would mean, they understand it, and they're deciding voluntarily without coercion. I'd presume this 72-year-old has capacity, then assess it specifically for this decision: can they understand the relevant information, retain it long enough to decide, weigh it up, and communicate their choice? Crucially, refusing what we recommend, even something likely to help, does not by itself mean they lack capacity — a capacitous adult is entitled to make what we might consider an unwise decision. So I'd sit with the patient and explore why: are they frightened, do they have a past experience, a misunderstanding about the operation, or clear personal values about what matters to them? I'd correct any factual misconceptions and make sure the information was given in a way they could genuinely engage with, addressing reversible barriers like pain or delirium. If, after a full and uncoerced conversation, they still have capacity and still refuse, I respect that, document the discussion and my capacity assessment carefully, and keep the door open to revisit. If instead I concluded they genuinely couldn't weigh the decision, I wouldn't just proceed on the team's wish — I'd follow the best-interests process, look for any advance decision or appropriate surrogate, and involve seniors and possibly clinical ethics. And I'd handle the surgical team by acknowledging they want what's best for the patient, while being clear that coercion is neither ethical nor produces valid consent, and offering a joint conversation or senior review."
+  },
+  "interviewer_notes": "Mid-level ethics station on consent and capacity. The core discriminator is whether the candidate understands that a capacitous adult may refuse recommended treatment and that refusal is not itself evidence of incapacity — probe hard here. Also test whether they resist the 'just get them to sign' pressure (voluntariness) and whether they can actually describe a capacity assessment (understand/retain/weigh/communicate) rather than just naming the word. Reward candidates who explore the patient's reasons before concluding, and who know the best-interests pathway if capacity is genuinely absent. Do not require jurisdiction-specific statute names — the ethical framework and reasoning are what's scored. Penalize coercion, conflating unwise decisions with incapacity, and skipping capacity assessment altogether."
+}

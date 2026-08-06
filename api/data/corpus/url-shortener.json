@@ -1,0 +1,86 @@
+{
+  "id": "url-shortener",
+  "title": "Design a URL Shortener (TinyURL)",
+  "track": "engineering",
+  "domain": "system_design",
+  "modality": "system_design",
+  "difficulty": "mid",
+  "tags": ["hashing", "kv-store", "caching", "read-heavy", "cdn"],
+  "prompt": "Design a service that converts long URLs into short links and redirects users from a short link to the original URL. Assume it must serve a large, read-heavy global audience.",
+  "blurb": "The classic read-heavy KV design — key generation, collisions, cache, CDN, and analytics.",
+  "rubric": [
+    { "key": "requirements", "label": "Requirements gathering", "description": "Separates functional (shorten, redirect, analytics, expiry, custom alias) from non-functional (low-latency redirect, high availability, durability).", "weight": 1.0 },
+    { "key": "clarifying_questions", "label": "Clarifying questions", "description": "Asks about scale, read/write ratio, custom aliases, link lifetime/expiry, analytics needs.", "weight": 1.0 },
+    { "key": "estimations", "label": "Back-of-envelope estimations", "description": "Derives QPS (reads vs writes), storage/year, key length from cardinality, cache size.", "weight": 1.2 },
+    { "key": "api_design", "label": "API design", "description": "POST /shorten, GET /{code} redirect (301 vs 302 reasoning), analytics endpoints.", "weight": 1.0 },
+    { "key": "data_model", "label": "Data model", "description": "code→url mapping plus created_at, owner, expiry; choice of store.", "weight": 1.0 },
+    { "key": "high_level_design", "label": "High-level design", "description": "LB → stateless app tier → KV store + cache + CDN for redirects; write vs read paths.", "weight": 1.3 },
+    { "key": "key_generation", "label": "Key generation depth", "description": "Base62 counter vs hashing vs KGS; collision handling; distributed counter / hot key.", "weight": 1.2 },
+    { "key": "scaling", "label": "Scaling", "description": "Sharding the KV store, replication, caching hot links, CDN edge redirects.", "weight": 1.1 },
+    { "key": "bottlenecks", "label": "Bottlenecks", "description": "Identifies + mitigates cache hot path and the ID generator as a potential SPOF.", "weight": 1.0 },
+    { "key": "reliability", "label": "Reliability", "description": "Replication, failover, graceful degradation, backpressure on write path.", "weight": 1.0 },
+    { "key": "observability", "label": "Observability", "description": "Redirect metrics, latency SLOs, click analytics pipeline, alerting.", "weight": 0.8 },
+    { "key": "security", "label": "Security & abuse", "description": "Malicious-URL scanning, rate limiting, auth for custom aliases, open-redirect avoidance.", "weight": 0.8 }
+  ],
+  "reference": {
+    "functional_requirements": [
+      "Create a short code for a long URL",
+      "Redirect short code → original URL",
+      "Optional custom alias",
+      "Optional expiry",
+      "Click analytics"
+    ],
+    "nonfunctional_requirements": [
+      "Redirect latency < 50ms p99",
+      "Very high availability for reads",
+      "Durable mappings",
+      "Read-heavy (~100:1 read:write)"
+    ],
+    "clarifying_questions": [
+      "Expected traffic and read/write ratio?",
+      "Do we support custom aliases?",
+      "Do links expire?",
+      "How long must codes remain valid?",
+      "Do we need per-link analytics?"
+    ],
+    "qualifying_questions": [
+      "Is analytics real-time or batch?",
+      "Global or single-region audience?"
+    ],
+    "estimations": {
+      "traffic": "100M new URLs/day ≈ 1.2K writes/s; ~100:1 read ratio ≈ 120K reads/s",
+      "storage": "100M/day × 365 × ~500B ≈ ~18TB/year",
+      "key_space": "Base62^7 ≈ 3.5T codes — 7 chars is plenty",
+      "cache": "Cache hot 20% of daily reads in memory; ~tens of GB"
+    },
+    "core_components": ["Load balancer", "Stateless app tier", "Key generation service", "KV store (mappings)", "Cache (hot links)", "CDN (edge redirects)", "Analytics pipeline", "Object/blob for logs"],
+    "data_model": ["urls(code PK, long_url, created_at, owner_id, expires_at)", "analytics(code, ts, ip, ua, referrer)"],
+    "api_design": [
+      "POST /api/shorten { url, alias?, ttl? } → { code, short_url }",
+      "GET /{code} → 302 redirect (302 keeps analytics; 301 is cacheable but loses per-click counts)",
+      "GET /api/{code}/stats → click analytics"
+    ],
+    "high_level_design": "Writes go LB → app → KGS assigns base62 id → persist to sharded KV + warm cache. Reads go LB/CDN → cache → KV; redirect served from edge when possible. Analytics events streamed async to a queue → aggregation store.",
+    "deep_dives": [
+      { "topic": "key_generation", "probe": "How do you generate codes without collisions at 1.2K writes/s across many app servers? Counter vs hash vs a key-generation service?" },
+      { "topic": "distributed_counter", "probe": "If you use a counter, how do you avoid a single point of contention — ranges/blocks per server? What happens on server crash mid-block?" },
+      { "topic": "cache_strategy", "probe": "What do you cache and with what eviction? How do you handle a stampede when a viral link's cache entry expires?" },
+      { "topic": "cdc_analytics", "probe": "You store mappings in a database. How would you capture changes to feed the analytics/search pipeline — change data capture, something like Debezium, or dual writes?" },
+      { "topic": "redirect_semantics", "probe": "301 vs 302 — what are the caching and analytics tradeoffs?" }
+    ],
+    "followup_bank": [
+      { "trigger": "mentions cache", "question": "Eviction policy — TTL vs LRU? And how do you prevent a cache stampede?" },
+      { "trigger": "mentions database or postgres or sql", "question": "How do you capture DB changes downstream — CDC/Debezium vs dual writes?" },
+      { "trigger": "mentions hash", "question": "How do you handle hash collisions, and how long must the code be for your key space?" },
+      { "trigger": "mentions counter", "question": "How is that counter distributed and made fault-tolerant across servers?" }
+    ],
+    "scaling": ["Shard KV by code prefix / consistent hashing", "Read replicas + cache for hot links", "CDN edge redirects for the hottest links", "Async analytics to avoid slowing redirects"],
+    "bottlenecks": ["ID generator contention (SPOF)", "Cache hot key / stampede", "Analytics write amplification on redirect path"],
+    "tradeoffs": ["302 (per-click analytics) vs 301 (edge-cacheable, cheaper)", "Counter (dense, predictable) vs hash (no coordination, collision risk)", "Strong vs eventual consistency for analytics"],
+    "alternative_solutions": ["Hash(long_url) + truncate with collision retry", "Pre-generated key pool served by a KGS", "Snowflake-style distributed IDs base62-encoded"],
+    "observability": ["Redirect latency + error rate SLOs", "Cache hit ratio", "KGS block exhaustion alerts", "Analytics pipeline lag"],
+    "security": ["Scan submitted URLs for malware/phishing", "Rate-limit creation per IP/user", "Authn for custom aliases", "Prevent open-redirect abuse and enumeration"],
+    "reference_answer": "A strong answer scopes read-heavy traffic, estimates QPS/storage, picks a base62 key strategy with an explicit collision/coordination story, separates read/write paths with a cache + CDN for redirects, streams analytics asynchronously, and proactively raises the ID generator as the main SPOF plus cache stampede as the main hot-path risk."
+  },
+  "interviewer_notes": "Let the candidate drive requirements first. If they place a datastore, interrupt with the CDC/Debezium probe. If they add a cache, probe eviction + stampede. Push on key generation depth — this separates mid from senior. Reserve the last minutes for reliability + analytics pipeline."
+}

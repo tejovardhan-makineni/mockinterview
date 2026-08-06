@@ -1,0 +1,26 @@
+# env / secrets
+.env
+*.env
+!.env.example
+deploy/*.env
+deploy/secrets/
+
+# Go
+api/bin/
+api/mockinterview
+*.test
+*.out
+
+# Node / Next
+web/node_modules/
+web/.next/
+web/out/
+web/.turbo/
+npm-debug.log*
+
+# macOS
+.DS_Store
+
+# misc
+*.log
+scratch/

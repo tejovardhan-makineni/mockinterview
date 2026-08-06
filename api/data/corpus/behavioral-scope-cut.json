@@ -1,0 +1,53 @@
+{
+  "id": "behavioral-scope-cut",
+  "title": "Tell me about a time you had to cut scope or say no",
+  "track": "professional",
+  "domain": "behavioral",
+  "modality": "conversational",
+  "difficulty": "mid",
+  "tags": ["prioritization", "saying-no", "scope", "tradeoffs", "star"],
+  "prompt": "Tell me about a time you had to cut scope or say no to something people wanted — a feature, a request, a project. How did you make the call, and how did you handle the people who wanted it?",
+  "blurb": "Scope cut / saying no: did they prioritize with clear reasoning and bring people along — or just refuse or overcommit?",
+  "rubric": [
+    { "key": "situation_clarity", "label": "Situation & the pressure", "description": "Frames what was being asked, who wanted it, and the constraint (time, resources, focus) that forced a cut or a no.", "weight": 1.0 },
+    { "key": "task_ownership", "label": "Owning the decision", "description": "Shows THEY made or drove the call to cut/decline, taking responsibility for a decision that would disappoint someone, rather than deflecting it.", "weight": 1.2 },
+    { "key": "action_specificity", "label": "Prioritization reasoning", "description": "Describes the concrete basis for the decision — impact vs cost, alignment to goals, data — and specifically what they cut and what they protected.", "weight": 1.3 },
+    { "key": "result_impact", "label": "Result & stakeholder handling", "description": "Shows the outcome (focus/quality preserved, right thing shipped) AND that they handled the disappointed stakeholders well — brought them along rather than just refusing.", "weight": 1.2 },
+    { "key": "reflection", "label": "Reflection & judgment", "description": "Reflects on how they weigh trade-offs, the cost of saying yes to everything, and how to say no in a way that preserves relationships.", "weight": 1.1 },
+    { "key": "communication", "label": "Communication & structure", "description": "Structured and clear, showing they can explain a hard trade-off crisply.", "weight": 0.9 }
+  ],
+  "reference": {
+    "scenario": "The candidate should recall a moment they had to decline a request or cut committed scope — a feature stakeholders wanted, a project competing for resources, a customer ask, extra scope creeping into a deadline — under a real constraint. The signal is principled prioritization (clear reasoning about what matters most) plus the interpersonal skill to bring the disappointed party along, not just refuse.",
+    "model_points": [
+      "Situation: a real ask under a real constraint, with a stakeholder who genuinely wanted it and would be disappointed by a no or a cut.",
+      "Task: they owned making the prioritization call rather than saying yes to everything or punting the decision upward.",
+      "Action: reasoned explicitly about trade-offs — impact vs effort, alignment to the top goal, opportunity cost — and decided what to cut/decline and what to protect.",
+      "Action: handled the people — explained the 'why' transparently, acknowledged the ask's value, offered alternatives or a later slot, and negotiated rather than issuing a flat refusal.",
+      "Result: the outcome — focus/quality preserved, the highest-value work shipped — plus stakeholders who understood and stayed on board (not alienated).",
+      "Reflection: understands that saying yes to everything is a failure to prioritize; reflects on how to say no while keeping trust, and when a no should later become a yes."
+    ],
+    "probes": [
+      { "trigger": "just refused, no reasoning", "question": "On what basis did you decide this was the thing to cut? What was your prioritization framework — impact, effort, alignment?" },
+      { "trigger": "stakeholder handling ignored", "question": "How did the person who wanted it react, and what did you do to bring them along rather than just telling them no?" },
+      { "trigger": "actually said yes to everything", "question": "It sounds like you found a way to do it all — did you? If so, what gave, and was that the right call?" },
+      { "trigger": "no outcome", "question": "What did protecting focus actually buy you? Did the higher-priority work benefit measurably?" },
+      { "trigger": "decision made for them", "question": "Was this your call, or did someone above make it? What did YOU drive here?" }
+    ],
+    "red_flags": [
+      "Said no bluntly with no reasoning or empathy, alienating the stakeholder.",
+      "Couldn't actually say no — took on everything and the real story is overcommitment.",
+      "No prioritization logic; the cut seems arbitrary or self-serving.",
+      "Punted the hard decision to their manager and takes credit for it.",
+      "No account of how the disappointed party was handled — relationship damage ignored.",
+      "No sense of opportunity cost or what saying yes would have cost the top priority."
+    ],
+    "follow_ups": [
+      "How do you decide what makes the cut versus what doesn't?",
+      "How do you say no to someone senior or to an important customer?",
+      "Tell me about a no you later reversed. What changed?",
+      "How do you keep a good relationship with someone whose request you declined?"
+    ],
+    "exemplar_answer": "Situation: 'Two weeks from a committed launch, our biggest customer's exec asked us to add a custom export format they said was a must-have. Saying yes would have blown the date for everyone else.' Task: 'As the owner of the release, the call to include it or not was mine, and either answer would disappoint someone important.' Action: 'I didn't just refuse. I sized it honestly — it was about a week of work on the critical path — and weighed it against the goal: an on-time launch that served all customers, not one. I decided to decline it for v1. Then I handled the relationship: I called the customer's team, acknowledged the need was real, showed them the launch timeline math, and offered a concrete alternative — a lightweight CSV workaround for now and a committed slot for the full format in the next release, in writing.' Result: 'We launched on time for everyone; the customer accepted the workaround and the roadmap commitment, and we shipped their format six weeks later as promised — the account stayed healthy. Protecting the date also let the core launch land clean.' Reflection: 'Saying yes to everything would've been the easy answer and the wrong one — it's a failure to prioritize. The skill wasn't the no; it was the transparent 'why' plus a real alternative, which is what kept the relationship. I've learned to pair every no with a reason and a path forward.'"
+  },
+  "interviewer_notes": "Two failure modes: (1) can't actually say no — the real story is overcommitment; probe whether anything was truly declined and what gave. (2) said no with no empathy or reasoning — probe the prioritization basis and how the stakeholder was handled. The strong signal is BOTH clear prioritization logic AND bringing the disappointed party along (transparent why + alternative), preserving the relationship. Check ownership — did they drive the call or punt it to their manager? Reward awareness that yes-to-everything is a prioritization failure. Probe I-vs-we on who made the decision."
+}

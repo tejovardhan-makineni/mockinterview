@@ -1,0 +1,95 @@
+{
+  "id": "personalized-notifications",
+  "title": "Design an ML-Driven Notification Targeting System",
+  "track": "engineering",
+  "domain": "ml_system_design",
+  "modality": "system_design",
+  "difficulty": "mid",
+  "tags": ["propensity-model", "ranking", "send-time-optimization", "fatigue", "ml-serving", "feature-store"],
+  "prompt": "Design a system that decides which push/email notifications to send to each user, when to send them, and how often. It should use ML to predict engagement propensity, optimize send time, and avoid over-notifying users. Assume a large consumer app with many notification types competing for attention.",
+  "blurb": "ML notification targeting: propensity scoring, send-time optimization, and fatigue/frequency capping without tanking long-term engagement.",
+  "rubric": [
+    { "key": "requirements", "label": "Requirements gathering", "description": "Separates functional (candidate notifications, propensity scoring, send-time, frequency capping, channel choice) from non-functional (throughput, freshness, respecting caps, long-term engagement).", "weight": 1.0 },
+    { "key": "clarifying_questions", "label": "Clarifying questions", "description": "Asks about notification types, objective (opens vs long-term retention vs revenue), channels, volume, opt-outs/regulatory limits, real-time vs batch.", "weight": 1.0 },
+    { "key": "estimations", "label": "Back-of-envelope estimations", "description": "Derives users × candidate notifications, scoring QPS/batch size, feature fetch volume, send throughput, storage for events and features.", "weight": 1.0 },
+    { "key": "propensity_model", "label": "Propensity / engagement model", "description": "Predicts P(engage | user, notification, context); features (user history, notification content, recency, context); ranking candidates; utility beyond click.", "weight": 1.2 },
+    { "key": "send_time_fatigue", "label": "Send-time & fatigue optimization", "description": "Send-time optimization per user, frequency/fatigue capping, diminishing returns, avoiding annoyance-driven opt-outs and unsubscribes.", "weight": 1.2 },
+    { "key": "feature_pipeline", "label": "Feature pipeline & store", "description": "Online features (recent activity, last-notified, session state) + offline features (long-term engagement), freshness, training-serving parity.", "weight": 1.1 },
+    { "key": "ml_evaluation_drift", "label": "Evaluation & long-term impact", "description": "Offline metrics (AUC/calibration) vs online A/B on the right objective (retention, opt-out rate, not just CTR), holdouts, guarding against short-term-click optimization, drift.", "weight": 1.3 },
+    { "key": "high_level_design", "label": "High-level design", "description": "Candidate generation → propensity scoring → send-time + fatigue policy → channel delivery; async engagement logging → training + feature updates.", "weight": 1.1 },
+    { "key": "scaling", "label": "Scaling & reliability", "description": "Batch vs real-time scoring, delivery throughput, sharded feature store, backpressure, respecting caps under failures, dedup.", "weight": 1.0 },
+    { "key": "observability", "label": "Observability", "description": "Send/open/opt-out metrics, per-notification-type performance, feature freshness, cap adherence, model version tracking, drift.", "weight": 0.9 },
+    { "key": "security", "label": "Privacy & user trust", "description": "Consent/opt-outs, channel regulations, PII in content, avoiding manipulative patterns, respecting quiet hours.", "weight": 0.8 }
+  ],
+  "reference": {
+    "functional_requirements": [
+      "Generate candidate notifications per user (from many producers)",
+      "Score engagement propensity for each candidate",
+      "Choose whether to send, which channel, and when (send-time optimization)",
+      "Enforce frequency/fatigue caps across all notification types",
+      "Log engagement and unsubscribes for learning"
+    ],
+    "nonfunctional_requirements": [
+      "Handle large user base × many candidate notifications efficiently",
+      "Respect frequency caps and quiet hours reliably",
+      "Optimize long-term engagement, not just immediate opens",
+      "Fresh features (recent activity, last-notified time)",
+      "Reproducible decisions with logged features + model version"
+    ],
+    "clarifying_questions": [
+      "What notification types exist and who produces them?",
+      "What's the real objective — opens, sessions, retention, revenue?",
+      "Which channels (push, email, in-app) and any legal frequency limits?",
+      "How many users and candidate notifications per user per day?",
+      "Real-time triggers, scheduled batches, or both?",
+      "Do users have explicit preferences / quiet hours?"
+    ],
+    "qualifying_questions": [
+      "Is over-notification currently causing opt-outs (fatigue a known problem)?",
+      "One global frequency cap or per-channel/per-type?",
+      "Do we need per-user send-time or is a global best-time acceptable?"
+    ],
+    "estimations": {
+      "scale": "100M users × ~10 candidate notifications/day = ~1B scoring events/day → mostly batch, with real-time for triggered events",
+      "scoring": "Batch score overnight/hourly; real-time path for time-sensitive triggers at moderate QPS",
+      "feature_fetch": "Per-user features (history, last-notified, context) from an online store; precompute heavy features offline",
+      "delivery": "Send throughput must handle bursts (e.g. breaking events) with rate limiting to channels",
+      "storage": "Engagement events + features: many TB; retain history for training + long-term metrics"
+    },
+    "core_components": ["Candidate/notification producers", "Candidate aggregation + dedup", "Propensity scoring service", "Send-time optimization model", "Fatigue / frequency-cap policy engine", "Channel delivery (push/email/in-app)", "Online + offline feature store", "Engagement logging pipeline", "Training + eval pipeline", "Experimentation (A/B + holdouts)", "Model registry + monitoring"],
+    "data_model": ["notifications(notif_id, user_id, type, content_ref, produced_at)", "user_features_online(user_id, recent_activity, last_notified_at, session_state, updated_at)", "user_features_offline(user_id, long_term_engagement, preferences)", "sends(user_id, notif_id, channel, sent_at, score, model_version)", "engagement(user_id, notif_id, action, ts)  — open/click/dismiss/unsubscribe", "caps(user_id, window, count, quiet_hours)"],
+    "api_design": [
+      "POST /v1/candidates { user_id, notifications[] } → enqueued for scoring",
+      "internal score(user_id, notif) → { propensity, predicted_best_time }",
+      "policy decide(user_id, scored_candidates[]) → { send?, channel, at } respecting caps",
+      "POST /v1/engagement { user_id, notif_id, action } → async into log"
+    ],
+    "high_level_design": "Notification producers emit candidates per user into an aggregation layer that dedups and collects them. A propensity model scores P(engage) for each candidate using user features (recent + long-term activity, last-notified recency), notification content features, and context. A send-time model predicts each user's likely-active windows. A policy engine then decides what to actually send: it ranks candidates by expected utility, applies frequency/fatigue caps and quiet hours across all types, and schedules delivery at the optimized time through the appropriate channel. Most scoring runs in batch (hourly/nightly) with a real-time path for time-sensitive triggers. Engagement — opens, dismisses, and crucially unsubscribes — streams into a log that updates features and feeds retraining. Models are evaluated online with A/B tests and long-term holdouts on retention and opt-out rate, not just CTR.",
+    "deep_dives": [
+      { "topic": "propensity_utility", "probe": "You predict P(open). But maximizing opens can train the model to spam. How do you define utility so you value long-term engagement and penalize opt-outs, not just the immediate click?" },
+      { "topic": "send_time", "probe": "How do you learn each user's best send time? What features, and how do you handle users with little history (cold start)?" },
+      { "topic": "fatigue_caps", "probe": "Multiple producers all want to notify the same user. How does the policy engine arbitrate, enforce a global fatigue cap, and model diminishing returns / annoyance?" },
+      { "topic": "long_term_eval", "probe": "A model that raised CTR this week could be hurting retention via opt-outs. How do you evaluate — long-term holdouts, guardrail metrics — to avoid short-term-metric traps?" },
+      { "topic": "training_serving_skew", "probe": "How do you ensure last-notified / recency features at training time match serving? Point-in-time correctness matters because these change fast." },
+      { "topic": "cold_start", "probe": "A brand-new user or a brand-new notification type has no engagement history. How do you score and send responsibly, and explore without annoying?" },
+      { "topic": "cdc_feature_freshness", "probe": "A user just opted out or changed preferences, or just took an action in-app. How does that state change reach the scoring path quickly so you don't send a notification you shouldn't?" }
+    ],
+    "followup_bank": [
+      { "trigger": "mentions feature store or features or last-notified", "question": "When a user's state changes in the source system (opt-out, preference change, just-completed action), how does that propagate into the online feature store so scoring sees it fast — CDC/change-stream vs periodic recompute? What staleness is safe?" },
+      { "trigger": "mentions cache", "question": "You cache per-user scores or features between batches — what's the eviction/TTL, and when the user's state changes how do you invalidate stale-after-change entries so you don't send based on outdated data?" },
+      { "trigger": "mentions model or propensity", "question": "How do you roll out a new model and prove it helps long-term engagement, not just this week's CTR — A/B plus long-term holdout on which metrics?" },
+      { "trigger": "mentions cap or frequency or fatigue", "question": "How does the policy engine enforce a global cap across all producers and model diminishing returns, and what happens on a breaking-event burst?" },
+      { "trigger": "mentions CTR or opens or engagement", "question": "Why is optimizing opens alone risky, and how do you incorporate opt-out/unsubscribe cost into the objective?" },
+      { "trigger": "mentions cold start or new user", "question": "How do you score and send for users or notification types with no history, and how do you explore safely?" }
+    ],
+    "scaling": ["Batch scoring for the bulk; real-time path only for triggered/time-sensitive notifications", "Sharded online feature store keyed by user", "Rate-limited channel delivery with burst handling and dedup", "Idempotent send + cap enforcement resilient to retries", "Precompute heavy features offline"],
+    "bottlenecks": ["Feature freshness for fast-changing recency/last-notified signals", "Delivery bursts on breaking events vs channel limits", "Cross-producer cap arbitration", "Label sparsity for rare notification types", "Short-term-metric optimization degrading retention"],
+    "tradeoffs": ["Real-time scoring (fresh, costly) vs batch (cheap, staler)", "More notifications (short-term engagement) vs fatigue/opt-outs (long-term)", "Per-user send-time (better) vs global best-time (simpler)", "Aggressive personalization vs privacy + cold-start", "Single utility model vs separate propensity + send-time + fatigue models"],
+    "alternative_solutions": ["Rules + static frequency caps (simple baseline)", "Bandit approach balancing exploration of send-time/content", "Reinforcement-learning framing for long-term engagement (complex)", "Uplift modeling — send only when it changes behavior, not to already-active users"],
+    "observability": ["Send/open/dismiss/opt-out rates by notification type + channel", "Cap adherence and quiet-hour violations", "Feature freshness + last-notified accuracy", "Model version + experiment assignment", "Long-term engagement/retention dashboards and drift alerts"],
+    "security": ["Respect consent, opt-outs, and channel regulations (e.g. quiet hours)", "PII handling in notification content and logs", "Avoid dark-pattern/manipulative notification tactics", "Access control on producer APIs to prevent spam", "Rate limiting per user across all producers"],
+    "reference_answer": "A strong mid-level answer separates candidate generation, propensity scoring, send-time optimization, and a fatigue/frequency-cap policy engine, and is explicit that the objective must be long-term engagement — penalizing opt-outs — not raw opens, because maximizing clicks trains the system to spam. It scores mostly in batch with a real-time path for time-sensitive triggers, fetching fast-changing recency/last-notified features from an online store and precomputing heavier features offline, with attention to training-serving parity on those volatile features. It arbitrates across competing producers under a global cap, handles cold start for new users/notification types, and evaluates models with online A/B plus long-term holdouts on retention and unsubscribe rate rather than short-term CTR. It keeps user state fresh (opt-outs and just-taken actions must reach scoring fast) and respects consent, quiet hours, and channel limits.",
+    "canonical": "reference_answer holds the model response"
+  },
+  "interviewer_notes": "This is a mid-level question, so a solid structured answer (candidate generation → propensity → send-time → fatigue policy → delivery, with a feedback loop) earns a good score. The key thing to push, even at mid-level, is the objective: candidates who optimize P(open) without recognizing that it drives spam and opt-outs are missing the central insight — steer them to a utility that values long-term engagement and penalizes unsubscribes, and evaluate with long-term holdouts, not just weekly CTR. This is the evaluation/ml-specifics dimension. Probe fatigue/frequency capping across competing producers and send-time optimization concretely. When they place a feature store, hit the CDC/freshness probe: an opt-out or just-taken action must reach scoring fast. When they add a per-user score/feature cache between batches, probe eviction and stale-after-change. Cold start (new user / new notification type) is a good stretch probe. Don't expect the depth of the senior questions on stats or serving internals, but do expect awareness of the long-term-vs-short-term metric trap."
+}

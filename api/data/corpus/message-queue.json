@@ -1,0 +1,106 @@
+{
+  "id": "message-queue",
+  "title": "Design a Distributed Message Queue (Kafka-like)",
+  "track": "engineering",
+  "domain": "system_design",
+  "modality": "system_design",
+  "difficulty": "staff",
+  "tags": ["messaging", "partitions", "ordering", "consumer-groups", "replication", "delivery-semantics", "log"],
+  "prompt": "Design a distributed, durable, high-throughput message queue / streaming platform like Apache Kafka. Producers publish messages to topics; consumers read them, possibly in groups for parallelism. Cover partitioning, ordering guarantees, consumer groups and offset management, replication and durability, delivery semantics (at-least-once / at-most-once / exactly-once), and retention. Assume very high throughput and strong durability requirements.",
+  "blurb": "The append-only partitioned log — ordering vs parallelism, consumer-group rebalancing, replication with ISR, and honest delivery semantics.",
+  "rubric": [
+    { "key": "requirements", "label": "Requirements gathering", "description": "Separates functional (publish, subscribe, topics/partitions, consumer groups, retention, replay) from non-functional (throughput, durability, ordering, delivery guarantees, latency).", "weight": 1.1 },
+    { "key": "clarifying_questions", "label": "Clarifying questions", "description": "Asks about throughput, message size, ordering scope, delivery-semantics requirement, retention duration, replay, multi-DC.", "weight": 1.0 },
+    { "key": "estimations", "label": "Back-of-envelope estimations", "description": "Messages/s and MB/s ingest, storage per retention window, partition count, replication bandwidth.", "weight": 0.9 },
+    { "key": "log_partitioning", "label": "Partitioned append-only log design", "description": "Topic → partitions, each an ordered append-only log on disk with offsets; partitioning key; sequential IO / page cache for throughput. Central staff signal.", "weight": 1.4 },
+    { "key": "ordering", "label": "Ordering guarantees", "description": "Per-partition total order vs no global order; partition key choice; ordering vs parallelism tradeoff; effect of producer retries on order.", "weight": 1.2 },
+    { "key": "consumer_groups", "label": "Consumer groups & offset management", "description": "Group coordinator, partition assignment, rebalancing, committed offsets, at-least-once via commit-after-process, one consumer per partition per group. Central staff signal.", "weight": 1.4 },
+    { "key": "replication_durability", "label": "Replication & durability", "description": "Leader/follower per partition, ISR, acks levels, high-water-mark, leader election, no data loss on broker failure.", "weight": 1.3 },
+    { "key": "delivery_semantics", "label": "Delivery semantics", "description": "At-most-once vs at-least-once vs exactly-once; idempotent producer (sequence numbers), transactions, and consumer-side idempotency/dedup.", "weight": 1.3 },
+    { "key": "api_design", "label": "API design", "description": "produce (with acks/keys), fetch (offset-based), commit offset, subscribe/assign; admin (create topic).", "weight": 0.8 },
+    { "key": "high_level_design", "label": "High-level design", "description": "Producers → brokers (partition leaders) → replicated logs → consumers pulling by offset; coordinator role.", "weight": 1.1 },
+    { "key": "retention_scaling", "label": "Retention, compaction & scaling", "description": "Time/size retention, log compaction, segment files, adding partitions/brokers, rebalancing data, tiered storage.", "weight": 1.0 },
+    { "key": "bottlenecks", "label": "Bottlenecks", "description": "Hot partitions, rebalance storms, replication lag, consumer lag, disk IO, slow consumers.", "weight": 1.0 },
+    { "key": "observability", "label": "Observability & reliability", "description": "Consumer lag, ISR shrink/under-replicated partitions, throughput, end-to-end latency, poison-message/DLQ handling.", "weight": 0.9 }
+  ],
+  "reference": {
+    "functional_requirements": [
+      "Producers publish messages to topics",
+      "Topics are split into partitions for parallelism",
+      "Consumers subscribe, individually or in consumer groups for scale-out",
+      "Durable retention with replay from any offset within the window",
+      "Configurable ordering and delivery guarantees",
+      "Retention by time/size; optional log compaction"
+    ],
+    "nonfunctional_requirements": [
+      "Very high throughput (millions of messages/s, GB/s)",
+      "Durable — no acknowledged message lost on broker failure",
+      "Per-partition ordering",
+      "Horizontal scalability of producers, consumers, and storage",
+      "Low, predictable end-to-end latency",
+      "Configurable delivery semantics up to exactly-once"
+    ],
+    "clarifying_questions": [
+      "Target throughput (messages/s and MB/s) and typical message size?",
+      "What ordering scope do consumers need — per-key, per-partition, or none?",
+      "Which delivery guarantee is required — at-most, at-least, or exactly-once?",
+      "Retention: how long must messages be replayable, and do we need compaction?",
+      "Single cluster or multi-datacenter / geo-replication?",
+      "Do consumers pull or do we push to them?"
+    ],
+    "qualifying_questions": [
+      "Are producers okay trading latency (acks=all) for durability?",
+      "How many consumer groups and how sensitive to rebalance pauses?",
+      "Is tiered/cheap storage for old segments acceptable?"
+    ],
+    "estimations": {
+      "traffic": "1M messages/s × 1KB avg = ~1GB/s ingest. With replication factor 3, ~3GB/s of write + replication IO across the cluster.",
+      "storage": "1GB/s × 86400s ≈ ~86TB/day of raw log per replica; ×RF and ×retention days → petabytes; drives partition count and broker/disk sizing; old segments tiered to object storage.",
+      "partitions": "Parallelism is bounded by partition count: to let a group of C consumers run in parallel you need ≥ C partitions; choose partitions for peak parallelism + headroom (repartitioning is disruptive).",
+      "replication": "acks=all waits for the in-sync replica set; replication traffic ≈ (RF-1) × ingest."
+    },
+    "core_components": ["Producer client (batching, partitioner, idempotent sequence)", "Brokers (host partition leaders + followers)", "Partitioned append-only commit log on disk (segment files + index)", "Replication protocol (leader/follower, ISR)", "Group coordinator (assignment + offset commits)", "Cluster metadata/controller (leaders, membership) — e.g., Raft/ZK-like", "Consumer client (pull by offset, commit)", "Offset store (__consumer_offsets-style topic)", "Tiered storage for old segments", "Schema registry / DLQ (optional)"],
+    "data_model": [
+      "topic → N partitions; each partition = ordered append-only log of records, each with a monotonically increasing offset",
+      "record(offset, key, value, timestamp, headers)",
+      "segment files per partition (active + rolled), with a sparse offset→position index",
+      "partition_replicas(partition, leader_broker, replica_brokers[], isr[])",
+      "consumer_offsets(group_id, topic, partition, committed_offset) — durable, itself a compacted log",
+      "high_water_mark per partition = highest offset replicated to all ISR (consumer-visible boundary)"
+    ],
+    "api_design": [
+      "Produce: send(topic, key, value, acks=[0|1|all]) → partition chosen by hash(key); returns (partition, offset)",
+      "Fetch: poll(topic, partition, from_offset, max_bytes) → records[] (consumer pulls)",
+      "Commit: commitOffset(group, topic, partition, offset)",
+      "Subscribe(group, topics) → coordinator assigns partitions;  Assign(topic, partition) for manual",
+      "Admin: createTopic(name, partitions, replication_factor, retention)"
+    ],
+    "high_level_design": "A topic is divided into PARTITIONS; each partition is an ORDERED, APPEND-ONLY commit log persisted as segment files, and every record gets a monotonically increasing OFFSET. Throughput comes from sequential disk IO, OS page cache, zero-copy transfer, and producer batching/compression — not random writes. Each partition has one LEADER broker and RF-1 followers; producers write to the leader, which appends and replicates to followers. The IN-SYNC REPLICA (ISR) set tracks followers caught up to the leader; with acks=all a produce is acknowledged only once all ISR have it, and the HIGH-WATER-MARK (max offset present on all ISR) is the boundary consumers may read — guaranteeing durability and that consumers never read un-replicated data. On leader failure a controller elects a new leader from the ISR, so no acknowledged data is lost. Consumers PULL by offset (cheap replay, natural backpressure). A CONSUMER GROUP shares a topic's partitions: the group coordinator assigns each partition to exactly one consumer in the group, giving per-partition ordering with cross-partition parallelism; when members join/leave, a REBALANCE reassigns partitions. Consumers commit offsets (durably, to an offsets topic); at-least-once = commit AFTER processing (a crash re-delivers), at-most-once = commit before. Exactly-once uses an idempotent producer (per-partition sequence numbers dedup producer retries) plus transactions (atomic write + offset commit), with consumer-side idempotency for true end-to-end EOS. Retention is by time/size with old segments deleted or tiered; log compaction keeps the latest value per key for changelog topics.",
+    "deep_dives": [
+      { "topic": "log_partitioning", "probe": "Why is a partition a single append-only log on disk instead of a database table, and how does that get you millions of messages a second? Talk me through sequential IO, page cache, zero-copy, batching, and how offsets and segment index files let a consumer seek." },
+      { "topic": "ordering", "probe": "A consumer needs all events for a given user in order but you also want parallelism. How do partitions give you that, what do you pick as the partition key, and what breaks ordering — including what a producer retry can do to order and how the idempotent producer fixes it?" },
+      { "topic": "consumer_groups", "probe": "Explain consumer groups: who assigns partitions, what exactly happens during a rebalance, and why can't two consumers in the same group read the same partition? A consumer processes a batch then crashes before committing — what does the next consumer see, and is that at-least-once or exactly-once?" },
+      { "topic": "replication_durability", "probe": "Walk through acks=0/1/all and ISR. A broker leading a partition dies right after acking a write with acks=all — is the data safe, and how is the new leader chosen? What's the high-water-mark and why can't consumers read past it? When can you still lose data (unclean leader election)?" },
+      { "topic": "delivery_semantics", "probe": "Define at-most-once, at-least-once, and exactly-once precisely in this system. How does the idempotent producer dedup retries, how do transactions make the write-plus-offset-commit atomic, and why do you still need consumer-side idempotency for real end-to-end exactly-once?" },
+      { "topic": "cdc_source", "probe": "A common use of this queue is ingesting database changes. If a producer is a CDC/Debezium connector streaming a DB's changelog into a topic, how do you preserve per-row ordering, handle the connector restarting (duplicates), and use log compaction to keep the latest state per key?" },
+      { "topic": "cache_backpressure", "probe": "Brokers rely heavily on the OS page cache for hot tail reads; a fleet of consumers doing historical replay evicts the hot pages and thrashes disk — a cache stampede at the storage layer. How do you protect tail-read latency — read throttling/quotas, tiered storage for old segments, isolating replay consumers?" }
+    ],
+    "followup_bank": [
+      { "trigger": "mentions partition or log", "question": "Why an append-only log per partition, and how do sequential IO + page cache + zero-copy + batching get you GB/s? How do segment index files enable offset seeks?" },
+      { "trigger": "mentions ordering or key", "question": "What's your partition key, and how can a producer retry reorder messages within a partition — how does the idempotent producer prevent it?" },
+      { "trigger": "mentions consumer group or rebalance", "question": "Who coordinates assignment, what happens during a rebalance, and after a crash-before-commit is redelivery at-least-once or exactly-once?" },
+      { "trigger": "mentions replication or acks or isr", "question": "Explain acks=all + ISR + high-water-mark, how a new leader is elected on failure, and when unclean leader election can still lose data." },
+      { "trigger": "mentions exactly once or idempotent", "question": "How does the idempotent producer dedup retries, how do transactions atomically commit write+offset, and why is consumer-side idempotency still required end-to-end?" },
+      { "trigger": "mentions cdc or debezium or database", "question": "If the producer is a CDC/Debezium connector, how do you preserve per-row ordering and dedup on connector restart, and how does log compaction keep latest-per-key?" },
+      { "trigger": "mentions cache or page cache or replay", "question": "How do you stop replay/backfill consumers from evicting hot tail pages and thrashing disk — quotas, tiered storage, consumer isolation?" }
+    ],
+    "scaling": ["Add partitions for more parallelism (bounded by consumer count); plan capacity since repartitioning is disruptive", "Add brokers and rebalance partition replicas across them", "Tiered storage: offload cold segments to object storage, keep hot tail on local disk", "Producer batching + compression to raise effective throughput", "Isolate heavy replay consumers with quotas"],
+    "bottlenecks": ["Hot partition from a skewed key (one key dominating)", "Rebalance storms pausing consumption on membership churn", "Replication lag shrinking ISR and threatening durability/availability", "Consumer lag from slow/poison-message processing", "Disk IO and page-cache thrash from historical replay"],
+    "tradeoffs": ["More partitions (parallelism, replay) vs fewer (less overhead, faster rebalance, more ordering scope)", "acks=all (durable, higher latency) vs acks=1/0 (fast, risk loss)", "At-least-once (simple, duplicates) vs exactly-once (no dupes, transaction overhead/latency)", "Long retention/replay (flexible, costly storage) vs short", "Push (low latency, hard backpressure) vs pull (backpressure-friendly, poll latency) — pull chosen", "Ordering (single partition per key, limits parallelism) vs throughput"],
+    "alternative_solutions": ["Traditional broker with per-message ack + queue (RabbitMQ-style) — richer routing, weaker replay/throughput", "Pulsar-style separation of compute (brokers) and storage (bookies) for independent scaling", "Cloud log services (Kinesis/PubSub) — managed, less control", "KRaft/Raft-based metadata instead of an external coordinator like ZooKeeper"],
+    "observability": ["Consumer lag per group/partition (the key health metric)", "Under-replicated / offline partitions and ISR shrink alerts", "End-to-end produce→consume latency and broker throughput", "Rebalance frequency/duration", "Poison-message handling / dead-letter queue and reprocessing", "Disk usage vs retention, tiered-storage offload rate"],
+    "security": ["AuthN (mTLS/SASL) and per-topic ACLs for produce/consume", "Encryption in transit; at-rest encryption of segments", "Quotas to prevent a noisy tenant starving others", "Audit of admin ops (topic create/ACL change)", "Multi-tenant isolation"],
+    "reference_answer": "A staff-level answer models a topic as PARTITIONS, each an ordered append-only commit log with monotonic offsets, and explains that throughput comes from sequential IO, page cache, zero-copy, and batching. Each partition has a leader + followers with an ISR; acks=all + high-water-mark give durability (no acknowledged data lost, consumers never read un-replicated records), and a controller elects a new leader from the ISR on failure — with an honest note on unclean leader election. Ordering is per-partition via the partition key, explicitly traded against parallelism, and the candidate knows a producer retry can reorder and that the idempotent producer (sequence numbers) fixes it. Consumer groups assign each partition to one member via a coordinator, rebalance on membership change, and commit offsets durably; commit-after-process = at-least-once, and true exactly-once needs the idempotent producer + transactions (atomic write+offset commit) plus consumer-side idempotency. They cover retention/compaction/tiered storage, treat consumer lag and under-replicated partitions as the core health signals, and name hot partitions, rebalance storms, replication lag, and page-cache thrash from replay as the main bottlenecks with mitigations. Bonus: CDC-connector-as-producer ordering/restart handling and pull-based backpressure."
+  },
+  "interviewer_notes": "Staff bar: precise reasoning about the log abstraction, ordering-vs-parallelism, replication/ISR durability, and honest delivery semantics — not buzzwords. Make them explain WHY a partition is an append-only log and how that yields GB/s (sequential IO, page cache, zero-copy, batching). Force precision on delivery semantics: many candidates claim 'exactly-once' loosely — push until they separate idempotent producer, transactions, and consumer-side idempotency, and admit at-least-once + idempotent consumer is the common real answer. Drive the consumer-group deep-dive (assignment, rebalance, crash-before-commit) and replication (acks/ISR/HWM/leader election, unclean election data loss). This is a queue, so use the CDC probe as 'the producer IS a Debezium connector — preserve ordering and dedup on restart', and the cache probe as page-cache thrash from replay consumers. Watch for red flags: global ordering claims, push-based with no backpressure story, or ignoring rebalance/lag. Reserve time for retention/compaction/tiered storage and observability (lag, under-replicated partitions)."
+}

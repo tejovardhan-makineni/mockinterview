@@ -1,0 +1,78 @@
+{
+  "id": "word-break",
+  "title": "Word Break",
+  "track": "engineering",
+  "domain": "coding",
+  "modality": "coding",
+  "difficulty": "senior",
+  "tags": ["dynamic-programming", "trie", "strings", "memoization", "segmentation"],
+  "prompt": "Given a string s and a dictionary of words wordDict, return true if s can be segmented into a space-separated sequence of one or more dictionary words. The same dictionary word may be reused any number of times. As a follow-up, discuss how a trie changes the approach, and how you would return ALL valid segmentations (Word Break II) without exponential blowup on adversarial inputs.",
+  "blurb": "String segmentation as DP — dp[i] is true if a prefix boundary is reachable; a trie speeds prefix checks and Word Break II adds memoized backtracking with a critical pruning insight.",
+  "rubric": [
+    { "key": "problem_understanding", "label": "Problem understanding", "description": "Clarifies word reuse is allowed, whether wordDict has duplicates, the alphabet/size, and notes the naive 'greedily match longest word' is wrong (needs backtracking).", "weight": 1.0 },
+    { "key": "approach", "label": "Approach", "description": "Reaches dp over prefix boundaries: dp[i] true iff some j<i has dp[j] true and s[j:i] in dict. Equivalently top-down memoized recursion on the start index. Explains the greedy trap.", "weight": 1.3 },
+    { "key": "correctness", "label": "Correctness", "description": "dp[0]=true base case, correct index ranges, dictionary as a hash set for O(1) lookup, returns dp[n]. Memoized version caches results per start index to avoid recomputing suffixes.", "weight": 1.3 },
+    { "key": "complexity_analysis", "label": "Complexity analysis", "description": "O(n^2) substrings times O(L) hashing = O(n^2 * L) or O(n^2) with careful hashing; O(n) space. A trie makes prefix extension O(total matched length) and prunes impossible branches early. Word Break II can be exponential in output size — analyzes why.", "weight": 1.1 },
+    { "key": "code_quality", "label": "Code quality", "description": "Clean single/double loop or a tidy memoized recursion; dictionary stored as a set; substring bounds correct; the trie node structure (children map + isWord flag) is clean if used.", "weight": 1.0 },
+    { "key": "edge_cases", "label": "Edge cases", "description": "Empty string (true), s equals a single dict word, no possible segmentation, a word longer than s, overlapping words, and the adversarial case 'aaaa...b' with dict {a, aa, aaa, ...} that explodes naive recursion.", "weight": 1.1 },
+    { "key": "testing", "label": "Testing", "description": "Tests the greedy-failure case (e.g. s='aaaaaaa', dict={aaaa, aaa} — greedy-longest fails, DP succeeds) and the exponential adversarial input for Word Break II.", "weight": 0.9 },
+    { "key": "communication", "label": "Communication", "description": "Explains why greedy fails, how memoization collapses overlapping suffix subproblems, and the trie/pruning benefit for II.", "weight": 0.9 }
+  ],
+  "reference": {
+    "constraints": [
+      "1 <= s.length <= 300",
+      "1 <= wordDict.length <= 1000, 1 <= wordDict[i].length <= 20",
+      "wordDict has no duplicates; a word may be reused any number of times in the segmentation",
+      "s and words are lowercase English letters"
+    ],
+    "examples": [
+      {
+        "input": "s = \"leetcode\", wordDict = [\"leet\",\"code\"]",
+        "output": "true",
+        "explanation": "\"leetcode\" splits as \"leet\" + \"code\", both in the dictionary."
+      },
+      {
+        "input": "s = \"applepenapple\", wordDict = [\"apple\",\"pen\"]",
+        "output": "true",
+        "explanation": "\"apple\" + \"pen\" + \"apple\"; the word \"apple\" is reused."
+      },
+      {
+        "input": "s = \"catsandog\", wordDict = [\"cats\",\"dog\",\"sand\",\"and\",\"cat\"]",
+        "output": "false",
+        "explanation": "No segmentation covers the whole string: \"cats\"+\"and\"+... leaves \"og\"; \"cat\"+\"sand\"+... leaves \"og\". A greedy longest-match down one branch fails, and no branch succeeds."
+      }
+    ],
+    "test_cases": [
+      { "input": "s = \"a\", wordDict = [\"a\"]", "expected": "true — single word match" },
+      { "input": "s = \"ab\", wordDict = [\"a\"]", "expected": "false — 'b' cannot be covered" },
+      { "input": "s = \"aaaaaaa\", wordDict = [\"aaaa\",\"aaa\"]", "expected": "true — greedy-longest takes 'aaaa' then can't finish; DP finds 'aaa'+'aaaa' or 'aaaa'+'aaa'" },
+      { "input": "s = \"cars\", wordDict = [\"car\",\"ca\",\"rs\"]", "expected": "true — 'ca'+'rs' works even though 'car' is a tempting longer prefix" },
+      { "input": "s = \"aaaaaaaaaaaaaaaab\", wordDict = [\"a\",\"aa\",\"aaa\",\"aaaa\"]", "expected": "false — the adversarial explosion case; must return false efficiently via memoization, and for Word Break II must prune to avoid enumerating exponentially many dead partial splits" },
+      { "input": "s = \"pineapplepenapple\", wordDict = [\"apple\",\"pen\",\"applepen\",\"pine\",\"pineapple\"]", "expected": "true — multiple valid splits exist; relevant to Word Break II" }
+    ],
+    "optimal_time": "O(n^2) boundaries with O(1) set lookups (O(n^2) to O(n^2 * L) depending on hashing); a trie bounds inner work by the length of matchable prefixes",
+    "optimal_space": "O(n) for the dp array / memo; O(total dictionary characters) for a trie",
+    "approaches": [
+      { "name": "greedy longest match (INCORRECT)", "idea": "At each position take the longest dictionary word that matches and advance. Fails because an early greedy choice can strand a suffix that a shorter choice would have segmented (e.g. 'aaaaaaa' with {aaaa, aaa}). Useful to state and reject to show why backtracking/DP is needed.", "time": "O(n * L)", "space": "O(1)" },
+      { "name": "top-down memoized recursion", "idea": "canBreak(start): if start == n return true; for end in start+1..n: if s[start:end] in dict and canBreak(end): return true; return false. Memoize on start so each suffix is solved once — this is what tames the exponential 'aaaa...b' input. Store the dictionary as a hash set.", "time": "O(n^2) states*transitions with O(1) lookup (O(n^2 * L) with substring hashing)", "space": "O(n) memo + recursion" },
+      { "name": "bottom-up DP over prefix boundaries", "idea": "dp[i] = true iff s[0:i] is segmentable. dp[0] = true. For i in 1..n, for j in 0..i-1: if dp[j] and s[j:i] in dict then dp[i] = true, break. Answer dp[n]. Iterating j (or only over word lengths) checks every last-word boundary.", "time": "O(n^2) (or O(n * maxWordLen) if you only try lengths present in the dict)", "space": "O(n)" },
+      { "name": "trie-accelerated DP", "idea": "Build a trie of the dictionary. From each start i, walk the trie character by character along s; whenever you hit an isWord node at position j, you can transition dp/recurse from j. This replaces substring-hash lookups with a single forward walk that stops as soon as no dictionary word can extend the current prefix — pruning impossible branches early and avoiding building substrings.", "time": "O(n * maxMatchLen) inner walks, ~O(n^2) worst but with strong pruning", "space": "O(dictionary chars)" }
+    ],
+    "follow_ups": [
+      "Word Break II — return ALL sentence segmentations, not just a boolean. Memoize start-index -> list of suffix segmentations and prune with a preliminary Word Break (I) check so you never explore branches that cannot reach the end; without that guard, 'aaaa...b' with {a,aa,...} enumerates exponentially many dead partial splits.",
+      "Trie in depth — how it speeds prefix checks and enables early termination when no word extends the current path.",
+      "Return the MINIMUM number of words (or the lexicographically smallest split) — DP storing best-so-far instead of a boolean.",
+      "Streaming / very large dictionary — memory tradeoffs of a hash set vs a trie vs an Aho-Corasick automaton for multi-pattern matching.",
+      "What changes if words can be used AT MOST once — the reuse assumption is load-bearing; removing it makes it a harder combinatorial problem."
+    ],
+    "reference_solution": "Bottom-up: wordBreak(s, wordDict): words = set(wordDict); n = len(s); dp = [False]*(n+1); dp[0] = True. for i in range(1, n+1): for j in range(i): if dp[j] and s[j:i] in words: dp[i] = True; break. return dp[n]. dp[j] means 's[0:j] is segmentable'; the inner loop asks whether some last word s[j:i] closes the gap.\n\nMemoized top-down (same complexity, clearer for Word Break II): memo = {}. def can(start): if start == n: return True; if start in memo: return memo[start]; for end in range(start+1, n+1): if s[start:end] in words and can(end): memo[start] = True; return True; memo[start] = False; return False.\n\nWord Break II sketch: FIRST run Word Break I to confirm segmentability (prune) — this single guard converts the adversarial 'aaaa...b' from exponential to trivial-false. Then memoize backtrack(start) -> list of all segmentations of s[start:]: for each end where s[start:end] in words, prepend that word to every segmentation returned by backtrack(end). Output size can still be exponential when many splits genuinely exist, but no work is wasted on branches that cannot reach the end.",
+    "pitfalls": [
+      "Greedy longest-match without backtracking — strands suffixes and returns wrong answers.",
+      "No memoization on the recursion — exponential blowup on inputs like 'aaaa...b' with {a,aa,aaa,...}.",
+      "Off-by-one in substring bounds (s[j:i]) or forgetting the dp[0]=true base case.",
+      "Not storing the dictionary as a set, making each lookup O(dict) and inflating complexity.",
+      "Word Break II: skipping the up-front Word Break I feasibility check, so the search explores exponentially many partial splits that can never complete."
+    ]
+  },
+  "interviewer_notes": "As a senior problem, the bar is: reach DP quickly and spend the interview on depth. If they open greedy, hand them s='aaaaaaa', dict={aaaa,aaa} to break it, then expect a fast pivot to memoized recursion or bottom-up DP. Reaching correct DP is table stakes here — the real signal is the follow-ups. Probe complexity: make them justify O(n^2) and the O(1)-set-lookup assumption. Then escalate: (1) the trie — how it prunes impossible prefixes and why that matters for a large dictionary; (2) Word Break II — the key insight to watch for is running Word Break I first as a feasibility guard; a candidate who dives into enumerating segmentations without that prune will get destroyed by 'aaaa...b' with {a,aa,...}, so hand them that input and ask for the running time. Strong candidates volunteer the prune themselves and can articulate that the OUTPUT can still be exponential even with perfect pruning. Stay silent during clean implementation; intervene only to redirect toward the depth topics if they over-invest in the boolean version."
+}

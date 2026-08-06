@@ -1,0 +1,58 @@
+{
+  "id": "pm-strategy-writeup",
+  "title": "Product Strategy Write-Up: One-Page Strategy / PRD Outline",
+  "track": "professional",
+  "domain": "product_management",
+  "modality": "written",
+  "difficulty": "senior",
+  "tags": ["strategy", "prd", "written", "prioritization", "metrics", "go-to-market"],
+  "prompt": "Write a one-page product strategy for the following goal: a mid-sized video-conferencing company wants to grow adoption among small businesses (under 50 employees), a segment where it currently lags a dominant competitor. Produce a concise strategy document / PRD outline: the problem and opportunity, target user and their needs, the strategy and why-now, what you'd build (scope and explicit non-goals), success metrics, key risks and tradeoffs, and a rough sequencing plan. Write it as you would for a leadership review.",
+  "blurb": "A written product-strategy exercise — produce a crisp, leadership-ready one-pager with a clear thesis, prioritized scope, metrics, and risks.",
+  "rubric": [
+    { "key": "problem_framing", "label": "Problem & opportunity framing", "description": "Frames the problem and the size/why of the opportunity crisply, grounded in the target segment's reality and the competitive gap — not vague ambition.", "weight": 1.2 },
+    { "key": "user_empathy", "label": "Target user & needs", "description": "Identifies the specific small-business user and their distinct needs and buying behavior (price sensitivity, no IT dept, ease/setup), distinguishing them from the enterprise buyer.", "weight": 1.1 },
+    { "key": "strategy", "label": "Strategy & 'why now'", "description": "Articulates a clear strategic thesis / wedge (how they'll win this segment against a dominant incumbent) and a credible why-now, not a feature list.", "weight": 1.3 },
+    { "key": "prioritization", "label": "Scope, prioritization & non-goals", "description": "Defines a focused initial scope tied to the thesis AND explicit non-goals — demonstrating what they will deliberately NOT do.", "weight": 1.2 },
+    { "key": "metrics", "label": "Success metrics", "description": "Sets a north-star and supporting metrics (acquisition, activation, retention, monetization) with rough targets and guardrails.", "weight": 1.1 },
+    { "key": "tradeoffs", "label": "Risks & tradeoffs", "description": "Names the main risks (competitive response, cannibalization, unit economics) and the tradeoffs the strategy accepts, with mitigations.", "weight": 1.0 },
+    { "key": "communication", "label": "Structure & writing", "description": "Reads like a real one-pager: top-down thesis first, tight sections, scannable, concise, leadership-appropriate — no rambling or filler.", "weight": 1.0 }
+  ],
+  "reference": {
+    "scenario": "Written deliverable, senior bar. The candidate submits a one-page strategy / PRD outline. There is no single correct strategy; strong submissions share: a sharp thesis for winning small businesses (SMB) against a dominant incumbent, a clear understanding that SMB buyers differ from enterprise (self-serve, price-sensitive, no IT, value setup speed and simplicity, often bottoms-up adoption), a focused wedge rather than 'match the competitor feature-for-feature', explicit non-goals, real metrics with targets, and honest risks. A common strong wedge: win on frictionless self-serve onboarding + SMB-tailored pricing/bundles + integrations with the tools small businesses already use, rather than competing on enterprise admin/security features that SMBs don't value. The interviewer evaluates the written artifact holistically against the rubric; it should be scannable and top-down.",
+    "model_points": [
+      "Open with a one-line thesis / recommendation (top-down): how the company wins SMB and why it's worth doing now.",
+      "Problem & opportunity: the SMB segment is large and underpenetrated for this company; today the product and pricing are tuned for enterprise, so SMBs default to the incumbent. Quantify the opportunity roughly (segment size, current share, target share).",
+      "Target user & needs: the SMB decision-maker is often an owner/office-manager, not IT — they value fast self-serve setup, transparent affordable pricing, reliability, and integrations with existing tools; they do NOT value complex admin controls or procurement-heavy sales.",
+      "Strategy / wedge & why-now: pick a defensible angle (frictionless onboarding + SMB pricing/bundles + key integrations), and a why-now (remote/hybrid work normalizing video for small teams, incumbent complacent/expensive at the low end, a distribution or partnership opening).",
+      "Scope (what we build) AND explicit non-goals: e.g. build self-serve signup, a free/low tier, SMB-friendly billing, top 3 integrations, guided onboarding; NON-goals: enterprise SSO/admin console, custom procurement, telephony — deliberately deferred.",
+      "Success metrics: north-star (e.g. weekly active SMB paid teams, or activated teams retained at 30 days), plus acquisition (self-serve signups), activation (first successful hosted meeting), retention (M1/M3), monetization (free-to-paid conversion, ARPA), and guardrails (support cost/ticket rate, enterprise cannibalization).",
+      "Risks & tradeoffs with mitigations: competitive price response, low-tier unit economics / support cost, cannibalizing higher tiers, brand dilution — and how each is mitigated or monitored.",
+      "Sequencing: a rough phased plan (e.g. Phase 1 self-serve + pricing; Phase 2 integrations + onboarding polish; Phase 3 expansion/partnerships) with what unlocks the next phase."
+    ],
+    "probes": [
+      { "trigger": "submission is a feature list with no thesis", "question": "What is the one-sentence thesis for how you win this segment? Lead with it — why does this beat matching the incumbent feature-for-feature?" },
+      { "trigger": "no explicit non-goals", "question": "What are you deliberately NOT building or doing here? A strategy without non-goals isn't a strategy." },
+      { "trigger": "treats SMB like a smaller enterprise", "question": "How is the SMB buyer and their needs actually different from your enterprise buyer, and how does the plan reflect that?" },
+      { "trigger": "metrics are vague or vanity", "question": "What's your north-star metric and a rough target, and what guardrail keeps you from winning SMB at the expense of the core business?" },
+      { "trigger": "no why-now", "question": "Why is now the right time for this bet rather than a year ago or a year from now?" },
+      { "trigger": "ignores competitive response", "question": "The dominant incumbent can cut prices or copy you. What's your risk here and how do you stay defensible?" }
+    ],
+    "red_flags": [
+      "A feature list or wish list with no strategic thesis or wedge",
+      "No explicit non-goals / no evidence of prioritization",
+      "Treats SMB as a scaled-down enterprise; misunderstands the buyer",
+      "Vague or vanity metrics, no targets, no guardrails",
+      "Ignores competitive response, unit economics, or cannibalization",
+      "Rambling, not top-down, not scannable — reads like notes, not a leadership one-pager",
+      "Overreaches scope (tries to out-feature the incumbent everywhere) instead of a focused wedge"
+    ],
+    "follow_ups": [
+      "If leadership gives you only half the resources, what stays and what's cut from Phase 1?",
+      "How would you defend the low tier's unit economics if support costs balloon?",
+      "What would make you kill or pivot this strategy after two quarters — what's the disconfirming signal?",
+      "How do you prevent SMB pricing from cannibalizing your mid-market customers?"
+    ],
+    "exemplar_answer": "A strong one-pager opens with a crisp thesis ('We win SMB by being the fastest, simplest, best-priced video tool for teams under 50 — not by out-featuring the incumbent'). Problem & opportunity: the SMB segment is large and underpenetrated; the product and pricing are enterprise-tuned, so SMBs default to the incumbent — with rough segment size, current share, and a target. Target user: an owner/office-manager, not IT, who values self-serve setup, transparent affordable pricing, reliability, and integrations with tools they already use, and is repelled by procurement and admin complexity. Strategy & why-now: a focused wedge — frictionless self-serve onboarding + SMB pricing/bundles + the top integrations — timed to hybrid-work normalization and an incumbent that's complacent and expensive at the low end. Scope names exactly what ships and, critically, explicit non-goals (enterprise SSO/admin, custom procurement, telephony — deferred). Metrics give a north-star (retained activated SMB paid teams) plus acquisition/activation/retention/monetization with rough targets and guardrails (support cost, cannibalization). Risks & tradeoffs are honest (price war, low-tier economics, cannibalization) each with a mitigation, and a phased sequencing plan shows what unlocks what. It's top-down, tight, and scannable — a document a VP could read in two minutes and act on."
+  },
+  "interviewer_notes": "This is a WRITTEN deliverable — evaluate the artifact, not a live dialogue. The senior bar is a genuine strategy: a sharp thesis/wedge, explicit non-goals, and prioritization, not a feature list. Reward top-down structure (thesis first), SMB-specific buyer insight, real metrics with targets and guardrails, and honest treatment of competitive response and unit economics. The most common senior-level miss is omitting non-goals and trying to out-feature the incumbent everywhere. If used interactively, deliver the probes as written feedback prompting a revision. Judge writing quality and scannability as part of the score — a leadership one-pager must be concise."
+}

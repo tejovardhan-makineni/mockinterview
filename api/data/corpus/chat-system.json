@@ -1,0 +1,139 @@
+{
+  "id": "chat-system",
+  "title": "Design a Real-Time Chat System (WhatsApp/Messenger)",
+  "track": "engineering",
+  "domain": "system_design",
+  "modality": "system_design",
+  "difficulty": "senior",
+  "tags": ["websockets", "messaging", "real-time", "fanout", "presence", "ordering"],
+  "prompt": "Design a real-time messaging system that supports 1:1 and group chats, like WhatsApp or Messenger. It should handle persistent connections, deliver messages with low latency, work when recipients are offline, and show delivery/read receipts and presence.",
+  "blurb": "Persistent connections at scale — the connection layer, message ordering, fanout, offline delivery, and receipts.",
+  "rubric": [
+    { "key": "requirements", "label": "Requirements gathering", "description": "Separates functional (1:1, group, receipts, presence, offline delivery, media) from non-functional (low latency, ordered, at-least-once delivery, high availability).", "weight": 1.0 },
+    { "key": "clarifying_questions", "label": "Clarifying questions", "description": "Asks about scale, group size limits, E2E encryption, multi-device, message retention, media support.", "weight": 1.0 },
+    { "key": "estimations", "label": "Back-of-envelope estimations", "description": "Estimates concurrent connections, messages/sec, fanout amplification for groups, storage/day, connections per gateway box.", "weight": 1.1 },
+    { "key": "connection_management", "label": "Connection layer", "description": "WebSocket/long-poll gateway, connection registry, mapping user→gateway, heartbeats, reconnection, horizontal scale of stateful connections.", "weight": 1.3 },
+    { "key": "api_design", "label": "API & protocol design", "description": "Send/ack protocol over WebSocket, REST fallbacks for history, receipt and typing events, message envelope schema.", "weight": 1.0 },
+    { "key": "data_model", "label": "Data model", "description": "Messages, conversations, membership, per-user inbox/mailbox, receipts; choice of store partitioned by conversation/user.", "weight": 1.0 },
+    { "key": "high_level_design", "label": "High-level design", "description": "Client → gateway → message service → store + fanout; how a message routes from sender to one or many online/offline recipients.", "weight": 1.3 },
+    { "key": "ordering_delivery", "label": "Ordering & delivery guarantees", "description": "Per-conversation ordering via sequence numbers, idempotency/dedup, at-least-once with client-side dedup, exactly-once illusion.", "weight": 1.2 },
+    { "key": "fanout_groups", "label": "Group fanout", "description": "Fanout to group members, large-group handling, write vs read amplification, mailbox-per-user vs shared log.", "weight": 1.1 },
+    { "key": "presence_receipts", "label": "Presence & receipts", "description": "Presence via heartbeats with TTL, debounced last-seen, delivered/read receipt propagation and its cost.", "weight": 1.0 },
+    { "key": "scaling", "label": "Scaling & bottlenecks", "description": "Sharding connections and storage, hot groups, the presence fanout storm, backpressure.", "weight": 1.1 },
+    { "key": "security", "label": "Security", "description": "Authn on connect, E2E encryption tradeoffs, spam/abuse, rate limiting.", "weight": 0.8 }
+  ],
+  "reference": {
+    "functional_requirements": [
+      "Send/receive 1:1 messages in real time",
+      "Group chats with fanout to all members",
+      "Offline delivery: recipient gets messages on reconnect",
+      "Delivery (sent/delivered) and read receipts",
+      "Presence / last-seen and typing indicators",
+      "Message history retrieval and media attachments"
+    ],
+    "nonfunctional_requirements": [
+      "End-to-end message latency < 200ms p99 when both online",
+      "At-least-once delivery with client dedup (no lost messages)",
+      "Per-conversation ordering preserved",
+      "High availability of the connection and send path",
+      "Durable message storage until delivered/retention window"
+    ],
+    "clarifying_questions": [
+      "Expected DAU / concurrent connections and messages per second?",
+      "Max group size, and how many groups is a user in?",
+      "Do we need end-to-end encryption?",
+      "Multi-device per user (phone + web)?",
+      "Retention policy — store forever, or delete after delivery?",
+      "Media (images/video/voice) in scope, or text only?"
+    ],
+    "qualifying_questions": [
+      "Is strict global ordering required or only per-conversation?",
+      "Are read receipts optional/toggleable (affects fanout cost)?"
+    ],
+    "estimations": {
+      "traffic": "500M DAU, ~50M concurrent connections; 50B msgs/day ≈ 600K msgs/s avg, multi-million/s peak",
+      "connections": "~50M concurrent / ~65K per gateway box ≈ ~800 gateway nodes (memory + fd bound, not CPU)",
+      "fanout": "Group avg 20 members → a group message is 1 write but ~20 delivery events; large groups amplify heavily",
+      "storage": "50B msgs/day × ~300B ≈ ~15TB/day of message data before media; media in blob store"
+    },
+    "core_components": ["WebSocket gateway (stateful edge)", "Connection registry / session store", "Message/send service", "Message store (partitioned by conversation)", "Per-user mailbox/inbox store", "Fanout service", "Presence service", "Push notification service (offline)", "Media/blob store + CDN", "Kafka/queue backbone"],
+    "data_model": [
+      "messages(conversation_id, seq, message_id, sender_id, body, created_at, type) PK(conversation_id, seq)",
+      "conversations(conversation_id, type, created_at)",
+      "membership(conversation_id, user_id, joined_at, last_read_seq)",
+      "user_inbox(user_id, conversation_id, last_seq) — pointer per convo for offline catch-up",
+      "receipts(conversation_id, message_id, user_id, state, ts)",
+      "sessions(user_id, device_id, gateway_node, connected_at) in Redis with TTL"
+    ],
+    "api_design": [
+      "WS connect: GET /ws (auth token) → upgrade; server registers session",
+      "WS send: {type:'msg', client_msg_id, conversation_id, body} → server ack {server_msg_id, seq}",
+      "WS receive: {type:'msg', conversation_id, seq, sender_id, body}",
+      "WS receipt: {type:'receipt', conversation_id, message_id, state:'delivered|read'}",
+      "WS presence: {type:'presence', user_id, state:'online|offline', last_seen}",
+      "REST GET /conversations/{id}/messages?after_seq=N → history / offline catch-up"
+    ],
+    "high_level_design": "Clients hold a persistent WebSocket to a gateway node. The connection registry (Redis) maps user/device → gateway node. On send, the gateway forwards to the message service, which assigns a per-conversation sequence number, persists to the message store, then hands to fanout. Fanout looks up each recipient's session: if online, it routes the event to that recipient's gateway node (via a pub/sub or direct RPC keyed by node) which pushes over the socket; if offline, it advances the user's inbox pointer and triggers a push notification. On reconnect the client pulls messages after its last acked seq. Receipts and presence flow as lightweight events through the same path.",
+    "deep_dives": [
+      { "topic": "connection_management", "probe": "You have 50M stateful sockets. How does the message service find which gateway box holds a given recipient's connection, and what happens to in-flight sends when that box crashes?" },
+      { "topic": "ordering_delivery", "probe": "Two messages from the same sender race through different service instances. How do you guarantee the recipient sees them in order, and how do you dedup if the sender retries after a lost ack?" },
+      { "topic": "fanout_groups", "probe": "A 100K-member group gets a message. Walk me through fanout — do you write to 100K mailboxes, or keep a shared log the members read? What breaks at that size?" },
+      { "topic": "presence_receipts", "probe": "Presence for a user with 1000 contacts: when they go online, who needs to be notified and how do you avoid a fanout storm? How stale can last-seen be?" },
+      { "topic": "offline_delivery", "probe": "A user is offline for a week across 3 devices. How do you track what each device has received and catch each up on reconnect without resending everything?" },
+      { "topic": "cdc_search", "probe": "Messages live in your primary store. How would you feed a search index or analytics pipeline off it — change data capture with something like Debezium, or dual writes from the app?" },
+      { "topic": "cache_stampede", "probe": "You cache hot conversation metadata/membership. When a popular group's cache entry expires under load, how do you avoid a stampede of DB reads?" }
+    ],
+    "followup_bank": [
+      { "trigger": "mentions websocket or connection", "question": "How do you map a user to the specific gateway node holding their socket, and how does that survive a node crash or rebalance?" },
+      { "trigger": "mentions ordering or sequence", "question": "Per-conversation sequence numbers: who assigns them, and how do you keep ordering when the message service is horizontally scaled?" },
+      { "trigger": "mentions group or fanout", "question": "At what group size do you switch from fanout-on-write (mailbox per user) to fanout-on-read (shared log), and why?" },
+      { "trigger": "mentions database or cassandra or store", "question": "How do you capture message-store changes for search/analytics downstream — CDC/Debezium vs dual writes, and how do you handle out-of-order CDC events?" },
+      { "trigger": "mentions cache", "question": "What's your eviction policy for conversation/membership cache, and how do you prevent a stampede when a hot group's entry expires?" },
+      { "trigger": "mentions presence", "question": "How is presence computed — heartbeat TTL? — and how do you debounce last-seen updates to avoid write storms?" },
+      { "trigger": "mentions push or offline", "question": "How do you decide between an in-app socket push and a mobile push notification, and how do you dedup so a device isn't double-notified?" }
+    ],
+    "scaling": [
+      "Shard gateways by connection; use a Redis session registry keyed by user/device",
+      "Partition message store by conversation_id; hot large groups may need dedicated partitions",
+      "Fanout via Kafka topics keyed by recipient gateway or by conversation",
+      "Presence updates debounced and TTL-based to cut write volume",
+      "Media offloaded to blob store + CDN; only references travel through chat path"
+    ],
+    "bottlenecks": [
+      "Group fanout amplification (write amplification for huge groups)",
+      "Presence fanout storm on mass connect/disconnect events",
+      "Gateway memory / file-descriptor limits per node",
+      "Hot conversation partition (viral group)",
+      "Receipt fanout doubling event volume"
+    ],
+    "tradeoffs": [
+      "Fanout-on-write (fast read, expensive for big groups) vs fanout-on-read (shared log, cheaper write, heavier read)",
+      "At-least-once + client dedup vs complex exactly-once",
+      "Strong per-conversation ordering vs simpler last-writer-wins",
+      "E2E encryption (privacy, no server-side search/features) vs server-side plaintext",
+      "Rich real-time presence vs the write/fanout cost it imposes"
+    ],
+    "alternative_solutions": [
+      "MQTT instead of raw WebSockets for constrained mobile clients",
+      "Shared per-conversation log (like a Kafka partition) that clients tail, instead of per-user mailboxes",
+      "Consistent-hash connection routing instead of a central session registry",
+      "Push-only (APNs/FCM) with periodic sync for very low-activity users"
+    ],
+    "observability": [
+      "End-to-end delivery latency (send→delivered) percentiles",
+      "Connection count per gateway, reconnect rate, dropped-connection alerts",
+      "Undelivered/queued message backlog per user",
+      "Fanout lag and Kafka consumer lag",
+      "Receipt and presence event rates"
+    ],
+    "security": [
+      "Authenticate the token on WebSocket upgrade; re-auth on reconnect",
+      "E2E encryption (Signal-style) with server storing only ciphertext",
+      "Rate-limit sends per user to curb spam/abuse",
+      "Abuse/spam detection and blocklists",
+      "TLS for all transport; validate group membership on every fanout"
+    ],
+    "reference_answer": "A strong answer separates the stateful connection layer (WebSocket gateways + a session registry mapping user/device→node) from the stateless message and fanout services. It assigns per-conversation sequence numbers for ordering, uses at-least-once delivery with a client_msg_id for dedup, and stores messages partitioned by conversation with a per-user inbox pointer for offline catch-up. It handles groups by choosing fanout-on-write for small groups and a shared-log/fanout-on-read for huge ones, and it proactively raises the two hardest scaling problems: presence fanout storms and large-group fanout amplification. Presence is heartbeat/TTL-based and debounced; receipts flow through the same event path with awareness of their cost. It covers reconnect/catch-up, push for offline, and E2E-encryption tradeoffs."
+  },
+  "interviewer_notes": "Let the candidate scope 1:1 first, then push into groups and offline — that's where senior signal shows. The connection layer is the core: if they hand-wave 'just use WebSockets', interrupt and ask how the message service finds a recipient's specific gateway node and what happens on crash. Push hard on ordering + dedup and on group fanout at scale (100K members). If they place a datastore, fire the CDC/Debezium probe; if they add a cache, fire the eviction/stampede probe. Presence storms and receipt cost are good senior differentiators. Reserve the end for reliability and E2E-encryption tradeoffs."
+}

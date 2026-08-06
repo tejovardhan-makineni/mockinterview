@@ -1,0 +1,53 @@
+{
+  "id": "behavioral-ownership",
+  "title": "Tell me about a time you took ownership beyond your role",
+  "track": "professional",
+  "domain": "behavioral",
+  "modality": "conversational",
+  "difficulty": "mid",
+  "tags": ["ownership", "leadership-principles", "initiative", "accountability", "star"],
+  "prompt": "Tell me about a time you took ownership of a problem that wasn't really yours to solve — something outside your assigned role or team. What made you step in, what did you do, and how did it turn out?",
+  "blurb": "Ownership: did the candidate act like the problem was theirs — end to end — or wait for someone else to own it?",
+  "rubric": [
+    { "key": "situation_clarity", "label": "Situation & stakes", "description": "Sets up a concrete situation with enough context to judge why the problem mattered and why it was ambiguous who owned it.", "weight": 1.0 },
+    { "key": "task_ownership", "label": "Why they owned it", "description": "Explains what pulled them in — customer impact, a gap no one was filling, a risk they saw — rather than being told to. Shows the decision to step up was theirs.", "weight": 1.3 },
+    { "key": "action_specificity", "label": "Specific actions (I not we)", "description": "Describes the concrete steps THEY personally took, including navigating the fact that it wasn't their remit, without excessive 'we'.", "weight": 1.3 },
+    { "key": "result_impact", "label": "Result & quantified impact", "description": "States a measurable outcome and ties it to their intervention — incident resolved, metric moved, launch unblocked.", "weight": 1.2 },
+    { "key": "reflection", "label": "Reflection & judgment", "description": "Shows awareness of when stepping in is right vs overstepping; what they learned about ownership and follow-through.", "weight": 1.0 },
+    { "key": "communication", "label": "Communication & structure", "description": "Answer is structured (roughly STAR), concise, and easy to follow under follow-up probing.", "weight": 0.8 }
+  ],
+  "reference": {
+    "scenario": "The candidate should recall a moment where a problem fell through the cracks between teams or roles — a broken build no one owned, a customer escalation outside their area, a launch blocked by a dependency team, a data-quality issue upstream — and they chose to drive it to resolution rather than route it away or wait. Strong answers show they owned the outcome, not just their slice.",
+    "model_points": [
+      "Situation: a real gap where ownership was genuinely unclear — cross-team seam, on-call surprise, an orphaned system — with stakes (customers affected, revenue, a deadline at risk).",
+      "Task: what they personally decided the outcome needed to be, and why they felt accountable despite it not being their job.",
+      "Action: concrete steps — diagnosed the issue, pulled in the right people, made or drove a decision, filled the gap themselves, and communicated status up and across.",
+      "Action: navigated the org reality — got buy-in or forgiveness, avoided stepping on the actual owner, handed it back cleanly once stable.",
+      "Result: quantified outcome (incident resolved in X, launch shipped on time, defect rate down Y%, cost avoided) attributed to their intervention.",
+      "Reflection: recognized ownership as owning the result end-to-end; also learned where the line is between initiative and overstepping, and set up a durable owner so it wouldn't recur."
+    ],
+    "probes": [
+      { "trigger": "candidate stays in 'we' / describes team effort", "question": "What specifically did YOU do here, versus what the rest of the team did? Walk me through your individual contribution." },
+      { "trigger": "no measurable outcome given", "question": "How did you know it worked? What actually changed — a metric, a timeline, an incident count?" },
+      { "trigger": "claims they just took over", "question": "How did you handle the fact that this wasn't your job — did the actual owner or their manager know? How did you avoid stepping on toes?" },
+      { "trigger": "problem was solved but recurred / no handoff", "question": "After you fixed it, who owned it going forward? How did you make sure it didn't just land back on you or fall through again?" },
+      { "trigger": "vague on decision to step in", "question": "At the moment you noticed this, what were your options? Why step in yourself instead of escalating or flagging it?" }
+    ],
+    "red_flags": [
+      "Only ever says 'we' and never isolates a personal action or decision.",
+      "'Took ownership' means they just complained loudly or escalated — no follow-through to resolution.",
+      "No result, or a result with no connection to what they did.",
+      "Overstepped recklessly — trampled the real owner, created conflict, no coordination — and shows no awareness of it.",
+      "Blames the org or other teams for the gap and frames themselves as the lone hero with no reflection.",
+      "Story is hypothetical or so generic it could describe anyone."
+    ],
+    "follow_ups": [
+      "How much time did this take, and what did you deprioritize to do it? Was that the right trade?",
+      "How did your manager react to you spending time outside your lane?",
+      "Would you do it again the same way? What would you change?",
+      "Have you ever decided NOT to step into something that wasn't yours? How did you make that call?"
+    ],
+    "exemplar_answer": "Situation: 'Our checkout service started throwing 5xxs at 2am. I was on the payments team, but the root cause was an upstream identity service owned by another team with no one on call that night, and customers couldn't pay.' Task: 'I decided the priority was stopping the customer bleeding, even though the failing service wasn't mine.' Action: 'I traced it to a bad config push on identity, paged their EM, and while waiting I shipped a temporary fallback in our service to degrade gracefully instead of hard-failing. I set up an incident channel, posted 15-minute updates to leadership, and once identity rolled back their change I verified recovery and handed the incident back.' Result: 'We cut the outage from a projected multi-hour event to 40 minutes, roughly $X in payments recovered, and zero data loss.' Reflection: 'Afterward I wrote the postmortem and pushed for cross-team on-call coverage and a graceful-degradation pattern so this class of failure wouldn't need a hero next time. I learned ownership means owning the outcome — but also handing it back with a durable fix rather than becoming the permanent owner by accident.'"
+  },
+  "interviewer_notes": "Run this STAR-style. Let them tell the story, then probe hard on I-vs-we — this is the #1 signal for ownership and candidates default to 'we'. If they never quantify, push once for a metric or a concrete before/after. Distinguish real ownership (drove to a durable outcome) from noise (escalated, complained, or heroically overstepped without coordination). Senior-flavored maturity shows in the reflection: knowing when NOT to step in, and setting up a lasting owner. Reserve a probe for the handoff — did the fix stick, or did they just absorb someone else's job?"
+}

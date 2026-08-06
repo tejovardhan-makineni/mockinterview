@@ -1,0 +1,95 @@
+{
+  "id": "image-search",
+  "title": "Design a Visual / Embedding-Based Image Search System",
+  "track": "engineering",
+  "domain": "ml_system_design",
+  "modality": "system_design",
+  "difficulty": "senior",
+  "tags": ["embeddings", "ann", "vector-index", "retrieval", "reranking", "ml-serving"],
+  "prompt": "Design a visual search system: given a query image (or text), return visually similar images from a very large catalog. It must embed content, index embeddings for approximate nearest-neighbor retrieval, and rank results, all at low latency and high recall. Assume billions of images and continuous ingestion.",
+  "blurb": "Embedding-based retrieval at billion scale: encoders, ANN indexes, reranking, and keeping embeddings/index fresh as the catalog and model change.",
+  "rubric": [
+    { "key": "requirements", "label": "Requirements gathering", "description": "Separates functional (embed, index, k-NN retrieve, rerank, filter, multimodal query) from non-functional (p99 latency, recall@k, index freshness, availability, cost).", "weight": 1.0 },
+    { "key": "clarifying_questions", "label": "Clarifying questions", "description": "Asks about catalog size, query volume, latency budget, recall vs precision needs, query modality (image/text/both), metadata filtering, freshness.", "weight": 1.0 },
+    { "key": "estimations", "label": "Back-of-envelope estimations", "description": "Derives embedding dimension × count → index memory, QPS, per-query ANN + rerank cost, embedding compute/GPU for ingestion, storage.", "weight": 1.2 },
+    { "key": "embeddings", "label": "Embedding model & pipeline", "description": "Encoder choice (CNN/ViT/CLIP-style), shared image/text space for multimodal query, batch embedding of catalog, normalization, embedding versioning.", "weight": 1.2 },
+    { "key": "ann_index", "label": "ANN index design", "description": "HNSW/IVF-PQ tradeoffs, recall vs latency vs memory, quantization/compression, sharding billions of vectors, distributed search + merge.", "weight": 1.3 },
+    { "key": "retrieval_rerank", "label": "Retrieval + reranking", "description": "ANN candidate retrieval → precise rerank (exact distance / cross-encoder / metadata + business rules), metadata filtering (pre vs post), diversity.", "weight": 1.2 },
+    { "key": "training_serving_skew", "label": "Embedding consistency & skew", "description": "Same encoder + preprocessing for query and index, handling embedding-model version changes (must re-embed everything), avoiding mixed-version index.", "weight": 1.1 },
+    { "key": "ml_evaluation_drift", "label": "Evaluation & drift", "description": "Recall@k / precision@k / mAP against labeled sets, online engagement metrics, monitoring retrieval quality and catalog/embedding drift over time.", "weight": 1.3 },
+    { "key": "high_level_design", "label": "High-level design", "description": "Ingest → embed → index build/update; query → embed → ANN retrieve → rerank → filter → results; async re-embedding on model change.", "weight": 1.2 },
+    { "key": "scaling", "label": "Scaling & reliability", "description": "Sharded/replicated vector index, scatter-gather, incremental index updates vs periodic rebuild, caching, graceful degradation, GPU fleet for embedding.", "weight": 1.1 },
+    { "key": "observability", "label": "Observability", "description": "Latency per stage, recall/quality metrics, index freshness/lag, embedding version tracking, cache hit rate, drift alerts.", "weight": 0.9 },
+    { "key": "security", "label": "Safety, abuse & privacy", "description": "Filtering unsafe/illegal images, copyright/dedup, query privacy, preventing scraping, face/biometric considerations.", "weight": 0.8 }
+  ],
+  "reference": {
+    "functional_requirements": [
+      "Embed query (image or text) and catalog images into a shared vector space",
+      "Retrieve k approximate nearest neighbors from a billion-scale index",
+      "Rerank candidates for precision (exact distance / cross-encoder / business rules)",
+      "Filter by metadata (category, availability, safe-content) and diversify",
+      "Continuously ingest and index new/updated images"
+    ],
+    "nonfunctional_requirements": [
+      "Query latency p99 within budget (e.g. <150ms)",
+      "High recall@k with acceptable precision after rerank",
+      "Fresh index — new images searchable within minutes",
+      "High availability with partial-results degradation",
+      "Cost-efficient memory for billions of vectors"
+    ],
+    "clarifying_questions": [
+      "Catalog size and growth rate?",
+      "Query volume (QPS) and latency budget?",
+      "Query by image, by text, or both (multimodal)?",
+      "Recall vs precision priority, and k?",
+      "Do we filter by metadata, and how selective are filters?",
+      "How fresh must newly-added images be?"
+    ],
+    "qualifying_questions": [
+      "Is exact-duplicate detection a separate need from similarity search?",
+      "Are there hard metadata filters that must be applied pre-retrieval?",
+      "How often does the embedding model change (forcing full re-embedding)?"
+    ],
+    "estimations": {
+      "index_memory": "2B images × 512-dim float32 = ~4TB raw; PQ/quantization compresses ~8-32x → hundreds of GB, sharded across nodes",
+      "traffic": "~20K QPS; each query = 1 embedding + ANN search over shards + rerank of top candidates",
+      "query_cost": "Query embed ~5-20ms GPU; ANN search ~5-20ms/shard scatter-gather; rerank top-few-hundred exact/cross-encoder",
+      "ingestion": "Continuous new images → GPU embedding fleet; incremental index insert + periodic rebuild",
+      "storage": "Raw images in blob store; embeddings + metadata in vector index + KV; petabyte-scale blob"
+    },
+    "core_components": ["Ingestion pipeline", "Embedding service (GPU) — image + text encoders", "Vector index (ANN) — sharded", "Metadata store (filters, attributes)", "Retrieval/query service", "Reranker (exact distance / cross-encoder + business rules)", "Index build/update pipeline", "Embedding cache", "Blob store (raw images)", "Training/eval pipeline + model registry", "Quality + drift monitoring"],
+    "data_model": ["images(image_id PK, blob_uri, metadata, embedding_version, indexed_at)", "vectors(image_id, embedding[], shard) in ANN index", "metadata(image_id, category, tags, safe_flag, availability)", "query_log(query_id, query_embedding, results[], clicked[], ts)", "embedding_versions(version, model_ref, dim, created_at)"],
+    "api_design": [
+      "POST /v1/search { image|text, k, filters{} } → [{image_id, score, ...}], query_id",
+      "POST /internal/index/upsert { image_id, embedding, metadata } → incremental insert",
+      "POST /internal/reembed { embedding_version } → triggers catalog re-embedding + reindex",
+      "POST /v1/log/click { query_id, image_id, position } (async)"
+    ],
+    "high_level_design": "Ingestion pushes new images to a GPU embedding service that produces vectors with an explicit embedding-model version; vectors and metadata are inserted into a sharded ANN index (incremental inserts plus periodic full rebuilds for optimal graph/quantization). At query time, the query (image or text) is embedded with the same encoder/preprocessing into the shared space, ANN search scatter-gathers across shards to retrieve a candidate set with high recall, then a reranker computes exact distances (or a cross-encoder) and applies metadata filters and business/diversity rules to produce final results. Metadata filtering is done pre- or post-retrieval depending on selectivity. Query embeddings and hot results are cached. When the embedding model changes, the whole catalog must be re-embedded and reindexed under the new version — never mixing versions in one index. Quality is monitored with recall@k/precision@k offline and engagement online, plus index-freshness and drift monitoring.",
+    "deep_dives": [
+      { "topic": "ann_tradeoffs", "probe": "Choose an ANN index for billions of vectors. Walk me through HNSW vs IVF-PQ — recall, latency, memory, and build/update cost — and how quantization changes the tradeoff." },
+      { "topic": "sharding_search", "probe": "The index doesn't fit on one node. How do you shard billions of vectors and do distributed search — scatter-gather, per-shard top-k, merge — and what about hot shards and partial results?" },
+      { "topic": "rerank", "probe": "ANN gives approximate candidates. Why rerank, and with what — exact distances, a heavier cross-encoder, metadata/business rules? How many candidates do you rerank to fit latency?" },
+      { "topic": "embedding_versioning", "probe": "You improve the encoder. Now query and index embeddings are in different spaces. How do you re-embed billions of images and cut over without serving mixed-version, incompatible vectors?" },
+      { "topic": "metadata_filtering", "probe": "Users filter by category/availability. Do you filter before or after ANN retrieval? What breaks if a highly selective filter is applied post-retrieval?" },
+      { "topic": "eval", "probe": "How do you measure that retrieval is good — recall@k/precision@k against labeled pairs offline, and what online signal — and how do you catch quality regressions after a reindex?" },
+      { "topic": "cdc_embedding_freshness", "probe": "An image's content or metadata is updated, or new images arrive continuously. How does the index stay in sync — change-stream driving re-embed + upsert — and what's the lag before it's searchable?" }
+    ],
+    "followup_bank": [
+      { "trigger": "mentions index or embedding or vector", "question": "When a source image or its metadata changes (or new ones are added), how does the ANN index stay in sync — CDC/change-stream driving re-embedding and upsert vs periodic rebuild? What's the freshness lag before it's searchable?" },
+      { "trigger": "mentions cache or embedding cache", "question": "You cache query embeddings / hot results. What's the eviction policy, and when the embedding model version or an image changes, how do you invalidate stale-after-change cached embeddings so you don't return results from an old space?" },
+      { "trigger": "mentions ANN or HNSW or IVF or quantization", "question": "How does your chosen index trade recall vs latency vs memory, and how do you tune it (efSearch/nprobe) per query budget?" },
+      { "trigger": "mentions rerank", "question": "How many candidates do you rerank and with what, to fit the latency budget while recovering precision the ANN stage lost?" },
+      { "trigger": "mentions model or encoder or version", "question": "When you upgrade the encoder, how do you re-embed the whole catalog and cut over without a mixed-version index?" },
+      { "trigger": "mentions recall or precision or evaluation", "question": "How do you measure retrieval quality offline (recall@k against labeled sets) and catch a regression after a reindex?" }
+    ],
+    "scaling": ["Shard vectors across nodes; scatter-gather top-k with merge", "Replicate shards for QPS + availability; partial results on shard timeout", "Quantization (PQ/OPQ) to fit billions of vectors in memory", "Incremental inserts + periodic full rebuild for index quality", "GPU embedding fleet autoscaled for ingestion bursts; cache query embeddings"],
+    "bottlenecks": ["Index memory footprint at billion scale", "Reranker cost vs candidate count", "Re-embedding the whole catalog on model change", "Hot shards / hot query embeddings", "Index-update lag vs freshness"],
+    "tradeoffs": ["Recall vs latency vs memory in ANN tuning", "Quantization compression vs precision loss", "More rerank candidates (precision) vs latency", "Incremental updates (fresh) vs periodic rebuild (optimal index)", "Pre-filter (correct, index-complex) vs post-filter (simple, recall loss)"],
+    "alternative_solutions": ["Exact k-NN (only viable for small catalogs)", "LSH-based ANN (simpler, weaker recall/latency than graph/IVF)", "Two-tower retrieval + cross-encoder rerank pipeline", "Perceptual-hash matching for exact/near-duplicate detection alongside semantic search"],
+    "observability": ["Latency per stage (embed, ANN, rerank)", "Recall@k / precision@k on labeled sets + online CTR/engagement", "Index freshness/lag + embedding-version distribution", "Cache hit rate; hot-shard metrics", "Drift alerts on retrieval quality after reindex/model change"],
+    "security": ["Filter unsafe/illegal images from results (safe-content flags)", "Copyright / duplicate handling", "Query image privacy; avoid storing sensitive queries", "Face/biometric handling considerations and consent", "Anti-scraping + rate limiting on the search API"],
+    "reference_answer": "A strong answer embeds query and catalog into a shared space with the same encoder/preprocessing, then builds a sharded ANN index (HNSW or IVF-PQ) tuned for recall-vs-latency-vs-memory with quantization to fit billions of vectors, doing distributed scatter-gather search. It follows retrieval with a reranking stage — exact distances or a cross-encoder plus metadata/business filters — recovering the precision the approximate stage traded away, and reasons about pre- vs post-filtering by selectivity. It treats the embedding model version as first-class: an encoder upgrade requires re-embedding the entire catalog and a clean cutover, never mixing incompatible vectors in one index. It keeps the index fresh via a change-driven re-embed/upsert pipeline, caches query embeddings and hot results with version-aware invalidation, and evaluates with recall@k/precision@k offline plus online engagement, monitoring for quality drift after every reindex or model change."
+  },
+  "interviewer_notes": "The backbone here is the retrieve-then-rerank pattern over a sharded ANN index; make sure the candidate reaches it rather than proposing exact k-NN over billions of vectors. Push concretely on ANN choice (HNSW vs IVF-PQ) and the recall/latency/memory triangle including quantization — a senior candidate can tune efSearch/nprobe against a latency budget and explain sharding + scatter-gather. Two senior separators: (1) embedding versioning and consistency — an encoder change puts query and index in different spaces, forcing a full re-embed and clean cutover; a candidate who ignores this has a subtle correctness bug; and (2) evaluation — recall@k/precision@k against labeled sets and catching regressions after a reindex (the ml-specifics/eval dimension). When they mention the index/embeddings, hit the CDC/freshness probe: how new/changed images get re-embedded and become searchable, and the lag. When they add an embedding or result cache, probe eviction and, importantly, stale-after-change invalidation when the model version or an image changes. Also probe pre- vs post-metadata-filtering (post-filtering a selective filter silently destroys recall). Reserve time for drift monitoring and the re-embedding cutover. Weak candidates stop at 'compute embeddings and do nearest neighbor'; strong ones design a sharded, versioned, reranked, freshness-managed retrieval system."
+}

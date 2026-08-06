@@ -1,0 +1,53 @@
+{
+  "id": "behavioral-dealing-with-ambiguity",
+  "title": "Tell me about a time you drove clarity on an ambiguous project",
+  "track": "professional",
+  "domain": "behavioral",
+  "modality": "conversational",
+  "difficulty": "senior",
+  "tags": ["ambiguity", "leadership-principles", "strategy", "alignment", "star"],
+  "prompt": "Tell me about a time you were handed something genuinely ambiguous — an ill-defined problem, no clear goal or owner, conflicting signals — and you drove it to clarity. How did you approach it, and what did you produce?",
+  "blurb": "Ambiguity (senior): did they impose structure on chaos and align others — or just wait for direction?",
+  "rubric": [
+    { "key": "situation_clarity", "label": "The ambiguity", "description": "Conveys genuine ambiguity — unclear goals, no owner, conflicting stakeholders or data — and why it was hard, not just a normal under-specified task.", "weight": 1.0 },
+    { "key": "task_ownership", "label": "Taking on the ambiguity", "description": "Shows they chose to own the fog rather than wait for someone to define it, and framed what 'clarity' would even mean.", "weight": 1.2 },
+    { "key": "action_specificity", "label": "How they created structure", "description": "Describes the concrete method THEY used to reduce ambiguity — decomposing the problem, gathering data, forming hypotheses, defining scope and success metrics, sequencing.", "weight": 1.3 },
+    { "key": "result_impact", "label": "Alignment & measurable outcome", "description": "Shows they aligned stakeholders on a direction AND drove a real outcome — a decision made, a plan executed, a metric moved — not just a nice document.", "weight": 1.2 },
+    { "key": "reflection", "label": "Reflection & judgment", "description": "Reflects on decisions made under uncertainty, what they'd revisit, and how they knew when 'clear enough' was enough to act.", "weight": 1.1 },
+    { "key": "communication", "label": "Communication & structure", "description": "The answer itself is well-structured — modeling the clarity they claim to bring — and concise under probing.", "weight": 0.9 }
+  ],
+  "reference": {
+    "scenario": "A senior-level story: the candidate was given a vague mandate ('improve retention', 'figure out our data strategy', 'this system keeps breaking, fix the org problem') with no clear scope, owner, or success metric, and possibly conflicting stakeholders. They imposed structure, aligned people, and drove a concrete outcome. The signal is turning fog into a shared plan that others could execute against.",
+    "model_points": [
+      "Situation: real ambiguity — no defined goal, no clear owner, incomplete or conflicting information, multiple stakeholders pulling different ways.",
+      "Task: they took ownership of defining the problem itself, and articulated what a good outcome would look like before diving in.",
+      "Action: applied a structured approach — decomposed the space, gathered data/talked to stakeholders, formed and tested hypotheses, cut scope to a tractable first slice, and defined explicit success metrics.",
+      "Action: drove alignment — wrote it down, socialized a proposed direction, resolved conflicting stakeholder views, and got commitment to a plan.",
+      "Result: a concrete outcome, not just a doc — a decision made, a roadmap executed, a metric moved, ambiguity converted into an ownable stream of work with an owner and milestones.",
+      "Reflection: comfortable making reversible bets under uncertainty; knows when 'clear enough to act' beats waiting for certainty; would revisit specific assumptions."
+    ],
+    "probes": [
+      { "trigger": "produced a document but no decision/outcome", "question": "A plan is a start — what actually changed as a result? Was a decision made, did work ship, did a metric move?" },
+      { "trigger": "vague on method", "question": "Concretely, how did you go from fog to a plan? Walk me through the steps you took to reduce the ambiguity." },
+      { "trigger": "conflicting stakeholders glossed over", "question": "Who disagreed about what the goal even was, and how did you get them aligned on a single direction?" },
+      { "trigger": "waited for direction", "question": "How much of the structure did you create versus receive from your manager or a stakeholder?" },
+      { "trigger": "no success metric", "question": "How did you define success for something this open-ended? How did you know when you'd made it 'clear enough' to act?" }
+    ],
+    "red_flags": [
+      "Waited for someone else to define the problem; their role was execution once it was already clear.",
+      "Produced analysis or a doc but nothing was decided or shipped — clarity for its own sake.",
+      "Glosses over stakeholder conflict — no real alignment work, just their own opinion.",
+      "No structured method; 'I just figured it out' with no reproducible approach.",
+      "No success metric or definition of done for an open-ended problem.",
+      "The 'ambiguity' was really just a normal well-scoped task; stakes and openness are missing."
+    ],
+    "follow_ups": [
+      "How did you decide what to scope IN versus out for the first slice?",
+      "What did you do when new information contradicted your initial framing?",
+      "How did you keep the team motivated while the goal was still fuzzy?",
+      "Looking back, which assumption were you most wrong about, and how did you catch it?"
+    ],
+    "exemplar_answer": "Situation: 'Leadership told my team 'our onboarding is broken' and asked us to fix it — no defined metric, three stakeholders with three different theories, and data scattered across four tools.' Task: 'I took ownership of defining what 'fixed' meant before we built anything.' Action: 'I decomposed onboarding into a funnel, instrumented each step, and pulled the drop-off data — which showed the problem was concentrated at one step, not everywhere as people assumed. I interviewed churned users to form hypotheses, then wrote a one-page framing: the goal, the metric (activation rate at day 7), the top two hypotheses, and a scoped first experiment. I walked each stakeholder through it, reconciled their competing theories against the data, and got sign-off on a single direction and owner.' Result: 'We ran the first experiment within three weeks; day-7 activation rose from ~X% to ~Y% over the next two quarters, and the vague mandate became an owned workstream with a roadmap. The framing doc became how the team scoped ambiguous asks after that.' Reflection: 'The leverage was refusing to build until we'd defined success and let data settle the stakeholder debate. My biggest wrong assumption was that the problem was UI — it was expectation-setting earlier in the funnel — and instrumenting first is what caught it. I've learned to spend the first week making the problem legible, then move.'"
+  },
+  "interviewer_notes": "Senior bar: the differentiator is imposing structure on genuinely open problems AND aligning others, not just personal execution once clarity exists. Probe hard on method (how fog became a plan) and on stakeholder alignment (who disagreed and how they reconciled it). Reject clarity-for-its-own-sake: a beautiful doc with no decision or shipped outcome is not the signal — push for what actually changed. Look for a defined success metric on an open-ended problem and for comfort acting when 'clear enough'. The answer's own structure is itself evidence. Probe I-vs-we on who created the structure."
+}

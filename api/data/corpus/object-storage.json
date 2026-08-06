@@ -1,0 +1,91 @@
+{
+  "id": "object-storage",
+  "title": "Design an S3-like Object Storage System",
+  "track": "engineering",
+  "domain": "system_design",
+  "modality": "system_design",
+  "difficulty": "senior",
+  "tags": ["object-storage", "chunking", "erasure-coding", "durability", "metadata", "replication"],
+  "prompt": "Design an S3-like object storage system: clients PUT and GET arbitrary blobs (bytes to terabytes) under bucket/key names, with very high durability and availability. Cover how you store the bytes, track metadata, and achieve durability cost-effectively.",
+  "blurb": "The durable-blob-at-scale problem — separating metadata from data, chunking large objects, and replication vs erasure coding for eleven-nines durability.",
+  "rubric": [
+    { "key": "requirements", "label": "Requirements gathering", "description": "Separates functional (PUT/GET/DELETE, list, multipart, versioning) from non-functional (durability e.g. 11 nines, availability, throughput for large objects, cost).", "weight": 1.0 },
+    { "key": "clarifying_questions", "label": "Clarifying questions", "description": "Asks about object size distribution, read/write ratio, durability/availability targets, consistency model, throughput vs latency priorities.", "weight": 1.0 },
+    { "key": "estimations", "label": "Back-of-envelope estimations", "description": "Derives capacity/year, object count and metadata size, network throughput, and node/disk counts.", "weight": 1.0 },
+    { "key": "metadata_vs_data", "label": "Metadata / data separation", "description": "A metadata service (bucket/key -> chunk locations) separate from the data plane (chunk/blob stores); why coupling them limits scale.", "weight": 1.2 },
+    { "key": "chunking", "label": "Chunking & large objects", "description": "Splitting large objects into fixed chunks, multipart upload, parallelism, resumability, and how chunk placement is tracked.", "weight": 1.2 },
+    { "key": "durability", "label": "Durability: replication vs erasure coding", "description": "Replication (simple, 3x storage) vs erasure coding (e.g. 10+4, ~1.4x, cheaper, higher repair/latency cost); reasoning about failure domains.", "weight": 1.3 },
+    { "key": "high_level_design", "label": "High-level design", "description": "Client -> LB/API -> metadata service + data placement -> chunk servers -> background repair/scrubbing; read/write paths.", "weight": 1.2 },
+    { "key": "consistency", "label": "Consistency model", "description": "Read-after-write for new objects, overwrite/versioning semantics, eventual list consistency, atomic commit of a multipart upload.", "weight": 1.1 },
+    { "key": "scaling", "label": "Scaling", "description": "Sharding metadata, spreading chunks across failure domains, rebalancing on node add/loss, hot-object handling / caching / CDN.", "weight": 1.1 },
+    { "key": "reliability", "label": "Reliability & repair", "description": "Detecting silent corruption (scrubbing, checksums), re-replication / re-encoding on disk loss, bounding repair traffic.", "weight": 1.1 },
+    { "key": "observability", "label": "Observability", "description": "Durability accounting, under-replicated object counts, repair backlog, request latency/error SLOs, capacity headroom.", "weight": 0.7 }
+  ],
+  "reference": {
+    "functional_requirements": [
+      "PUT / GET / DELETE an object by bucket + key",
+      "Multipart upload for large objects",
+      "List objects in a bucket (by prefix)",
+      "Object versioning (optional)",
+      "Metadata (size, etag, content-type, custom headers)"
+    ],
+    "nonfunctional_requirements": [
+      "Very high durability (target ~11 nines)",
+      "High availability for reads and writes",
+      "High throughput for large objects; reasonable small-object latency",
+      "Cost-efficient storage overhead",
+      "Read-after-write consistency for new objects"
+    ],
+    "clarifying_questions": [
+      "Object size distribution — mostly small, or many multi-GB blobs?",
+      "Read/write ratio and throughput vs latency priorities?",
+      "Durability and availability targets (nines)?",
+      "Consistency model — strong read-after-write, or eventual?",
+      "Do we need versioning, lifecycle/tiering, and encryption at rest?",
+      "Single region or geo-replicated?"
+    ],
+    "qualifying_questions": [
+      "Is storage cost or write latency the harder constraint?",
+      "Are objects mostly immutable (write-once) or frequently overwritten?",
+      "What are the failure domains — disk, node, rack, AZ?"
+    ],
+    "estimations": {
+      "capacity": "1B objects/day avg 1MB = ~1PB/day ingest; a year is hundreds of PB — plan for continuous fleet growth.",
+      "metadata": "Object metadata ~1KB each; 100B objects -> ~100TB of metadata -> must be a sharded, indexed store, not a single DB.",
+      "durability_math": "3x replication survives 2 concurrent losses per object; 10+4 erasure coding survives any 4 of 14 shards at ~1.4x overhead vs 3x — big cost win at large scale.",
+      "throughput": "Multi-GB objects demand parallel chunk transfer; a single object saturates many disks/NICs at once."
+    },
+    "core_components": ["API/gateway (S3 protocol)", "Load balancer", "Metadata service (bucket/key -> chunk map, sharded)", "Placement/allocation service", "Data/chunk servers (disks)", "Erasure-coding / replication layer", "Background repair + scrubber", "Garbage collector", "Optional cache/CDN for hot objects"],
+    "data_model": ["buckets(bucket_id, owner, policy, versioning)", "objects(bucket_id, key, version_id, size, etag, chunk_list, created_at)", "chunks(chunk_id, object_ref, placement[node/disk], checksum, coding_scheme)", "nodes(node_id, rack, az, capacity, health)"],
+    "api_design": [
+      "PUT /{bucket}/{key} (body) -> etag; large uploads via multipart",
+      "POST /{bucket}/{key}?uploads (init) + PUT part + POST complete -> atomic commit",
+      "GET /{bucket}/{key} -> streams reassembled chunks",
+      "DELETE /{bucket}/{key}; GET /{bucket}?prefix= -> list"
+    ],
+    "high_level_design": "The gateway authenticates and routes to the metadata service, which maps bucket/key to an ordered chunk list. On PUT, the object is split into fixed-size chunks; each chunk is either replicated N ways or erasure-coded into k+m shards, and the placement service spreads those shards across distinct failure domains (disk/node/rack/AZ). Chunk servers store shards with checksums; the metadata commit that records the chunk map is the atomic 'the object now exists' point (enabling read-after-write). On GET, metadata yields the chunk list and the data plane streams/reassembles (decoding erasure shards if needed). A background scrubber verifies checksums and a repair service re-replicates or re-encodes chunks when disks/nodes are lost, bounded to avoid saturating the network. A GC reclaims space from deleted/overwritten versions.",
+    "deep_dives": [
+      { "topic": "durability", "probe": "Replication vs erasure coding — walk through the storage overhead and failure tolerance of 3x replication vs a 10+4 code, and when you'd pick each. How do read latency and repair cost differ?" },
+      { "topic": "chunking", "probe": "How do you handle a 5TB multipart upload — chunk size, parallelism, resumability, and how the final 'complete' becomes atomic and consistent?" },
+      { "topic": "placement", "probe": "How do you place shards so no single rack/AZ failure can lose an object, and how do you rebalance when you add capacity or lose a node?" },
+      { "topic": "consistency", "probe": "How do you provide read-after-write for a new object, and what are the semantics for overwrite, versioning, and list-after-delete?" },
+      { "topic": "repair", "probe": "A disk holding thousands of shards dies. How do you detect it, re-encode/re-replicate the affected chunks, and keep repair traffic from overwhelming the cluster?" },
+      { "topic": "cdc_metadata", "probe": "Your metadata store is the system of record for object locations. How do you feed downstream consumers — bucket indexing/listing, lifecycle rules, analytics — off metadata changes? Change data capture / Debezium, or emitting events on commit?" }
+    ],
+    "followup_bank": [
+      { "trigger": "mentions erasure or reed-solomon or coding", "question": "What k+m parameters, and how does that change read latency (must fetch k shards) and repair bandwidth vs plain replication?" },
+      { "trigger": "mentions cache or cdn", "question": "What is the cache eviction policy for hot objects, and how do you avoid a stampede when a viral object's cache entry expires and thousands of GETs hit the data plane at once?" },
+      { "trigger": "mentions metadata or database or postgres or sql or dynamo", "question": "How is the metadata store sharded, and how do you stream metadata changes to listing/lifecycle/analytics consumers — CDC/Debezium vs dual writes?" },
+      { "trigger": "mentions multipart or chunk", "question": "What chunk size do you pick and why, and how is the multipart 'complete' made atomic so a partial upload is never readable?" },
+      { "trigger": "mentions replication", "question": "Across how many failure domains do you spread replicas, and what durability do 3 copies actually buy vs an erasure code at the same cost?" }
+    ],
+    "scaling": ["Shard metadata by bucket/key hash; keep it separate from the data plane", "Spread chunk shards across disks/racks/AZs; rebalance on capacity change", "Parallelize large-object transfer across many chunk servers", "Tier cold data to cheaper media; cache/CDN hot objects", "Bound and prioritize repair traffic to protect foreground I/O"],
+    "bottlenecks": ["Metadata service hotspots for hot buckets/prefixes", "Repair bandwidth after large disk/node loss", "Small-object overhead (metadata dominates)", "Hot-object read amplification without a cache/CDN"],
+    "tradeoffs": ["Replication (simple, fast reads, 3x cost) vs erasure coding (~1.4x cost, slower reads/repair)", "Larger chunks (less metadata, coarse repair) vs smaller chunks (fine repair, more metadata)", "Strong read-after-write (coordination) vs eventual (cheaper, simpler)", "Aggressive repair (fast recovery, I/O contention) vs throttled (safe, longer under-replication window)"],
+    "alternative_solutions": ["Full 3x replication only (simpler, higher cost) for latency-sensitive tiers", "Erasure coding for cold/bulk tiers, replication for hot", "Log-structured storage with GC (append-only chunk files)", "LSM/HDFS-style with a single metadata master (simpler, master scaling limits)"],
+    "observability": ["Under-replicated / under-coded object counts", "Repair backlog and repair bandwidth", "Scrub coverage and detected-corruption rate", "Request latency/error SLOs by size class", "Capacity headroom and per-AZ balance"],
+    "security": ["Per-bucket/object access policies and signed URLs", "Encryption at rest (per-object keys) and in transit", "Authn/authz on every request; tenant isolation", "Integrity via end-to-end checksums (etag/content-MD5)", "Audit logging of access and admin actions"],
+    "reference_answer": "A strong answer separates a sharded metadata service (bucket/key -> chunk map) from a data plane of chunk servers, chunks large objects for parallel/resumable multipart uploads, and chooses durability deliberately: replication for hot/latency-sensitive data and erasure coding (e.g. 10+4, ~1.4x) for bulk, spreading shards across failure domains. The metadata commit is the atomic point giving read-after-write. It runs a checksum scrubber and a throttled repair/re-encode loop on disk loss, plans rebalancing and hot-object caching/CDN, and streams metadata changes (CDC) to listing/lifecycle/analytics. It names metadata hotspots and repair bandwidth as the key bottlenecks."
+  },
+  "interviewer_notes": "The signal is in three places: separating metadata from the data plane, chunking large objects (multipart, atomic complete), and reasoning quantitatively about durability — replication vs erasure coding overhead and failure domains. Do not accept 'store 3 copies' without asking about cost at scale and whether erasure coding fits. If they place a metadata store, hit the CDC/Debezium probe; if they add a hot-object cache/CDN, probe eviction and stampede. Push on the repair story after a disk dies (detection, re-encode, bounded bandwidth) and on consistency semantics for overwrite/versioning/list."
+}

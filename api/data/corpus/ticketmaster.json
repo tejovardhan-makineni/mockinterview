@@ -1,0 +1,101 @@
+{
+  "id": "ticketmaster",
+  "title": "Design a Ticket Booking System (Ticketmaster)",
+  "track": "engineering",
+  "domain": "system_design",
+  "modality": "system_design",
+  "difficulty": "senior",
+  "tags": ["inventory", "seat-locking", "concurrency", "flash-sale", "payments", "high-contention"],
+  "prompt": "Design a ticket booking system like Ticketmaster. Users browse events, select seats, and purchase tickets. The hard part is high-contention flash sales: when a popular event goes on sale, hundreds of thousands of users compete for the same limited seats in seconds. Ensure no seat is ever double-sold, hold seats during checkout, and integrate payment. Cover seat inventory, locking, the sale surge, and the booking lifecycle.",
+  "blurb": "The double-booking problem under a flash-sale thundering herd — seat holds, atomic reservation, and a queue that protects the datastore.",
+  "rubric": [
+    { "key": "requirements", "label": "Requirements gathering", "description": "Separates functional (browse events, view seat map, hold seat, checkout, payment, ticket issuance) from non-functional (no double-booking, fairness, flash-sale burst capacity, availability).", "weight": 1.0 },
+    { "key": "clarifying_questions", "label": "Clarifying questions", "description": "Asks about reserved vs general admission, hold duration, expected burst size, fairness/queueing, payment ownership, resale.", "weight": 1.0 },
+    { "key": "estimations", "label": "Back-of-envelope estimations", "description": "Peak concurrent users vs seat count, browse vs purchase QPS, hold volume, DB write contention.", "weight": 1.0 },
+    { "key": "seat_locking", "label": "Seat locking / no double-booking depth", "description": "Atomic reserve via DB row lock / conditional update / SELECT FOR UPDATE / distributed lock; hold with TTL and expiry; correctness under concurrency. Central senior signal.", "weight": 1.4 },
+    { "key": "flash_sale", "label": "Flash-sale / high-contention handling", "description": "Virtual waiting room / queue to smooth the herd, admission control, rate limiting, protecting the inventory DB from stampede. Central senior signal.", "weight": 1.4 },
+    { "key": "booking_lifecycle", "label": "Booking lifecycle & payment", "description": "held→reserved→paid→ticketed state machine, hold expiry releasing seats, idempotent payment, saga/compensation on failure.", "weight": 1.2 },
+    { "key": "api_design", "label": "API design", "description": "list events, get seat map, hold seats, checkout/pay, confirm; idempotency keys, hold tokens.", "weight": 0.9 },
+    { "key": "data_model", "label": "Data model", "description": "events, seats/inventory with status, holds with expiry, bookings, payments; consistency choices.", "weight": 1.0 },
+    { "key": "high_level_design", "label": "High-level design", "description": "Browse path (cacheable, read-heavy) vs purchase path (strongly consistent, contended); waiting room in front.", "weight": 1.2 },
+    { "key": "consistency", "label": "Consistency guarantees", "description": "Where strong consistency is required (inventory) vs eventual (seat-map display), avoiding overselling under partitions.", "weight": 1.0 },
+    { "key": "scaling", "label": "Scaling", "description": "Cache/CDN the seat map + event pages, shard inventory by event, scale waiting room, keep hot events isolated.", "weight": 1.0 },
+    { "key": "bottlenecks", "label": "Bottlenecks", "description": "Inventory row hot spot, hold-expiry sweep, payment latency holding inventory, thundering herd on sale open.", "weight": 1.0 },
+    { "key": "observability", "label": "Observability & fairness", "description": "Oversell alarms, hold/conversion funnel, queue wait times, fairness/anti-bot, reconciliation.", "weight": 0.8 }
+  ],
+  "reference": {
+    "functional_requirements": [
+      "Browse events and view a live seat map / availability",
+      "Select and temporarily HOLD specific seats (reserved seating)",
+      "Checkout and pay within a hold window",
+      "Issue tickets on successful payment",
+      "Release seats if the hold expires or payment fails",
+      "Guarantee a seat is never sold twice"
+    ],
+    "nonfunctional_requirements": [
+      "Strict correctness: zero double-booking / overselling",
+      "Survive flash-sale bursts (100Ks of users in seconds) without falling over",
+      "Reasonable fairness (not a pure lottery for bots)",
+      "High availability for browsing; strong consistency for inventory",
+      "Low-latency seat holds; payment can take longer"
+    ],
+    "clarifying_questions": [
+      "Reserved seating (specific seats) or general admission (count-based)?",
+      "How long is a seat held during checkout (e.g., 5-10 min)?",
+      "Expected peak concurrent users vs number of seats for a hot event?",
+      "Do we run a virtual waiting room / queue for fairness?",
+      "Do we own payment processing or integrate a PSP?",
+      "Do we need resale/transfer, and anti-bot requirements?"
+    ],
+    "qualifying_questions": [
+      "Is partial-order fairness (first-come queue) required, or best-effort?",
+      "What's the acceptable checkout timeout and retry behavior?",
+      "Global audience or single region per event?"
+    ],
+    "estimations": {
+      "traffic": "Hot event: 500K users hit 'buy' within the first minute for ~50K seats → ~10:1 contention. Browse QPS orders of magnitude higher than purchase QPS. Hold attempts spike to tens of thousands/s against one event's inventory.",
+      "storage": "Inventory is small (seats per event × events) — fits comfortably; the challenge is write contention, not size. Bookings/payments modest volume, must be durable and auditable.",
+      "contention": "Many concurrent writers target the same few hot rows (best seats) — this is a lock-contention problem, not a throughput problem.",
+      "waiting_room": "Queue must absorb 500K arrivals and admit at a rate the inventory tier can safely serve (e.g., admit N/s)."
+    },
+    "core_components": ["CDN/edge for event pages + seat map", "API gateway", "Virtual waiting room / queue service", "Event & inventory service (strongly consistent)", "Hold service (with TTL/expiry)", "Booking/order service (state machine)", "Payment service / PSP integration", "Notification (tickets, receipts)", "Inventory datastore (transactional)", "Cache for read-heavy seat maps"],
+    "data_model": [
+      "events(event_id PK, venue_id, on_sale_at, status)",
+      "seats(seat_id PK, event_id, section, row, num, status[available|held|sold], hold_id, version)",
+      "holds(hold_id PK, user_id, seat_ids[], expires_at, status)",
+      "bookings(booking_id PK, user_id, event_id, seat_ids[], state[held|reserved|paid|ticketed|cancelled], payment_id)",
+      "payments(payment_id PK, booking_id, amount, status, idempotency_key)"
+    ],
+    "api_design": [
+      "GET /v1/events/{id}/seatmap → cached availability snapshot (eventually consistent view)",
+      "POST /v1/events/{id}/holds { seat_ids } (Idempotency-Key, waiting-room token) → { hold_id, expires_at } or 409 if any seat taken",
+      "POST /v1/holds/{id}/checkout { payment_method } (Idempotency-Key) → { booking_id, payment_intent }",
+      "POST /v1/bookings/{id}/confirm ← payment webhook → issues tickets",
+      "DELETE /v1/holds/{id} → release seats early"
+    ],
+    "high_level_design": "Split the read-heavy browse path from the contended purchase path. Browse: event pages and seat maps are served from CDN/cache — the displayed map is an eventually-consistent snapshot (it may briefly show a just-taken seat as available; truth is enforced at hold time). Purchase: on sale open, users pass through a VIRTUAL WAITING ROOM that admits them to the inventory tier at a controlled rate, smoothing the thundering herd. To hold seats, the inventory service performs an ATOMIC conditional update — e.g., UPDATE seats SET status='held', hold_id=? WHERE seat_id IN (...) AND status='available' (or SELECT ... FOR UPDATE within a transaction, or an atomic op in a fast store) — succeeding only if all requested seats were still available; otherwise it returns 409 and the user reselects. A successful hold has a TTL; a background expiry sweep (or lazy check) releases seats whose hold lapsed. The user then checks out; payment is idempotent and can take longer than the hold, so the booking is a state machine with saga-style compensation: if payment fails/times out, the hold is released and the booking cancelled. On payment success the seats flip to 'sold' and tickets issue. Inventory is the source of truth and must be strongly consistent; overselling is never acceptable even under partition.",
+    "deep_dives": [
+      { "topic": "seat_locking", "probe": "Ten thousand users try to grab seat A1 at the same millisecond. Exactly how do you guarantee only one succeeds and nobody double-books? Compare an atomic conditional UPDATE, SELECT FOR UPDATE in a transaction, and a distributed lock — which do you pick and why, and what happens if the holder crashes?" },
+      { "topic": "flash_sale", "probe": "500K users hit the buy button the instant the sale opens for 50K seats. If they all reach the inventory DB you melt it. Design the virtual waiting room: how do you queue arrivals, admit them at a safe rate, keep it fair-ish, and stop bots from monopolizing?" },
+      { "topic": "hold_expiry", "probe": "A user holds the best 4 seats and walks away. How and when do those seats become available again — a sweeper job, lazy expiry on read, or TTL in the store? What are the race conditions between expiry and a late checkout, and how do you avoid releasing seats someone just paid for?" },
+      { "topic": "payment_saga", "probe": "Payment takes 8 seconds but your hold is 5 minutes; sometimes the PSP webhook is delayed or the charge succeeds but our confirm fails. Walk through the booking state machine and the saga/compensation so we never charge without a ticket or ticket without a charge. How is the charge idempotent?" },
+      { "topic": "cache_stampede", "probe": "You cache the seat map and event page. At sale open the cache is cold/expiring while 500K clients request it simultaneously. How do you avoid a stampede to the inventory service — request coalescing, prewarming, jittered TTL, serving a slightly stale snapshot?" },
+      { "topic": "cdc_analytics", "probe": "Bookings and inventory live in your transactional store but must feed analytics, fraud, and a resale marketplace. How do you propagate changes — CDC/Debezium off the DB vs dual writes — and how do you keep that stream exactly-once so a booking isn't counted twice?" }
+    ],
+    "followup_bank": [
+      { "trigger": "mentions lock or hold or reserve", "question": "Show me the exact atomic operation that prevents two users from holding the same seat, and what happens if the process holding a distributed lock crashes before releasing." },
+      { "trigger": "mentions cache or redis or cdn", "question": "Eviction/TTL for the seat-map cache, and how do you prevent a stampede when the cached map expires at sale open under 500K concurrent requests?" },
+      { "trigger": "mentions database or postgres or inventory store", "question": "How do booking/inventory changes reach analytics, fraud, and resale — CDC/Debezium vs dual writes — and how do you make that stream exactly-once?" },
+      { "trigger": "mentions payment or checkout", "question": "How is the charge idempotent, and what's the saga/compensation when payment succeeds but confirmation fails, or the hold expires mid-payment?" },
+      { "trigger": "mentions queue or waiting room", "question": "How do you admit users at a safe rate, keep fairness, and prevent bots from flooding the queue?" }
+    ],
+    "scaling": ["CDN/cache event pages + seat-map snapshots (read-heavy)", "Shard inventory by event so a hot event is isolated to its own partition/nodes", "Scale the waiting room independently to absorb arrivals", "Keep inventory writes on a strongly-consistent store; admit at a rate it can serve", "Precompute/prewarm hot event data before on-sale"],
+    "bottlenecks": ["Hot inventory rows (best seats) → lock contention", "Thundering herd at sale open", "Hold-expiry sweep vs late-checkout races", "Payment latency holding inventory", "Seat-map cache stampede"],
+    "tradeoffs": ["Atomic conditional UPDATE (simple, DB-bound) vs distributed lock (flexible, crash/TTL complexity) vs FOR UPDATE (clean, holds txn)", "Strong consistency for inventory (correct, lower throughput) vs eventual for display (fast, may show stale seat)", "Long holds (user-friendly, more seats locked idle) vs short holds (higher turnover, checkout pressure)", "Waiting room fairness (FIFO, complex) vs best-effort admission (simple, bot-prone)", "Optimistic (version check on commit) vs pessimistic (lock on select) concurrency"],
+    "alternative_solutions": ["Reserve seats in an in-memory store (Redis) with atomic ops + TTL, async-persisted to the DB, for higher hold throughput", "Optimistic concurrency with a version column and retry on conflict", "General-admission events modeled as an atomic counter decrement instead of per-seat rows", "Token-bucket admission from the waiting room instead of a strict FIFO queue"],
+    "observability": ["Oversell/double-book alarm (must be zero) + continuous inventory reconciliation", "Hold → checkout → paid conversion funnel", "Waiting-room queue depth and wait-time distribution", "Hold-expiry release rate and race incidents", "Payment success/latency; bot/abuse detection rate"],
+    "security": ["Anti-bot (CAPTCHA, device fingerprinting, rate limits) to keep flash sales fair", "Idempotent, PCI-compliant payment (tokenized, PSP-hosted)", "Purchase limits per user/account", "AuthN and abuse detection; audit trail for disputes/resale", "Prevent hold-hoarding and scalping automation"],
+    "reference_answer": "A strong answer separates the cacheable browse plane (eventually-consistent seat-map snapshot) from the strongly-consistent purchase plane, and puts a virtual waiting room in front to admit users to the inventory tier at a safe rate rather than letting 500K clients hammer the DB. Seat holds use an atomic conditional operation (conditional UPDATE / SELECT FOR UPDATE / atomic Redis op) so only one user can hold a given seat — the candidate can articulate exactly why it's race-free and what happens on holder crash (TTL expiry). Holds carry a TTL with a sweeper/lazy-release story and address the expiry-vs-late-checkout race. Booking is a state machine with idempotent payment and saga compensation so we never charge without a ticket. They handle the seat-map cache stampede at sale open, propagate bookings to analytics/fraud/resale via CDC (exactly-once), shard inventory per event to isolate hot events, and name hot-row contention, the thundering herd, and payment-holding-inventory as the top bottlenecks. Overselling is treated as a hard invariant with reconciliation and alarms."
+  },
+  "interviewer_notes": "Two things separate senior from mid here: a genuinely race-free seat-hold mechanism (make them state the exact atomic operation and defend it under concurrency and holder-crash) and a real flash-sale strategy (a waiting room that protects the inventory tier, not just 'add more servers'). Push both hard. Use the cache/stampede probe on the seat map at sale open and the CDC probe when bookings feed analytics/fraud/resale. Ensure the booking is an idempotent state machine with saga compensation and that they treat overselling as a zero-tolerance invariant with reconciliation. Watch for candidates who cache the seat map but forget the displayed map is only advisory — truth is enforced at hold time. Reserve time for hold-expiry races, fairness/anti-bot, and observability."
+}

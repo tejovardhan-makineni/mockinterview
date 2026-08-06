@@ -1,0 +1,55 @@
+{
+  "id": "pm-product-design",
+  "title": "Product Design: Design a Product for a User Segment",
+  "track": "professional",
+  "domain": "product_management",
+  "modality": "conversational",
+  "difficulty": "mid",
+  "tags": ["product-sense", "product-design", "user-needs", "prioritization", "tradeoffs"],
+  "prompt": "Design a product to help recent immigrants build credit history in a new country. Walk me through how you'd approach it — who you'd build for, what you'd build, and why.",
+  "blurb": "A product-sense case — pick a user, uncover real needs and pain points, prioritize a solution, and reason about tradeoffs and success.",
+  "rubric": [
+    { "key": "user_empathy", "label": "User empathy", "description": "Segments the broad user group, picks a specific target, and articulates their goals, contexts, and concrete pain points from the user's point of view — not generic personas.", "weight": 1.3 },
+    { "key": "prioritization", "label": "Prioritization", "description": "Generates multiple solution ideas, then narrows to a focused MVP using an explicit rationale (impact vs effort, severity of pain, reach) rather than trying to build everything.", "weight": 1.2 },
+    { "key": "product_thinking", "label": "Solution & product thinking", "description": "Proposes a concrete, coherent solution that maps directly to the chosen user's top pain point, and describes the core experience end to end.", "weight": 1.1 },
+    { "key": "metrics", "label": "Success metrics", "description": "Defines what success looks like with a clear primary metric tied to the user goal, plus guardrail/counter metrics.", "weight": 1.0 },
+    { "key": "tradeoffs", "label": "Tradeoffs & risks", "description": "Surfaces the key tradeoffs (e.g. inclusivity vs risk, speed vs trust), regulatory/abuse risks, and how they'd validate the riskiest assumption.", "weight": 1.1 },
+    { "key": "communication", "label": "Communication & structure", "description": "Lays out a clear structure (user -> needs -> solutions -> prioritize -> metrics/tradeoffs), signposts, and stays organized under follow-ups.", "weight": 0.9 }
+  ],
+  "reference": {
+    "scenario": "Open-ended product-design prompt. There is no single right product; the interviewer assesses whether the candidate structures the problem, grounds the design in a real user need, prioritizes, and reasons about metrics and tradeoffs. Context the candidate should surface themselves: recent immigrants often arrive with no domestic credit file, so they're locked out of housing, phone plans, car loans, and cards despite being creditworthy abroad; they may lack an SSN initially, distrust or not understand the local credit system, and face language barriers. Sub-segments differ sharply: students, skilled-visa workers with income, refugees/asylees with little income, family-reunification arrivals. Good candidates pick ONE segment and design for its specific pain. Plausible solutions: a secured card or 'credit-builder' account that reports rent/utility/telecom payments to bureaus; leveraging alternative or cross-border credit data; a deposit-backed card that graduates to unsecured. Real tensions: inclusivity vs default risk, regulatory/KYC constraints, trust-building with a wary user, and unit economics on a thin-file, low-balance population.",
+    "model_points": [
+      "Clarify the goal and constraints briefly: business objective (new user acquisition? a fintech's growth? social impact?), geography, and what 'build credit' concretely means (a bureau-reported credit file).",
+      "Segment the user group and pick one target with a reason: e.g. skilled-visa workers with steady income but no domestic file — high intent, monetizable, and a sharply defined pain — versus students or refugees whose needs and economics differ.",
+      "Articulate that segment's top pain points from their view: 'I earn well but get denied for an apartment/card because I have no history here, and I don't understand how to start.'",
+      "Brainstorm several solutions (secured/credit-builder card, rent & utility payment reporting, cross-border credit-history import, education + guided onboarding), then prioritize to a focused MVP using impact vs effort and pain severity.",
+      "Describe the MVP end to end: e.g. a credit-builder card backed by a small deposit that reports on-time payments to the bureaus and graduates the user to unsecured, with plain-language onboarding that explains how credit works.",
+      "Define success: primary metric = users who establish a scored credit file / graduate to unsecured within N months; guardrails = default/charge-off rate, and a trust/comprehension metric (activation, NPS).",
+      "Name the key tradeoffs and risks — inclusivity vs default risk, KYC/regulatory limits, unit economics on low balances — and state the single riskiest assumption and how you'd test it (e.g. a pilot measuring whether reported payments actually lift scores and whether defaults stay acceptable)."
+    ],
+    "probes": [
+      { "trigger": "candidate jumps to a solution before choosing a user", "question": "Who exactly is this for? These users are not one group — pick a segment and tell me why that one." },
+      { "trigger": "candidate lists needs generically", "question": "Put yourself in that user's shoes on day one in the country — what's the single most painful moment, and does your product hit it?" },
+      { "trigger": "candidate tries to build many features", "question": "If you could ship only one thing first, what is it and why — what's your prioritization rationale?" },
+      { "trigger": "candidate never defines success", "question": "How would you know this product is working? What's your primary metric, and what guardrail would stop you from gaming it?" },
+      { "trigger": "candidate ignores risk", "question": "You're extending credit to thin-file users. What's the tension between being inclusive and managing default, and how do you handle it?" },
+      { "trigger": "candidate is confident but untested", "question": "What is the riskiest assumption in this design, and how would you validate it before a full build?" }
+    ],
+    "red_flags": [
+      "Jumps straight to a feature/solution without choosing or understanding a user",
+      "Treats 'immigrants' as one homogeneous group with generic needs",
+      "No prioritization — proposes a laundry list with no MVP or rationale",
+      "No success metrics, or a vanity metric with no guardrail",
+      "Ignores tradeoffs, regulatory/abuse risk, or default economics entirely",
+      "Rambling and unstructured; can't tie the solution back to a specific user pain"
+    ],
+    "follow_ups": [
+      "How would your design change if the target were students with little or no income instead of salaried workers?",
+      "Rent-reporting depends on landlords and bureaus cooperating — how would you de-risk that dependency?",
+      "If early data showed users open the account but never use it, how would you diagnose and respond?",
+      "How would you balance a mission of financial inclusion against a P&L that punishes defaults?"
+    ],
+    "exemplar_answer": "A strong candidate first clarifies the goal (say, a fintech growing a creditworthy but underserved base) and what 'build credit' means (a bureau-reported file), then segments: students, skilled-visa earners, refugees, family reunification. They pick skilled-visa workers — steady income, high intent, monetizable, sharply defined pain — and voice that pain: 'I earn well but I'm denied apartments and cards because I have no domestic history, and no one explains how to start.' They brainstorm secured cards, rent/utility reporting, cross-border history import, and guided education, then prioritize to an MVP: a small-deposit credit-builder card that reports on-time payments to the bureaus and graduates users to unsecured, wrapped in plain-language onboarding. They set a primary metric (share who reach a scored file / graduate within ~6 months), guardrails (charge-off rate, activation/comprehension), and name the core tension — inclusivity versus default risk under KYC constraints and thin-file economics. They close by identifying the riskiest assumption (that reported payments meaningfully lift scores without unacceptable defaults) and proposing a small pilot to test it before scaling. Throughout they keep a clear structure and connect every decision back to the chosen user."
+  },
+  "interviewer_notes": "This is a product-sense / product-design case; the mid bar is user-first structure, a chosen segment, a prioritized MVP, and at least a basic metrics + tradeoffs story. Do NOT let the candidate design for 'everyone' — if they don't pick a segment, push them to. Reward brainstorming breadth followed by disciplined narrowing with an explicit rationale (impact vs effort). Probe for the primary metric plus a guardrail. The strongest signal is naming the riskiest assumption and a way to validate it. Keep them structured; interrupt rambling with 'who is this for again, and what's their top pain?' Reserve the last minutes for one tradeoff/risk follow-up."
+}

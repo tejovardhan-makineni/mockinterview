@@ -1,0 +1,144 @@
+{
+  "id": "ai-agent-platform",
+  "title": "Design a Platform to Run LLM Agents with Tools/MCP at Scale",
+  "track": "engineering",
+  "domain": "ml_system_design",
+  "modality": "system_design",
+  "difficulty": "staff",
+  "tags": ["llm-agents", "mcp", "tool-use", "orchestration", "sandboxing", "tracing", "guardrails"],
+  "prompt": "Design a platform that runs LLM agents which call tools (including MCP servers) to accomplish multi-step tasks for many tenants. It must orchestrate the agent loop, sandbox tool execution safely, manage agent memory/context, trace and debug runs, enforce guardrails and permissions, and control cost and latency across long-running agent runs.",
+  "blurb": "The agent runtime — orchestration loop, sandboxed tools/MCP, memory, tracing, guardrails, and cost/latency control at scale.",
+  "rubric": [
+    { "key": "requirements", "label": "Requirements gathering", "description": "Separates functional (run agent loop, call tools/MCP, persist memory, trace) from non-functional (per-step and end-to-end latency, isolation/safety, cost budget, reliability of long runs).", "weight": 1.0 },
+    { "key": "clarifying_questions", "label": "Clarifying questions", "description": "Asks about task types and run duration, tool trust model, tenant isolation needs, human-in-the-loop, cost/latency budgets, and how success/safety is measured.", "weight": 1.0 },
+    { "key": "estimations", "label": "Back-of-envelope estimations", "description": "Estimates concurrent agent runs, LLM calls and tokens per run (loop iterations x context growth), tool-call QPS, sandbox footprint, and cost per run.", "weight": 1.1 },
+    { "key": "orchestration", "label": "Agent orchestration", "description": "The plan/act/observe loop, step state machine, durable execution across long/async runs, retries, loop/step limits, and concurrency of sub-agents/tools.", "weight": 1.3 },
+    { "key": "tool_sandboxing", "label": "Tool & MCP sandboxing", "description": "Isolated execution of tools/MCP servers (containers/microVMs), egress/network policy, least-privilege credentials, resource limits, and untrusted-output handling.", "weight": 1.3 },
+    { "key": "memory_context", "label": "Memory & context management", "description": "Short-term (context window) vs long-term memory, summarization/compaction as context grows, retrieval of relevant memory, and context-window budgeting.", "weight": 1.1 },
+    { "key": "tracing", "label": "Tracing & observability", "description": "Full run traces (every prompt, tool call, output), step timing/token/cost attribution, replay/debugging, and evals over traces.", "weight": 1.1 },
+    { "key": "guardrails", "label": "Guardrails & safety", "description": "Input/output guardrails, tool-permission policy and approvals, prompt-injection defense from tool outputs, action confirmation, and PII/data-exfiltration controls.", "weight": 1.2 },
+    { "key": "cost_latency", "label": "Cost & latency control", "description": "Token/step budgets per run, model routing (cheap vs strong), caching (prompt/semantic), parallel tool calls, and stopping runaway loops.", "weight": 1.1 },
+    { "key": "reliability", "label": "Reliability", "description": "Durable/resumable runs across failures, idempotent tool calls, timeouts, backpressure, and handling non-deterministic model behavior.", "weight": 1.0 },
+    { "key": "ml_specifics", "label": "ML/agent specifics", "description": "Agent evaluation (task success, trajectory quality), non-determinism handling, model/prompt versioning, and offline eval of agent changes.", "weight": 1.1 },
+    { "key": "scaling", "label": "Scaling & multi-tenancy", "description": "Scaling the orchestrator and sandbox fleet, tenant isolation and quotas, and pooling/warm sandboxes.", "weight": 0.9 }
+  ],
+  "reference": {
+    "functional_requirements": [
+      "Run an agent loop (LLM plans, calls tools, observes, repeats) to completion",
+      "Register and invoke tools and MCP servers with typed schemas",
+      "Execute tools in an isolated sandbox with scoped credentials",
+      "Persist agent memory (short- and long-term) across steps and sessions",
+      "Trace every run for debugging, eval, and audit",
+      "Enforce guardrails, permissions, and human approvals for risky actions"
+    ],
+    "nonfunctional_requirements": [
+      "Bounded per-step latency; long runs execute durably/asynchronously",
+      "Strong tenant + tool isolation (no cross-tenant or host access)",
+      "Cost controls: token/step budgets and runaway-loop stops",
+      "Resumable, reliable runs across worker failures",
+      "Auditability and safety for autonomous actions"
+    ],
+    "clarifying_questions": [
+      "What tasks, and how long/complex are typical runs (steps, minutes vs hours)?",
+      "What's the tool trust model — first-party, third-party, arbitrary MCP servers?",
+      "Do risky actions need human-in-the-loop approval?",
+      "Multi-tenant isolation and per-tenant quotas/cost budgets?",
+      "Latency budget per step and acceptable cost per run?",
+      "How do we measure agent success and safety?"
+    ],
+    "qualifying_questions": [
+      "Synchronous chat-style agents or long-running background jobs?",
+      "Do agents spawn sub-agents / run tools in parallel?"
+    ],
+    "estimations": {
+      "concurrency": "10k concurrent runs; each holds state but is mostly idle waiting on LLM/tool I/O → orchestrate as durable async tasks, not threads",
+      "tokens_per_run": "A 10-step run with growing context can be 50k-200k+ tokens total → context compaction and model routing materially change cost",
+      "tool_qps": "10k runs x a tool call every few seconds → thousands of sandboxed tool executions/s → sandbox pooling required",
+      "sandbox_footprint": "Per-run microVM/container with CPU/mem caps; warm pool to hide cold start",
+      "cost_per_run": "Dominated by LLM tokens x loop iterations; token/step budgets and caching are the main levers"
+    },
+    "core_components": [
+      "Orchestrator / durable workflow engine (agent loop state machine)",
+      "LLM gateway (routing, streaming, token accounting)",
+      "Tool registry + MCP connector layer (typed schemas, discovery)",
+      "Sandbox execution fleet (containers/microVMs, egress policy)",
+      "Memory service (short-term context + long-term store + retrieval)",
+      "Guardrail/policy engine (input/output filters, permissions, approvals)",
+      "Tracing/eval store (full run traces, cost attribution)",
+      "Credential broker (scoped, short-lived tool creds)"
+    ],
+    "data_model": [
+      "runs(run_id, tenant_id, agent_id, status, step_count, token_cost, started_at)",
+      "steps(step_id, run_id, type[plan|tool|observe], prompt, model_version, tokens, latency_ms, ts)",
+      "tool_calls(call_id, step_id, tool, args, result, sandbox_id, status)",
+      "memory(run_id/session_id, kind[short|long], content, embedding, ts)",
+      "traces(run_id → ordered step/tool events) — for replay/eval",
+      "policies(tenant_id, tool, allow, requires_approval, egress_rules)"
+    ],
+    "api_design": [
+      "POST /runs { agent_id, input, budget } → { run_id } (async)",
+      "GET /runs/{run_id} → { status, steps, cost, output }",
+      "POST /runs/{run_id}/approve { step_id } → { ok } (human-in-the-loop)",
+      "POST /tools { name, schema, endpoint|mcp_url, policy } → { tool_id }",
+      "GET /runs/{run_id}/trace → full trace"
+    ],
+    "high_level_design": "A run is a durable workflow. The orchestrator drives the agent loop: build the prompt from instructions + memory + available tool schemas → call the LLM via the gateway → parse the chosen tool call(s) → check the guardrail/policy engine (allowed? needs approval?) → execute the tool in an isolated sandbox with short-lived scoped credentials and egress policy → capture the (untrusted) output → append to memory/observation → loop, until done or a step/token/time budget is hit. Long runs suspend and resume across worker failures via the durable engine (checkpointed state), so a crash doesn't lose progress; tool calls are made idempotent where possible. Memory is managed actively: recent turns stay in context, older content is summarized/compacted and pushed to a long-term store retrieved on demand to fit the window. Every prompt, tool call, and output is written to a trace for debugging, cost attribution, and offline eval. Guardrails filter inputs/outputs, defend against prompt injection from tool outputs, and gate risky actions behind human approval. Cost/latency are controlled with per-run budgets, model routing (cheap model for simple steps), prompt/semantic caching, parallel tool calls, and runaway-loop detection.",
+    "deep_dives": [
+      { "topic": "tool_sandboxing", "probe": "A tool or third-party MCP server runs untrusted code and returns attacker-controlled text. How do you isolate execution (container vs microVM), scope credentials and network egress, and prevent that output from hijacking the agent (prompt injection / data exfiltration)?" },
+      { "topic": "orchestration", "probe": "An agent run takes 30 minutes across 20 tool calls and a worker crashes at step 15. How do you make the run durable and resumable without re-executing side effects — checkpointing, idempotency, a workflow engine?" },
+      { "topic": "memory_context", "probe": "The context window fills up on a long run. How do you decide what to keep, summarize, or offload to long-term memory, and how do you retrieve the right memory back into context?" },
+      { "topic": "guardrails", "probe": "The agent is about to take an irreversible action (send money, delete data). How does the policy engine decide, and how do you insert human approval without stalling everything?" },
+      { "topic": "cost_latency", "probe": "One run enters a loop and burns tokens. How do you detect and stop runaway loops, budget tokens/steps per run, and cut cost with model routing and caching?" },
+      { "topic": "ml_specifics", "probe": "Agents are non-deterministic. How do you evaluate whether a prompt/model/tool change improved things — task-success metrics, trajectory eval over traces, regression sets?" }
+    ],
+    "followup_bank": [
+      { "trigger": "mentions memory or vector or embeddings or retrieval", "question": "Long-term agent memory is embedded and retrieved. When the underlying facts/documents change, how do those memory embeddings stay in sync — re-embed on source change (CDC-style), version and expire stale memories? What's the staleness bound?" },
+      { "trigger": "mentions cache or caching or prompt cache or semantic cache", "question": "You cache LLM prompts/responses (prompt cache or semantic cache) and tool results. What's the eviction policy, and how do you invalidate when the model version, tools, or underlying data change so an agent doesn't act on a stale cached result?" },
+      { "trigger": "mentions database or state store or postgres", "question": "Run/step state lives in a datastore. How do you propagate state changes for tracing/eval and resume — CDC vs event log vs the workflow engine's own history?" },
+      { "trigger": "mentions sandbox or container or tool execution", "question": "How do you pool/warm sandboxes to hide cold start while still guaranteeing isolation and clean teardown between tenants?" }
+    ],
+    "scaling": [
+      "Model runs as durable async workflows so 10k mostly-idle runs don't consume threads",
+      "Autoscale the sandbox fleet with warm pools; recycle per tenant",
+      "Scale the LLM gateway and route to cheaper models for simple steps",
+      "Partition orchestrator workers by tenant; enforce per-tenant quotas",
+      "Cache prompts/tool results; parallelize independent tool calls"
+    ],
+    "bottlenecks": [
+      "LLM latency/cost dominates long multi-step runs",
+      "Sandbox cold start and fleet capacity under bursty tool use",
+      "Context-window growth forcing expensive compaction/summarization",
+      "Non-determinism making failures hard to reproduce",
+      "Guardrail/approval steps adding latency"
+    ],
+    "tradeoffs": [
+      "Stronger model (fewer steps, better plans) vs cheaper model (lower per-call cost)",
+      "MicroVM isolation (safer) vs container (faster/cheaper start)",
+      "Aggressive caching (cheap/fast) vs staleness risk on actions",
+      "Autonomy (fast) vs human-in-the-loop approvals (safe, slower)",
+      "Long context (more memory in-window) vs cost and dilution"
+    ],
+    "alternative_solutions": [
+      "Fixed workflows / DAGs instead of open-ended agents (predictable, less flexible)",
+      "Single-shot LLM with tools (no durable loop) for short tasks",
+      "Per-tenant dedicated runtimes (isolation, poor utilization)",
+      "Managed agent frameworks vs building the orchestrator in-house"
+    ],
+    "observability": [
+      "Full run traces (prompts, tool calls, outputs) with replay",
+      "Per-step latency, token, and cost attribution",
+      "Task-success and trajectory-quality evals over sampled traces",
+      "Guardrail hit rates, approval queue latency, runaway-loop stops",
+      "Sandbox utilization, cold-start rate, and isolation violations"
+    ],
+    "security": [
+      "Strong sandbox isolation (microVM), no host/cross-tenant access, egress allowlists",
+      "Short-lived, least-privilege scoped credentials per tool call via a broker",
+      "Treat all tool/MCP outputs as untrusted — defend against prompt injection and exfiltration",
+      "Human approval + policy gates for irreversible/high-risk actions",
+      "Full audit trail of every action and credential use; PII controls"
+    ],
+    "reference_answer": "A staff-level answer models an agent run as a durable, resumable workflow rather than an in-memory loop, so 10k long-running, mostly-idle runs survive worker crashes without re-executing side effects (checkpointing + idempotent tool calls). It drives a plan/act/observe loop through an LLM gateway, executes every tool/MCP call in an isolated sandbox (microVM) with short-lived scoped credentials and egress allowlists, and treats all tool outputs as untrusted — defending against prompt injection and data exfiltration and gating irreversible actions behind a policy engine with human approval. It manages context actively (summarize/compact + long-term memory retrieval to fit the window), traces every prompt/tool/output for debugging, cost attribution, and trajectory eval, and controls cost/latency with per-run token/step budgets, model routing, caching, parallel tool calls, and runaway-loop detection. It names LLM cost/latency, sandbox capacity/cold-start, context growth, and non-determinism (hard-to-reproduce failures, needing trace-based eval) as the core challenges, and enforces tenant isolation and quotas throughout."
+  },
+  "interviewer_notes": "This is a staff design and the two dimensions that most separate candidates are tool/MCP sandboxing and durable orchestration. On sandboxing, push until they isolate execution (microVM vs container), scope credentials and network egress, and — critically — treat tool/MCP outputs as untrusted and defend against prompt injection and exfiltration; a candidate who calls tools in-process or trusts tool output has missed the central safety problem. On orchestration, make them handle a 30-minute run where a worker crashes mid-way — the expected answer is a durable workflow engine with checkpointing and idempotent tool calls, not a naive loop. Probe context/memory management (summarization + long-term retrieval) and cost control (per-run budgets, runaway-loop stops, model routing). Use the memory-embedding-sync follow-up (re-embed long-term memory when source facts change) and the prompt/semantic-cache invalidation follow-up as interrupts. For ML specifics, ask how they evaluate a non-deterministic agent — trace-based trajectory eval and task-success regression sets. Watch the clock: reserve time for guardrails/human-in-the-loop on irreversible actions, which is where safety-minded staff candidates shine."
+}

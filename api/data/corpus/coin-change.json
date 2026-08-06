@@ -1,0 +1,78 @@
+{
+  "id": "coin-change",
+  "title": "Coin Change — Fewest Coins and Number of Ways",
+  "track": "engineering",
+  "domain": "coding",
+  "modality": "coding",
+  "difficulty": "mid",
+  "tags": ["dynamic-programming", "unbounded-knapsack", "greedy-trap", "combinatorics"],
+  "prompt": "Given an array of coin denominations coins and an integer amount, return the fewest number of coins needed to make up that amount, assuming an unlimited supply of each coin. If the amount cannot be made, return -1. As a follow-up: return the NUMBER OF DISTINCT COMBINATIONS of coins that sum to the amount (order does not matter — [1,2] and [2,1] are the same combination).",
+  "blurb": "The unbounded-knapsack DP twins — min-coins is a shortest-path over amounts, count-ways is a combination count where loop order kills double-counting.",
+  "rubric": [
+    { "key": "problem_understanding", "label": "Problem understanding", "description": "Notes coins are unlimited (unbounded), that greedy (largest-first) is NOT always optimal, and for the follow-up that COMBINATIONS (unordered) differ from permutations (ordered).", "weight": 1.0 },
+    { "key": "approach", "label": "Approach", "description": "Min-coins: dp[a] = min over coins c of dp[a-c] + 1, a 1D bottom-up table. Count-ways: dp[a] += dp[a-c] with coins as the OUTER loop so each combination is counted once. Explains why greedy fails.", "weight": 1.3 },
+    { "key": "correctness", "label": "Correctness", "description": "Initializes dp[0] correctly (0 coins / 1 way), guards a-c >= 0, uses a sentinel (amount+1 or infinity) for unreachable min states and converts it to -1 at the end. Gets the loop nesting right for count-ways.", "weight": 1.3 },
+    { "key": "complexity_analysis", "label": "Complexity analysis", "description": "O(amount * number_of_coins) time and O(amount) space for both variants. Contrasts with the exponential naive recursion.", "weight": 1.0 },
+    { "key": "code_quality", "label": "Code quality", "description": "A single clean 1D array, sentinel handled once, no redundant recomputation; the count-ways loop order is deliberate and commented.", "weight": 1.0 },
+    { "key": "edge_cases", "label": "Edge cases", "description": "amount = 0 (0 coins / 1 way), no coins can make the amount (-1), a coin larger than the amount, coin value 1 always present, duplicate denominations, amount unreachable due to parity (e.g. only even coins, odd amount).", "weight": 1.1 },
+    { "key": "testing", "label": "Testing", "description": "Includes the greedy-trap case (coins=[1,3,4], amount=6 -> 2 not 3) and an impossible case, plus a count-ways case to confirm no double counting.", "weight": 0.9 },
+    { "key": "communication", "label": "Communication", "description": "Explains the recurrence in words, why the sentinel is needed, and why swapping the loop order changes combinations into permutations.", "weight": 0.8 }
+  ],
+  "reference": {
+    "constraints": [
+      "1 <= coins.length <= 12",
+      "1 <= coins[i] <= 2^31 - 1",
+      "0 <= amount <= 10^4",
+      "Unlimited supply of each coin denomination"
+    ],
+    "examples": [
+      {
+        "input": "coins = [1,2,5], amount = 11",
+        "output": "3",
+        "explanation": "11 = 5 + 5 + 1, using 3 coins, which is the minimum. No 2-coin combination reaches 11."
+      },
+      {
+        "input": "coins = [2], amount = 3",
+        "output": "-1",
+        "explanation": "Only even sums are reachable with coin 2, so odd 3 is impossible."
+      },
+      {
+        "input": "count-ways follow-up: coins = [1,2,5], amount = 5",
+        "output": "4",
+        "explanation": "The combinations are {5}, {2,2,1}, {2,1,1,1}, {1,1,1,1,1} — four distinct multisets. [2,2,1] and [1,2,2] are the same combination and counted once."
+      }
+    ],
+    "test_cases": [
+      { "input": "coins = [1,3,4], amount = 6", "expected": "2 — the greedy trap: greedy takes 4 then 1+1 = 3 coins, but optimal is 3+3 = 2 coins" },
+      { "input": "coins = [2,5,10,1], amount = 27", "expected": "4 — 10+10+5+2; order of coins in the array must not matter" },
+      { "input": "coins = [1], amount = 0", "expected": "0 — zero coins make amount 0" },
+      { "input": "coins = [5], amount = 5", "expected": "1 — exact single coin" },
+      { "input": "coins = [3,7], amount = 5", "expected": "-1 — unreachable" },
+      { "input": "count-ways: coins = [2,3,5], amount = 8", "expected": "2 — {3,5} and {2,3,3}; confirms combinations not permutations" }
+    ],
+    "optimal_time": "O(amount * coins.length) for both min-coins and count-ways",
+    "optimal_space": "O(amount) — a single 1D DP array",
+    "approaches": [
+      { "name": "greedy (INCORRECT in general)", "idea": "Repeatedly take the largest coin <= remaining amount. Works for canonical currency systems but is provably wrong for arbitrary denominations, e.g. [1,3,4] for 6. Worth stating and rejecting.", "time": "O(amount / min_coin)", "space": "O(1)" },
+      { "name": "naive recursion / top-down without memo", "idea": "minCoins(a) = 1 + min over c of minCoins(a-c). Explores an exponential tree of overlapping subproblems — correct but far too slow. Adding memoization on the amount collapses it to the DP below.", "time": "O(coins^amount) without memo", "space": "O(amount) recursion" },
+      { "name": "optimal min-coins: bottom-up 1D DP", "idea": "dp[a] = fewest coins to make a. dp[0]=0, all others = INF (use amount+1 as a safe sentinel). For a from 1..amount, for each coin c<=a: dp[a] = min(dp[a], dp[a-c] + 1). Answer is dp[amount] if it is < the sentinel else -1. This is effectively a shortest path where each coin is an edge of weight 1.", "time": "O(amount * coins.length)", "space": "O(amount)" },
+      { "name": "optimal count-ways: 1D DP with coins as outer loop", "idea": "ways[0]=1 (one way to make 0: pick nothing). FOR each coin c (outer): FOR a from c..amount (inner): ways[a] += ways[a-c]. Iterating coins on the outside ensures each combination is built in a fixed coin order, so {1,2} is counted once. Swapping the loops counts permutations instead (which is the Combination Sum IV variant).", "time": "O(amount * coins.length)", "space": "O(amount)" }
+    ],
+    "follow_ups": [
+      "Number of ways to make the amount (above) — and the crucial loop-order distinction between combinations and permutations.",
+      "Combination Sum IV — count ORDERED sequences summing to the target (swap the loop nesting: amount outer, coins inner).",
+      "Return the actual coin multiset, not just the count — store a parent/choice pointer and backtrack from dp[amount].",
+      "Bounded coins (each denomination has a limited count) — becomes a bounded knapsack; add a count dimension or iterate carefully.",
+      "Very large amount with few coins — discuss the pseudo-polynomial nature (depends on amount's magnitude) and when a BFS/level approach or number-theory shortcut helps."
+    ],
+    "reference_solution": "coinChange(coins, amount)  // fewest coins: dp = [amount+1] * (amount+1)  // sentinel = amount+1 (unreachable, since you can't use more than 'amount' coins of value>=1). dp[0] = 0. for a in range(1, amount+1): for c in coins: if c <= a: dp[a] = min(dp[a], dp[a-c] + 1). return dp[amount] if dp[amount] <= amount else -1.\n\nchange(coins, amount)  // number of combinations: ways = [0] * (amount+1); ways[0] = 1. for c in coins:            // OUTER loop over coins is what makes it combinations. for a in range(c, amount+1): ways[a] += ways[a-c]. return ways[amount].\n\nTwo subtleties: (1) the sentinel amount+1 lets min() work without special-casing infinity and is safely distinguishable from any real answer; (2) in change(), coins-outer/amount-inner counts each unordered multiset once — reversing to amount-outer/coins-inner counts ordered sequences (permutations), which answers a different question.",
+    "pitfalls": [
+      "Using greedy and assuming it's optimal — fails on [1,3,4], amount 6.",
+      "Wrong loop order in count-ways: amount-outer/coins-inner counts permutations, inflating the answer.",
+      "Forgetting dp[0]=0 (min) or ways[0]=1 (count), which corrupts every downstream state.",
+      "Returning the sentinel value instead of -1 for an unreachable amount, or picking a sentinel that collides with a real answer.",
+      "Integer overflow in count-ways for large amounts (use 64-bit or a modulus if the problem specifies one)."
+    ]
+  },
+  "interviewer_notes": "The first fork is whether they try greedy — many do. Let them, then hand them coins=[1,3,4], amount=6 and ask for the trace; when greedy gives 3 they should realize it's wrong and pivot to DP. Reaching the 1D bottom-up recurrence with a correct sentinel is the mid signal. Stay silent while they fill the table; nudge only if they mishandle the unreachable case (watch for them returning a huge number instead of -1). The count-ways follow-up is the senior separator: the give-away tell is whether they get the loop nesting right. If they write amount-outer/coins-inner, don't correct immediately — ask them to trace coins=[1,2], amount=3 and count; permutations give 3, combinations give 2, and the mismatch should make them find the bug. If they nail both, escalate to reconstructing the actual coin set via parent pointers, or Combination Sum IV to cement the permutation contrast."
+}

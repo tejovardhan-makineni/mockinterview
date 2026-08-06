@@ -1,0 +1,65 @@
+{
+  "id": "law-client-counseling",
+  "title": "Client Counseling: Advising a Small-Business Client on a Broken Deal",
+  "track": "professional",
+  "domain": "law",
+  "modality": "conversational",
+  "difficulty": "mid",
+  "tags": ["client-counseling", "interviewing", "communication", "options-analysis", "expectation-management", "professionalism"],
+  "prompt": "You are a junior lawyer meeting a new client, Sam, who runs a small catering business. Sam says: 'A supplier promised to deliver 300 custom dessert boxes for a wedding I catered last month. They cancelled two days before, I had to buy replacements at triple the price, and the wedding client is furious. I want to sue them for everything — the extra cost, the stress, and to make them pay for the reputation hit.' Conduct the counseling conversation: elicit the facts you need, explain the realistic options, and manage Sam's expectations. This is a spoken conversation, not a written memo.",
+  "blurb": "A client-counseling roleplay — draw out the facts, frame options plainly, and set realistic expectations without giving false comfort or premature legal conclusions.",
+  "rubric": [
+    { "key": "fact_gathering", "label": "Fact elicitation", "description": "Uses open-ended then targeted questions to draw out the facts that matter: was there a written contract/PO, the agreed terms and price, how the cancellation was communicated, documentation of the replacement cost, the timeline, and whether any deposit was paid.", "weight": 1.3 },
+    { "key": "active_listening", "label": "Active listening & rapport", "description": "Acknowledges Sam's frustration, lets Sam tell the story before problem-solving, reflects back to confirm understanding, and builds trust without being dismissive.", "weight": 1.0 },
+    { "key": "options_analysis", "label": "Options & tradeoffs", "description": "Lays out realistic paths — demand letter, negotiation/settlement, small-claims vs. civil suit, mediation — with plain-language pros, cons, cost, and time for each, rather than jumping straight to 'sue.'", "weight": 1.2 },
+    { "key": "expectation_management", "label": "Managing expectations", "description": "Gently reframes recovery: likely limited to provable direct damages (the extra cost), skepticism on 'stress' and speculative reputational damages, and the reality of cost/time/collectibility. Avoids overpromising.", "weight": 1.3 },
+    { "key": "legal_framing", "label": "Legal issue framing (plain language)", "description": "Identifies the likely breach-of-contract claim and the measure of damages (expectation/cover) in accessible terms; flags open questions (was it enforceable, any limitation-of-liability clause) without giving a premature firm opinion.", "weight": 1.1 },
+    { "key": "professionalism", "label": "Professionalism & ethics", "description": "Sets scope, does not guarantee an outcome, avoids unauthorized promises, notes need to review documents and possibly the wedding-client contract, respects that the decision is Sam's.", "weight": 1.0 },
+    { "key": "communication", "label": "Communication & clarity", "description": "Avoids jargon or explains it, is organized, checks for understanding, and closes with concrete next steps.", "weight": 1.0 }
+  ],
+  "reference": {
+    "scenario": "New-client intake for a likely breach-of-contract matter. The commercially and legally sound analysis: Sam probably has a viable breach claim for the supplier's cancellation, and the core recoverable damages are the cover cost — the difference between the contract price and the triple-price replacement (expectation/cover damages). 'Stress' is generally not recoverable in an ordinary commercial contract case, and reputational harm is typically too speculative and not the kind of damages contemplated by a supply contract (and may run into foreseeability/Hadley v. Baxendale limits). The lawyer must first gather facts — most importantly whether there was an enforceable agreement (PO, emails, terms, price, quantity) and documentation of the extra cost — before committing to any opinion. Then present options along a cost/time/relationship spectrum: a demand letter and negotiated settlement first (fast, cheap), small-claims if the amount fits the jurisdictional cap, or a civil suit; mediation as a middle path. Throughout, the lawyer manages expectations honestly (no guarantee, collectibility risk, litigation cost may exceed the extra spend) and keeps the decision with the client. A weak candidate validates 'sue for everything,' promises a win, or dives into legal conclusions before learning whether a contract even exists.",
+    "model_points": [
+      "Open with an empathetic acknowledgment, then let Sam tell the full story before steering.",
+      "Establish whether there was an enforceable contract: written PO/order confirmation, emails/texts, agreed quantity (300 boxes), price, delivery date, and any signed terms.",
+      "Pin down the cancellation: who said what, when, in writing?, and any stated reason (which may bear on defenses/force majeure).",
+      "Quantify damages with documentation: original price vs. the triple-price replacement (the cover cost), receipts/invoices, and whether a deposit was paid or is refundable.",
+      "Ask about any limitation-of-liability or damages cap in the supplier's terms — this can sharply limit recovery.",
+      "Ask about the downstream contract with the wedding client — any refund/discount Sam gave, and whether the wedding client is threatening a claim against Sam (relevant to consequential damages and to Sam's total exposure).",
+      "Frame the likely claim in plain language: breach of contract; the usual remedy is money damages that put Sam in the position performance would have — principally the extra cover cost.",
+      "Reframe the 'stress' and 'reputation' asks: emotional-distress damages are generally unavailable in ordinary commercial contract cases; reputational/lost-business damages are often too speculative and may fail the foreseeability test unless specifically provable and contemplated.",
+      "Lay out options with tradeoffs: (1) demand letter + negotiate — fast, cheap, preserves relationship; (2) mediation — collaborative, private; (3) small-claims court if the amount is within the cap — cheap, no lawyer needed; (4) civil suit — higher cost/time, only worth it if damages and collectibility justify it.",
+      "Discuss cost/benefit and collectibility candidly — attorney fees and time can exceed the extra spend; is the supplier solvent?",
+      "Manage expectations: no guaranteed outcome, and recovery is likely limited to provable direct losses; be clear you need to review the documents before giving a firm opinion.",
+      "Close with concrete next steps: gather documents (PO, emails, invoices, wedding-client contract), a follow-up meeting, and confirm the client decides how to proceed."
+    ],
+    "probes": [
+      { "trigger": "candidate promises Sam will win or recover 'everything'", "question": "Sam brightens and says 'So you can guarantee I'll get all of it back — the stress and the reputation hit too?' How do you respond?" },
+      { "trigger": "candidate gives legal conclusions before establishing there was a contract", "question": "Before you advise on suing — do you actually know yet whether there was an enforceable agreement? What would you need to see?" },
+      { "trigger": "candidate never addresses the non-recoverable 'stress'/'reputation' demands", "question": "Sam is adamant about being paid for the stress and the damage to the business's reputation. How do you handle those two specific asks?" },
+      { "trigger": "candidate jumps straight to filing a lawsuit", "question": "Is litigation the only option here? Walk Sam through the alternatives and why you might start somewhere other than a lawsuit." },
+      { "trigger": "candidate uses heavy jargon (e.g., 'cover,' 'consequential damages') without explaining", "question": "Sam looks confused and asks what 'cover damages' means. Explain it in plain English." },
+      { "trigger": "candidate ignores cost/collectibility", "question": "The extra cost Sam paid was about $2,000. How does that figure into whether a lawsuit makes sense?" }
+    ],
+    "red_flags": [
+      "Guarantees an outcome or tells Sam they'll recover 'everything.'",
+      "Validates suing for emotional distress and speculative reputational harm without reframing their recoverability.",
+      "Gives a firm legal opinion before learning whether an enforceable contract exists.",
+      "Jumps straight to litigation without presenting cheaper/faster options.",
+      "Fails to ask for documentation or to quantify the actual loss.",
+      "Talks over the client or dismisses their frustration; no rapport.",
+      "Buries advice in jargon without explaining it.",
+      "Makes the decision for the client rather than presenting options and letting Sam choose.",
+      "Overlooks collectibility and the cost-benefit of the extra $2,000 vs. litigation expense."
+    ],
+    "follow_ups": [
+      "Suppose you learn there was only a verbal agreement over the phone with no writing. How does that change your advice, and what about the statute of frauds?",
+      "The supplier's order form has a clause capping their liability at the amount Sam paid them. How do you counsel Sam now?",
+      "The wedding client is now threatening to sue Sam for the ruined dessert service. How does that reshape the conversation?",
+      "Sam wants to post about the supplier on social media 'to warn other caterers.' How do you advise?",
+      "If you filed in small claims, what is the practical ceiling on what Sam could recover, and what would Sam need to prove?"
+    ],
+    "exemplar_answer": "The candidate opens with empathy ('That sounds incredibly stressful, especially two days out from a wedding — let me make sure I understand exactly what happened'), then lets Sam narrate before asking targeted questions: Was the order in writing — a PO, email, or text? What quantity, price, and delivery date were agreed? How and when did the supplier cancel, and did they give a reason? Do you have receipts showing the triple-price replacement cost, and did you pay a deposit? Are there any printed terms on the supplier's order form? Did you give the wedding client any refund, and are they threatening you? The candidate then frames the law plainly: 'It sounds like a breach-of-contract situation. If we can show a binding agreement, the law generally tries to put you back where you'd have been if they had delivered — that mainly means the extra amount you had to pay to buy replacements, which we call cover damages.' On expectations, the candidate is honest but kind: 'I have to be straight with you — courts usually don't award money for stress in a business contract like this, and reputation damage is very hard to prove and often isn't recoverable, so I wouldn't want you to count on those. Your strongest, clearest claim is the extra cost you can document.' The candidate lays out options with tradeoffs — a demand letter and negotiation first (fast and cheap), mediation, small claims if the amount fits the cap, or a civil suit if warranted — and flags cost/benefit and collectibility given the roughly $2,000 loss. The candidate declines to guarantee anything, notes the need to review the documents before a firm opinion, and closes with next steps: 'Send me the PO, the emails, and the replacement invoices, let's meet again Thursday, and ultimately you decide how far to take this — I'll lay out the tradeoffs each step of the way.'"
+  },
+  "interviewer_notes": "Conversational roleplay: the AI plays Sam, an emotional, non-lawyer small-business owner who initially wants to 'sue for everything.' Run it as a real intake. Early on, Sam should push for a guarantee and insist on being paid for stress and reputation — use those to test whether the candidate manages expectations honestly rather than validating unrealistic demands. Dock candidates who give firm legal conclusions before establishing whether an enforceable contract even exists; deploy the 'do you know there was a contract yet?' probe if they leap ahead. The core skill being tested is the sequence: elicit facts, then frame options and tradeoffs in plain language, then manage expectations, then confirm the client decides. Reward empathy paired with candor. If the candidate drowns Sam in jargon, have Sam ask 'what does that mean?' Strong candidates proactively ask about a liability cap and the downstream wedding-client exposure. Keep Sam cooperative once rapport is established, but persistent on the emotional asks until the candidate addresses them directly."
+}

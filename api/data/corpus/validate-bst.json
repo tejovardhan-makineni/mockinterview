@@ -1,0 +1,71 @@
+{
+  "id": "validate-bst",
+  "title": "Validate a Binary Search Tree",
+  "track": "engineering",
+  "domain": "coding",
+  "modality": "coding",
+  "difficulty": "mid",
+  "tags": ["binary-tree", "bst", "recursion", "inorder-traversal", "invariants"],
+  "prompt": "Given the root of a binary tree, determine whether it is a valid binary search tree (BST). A valid BST requires: every node in a node's LEFT subtree is strictly less than the node, every node in its RIGHT subtree is strictly greater, and both subtrees are themselves valid BSTs. Note the constraint is over the entire subtree, not just the immediate children.",
+  "blurb": "The classic invariant trap — checking node-vs-children is wrong; you must bound each node by a (min, max) range or verify a strictly increasing inorder traversal.",
+  "rubric": [
+    { "key": "problem_understanding", "label": "Problem understanding", "description": "Recognizes the property is over the whole subtree, not just direct children, and clarifies whether equal values are allowed (strict vs non-strict). Understands why a purely local left<node<right check is insufficient.", "weight": 1.2 },
+    { "key": "approach", "label": "Approach", "description": "Reaches either the (min, max) range-passing recursion or the inorder traversal that must be strictly increasing. Can explain why both work and how they encode the global constraint.", "weight": 1.3 },
+    { "key": "correctness", "label": "Correctness", "description": "Range approach: tightens low on right descent and high on left descent, uses open bounds (strict <, >), handles integer-limit values (why null/None bounds beat MIN/MAX sentinels). Inorder: compares each value to the previous and fails on <=.", "weight": 1.3 },
+    { "key": "complexity_analysis", "label": "Complexity analysis", "description": "O(n) time (each node visited once). Space O(h) for the recursion/inorder stack — O(log n) balanced, O(n) skewed. Notes Morris traversal achieves O(1) space.", "weight": 1.0 },
+    { "key": "code_quality", "label": "Code quality", "description": "Clean recursive helper carrying bounds, or an inorder that early-exits on the first violation rather than building the full list; no repeated subtree traversals.", "weight": 1.0 },
+    { "key": "edge_cases", "label": "Edge cases", "description": "Empty tree (valid), single node (valid), duplicate values, the deep-violation case (a node valid vs its parent but invalid vs an ancestor), values at INT_MIN/INT_MAX, left-skewed and right-skewed trees.", "weight": 1.2 },
+    { "key": "testing", "label": "Testing", "description": "Explicitly tests the ancestor-violation trap (e.g. root 5, right child 6, whose left child is 4 — invalid) that defeats the naive local check.", "weight": 0.9 },
+    { "key": "communication", "label": "Communication", "description": "Articulates why local checks fail, and why inorder-strictly-increasing is an equivalent characterization of a BST.", "weight": 0.8 }
+  ],
+  "reference": {
+    "constraints": [
+      "The number of nodes is in [0, 10^4]",
+      "-2^31 <= Node.val <= 2^31 - 1 (values can reach the 32-bit limits)",
+      "Left subtree values strictly less, right subtree values strictly greater (no duplicates in the standard variant)"
+    ],
+    "examples": [
+      {
+        "input": "root = [2,1,3]  (2 with left 1, right 3)",
+        "output": "true",
+        "explanation": "1 < 2 < 3 and both subtrees are trivially valid."
+      },
+      {
+        "input": "root = [5,1,4,null,null,3,6]  (5; left 1; right 4 whose children are 3 and 6)",
+        "output": "false",
+        "explanation": "The node 4 sits in 5's RIGHT subtree, so everything under it must be > 5. But 4 (and its child 3) are less than 5. A local check at each node would wrongly pass 4>3 and 4<6; the range check catches that 4 <= 5."
+      }
+    ],
+    "test_cases": [
+      { "input": "root = []", "expected": "true — empty tree is a valid BST" },
+      { "input": "root = [1]", "expected": "true — single node" },
+      { "input": "root = [1,1]  (1 with left child 1)", "expected": "false — duplicate; left must be strictly less" },
+      { "input": "root = [5,4,6,null,null,3,7]", "expected": "false — 3 is in 5's right subtree but 3 < 5 (ancestor violation, passes a naive local check)" },
+      { "input": "root = [2147483647]", "expected": "true — a single node at INT_MAX; MIN/MAX sentinel bounds would break here, null bounds do not" },
+      { "input": "root = [3,1,5,0,2,4,6]", "expected": "true — a balanced, fully valid BST" }
+    ],
+    "optimal_time": "O(n) — every node visited exactly once",
+    "optimal_space": "O(h) recursion/stack (O(log n) balanced, O(n) skewed); O(1) with Morris inorder",
+    "approaches": [
+      { "name": "naive local check (INCORRECT)", "idea": "At each node verify node.left.val < node.val < node.right.val and recurse. Fails because it only enforces the immediate parent-child relation, missing violations against distant ancestors (e.g. a right-subtree node smaller than the root). Worth stating precisely so the interviewer sees the candidate knows WHY it's wrong.", "time": "O(n)", "space": "O(h)" },
+      { "name": "range (min, max) recursion", "idea": "Carry an open interval (low, high) that every node in the current subtree must fall within. Start (-inf, +inf). At node x: if not (low < x.val < high) return false. Recurse left with (low, x.val) and right with (x.val, high), tightening the bound. Using null/None for unbounded sides (rather than INT_MIN/INT_MAX) correctly handles values at the 32-bit limits.", "time": "O(n)", "space": "O(h)" },
+      { "name": "inorder traversal strictly increasing", "idea": "An inorder traversal of a valid BST yields values in strictly ascending order. Traverse inorder tracking only the PREVIOUS value; if the current value <= previous, return false. Early-exit on the first violation; no need to materialize the full list. Iterative with an explicit stack, or Morris traversal for O(1) space.", "time": "O(n)", "space": "O(h) (O(1) with Morris)" }
+    ],
+    "follow_ups": [
+      "Allow duplicate values on one side (e.g. left <= node) — adjust the strict inequality; discuss which side and why the choice must be consistent.",
+      "Recover a BST in which exactly two nodes were swapped — inorder to find the two out-of-order positions, then swap their values (O(1) space with Morris).",
+      "Kth smallest element in a BST — inorder with a counter, stopping early at k.",
+      "Validate and simultaneously return the size of the largest BST SUBTREE within an arbitrary binary tree (bottom-up, returning (isBST, min, max, size)).",
+      "Achieve O(1) extra space — Morris inorder threading; walk through how it restores the tree structure."
+    ],
+    "reference_solution": "Range recursion: isValidBST(root): return validate(root, None, None)  // (low, high) open bounds.\nvalidate(node, low, high): if node is None: return True. if low is not None and node.val <= low: return False. if high is not None and node.val >= high: return False. return validate(node.left, low, node.val) and validate(node.right, node.val, high). Using None for the unbounded side avoids the INT_MIN/INT_MAX sentinel bug when a node's value equals a 32-bit extreme.\n\nInorder alternative: keep prev = None; do an inorder walk (recursive or stack); at each node, if prev is not None and node.val <= prev.val: return False; set prev = node. Return True if the whole traversal is monotonic. Early-exit on the first failure — no need to store the entire sequence. Both are O(n); pick based on whether you find the range invariant or the sorted-order characterization clearer to communicate.",
+    "pitfalls": [
+      "Checking only node vs its immediate children — misses ancestor violations (the central trap of this problem).",
+      "Using INT_MIN/INT_MAX as initial bounds, which breaks when a node's value is exactly INT_MIN or INT_MAX — use null/None bounds or long sentinels.",
+      "Non-strict comparison (<=/>=) admitting duplicates when the spec requires strictly less/greater (or vice versa).",
+      "Inorder version building the full list then scanning — correct but wastes O(n) space and can't early-exit; compare to just the previous value.",
+      "Forgetting the empty tree is valid, or mishandling a single-child chain (skewed tree) in the stack version."
+    ]
+  },
+  "interviewer_notes": "This problem's entire signal is whether the candidate sees that a local left<node<right check is insufficient. Many write it immediately — let them, then hand them [5,4,6,null,null,3,7] (3 buried in the right subtree) and ask them to trace it; the failure should push them to a global invariant. Reaching either the (min,max) range recursion or inorder-strictly-increasing is the mid signal. If they use INT_MIN/INT_MAX sentinels, probe with a node valued INT_MAX (2147483647) to expose the boundary bug and see if they switch to null bounds. Stay silent through the implementation. Ask them to state the time/space and whether they can do O(1) space — Morris inorder is the senior/staff escalation. If they finish quickly and cleanly, escalate to 'recover a BST with two swapped nodes' which builds directly on the inorder insight."
+}

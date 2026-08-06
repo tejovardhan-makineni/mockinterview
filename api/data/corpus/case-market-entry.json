@@ -1,0 +1,55 @@
+{
+  "id": "case-market-entry",
+  "title": "Market Entry: Should the Client Enter a New Market?",
+  "track": "professional",
+  "domain": "consulting_case",
+  "modality": "conversational",
+  "difficulty": "senior",
+  "tags": ["market-entry", "structure", "hypothesis", "market-sizing", "go-to-market"],
+  "prompt": "Our client is a mid-sized North American manufacturer of premium pet food. Their board is considering entering the European market for the first time. They want to know: should they enter, and if so, how? Take a few minutes to structure your approach, then walk me through it.",
+  "blurb": "A classic market-entry case — structure the decision, size the prize, and reach an entry recommendation with a real go-to-market path.",
+  "rubric": [
+    { "key": "structure", "label": "Structure (MECE)", "description": "Lays out a MECE framework covering the market (size, growth, segments), competition, the client's ability to win/right-to-win, and entry economics/mode — not a generic memorized list but tailored to a market-entry decision.", "weight": 1.3 },
+    { "key": "hypothesis", "label": "Hypothesis-driven", "description": "States an upfront hypothesis (e.g. 'attractive market but entry only makes sense via acquisition/partnership') and uses the analysis to confirm or reject it rather than boiling the ocean.", "weight": 1.1 },
+    { "key": "quantitative", "label": "Quantitative rigor", "description": "Sizes the market with an explicit calculation, estimates attainable share and profitability, and does breakeven/payback math — carries units and sanity-checks the result.", "weight": 1.2 },
+    { "key": "business_judgment", "label": "Business judgment", "description": "Weighs entry modes (organic, acquisition, JV, licensing), reads competitive dynamics and barriers (regulation, brand, distribution), and connects the answer to the client's objective and risk tolerance.", "weight": 1.2 },
+    { "key": "synthesis", "label": "Synthesis & recommendation", "description": "Delivers a clear go/no-go recommendation up front with 2-3 supporting reasons, the key risk, and a next step — not a wishy-washy 'it depends'.", "weight": 1.1 },
+    { "key": "communication", "label": "Communication", "description": "Top-down, signposted, concise; checks in with the interviewer, listens to data given, and adapts the structure instead of reciting it.", "weight": 0.9 }
+  ],
+  "reference": {
+    "scenario": "Client: premium pet food maker, ~$400M North American revenue, healthy ~15% operating margin, strong brand at home but unknown in Europe. European premium pet food market is large (~$8-10B) and growing ~6%/yr, but fragmented and dominated by two large incumbents plus many local brands. Regulatory approval and country-by-country distribution are the main friction. The board's real objective is growth: NA is maturing (~3%/yr) and they want a second growth engine. Interviewer has these facts to feed on request: EU market ~$9B, growing 6%; premium segment ~30% of that and growing faster (~9%); top 2 players hold ~45% share; the client could realistically reach ~2-3% share in 5 years organically; building a plant + distribution costs ~$150M; a mid-sized EU brand is available to acquire for ~$300M at ~2x revenue.",
+    "model_points": [
+      "Clarify the objective and decision criteria first: is 'success' a revenue target, a margin threshold, a payback period, strategic optionality? Confirm time horizon and appetite for capex/risk.",
+      "Structure MECE around four buckets: (1) Market attractiveness — size, growth, segmentation, profitability; (2) Competition — who wins today, concentration, barriers to entry; (3) Client's right-to-win — brand transferability, product fit, cost position, capabilities; (4) Entry economics & mode — capex, breakeven, organic vs acquire vs partner, risk.",
+      "State a hypothesis early, e.g. 'The market is attractive but the client's brand doesn't travel, so entry should be via acquisition or partnership rather than organic build.'",
+      "Size the prize: EU premium pet food ~ $9B x ~30% premium x reachable share. At 2-3% of a ~$2.7B premium segment that's ~$55-80M revenue in 5 years; test whether that moves the needle vs a $400M base.",
+      "Do entry economics: organic build ~$150M capex, years to breakeven at 15% incremental margin; acquisition ~$300M buys instant share and distribution but at a control premium — compare NPV/payback of the two paths.",
+      "Assess right-to-win honestly: premium brand equity rarely crosses the Atlantic cold; distribution and regulatory access are the real barriers, which argues for acquiring or partnering with a local player.",
+      "Synthesize into a recommendation with the decision, the two or three reasons, the biggest risk, and the immediate next step (e.g. commission due diligence on the acquisition target)."
+    ],
+    "probes": [
+      { "trigger": "candidate lists a generic 3C/4P framework with no tailoring", "question": "That's a lot of buckets — which two matter most for THIS decision, and why? Where would you spend your time first?" },
+      { "trigger": "candidate asks how big the market is", "question": "The EU premium pet food segment is about $2.7B and growing ~9% a year. What share could the client realistically capture, and what revenue does that imply in five years?" },
+      { "trigger": "candidate estimates a reachable share", "question": "Walk me through the math to a revenue and profit number — and tell me whether that's big enough to matter to a $400M company." },
+      { "trigger": "candidate recommends organic entry", "question": "Building a plant and distribution runs about $150M. A local brand is for sale at $300M for roughly its revenue. Which path do you prefer and how would you decide between them?" },
+      { "trigger": "candidate never mentions how they'd enter", "question": "Suppose the numbers say 'go' — organic build, acquisition, JV, or licensing? What drives that choice?" },
+      { "trigger": "candidate ignores risk", "question": "What is the single biggest risk to this recommendation, and how would you de-risk it before the board commits capital?" }
+    ],
+    "red_flags": [
+      "Reciting a memorized framework (Porter's, 3C, 4P) without adapting it to the market-entry decision",
+      "Jumping to 'yes, enter' or 'no' before any sizing or competitive analysis",
+      "No quantification — never sizes the market, share, or breakeven",
+      "Boiling the ocean: analyzing every bucket equally instead of prioritizing by hypothesis",
+      "Ignores entry mode entirely (treats 'should we enter' as separable from 'how')",
+      "Never states a clear recommendation, or hedges with 'it depends' and no criteria"
+    ],
+    "follow_ups": [
+      "If the acquisition target's margins are only 8% versus your client's 15%, does that change the recommendation?",
+      "How would a possible EU tariff on imported pet food change organic-build vs acquire?",
+      "What are the top three items you'd put on a 90-day due-diligence plan before the board commits?",
+      "If the board's real motive is to signal growth to investors within 12 months, how does that reshape your answer?"
+    ],
+    "exemplar_answer": "A strong candidate first pins down the objective (a second growth engine, with some payback discipline) and horizon (~5 years), then lays out a tailored MECE structure: market attractiveness, competition, right-to-win, and entry economics/mode. They lead with a hypothesis — attractive market, but the brand won't travel cold, so favor acquisition/partnership. They size the prize explicitly: ~$2.7B premium segment, ~2-3% reachable share → ~$55-80M revenue and, at ~15% margin, ~$8-12M operating profit in five years, then judge that against the $400M base and the capital required. They compare organic build (~$150M capex, slow, uncertain distribution) against acquiring a local brand (~$300M, instant share and distribution, control premium) on payback/NPV, and flag that regulatory and distribution access — not product — are the true barriers. They close top-down: 'Enter, but via acquisition of the local brand rather than organic build, because it buys distribution and regulatory access instantly, the prize is material at ~$70M revenue, and the payback beats a greenfield plant; the key risk is overpaying, so the next step is target due diligence and a walk-away price.'"
+  },
+  "interviewer_notes": "Give the candidate 60-90 seconds to structure silently, then have them present top-down. Withhold the numbers until they ask for them — volunteering data is a negative signal you want to test. Feed facts from the scenario one at a time as requested. Push hard on the quant: make them carry units to a revenue and profit figure and sanity-check it against the $400M base. The senior bar is the entry-mode judgment (organic vs acquire) and a crisp, defended recommendation — mid-level candidates size the market but stall on 'how to enter.' Reserve the last two minutes for the synthesis and one risk/next-step follow-up."
+}

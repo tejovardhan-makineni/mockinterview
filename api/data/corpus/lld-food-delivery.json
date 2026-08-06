@@ -1,0 +1,137 @@
+{
+  "id": "lld-food-delivery",
+  "title": "Design a Food Delivery App (DoorDash) — Object Model",
+  "track": "engineering",
+  "domain": "low_level_design",
+  "modality": "system_design",
+  "difficulty": "senior",
+  "tags": ["ood", "lld", "state-machine", "strategy-pattern", "cart", "order-lifecycle"],
+  "prompt": "Design the object model for a food delivery platform like DoorDash or Uber Eats. Customers browse restaurants and menus, build a cart, place an order, and the order flows from placed → confirmed → preparing → picked up → delivered. Design the core classes, the cart and order model, the order state machine, and pricing/promotions. Focus on class design and APIs rather than the distributed backend. Sketch the class diagram.",
+  "blurb": "Restaurant/menu modeling, a cart-to-order flow, an order state machine spanning three actors, and pluggable pricing/promos.",
+  "rubric": [
+    { "key": "requirements_clarification", "label": "Requirements clarification", "description": "Separates functional (browse, cart, order, three-party lifecycle, payment, delivery tracking) from non-functional (menu-price consistency, order correctness, extensible promos).", "weight": 1.0 },
+    { "key": "core_entities", "label": "Core entities", "description": "Customer, Restaurant, MenuItem, Cart, CartItem, Order, OrderItem, DeliveryAgent, Payment, Promotion — cleanly separated.", "weight": 1.1 },
+    { "key": "class_design", "label": "Class design & responsibilities", "description": "Cart vs Order separation; OrderItem snapshots price at order time; pricing/promotions are their own components.", "weight": 1.2 },
+    { "key": "relationships", "label": "Relationships & cardinality", "description": "Restaurant 1..* MenuItem; Cart 1..* CartItem; Order 1..* OrderItem; Order references one Customer, one Restaurant, one DeliveryAgent. Composition vs association reasoned.", "weight": 1.0 },
+    { "key": "design_patterns", "label": "Design patterns", "description": "State for order lifecycle, Strategy for pricing/promotions and delivery-agent assignment, Builder for Cart→Order, Observer for status notifications, Decorator for item add-ons/customizations.", "weight": 1.2 },
+    { "key": "solid_principles", "label": "SOLID / OCP", "description": "New promo type or delivery-fee rule plugs in without editing Order; item customization via composition; state logic localized.", "weight": 1.1 },
+    { "key": "api_methods", "label": "API / method design", "description": "addToCart, checkout, placeOrder, confirmOrder, assignAgent, updateStatus, applyPromo — clear ownership.", "weight": 1.0 },
+    { "key": "state_machine", "label": "Order state machine", "description": "Explicit states + legal transitions across customer/restaurant/agent; cancellation/refund from valid states.", "weight": 1.2 },
+    { "key": "edge_cases", "label": "Edge cases", "description": "Item out of stock at checkout, restaurant offline, price changed after add-to-cart, promo not applicable, no agents, partial cancellation.", "weight": 1.0 },
+    { "key": "concurrency", "label": "Concurrency", "description": "Inventory/availability at checkout, double order submission, agent double-assignment, price snapshot vs live menu.", "weight": 0.9 },
+    { "key": "extensibility", "label": "Extensibility", "description": "Group orders, scheduled orders, new promo types, multi-restaurant carts, tips, ratings added cleanly.", "weight": 0.9 },
+    { "key": "communication", "label": "Communication", "description": "Narrates cart→order flow and state diagram, states tradeoffs, reasons about price snapshotting.", "weight": 0.8 }
+  ],
+  "reference": {
+    "functional_requirements": [
+      "Browse restaurants and their menus (items, prices, availability, customizations)",
+      "Build a cart from one restaurant; adjust quantities and add-ons",
+      "Checkout: apply promos, compute item total + tax + delivery fee + tip, pay",
+      "Place order; order flows PLACED → CONFIRMED → PREPARING → READY → PICKED_UP → DELIVERED",
+      "Assign a delivery agent; track status; notify customer",
+      "Cancel/refund within allowed states; rate restaurant and agent"
+    ],
+    "nonfunctional_requirements": [
+      "Order captures the price at checkout time even if the menu later changes",
+      "Order correctness — totals reconcile (items + tax + fee + tip − discount)",
+      "Extensible promotions, delivery-fee rules, and assignment policies",
+      "A single order handled by exactly one delivery agent"
+    ],
+    "clarifying_questions": [
+      "Single-restaurant carts only, or multi-restaurant / group orders?",
+      "What promo types must we support — percent off, flat, free delivery, BOGO?",
+      "Is delivery fee flat, distance-based, or surge-based?",
+      "Do customizations affect price (extra cheese +$1)?",
+      "Do we schedule future orders or on-demand only?",
+      "Who can cancel and from which states — is there a refund policy?"
+    ],
+    "core_classes": [
+      { "name": "Customer", "responsibility": "Buyer identity, addresses, payment methods.", "key_fields": ["customerId", "name", "List<Address> addresses", "paymentMethods"], "key_methods": ["addToCart(item, qty)", "checkout()"] },
+      { "name": "Restaurant", "responsibility": "Seller with a menu and availability.", "key_fields": ["restaurantId", "name", "Menu menu", "boolean isOpen", "Location location"], "key_methods": ["getMenu()", "isItemAvailable(id)", "confirmOrder(order)"] },
+      { "name": "Menu / MenuItem", "responsibility": "Catalog of items; MenuItem holds name, price, availability, and allowed customizations.", "key_fields": ["itemId", "name", "Money price", "boolean available", "List<AddOn> addOns"], "key_methods": ["getPrice()"] },
+      { "name": "Cart / CartItem", "responsibility": "Mutable pre-order selection tied to one restaurant; CartItem = item + qty + chosen add-ons.", "key_fields": ["Restaurant restaurant", "List<CartItem> items"], "key_methods": ["add(item, qty, addOns)", "remove(...)", "subtotal()"] },
+      { "name": "Order / OrderItem", "responsibility": "Immutable record of a placed cart; OrderItem snapshots name+price at order time.", "key_fields": ["orderId", "Customer customer", "Restaurant restaurant", "List<OrderItem> items", "OrderState state", "Bill bill", "DeliveryAgent agent"], "key_methods": ["transitionTo(state)", "cancel()", "total()"] },
+      { "name": "OrderState", "responsibility": "State pattern base; each concrete state defines legal transitions and guards.", "key_fields": [], "key_methods": ["confirm()", "prepare()", "pickup()", "deliver()", "cancel()"] },
+      { "name": "PricingEngine", "responsibility": "Computes the Bill: subtotal, tax, delivery fee, tip, minus promotions.", "key_fields": ["DeliveryFeeStrategy feeStrategy", "TaxPolicy tax", "List<Promotion> promos"], "key_methods": ["computeBill(cart, promos, address) -> Bill"] },
+      { "name": "Promotion", "responsibility": "Abstract discount rule (percent, flat, free-delivery, BOGO) with applicability check.", "key_fields": ["code", "conditions"], "key_methods": ["isApplicable(cart) -> bool", "apply(Bill) -> Bill"] },
+      { "name": "DeliveryAgent", "responsibility": "Courier identity, location, availability.", "key_fields": ["agentId", "Location current", "AgentStatus status"], "key_methods": ["assign(order)", "updateLocation(loc)"] },
+      { "name": "AssignmentStrategy", "responsibility": "Abstract: choose a delivery agent for an order.", "key_fields": [], "key_methods": ["assign(order, List<DeliveryAgent> nearby) -> DeliveryAgent"] },
+      { "name": "OrderService", "responsibility": "Orchestrates checkout → order → lifecycle; coordinates payment, assignment, notifications.", "key_fields": ["PricingEngine pricing", "AssignmentStrategy assigner", "PaymentGateway payment", "orderRepo"], "key_methods": ["checkout(cart, promoCode)", "placeOrder(...)", "advance(orderId, event)", "cancel(orderId, by)"] }
+    ],
+    "relationships": [
+      "Restaurant composes a Menu of MenuItems; MenuItem composes allowed AddOns.",
+      "Cart is tied to exactly one Restaurant and composes CartItems (each referencing a MenuItem + chosen AddOns).",
+      "Order composes OrderItems (price-snapshotted), references one Customer, one Restaurant, one DeliveryAgent, and composes a Bill and OrderState.",
+      "PricingEngine depends on DeliveryFeeStrategy, TaxPolicy, and Promotion abstractions (DIP/OCP).",
+      "OrderService depends on abstractions: PricingEngine, AssignmentStrategy, PaymentGateway."
+    ],
+    "design_patterns": [
+      { "pattern": "State", "where": "OrderState subclasses drive the order lifecycle", "why": "Legal transitions/guards spanning customer, restaurant, and agent live in state objects, not one big switch." },
+      { "pattern": "Strategy", "where": "Promotion, DeliveryFeeStrategy, AssignmentStrategy", "why": "Promo math, fee rules, and courier selection each vary independently and plug in without editing Order/PricingEngine (OCP)." },
+      { "pattern": "Decorator", "where": "Item customizations / add-ons wrap a MenuItem to adjust price", "why": "Add-ons compose onto items so new customizations don't change the item class." },
+      { "pattern": "Builder", "where": "Cart → Order construction (snapshot prices, compute bill, freeze)", "why": "Assembles a complex immutable Order in a controlled, validated way." },
+      { "pattern": "Observer", "where": "Order status changes notify customer/restaurant/agent apps", "why": "Decouples notification/tracking from core state transitions." }
+    ],
+    "apis": [
+      "addToCart(customerId, itemId, qty, addOns) -> Cart",
+      "checkout(cartId, promoCode?) -> Bill (preview)",
+      "placeOrder(cartId, paymentMethod) -> Order (state PLACED)",
+      "confirmOrder(orderId) / markPreparing / markReady / markPickedUp / markDelivered",
+      "assignAgent(orderId) -> DeliveryAgent",
+      "cancelOrder(orderId, cancelledBy) -> refund?",
+      "rate(orderId, restaurantStars, agentStars)"
+    ],
+    "state_transitions": [
+      "PLACED → CONFIRMED (restaurant accepts) | CANCELLED (restaurant rejects / customer cancels / payment fails)",
+      "CONFIRMED → PREPARING → READY_FOR_PICKUP",
+      "READY_FOR_PICKUP → PICKED_UP (agent collects) → OUT_FOR_DELIVERY → DELIVERED",
+      "CANCELLED reachable from PLACED/CONFIRMED (and PREPARING per policy, with refund rules); DELIVERED and CANCELLED terminal",
+      "Guards: can't pick up before READY; can't deliver before picked up"
+    ],
+    "edge_cases": [
+      "Item goes out of stock between add-to-cart and checkout → reprice/remove and warn",
+      "Menu price changed after add-to-cart → Order snapshots the price shown at checkout; reconcile if stale",
+      "Restaurant offline at checkout → block order",
+      "Promo not applicable (min basket, expired, wrong restaurant) → reject with reason",
+      "No delivery agents available → queue / delay / notify",
+      "Duplicate placeOrder from a retry → idempotency key",
+      "Partial cancellation of some items → refund math",
+      "Restaurant rejects after payment captured → auto-refund"
+    ],
+    "concurrency": [
+      "Availability check + order placement should be consistent (avoid selling a just-sold-out item)",
+      "assignAgent must atomically flip agent status so one agent isn't double-assigned",
+      "Idempotent placeOrder via client requestId to survive retries",
+      "Price snapshot at checkout decouples the immutable Order from concurrent menu edits"
+    ],
+    "extensibility": [
+      "Group orders → a shared Cart with multiple contributors",
+      "Scheduled orders → Scheduler submits at time T",
+      "New promo types (BOGO, tiered) → new Promotion subclass",
+      "Multi-restaurant orders → Order composes sub-orders per restaurant with independent lifecycles",
+      "Tips, ratings, reorders → additive without reshaping the core model"
+    ],
+    "deep_dives": [
+      { "topic": "cart_vs_order", "probe": "Why separate Cart and Order? What does OrderItem store that CartItem doesn't, and why does price snapshotting matter when the menu changes after checkout?" },
+      { "topic": "order_state_machine", "probe": "Three actors drive the lifecycle — customer, restaurant, agent. Draw the states and legal transitions. Where does 'can't deliver before pickup' get enforced?" },
+      { "topic": "promotions", "probe": "Model percent-off, flat, free-delivery, and BOGO promos so adding a new one doesn't touch PricingEngine. How do stacked promos and applicability checks compose?" },
+      { "topic": "customizations", "probe": "'Large, extra cheese, no onions' with price deltas — how do you model item customizations without exploding MenuItem into subclasses?" },
+      { "topic": "assignment", "probe": "How is a delivery agent chosen and assigned atomically so no two orders grab the same agent?" }
+    ],
+    "followup_bank": [
+      { "trigger": "mentions cart or order", "question": "If the restaurant raises a price after the customer added the item, what price does the order charge? Where is that captured?" },
+      { "trigger": "mentions promo or discount or coupon", "question": "Add a BOGO promo without editing PricingEngine. How do promos declare applicability and stack?" },
+      { "trigger": "mentions status or state or lifecycle", "question": "Who is allowed to move the order from READY to PICKED_UP, and how do you stop an out-of-order transition?" },
+      { "trigger": "mentions customization or add-on or topping", "question": "Model add-ons that change price without subclassing MenuItem for every combination." },
+      { "trigger": "mentions agent or courier or driver", "question": "How do you assign exactly one agent per order under concurrent assignment?" }
+    ],
+    "tradeoffs": [
+      "Snapshot prices in Order (correctness, storage) vs reference live menu (stale, cheaper)",
+      "State pattern (localized transitions, more classes) vs status enum + switch (fewer classes, brittle)",
+      "Decorator add-ons (flexible) vs fixed customization fields (simple, rigid)",
+      "Single order per restaurant (simple lifecycle) vs multi-restaurant order (better UX, complex per-vendor state)"
+    ],
+    "reference_answer": "A strong answer cleanly separates the mutable Cart from the immutable Order, snapshots item prices into OrderItem at checkout so later menu edits don't change a placed order, and models the lifecycle as a State machine spanning customer/restaurant/agent with explicit guards. Pricing is a PricingEngine composing Strategy objects — Promotion, DeliveryFeeStrategy, TaxPolicy — so new promo types obey OCP, and item customizations use Decorator rather than subclass explosion. It makes agent assignment atomic, dedupes order placement idempotently, and handles out-of-stock/offline/promo-invalid at checkout. Senior signal: price snapshotting and the multi-actor state machine."
+  },
+  "interviewer_notes": "Have them scope single vs multi-restaurant and promo types early. Two differentiators: (1) Cart-vs-Order separation with price snapshotting — if they let Order read live menu prices, hit them with the 'price changed after add-to-cart' case; (2) modeling the lifecycle as a State machine across three actors rather than a status field. Test pricing extensibility with 'add a BOGO promo without editing PricingEngine' and customizations with the Decorator probe. Reserve time for atomic agent assignment. Keep them in object-design territory, not infra."
+}

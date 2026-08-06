@@ -1,0 +1,63 @@
+{
+  "id": "resident-prioritization",
+  "title": "On-Call Prioritization: Competing Urgent Tasks",
+  "track": "professional",
+  "domain": "medical_residency",
+  "modality": "conversational",
+  "difficulty": "entry",
+  "tags": ["prioritization", "time-management", "on-call", "patient-safety", "residency"],
+  "prompt": "You are the resident covering a busy ward overnight. Within a couple of minutes you receive four tasks: (1) a nurse calls that a patient has a low oxygen saturation and looks unwell; (2) a patient's family is at the desk demanding to speak with a doctor now; (3) the pharmacy needs a medication chart re-written before a dose is due in 30 minutes; and (4) another ward calls asking you to review a stable patient's routine bloods. Talk me through how you prioritize and manage these.",
+  "blurb": "An on-call prioritization station — triaging competing demands by urgency and safety while using the team effectively.",
+  "rubric": [
+    { "key": "prioritization", "label": "Prioritization & triage", "description": "Triages by clinical urgency and risk — the unwell hypoxic patient first — and orders the rest sensibly; distinguishes the sick from the merely loud or administrative.", "weight": 1.3 },
+    { "key": "safety", "label": "Patient safety", "description": "Recognizes the deteriorating patient as the priority, responds appropriately (assess ABCs, escalate), and never lets a lower-acuity but noisier demand displace a safety-critical one.", "weight": 1.2 },
+    { "key": "delegation_teamwork", "label": "Delegation & teamwork", "description": "Uses the whole team — nurses, pharmacist, seniors — delegating or parallelizing tasks appropriately rather than trying to do everything sequentially alone; asks for help when overloaded.", "weight": 1.2 },
+    { "key": "structure", "label": "Structure & method", "description": "Uses a clear, reproducible method (e.g., rapid triage of urgency/importance) and communicates the plan; gathers quick information to triage rather than guessing.", "weight": 1.1 },
+    { "key": "communication", "label": "Communication", "description": "Communicates clearly with the nurse, family, pharmacy, and colleagues; sets expectations (e.g., who will see the family and when); hands over safely.", "weight": 1.0 },
+    { "key": "situational_awareness", "label": "Situational awareness & escalation", "description": "Maintains an overview, reassesses as things change, and knows when and how to escalate to a senior; recognizes personal and system limits.", "weight": 1.0 },
+    { "key": "professionalism", "label": "Professionalism & composure", "description": "Stays calm and courteous under pressure, treats the family and staff with respect, and manages stress without cutting corners on safety.", "weight": 0.8 }
+  ],
+  "reference": {
+    "scenario": "An overnight ward resident receives four simultaneous demands of differing acuity. The station tests triage by clinical urgency, patient-safety prioritization, effective delegation and use of the team, clear communication, and knowing when to escalate. There is no single perfect ordering, but the deteriorating hypoxic patient must come first, and the strong candidate parallelizes via the team rather than serializing everything alone.",
+    "model_points": [
+      "Triages by clinical urgency and risk rather than by who is loudest or first — the hypoxic, unwell patient is the immediate priority (potential ABC problem).",
+      "Goes to the deteriorating patient first: rapid ABCDE assessment, oxygen, obtain observations/monitoring, and escalate to a senior or rapid-response/outreach if the patient is critically unwell.",
+      "Parallelizes using the team instead of doing everything sequentially: asks the nurse to start observations/oxygen and get equipment while en route; asks the pharmacist whether the medication can be safely given/prescribed verbally or if the rewrite can wait, and gets help with the chart.",
+      "Delegates or defers appropriately: the routine bloods on a stable patient on another ward are the lowest priority and can wait or be handed to a colleague; sets a realistic timeframe.",
+      "Manages the family courteously without being derailed: asks a nurse to explain you're dealing with an emergency, apologize, and give a realistic time you'll come — does not let an emotional but non-clinical demand displace a sick patient, but does not ignore them either.",
+      "Handles the time-critical medication rewrite (30 min) by getting the pharmacist's help and checking whether the dose is itself urgent; if it can be safely delayed slightly, that's fine, but it isn't ignored.",
+      "Gathers quick information to triage — a few questions to each caller (observations, how unwell, what exactly is needed) rather than guessing.",
+      "Keeps situational awareness: reassesses priorities as the picture changes (e.g., if the sick patient stabilizes or deteriorates further), and escalates early rather than struggling alone.",
+      "Knows personal and system limits: if genuinely overwhelmed by simultaneous emergencies, calls a senior for help — asking for help is a strength, not a failure.",
+      "Communicates the plan and hands over safely; stays calm, courteous, and professional under pressure.",
+      "Reflects that clear triage, delegation, and escalation are core to safe out-of-hours working."
+    ],
+    "probes": [
+      { "trigger": "candidate does not put the hypoxic patient first", "question": "Which of these four could deteriorate and harm the patient in the next few minutes, and where should you physically be first?" },
+      { "trigger": "candidate tries to do all four sequentially and alone", "question": "You can't be in four places at once. Who else is around, and what can you safely hand to them?" },
+      { "trigger": "candidate ignores or dismisses the family", "question": "The family is getting angrier at the desk. How do you deal with them without leaving the sick patient?" },
+      { "trigger": "candidate never escalates", "question": "The hypoxic patient is peri-arrest and the pharmacy dose is now overdue. At what point do you call for senior help, and how?" },
+      { "trigger": "candidate treats the routine bloods as urgent", "question": "Where do the routine bloods on a stable patient sit in your ordering, and why?" },
+      { "trigger": "candidate guesses acuity without gathering info", "question": "What quick questions would you ask each caller to decide the order?" }
+    ],
+    "red_flags": [
+      "Not prioritizing the deteriorating hypoxic patient first.",
+      "Being driven by who is loudest or most insistent (the family) rather than by clinical risk.",
+      "Trying to do everything alone and sequentially without delegating or parallelizing.",
+      "Failing to escalate to a senior when overwhelmed or when the patient is critically unwell.",
+      "Ignoring the family or the medication task entirely rather than managing expectations.",
+      "Guessing acuity without gathering minimal information to triage.",
+      "Losing composure or being rude to staff/family under pressure.",
+      "No reassessment or situational awareness as the situation evolves."
+    ],
+    "follow_ups": [
+      "How would you quickly assess the hypoxic patient when you get there?",
+      "Exactly what would you ask the nurse to do while you're on your way?",
+      "How would you word your message to the waiting family?",
+      "At what point do you call your senior, and what would you hand over?",
+      "If two of these had been emergencies at once, how would you cope?"
+    ],
+    "exemplar_answer": "I'd triage by clinical risk rather than by who reached me first, and the low-saturation, unwell-looking patient is clearly the priority because that's a potential airway or breathing problem that could deteriorate in minutes. So I'd head there first, but I'd parallelize using the team on the way: I'd ask the calling nurse to start oxygen, get a full set of observations and put the patient on a monitor, and have equipment ready, so assessment is already underway when I arrive. For the family, I'd ask a nurse to let them know a doctor is dealing with an emergency, apologize, and give them a realistic time I'll come to speak with them — I don't want to ignore them, but an emotional non-clinical demand can't displace a sick patient. For the medication rewrite due in 30 minutes, I'd get the pharmacist's help and check whether that specific dose is time-critical; if it can safely wait a short while or be handled with pharmacy support, that's fine, but it stays on my radar. The routine bloods on a stable patient on another ward are the lowest priority — they can wait or be picked up by a colleague, and I'd give the caller a timeframe. When I reach the unwell patient I'd do a rapid ABCDE assessment, treat as I go, and if they're critically unwell I'd escalate early to my senior or put out a rapid-response call rather than struggle alone. Throughout I'd keep reassessing — if that patient stabilizes I move down the list, if they deteriorate I get more help — and I'd stay calm and courteous with everyone. The main principles are: sick patient first, use the whole team, manage expectations, and escalate early, because asking for help is a strength when you're covering a busy ward alone."
+  },
+  "interviewer_notes": "Entry-level prioritization/time-management station. The single must-have is putting the deteriorating hypoxic patient first — flag immediately if the candidate is swayed by the loud family or the administrative deadline over clinical risk. The best answers don't just order the tasks; they parallelize by delegating to nurses and pharmacy and escalate early rather than trying to do everything alone. Probe delegation ('you can't be in four places at once — who helps?') and escalation ('when do you call your senior?'). Also check they manage, rather than ignore, the family and the medication task. Gathering a little information to triage, staying calm, and reassessing as things change are marks of a strong candidate. There's no single correct ordering beyond the sick patient first."
+}

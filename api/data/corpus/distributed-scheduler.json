@@ -1,0 +1,91 @@
+{
+  "id": "distributed-scheduler",
+  "title": "Design a Distributed Job Scheduler (Cron at Scale)",
+  "track": "engineering",
+  "domain": "system_design",
+  "modality": "system_design",
+  "difficulty": "senior",
+  "tags": ["scheduler", "cron", "time-wheel", "at-least-once", "idempotency", "queues", "leader-election"],
+  "prompt": "Design a distributed job scheduler: users register one-off and recurring (cron-style) jobs that must fire at or near their scheduled time and run to completion exactly the intended number of times, across a fleet of workers. Cover how you store schedules, trigger them on time, and execute them reliably.",
+  "blurb": "The scheduling-at-scale problem — time-based indexing (time-wheel/bucketed queues), dedup so a job fires once, and at-least-once execution with idempotent workers.",
+  "rubric": [
+    { "key": "requirements", "label": "Requirements gathering", "description": "Separates functional (register one-off/recurring jobs, cancel, retries, cron semantics) from non-functional (fire within tolerance, no missed jobs, no unbounded duplicates, durability).", "weight": 1.0 },
+    { "key": "clarifying_questions", "label": "Clarifying questions", "description": "Asks about number of jobs, firing granularity/tolerance, exactly-once vs at-least-once, max concurrency, timezone/DST handling, retry policy.", "weight": 1.0 },
+    { "key": "estimations", "label": "Back-of-envelope estimations", "description": "Derives jobs due per second at peak, storage for schedules, worker fleet sizing, and queue throughput.", "weight": 1.0 },
+    { "key": "time_indexing", "label": "Time indexing / trigger mechanism", "description": "How due jobs are found on time: time-wheel, bucketed 'due at' index, DB polling with a time index, or delay queue — and the tradeoffs of each at scale.", "weight": 1.3 },
+    { "key": "delivery_semantics", "label": "Delivery semantics", "description": "Why exactly-once firing is hard; settle on at-least-once + idempotent execution with dedup keys; how retries interact with duplicates.", "weight": 1.3 },
+    { "key": "dedup_coordination", "label": "Dedup & coordination", "description": "Ensuring one dispatcher claims a due job (locks/leases/leader election/partitioning) so it isn't triggered by multiple nodes simultaneously.", "weight": 1.2 },
+    { "key": "high_level_design", "label": "High-level design", "description": "Schedule store -> dispatcher(s) scanning due jobs -> queue -> worker pool -> execution/result store; recurrence recomputes next fire time.", "weight": 1.2 },
+    { "key": "reliability", "label": "Reliability & failure handling", "description": "Dispatcher crash mid-scan, worker crash mid-job, clock skew, catch-up after downtime, missed-fire policy.", "weight": 1.1 },
+    { "key": "scaling", "label": "Scaling", "description": "Partition schedules by time bucket / job id, multiple dispatchers without double-firing, backpressure when due jobs spike.", "weight": 1.1 },
+    { "key": "bottlenecks", "label": "Bottlenecks", "description": "Thundering herd at round times (e.g., every job at :00), hot time buckets, dispatcher as SPOF, long-running jobs starving workers.", "weight": 1.0 },
+    { "key": "observability", "label": "Observability", "description": "Fire-time skew (scheduled vs actual), execution success/retry rates, queue depth, missed/late-job alerts.", "weight": 0.8 }
+  ],
+  "reference": {
+    "functional_requirements": [
+      "Register one-off jobs (run at time T)",
+      "Register recurring jobs (cron / interval)",
+      "Cancel or update a scheduled job",
+      "Execute the job's action (callback/HTTP/enqueue) with retries",
+      "Track execution status and history"
+    ],
+    "nonfunctional_requirements": [
+      "Jobs fire within a bounded tolerance of their target time",
+      "No silently missed jobs; durable schedules",
+      "At-least-once execution with bounded/idempotent duplicates",
+      "Horizontally scalable dispatchers and workers",
+      "Survives dispatcher/worker crashes and short outages (catch-up)"
+    ],
+    "clarifying_questions": [
+      "How many active scheduled jobs, and how many due per second at peak?",
+      "What firing precision/tolerance is acceptable (seconds? sub-second?)",
+      "Do we need exactly-once, or is at-least-once + idempotency acceptable?",
+      "Max concurrent executions and per-job timeout?",
+      "How are timezones/DST and cron ambiguities handled?",
+      "Retry/backoff policy and dead-letter behavior on repeated failure?"
+    ],
+    "qualifying_questions": [
+      "After an outage, do we run all missed fires, the latest only, or skip?",
+      "Are job actions idempotent, or must the scheduler guarantee single delivery?",
+      "Is fairness across tenants required (no one tenant starves others)?"
+    ],
+    "estimations": {
+      "traffic": "100M scheduled jobs; if evenly spread, thousands due/sec, but real load spikes at round times (:00, midnight). Design for the peak bucket, not the average.",
+      "storage": "100M jobs x ~1KB (cron spec, payload, next_fire, state) ~= 100GB in a partitioned store.",
+      "workers": "If avg job runs 200ms and peak is 20K due/sec, need ~4K concurrent worker slots; long jobs need isolation to avoid head-of-line blocking.",
+      "granularity": "Bucket the timeline into 1s (or coarser) slots; a due-scan runs each tick."
+    },
+    "core_components": ["Schedule API", "Durable schedule store (partitioned by time bucket)", "Dispatcher/trigger service (finds due jobs)", "Coordination (leases / leader election / partition ownership)", "Task queue (delay/standard queue)", "Worker pool", "Execution/result store", "Dead-letter queue"],
+    "data_model": ["jobs(job_id PK, owner, action, cron|run_at, next_fire_at, status, timezone, retry_policy)", "due_index(bucket_ts, job_id) — time-partitioned index of what fires when", "executions(job_id, fire_ts, attempt, status, worker_id) — dedup + audit", "leases(partition_id, owner_node, expires_at)"],
+    "api_design": [
+      "POST /jobs { action, schedule (cron|at), payload, retry_policy } -> job_id",
+      "DELETE /jobs/{id} -> cancel",
+      "PATCH /jobs/{id} -> update schedule",
+      "GET /jobs/{id}/executions -> history"
+    ],
+    "high_level_design": "Schedules live in a durable store, indexed by a 'next_fire_at' time bucket so due jobs are cheap to find. Dispatchers own disjoint partitions of the timeline (via leases / leader election / consistent-hash of buckets) and, each tick, claim jobs whose next_fire_at <= now, write an execution row keyed by (job_id, fire_ts) for dedup, enqueue a task, and — for recurring jobs — compute the next fire time and reschedule. Workers pull from the queue, execute idempotently (guarded by the (job_id, fire_ts) key), and record results; failures retry with backoff and eventually dead-letter. Firing is at-least-once; correctness comes from idempotent execution plus the dedup key, not from trying to make delivery exactly-once.",
+    "deep_dives": [
+      { "topic": "time_indexing", "probe": "How do you find the jobs due right now without scanning 100M rows every second — time-wheel, bucketed due-index, delay queue, or DB polling on a time index? Tradeoffs?" },
+      { "topic": "delivery_semantics", "probe": "Can you guarantee a job fires exactly once? If not, why, and how do you make at-least-once safe — dedup keys, idempotent workers, fencing?" },
+      { "topic": "dedup_coordination", "probe": "Two dispatchers scan the same bucket. How do you ensure a due job is claimed and enqueued by exactly one — leases, partition ownership, conditional writes?" },
+      { "topic": "thundering_herd", "probe": "Half your jobs are 'daily at midnight'. How do you avoid a giant spike at :00 — jitter, spreading, sharded buckets, rate-limited draining?" },
+      { "topic": "catch_up", "probe": "A dispatcher was down for 10 minutes. On recovery, thousands of jobs are overdue. Do you run them all, coalesce to the latest, or skip — and how does the policy get expressed per job?" },
+      { "topic": "cdc_history", "probe": "Job definitions and execution results live in a datastore. How do you stream state changes (created/updated/fired) to an audit log, search index, or analytics pipeline — change data capture / Debezium off the store, or explicit event emission?" }
+    ],
+    "followup_bank": [
+      { "trigger": "mentions queue or kafka or sqs", "question": "Does the queue give at-least-once or exactly-once, and how do visibility timeouts / redelivery interact with your dedup key?" },
+      { "trigger": "mentions cache or redis", "question": "If you cache the due-index or use Redis for the time-wheel, what is the eviction/expiry policy and how do you avoid a stampede when a hot time bucket's entries all come due at once?" },
+      { "trigger": "mentions database or postgres or sql or dynamo", "question": "How do you stream job/execution state changes to audit and analytics — CDC/Debezium off the store vs dual writes? And how do you index next_fire_at for cheap due-scans?" },
+      { "trigger": "mentions lock or lease or leader", "question": "How do you handle a dispatcher that holds a lease but is partitioned/GC-paused — fencing tokens so a stale owner can't double-dispatch?" },
+      { "trigger": "mentions idempoten", "question": "Where is the dedup key stored, and what is its lifetime so retries within a window are deduped but the same job can fire again next period?" }
+    ],
+    "scaling": ["Partition the timeline/jobs across dispatchers via consistent hashing or leased partitions", "Bucket due-index by second/minute to bound scan size", "Add jitter and spread to flatten round-time spikes", "Isolate long-running jobs on separate worker pools to avoid head-of-line blocking", "Per-tenant rate limits and fair queuing"],
+    "bottlenecks": ["Thundering herd at round times (:00, midnight)", "Hot time buckets", "Dispatcher as a single point of failure per partition", "Long jobs starving worker slots", "Dedup store write rate at peak"],
+    "tradeoffs": ["At-least-once + idempotency (practical) vs exactly-once (usually impossible end-to-end)", "DB polling (simple, load) vs time-wheel/delay-queue (efficient, more moving parts)", "Fine granularity (precise, costly) vs coarse buckets (cheap, jitter)", "Run-all missed vs coalesce-latest after downtime"],
+    "alternative_solutions": ["DB with a next_fire_at index + polling dispatchers (Quartz-style)", "Hashed/hierarchical time-wheel in memory backed by durable store", "Delay queues (SQS delay / Redis sorted-set by fire time / Kafka + tumbling)", "Cloud-native (per-job cloud timers) for lower scale"],
+    "observability": ["Fire-time skew: scheduled vs actual firing time", "Missed / late job alerts", "Execution success, retry, and dead-letter rates", "Queue depth and worker saturation", "Dispatcher lease churn / partition rebalance events"],
+    "security": ["Authn/authz on job registration; per-tenant isolation", "Validate/sandbox job actions (SSRF on HTTP callbacks, resource limits)", "Rate-limit job creation and per-tenant concurrency caps", "Audit trail of who scheduled/changed what"],
+    "reference_answer": "A strong answer scopes firing tolerance and delivery semantics up front, then indexes schedules by next_fire_at (time-wheel or bucketed due-index) so due-scans are cheap. Dispatchers own disjoint timeline partitions via leases/leader election and use conditional writes plus an (job_id, fire_ts) dedup key so a job is enqueued once; execution is at-least-once with idempotent workers and retries/dead-letter. It handles the round-time thundering herd with jitter/spreading, defines a catch-up policy after outages, uses fencing tokens against stale lease holders, and streams job/execution state to audit/analytics via CDC. It names the thundering herd and long-job head-of-line blocking as the key bottlenecks."
+  },
+  "interviewer_notes": "The two make-or-break areas are (1) how due jobs are found on time — push for a time-wheel or bucketed due-index rather than 'scan the table every second' — and (2) delivery semantics, where a senior candidate concedes exactly-once is impractical and builds at-least-once + idempotency with a dedup key. Probe coordination: how two dispatchers avoid double-firing (leases/partitions/fencing). If they add a datastore, hit the CDC/Debezium probe; if they add Redis/cache for the time-wheel, probe expiry and hot-bucket stampede. Save time for the round-time thundering herd and the post-outage catch-up policy."
+}

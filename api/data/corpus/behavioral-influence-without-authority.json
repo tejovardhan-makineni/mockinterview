@@ -1,0 +1,53 @@
+{
+  "id": "behavioral-influence-without-authority",
+  "title": "Tell me about a time you influenced people without formal authority",
+  "track": "professional",
+  "domain": "behavioral",
+  "modality": "conversational",
+  "difficulty": "senior",
+  "tags": ["influence", "leadership-principles", "cross-functional", "persuasion", "star"],
+  "prompt": "Tell me about a time you needed to get people or teams you had no authority over to change direction or adopt your approach. What did you want, why did they resist, and how did you actually move them?",
+  "blurb": "Influence without authority (senior): did they persuade with evidence, empathy and trust — or just escalate?",
+  "rubric": [
+    { "key": "situation_clarity", "label": "Situation & the ask", "description": "Clearly frames what they needed, from whom, and why those people had no obligation to say yes — the authority gap is real.", "weight": 1.0 },
+    { "key": "task_ownership", "label": "Owning the outcome", "description": "Shows they took responsibility for driving alignment across boundaries, understanding the other parties' incentives and objections.", "weight": 1.1 },
+    { "key": "action_specificity", "label": "Influence tactics", "description": "Describes the concrete tactics THEY used — data, a compelling narrative, finding shared goals, addressing the other side's incentives, building coalitions, trading, prototyping — rather than mandating or escalating.", "weight": 1.4 },
+    { "key": "result_impact", "label": "Result & durability", "description": "Shows the other parties actually changed course and stayed bought-in, with a measurable outcome — not grudging compliance that unravels.", "weight": 1.2 },
+    { "key": "reflection", "label": "Reflection & relationships", "description": "Reflects on preserving the relationship for the long run, when to escalate as a last resort, and what they learned about persuasion.", "weight": 1.1 },
+    { "key": "communication", "label": "Communication & structure", "description": "Structured, concise, and shows they can articulate another party's viewpoint fairly.", "weight": 0.9 }
+  ],
+  "reference": {
+    "scenario": "A senior story: the candidate needed another team, a peer, or a more senior stakeholder — over whom they had no authority — to adopt a standard, reprioritize, change an interface, or back a direction, and those people had their own goals and initially resisted. They won them over through influence, not org power, and the change stuck. The signal is earning alignment across boundaries and keeping the relationship intact.",
+    "model_points": [
+      "Situation: a concrete cross-team or cross-level ask where the candidate had no lever to compel, and the other side had real reasons to resist.",
+      "Task: they owned getting to a 'yes' that would actually hold, which meant first understanding the other party's incentives and objections.",
+      "Action: led with the other side's interest — framed the ask in terms of shared or their goals; brought evidence (data, a prototype, a pilot) to de-risk the change; built a coalition of supporters; and where needed, traded or made concessions.",
+      "Action: chose persuasion over escalation, using escalation only as a transparent last resort rather than a first move that would poison the relationship.",
+      "Result: the other team genuinely changed course and stayed committed; a measurable outcome followed (adoption %, project unblocked, standard rolled out), and the relationship was intact or stronger.",
+      "Reflection: understands influence compounds through trust and reciprocity over time; knows when to escalate and how to do it without burning bridges; what they'd do differently to get to yes faster."
+    ],
+    "probes": [
+      { "trigger": "just escalated to a manager", "question": "Did you win them over, or did someone above force the decision? What did YOU do to change their minds before escalating?" },
+      { "trigger": "doesn't mention the other side's incentives", "question": "Why were they resisting — what did the situation look like from their side? How did you address their actual concerns?" },
+      { "trigger": "vague on tactics", "question": "What specifically moved them — data, a pilot, a trade, a coalition? Walk me through the moment they said yes." },
+      { "trigger": "compliance may be shallow", "question": "Did they actually buy in, or just comply? How do you know it held up after the meeting?" },
+      { "trigger": "relationship cost ignored", "question": "How was your relationship with that team afterward? Did winning cost you anything long-term?" }
+    ],
+    "red_flags": [
+      "'Influence' was really just escalating to a shared boss to force the outcome.",
+      "Never understood or engaged with why the other side resisted — only pushed their own view harder.",
+      "Won the battle but damaged the relationship, with no awareness of the cost.",
+      "Outcome was grudging compliance that unraveled, or there's no evidence it stuck.",
+      "No concrete tactics — 'I convinced them' with no mechanism.",
+      "Framed the other team as obstacles/idiots rather than people with legitimate incentives."
+    ],
+    "follow_ups": [
+      "How do you build the kind of relationships that make future influence easier — before you need something?",
+      "When is escalation the right move, and how do you do it without burning the relationship?",
+      "Tell me about a time you tried to influence someone and failed. Why?",
+      "How do you influence someone more senior than you who disagrees?"
+    ],
+    "exemplar_answer": "Situation: 'I needed the platform team to add rate-limiting to a shared API my product depended on. It wasn't on their roadmap, I had no authority over them, and their PM saw it as our problem to work around.' Task: 'I owned getting them to genuinely prioritize it, in a way that would stick — not a forced favor.' Action: 'First I understood their world: they were slammed and measured on platform reliability. So I reframed the ask around their goal — I pulled data showing our unthrottled traffic was a top cause of their own latency incidents, which made rate-limiting a reliability win for them, not a favor to me. I built a quick prototype to show it was a small change, and I lined up two other teams hitting the same issue so it wasn't just my voice. I offered to do the integration work on our side to lower their cost.' Result: 'Their PM put it in the next sprint; adoption across the three teams cut platform latency incidents by ~40% that quarter, and it stayed in place. I never had to escalate.' Reflection: 'The unlock was translating my need into their metric and bringing evidence plus a coalition. I also invested in that PM relationship afterward, which made the next three cross-team asks far easier. Escalation would've gotten a grudging yes and cost me a partner — influence got a real one.'"
+  },
+  "interviewer_notes": "Senior bar. The single biggest discriminator: did they PERSUADE or did they ESCALATE? Probe immediately if the story resolves via a shared boss forcing it — that's authority, not influence. Look for genuine engagement with the other party's incentives (can they articulate the resistance fairly?) and for concrete tactics: data, pilots, coalitions, trades, framing around others' goals. Test durability — buy-in vs shallow compliance that unravels. Senior maturity shows in protecting the long-term relationship and treating escalation as a transparent last resort. Probe I-vs-we on the persuasion actions."
+}

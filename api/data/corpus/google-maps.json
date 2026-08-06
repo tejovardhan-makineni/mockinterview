@@ -1,0 +1,91 @@
+{
+  "id": "google-maps",
+  "title": "Design a Maps & Routing System (Google Maps)",
+  "track": "engineering",
+  "domain": "system_design",
+  "modality": "system_design",
+  "difficulty": "staff",
+  "tags": ["routing", "shortest-path", "map-tiles", "graph-partitioning", "eta", "traffic"],
+  "prompt": "Design the routing and maps backend behind a service like Google Maps: render the map, and compute the fastest route between two points on a continent-scale road network with live traffic, returning a route and ETA in well under a second. Cover map tile serving, the routing engine, and how traffic and ETAs stay fresh.",
+  "blurb": "The continent-scale shortest-path problem — why plain Dijkstra can't answer in time, graph preprocessing (contraction hierarchies), tiled map rendering, and traffic-aware ETAs.",
+  "rubric": [
+    { "key": "requirements", "label": "Requirements gathering", "description": "Separates functional (map rendering, point-to-point routing, ETA, alternatives, turn-by-turn, live traffic) from non-functional (sub-second routing, freshness of traffic, availability, global scale).", "weight": 1.0 },
+    { "key": "clarifying_questions", "label": "Clarifying questions", "description": "Asks about scale (graph size, QPS), latency target, modes (drive/walk/transit), how fresh traffic must be, static vs dynamic routing.", "weight": 1.0 },
+    { "key": "map_tiles", "label": "Map tile serving", "description": "Pre-rendered vs vector tiles, zoom-level pyramid, tile keys, aggressive CDN caching, why rendering is a separate read-heavy problem from routing.", "weight": 1.0 },
+    { "key": "graph_model", "label": "Road-network graph model", "description": "Modeling roads as a weighted directed graph (nodes=intersections, edges=segments), turn restrictions, edge weights as travel time, storage of a continent-scale graph.", "weight": 1.1 },
+    { "key": "routing_algorithm", "label": "Routing algorithm depth", "description": "Why plain Dijkstra/A* is too slow at continent scale; preprocessing techniques (contraction hierarchies, ALT, arc-flags, hub labeling) enabling millisecond queries; A* with good heuristics.", "weight": 1.4 },
+    { "key": "graph_partitioning", "label": "Partitioning & scale", "description": "Partitioning the graph into regions/tiles, hierarchical routing (local + highway networks), sharding preprocessed data, handling cross-partition long routes.", "weight": 1.2 },
+    { "key": "eta_traffic", "label": "ETA & live traffic", "description": "Edge weights from historical + live speeds, ingesting GPS probe data, updating weights without full re-preprocessing, ML/time-dependent ETA, dynamic re-routing.", "weight": 1.3 },
+    { "key": "high_level_design", "label": "High-level design", "description": "Client -> tile service (CDN) for rendering + routing service (preprocessed graph) + traffic pipeline updating weights; ETA service.", "weight": 1.1 },
+    { "key": "scaling", "label": "Scaling", "description": "CDN for tiles, replicating/sharding the preprocessed graph in memory, caching popular routes/corridors, batching traffic updates.", "weight": 1.0 },
+    { "key": "bottlenecks", "label": "Bottlenecks", "description": "Preprocessing cost vs freshness (re-CH on traffic change), long cross-region queries, tile hotspots, traffic-ingest volume.", "weight": 1.0 },
+    { "key": "observability", "label": "Observability", "description": "Route latency, ETA accuracy vs actual, traffic-pipeline lag, tile cache hit ratio, re-route rates.", "weight": 0.7 }
+  ],
+  "reference": {
+    "functional_requirements": [
+      "Render the map at multiple zoom levels",
+      "Compute the fastest route between two points",
+      "Provide ETA and alternative routes",
+      "Turn-by-turn navigation with dynamic re-routing",
+      "Incorporate live traffic into routes and ETAs"
+    ],
+    "nonfunctional_requirements": [
+      "Route + ETA returned in well under a second",
+      "Traffic reasonably fresh (minutes)",
+      "Highly available, global scale",
+      "Map tiles served with very high cache hit ratio",
+      "ETA accuracy close to real travel time"
+    ],
+    "clarifying_questions": [
+      "Continent/global graph size (nodes/edges) and routing QPS?",
+      "Latency target for a route request?",
+      "Which modes — driving, walking, cycling, transit?",
+      "How fresh must live traffic be, and do we have GPS probe data?",
+      "Do we need alternatives, and dynamic re-routing during navigation?",
+      "Is turn-by-turn (voice/instructions) in scope, or just route + ETA?"
+    ],
+    "qualifying_questions": [
+      "Static edge weights (distance) or time-dependent/traffic-aware?",
+      "Is preprocessing latency (rebuild on traffic change) an acceptable tradeoff for fast queries?",
+      "How large is the probe-data firehose we must ingest?"
+    ],
+    "estimations": {
+      "graph": "A continent road graph is tens of millions of nodes and ~100M+ edges — too big to Dijkstra per request within budget; must preprocess.",
+      "dijkstra_cost": "Plain Dijkstra over 10s of millions of nodes visits a huge fraction of the graph — hundreds of ms to seconds. Contraction hierarchies answer the same query in ~sub-millisecond after preprocessing.",
+      "tiles": "Zoom pyramid: level z has 4^z tiles; global coverage to high zoom is billions of tiles — pre-render popular areas, cache hard at the CDN (hit ratio >95%).",
+      "traffic": "Millions of GPS probes/sec aggregate into per-edge speed estimates; update weights incrementally rather than re-preprocessing the whole graph."
+    },
+    "core_components": ["Map tile service + CDN", "Vector/raster tile renderer", "Routing service (holds preprocessed graph in memory)", "Graph preprocessing pipeline (contraction hierarchies / ALT)", "Traffic ingestion + aggregation pipeline (GPS probes)", "ETA / speed-model service", "Geocoding / place lookup", "Graph partition manager"],
+    "data_model": ["graph: nodes(intersection id, lat, lng), edges(from, to, length, base_time, road_class, turn_restrictions)", "ch_data: contraction shortcuts + node ordering per partition", "edge_speeds(edge_id, historical_profile, live_speed, updated_at)", "tiles(z, x, y, rendered_blob / vector data)", "probes(anonymized speed samples) -> aggregated per edge"],
+    "api_design": [
+      "GET /tiles/{z}/{x}/{y} -> tile (CDN-cached)",
+      "GET /route?from&to&mode&depart_at -> { geometry, eta, alternatives }",
+      "GET /eta?route -> updated ETA with live traffic",
+      "POST /reroute { current_pos, dest } -> new route during navigation"
+    ],
+    "high_level_design": "Map rendering and routing are two separate problems. Tiles are pre-rendered (or vector tiles rendered client-side) into a z/x/y pyramid and served overwhelmingly from a CDN — this read-heavy path is cache-dominated. Routing runs on a routing service that holds a preprocessed road graph in memory. Because plain Dijkstra/A* is too slow on a continent-scale graph, an offline pipeline preprocesses the graph (e.g. contraction hierarchies) so a query only touches a tiny 'highway' of shortcut edges and returns in sub-millisecond; A* with landmark (ALT) heuristics is an alternative. Edge weights encode travel time, blending historical time-of-day speed profiles with live traffic. A traffic pipeline ingests anonymized GPS probes, aggregates per-edge live speeds, and updates weights incrementally; because full CH re-preprocessing is expensive, live traffic is applied via customizable/partition-level updates rather than rebuilding the whole hierarchy. The graph is partitioned into regions so preprocessing and updates are local, with hierarchical routing stitching long cross-region trips via the highway network. An ETA service and dynamic re-routing use the same weights.",
+    "deep_dives": [
+      { "topic": "routing_algorithm", "probe": "Plain Dijkstra on 50M nodes won't hit your latency budget. Explain how contraction hierarchies (or ALT/arc-flags/hub-labeling) preprocess the graph so queries become near-instant, and what preprocessing costs you." },
+      { "topic": "eta_traffic", "probe": "How do live-traffic edge-weight changes get into routing without re-running full CH preprocessing on the whole continent? (customizable CH / partition-local updates / overlay.) How do historical profiles and live speeds combine into an ETA?" },
+      { "topic": "graph_partitioning", "probe": "How do you partition a continent graph, and how does a route from one region to a far region get computed — hierarchical/overlay routing across partitions?" },
+      { "topic": "map_tiles", "probe": "Why serve map rendering as tiles through a CDN separate from routing? Vector vs raster tiles, the zoom pyramid, and how you keep the cache hit ratio very high." },
+      { "topic": "reroute", "probe": "During turn-by-turn, the driver misses a turn or traffic changes. How do you detect it and re-route quickly using the already-loaded graph?" },
+      { "topic": "cdc_traffic", "probe": "Aggregated edge speeds and map/road updates live in datastores, and multiple systems (routing nodes, ETA, analytics) must pick up changes promptly. How do you propagate these — change data capture / a change stream off the store, or dual writes — and how do you push fresh weights to in-memory routing replicas without a stampede?" }
+    ],
+    "followup_bank": [
+      { "trigger": "mentions dijkstra or a-star or a*", "question": "At continent scale plain Dijkstra/A* is too slow — what preprocessing (contraction hierarchies, ALT, arc-flags) makes queries sub-millisecond, and what does it cost to build/update?" },
+      { "trigger": "mentions cache or cdn or tile", "question": "What's the tile cache eviction/TTL policy, and how do you avoid a stampede/origin overload when a popular area's tiles expire or a new map version invalidates them?" },
+      { "trigger": "mentions traffic or probe or gps", "question": "How do live-traffic weight updates reach routing without full re-preprocessing, and how do you combine historical time-of-day profiles with live speeds for the ETA?" },
+      { "trigger": "mentions database or store or postgres or graph store", "question": "How do edge-speed and map updates propagate to routing nodes, ETA, and analytics — CDC / change stream vs dual writes — and how do you refresh in-memory graph replicas without a herd?" },
+      { "trigger": "mentions partition or shard or region", "question": "How does a long route spanning multiple partitions get computed — overlay/hierarchical routing across region boundaries?" }
+    ],
+    "scaling": ["CDN + zoom pyramid for tiles (cache-dominated read path)", "Replicate the preprocessed graph in memory across routing nodes; shard by region", "Cache popular routes/corridors and common OD pairs", "Batch and incrementally apply traffic updates rather than full re-preprocessing", "Hierarchical routing to keep cross-region queries cheap"],
+    "bottlenecks": ["Preprocessing cost vs traffic freshness (rebuild latency)", "Long cross-region routing queries", "Tile hotspots / cache invalidation on map updates", "GPS probe ingest volume and per-edge aggregation"],
+    "tradeoffs": ["Contraction hierarchies (fast queries, costly/slow to rebuild) vs plain Dijkstra/A* (no preprocessing, slow queries)", "Customizable CH / overlays (cheap traffic updates) vs full CH (best query speed, expensive updates)", "Pre-rendered raster tiles (simple, storage-heavy) vs vector tiles (flexible, client renders)", "Fresher traffic (more re-weighting cost) vs cheaper compute (staler ETAs)"],
+    "alternative_solutions": ["Contraction Hierarchies (with Customizable CH for live traffic)", "ALT (A* + landmarks) for lower preprocessing cost", "Arc-flags / hub-labeling for very fast queries", "Time-dependent / ML ETA models layered over the base route"],
+    "observability": ["Route query latency (p99) and preprocessing/update lag", "ETA accuracy vs actual travel time", "Traffic-pipeline freshness/lag", "Tile CDN hit ratio and origin load", "Re-route frequency and cross-region query share"],
+    "security": ["Anonymize/aggregate GPS probe data (privacy)", "Rate-limit routing/tile APIs and abuse detection", "Authn for personalized/history features; minimize retained location data", "Protect against scraping of the full graph / tiles"],
+    "reference_answer": "A staff-level answer splits the problem: map rendering is a read-heavy tiled CDN problem (zoom pyramid, vector/raster tiles, high cache hit ratio) while routing is a graph problem. It models roads as a weighted directed graph with turn restrictions and recognizes that plain Dijkstra/A* cannot meet a sub-second budget at continent scale, so it preprocesses with contraction hierarchies (or ALT/arc-flags/hub-labeling) for near-instant queries, held in memory and sharded by region with hierarchical/overlay routing for long trips. It builds edge weights from historical time-of-day profiles plus live traffic ingested from anonymized GPS probes, applying updates incrementally (customizable CH / partition-local) rather than re-preprocessing the continent, and layers an ETA model. It caches popular corridors, propagates speed/map updates to routing replicas via CDC/change streams without stampede, and names preprocessing-vs-freshness and cross-region queries as the key bottlenecks."
+  },
+  "interviewer_notes": "The defining moment is when the candidate confronts that Dijkstra/A* on a continent graph can't answer in time and reaches for graph preprocessing (contraction hierarchies, ALT, arc-flags, hub-labeling) — push hard here; naming a technique and its preprocessing-vs-query-speed tradeoff is the staff signal. Make sure they separate tiled map rendering (CDN, read-heavy) from routing. The second hard problem is live traffic: applying weight changes without full re-preprocessing (customizable CH / overlays) and blending historical + live speeds into an ETA. If they mention tiles/CDN/cache, probe invalidation and stampede on map version bumps; if they mention a datastore for speeds/map, hit the CDC/change-stream probe plus refreshing in-memory graph replicas without a herd. Cover partitioning and cross-region routing if time allows."
+}

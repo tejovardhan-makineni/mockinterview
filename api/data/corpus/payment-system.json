@@ -1,0 +1,105 @@
+{
+  "id": "payment-system",
+  "title": "Design a Payment System & Ledger",
+  "track": "engineering",
+  "domain": "system_design",
+  "modality": "system_design",
+  "difficulty": "staff",
+  "tags": ["ledger", "double-entry", "idempotency", "exactly-once", "reconciliation", "consistency", "pci"],
+  "prompt": "Design a payment system with an internal ledger — the kind that moves money between accounts, charges customers, pays out to merchants, and must be auditable and correct to the cent. Cover idempotency, double-entry accounting, exactly-once semantics against external processors, reconciliation, and the consistency/compliance requirements. Assume high volume and zero tolerance for lost or duplicated money.",
+  "blurb": "Money must never be lost, created, or double-counted — double-entry ledger, idempotency, exactly-once against flaky PSPs, and reconciliation.",
+  "rubric": [
+    { "key": "requirements", "label": "Requirements gathering", "description": "Separates functional (charge, payout, transfer, refund, balance, statement) from non-functional (correctness/consistency, auditability, idempotency, availability, compliance).", "weight": 1.1 },
+    { "key": "clarifying_questions", "label": "Clarifying questions", "description": "Asks about money flows, currencies, external PSPs/banks, settlement timing, regulatory scope (PCI, SOX), consistency requirements.", "weight": 1.0 },
+    { "key": "estimations", "label": "Back-of-envelope estimations", "description": "Transaction TPS, ledger entry volume/growth, read patterns (balances, statements), storage/retention for audit.", "weight": 0.9 },
+    { "key": "ledger_double_entry", "label": "Double-entry ledger design", "description": "Immutable journal, balanced debit/credit entries per transaction, accounts, invariant that sum of entries is zero, deriving balances. Central staff signal.", "weight": 1.4 },
+    { "key": "idempotency", "label": "Idempotency", "description": "Idempotency keys, dedup store, safe retries producing exactly one ledger effect; handling client retries and at-least-once messaging.", "weight": 1.3 },
+    { "key": "exactly_once_external", "label": "Exactly-once vs external processors", "description": "PSPs/banks are at-least-once and can time out ambiguously; use idempotency keys to the PSP, reconciliation, and a state machine to avoid double-charge. Central staff signal.", "weight": 1.4 },
+    { "key": "consistency_txn", "label": "Consistency & transactions", "description": "ACID within the ledger, atomic multi-entry writes, avoiding partial postings; where strong consistency is mandatory vs eventual; saga for cross-service flows.", "weight": 1.2 },
+    { "key": "reconciliation", "label": "Reconciliation", "description": "Comparing internal ledger vs external processor/bank statements, detecting drift, break handling, out-of-band settlement.", "weight": 1.1 },
+    { "key": "api_design", "label": "API design", "description": "createCharge, refund, transfer, getBalance, listEntries; idempotency-key contract, statuses.", "weight": 0.8 },
+    { "key": "data_model", "label": "Data model", "description": "accounts, immutable journal/entries, transactions, idempotency keys, external payment records.", "weight": 1.0 },
+    { "key": "scaling", "label": "Scaling & availability", "description": "Partitioning the ledger, hot-account handling, read models for balances, keeping correctness under scale.", "weight": 0.9 },
+    { "key": "security_compliance", "label": "Security & compliance", "description": "PCI DSS (tokenization, no raw PAN), encryption, least privilege, audit trail, fraud, SOX controls.", "weight": 1.0 },
+    { "key": "observability", "label": "Observability & correctness monitoring", "description": "Balance invariants/assertions, reconciliation break alerts, double-post detection, end-to-end tracing of money movement.", "weight": 0.9 }
+  ],
+  "reference": {
+    "functional_requirements": [
+      "Charge a customer (capture funds via a PSP)",
+      "Pay out / settle to merchants",
+      "Transfer between internal accounts",
+      "Refunds and reversals",
+      "Query balances and produce statements/history",
+      "Every money movement recorded in an auditable ledger"
+    ],
+    "nonfunctional_requirements": [
+      "Correctness above all: money is never lost, created, or double-counted",
+      "Strong consistency / ACID for ledger postings",
+      "Idempotent operations; safe under retries and at-least-once messaging",
+      "Full auditability and immutability of the journal",
+      "Regulatory compliance (PCI DSS, SOX-style controls)",
+      "High availability, but correctness wins over availability in conflict"
+    ],
+    "clarifying_questions": [
+      "Which money flows do we support (customer charge, merchant payout, internal transfer, refund)?",
+      "Single or multi-currency; do we do FX?",
+      "Which external processors/banks, and what are their settlement timelines?",
+      "What consistency guarantee is required at the API — synchronous confirmed or async settled?",
+      "Regulatory scope — do we store card data (PCI) or tokenize via the PSP?",
+      "Retention/audit requirements (years of immutable history)?"
+    ],
+    "qualifying_questions": [
+      "Is real-time balance required, or is eventual-consistent balance acceptable with a strong journal?",
+      "How do we handle currencies and rounding?",
+      "What's the recovery objective — can we tolerate temporary unavailability to guarantee no double-spend?"
+    ],
+    "estimations": {
+      "traffic": "Say 10K payment TPS peak; each payment produces multiple ledger entries (double-entry → ≥2 per transaction, more with fees/tax/FX) → tens of thousands of journal appends/s.",
+      "storage": "Journal is append-only and retained for years for audit: 10K TPS × ~4 entries × ~300B × seconds/year ≈ hundreds of TB/year — partitioned, immutable, archived to cold storage.",
+      "reads": "Balances and statements are read-heavy but derivable; served from a materialized read model, not by scanning the whole journal.",
+      "reconciliation": "Daily/continuous matching of internal entries against PSP/bank settlement files (millions of records)."
+    },
+    "core_components": ["Payment API / orchestration service", "Ledger service (immutable double-entry journal)", "Idempotency/dedup store", "PSP/bank integration adapters", "Reconciliation engine", "Balance/read-model (materialized)", "Settlement/payout service", "Fraud/risk service", "Event stream (money-movement events)", "Vault/tokenization for card data"],
+    "data_model": [
+      "accounts(account_id PK, owner, type[customer|merchant|fee|cash|clearing], currency)",
+      "transactions(txn_id PK, type, status[pending|posted|failed|reversed], idempotency_key UNIQUE, external_ref)",
+      "journal_entries(entry_id PK, txn_id, account_id, direction[debit|credit], amount, currency, created_at) — IMMUTABLE, sum(debits)=sum(credits) per txn",
+      "idempotency_keys(key PK, txn_id, request_hash, response, created_at)",
+      "external_payments(external_ref PK, psp, psp_idempotency_key, status, amount) — mirrors PSP state",
+      "reconciliation_breaks(id, txn_id, external_ref, discrepancy, status)"
+    ],
+    "api_design": [
+      "POST /v1/charges { amount, currency, source, ... } (Idempotency-Key REQUIRED) → { charge_id, status }",
+      "POST /v1/refunds { charge_id, amount } (Idempotency-Key) → { refund_id, status }",
+      "POST /v1/transfers { from, to, amount } (Idempotency-Key) → { txn_id }",
+      "GET /v1/accounts/{id}/balance → { available, pending, currency }",
+      "GET /v1/accounts/{id}/entries?cursor= → immutable journal entries"
+    ],
+    "high_level_design": "Every money movement is recorded as a TRANSACTION composed of balanced DOUBLE-ENTRY journal entries: for each transaction the sum of debits equals the sum of credits, so money is conserved by construction (e.g., a charge debits the clearing account and credits the merchant + fee accounts). The journal is append-only and immutable — you never mutate a balance in place; you post a correcting entry (a refund is new entries, not an edit). Every write API requires an IDEMPOTENCY KEY: the first request with a key creates the transaction and stores the result keyed by (key, request-hash); retries with the same key return the stored result and post nothing new, so at-least-once clients and message retries produce exactly one ledger effect. Against EXTERNAL PSPs/banks — which are themselves at-least-once and can time out ambiguously (did the charge go through?) — we send our own idempotency key to the PSP, model the external payment as a state machine (pending → confirmed/failed), never assume success on a timeout, and let RECONCILIATION reconcile our ledger against the PSP's settlement files to catch and repair drift. Cross-service flows (risk check → charge → payout) use a saga with compensating entries. Balances are a materialized read model derived from the journal (and continuously assertable: recompute must match), not the source of truth. Correctness is prioritized over availability: if we can't safely confirm, we hold the transaction pending rather than risk a double-spend.",
+    "deep_dives": [
+      { "topic": "ledger_double_entry", "probe": "Walk me through the exact journal entries for a $100 customer charge with a $3 fee and a payout to the merchant. Which accounts are debited and credited, why must debits equal credits, and how do you get a merchant's balance without a mutable balance column? Why is the journal immutable and how do you 'correct' a mistake?" },
+      { "topic": "idempotency", "probe": "A client sends a charge, times out, and retries with the same idempotency key — but the first request is still in flight. How do you guarantee exactly one charge? What do you key on, how do you handle concurrent duplicates, and what if the retry has a different request body under the same key?" },
+      { "topic": "exactly_once_external", "probe": "You call the PSP to capture funds and the request times out — you don't know if the money moved. What do you do next? Explain idempotency keys to the PSP, the pending state machine, and how reconciliation resolves the ambiguity without double-charging or losing the payment." },
+      { "topic": "consistency_txn", "probe": "A transaction has multiple journal entries across accounts on different shards. How do you post them atomically so you never leave an unbalanced, half-posted transaction? Single-partition transaction vs 2PC vs saga — what do you choose and what are the failure modes?" },
+      { "topic": "reconciliation", "probe": "At end of day the PSP's settlement file says you captured 1,000,000 charges but your ledger shows 999,998. How does the reconciliation engine find and classify the 2 breaks, and what's the repair workflow so the books balance?" },
+      { "topic": "cdc_read_model", "probe": "Balances, statements, analytics, and fraud all need to see money movements. How do you propagate committed journal entries to those read models — CDC/Debezium off the ledger DB vs dual writes — and how do you guarantee the read model is exactly-once and never double-counts an entry?" },
+      { "topic": "cache_stampede", "probe": "You cache hot merchant balances for fast reads. A high-volume merchant's cached balance expires during a spike and thousands of balance reads hit at once. How do you avoid a stampede recomputing it from the journal — coalescing, jittered TTL, serving the last materialized value?" }
+    ],
+    "followup_bank": [
+      { "trigger": "mentions ledger or balance or double entry", "question": "Show the debit/credit entries for a charge-with-fee-and-payout and how you derive a balance from an immutable journal without a mutable balance field." },
+      { "trigger": "mentions idempotency or retry", "question": "What do you key idempotency on, how do you handle two concurrent requests with the same key, and what if the same key arrives with a different request body?" },
+      { "trigger": "mentions psp or processor or bank or stripe", "question": "The capture call times out ambiguously — how do you avoid double-charging, and how does reconciliation resolve whether the money actually moved?" },
+      { "trigger": "mentions database or ledger store or postgres", "question": "How do committed journal entries reach balance/statement/fraud read models — CDC/Debezium vs dual writes — and how do you make that stream exactly-once so nothing is double-counted?" },
+      { "trigger": "mentions cache or redis or balance cache", "question": "Eviction/TTL for cached balances, and how do you prevent a stampede recomputing a hot merchant balance from the journal when its cache entry expires?" },
+      { "trigger": "mentions transaction or atomic or 2pc or saga", "question": "How do you post multi-account entries atomically so you never leave a half-posted, unbalanced transaction across shards?" }
+    ],
+    "scaling": ["Partition the journal by account/entity while keeping each transaction's entries co-located or coordinated", "Materialized balance read models to avoid scanning the journal", "Hot-account handling (busy merchants) with sharded sub-accounts or batching", "Append-only writes archived to cold storage; recent entries hot", "Async event stream for downstream consumers (analytics/fraud)"],
+    "bottlenecks": ["Hot accounts (high-volume merchant, central clearing account) as write hot spots", "Cross-shard atomic multi-entry postings", "Reconciliation over millions of records", "Balance recompute cost / cache stampede", "External PSP latency and ambiguous timeouts"],
+    "tradeoffs": ["Strong consistency / correctness over availability (hold pending vs risk double-spend)", "Single-partition transactions (simple, atomic, limits sharding) vs saga/2PC across shards (scalable, complex, failure modes)", "Immutable journal + correcting entries (auditable, more storage) vs mutable balances (compact, unauditable — rejected)", "Synchronous confirmed API (clear UX, slower) vs async settled (fast ack, eventual)", "Real-time materialized balance (fast reads, extra pipeline) vs on-demand recompute (accurate, slow)"],
+    "alternative_solutions": ["Event-sourced ledger (the event log IS the journal; balances are projections)", "Per-currency and per-region ledgers with a clearing account for cross-boundary movement", "Outbox pattern for reliable event emission instead of raw CDC", "TigerBeetle-style purpose-built double-entry accounting datastore for high-throughput debits/credits"],
+    "observability": ["Continuous invariant assertions: per-transaction debits==credits, global sum-of-entries==0", "Reconciliation break count and aging (should trend to zero)", "Double-post / duplicate-idempotency-key detection alerts", "End-to-end tracing of a payment across services and PSP", "Pending-transaction backlog and ambiguous-timeout rate"],
+    "security": ["PCI DSS: never store raw PAN — tokenize/vault via PSP; scope the cardholder-data environment", "Encryption in transit and at rest; field-level encryption for sensitive data", "Least-privilege access; segregation of duties; immutable audit log (SOX)", "Fraud/risk scoring before capture; velocity limits", "Strong authN and signed webhooks from PSPs; replay protection"],
+    "reference_answer": "A staff-level answer makes correctness the top-line requirement and builds an immutable, append-only DOUBLE-ENTRY ledger where every transaction's debits equal its credits so money is conserved by construction, and balances are derived (materialized) projections, never mutable fields — corrections are new entries. Every write API requires an idempotency key backed by a dedup store so retries and at-least-once messaging yield exactly one ledger effect, including correct handling of concurrent duplicates and mismatched bodies. Against at-least-once external PSPs/banks it sends idempotency keys downstream, models external payments as a pending state machine that never assumes success on an ambiguous timeout, and uses a reconciliation engine to match the internal ledger against settlement files and repair breaks. Multi-entry postings are atomic (single-partition transaction or saga with compensation), committed entries flow to balance/fraud/analytics read models via CDC with exactly-once/no-double-count guarantees, and hot balances are cached with stampede protection. The candidate enforces invariants continuously (debits==credits, global sum zero), designs for PCI/SOX (tokenization, immutable audit, least privilege), and explicitly prioritizes correctness over availability, naming hot accounts, cross-shard atomicity, and ambiguous PSP timeouts as the key risks with concrete mitigations."
+  },
+  "interviewer_notes": "This is a staff question — the bar is money-correctness reasoning, not box-drawing. The three make-or-break deep-dives are: (1) a real double-entry ledger with immutable journal and derived balances (make them write the debit/credit lines for a charge-with-fee-and-payout), (2) idempotency that survives concurrent retries and at-least-once messaging, and (3) exactly-once against a PSP that times out ambiguously, backstopped by reconciliation. Push all three. Use the CDC probe when journal entries feed balance/fraud/analytics read models (must be exactly-once) and the cache/stampede probe on hot merchant balances. Strong candidates state invariants they can assert (debits==credits, global sum zero), treat overpaying/double-charging as catastrophic, and choose correctness over availability. Watch for red flags: mutable balance columns, assuming PSP success on timeout, dual writes without dedup, or hand-waving reconciliation. Reserve time for consistency/atomicity across shards and PCI/SOX compliance."
+}

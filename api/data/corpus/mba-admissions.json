@@ -1,0 +1,61 @@
+{
+  "id": "mba-admissions",
+  "title": "MBA Admissions Interview: Why an MBA & Career Goals",
+  "track": "professional",
+  "domain": "mba_admissions",
+  "modality": "conversational",
+  "difficulty": "entry",
+  "tags": ["mba", "admissions", "career-goals", "why-mba", "self-awareness", "fit"],
+  "prompt": "Let's talk about your candidacy. Walk me through your career so far, why you want an MBA now, what your short-term and long-term goals are, and why this program specifically. I'll ask follow-ups as we go.",
+  "blurb": "A classic MBA admissions interview — assessed for a coherent career narrative, a genuine and specific 'why MBA / why now', clear goals, and authentic program fit.",
+  "rubric": [
+    { "key": "career_narrative", "label": "Career narrative & coherence", "description": "Tells a coherent story connecting past experience, decisions, and growth to where they're headed — a logical thread, not a resume recital, and takes ownership of choices.", "weight": 1.2 },
+    { "key": "why_mba", "label": "Why MBA & why now", "description": "Gives a genuine, specific reason an MBA is the right vehicle now — the concrete gaps (skills, network, pivot, credibility) it fills — rather than vague prestige or 'to grow my network' clichés.", "weight": 1.3 },
+    { "key": "goal_clarity", "label": "Goal clarity & realism", "description": "Articulates clear, realistic short-term and long-term goals with a plausible path between them, and connects them to their background and to what the degree enables.", "weight": 1.2 },
+    { "key": "program_fit", "label": "Program fit & specificity", "description": "Shows researched, specific fit with THIS program (courses, clubs, approach, culture) and what they'd contribute, not generic praise that could apply anywhere.", "weight": 1.1 },
+    { "key": "self_awareness", "label": "Self-awareness & authenticity", "description": "Demonstrates honest self-reflection — strengths, gaps, motivations — and comes across as authentic rather than over-rehearsed or telling the interviewer what they want to hear.", "weight": 1.1 },
+    { "key": "communication", "label": "Communication & poise", "description": "Communicates with structure, clarity, and poise, listens and answers the actual question, handles follow-ups gracefully, and is concise.", "weight": 1.0 }
+  ],
+  "reference": {
+    "scenario": "Entry-level MBA admissions interview — the canonical 'walk me through your story, why MBA, why now, why us' conversation. There is no correct background; the interviewer assesses coherence, authenticity, clarity of goals, and genuine fit. A strong candidate tells a connected narrative: how their experiences and choices led logically to this point and to their goals, owning their decisions rather than reciting a resume. Their 'why MBA / why now' is specific and honest — it names the concrete gaps the degree fills (leadership/management skills, a functional or industry pivot, a network, credibility, the toolkit to move from individual contributor to leader) and why now is the right moment (a plateau, a pivot that needs the reset, timing in their trajectory) — not vague 'to grow' or prestige-seeking. Goals are clear and realistic: a plausible short-term role right after the MBA and a longer-term aspiration, with a believable path between them that connects to their background and to what the program enables; strong candidates are specific but not rigidly over-scripted. Program fit is researched and specific — particular courses, professors, clubs, experiential offerings, culture — plus what they would contribute to the class, not generic praise that fits any school. Throughout they show self-awareness (honest about strengths and gaps and what they're seeking) and authenticity, and they answer with structure and poise, handling follow-ups gracefully. Weak candidates recite their resume with no thread, give cliched or vague reasons for the MBA, have fuzzy or unrealistic goals with no path, praise the school generically (or clearly could swap in any school's name), sound over-rehearsed and inauthentic, or ramble and don't answer the question.",
+    "model_points": [
+      "Tell a coherent narrative, not a resume: connect past experiences, key decisions, and growth into a logical thread that leads to the MBA and the goals, and own the choices along the way.",
+      "Make 'why MBA / why now' specific and honest: name the concrete gaps the degree fills — leadership and general-management skills, a functional/industry pivot, network, credibility, the move from doing to leading — and why this is the right moment in their trajectory.",
+      "Give clear, realistic short-term and long-term goals: a plausible immediate post-MBA role and a longer-term aspiration, connected to each other and to their background — specific without being robotically over-scripted.",
+      "Show a believable path: how the MBA bridges where they are to the short-term goal, and the short-term goal to the long-term one — the logic should hold up under a follow-up.",
+      "Demonstrate researched, specific program fit: particular courses, professors, clubs, experiential/immersion offerings, and culture — and articulate what THEY would uniquely contribute to the cohort.",
+      "Show self-awareness: honest reflection on strengths, gaps, and motivations, including what they still need to develop — not a flawless self-portrait.",
+      "Be authentic, not over-rehearsed: sound like a real person with genuine reasons rather than reciting what they think admissions wants to hear.",
+      "Communicate with structure and poise: answer the actual question, stay concise, and handle follow-ups and curveballs gracefully.",
+      "Connect goals to impact/values where genuine: why these goals matter to them, lending the story authenticity and motivation."
+    ],
+    "probes": [
+      { "trigger": "candidate recites their resume with no thread", "question": "That's the what — help me understand the why. What connects these moves, and what were you actually deciding at each step?" },
+      { "trigger": "why-MBA is vague or cliched ('grow, network')", "question": "Lots of things grow your network. Specifically, what can't you get without an MBA, and why do you need it now rather than in three years?" },
+      { "trigger": "goals are fuzzy or unrealistic", "question": "Get concrete — what's the actual role you want right after graduating, and how does that lead to your long-term goal? Is that path realistic from where you are?" },
+      { "trigger": "program praise is generic", "question": "Everything you just said could describe a dozen schools. What specifically about THIS program fits your goals, and what would you contribute here?" },
+      { "trigger": "candidate sounds over-rehearsed", "question": "Set the script aside — what's the real, personal reason you're doing this? What are you genuinely unsure about?" },
+      { "trigger": "candidate presents a flawless self-portrait", "question": "What's a genuine weakness or gap you're hoping the MBA helps you address?" },
+      { "trigger": "short-term and long-term goals don't connect", "question": "Walk me through how the short-term role actually gets you to the long-term goal — I'm not seeing the bridge." }
+    ],
+    "red_flags": [
+      "Resume recital with no narrative thread or ownership of choices",
+      "Vague or cliched 'why MBA' (prestige, generic networking, 'to grow')",
+      "Fuzzy, unrealistic, or disconnected goals with no path between short and long term",
+      "Generic program praise that could apply to any school; no real research",
+      "Over-rehearsed, inauthentic, telling the interviewer what they want to hear",
+      "No self-awareness; a flawless self-portrait with no acknowledged gaps",
+      "Rambles, doesn't answer the question, or can't handle follow-ups",
+      "Can't explain why NOW versus later, or why an MBA versus another path"
+    ],
+    "follow_ups": [
+      "If you don't get into this program, what's your plan?",
+      "Why an MBA specifically rather than continuing to learn on the job or a specialized masters?",
+      "Tell me about a time you led without formal authority — how does that connect to your goals?",
+      "Your long-term goal is ambitious. What's the biggest obstacle between you and it, and how does the MBA help?",
+      "What would your current colleagues say is your biggest area to develop?"
+    ],
+    "exemplar_answer": "A strong candidate tells a threaded story, not a resume: 'I started in operations because I liked untangling messy processes, moved into a project-lead role where I realized I was managing people and strategy without the formal toolkit for either, and that gap is what's driving me here.' The why-MBA is specific and honest: 'I want to move from running individual projects to leading a function, and I've hit the ceiling of what I can learn on the job — I need the general-management foundation, finance and strategy I don't have, and to build a peer network in industries I want to pivot toward. Now is the moment because I've got enough experience to contribute and I'm at a natural pivot point rather than coasting another two years.' Goals are concrete and connected: 'Short term, a strategy or operations role in [sector]; long term, to lead operations at a company scaling through that transition. The MBA bridges the first gap, and that role builds the P&L and leadership experience for the second.' Program fit is researched and specific: 'The operations concentration and Professor X's course, the experiential consulting project, and the [specific club] are exactly the reps I want — and I'd contribute my process-improvement background to study teams.' Self-awareness: 'Honestly, my gap is finance and executive presence, and I'm choosing an environment that will push me there.' It's authentic, structured, and every claim survives a follow-up because the logic is real — the interviewer can see the person behind the answers, not a script."
+  },
+  "interviewer_notes": "Run this warmly but probe for substance — the goal is to see the real person and whether their story, goals, and fit hold together. This is entry-level: reward authenticity, coherence, and clear thinking over polish; an over-rehearsed candidate should score LOWER on self-awareness than an honest, slightly-imperfect one. The strongest signal is a specific, genuine 'why MBA / why now' tied to concrete gaps, plus goals with a believable bridge between short and long term. Use probes to pierce cliches: if the why-MBA is 'grow my network', ask what they specifically can't get otherwise; if goals are fuzzy, force a concrete first role and the path; if program praise is generic, ask what could ONLY be said about this school and what they'd contribute. Test self-awareness by asking for a real gap, and test authenticity by inviting them off-script. Handle follow-ups as a conversation, not an interrogation. Penalize resume recitals, cliched or prestige-driven motivation, disconnected or unrealistic goals, generic fit, and over-rehearsed inauthenticity."
+}

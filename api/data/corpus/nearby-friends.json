@@ -1,0 +1,91 @@
+{
+  "id": "nearby-friends",
+  "title": "Design Nearby Friends / Proximity Service",
+  "track": "engineering",
+  "domain": "system_design",
+  "modality": "system_design",
+  "difficulty": "senior",
+  "tags": ["geospatial", "geohash", "quadtree", "location-updates", "pubsub", "real-time"],
+  "prompt": "Design a 'Nearby Friends' feature: users who opt in continuously share their location, and each user sees which of their friends are within a configurable radius (say 5 km), updated in near real time. Cover how you ingest high-frequency location updates and how you answer proximity queries at scale.",
+  "blurb": "The canonical geospatial fan-out problem — indexing moving points with geohash/quadtree, ingesting a firehose of location pings, and pushing proximity changes to friends in real time.",
+  "rubric": [
+    { "key": "requirements", "label": "Requirements gathering", "description": "Separates functional (opt-in sharing, radius query, friend-scoped, real-time push) from non-functional (freshness < ~10s, privacy, availability, battery/bandwidth on client).", "weight": 1.0 },
+    { "key": "clarifying_questions", "label": "Clarifying questions", "description": "Asks about active-user count, update frequency, radius size, friend graph size, freshness SLA, whether it is friend-scoped vs global nearby.", "weight": 1.0 },
+    { "key": "estimations", "label": "Back-of-envelope estimations", "description": "Derives location-update QPS (users x ping rate), fan-out volume, index memory footprint, and read/query QPS.", "weight": 1.1 },
+    { "key": "geo_indexing", "label": "Geospatial indexing depth", "description": "Geohash vs quadtree vs S2 vs H3; precision/cell-size tradeoff, boundary/neighbor-cell problem, index update cost for moving points.", "weight": 1.3 },
+    { "key": "ingestion", "label": "Location ingestion path", "description": "Handles a write-heavy firehose: stateless ingestion tier, location cache (Redis GEO / in-memory), TTL on stale locations, avoiding write amplification.", "weight": 1.2 },
+    { "key": "fanout_delivery", "label": "Fan-out & real-time delivery", "description": "Friend-scoped push via websockets/pubsub; compute proximity on write vs on read; only emit on state change (entered/left radius).", "weight": 1.2 },
+    { "key": "high_level_design", "label": "High-level design", "description": "Client -> LB -> location ingestion -> location store/cache -> proximity engine -> pub/sub -> websocket gateway -> friends; friend-graph service.", "weight": 1.2 },
+    { "key": "scaling", "label": "Scaling", "description": "Shard by geo cell and/or user; handle dense cells (stadiums), redistribute hot cells, horizontal websocket gateways with a session registry.", "weight": 1.1 },
+    { "key": "bottlenecks", "label": "Bottlenecks", "description": "Identifies dense-cell hotspots, fan-out amplification for users with many friends, and stale-location cleanup.", "weight": 1.0 },
+    { "key": "privacy_security", "label": "Privacy & security", "description": "Opt-in, granular sharing, location precision/blurring, revocation, not leaking location to non-friends, retention limits.", "weight": 1.0 },
+    { "key": "observability", "label": "Observability", "description": "Freshness/staleness metrics, delivery latency, dropped-update rate, hot-cell alerts, connection churn.", "weight": 0.7 }
+  ],
+  "reference": {
+    "functional_requirements": [
+      "Users opt in to share live location",
+      "A user sees friends currently within radius R",
+      "Near-real-time updates as friends move in/out of radius",
+      "Configurable radius and sharing toggles",
+      "Distance/last-seen shown per nearby friend"
+    ],
+    "nonfunctional_requirements": [
+      "Freshness: nearby set reflects reality within ~5-10s",
+      "High availability for reads; updates can be lossy (last-write-wins)",
+      "Low client battery/bandwidth cost (adaptive ping rate)",
+      "Privacy-first: strictly friend-scoped, revocable",
+      "Horizontally scalable to tens of millions of active sharers"
+    ],
+    "clarifying_questions": [
+      "How many concurrent users share location, and at what ping frequency?",
+      "Is 'nearby' friend-scoped only, or also strangers/places?",
+      "What radius, and is it user-configurable?",
+      "How fresh must the nearby set be (SLA)?",
+      "Average and p99 friend-count per user (fan-out sizing)?",
+      "Do we persist location history or only the latest point?"
+    ],
+    "qualifying_questions": [
+      "Is it acceptable to drop/merge rapid updates (eventual freshness)?",
+      "Global audience with regional data residency requirements?",
+      "Do we need entered/left events or just a periodic nearby list?"
+    ],
+    "estimations": {
+      "traffic": "10M active sharers pinging every 5s = 2M location updates/s. If we down-sample server-side to every 30s effective, ~330K writes/s to the index.",
+      "fanout": "Avg 200 friends/user; only friends who are (a) online and (b) near matter. Proximity change events are far fewer than raw pings — emit only on radius crossings.",
+      "index_memory": "10M users x ~100B (id, lat, lng, ts, geohash) ~= 1GB hot in a distributed in-memory store; trivially shardable.",
+      "read_qps": "If clients also poll, cap by pushing deltas over persistent connections instead of polling."
+    },
+    "core_components": ["Mobile client (adaptive ping)", "Load balancer / API gateway", "Location ingestion service (stateless)", "Location store/cache (Redis GEO or in-memory geo-index)", "Proximity/matching engine", "Friend-graph service", "Pub/Sub bus", "WebSocket gateway + session registry", "Privacy/consent service"],
+    "data_model": ["locations(user_id PK, lat, lng, geohash, updated_at TTL)", "sharing(user_id, enabled, radius, precision, updated_at)", "friends(user_id, friend_id) — from social graph", "sessions(user_id, gateway_node, conn_id)"],
+    "api_design": [
+      "POST /location { lat, lng, ts } -> 204 (frequent, cheap)",
+      "WS /subscribe -> server pushes { friend_id, distance, entered|left, ts }",
+      "GET /nearby?radius=5000 -> snapshot list of nearby friends",
+      "PUT /sharing { enabled, radius, precision }"
+    ],
+    "high_level_design": "Clients push location to a stateless ingestion tier behind the LB. Ingestion writes latest position to a geo-indexed store (Redis GEO / geohash buckets) with a TTL so stale sharers age out. A proximity engine, on each update, looks up the user's friends (from the friend-graph service), checks which are within R using the geo index, and emits only entered/left transitions to a pub/sub topic keyed by user. WebSocket gateways subscribe on behalf of connected clients (session registry maps user -> gateway node) and push deltas. Sharing/consent is checked before any location is stored or revealed.",
+    "deep_dives": [
+      { "topic": "geo_indexing", "probe": "Geohash vs quadtree vs S2/H3 for indexing moving points? How do you pick cell precision, and how do you handle two friends near a cell boundary who are close in reality but in different cells?" },
+      { "topic": "compute_model", "probe": "Do you compute proximity on write (per location update, scan friends) or on read (per query)? What changes when a user has 5000 friends vs 20?" },
+      { "topic": "hot_cells", "probe": "A concert packs 100K sharers into a few cells. How do you keep that cell from becoming a hotspot in both index writes and query fan-out?" },
+      { "topic": "delivery", "probe": "How do WebSocket gateways scale horizontally, and how does a location update reach the right gateway holding a friend's connection?" },
+      { "topic": "cdc_history", "probe": "Product wants a location-history / 'were we ever near?' feature. Your latest-location cache only holds the current point. How would you stream position changes out to a history/analytics store — change data capture, Debezium off the datastore, or explicit event emission?" },
+      { "topic": "stale_cleanup", "probe": "How do you ensure a friend who lost signal or closed the app disappears from nearby lists — TTL, tombstones, heartbeat?" }
+    ],
+    "followup_bank": [
+      { "trigger": "mentions geohash or quadtree or s2 or h3", "question": "What cell precision, and how do you handle the boundary problem where nearby points fall in adjacent cells — search the 8 neighbor cells?" },
+      { "trigger": "mentions redis or cache", "question": "What is your eviction/TTL policy for stale locations, and how do you avoid a stampede when a hot cell's entries all expire and refill at once?" },
+      { "trigger": "mentions database or postgres or cassandra or sql", "question": "If you persist positions or history in a datastore, how do you capture changes downstream for analytics — CDC/Debezium vs dual writes?" },
+      { "trigger": "mentions websocket or push or pubsub", "question": "How does an update for user A reach the specific gateway node holding friend B's live connection? Describe the session registry / routing." },
+      { "trigger": "mentions fan-out or fanout", "question": "For a user with thousands of friends, do you fan out on write or read, and how do you bound the cost?" }
+    ],
+    "scaling": ["Shard the geo index by cell (geohash prefix) and the session registry by user_id", "Redistribute or sub-shard dense cells (stadium/concert) dynamically", "Emit only radius-crossing transitions, not every ping", "Down-sample ingestion server-side; adaptive client ping rate based on movement", "Stateless ingestion and gateways scale horizontally behind a session registry"],
+    "bottlenecks": ["Dense-cell hotspots (crowded venues)", "Fan-out amplification for high-friend-count users", "Stale-location cleanup / tombstoning", "WebSocket connection churn and reconnect storms"],
+    "tradeoffs": ["Compute-on-write (fresh, costly per ping) vs compute-on-read (cheap writes, staler)", "Geohash (simple, boundary issues) vs quadtree/S2 (adaptive density, more complex)", "Push deltas (efficient, stateful conns) vs poll (simple, chatty)", "Higher ping rate (fresher) vs battery/bandwidth cost"],
+    "alternative_solutions": ["Redis GEO commands (GEOADD/GEOSEARCH) as the index", "PostGIS with spatial index for lower-scale/analytics", "S2 cell covering + Kafka-partitioned proximity workers", "Grid bucketing in memory with neighbor-cell scan"],
+    "observability": ["End-to-end freshness (ping -> visible) latency", "Delivery latency and drop rate", "Hot-cell density alerts", "TTL/stale-entry counts", "Connection count and reconnect churn per gateway"],
+    "security": ["Strict opt-in and revocable sharing", "Friend-scope enforcement on every read", "Location precision reduction / blurring option", "Retention limits and right-to-delete", "Rate-limit and authenticate location writes to prevent spoofing"],
+    "reference_answer": "A strong answer scopes freshness and privacy, sizes the update firehose and fan-out, and picks a geospatial index (geohash/quadtree/S2) with an explicit boundary-cell story. It ingests via a stateless tier into a TTL'd geo cache, computes proximity on write emitting only entered/left transitions, and routes deltas through pub/sub to horizontally scaled WebSocket gateways via a session registry. It proactively raises dense-cell hotspots and high-friend fan-out as the main bottlenecks, and treats consent/precision/retention as first-class."
+  },
+  "interviewer_notes": "Let the candidate scope privacy and freshness before diving in. The core differentiator is the geospatial index — push hard on cell precision and the boundary problem; a senior candidate mentions neighbor-cell search or adaptive cells (quadtree/S2). If they place a datastore for history, interrupt with the CDC/Debezium probe. If they add Redis/cache, probe TTL for stale locations and stampede on hot cells. Make them reason about compute-on-write vs on-read and about dense-cell hotspots. Reserve the last minutes for real-time delivery routing (session registry) and privacy/consent."
+}

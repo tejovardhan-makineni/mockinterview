@@ -1,0 +1,68 @@
+{
+  "id": "rate-limiter-code",
+  "title": "Implement a Token-Bucket Rate Limiter",
+  "track": "engineering",
+  "domain": "coding",
+  "modality": "coding",
+  "difficulty": "mid",
+  "tags": ["design", "concurrency", "rate-limiting", "oop", "time"],
+  "prompt": "Implement a rate limiter class using the token-bucket algorithm. The bucket holds up to `capacity` tokens and refills at `refillRate` tokens per second. A method allow() (optionally allow(n) requesting n tokens) returns true and consumes tokens if enough are available, else returns false. Refilling is continuous over time, not in discrete ticks. Follow-up: make it thread-safe for concurrent callers, and support per-client limits.",
+  "blurb": "Token bucket done right — lazy time-based refill computed on demand, then a thread-safety and per-client extension.",
+  "rubric": [
+    { "key": "problem_understanding", "label": "Problem understanding", "description": "Distinguishes token bucket (allows bursts up to capacity, smooth average) from fixed-window/sliding-window; clarifies capacity vs refillRate and burst semantics.", "weight": 1.1 },
+    { "key": "approach", "label": "Approach", "description": "Uses lazy refill: store tokens + lastRefillTimestamp, and on each allow() compute elapsed*refillRate to add tokens (capped at capacity) rather than a background thread ticking.", "weight": 1.3 },
+    { "key": "correctness", "label": "Correctness", "description": "Refill capped at capacity; fractional tokens accumulated correctly; consume only if tokens >= requested; monotonic clock used; no negative balances.", "weight": 1.3 },
+    { "key": "complexity_analysis", "label": "Complexity analysis", "description": "O(1) time and O(1) space per allow() (per bucket); per-client is O(number of clients) space. No busy-waiting or background timer needed.", "weight": 0.9 },
+    { "key": "code_quality", "label": "Code quality", "description": "Clean class with a private refill() helper, sensible fields, monotonic time source injectable for testing.", "weight": 1.1 },
+    { "key": "edge_cases", "label": "Edge cases", "description": "First call, long idle then burst (cap at capacity, not unbounded), requesting more than capacity, refillRate/capacity of 0 or fractional, clock going backward.", "weight": 1.1 },
+    { "key": "testing", "label": "Testing", "description": "Simulates time (injectable clock) to test burst, steady-state, and refill-after-idle without real sleeps.", "weight": 1.0 },
+    { "key": "communication", "label": "Communication", "description": "Explains lazy refill vs background timer and the burst-vs-smoothness tradeoff; states the concurrency plan before coding the lock.", "weight": 0.8 }
+  ],
+  "reference": {
+    "constraints": [
+      "capacity >= 1; refillRate > 0 tokens per second (may be fractional, e.g. 0.5/s = 1 per 2s)",
+      "allow(n): 1 <= n <= capacity typically; requesting n > capacity can never succeed",
+      "Use a monotonic clock, not wall-clock, so NTP adjustments / DST don't corrupt timing",
+      "Must not require a background thread; refill is computed on demand"
+    ],
+    "examples": [
+      {
+        "input": "capacity=5, refillRate=1/s. At t=0 call allow() 5 times, then allow() again. At t=2s call allow() twice.",
+        "output": "First 5 -> true (burst drains the bucket), 6th -> false. At t=2s: 2 tokens refilled, both allow() -> true.",
+        "explanation": "Bucket starts full at 5, absorbs a burst of 5, then is empty. Over 2 seconds at 1 token/s it refills 2 tokens, enabling 2 more requests."
+      }
+    ],
+    "test_cases": [
+      { "input": "cap=1, rate=1/s; allow() at t=0, allow() at t=0.5, allow() at t=1.0", "expected": "true, false, true — one token, refills after 1s" },
+      { "input": "cap=10, rate=5/s; idle 100s then allow() once", "expected": "true, and tokens capped at 10 (not 500) — idle refill must clamp to capacity" },
+      { "input": "cap=3, rate=1/s; allow(5)", "expected": "false — request exceeds capacity, can never be satisfied" },
+      { "input": "cap=2, rate=0.5/s; allow() twice at t=0, allow() at t=1, allow() at t=2", "expected": "true,true, false (only 0.5 refilled), true (1.0 accumulated) — fractional refill" },
+      { "input": "clock returns an earlier time than lastRefill (backward clock)", "expected": "treat elapsed as 0 (max(0, now-last)); do not subtract tokens" }
+    ],
+    "optimal_time": "O(1) per allow() call",
+    "optimal_space": "O(1) per bucket; O(C) for C distinct clients in the per-client variant",
+    "approaches": [
+      { "name": "naive: background refiller thread", "idea": "A timer thread adds tokens every tick. Simple mentally but wastes a thread per limiter, ties resolution to the tick interval, and scales badly to many per-client buckets.", "time": "O(1) per allow, O(buckets) per tick", "space": "O(1) per bucket + a thread" },
+      { "name": "optimal: lazy (on-demand) refill", "idea": "Store tokens (float) and lastRefillTime. On each allow(n): now = monotonic(); elapsed = max(0, now - lastRefillTime); tokens = min(capacity, tokens + elapsed * refillRate); lastRefillTime = now; if tokens >= n: tokens -= n; return true; else return false. No threads, exact continuous refill, O(1).", "time": "O(1)", "space": "O(1)" },
+      { "name": "thread-safe (single bucket)", "idea": "Wrap the refill+consume critical section in a mutex/lock (or use an atomic compare-and-swap loop on a packed (tokens,timestamp) state for lock-free). The read-modify-write of tokens must be atomic or two threads can both see enough tokens and over-consume.", "time": "O(1) amortized", "space": "O(1)" },
+      { "name": "per-client / distributed", "idea": "Per client: a concurrent map clientId -> bucket, each bucket independently locked (lock striping), plus eviction of idle buckets. Distributed: keep the (tokens,timestamp) in Redis and do the refill+consume atomically in a Lua script so all app servers share one logical bucket.", "time": "O(1) per request", "space": "O(#active clients)" }
+    ],
+    "follow_ups": [
+      "Make it thread-safe: single mutex vs. an atomic CAS loop on packed state; why the check-then-consume must be one atomic step.",
+      "Per-client limits: a concurrent map of buckets with lock striping and idle-bucket eviction to bound memory.",
+      "Distributed rate limiting across many servers sharing one limit — Redis with an atomic Lua refill+consume, and clock/latency concerns.",
+      "Compare token bucket to leaky bucket, fixed-window counter, and sliding-window log/counter — burst behavior and boundary spikes.",
+      "Add a blocking acquire(n) that waits until tokens are available (compute exact sleep = (n - tokens)/refillRate) instead of returning false."
+    ],
+    "reference_solution": "class TokenBucket: def __init__(self, capacity, refillRate, clock=monotonic): self.capacity=capacity; self.refillRate=refillRate; self.tokens=capacity; self.last=clock(); self.clock=clock; self.lock=Lock(). def _refill(self): now=self.clock(); elapsed=max(0.0, now-self.last); self.tokens=min(self.capacity, self.tokens + elapsed*self.refillRate); self.last=now. def allow(self, n=1): with self.lock: self._refill(); if self.tokens >= n: self.tokens -= n; return True; return False. Key properties: (1) lazy refill — no background thread; tokens are reconstructed from elapsed time on demand; (2) cap at capacity so an idle bucket can't accumulate unbounded tokens (bursts are bounded by capacity); (3) monotonic clock and max(0, elapsed) so a backward clock never grants or removes tokens; (4) the lock makes refill+check+consume a single atomic critical section so concurrent callers can't double-spend. For per-client: buckets = ConcurrentMap<clientId, TokenBucket>; getOrCreate then allow; evict entries idle beyond a TTL. For distributed: move the same _refill+consume logic into a Redis Lua script keyed by clientId so it executes atomically server-side.",
+    "pitfalls": [
+      "Refill without capping at capacity — an idle bucket accumulates unlimited tokens and a huge burst slips through.",
+      "Using wall-clock time instead of a monotonic clock — NTP/DST steps corrupt refill.",
+      "Truncating fractional tokens each call so a sub-1/s refillRate never accumulates.",
+      "Making check and consume two separate steps under concurrency — two threads both pass the check and over-consume.",
+      "A background-thread design that doesn't scale to thousands of per-client buckets.",
+      "Not injecting the clock, making the limiter untestable without real sleeps."
+    ]
+  },
+  "interviewer_notes": "Early signal: do they know token bucket allows bursts (up to capacity) while smoothing the average, and can they contrast it with fixed/sliding window? Push them off any background-timer instinct toward lazy on-demand refill by asking 'what if you have a million clients — a thread each?'. The correctness crux is capping refill at capacity and handling fractional/elapsed time; probe with the 'idle 100s' test and ask what tokens should be. Insist on an injectable clock — if they reach for real sleep() in tests, ask how they'd test refill deterministically. The main escalation is thread-safety: first get them to add a lock around refill+check+consume as ONE critical section, then push on whether a lock-free CAS on packed state is possible, and finally per-client (lock striping + eviction) and distributed (Redis + atomic Lua). Stay silent while they write the single-threaded version; it should come quickly for a mid candidate."
+}

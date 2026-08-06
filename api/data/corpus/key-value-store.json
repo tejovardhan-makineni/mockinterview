@@ -1,0 +1,138 @@
+{
+  "id": "key-value-store",
+  "title": "Design a Distributed Key-Value Store (Dynamo-style)",
+  "track": "engineering",
+  "domain": "system_design",
+  "modality": "system_design",
+  "difficulty": "staff",
+  "tags": ["consistent-hashing", "quorum", "replication", "gossip", "hinted-handoff", "consistency"],
+  "prompt": "Design a highly available, horizontally scalable distributed key-value store in the style of Amazon Dynamo — one that stays writable during partitions and node failures. Cover partitioning, replication, how reads and writes stay consistent enough, membership, and failure handling.",
+  "blurb": "The Dynamo playbook: partitioning, quorums, vector clocks, gossip, hinted handoff, and tunable consistency.",
+  "rubric": [
+    { "key": "requirements", "label": "Requirements gathering", "description": "Separates functional (get/put by key, tunable consistency) from non-functional (always-writable, high availability, partition tolerance, scale, durability).", "weight": 1.0 },
+    { "key": "clarifying_questions", "label": "Clarifying questions", "description": "Asks about consistency needs, value size, read/write mix, availability vs consistency priority, conflict tolerance, multi-region.", "weight": 1.0 },
+    { "key": "estimations", "label": "Estimations", "description": "Estimates QPS, dataset size, nodes, replication factor overhead, storage per node.", "weight": 0.9 },
+    { "key": "partitioning", "label": "Partitioning", "description": "Consistent hashing with virtual nodes; even distribution; how key ranges map to nodes; add/remove with minimal movement.", "weight": 1.3 },
+    { "key": "replication", "label": "Replication", "description": "N replicas via preference list on the ring; coordinator; sloppy quorum; cross-node/rack/region placement.", "weight": 1.3 },
+    { "key": "consistency_quorum", "label": "Quorum & tunable consistency", "description": "N/R/W quorum math (R+W>N), read-repair, tunable per-request consistency, CAP positioning (AP with eventual consistency).", "weight": 1.4 },
+    { "key": "conflict_resolution", "label": "Conflict resolution", "description": "Concurrent writes → vector clocks / version vectors, sibling detection, last-write-wins vs application-level merge, tombstones.", "weight": 1.3 },
+    { "key": "membership_gossip", "label": "Membership & gossip", "description": "Decentralized membership via gossip, failure detection (phi-accrual), no single coordinator, ring propagation.", "weight": 1.1 },
+    { "key": "failure_handling", "label": "Failure handling", "description": "Hinted handoff for temporary failures, anti-entropy / Merkle trees for permanent divergence, sloppy quorum tradeoffs.", "weight": 1.3 },
+    { "key": "storage_engine", "label": "Storage engine", "description": "Per-node engine (LSM vs B-tree), write path (commit log + memtable + SSTable), compaction, durability.", "weight": 1.0 },
+    { "key": "high_level_design", "label": "High-level design", "description": "Client → coordinator node → preference-list replicas with quorum; read/write path end to end.", "weight": 1.2 },
+    { "key": "scaling", "label": "Scaling & bottlenecks", "description": "Rebalancing, hot partitions, tombstone/compaction load, gossip overhead at large N.", "weight": 1.0 },
+    { "key": "observability", "label": "Observability", "description": "Per-op latency, quorum failures, hinted-handoff/anti-entropy backlog, replica lag, compaction stats.", "weight": 0.8 }
+  ],
+  "reference": {
+    "functional_requirements": [
+      "get(key) and put(key, value) as the core API",
+      "Tunable per-request consistency (choose R and W)",
+      "Always accept writes (highly available) even under failures/partitions",
+      "Durable, replicated storage",
+      "Automatic recovery and reconciliation after failures"
+    ],
+    "nonfunctional_requirements": [
+      "Highly available and partition-tolerant (AP; eventual consistency)",
+      "Horizontally scalable to thousands of nodes, incremental growth",
+      "Low-latency get/put (single-digit ms)",
+      "No single point of failure — fully decentralized",
+      "Predictable behavior under node/rack/region failure"
+    ],
+    "clarifying_questions": [
+      "How strong must consistency be — can the app tolerate eventual/conflicting reads?",
+      "Value sizes and read/write ratio?",
+      "Is availability strictly prioritized over consistency (Dynamo-style AP)?",
+      "Multi-region / multi-datacenter?",
+      "Can the application resolve conflicts, or do we need server-side LWW?"
+    ],
+    "qualifying_questions": [
+      "Do we need range queries/secondary indexes, or pure key access?",
+      "What's the durability requirement — how many replicas must ack before we call a write safe?"
+    ],
+    "estimations": {
+      "traffic": "1M ops/s; with N=3 replication each write touches 3 nodes → ~3M internal write ops/s",
+      "storage": "100TB dataset × N=3 ≈ 300TB raw; ~few TB per node → hundreds of nodes plus headroom",
+      "replication_overhead": "N=3 triples storage and write amplification; quorum reads touch R nodes each",
+      "gossip": "Gossip is O(nodes) chatter; at thousands of nodes must be bounded/periodic to stay cheap"
+    },
+    "core_components": ["Client/coordinator (any node can coordinate)", "Consistent-hash ring + virtual nodes", "Replica preference list per key", "Quorum read/write logic", "Vector-clock/versioning + reconciliation", "Gossip membership + failure detector", "Hinted handoff buffer", "Anti-entropy (Merkle-tree) repair", "Per-node storage engine (LSM)", "Read-repair path"],
+    "data_model": [
+      "Ring: key → hash position → first N distinct nodes clockwise = preference list",
+      "value record: {value, version (vector clock), timestamp, tombstone?}",
+      "hinted writes: {intended_node, key, value, vclock} buffered on a stand-in node",
+      "per-node LSM: commit log + memtable → SSTables + Merkle tree per range for anti-entropy"
+    ],
+    "api_design": [
+      "put(key, value, context?) with consistency W → { version }",
+      "get(key) with consistency R → { value(s), context } (may return siblings to reconcile)",
+      "context carries the vector clock the client last saw (for causal writes)",
+      "Per-request N/R/W knobs (e.g. W=1 fast+risky, R=W=quorum for R+W>N)"
+    ],
+    "high_level_design": "Keys are placed on a consistent-hash ring with virtual nodes; the first N distinct physical nodes clockwise from the key's hash form its preference list (spread across racks/regions). Any node can act as coordinator: on put, the coordinator writes locally and forwards to the other replicas, acking once W replicas confirm; on get, it queries the preference list and returns once R respond, performing read-repair on stale replicas. With R+W>N the read and write quorums overlap, giving read-your-writes-style guarantees while staying available. Concurrent writes produce divergent versions tracked by vector clocks — the store detects siblings and either resolves by last-write-wins or returns them for application-level merge, with tombstones for deletes. Membership and liveness propagate via gossip with a phi-accrual failure detector (no central coordinator). Temporary failures are covered by hinted handoff (a healthy node holds writes destined for a down node and replays them on recovery), and permanent divergence is repaired by anti-entropy using Merkle trees to find and sync differing key ranges. Each node stores data in an LSM engine (commit log + memtable + SSTables + compaction).",
+    "deep_dives": [
+      { "topic": "consistency_quorum", "probe": "Walk me through N, R, W. Show me why R+W>N gives overlap, what W=1/R=1 vs quorum buys you, and what 'sloppy quorum' means when the natural replicas are down." },
+      { "topic": "conflict_resolution", "probe": "Two clients put the same key concurrently on different coordinators during a partition. Both succeed. What does a later get return, and how do vector clocks let you tell a true conflict from a causal overwrite?" },
+      { "topic": "failure_handling", "probe": "A replica is down for 10 minutes, then for 3 days. Contrast hinted handoff (temporary) with anti-entropy / Merkle-tree repair (permanent divergence) — when does each kick in and what does each cost?" },
+      { "topic": "membership_gossip", "probe": "No central coordinator — how do nodes learn the ring and detect failures? Explain gossip and why a phi-accrual detector beats a fixed timeout heartbeat." },
+      { "topic": "partitioning", "probe": "How do virtual nodes improve balance and make adding/removing a node cheap? What moves when a node joins, and how do you avoid a rebalancing storm?" },
+      { "topic": "storage_engine", "probe": "Why an LSM tree over a B-tree for this write-heavy store? Walk the write path (commit log → memtable → SSTable), and explain how compaction and tombstones interact — including the deleted-data-resurrection risk." },
+      { "topic": "cache_stampede", "probe": "A read-through cache sits in front of hot keys. When a hot key's cache entry expires and quorum reads flood the replicas, how do you prevent a stampede onto the store?" },
+      { "topic": "cdc_pipeline", "probe": "You want to stream every change out to search/analytics. In an eventually-consistent, multi-version store, how do you do change data capture (CDC/Debezium-style) correctly given siblings, out-of-order writes, and tombstones?" }
+    ],
+    "followup_bank": [
+      { "trigger": "mentions quorum or consistency or R and W", "question": "Why does R+W>N matter, and what exactly do you give up choosing W=1 for lower write latency? What's a sloppy quorum?" },
+      { "trigger": "mentions vector clock or version or conflict", "question": "How does a vector clock distinguish a concurrent conflict from a causal overwrite, and who resolves siblings — the store (LWW) or the application?" },
+      { "trigger": "mentions replication or replica", "question": "How is the preference list chosen on the ring, and how do you ensure replicas span racks/regions for fault isolation?" },
+      { "trigger": "mentions failure or down node or recovery", "question": "Hinted handoff vs anti-entropy/Merkle trees — when does each apply, and what's the cost of each during recovery?" },
+      { "trigger": "mentions gossip or membership", "question": "Why gossip + phi-accrual failure detection instead of a central coordinator or fixed heartbeat timeouts?" },
+      { "trigger": "mentions lsm or storage or compaction", "question": "Walk the LSM write path and explain how tombstones + compaction can resurrect deleted data if GC grace is mishandled." },
+      { "trigger": "mentions cache", "question": "For a read-through cache over hot keys, what's the eviction policy and how do you prevent a stampede of quorum reads when a hot key expires?" },
+      { "trigger": "mentions cdc or stream or search index", "question": "How do you do CDC out of an eventually-consistent multi-version store — handling siblings, out-of-order writes, and tombstones without emitting corrupt downstream state?" }
+    ],
+    "scaling": [
+      "Consistent hashing + virtual nodes for even load and cheap incremental scaling",
+      "Tunable N/R/W per request to trade latency vs consistency vs durability",
+      "Sloppy quorum + hinted handoff to stay available during transient failures",
+      "Anti-entropy with Merkle trees to bound reconciliation cost",
+      "LSM compaction tuned to control write/space amplification",
+      "Bounded, periodic gossip to keep membership overhead sublinear in practice"
+    ],
+    "bottlenecks": [
+      "Hot partition/key overloading a preference list",
+      "Compaction I/O and space amplification under write-heavy load",
+      "Tombstone accumulation and read amplification",
+      "Anti-entropy / hinted-handoff backlog after long outages",
+      "Gossip and coordination overhead as node count grows",
+      "Cross-region write latency for wide replication"
+    ],
+    "tradeoffs": [
+      "AP + eventual consistency (always writable, may read stale/siblings) vs CP (linearizable, may reject during partition)",
+      "Low R/W (fast, weaker) vs quorum R+W>N (stronger, higher latency)",
+      "LWW conflict resolution (simple, can lose writes) vs vector-clock siblings + app merge (correct, complex)",
+      "LSM (write-optimized, compaction cost) vs B-tree (read-optimized, write amplification)",
+      "Strict quorum (consistent, may fail writes) vs sloppy quorum (available, temporary inconsistency)"
+    ],
+    "alternative_solutions": [
+      "CP quorum store (Raft/Paxos per shard, e.g. Spanner/CockroachDB-style) when strong consistency is required",
+      "Leaderless (Dynamo/Cassandra) vs leader-based per-partition replication",
+      "CRDTs for automatic, conflict-free merge instead of vector-clock siblings",
+      "Range partitioning (ordered, range scans) instead of hash partitioning (even load, no scans)"
+    ],
+    "observability": [
+      "Per-op latency and quorum success/failure rates",
+      "Hinted-handoff queue depth and anti-entropy repair backlog",
+      "Replica divergence / read-repair rates",
+      "Compaction throughput, SSTable counts, tombstone ratios",
+      "Gossip convergence time and failure-detector accuracy",
+      "Per-node storage and hot-partition detection"
+    ],
+    "security": [
+      "Authn/authz between clients and nodes and node-to-node (mutual TLS)",
+      "Encryption at rest and in transit for replicated data",
+      "Isolate/limit tenants to prevent hot-partition noisy-neighbor abuse",
+      "Audit administrative ring/membership changes"
+    ],
+    "reference_answer": "A staff-level answer reconstructs the Dynamo design coherently: consistent hashing with virtual nodes for partitioning; an N-node preference list (spread across racks/regions) for replication with any node able to coordinate; and tunable N/R/W quorums where R+W>N gives overlapping read/write sets. It handles concurrent writes with vector clocks — distinguishing causal overwrites from true conflicts (siblings) and choosing LWW vs application-level merge, with tombstones for deletes. It uses decentralized gossip membership with phi-accrual failure detection (no coordinator), covers temporary failures with sloppy quorum + hinted handoff and permanent divergence with anti-entropy Merkle-tree repair, and picks an LSM storage engine (commit log → memtable → SSTable → compaction), including the tombstone/GC-grace resurrection hazard. It positions the system explicitly on CAP (AP, eventual consistency) and names the real bottlenecks — hot partitions, compaction/tombstone load, and reconciliation backlog after outages. Strong candidates also address correct CDC over a multi-version, sibling-bearing store."
+  },
+  "interviewer_notes": "This is a staff question — expect the candidate to synthesize the whole Dynamo playbook, not just name pieces. The four load-bearing deep dives are quorum math (R+W>N and sloppy quorum), conflict resolution (vector clocks: causal vs concurrent, who merges), failure handling (hinted handoff vs anti-entropy/Merkle trees — when each applies), and decentralized gossip + phi-accrual. Push for precision: many candidates say 'vector clocks' without explaining sibling detection, or 'quorum' without the overlap argument. The LSM storage-engine detail (and the tombstone-resurrection / GC-grace hazard) is a great staff differentiator. Fire the CDC/Debezium probe with the twist that CDC over an eventually-consistent multi-version store is genuinely hard (siblings, reordering, tombstones); fire the cache eviction/stampede probe for hot keys. Have them place the system on CAP explicitly and defend the AP choice. Reserve time for hot partitions and reconciliation backlog as the real operational bottlenecks."
+}

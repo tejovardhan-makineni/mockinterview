@@ -1,0 +1,59 @@
+{
+  "id": "data-science-ml-concept",
+  "title": "ML Concept: Overfitting, Bias-Variance, and Honest Evaluation",
+  "track": "professional",
+  "domain": "data_science",
+  "modality": "conversational",
+  "difficulty": "mid",
+  "tags": ["machine-learning", "overfitting", "bias-variance", "evaluation", "cross-validation", "metrics"],
+  "prompt": "You train a model that gets 99% accuracy on your training data but only 82% on a held-out test set. Explain what's going on, why it happens, and how you'd diagnose and fix it. Along the way, tell me how you'd decide whether 82% is even a good result.",
+  "blurb": "An applied ML-concepts discussion — diagnose overfitting through the bias-variance lens and reason carefully about what evaluation actually tells you.",
+  "rubric": [
+    { "key": "concept_clarity", "label": "Concept clarity", "description": "Correctly explains overfitting and the bias-variance tradeoff: the model has memorized noise / high variance, generalizes poorly, and the train-test gap is the tell. Explains in intuitive terms, not just jargon.", "weight": 1.2 },
+    { "key": "diagnosis", "label": "Diagnosis", "description": "Proposes a concrete diagnostic process: learning curves, cross-validation, comparing train vs validation error over model complexity / training size, and checking for leakage before assuming overfitting.", "weight": 1.2 },
+    { "key": "remedies", "label": "Remedies & tradeoffs", "description": "Offers appropriate fixes (more data, regularization, simpler model, early stopping, feature selection, data augmentation, ensembling) and explains what each does to bias vs variance — not a random grab-bag.", "weight": 1.1 },
+    { "key": "evaluation", "label": "Evaluation rigor", "description": "Questions whether accuracy is the right metric (class imbalance, base rate, cost of errors), invokes a baseline, and mentions precision/recall/AUC/calibration and a proper train/val/test or CV split with no leakage.", "weight": 1.3 },
+    { "key": "leakage_awareness", "label": "Data leakage & validity", "description": "Proactively considers data leakage, distribution shift between train and test, and improper splitting (temporal leakage, duplicate rows, target leakage) as alternative explanations for the gap.", "weight": 1.0 },
+    { "key": "communication", "label": "Communication", "description": "Structured, teaches the concept clearly with a concrete example or intuition, and stays honest about tradeoffs rather than reciting definitions.", "weight": 1.0 }
+  ],
+  "reference": {
+    "scenario": "Conversational ML-concepts question at the mid bar. A large train-test gap (99% vs 82%) is the classic overfitting signature, and a strong candidate reads it through the bias-variance lens: the model has low bias but high variance — it has fit the training set's noise and idiosyncrasies rather than the underlying signal, so it fails to generalize. But the best answers don't stop at 'it's overfitting': they first rule out data leakage and improper splits (a suspiciously high train score plus a real-world-plausible test score can also indicate target leakage in training, or a leaky feature), lay out a diagnostic process (learning curves, cross-validation, plotting train vs validation error as complexity or training-set size grows), and then match remedies to the diagnosis — regularization (L1/L2), a simpler model, early stopping, more or augmented data, feature selection, dropout, or ensembling — explaining that each trades variance for a little bias. Crucially, they interrogate the evaluation itself: is accuracy even meaningful here? With class imbalance, 82% might be worse than a majority-class baseline; they'd want a baseline, the confusion matrix, precision/recall or AUC depending on error costs, calibration, and confirmation the test set is truly held out with no leakage and drawn from the deployment distribution. Weak answers recite the textbook definition of overfitting without a diagnostic plan, throw remedies without connecting them to bias/variance, never question whether accuracy is the right metric, and never consider leakage or distribution shift.",
+    "model_points": [
+      "Name it: a large train-test gap (99% vs 82%) is the classic overfitting signature — high variance, low bias. The model memorized noise and specifics of the training set instead of the generalizable signal.",
+      "Bias-variance framing: bias is error from an overly simple model (underfitting), variance is error from an overly flexible model that reacts to noise (overfitting); total generalization error trades the two, and here we're on the high-variance side.",
+      "Before concluding overfitting, rule out data leakage and bad splits: target leakage or a leaky feature can inflate training performance; duplicate rows across splits or temporal leakage can distort the gap. Check how the split was made.",
+      "Diagnose properly: use cross-validation rather than a single split, plot learning curves (train vs validation error as training-set size grows), and sweep model complexity — a widening gap as complexity grows confirms variance.",
+      "Match remedies to the diagnosis and say what each does: regularization (L1/L2) and simpler models add a little bias to cut variance; more/augmented data reduces variance without adding bias; early stopping and dropout curb overfitting during training; feature selection removes noisy predictors; ensembling/bagging averages out variance.",
+      "Interrogate the metric: is accuracy right? With class imbalance a majority-class baseline might already beat 82% — always compare to a baseline. Depending on error costs, use precision/recall, F1, AUC/PR-AUC, or calibration.",
+      "Validate the evaluation setup: the test set must be genuinely held out, split correctly (temporal split for time series), free of leakage, and representative of the deployment distribution — otherwise 82% is meaningless.",
+      "Consider distribution shift: if train and test come from different populations or time periods, the gap may reflect shift rather than overfitting, and the fix is different (better sampling, domain adaptation, monitoring)."
+    ],
+    "probes": [
+      { "trigger": "candidate only recites the definition of overfitting", "question": "Frame it in bias-variance terms — which one is high here, and what does that tell you about the fix?" },
+      { "trigger": "candidate lists remedies without reasoning", "question": "For each fix you named, what does it actually do to bias versus variance? Why would it help here specifically?" },
+      { "trigger": "candidate never questions accuracy", "question": "Is 82% accuracy even good? How would you know — what would you compare it against?" },
+      { "trigger": "candidate assumes overfitting immediately", "question": "Before you conclude it's overfitting, what else could produce a huge train-test gap? Could the training score be inflated for another reason?" },
+      { "trigger": "candidate ignores the split / leakage", "question": "How was that test set created, and how would you make sure there's no leakage between train and test?" },
+      { "trigger": "candidate doesn't mention validation methodology", "question": "You have one train/test split. Why might that be misleading, and what would you do instead?" },
+      { "trigger": "candidate assumes classes are balanced", "question": "Suppose 85% of examples are the negative class. What does that do to your read on 82% accuracy?" }
+    ],
+    "red_flags": [
+      "Recites 'overfitting = memorizing training data' with no diagnostic plan",
+      "Throws remedies (regularization, more data) without connecting them to bias/variance",
+      "Never questions whether accuracy is the right metric or invokes a baseline",
+      "Ignores data leakage, improper splits, and distribution shift as alternative causes",
+      "Confuses bias and variance, or gets the tradeoff direction wrong",
+      "Assumes balanced classes and a valid test set without checking",
+      "Suggests 'just add more layers/complexity' to fix a high-variance problem"
+    ],
+    "follow_ups": [
+      "If getting more labeled data is impossible, what's your next-best lever and why?",
+      "Your classes are 90/10. Redesign the evaluation — what metrics and what baseline?",
+      "How would you tell overfitting apart from a train/test distribution shift?",
+      "You add L2 regularization and now train and test are both 84%. Good or bad? What next?",
+      "What is target leakage, and give an example that would produce a 99% training score?"
+    ],
+    "exemplar_answer": "A strong answer: 'A 99%-to-82% gap is the textbook sign of overfitting — in bias-variance terms the model has low bias but high variance: it's flexible enough to fit the training set's noise and quirks, so it doesn't generalize. But before I commit to that, I'd check the plumbing — a suspiciously high training score can also come from target leakage or a leaky feature, and duplicate or temporally-mixed rows across the split can distort the gap, so I'd confirm how the split was made. To diagnose, I'd use cross-validation instead of a single split and plot learning curves: if validation error stays high while training error is near zero, and the gap widens as I add complexity, that's variance. The fixes I'd reach for, and why: regularization or a simpler model trade a little bias for much less variance; more or augmented data reduces variance directly; early stopping and dropout curb overfitting during training; and dropping noisy features helps. I'd match the fix to what the learning curve shows rather than throwing everything at it. Separately, I'd challenge the 82% itself — accuracy can be misleading. If the classes are, say, 85/15, a majority-class baseline already beats 82%, so I'd want a baseline, the confusion matrix, and precision/recall or AUC depending on which errors are costly, plus calibration if we need probabilities. And I'd make sure the test set is genuinely held out, split correctly for the data type, leakage-free, and drawn from the same distribution we'll deploy on — otherwise the number tells us nothing.' The answer teaches the concept, diagnoses before prescribing, and refuses to trust the metric blindly."
+  },
+  "interviewer_notes": "This is a teaching-and-reasoning question — assess whether the candidate can both explain the concept cleanly AND apply it diagnostically. The mid-level bar is bias-variance framing plus a real diagnostic process, not just the definition of overfitting. Push hard on two things weaker candidates skip: (1) questioning whether accuracy is even the right metric — use the imbalance probe if they assume balanced classes; and (2) ruling out data leakage / bad splits before concluding overfitting. If they list remedies as a grab-bag, make them tie each to bias vs variance. Reward intuition and concrete examples over jargon. The strongest candidates treat the evaluation setup itself as suspect and distinguish overfitting from distribution shift. Penalize metric-blindness, mislabeling bias vs variance, and 'add more capacity' as a fix for high variance."
+}

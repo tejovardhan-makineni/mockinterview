@@ -1,0 +1,96 @@
+{
+  "id": "ab-testing-platform",
+  "title": "Design an Experimentation / A-B Testing Platform",
+  "track": "engineering",
+  "domain": "ml_system_design",
+  "modality": "system_design",
+  "difficulty": "senior",
+  "tags": ["experimentation", "assignment", "metrics-pipeline", "statistics", "streaming", "data-quality"],
+  "prompt": "Design an experimentation platform that lets teams run A/B tests and feature rollouts across a large product. It must assign users to variants deterministically, expose assignments at low latency, compute experiment metrics, and run a statistics engine that reports significance and guardrails. Assume thousands of concurrent experiments and a very large user base.",
+  "blurb": "The platform behind trustworthy A/B tests: deterministic assignment, a metrics pipeline, and a stats engine that resists peeking and interference.",
+  "rubric": [
+    { "key": "requirements", "label": "Requirements gathering", "description": "Separates functional (assignment, targeting, metrics, stats reports, guardrails, ramp/rollback) from non-functional (low-latency assignment, correctness/trustworthiness, isolation between experiments, auditability).", "weight": 1.0 },
+    { "key": "clarifying_questions", "label": "Clarifying questions", "description": "Asks about number of concurrent experiments, user base size, unit of randomization, metric types, real-time vs batch results, org guardrails.", "weight": 1.0 },
+    { "key": "estimations", "label": "Back-of-envelope estimations", "description": "Derives assignment QPS, config size, exposure-event volume, metrics-pipeline throughput, storage for events and results.", "weight": 1.0 },
+    { "key": "assignment", "label": "Deterministic assignment", "description": "Hash(user_id, experiment_salt) → bucket; sticky, uniform, independent across experiments; low-latency edge/SDK evaluation; mutual exclusion / layers for overlapping experiments.", "weight": 1.3 },
+    { "key": "metrics_pipeline", "label": "Metrics pipeline", "description": "Exposure logging, event ingestion, joining exposures to metric events, batch + streaming aggregation, metric definitions/registry, data-quality checks.", "weight": 1.2 },
+    { "key": "stats_engine", "label": "Statistics engine", "description": "Hypothesis testing, variance reduction (CUPED), sequential/peeking correction, multiple comparisons, ratio metrics (delta method), minimum detectable effect / power.", "weight": 1.3 },
+    { "key": "experiment_integrity", "label": "Experiment integrity & interference", "description": "SRM (sample-ratio mismatch) detection, network/interference effects, novelty effects, carryover, guardrail metrics, isolation between experiments.", "weight": 1.2 },
+    { "key": "ml_evaluation_drift", "label": "Result validity & monitoring (evaluation)", "description": "Detecting invalid experiments (SRM, logging bugs, drift in traffic mix), pre-experiment A/A tests, monitoring metric health and pipeline correctness over time.", "weight": 1.2 },
+    { "key": "high_level_design", "label": "High-level design", "description": "Config service → assignment SDK/edge → exposure + event logging → metrics pipeline → stats engine → results UI; ramp/rollback controls and guardrails.", "weight": 1.1 },
+    { "key": "scaling", "label": "Scaling & reliability", "description": "Config distribution at scale, low-latency assignment with local evaluation, high-throughput event pipeline, incremental/streaming metric computation, availability with safe defaults.", "weight": 1.0 },
+    { "key": "observability", "label": "Observability", "description": "Assignment latency, exposure/event volumes, pipeline lag, SRM/guardrail alerts, config propagation lag, result freshness.", "weight": 0.8 },
+    { "key": "security", "label": "Governance & trust", "description": "Access control on experiment config, audit trail, preventing p-hacking/peeking abuse, guardrail enforcement, privacy of user-level data.", "weight": 0.8 }
+  ],
+  "reference": {
+    "functional_requirements": [
+      "Assign users to variants deterministically and stickily",
+      "Target experiments by attributes/segments and ramp exposure",
+      "Log exposures and collect metric events",
+      "Compute metrics per variant and run a statistics engine",
+      "Report significance, confidence intervals, and guardrails",
+      "Support safe ramp-up and instant rollback"
+    ],
+    "nonfunctional_requirements": [
+      "Assignment evaluated at very low latency (ideally local/edge)",
+      "Trustworthy results — correctness over speed; detect invalid experiments",
+      "Isolation: overlapping experiments must not confound each other",
+      "Scale to thousands of concurrent experiments and huge traffic",
+      "Auditable config changes and reproducible analyses"
+    ],
+    "clarifying_questions": [
+      "How many concurrent experiments and how large is the user base?",
+      "Unit of randomization — user, session, device, account, cluster?",
+      "Metric types — means, proportions, ratios, per-user aggregates?",
+      "Do teams need near-real-time readouts or is daily batch fine?",
+      "What org-wide guardrail metrics must every experiment respect?",
+      "Do experiments overlap, requiring mutual exclusion / layering?"
+    ],
+    "qualifying_questions": [
+      "Client-side (SDK/edge) or server-side assignment, or both?",
+      "Are there network/marketplace interference effects (two-sided platform)?",
+      "Any need for switchback or cluster-randomized designs?"
+    ],
+    "estimations": {
+      "assignment_qps": "If assignment is evaluated per request, effectively product traffic QPS (100Ks-Ms/s) — must be local, not a network call",
+      "config": "Thousands of experiments × targeting rules → MBs of config, pushed to SDKs/edge and cached",
+      "exposure_events": "One exposure log per user-experiment first-touch + metric events → tens of billions/day",
+      "metrics_pipeline": "High-throughput stream + daily batch; storage for raw events (PBs over time) + aggregated results",
+      "results": "Per experiment × variant × metric × day aggregates — modest, but many experiments"
+    },
+    "core_components": ["Experiment config service + registry", "Assignment SDK / edge evaluator (deterministic hashing)", "Exposure logging", "Event ingestion (streaming)", "Metrics pipeline (batch + streaming)", "Metric definition registry", "Statistics engine", "Results/analysis UI", "Guardrail + SRM monitor", "Ramp/rollout controller", "Governance + audit service"],
+    "data_model": ["experiments(exp_id PK, hypothesis, layer, variants[], targeting, allocation, status, owner)", "assignments(logged lazily): exposure(user_id, exp_id, variant, ts, context)", "metric_defs(metric_id, definition, type, is_guardrail)", "events(user_id, event_type, value, ts)", "results(exp_id, variant, metric_id, date, estimate, ci, p_value, n)", "audit(exp_id, change, actor, ts)"],
+    "api_design": [
+      "getVariant(user_id, exp_id) → variant  (evaluated locally via cached config + hash; logs exposure)",
+      "POST /v1/experiments { config } → creates/updates experiment (governed, audited)",
+      "GET /v1/experiments/{id}/results → { per-variant metrics, ci, p_value, srm_status, guardrails }",
+      "POST /v1/experiments/{id}/ramp { allocation } / /rollback"
+    ],
+    "high_level_design": "A config service holds experiment definitions (variants, targeting, allocation, layer) and pushes them to SDKs/edge evaluators. Assignment is a pure function: hash(user_id, experiment_salt) → bucket → variant, evaluated locally so there's no network hop, and it's sticky and independent across experiments; overlapping experiments are organized into mutually-exclusive layers so they don't confound. The first exposure per user-experiment is logged. Metric events stream into an ingestion layer; a metrics pipeline (streaming for early reads, batch for authoritative daily results) joins exposures to events, applies metric definitions, and produces per-variant aggregates. A statistics engine computes estimates, confidence intervals, and p-values with variance reduction (CUPED), sequential-testing correction to allow safe peeking, multiple-comparison control, and the delta method for ratio metrics. An integrity monitor runs SRM checks and guardrail evaluation, flagging invalid experiments. Results surface in a UI with ramp/rollback controls, all config changes audited.",
+    "deep_dives": [
+      { "topic": "assignment_hashing", "probe": "Design deterministic assignment. Why hash(user_id, per-experiment salt)? How do you keep it sticky, uniform, and independent across experiments, and evaluate it at request latency?" },
+      { "topic": "overlap_layers", "probe": "Two experiments touch the same surface. How do you prevent them from confounding — mutual exclusion, layers/universes, orthogonal randomization?" },
+      { "topic": "peeking_sequential", "probe": "Teams stare at dashboards and stop when it's 'significant.' Why is naive peeking wrong, and how does your stats engine allow continuous monitoring — sequential tests / always-valid p-values / Bayesian?" },
+      { "topic": "variance_reduction", "probe": "How do you increase sensitivity without more traffic — CUPED / covariate adjustment? What's the intuition and what does it require?" },
+      { "topic": "srm_integrity", "probe": "You expected 50/50 but see 50.8/49.2 over millions of users. Why does that invalidate the experiment, how do you detect it, and what causes it?" },
+      { "topic": "ratio_metrics", "probe": "A metric like clicks-per-session is a ratio of sums where the denominator varies per user. Why can't you use a naive t-test, and how does the delta method fix the variance?" },
+      { "topic": "cdc_config_freshness", "probe": "Experiment config changes (ramp, targeting, kill-switch) in the config service. How does that change propagate to every SDK/edge evaluator quickly and consistently, so you don't have users on stale allocations?" }
+    ],
+    "followup_bank": [
+      { "trigger": "mentions config or targeting or flag", "question": "When an experiment's config changes (ramp, kill-switch, targeting) in the source config store, how does that propagate to all SDK/edge evaluators — change-stream/push vs polling? What's your propagation-lag bound and consistency story?" },
+      { "trigger": "mentions cache or SDK or edge", "question": "SDKs cache experiment config locally. What's the refresh/eviction policy, and when config changes how do you invalidate stale-after-change cached config so users aren't stuck on old allocations?" },
+      { "trigger": "mentions significance or p-value or stop", "question": "How do you prevent invalid conclusions from peeking — sequential testing, always-valid p-values, or a fixed-horizon design with power analysis?" },
+      { "trigger": "mentions assignment or hash or bucket", "question": "How do you guarantee assignment is sticky, uniform, and independent across overlapping experiments?" },
+      { "trigger": "mentions SRM or sample ratio or imbalance", "question": "What's your SRM detection threshold and what are the common root causes you'd investigate?" },
+      { "trigger": "mentions metric or ratio", "question": "For a ratio metric where the denominator varies per user, how do you compute correct variance — delta method / bootstrap?" }
+    ],
+    "scaling": ["Local/edge assignment via cached config — no per-request network call", "Push config updates via a fast propagation channel with versioning", "Horizontally scaled event ingestion; partition by user/experiment", "Streaming for early reads + batch for authoritative results", "Incremental/materialized aggregation to avoid full recompute"],
+    "bottlenecks": ["Config propagation lag causing inconsistent assignment", "Exposure/event volume in the metrics pipeline", "Join of exposures to metric events at scale", "Stats compute across many experiments × metrics × slices", "Late/duplicate events corrupting aggregates"],
+    "tradeoffs": ["Local assignment (fast, config-lag risk) vs server assignment (consistent, latency)", "Streaming results (fast, noisier) vs batch (authoritative, delayed)", "Sequential tests (safe peeking, less power) vs fixed-horizon (more power, no peeking)", "More slices/metrics (insight) vs multiple-comparison + compute cost", "Sensitivity via CUPED (complex) vs more traffic/longer runs"],
+    "alternative_solutions": ["Bayesian A/B framework with posteriors instead of frequentist p-values", "Bandit/adaptive allocation for optimization-oriented tests", "Switchback / cluster randomization for marketplace interference", "Server-side-only assignment for strong consistency at latency cost"],
+    "observability": ["Assignment latency + config propagation lag", "Exposure/event volumes and pipeline lag", "SRM and guardrail alerts per experiment", "A/A test health checks and metric-definition drift", "Result freshness and stats-engine job status"],
+    "security": ["RBAC + approval workflow on experiment config; full audit trail", "Guardrail enforcement and auto-rollback on regressions", "Discourage p-hacking (fixed metrics/hypothesis registered up front)", "Privacy of user-level exposure/event data; aggregation for reporting", "Kill-switch access controls"],
+    "reference_answer": "A strong answer makes assignment a deterministic, local pure function — hash(user_id, per-experiment salt) → bucket — that's sticky, uniform, and independent across experiments, with overlapping experiments organized into mutually-exclusive layers, so it evaluates at request latency without a network hop. It logs exposures and builds a metrics pipeline (streaming for early reads, batch for authoritative results) that joins exposures to events under a governed metric registry with data-quality checks. Its statistics engine is the differentiator: variance reduction (CUPED), sequential/always-valid tests so teams can peek safely, multiple-comparison control, and the delta method for ratio metrics — plus SRM detection and guardrail monitoring to catch invalid experiments. It treats config propagation as a correctness concern (fast, versioned updates so no one is stuck on stale allocations), enforces governance/audit, and monitors pipeline and result health continuously. The theme is trustworthiness: correct assignment, correct statistics, and detection of the many ways experiments silently go wrong."
+  },
+  "interviewer_notes": "This platform lives or dies on trustworthiness, so reward candidates who prioritize correctness over cleverness. Assignment should be a deterministic, locally-evaluated hash — if they propose a network call per assignment, probe latency and push them to edge/SDK evaluation, then ask how overlapping experiments avoid confounding (layers). The senior separator is the statistics engine: make them address peeking (why naive significance-chasing is wrong; sequential/always-valid tests), ratio-metric variance (delta method), variance reduction (CUPED), and SRM as an experiment-invalidation signal. A candidate who only says 't-test for significance' is mid-level. Treat SRM/guardrails/A-A tests as the 'evaluation/validity' dimension — detecting when an experiment is silently broken. When they mention the config store, hit the CDC/propagation-freshness probe: how config changes reach every evaluator fast and consistently. When they mention SDK/edge config caching, probe refresh/eviction and stale-after-change. Reserve time for the metrics pipeline (exposure-to-event joins, late/duplicate events) and governance/audit. Weak candidates build a bucketing service; strong ones build a trustworthy inference system with integrity checks."
+}

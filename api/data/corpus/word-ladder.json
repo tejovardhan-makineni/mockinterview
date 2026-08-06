@@ -1,0 +1,73 @@
+{
+  "id": "word-ladder",
+  "title": "Word Ladder — Shortest Transformation Sequence",
+  "track": "engineering",
+  "domain": "coding",
+  "modality": "coding",
+  "difficulty": "senior",
+  "tags": ["bfs", "graph", "shortest-path", "strings", "hashset"],
+  "prompt": "Given two words beginWord and endWord, and a dictionary wordList, return the length of the shortest transformation sequence from beginWord to endWord such that: each step changes exactly one letter, and every intermediate word must exist in wordList. Return 0 if no such sequence exists. The sequence length counts the number of words in the path (including begin and end). All words are the same length and lowercase.",
+  "blurb": "An implicit unweighted graph where edges are one-letter edits — BFS gives the shortest path, and neighbor generation is the real design decision.",
+  "rubric": [
+    { "key": "problem_understanding", "label": "Problem understanding", "description": "Frames it as shortest path in an unweighted graph; nodes are words, edges connect words differing by one letter. Confirms endWord must be in the list.", "weight": 1.1 },
+    { "key": "approach", "label": "Approach", "description": "Chooses BFS (not DFS) for shortest path; recognizes the graph is implicit and must be traversed without materializing all edges.", "weight": 1.3 },
+    { "key": "correctness", "label": "Correctness", "description": "Level-order BFS counting levels, marking visited to avoid revisiting, returning at first sight of endWord; 0 if endWord absent or unreachable.", "weight": 1.2 },
+    { "key": "complexity_analysis", "label": "Complexity analysis", "description": "Neighbor generation dominates: O(L) placeholders * 26 vs O(N*L) pairwise. Reaches O(N * L^2) with the wildcard/placeholder trick and explains the tradeoff.", "weight": 1.2 },
+    { "key": "code_quality", "label": "Code quality", "description": "Clean neighbor-generation helper, wordList as a hash set for O(1) membership, no repeated string scans.", "weight": 1.0 },
+    { "key": "edge_cases", "label": "Edge cases", "description": "endWord not in list (return 0), begin==end handling, no path exists, single-letter words, duplicate handling.", "weight": 1.0 },
+    { "key": "testing", "label": "Testing", "description": "Tests an unreachable case and the endWord-missing case, not just a solvable ladder.", "weight": 0.8 },
+    { "key": "communication", "label": "Communication", "description": "Explains why BFS over DFS, and articulates the neighbor-generation tradeoff clearly.", "weight": 0.9 }
+  ],
+  "reference": {
+    "constraints": [
+      "1 <= word length L <= 10",
+      "1 <= wordList.length N <= 5000",
+      "All words same length, lowercase English letters",
+      "beginWord != endWord; all words in wordList are unique",
+      "beginWord need not be in wordList; endWord MUST be in wordList for a valid answer"
+    ],
+    "examples": [
+      {
+        "input": "beginWord=\"hit\", endWord=\"cog\", wordList=[\"hot\",\"dot\",\"dog\",\"lot\",\"log\",\"cog\"]",
+        "output": "5",
+        "explanation": "hit -> hot -> dot -> dog -> cog is 5 words. (hit->hot->lot->log->cog also length 5.)"
+      },
+      {
+        "input": "beginWord=\"hit\", endWord=\"cog\", wordList=[\"hot\",\"dot\",\"dog\",\"lot\",\"log\"]",
+        "output": "0",
+        "explanation": "endWord \"cog\" is not in wordList, so no valid sequence exists."
+      }
+    ],
+    "test_cases": [
+      { "input": "begin=\"a\", end=\"c\", list=[\"a\",\"b\",\"c\"]", "expected": "2 — a->c directly (single-letter words, one edit)" },
+      { "input": "begin=\"hot\", end=\"dog\", list=[\"hot\",\"dog\"]", "expected": "0 — hot and dog differ by 2 letters, no intermediate 'dot'/'hog' in list" },
+      { "input": "begin=\"hit\", end=\"cog\", list=[\"hot\",\"dot\",\"dog\",\"lot\",\"log\",\"cog\"]", "expected": "5 — the canonical example" },
+      { "input": "begin=\"talk\", end=\"tail\", list=[\"talk\",\"tons\",\"fall\",\"tail\",\"gale\",\"hall\",\"ails\"]", "expected": "0 — no one-letter path exists to tail" },
+      { "input": "begin=\"red\", end=\"tax\", list=[\"ted\",\"tex\",\"red\",\"tax\",\"tad\",\"den\",\"rex\",\"pee\"]", "expected": "4 — red->ted->tad->tax or red->ted->tex->tax" }
+    ],
+    "optimal_time": "O(N * L^2) — for each of N words, generate L placeholder patterns each costing O(L) to build",
+    "optimal_space": "O(N * L^2) for the placeholder adjacency map, O(N) for the queue/visited",
+    "approaches": [
+      { "name": "brute force (pairwise adjacency)", "idea": "Build a graph by comparing every pair of words (O(N^2 * L) to find one-letter-diff edges), then run BFS. Fine for small N but the edge-building dominates.", "time": "O(N^2 * L) to build + O(N^2) BFS", "space": "O(N^2)" },
+      { "name": "BFS with on-the-fly neighbor generation", "idea": "BFS from beginWord. For the current word, generate all L*25 one-letter variants and check O(1) membership in the wordList set; enqueue unvisited hits. Avoids the N^2 edge build.", "time": "O(N * L * 26) = O(N*L)", "space": "O(N)" },
+      { "name": "optimal: placeholder/wildcard buckets + BFS", "idea": "Preprocess: for each word, for each position i, form the pattern with position i replaced by '*' (e.g. 'hot' -> '*ot','h*t','ho*') and map pattern -> list of words. Two words are neighbors iff they share a pattern bucket. BFS using the buckets to find neighbors in O(L) per word. This is the cleanest way to enumerate neighbors without 26x scanning.", "time": "O(N * L^2)", "space": "O(N * L^2)" },
+      { "name": "bidirectional BFS (optimization)", "idea": "Search simultaneously from beginWord and endWord, always expanding the smaller frontier, stopping when the frontiers meet. Cuts the effective branching factor's exponent roughly in half.", "time": "O(N * L^2) worst case but far fewer nodes explored in practice", "space": "O(N * L^2)" }
+    ],
+    "follow_ups": [
+      "Word Ladder II: return ALL shortest transformation sequences, not just the length — BFS to build a parent/predecessor DAG by level, then DFS/backtrack to reconstruct every shortest path.",
+      "Implement bidirectional BFS and explain why it explores fewer nodes than one-directional BFS.",
+      "What if L is large (say 50)? The L^2 factor and the 26-variant approach both hurt; discuss the placeholder-bucket precompute tradeoff.",
+      "If edges had weights (some transformations cost more), what changes? (Dijkstra instead of BFS).",
+      "How would you handle a wordList too large for memory / a distributed dictionary?"
+    ],
+    "reference_solution": "First check endWord in the set; if not, return 0. Build the set S = wordList (for O(1) membership). BFS: queue holds words, dist tracked by level. Initialize queue=[beginWord], level=1, visited={beginWord}. While queue not empty: for each word at the current level, if word==endWord return level; generate neighbors: for each index i in 0..L-1, for each letter c in 'a'..'z' (skip the original), form candidate; if candidate in S and not visited, mark visited and enqueue for next level. After processing a full level, level++. If exhausted, return 0. Marking visited on ENQUEUE (not dequeue) prevents the same word being queued multiple times within a level. The placeholder optimization replaces the 26-letter inner loop with pattern-bucket lookups: precompute patternMap['*ot'] = ['hot','dot','lot',...], and a word's neighbors are the union of its L pattern buckets. Bidirectional BFS keeps two visited/frontier sets (from begin and end) and swaps to always expand the smaller; when a generated neighbor is in the opposite frontier, the answer is the sum of the two levels.",
+    "pitfalls": [
+      "Using DFS — it does not give the shortest path in an unweighted graph.",
+      "Forgetting to check endWord is in the list up front (return 0).",
+      "Marking visited on dequeue instead of enqueue, causing duplicate work or wrong level counts.",
+      "Off-by-one in the length count — the answer counts words (nodes), so beginWord is level 1, not 0.",
+      "Rebuilding neighbor lists by rescanning all N words each step (O(N) per node) instead of generating variants."
+    ]
+  },
+  "interviewer_notes": "The key early signal is reframing this as unweighted shortest path => BFS. If the candidate reaches for DFS or Dijkstra, ask 'what's the cost of each edge?' to steer them to plain BFS. Let them get a correct BFS first even if neighbor generation is the naive O(N^2) pairwise build; then interrupt with 'how do you find a word's neighbors without comparing against all N words?' — pushing to the 26-variant or placeholder-bucket approach is the senior discriminator. Watch visited-on-enqueue and the endWord-not-in-list guard; nudge only if they miss the latter during their own testing. Strong candidates should be escalated to bidirectional BFS (why it helps) and then Word Ladder II (reconstructing all shortest paths via a predecessor DAG), which is a genuine staff-level extension."
+}

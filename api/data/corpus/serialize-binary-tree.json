@@ -1,0 +1,72 @@
+{
+  "id": "serialize-binary-tree",
+  "title": "Serialize and Deserialize a Binary Tree",
+  "track": "engineering",
+  "domain": "coding",
+  "modality": "coding",
+  "difficulty": "senior",
+  "tags": ["tree", "recursion", "bfs", "dfs", "design", "encoding"],
+  "prompt": "Design an algorithm to serialize a binary tree to a string and deserialize that string back into the exact same tree structure. Serialization is the process of converting the in-memory tree to a string (or byte stream) so it can be stored or transmitted; deserialization reconstructs the original tree from that string. The tree is a general binary tree — values may repeat and are not ordered. You define the format; serialize(deserialize(t)) must reproduce t.",
+  "blurb": "You own the wire format — the crux is encoding null children so structure is unambiguous, then reconstructing in the same traversal order.",
+  "rubric": [
+    { "key": "problem_understanding", "label": "Problem understanding", "description": "Recognizes it's a general (unordered, possibly-duplicate-value) tree, so structure must be captured explicitly; clarifies value domain and null representation.", "weight": 1.1 },
+    { "key": "approach", "label": "Approach", "description": "Picks a traversal (preorder DFS or level-order BFS) and commits to encoding nulls as explicit markers so the structure is recoverable.", "weight": 1.3 },
+    { "key": "correctness", "label": "Correctness", "description": "Deserialize consumes tokens in the SAME order serialize produced them; null markers reconstruct missing children exactly; round-trips arbitrary shapes.", "weight": 1.3 },
+    { "key": "complexity_analysis", "label": "Complexity analysis", "description": "O(n) time and O(n) space for both directions; notes recursion/queue depth and output size are O(n).", "weight": 1.0 },
+    { "key": "code_quality", "label": "Code quality", "description": "Clean token stream (delimiter + null sentinel), a shared index/iterator for deserialize, no fragile string parsing.", "weight": 1.1 },
+    { "key": "edge_cases", "label": "Edge cases", "description": "Empty tree (null root), single node, skewed/degenerate tree, duplicate values, negative values, values containing the delimiter.", "weight": 1.1 },
+    { "key": "testing", "label": "Testing", "description": "Round-trips a skewed tree and an empty tree, and confirms duplicate values don't corrupt reconstruction.", "weight": 0.8 },
+    { "key": "communication", "label": "Communication", "description": "Clearly states the format contract (delimiter, null sentinel, traversal order) before coding, so both halves agree.", "weight": 0.9 }
+  ],
+  "reference": {
+    "constraints": [
+      "0 <= number of nodes <= 10^4",
+      "-1000 <= Node.val <= 1000 (values may repeat; tree is not a BST)",
+      "Format is your choice, but serialize then deserialize must reproduce the identical tree",
+      "Must handle the empty tree (root == null)"
+    ],
+    "examples": [
+      {
+        "input": "root = [1,2,3,null,null,4,5] (1 with left=2, right=3; 3 has children 4 and 5)",
+        "output": "serialize -> \"1,2,#,#,3,4,#,#,5,#,#\" (preorder with '#' for null); deserialize rebuilds the identical tree",
+        "explanation": "Preorder visits 1, then left subtree (2 with two null children), then right subtree (3, then 4 with nulls, then 5 with nulls). '#' marks every absent child so structure is unambiguous."
+      },
+      {
+        "input": "root = [] (empty tree)",
+        "output": "\"#\" (a single null marker); deserialize returns null",
+        "explanation": "The empty tree must round-trip too."
+      }
+    ],
+    "test_cases": [
+      { "input": "single node [7]", "expected": "round-trips to a single node with val 7 (\"7,#,#\")" },
+      { "input": "left-skewed [5,4,null,3,null,2,null] (a chain to the left)", "expected": "round-trips preserving the degenerate chain" },
+      { "input": "tree with duplicate values [2,2,2]", "expected": "round-trips; duplicates don't confuse reconstruction because position, not value, drives structure" },
+      { "input": "tree with negatives [-3,-1,-2]", "expected": "round-trips; parser must handle the minus sign, not split it as a delimiter" },
+      { "input": "empty tree []", "expected": "serialize -> \"#\", deserialize -> null" }
+    ],
+    "optimal_time": "O(n) to serialize and O(n) to deserialize (each node visited once)",
+    "optimal_space": "O(n) for the output string plus O(h) recursion stack (or O(n) queue for BFS)",
+    "approaches": [
+      { "name": "naive: preorder values only (no null markers)", "idea": "Emit just the node values in preorder. This is ambiguous for a general tree — many distinct trees produce the same value sequence — so it cannot be deserialized uniquely. (It works ONLY for a BST, where a preorder sequence plus the ordering invariant is enough.)", "time": "O(n)", "space": "O(n)", "note": "Rejected for general trees: structure is lost." },
+      { "name": "optimal A: preorder DFS with null sentinels", "idea": "Serialize with a recursive preorder that emits each node's value, then recurses left, then right; emit a sentinel (e.g. '#') for null children. Deserialize reads tokens left-to-right with a shared cursor: read a token; if '#', return null; else create a node, then recursively build left, then right. The null markers make the structure unambiguous.", "time": "O(n)", "space": "O(n)" },
+      { "name": "optimal B: level-order BFS (LeetCode-style)", "idea": "Serialize by BFS, emitting values level by level with a sentinel for each null child of a real node. Deserialize with a queue: the first token is the root; then consume pairs of tokens as the left/right children of dequeued nodes, enqueuing non-null children. Produces the familiar bracket-array format.", "time": "O(n)", "space": "O(n)" },
+      { "name": "length-prefixed / typed encoding (robustness)", "idea": "For a compact binary format, write a null bit per child and length-prefix each value, avoiding delimiter-collision issues entirely. More work but robust to arbitrary value content.", "time": "O(n)", "space": "O(n)" }
+    ],
+    "follow_ups": [
+      "Reconstruct a BST from preorder ONLY (no null markers) using value bounds — O(n) — and explain why the general tree can't do this.",
+      "Serialize an N-ary tree: encode each node's child count, or use null/'end-of-children' markers.",
+      "Make the format compact: bit-per-null-child + fixed-width or varint values; compare size vs. the CSV-with-'#' format.",
+      "Make it delimiter-safe: what if values are arbitrary strings that may contain the comma/'#'? (length-prefixing or escaping).",
+      "Deserialize iteratively instead of recursively to avoid stack overflow on a skewed 10^4-deep tree."
+    ],
+    "reference_solution": "Format contract: comma-separated tokens, '#' for null, preorder. serialize(root): use a helper that appends to a list: if node is null, append '#'; else append str(node.val), then recurse(node.left), then recurse(node.right). Join with ','. serialize(null) -> '#'. deserialize(data): split on ',' into tokens; keep a shared index (closure/iterator). build(): read tokens[i]; i++; if token == '#' return null; node = TreeNode(int(token)); node.left = build(); node.right = build(); return node. The invariant is that build() consumes exactly the tokens serialize emitted for that subtree, in the same preorder, so left is fully consumed before right begins. This is why duplicate values are fine — position in the stream, not value, determines structure. For an iterative deserialize (avoiding deep recursion), the BFS/queue variant is cleaner: read root, push to queue; while tokens remain, dequeue a parent and assign its next two tokens as left/right children, enqueuing any non-null child.",
+    "pitfalls": [
+      "Omitting null markers — structure becomes ambiguous for general trees (only works for BSTs).",
+      "Deserialize reading tokens in a different order than serialize wrote them (e.g. right before left).",
+      "Using a value that can appear in the data as the delimiter/sentinel — pick a sentinel outside the value domain or length-prefix.",
+      "Mishandling the empty tree (null root) as a special case.",
+      "Recursive deserialize blowing the stack on a 10^4-deep skewed tree — mention the iterative option."
+    ]
+  },
+  "interviewer_notes": "This tests format design as much as coding. The single most important early question to see them ask (or to prompt): 'is this a BST or a general tree?' — because a general tree needs explicit null encoding. If they propose preorder-values-only, hand them two different trees that produce the same value sequence and let them discover the ambiguity themselves rather than telling them. Stay silent through the recursion; the classic bug is deserialize consuming tokens in a different order than serialize wrote — surface it by asking them to trace [1,2,3,null,null,4,5]. Confirm they handle the empty tree. Escalate strong candidates to: reconstruct a BST from preorder alone (bounds trick, O(n)), then a compact binary/varint format, and finally an iterative deserialize to survive a 10^4-deep skewed tree."
+}

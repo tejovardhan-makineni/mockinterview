@@ -1,0 +1,55 @@
+{
+  "id": "pm-metrics",
+  "title": "Metrics & Diagnosis: A Feature's Engagement Dropped",
+  "track": "professional",
+  "domain": "product_management",
+  "modality": "conversational",
+  "difficulty": "mid",
+  "tags": ["metrics", "analytics", "diagnosis", "product-sense", "root-cause"],
+  "prompt": "You're the PM for the 'Groups' feature in a large social app. Daily messages sent in Groups dropped 15% week-over-week. The eng and data teams are looking at you. How would you define the right metrics for this feature and figure out what happened?",
+  "blurb": "A metrics + diagnosis case — define the feature's success metrics, then run a structured root-cause investigation of a sudden drop.",
+  "rubric": [
+    { "key": "metrics", "label": "Metric definition", "description": "Defines a sensible metric framework for the feature — a primary success metric tied to the feature's goal, plus input/engagement, quality, and guardrail/counter metrics — not just the one number that moved.", "weight": 1.3 },
+    { "key": "structure", "label": "Structured diagnosis", "description": "Runs a MECE root-cause investigation: is the drop real (instrumentation/logging), internal (a release, experiment, or dependency), external (seasonality, a competitor, an event), and which segment/dimension is it concentrated in.", "weight": 1.3 },
+    { "key": "hypothesis", "label": "Hypothesis prioritization", "description": "Forms hypotheses and prioritizes which to check first by likelihood and ease of ruling out, rather than checking everything at random.", "weight": 1.1 },
+    { "key": "quantitative", "label": "Quantitative reasoning", "description": "Decomposes the 15% drop by dimension (platform, geo, cohort, new vs existing, funnel step) to localize it, and reasons about magnitude and whether it's within normal variance.", "weight": 1.1 },
+    { "key": "judgment", "label": "Judgment & next steps", "description": "Distinguishes symptom from root cause, knows a metric drop can be good or benign, and lands on a concrete next action (rollback, fix, monitor, or escalate).", "weight": 1.0 },
+    { "key": "communication", "label": "Communication", "description": "Explains the framework and investigation clearly and calmly, signposts, and adapts as evidence comes in.", "weight": 0.9 }
+  ],
+  "reference": {
+    "scenario": "Diagnostic + metrics case. 'Daily messages sent in Groups' fell 15% WoW. There is no single right cause — the interviewer evaluates the metric framework and a disciplined, MECE diagnosis. Plausible causes to steer toward if the candidate localizes well: (a) a release regression — a recent app update broke the 'send' button on Android, so the drop is concentrated on Android and at the compose/send funnel step (a real, actionable cause); alternative branches the interviewer can also run: a logging/instrumentation change undercounting messages (the drop is not real), a change that moved users to a different surface (e.g. Groups content now shown in the main feed, so engagement shifted, not lost — a benign/good drop), or seasonality/an external event. A strong candidate defines metrics first, then narrows by dimension to localize the drop before naming a cause, and treats the number as a symptom.",
+    "model_points": [
+      "Clarify the feature's goal and what the metric represents before reacting: what is Groups for (connection, retention?), and is 'daily messages sent' even the right north-star, or an input metric?",
+      "Lay out a metric framework: primary/north-star (e.g. weekly connected groups, or retained group participants), input/engagement metrics (messages sent, active senders, groups active), quality metrics (message read/reply rate, meaningful interactions), and guardrails/counter metrics (spam reports, notification opt-outs, overall app DAU so you don't optimize Groups at the app's expense).",
+      "Reframe the 15% drop as a symptom and run a MECE diagnosis: (1) Is it real? Check instrumentation/logging changes and data-pipeline issues first. (2) Internal causes: recent releases, A/B experiments, infra incidents, a changed dependency or surface. (3) External causes: seasonality, holidays, a competitor, a news event.",
+      "Localize by decomposing the drop across dimensions: platform (iOS vs Android), app version, geography, user cohort (new vs existing, power vs casual), and funnel step (open Groups -> compose -> send). A concentrated drop points to a cause.",
+      "Prioritize hypotheses by likelihood x ease of checking — a recent release is fast to confirm via version/platform cuts, so check that before slow external theories.",
+      "Distinguish symptom from root cause and judge whether the drop is bad, benign, or good — e.g. if engagement simply moved to another surface, total value may be unchanged.",
+      "Land on a next action tied to the finding: roll back or hotfix a regression, correct instrumentation, keep monitoring if within variance, or escalate with a clear readout."
+    ],
+    "probes": [
+      { "trigger": "candidate immediately guesses a cause", "question": "Before theories — is this drop even real? What would you check first to rule out measurement error?" },
+      { "trigger": "candidate only tracks 'messages sent'", "question": "Is messages-sent the right success metric for Groups, or an input? What would your primary metric and guardrails be?" },
+      { "trigger": "candidate lists causes without localizing", "question": "How would you narrow this down fast? What dimensions would you cut the 15% by to localize where it's happening?" },
+      { "trigger": "candidate finds it's Android-only", "question": "It's concentrated on Android and at the send step after a recent release. What's your hypothesis and your next move?" },
+      { "trigger": "candidate assumes the drop is bad", "question": "Could a 15% drop in messages actually be fine or even good? Under what scenario, and how would you tell?" },
+      { "trigger": "candidate never prioritizes checks", "question": "You have five hypotheses and limited time — which do you check first and why?" }
+    ],
+    "red_flags": [
+      "Panics and guesses a root cause before verifying the drop is real",
+      "Fixates on the single metric that moved with no framework (no guardrails, no quality metrics)",
+      "Unstructured hypothesis dump with no MECE breakdown and no prioritization",
+      "Never decomposes by dimension to localize the drop",
+      "Assumes any drop is automatically bad; misses that engagement may have shifted or the metric is mis-instrumented",
+      "No concrete next action or escalation plan"
+    ],
+    "follow_ups": [
+      "You confirm it's an Android send-button regression from last week's release. Roll back, hotfix, or ship forward — how do you decide, and what do you tell leadership?",
+      "If the data instead showed the drop is uniform across every platform, version, and geo, what would that suggest?",
+      "How would you set an alerting threshold so you catch a real regression but aren't paged on normal weekly variance?",
+      "Suppose messages dropped 15% but time-in-Groups rose — how do you reconcile that, and which metric do you trust?"
+    ],
+    "exemplar_answer": "A strong candidate resists guessing and first frames the feature's goal, questioning whether 'messages sent' is the north-star or just an input, then sketches a metric framework: a primary metric (retained/connected group participants), engagement inputs (active senders, active groups, messages), quality (reply/read rate, reported spam), and guardrails (notification opt-outs, overall app DAU). They treat the 15% as a symptom and run a MECE diagnosis — first ruling out instrumentation/logging changes ('is it even real?'), then internal causes (recent releases, experiments, infra, a surface change), then external (seasonality, events). Crucially they localize by decomposing the drop across platform, app version, geo, cohort, and funnel step, prioritizing the fast checks (version/platform cuts) first. Finding the drop concentrated on Android at the send step right after a release, they hypothesize a regression, and their next action is to confirm via the release, roll back or hotfix, and give leadership a crisp readout. They note explicitly that a drop can be benign or good — if engagement merely shifted to another surface — and would verify total value before declaring an emergency."
+  },
+  "interviewer_notes": "Two skills in one: metric definition and structured diagnosis. Make the candidate define a metric framework before they diagnose — many jump straight to root-cause theories. The single most important behavior is checking 'is the drop real?' (instrumentation) before external theories, and localizing by dimension rather than guessing. Steer via probes: once they start cutting the data, reveal it's Android-only at the send step after a release and see if they reach 'regression -> roll back.' Reward the insight that a metric drop can be benign or good. Penalize panic, single-metric tunnel vision, and unprioritized hypothesis dumps. Close on the rollback-vs-hotfix judgment follow-up."
+}

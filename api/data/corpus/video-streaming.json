@@ -1,0 +1,102 @@
+{
+  "id": "video-streaming",
+  "title": "Design a Video Streaming Platform (YouTube/Netflix)",
+  "track": "engineering",
+  "domain": "system_design",
+  "modality": "system_design",
+  "difficulty": "senior",
+  "tags": ["cdn", "transcoding", "adaptive-bitrate", "blob-storage", "pipeline", "recommendations"],
+  "prompt": "Design a video streaming platform like YouTube or Netflix. Creators upload videos; the system transcodes them into multiple resolutions, distributes them globally, and streams them to viewers with adaptive bitrate. Also cover metadata, view counts, and a basic recommendations feed. Assume global scale with a very large catalog and heavy read traffic.",
+  "blurb": "An upload+transcoding pipeline feeding a CDN, adaptive-bitrate delivery, and the read-heavy metadata plane around it.",
+  "rubric": [
+    { "key": "requirements", "label": "Requirements gathering", "description": "Separates functional (upload, transcode, stream/ABR, metadata, search, view counts, recommendations) from non-functional (startup latency, global availability, durability of masters, cost).", "weight": 1.0 },
+    { "key": "clarifying_questions", "label": "Clarifying questions", "description": "Asks about catalog size, upload vs view ratio, live vs VOD, device/codec matrix, target startup time, DRM.", "weight": 1.0 },
+    { "key": "estimations", "label": "Back-of-envelope estimations", "description": "Upload rate, storage for masters + renditions, egress bandwidth (the dominant cost), transcoding compute, CDN cache footprint.", "weight": 1.1 },
+    { "key": "upload_pipeline", "label": "Upload & transcoding pipeline depth", "description": "Chunked/resumable upload, segmentation, fan-out transcode jobs per rendition, DAG/queue orchestration, retries, packaging (HLS/DASH). Key senior signal.", "weight": 1.4 },
+    { "key": "cdn_delivery", "label": "CDN & adaptive bitrate", "description": "Segment-based delivery (HLS/DASH), multi-CDN, edge caching, origin shielding, ABR ladder, manifest design.", "weight": 1.3 },
+    { "key": "api_design", "label": "API design", "description": "initiate/complete upload, get manifest, playback URLs (signed), metadata/search, view/heartbeat events.", "weight": 0.9 },
+    { "key": "data_model", "label": "Data model", "description": "video metadata, rendition/asset records, upload jobs, view counts; store choices (blob for media, RDBMS/NoSQL for metadata).", "weight": 1.0 },
+    { "key": "high_level_design", "label": "High-level design", "description": "Write/ingest path (upload→transcode→package→publish) vs read/playback path (metadata→manifest→CDN segments).", "weight": 1.2 },
+    { "key": "scaling", "label": "Scaling", "description": "Elastic transcode fleet, CDN tiering, metadata sharding + caching, popular-title prewarming.", "weight": 1.0 },
+    { "key": "bottlenecks", "label": "Bottlenecks", "description": "Egress bandwidth cost, transcode backlog for viral uploads, cold CDN cache for long-tail, metadata hot keys.", "weight": 1.0 },
+    { "key": "view_counts", "label": "View counts & analytics", "description": "Approximate/streaming view counting, dedup, heartbeat-based watch time, hot-video counter handling.", "weight": 0.8 },
+    { "key": "recommendations", "label": "Recommendations", "description": "Candidate generation + ranking, precompute vs online, feedback signals; acceptable at a high level.", "weight": 0.7 },
+    { "key": "observability", "label": "Observability & reliability", "description": "QoE metrics (startup time, rebuffer ratio), transcode pipeline lag, CDN hit ratio, durability of masters.", "weight": 0.8 }
+  ],
+  "reference": {
+    "functional_requirements": [
+      "Creators upload videos (large files, resumable)",
+      "Transcode each upload into multiple resolutions/bitrates (ABR ladder) and package (HLS/DASH)",
+      "Stream to viewers with adaptive bitrate on many devices",
+      "Video metadata, thumbnails, search",
+      "View counts and watch-time analytics",
+      "A recommendations feed"
+    ],
+    "nonfunctional_requirements": [
+      "Low startup latency (< ~2s) and low rebuffer ratio globally",
+      "Very read-heavy; global availability",
+      "Durable storage of original masters (11 9s style durability)",
+      "Cost-efficient egress (bandwidth dominates cost)",
+      "Elastic to viral upload/view spikes"
+    ],
+    "clarifying_questions": [
+      "Catalog size and daily uploads vs daily views?",
+      "VOD only, or live streaming too?",
+      "Which devices/codecs must we support (H.264/H.265/AV1, mobile/TV/web)?",
+      "Target startup time and quality (up to 4K/HDR)?",
+      "Do we need DRM/geo-restrictions?",
+      "Are view counts exact or approximate, and real-time or delayed?"
+    ],
+    "qualifying_questions": [
+      "Do we own the CDN or use commercial multi-CDN?",
+      "Monetization/ads that affect the manifest?",
+      "How fresh must recommendations be?"
+    ],
+    "estimations": {
+      "traffic": "500K uploads/day (~6/s avg) but each fans out to many transcode jobs; views ~ billions/day, tens of millions concurrent streams at peak.",
+      "storage": "Master: e.g., 10GB/hour source. Renditions add ~1.5-2x the master across the ladder. Catalog of billions of hours → exabytes; store masters in cheap cold-ish durable object storage, renditions in warm object storage.",
+      "bandwidth": "Egress is the dominant cost: tens of millions of concurrent streams × few Mbps → tens of Tbps globally, served almost entirely from CDN edge to keep origin egress and cost low.",
+      "compute": "Transcoding is CPU/GPU-heavy: one upload → N renditions × segments; elastic fleet sized to backlog SLA."
+    },
+    "core_components": ["Upload service (resumable/chunked)", "Raw/master object store (blob)", "Transcoding pipeline (orchestrator + worker fleet)", "Packaging (HLS/DASH segmenter)", "Rendition object store", "Multi-CDN + origin shield", "Metadata service + store", "Search index", "View/analytics streaming pipeline", "Recommendations service", "DRM/license server"],
+    "data_model": [
+      "videos(video_id PK, creator_id, title, description, status, duration, created_at, visibility)",
+      "assets(asset_id, video_id, rendition, codec, bitrate, resolution, storage_url, manifest_url)",
+      "upload_jobs(job_id, video_id, state, progress, error) — pipeline tracking",
+      "view_counts(video_id, count) — approximate, updated from stream",
+      "manifests: HLS/DASH per video referencing segment URLs on CDN"
+    ],
+    "api_design": [
+      "POST /v1/uploads { filename, size, content_type } → { upload_id, chunk_urls } (resumable)",
+      "PUT <chunk_url> (multipart) ; POST /v1/uploads/{id}/complete → triggers transcode",
+      "GET /v1/videos/{id} → { metadata, manifest_url }",
+      "GET /v1/videos/{id}/manifest.m3u8 → HLS manifest with signed segment URLs",
+      "POST /v1/videos/{id}/heartbeat { position, session_id } → watch-time/view event",
+      "GET /v1/feed → recommended videos"
+    ],
+    "high_level_design": "Ingest path: client does a resumable/chunked upload to the upload service, which lands the master in durable object storage and enqueues a transcode job. An orchestrator fans the job out into per-rendition, per-segment transcode tasks on an elastic worker fleet (a DAG: probe → split → transcode ladder → package HLS/DASH → generate thumbnails/manifests). On success the video's status flips to published, assets are written, and metadata/search are updated. Playback path: viewer requests metadata + a manifest; the player fetches an ABR manifest and pulls small media segments from the nearest CDN edge, adapting bitrate to bandwidth. The CDN serves ~all bytes; on a miss it goes to an origin shield then the rendition store. Metadata reads are served from a cache in front of a sharded metadata store. View/heartbeat events stream async to an analytics pipeline (approx counting, watch time) that also feeds recommendations.",
+    "deep_dives": [
+      { "topic": "upload_pipeline", "probe": "A creator uploads a 4-hour 4K video and it fails at 90%. How does resumable upload work, and then walk me through the transcoding pipeline — how do you segment, fan out renditions, orchestrate the job DAG, retry failed segments, and only publish when the whole ladder is ready?" },
+      { "topic": "cdn_delivery", "probe": "How does adaptive bitrate actually work end to end — manifest, segment sizes, the bitrate ladder, and how the player switches? How do you keep origin egress low with tiered caching / origin shield, and how do you prewarm the CDN for a title you expect to go viral?" },
+      { "topic": "cold_cache", "probe": "Your catalog is mostly long-tail. A rarely-watched video is requested and it's not on any edge. Describe the cache-miss path and how you avoid a stampede to origin when a video suddenly trends and many edges miss at once." },
+      { "topic": "view_counts", "probe": "How do you count views for a video getting a million views a minute without a hot counter melting down, and how do you dedup a single viewer refreshing? Exact vs approximate, and how do heartbeats give you watch time?" },
+      { "topic": "cdc_metadata", "probe": "Video metadata lives in your primary store but must reach the search index and the recommendations feature store. How do you propagate changes — CDC/Debezium off the metadata DB vs dual writes — and how do you handle publish-status transitions consistently?" },
+      { "topic": "storage_tiering", "probe": "Masters are huge and rarely re-read; renditions are read constantly. How do you tier storage for cost, and what's your durability strategy for masters vs regenerable renditions?" }
+    ],
+    "followup_bank": [
+      { "trigger": "mentions cdn or cache or edge", "question": "How do you prevent an origin stampede when a long-tail video suddenly trends and many edges miss simultaneously — request coalescing at the shield, prewarming, jittered TTLs?" },
+      { "trigger": "mentions database or store or metadata", "question": "How do metadata changes reach search and recommendations — CDC/Debezium vs dual writes — and how do you keep publish-status transitions consistent across them?" },
+      { "trigger": "mentions transcode or transcoding", "question": "How do you orchestrate the per-rendition job DAG, retry individual failed segments, and avoid publishing a half-transcoded video?" },
+      { "trigger": "mentions view count or counter", "question": "How do you count views on a viral video without a hot-key counter, and how do you dedup refreshes — exact vs approximate?" },
+      { "trigger": "mentions object storage or s3 or blob", "question": "How do you tier masters vs renditions for cost, and what's regenerable vs must-be-durable?" }
+    ],
+    "scaling": ["Elastic transcode fleet sized to backlog SLA (GPU for heavy codecs)", "Multi-CDN with origin shield tier to cut origin egress", "Shard + cache metadata; CDN-cache thumbnails/manifests", "Prewarm edges for anticipated-popular titles", "Async streaming pipeline for views/analytics"],
+    "bottlenecks": ["Egress bandwidth cost (dominant)", "Transcode backlog on viral/large uploads", "Cold CDN cache for long-tail + origin stampede when a title trends", "Hot metadata keys and hot view counters", "Storage growth from renditions"],
+    "tradeoffs": ["Precompute all renditions on upload (fast playback, wasted compute on unwatched videos) vs transcode-on-demand (cheaper, slower first play)", "More ABR rungs (smoother adaptation, more storage/compute) vs fewer", "Exact view counts (costly, hot key) vs approximate streaming counts", "Multi-CDN (resilience, cost leverage, complexity) vs single CDN", "Newer codecs like AV1 (smaller egress, higher encode cost) vs H.264 (cheap encode, bigger files)"],
+    "alternative_solutions": ["Per-title encoding (optimize ladder per content complexity) vs fixed ladder", "Just-in-time packaging (store one mezzanine, package to HLS/DASH at request) vs pre-packaging", "P2P-assisted delivery for popular live events", "Serverless transcode for spiky small workloads"],
+    "observability": ["QoE: startup time, rebuffer ratio, bitrate distribution per region", "Transcode pipeline lag and failure rate", "CDN cache hit ratio and origin egress", "Metadata read latency + cache hit ratio", "View pipeline freshness and dedup rate"],
+    "security": ["Signed/expiring segment URLs; token auth", "DRM (Widevine/FairPlay/PlayReady) + geo-restrictions", "Malware/abuse scanning on upload; content moderation", "Rate limiting; hotlink protection", "PII/watch-history privacy controls"],
+    "reference_answer": "A strong answer splits the ingest pipeline from the playback plane. Ingest: resumable chunked upload to durable object storage, then an orchestrated transcode DAG (probe → segment → fan out the ABR ladder → package HLS/DASH → thumbnails/manifests) on an elastic fleet with per-segment retries and publish-only-when-complete. Playback: metadata + manifest served through a cache, media segments served almost entirely from a multi-CDN with an origin shield and prewarming, using ABR to adapt bitrate. The candidate calls out egress as the dominant cost and designs around it, handles the long-tail cold-cache + origin-stampede case with coalescing/prewarming, counts views approximately via a streaming pipeline with dedup and heartbeats for watch time, propagates metadata to search/recs via CDC, and tiers storage (durable masters vs regenerable renditions). They name transcode backlog, egress cost, and cold cache as the top bottlenecks with concrete mitigations, and track QoE (startup, rebuffer) as the core reliability metric."
+  },
+  "interviewer_notes": "Watch for candidates who conflate the ingest pipeline with delivery — the strong ones cleanly separate them. Drive the transcoding-pipeline deep-dive (resumable upload, DAG fan-out, per-segment retries, publish-on-complete) and the CDN/ABR deep-dive (manifest, ladder, origin shield, prewarming) — these carry senior signal. Use the cache/stampede probe on the long-tail cold-cache case and the CDC probe when metadata feeds search/recs. Ensure they recognize egress bandwidth as the dominant cost and reason about storage tiering (masters vs renditions). View-count and recommendations can stay higher level. Reserve the last minutes for QoE observability and durability."
+}

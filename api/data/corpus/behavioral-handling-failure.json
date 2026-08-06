@@ -1,0 +1,53 @@
+{
+  "id": "behavioral-handling-failure",
+  "title": "Tell me about a significant failure and what you learned",
+  "track": "professional",
+  "domain": "behavioral",
+  "modality": "conversational",
+  "difficulty": "mid",
+  "tags": ["failure", "leadership-principles", "learning", "accountability", "star"],
+  "prompt": "Tell me about a significant failure — something you were responsible for that didn't work out. What happened, what was your role in it, and what did you take away?",
+  "blurb": "Handling failure: do they own it, extract a real lesson, and show they changed — or deflect blame?",
+  "rubric": [
+    { "key": "situation_clarity", "label": "Situation & real stakes", "description": "Picks a genuinely significant failure with real consequences — not a humble-brag or a trivial miss dressed as failure.", "weight": 1.0 },
+    { "key": "task_ownership", "label": "Ownership & accountability", "description": "Takes clear personal responsibility for their part — 'I' and 'my decision' — without blaming teammates, the org, or bad luck. Honest about their contribution.", "weight": 1.4 },
+    { "key": "action_specificity", "label": "Response to the failure", "description": "Describes concretely how THEY responded — contained the damage, communicated it, ran a blameless retro, made it right — not just that it happened.", "weight": 1.1 },
+    { "key": "result_impact", "label": "Impact & recovery", "description": "Honestly states the impact (cost, missed goal, damaged trust) and how they or the team recovered.", "weight": 1.0 },
+    { "key": "reflection", "label": "Lesson & lasting change", "description": "Extracts a specific, credible lesson AND shows they changed behavior since — ideally with evidence it didn't recur. This is the heart of the question.", "weight": 1.4 },
+    { "key": "communication", "label": "Communication & candor", "description": "Tells it with candor and composure, structured and without defensiveness.", "weight": 0.8 }
+  ],
+  "reference": {
+    "scenario": "The candidate should recall a real failure they owned — a project that missed, a bad technical or product call, an outage they caused, a hire that went wrong, a deadline blown. The signal is not the failure itself but the ownership and the learning: do they take honest accountability, extract a concrete lesson, and show durable behavior change afterward?",
+    "model_points": [
+      "Situation: a genuinely significant failure with real stakes — chosen honestly, not a disguised strength or trivial issue.",
+      "Task/role: crisp about what THEY were responsible for and where their own judgment or action fell short.",
+      "Action: how they responded in the moment — owned it publicly, contained damage, communicated transparently to stakeholders, and ran an honest (blameless) post-mortem.",
+      "Result: honest accounting of the impact and how recovery went — sometimes partial, and that's fine if told truthfully.",
+      "Reflection: a specific, non-generic lesson tied to the root cause, plus concrete evidence they changed — a new habit, process, or a later situation where they applied the lesson and it didn't recur.",
+      "Tone: accountable and composed, self-aware without wallowing, no scapegoating."
+    ],
+    "probes": [
+      { "trigger": "blames others or circumstances", "question": "Setting aside what others did — what was YOUR part in this? What would you have done differently, regardless of them?" },
+      { "trigger": "failure is actually a humble-brag", "question": "That sounds like it mostly worked out. Tell me about something that genuinely failed, where you were clearly in the wrong." },
+      { "trigger": "lesson is generic ('communicate more')", "question": "That's broad — what specifically changed in how you work? Give me a concrete example of you doing it differently since." },
+      { "trigger": "no evidence of change", "question": "How do you know you actually learned this? Has a similar situation come up since, and what happened?" },
+      { "trigger": "no impact quantified", "question": "How bad was it really — what did it cost in time, money, or trust?" }
+    ],
+    "red_flags": [
+      "Blames teammates, the org, leadership, or bad luck; own role is minimized or absent.",
+      "Humble-brag: the 'failure' is really a success or a strength ('I worked too hard').",
+      "Trivial stakes dressed up as a significant failure.",
+      "Generic lesson with no behavior change ('I learned to communicate better') and no evidence it stuck.",
+      "Defensive, still relitigating who was at fault, or clearly hasn't processed it.",
+      "Can't articulate a root cause — treats it as random misfortune."
+    ],
+    "follow_ups": [
+      "Who did you have to tell, and how did you deliver that news?",
+      "How did this change how you approach that kind of decision now?",
+      "Did you rebuild trust with anyone affected? How?",
+      "What's the difference between this failure and one you'd consider unacceptable / not worth the risk?"
+    ],
+    "exemplar_answer": "Situation: 'I owned the migration of our billing system to a new provider. I set an aggressive cutover date and, to hit it, I skipped a full dry-run against production-scale data.' Task: 'The migration and the go/no-go call were mine.' Action: 'On cutover night, a data-type mismatch I'd have caught in a real dry-run caused a subset of invoices to generate with wrong amounts. The moment I saw it, I halted the rollout, paused invoicing, and told my manager and the affected customers' account teams directly rather than hoping to quietly fix it. We rolled back within the hour and ran the proper dry-run before retrying.' Result: 'About 300 invoices were affected; we corrected every one and proactively notified those customers, but it cost roughly a week of delay and some trust with finance. No customer was over-charged in the end because we caught it fast.' Reflection: 'The root cause wasn't the bug — it was me trading away a validation step for a date. The specific change: I now treat 'test against production-scale data' as non-negotiable for any migration, and I've made 'what did we skip to hit the date?' a standing question in my go/no-go reviews. On the next two migrations we ran full dry-runs and had clean cutovers. I own that this one was on my judgment, not the tooling.'"
+  },
+  "interviewer_notes": "The failure is the setup; ownership and learning are the signal. Watch for the two classic evasions: (1) the humble-brag disguised failure — if it basically worked out, push for a real one; (2) blame-shifting — redirect to 'what was YOUR part, regardless of others'. The most important probe is on the lesson: reject generic platitudes ('communicate more') and press for a specific behavior change WITH evidence it stuck (a later situation where they applied it). Reward candor and composure; penalize defensiveness. Quantify the impact once. Distinguish accountability from self-flagellation."
+}

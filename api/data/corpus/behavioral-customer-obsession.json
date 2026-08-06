@@ -1,0 +1,53 @@
+{
+  "id": "behavioral-customer-obsession",
+  "title": "Tell me about a time you went above and beyond for a customer or user",
+  "track": "professional",
+  "domain": "behavioral",
+  "modality": "conversational",
+  "difficulty": "mid",
+  "tags": ["customer-obsession", "leadership-principles", "empathy", "impact", "star"],
+  "prompt": "Tell me about a time you went above and beyond for a customer or user. What was their problem, what did you do that went past the normal expectation, and what was the outcome for them and for the business?",
+  "blurb": "Customer obsession: did they dig into the real customer need and act on it — or just perform helpfulness?",
+  "rubric": [
+    { "key": "situation_clarity", "label": "Customer & their real need", "description": "Clearly identifies who the customer was and the underlying need, not just the surface request — shows they understood the problem from the customer's side.", "weight": 1.1 },
+    { "key": "task_ownership", "label": "Why they went further", "description": "Explains what made them go beyond the minimum — genuine empathy or a working-backwards-from-the-customer instinct, not policy or being told to.", "weight": 1.1 },
+    { "key": "action_specificity", "label": "Specific above-and-beyond action", "description": "Describes concretely what THEY did that exceeded the default — and ideally that they dug past the stated ask to the root need.", "weight": 1.3 },
+    { "key": "result_impact", "label": "Result for customer AND business", "description": "Quantifies the outcome for the customer (problem solved, retained, satisfaction) and connects it to business value — customer obsession isn't charity.", "weight": 1.2 },
+    { "key": "reflection", "label": "Reflection & generalization", "description": "Shows they turned a one-off save into something durable — a fix, a process, a product change — so the next customer benefits too.", "weight": 1.1 },
+    { "key": "communication", "label": "Communication & structure", "description": "Structured, concise, and centered on the customer rather than on themselves.", "weight": 0.8 }
+  ],
+  "reference": {
+    "scenario": "The candidate should recall a specific customer or user in real difficulty — a churning account, a blocked user hitting a bug, an internal 'customer' team stuck — where they went past the default response: dug into the real need, fixed the root cause, or delivered something the customer didn't even know to ask for. The best answers balance customer delight with business sense and generalize the fix.",
+    "model_points": [
+      "Situation: a specific customer and their actual problem, framed from the customer's perspective, with why it mattered to them.",
+      "Task: they recognized the standard response wasn't enough and took it on themselves to solve the real need.",
+      "Action: dug beneath the stated request to the root need; did concrete work beyond their remit — a fast fix, a workaround, hands-on support, or a product change — and closed the loop with the customer.",
+      "Action: balanced the effort against business reality — didn't over-invest in one account at everyone else's expense, or made the case for why this one was worth it.",
+      "Result: quantified customer outcome (retained account worth $X, user unblocked, CSAT/NPS moved) AND business outcome (revenue saved, a fix that helped many customers, a testimonial).",
+      "Reflection: generalized the one-off into something lasting — a bug fix shipped for all users, a runbook, a product insight — so customer obsession scaled beyond heroics."
+    ],
+    "probes": [
+      { "trigger": "solved only the surface request", "question": "Did you address what they asked for, or what they actually needed? How did you figure out the difference?" },
+      { "trigger": "no business impact mentioned", "question": "What did this mean for the business — retention, revenue, or a fix that helped other customers? How do you know it was worth the effort?" },
+      { "trigger": "sounds like one-off heroics", "question": "Did this only help that one customer, or did you turn it into something that helps others? Walk me through what you generalized." },
+      { "trigger": "vague on personal action", "question": "What did you specifically do that went beyond the normal expectation — what would a typical response have looked like by comparison?" },
+      { "trigger": "over-invested in one account", "question": "How did you weigh this against your other work and other customers? Was it the right allocation?" }
+    ],
+    "red_flags": [
+      "Confuses customer obsession with saying yes to everything or giving discounts — no real problem-solving.",
+      "Only solved the literal request, no sign they understood the underlying need.",
+      "No business value — pure heroics that didn't scale and may have hurt other priorities.",
+      "Takes all the credit and centers themselves rather than the customer's outcome.",
+      "No customer metric or outcome; can't say whether the customer was actually better off.",
+      "Story is generic 'I always put customers first' with no specific instance."
+    ],
+    "follow_ups": [
+      "How did you know what the customer actually needed versus what they asked for?",
+      "How do you balance one demanding customer against the needs of all your other customers?",
+      "Was there a moment you had to say no to a customer? How did you keep their trust?",
+      "What did the business learn from this that changed the product or process?"
+    ],
+    "exemplar_answer": "Situation: 'A mid-size customer was about to churn — they said our reporting export was 'too slow'. It was a top-20 account by revenue.' Task: 'Support would normally file a ticket and move on, but I owned that area and wanted to understand why it was a dealbreaker.' Action: 'I got on a call and watched them work. The real problem wasn't raw speed — they were exporting the full dataset daily just to pull three fields for a board deck. I built them a lightweight filtered export and a scheduled email, then realized dozens of customers likely did the same thing, so I turned it into a proper product feature.' Result: 'The account renewed — about $Y ARR saved — and the shipped feature cut export volume across all customers by ~30% and became one of our most-used reporting options within a quarter.' Reflection: 'I learned to work backward from what the customer is actually trying to accomplish, not the feature they name. The win wasn't saving one account by hand — it was turning that insight into something every customer got.'"
+  },
+  "interviewer_notes": "Probe for depth-of-understanding: the strongest signal is digging past the stated request to the real need (working backwards from the customer). Watch for the two anti-patterns: (1) customer obsession as pure people-pleasing/discounting with no problem-solving; (2) one-off heroics that don't scale or that hurt other priorities. Push for BOTH a customer metric and a business metric — customer obsession is not charity. The best answers generalize the save into a durable fix; probe explicitly for that. Keep them centered on the customer, not on their own heroism."
+}

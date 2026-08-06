@@ -1,0 +1,98 @@
+{
+  "id": "search-ranking",
+  "title": "Design a Learning-to-Rank Search System",
+  "track": "engineering",
+  "domain": "ml_system_design",
+  "modality": "system_design",
+  "difficulty": "senior",
+  "tags": ["learning-to-rank", "retrieval", "candidate-generation", "online-eval", "feature-store", "ml-serving"],
+  "prompt": "Design the ranking system behind a large-scale search product. Given a user query, it must retrieve candidate documents and rank them so the most relevant appear first, using an ML ranking model with query, document, and user/context features. Assume high query volume, tight latency, and continuous online evaluation.",
+  "blurb": "Multi-stage retrieval + learning-to-rank: candidate generation, ranking features, training from click logs, and online eval without feedback loops.",
+  "rubric": [
+    { "key": "requirements", "label": "Requirements gathering", "description": "Separates functional (retrieve candidates, rank, personalize, diversify, freshness) from non-functional (p99 latency budget, relevance quality, availability, index freshness).", "weight": 1.0 },
+    { "key": "clarifying_questions", "label": "Clarifying questions", "description": "Asks about corpus size, query volume, latency budget, personalization scope, freshness needs, how relevance is judged (human labels vs clicks).", "weight": 1.0 },
+    { "key": "estimations", "label": "Back-of-envelope estimations", "description": "Derives QPS, index size, per-stage candidate counts and latency, feature fetch QPS, ranking-model inference cost per candidate set.", "weight": 1.1 },
+    { "key": "multistage_retrieval", "label": "Multi-stage retrieval architecture", "description": "Candidate generation (inverted index / ANN / multiple retrievers) → lightweight L1 ranker → heavy L2 ranker; narrowing candidate count per stage to fit latency.", "weight": 1.3 },
+    { "key": "ranking_features", "label": "Ranking features & LTR model", "description": "Query, document, query-document match, and user/context features; pairwise/listwise LTR objective (e.g. LambdaMART / neural ranker); feature freshness.", "weight": 1.2 },
+    { "key": "training_serving_skew", "label": "Training-serving parity", "description": "Same feature computation offline and online, logging served features + positions, point-in-time correctness, avoiding leakage from future signals.", "weight": 1.1 },
+    { "key": "click_logs_bias", "label": "Training from click logs & bias", "description": "Turning clicks into labels, position bias correction (IPS/randomization), selection bias, presentation bias, using human relevance judgments for calibration.", "weight": 1.2 },
+    { "key": "ml_evaluation_drift", "label": "Evaluation & online eval", "description": "Offline ranking metrics (NDCG/MAP/MRR), interleaving and A/B tests online, guardrail metrics, detecting relevance/feature drift and feedback loops.", "weight": 1.3 },
+    { "key": "high_level_design", "label": "High-level design", "description": "Query understanding → candidate generation → L1 → L2 ranking → blending/diversity → results; async indexing + click-log pipeline feeding training.", "weight": 1.2 },
+    { "key": "scaling", "label": "Scaling & reliability", "description": "Sharded/replicated index, ANN scaling, model-serving fan-out, timeout/partial-results fallback, index update pipeline.", "weight": 1.0 },
+    { "key": "observability", "label": "Observability", "description": "Latency per stage, relevance metrics dashboards, feature freshness/nulls, model version tracking, click-through and abandonment monitoring.", "weight": 0.9 },
+    { "key": "security", "label": "Abuse, fairness & integrity", "description": "Spam/SEO manipulation, query privacy, fairness/diversity, preventing ranking-signal gaming and feedback-loop entrenchment.", "weight": 0.8 }
+  ],
+  "reference": {
+    "functional_requirements": [
+      "Retrieve candidate documents for a query (recall stage)",
+      "Rank candidates by predicted relevance (precision stage)",
+      "Incorporate personalization and context (user, locale, device, time)",
+      "Ensure freshness — newly indexed docs are rankable quickly",
+      "Diversify/blend results and apply business rules",
+      "Continuously evaluate and improve ranking online"
+    ],
+    "nonfunctional_requirements": [
+      "End-to-end search latency p99 within budget (e.g. <200ms)",
+      "High relevance quality (NDCG) and low abandonment",
+      "High availability with graceful partial results",
+      "Fresh index (new/updated docs rankable within minutes)",
+      "Reproducible ranking: logged features + model version per query"
+    ],
+    "clarifying_questions": [
+      "Corpus size and query volume (QPS)?",
+      "Latency budget end-to-end?",
+      "Is personalization in scope, and at what granularity?",
+      "How fresh must the index be?",
+      "How is relevance defined — human judgments, clicks, conversions?",
+      "Text-only search or multi-entity (products, media, people)?"
+    ],
+    "qualifying_questions": [
+      "Head-heavy queries (cacheable) or long-tail dominated?",
+      "Single global index or per-locale/vertical indexes?",
+      "Do we need strict result diversity or business-rule overrides?"
+    ],
+    "estimations": {
+      "traffic": "~50K QPS peak; head queries cacheable, long tail must be computed",
+      "index": "Billions of documents; sharded inverted index + ANN embeddings; TB-scale",
+      "candidate_funnel": "Retrieval ~10K candidates → L1 lightweight ranker → ~500 → L2 heavy ranker → ~50 shown; latency scales with candidate count × model cost",
+      "feature_fetch": "L2 scores hundreds of candidates × dozens of features → high feature-store read QPS; precompute doc features offline",
+      "inference": "L2 neural ranker ~1-5ms per batch of candidates on GPU/CPU; keep L1 ultra-cheap"
+    },
+    "core_components": ["Query understanding (tokenize, rewrite, intent, embedding)", "Candidate generation: inverted index + ANN vector retrieval", "L1 lightweight ranker", "L2 heavy LTR model serving", "Feature store (doc features offline + user/context online)", "Blending/diversity/business-rules layer", "Indexing pipeline (doc ingest → index + embeddings)", "Click/impression logging pipeline", "Training + offline eval pipeline", "Online experimentation (interleaving/A-B)", "Model registry + monitoring"],
+    "data_model": ["documents(doc_id PK, fields, embedding, static_features, updated_at)", "inverted_index(term → posting list)", "ann_index(doc_id → embedding vector)", "doc_features(doc_id, feature_vector, computed_at)", "online_user_features(user_id, context_features, updated_at)", "impressions(query_id, doc_id, position, features_logged, model_version, ts)", "clicks(query_id, doc_id, position, dwell, ts)"],
+    "api_design": [
+      "GET /v1/search?q=...&user=...&ctx=... → ranked [{doc_id, score, ...}], query_id, model_version",
+      "POST /v1/log/impression { query_id, results[], positions[], served_features } (async)",
+      "POST /v1/log/click { query_id, doc_id, position, dwell } (async)",
+      "POST /internal/index/upsert { doc } → updates inverted + ANN index"
+    ],
+    "high_level_design": "A query first passes through query understanding (normalization, spell/rewrite, intent, query embedding). Candidate generation runs multiple retrievers in parallel — a lexical inverted-index retriever and an ANN embedding retriever — producing a large recall set. A cheap L1 ranker prunes it to a few hundred candidates. The L2 heavy LTR model scores those using query, document, query-doc match, and user/context features fetched from a feature store (doc features precomputed offline; user/context features online). A blending layer applies diversity and business rules to produce the final page. Every impression logs the served features, positions, and model version; clicks/dwell stream into a log pipeline. Offline, clicks are debiased into training labels (position-bias correction), models are retrained and evaluated with NDCG on human-judged and click-derived sets, then rolled out via interleaving and A/B experiments with guardrail metrics.",
+    "deep_dives": [
+      { "topic": "candidate_generation", "probe": "Design the retrieval stage. How do you combine lexical (inverted index) and semantic (ANN) retrieval, and how many candidates do you pass forward to fit the L2 latency budget?" },
+      { "topic": "position_bias", "probe": "Your training labels come from clicks, but users click top results regardless of relevance. How do you correct for position/presentation bias — IPS weighting, randomization, an examination model?" },
+      { "topic": "training_serving_skew", "probe": "How do you ensure the features the L2 model sees at serving time match training exactly? Talk through logging served features and point-in-time joins to avoid leakage." },
+      { "topic": "online_eval", "probe": "Offline NDCG improved but that doesn't prove it's better live. How do you evaluate online — interleaving vs A/B — and what guardrail metrics protect against regressions?" },
+      { "topic": "feedback_loop", "probe": "The ranker decides what users see, and their clicks train the next ranker. How do you prevent a self-reinforcing feedback loop that entrenches current rankings?" },
+      { "topic": "freshness", "probe": "A document is updated or newly published. How quickly is it retrievable and correctly ranked, and how do you avoid serving stale document features?" },
+      { "topic": "cdc_feature_freshness", "probe": "Document attributes (price, availability, popularity, embeddings) change in a source system. How do those updates propagate into the retrieval index and the feature store so ranking isn't computed on stale doc state?" }
+    ],
+    "followup_bank": [
+      { "trigger": "mentions feature store or features or embedding", "question": "When a document's source attributes change (price, stock, popularity, its embedding), how do the index and feature store stay in sync — CDC/change-stream driving re-index + feature recompute, or scheduled batch? What's the freshness bound?" },
+      { "trigger": "mentions cache", "question": "You cache results or features for head queries — what's the eviction/TTL policy, and when a document changes how do you invalidate stale-after-change cache entries so you don't serve outdated rankings?" },
+      { "trigger": "mentions click or log or label", "question": "How do you turn clicks into unbiased training labels — position-bias correction, randomization, or human relevance judgments for calibration?" },
+      { "trigger": "mentions model or ranker", "question": "How do you roll out a new ranking model — interleaving, A/B, guardrail metrics, and rollback on what signal?" },
+      { "trigger": "mentions ANN or vector or embedding retrieval", "question": "How do you scale and update the ANN index, and how do you combine its results with lexical retrieval?" },
+      { "trigger": "mentions NDCG or evaluation", "question": "Why can offline NDCG improve while the live experience regresses, and how do you guard against that?" }
+    ],
+    "scaling": ["Shard inverted + ANN index by doc; scatter-gather across shards", "Replicate shards for QPS and availability; partial results on shard timeout", "Cache results/features for head queries with freshness-aware TTL", "Batch L2 scoring; keep L1 ultra-cheap to control fan-out cost", "Near-real-time indexing pipeline for freshness"],
+    "bottlenecks": ["L2 scoring cost scales with candidate count", "Feature fetch fan-out for hundreds of candidates", "ANN index build/update cost and memory", "Click-log processing lag delaying retraining", "Head-query cache staleness vs freshness"],
+    "tradeoffs": ["More candidates (better recall) vs latency/cost", "Heavier L2 model (better NDCG) vs inference budget", "Personalization (relevance) vs cacheability + privacy", "Freshness (frequent reindex) vs index stability/cost", "Clicks (abundant, biased) vs human judgments (clean, scarce) for labels"],
+    "alternative_solutions": ["Single-stage BM25/lexical ranking (cheap, no ML) as a baseline/fallback", "Pure dense-retrieval + cross-encoder reranker (semantic-first)", "Cascade with more stages (L0/L1/L2/L3) for very large corpora", "Bandit-based exploration to combat feedback loops"],
+    "observability": ["Per-stage latency (retrieval, L1, L2, blend)", "Online relevance: CTR, dwell, abandonment, NDCG on judged sets", "Feature freshness/null rates; embedding index age", "Model version + experiment assignment tracking", "Interleaving/A-B experiment dashboards and guardrails"],
+    "security": ["Anti-spam / anti-SEO manipulation of ranking signals", "Query privacy and PII handling in logs", "Fairness and diversity constraints; avoid harmful amplification", "Detect and dampen ranking-signal gaming", "Rate limiting and scraping protection"],
+    "tradeoffs_note": "The core tension is latency budget vs candidate count vs model complexity across stages.",
+    "reference_answer": "A strong answer builds a multi-stage funnel — parallel lexical + ANN candidate generation, a cheap L1 pruner, and a heavy L2 LTR model — sizing candidate counts per stage to fit a strict latency budget. It uses query, document, query-doc match, and user/context features, precomputing doc features offline and fetching user/context features online, and trains a pairwise/listwise ranker. It treats click logs as biased signal: correcting position/presentation bias (IPS/randomization), calibrating with human judgments, and guarding against the self-reinforcing feedback loop where the ranker trains on its own exposure. It insists on training-serving parity via logged served features and point-in-time joins, and it evaluates offline with NDCG but proves wins online through interleaving/A-B with guardrail metrics. It keeps the index and feature store fresh via a change-driven reindex/recompute pipeline and monitors relevance, feature freshness, and drift as first-class concerns.",
+    "extra": "reference_answer above is the canonical strong response"
+  },
+  "interviewer_notes": "Anchor the conversation on the latency budget and force the candidate to justify candidate counts at each stage — this is the crux of ranking-system design. If they jump straight to a fancy model without a retrieval/candidate-generation story, pull them back. Two senior separators: (1) training from biased click logs — make them explain position-bias correction and the feedback-loop risk, not just 'clicks are labels'; and (2) online evaluation — offline NDCG gains must be proven with interleaving/A-B and guardrails, and they should know why offline can improve while live regresses. When they place a feature store or index, hit the CDC/freshness probe: how do source document changes (price, popularity, embeddings) reach the index and feature store. When they add a result/feature cache, probe eviction and stale-after-change invalidation. Also push on training-serving skew via logged served features. Reserve time for drift and safe model rollout. Weak candidates design a single-model ranker; strong ones design a multi-stage retrieval+ranking system with a rigorous, bias-aware training and online-eval loop."
+}

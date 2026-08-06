@@ -1,0 +1,91 @@
+{
+  "id": "leaderboard",
+  "title": "Design a Real-Time Gaming Leaderboard",
+  "track": "engineering",
+  "domain": "system_design",
+  "modality": "system_design",
+  "difficulty": "mid",
+  "tags": ["sorted-set", "ranking", "redis", "read-heavy", "caching", "sharding"],
+  "prompt": "Design a real-time leaderboard for a popular game: players earn points, and you must show the top N players globally plus a given player's rank and the players immediately around them. Updates and reads are both high-volume and should feel instant.",
+  "blurb": "The ranking-at-scale problem — sorted sets, top-N vs 'my rank', ties, and why an ordinary indexed SQL count-query falls over.",
+  "rubric": [
+    { "key": "requirements", "label": "Requirements gathering", "description": "Separates functional (top-N, player rank, neighbors, score update, time-windowed boards) from non-functional (low-latency reads, freshness, correctness of rank).", "weight": 1.0 },
+    { "key": "clarifying_questions", "label": "Clarifying questions", "description": "Asks about number of players, update frequency, how fresh ranks must be, tie-breaking, board scope (global/regional/friends), and time windows (daily/weekly/all-time).", "weight": 1.0 },
+    { "key": "estimations", "label": "Back-of-envelope estimations", "description": "Derives score-update QPS, rank-read QPS, memory for a sorted set of N players, and shard counts.", "weight": 1.0 },
+    { "key": "ranking_datastructure", "label": "Ranking data structure depth", "description": "Redis sorted set / skip-list giving O(log N) update and O(log N) rank; why a SQL 'COUNT(*) WHERE score > x' does not scale; tie-breaking by timestamp.", "weight": 1.3 },
+    { "key": "data_model", "label": "Data model", "description": "Sorted set per board window; source-of-truth store for scores; player metadata separate from the ranking index.", "weight": 1.0 },
+    { "key": "api_design", "label": "API design", "description": "POST score update, GET top N, GET player rank + neighbors, GET around-me window.", "weight": 0.9 },
+    { "key": "high_level_design", "label": "High-level design", "description": "Write path updates source-of-truth + sorted set; read path served from the in-memory ranking store; separate boards per time window.", "weight": 1.2 },
+    { "key": "scaling", "label": "Scaling", "description": "Sharding a leaderboard too big for one node, approximate ranks for lower tiers, read replicas, caching top-N.", "weight": 1.2 },
+    { "key": "bottlenecks", "label": "Bottlenecks", "description": "Hot single sorted set as a write hotspot, memory ceiling for hundreds of millions of players, exact rank at the tail.", "weight": 1.0 },
+    { "key": "consistency", "label": "Consistency & correctness", "description": "How stale a rank can be, atomic score updates, replay/idempotency, reconciling cache vs source of truth.", "weight": 1.0 },
+    { "key": "observability", "label": "Observability", "description": "Rank-read latency, update lag, sorted-set memory, cache hit ratio, drift between store and index.", "weight": 0.7 }
+  ],
+  "reference": {
+    "functional_requirements": [
+      "Update a player's score (absolute or increment)",
+      "Return the global top N players",
+      "Return a specific player's current rank",
+      "Return the K players immediately above/below a player",
+      "Support time-windowed boards (daily / weekly / all-time)"
+    ],
+    "nonfunctional_requirements": [
+      "Reads feel instant (< ~50ms p99)",
+      "Ranks fresh within a second or two",
+      "Score updates are atomic and idempotent",
+      "Highly available reads; durable score source of truth",
+      "Scales to hundreds of millions of players"
+    ],
+    "clarifying_questions": [
+      "How many total and concurrently-active players?",
+      "How often are scores updated, and are they increments or absolute values?",
+      "How fresh must rank be — real-time or a few seconds of lag OK?",
+      "Do we need exact rank for everyone, or approximate for the long tail?",
+      "What board scopes: global, regional, per-friends, per-time-window?",
+      "How are ties broken (earliest to reach the score)?"
+    ],
+    "qualifying_questions": [
+      "Is the top-N the hot read, or is 'my rank' equally hot?",
+      "Do old windows need to be archived and queryable?",
+      "Anti-cheat / score validation in scope?"
+    ],
+    "estimations": {
+      "traffic": "50M daily active players, ~5 score events each = 250M updates/day ~= 3K writes/s avg, higher at peaks. Rank/board reads can be 10-50x that.",
+      "memory": "100M players in a sorted set at ~64-100B/entry ~= 6-10GB per board window — fits in a beefy Redis node or a handful of shards.",
+      "windows": "Daily + weekly + all-time = 3 live sorted sets; daily rotates and archives.",
+      "top_n": "Top 100 is a tiny, cacheable slice recomputed cheaply from the sorted set."
+    },
+    "core_components": ["API/app tier (stateless)", "In-memory ranking store (Redis sorted sets / skip-list)", "Durable score store (source of truth, e.g. DynamoDB/Cassandra)", "Cache for top-N", "Score-ingestion/validation service", "Windowed-board rotation job", "Archival store for closed windows"],
+    "data_model": ["ZSET leaderboard:{window} member=player_id score=points (tie-break encoded into score)", "scores(player_id, window, points, updated_at) — durable source of truth", "players(player_id, name, avatar) — metadata", "archive(window_id, snapshot) — closed boards"],
+    "api_design": [
+      "POST /score { player_id, delta|value } -> updates source of truth + ZINCRBY/ZADD",
+      "GET /leaderboard/top?window=daily&n=100 -> ZREVRANGE 0 99",
+      "GET /leaderboard/rank?player_id -> ZREVRANK + score",
+      "GET /leaderboard/around?player_id&k=5 -> rank then ZREVRANGE r-k r+k"
+    ],
+    "high_level_design": "A score update hits the app tier, which writes to the durable score store (source of truth, idempotent by event id) and updates the Redis sorted set (ZADD/ZINCRBY, O(log N)). Reads (top-N, rank, around-me) are served directly from the sorted set: ZREVRANGE for top-N, ZREVRANK for rank, and a rank +/- K range for neighbors. Top-N is additionally cached since it changes slowly relative to read volume. Separate sorted sets exist per time window; a rotation job snapshots and archives closed windows and starts fresh ones.",
+    "deep_dives": [
+      { "topic": "ranking_datastructure", "probe": "Why not just SELECT COUNT(*) WHERE score > mine in SQL for rank? Walk through the cost at 100M players and contrast with a skip-list / sorted set's O(log N)." },
+      { "topic": "ties", "probe": "Two players have identical scores — how do you break ties deterministically (e.g., who reached it first)? How do you encode that into a single sortable score?" },
+      { "topic": "sharding", "probe": "A single all-time board no longer fits one node or one node can't take the write rate. How do you shard a global ranking and still answer exact global rank?" },
+      { "topic": "approximate_rank", "probe": "Exact rank for player #48,000,001 is expensive and nobody cares to the unit. How could you serve approximate ranks for the long tail while keeping the top exact?" },
+      { "topic": "cache_top_n", "probe": "Top-N is read enormously. How do you cache it, and what happens when the cached entry expires under a thundering read load?" },
+      { "topic": "cdc_source_of_truth", "probe": "Redis is your ranking index but not durable enough alone. If your durable score store is the source of truth, how do you keep the sorted set in sync and rebuild it — replay, or change data capture / Debezium off the store?" }
+    ],
+    "followup_bank": [
+      { "trigger": "mentions redis or sorted set or zset or cache", "question": "What is the eviction/rotation policy per window, and how do you prevent a stampede when the cached top-N expires under heavy read load?" },
+      { "trigger": "mentions database or postgres or sql or dynamo or cassandra", "question": "The durable store is the source of truth but Redis serves ranks. How do you keep them consistent and rebuild the index — CDC/Debezium off the store, or event replay?" },
+      { "trigger": "mentions sql or count", "question": "Why does COUNT(*) WHERE score > x not scale for rank, and what does a skip-list buy you?" },
+      { "trigger": "mentions shard or sharding", "question": "With a sharded board, how do you answer exact global rank across shards without scanning them all?" },
+      { "trigger": "mentions tie", "question": "How do you encode a deterministic tie-break (timestamp) into the score so the sorted set orders it for you?" }
+    ],
+    "scaling": ["Keep the active board in a sorted set; cache top-N separately", "Rotate/ archive time-windowed boards to bound memory", "Shard huge boards by score-range or hash; merge for global rank", "Exact top tier + approximate long-tail ranks", "Read replicas of the ranking store for read fan-out"],
+    "bottlenecks": ["Single hot sorted set as a write hotspot", "Memory ceiling for hundreds of millions of members", "Exact global rank across shards", "Top-N cache stampede under read spikes"],
+    "tradeoffs": ["Exact rank (costly at tail) vs approximate rank (cheap, good enough)", "Redis sorted set (fast, needs durability backing) vs SQL (durable, slow ranking)", "Update on every event (fresh) vs batched updates (cheaper, staler)", "Single global board (simple, hot) vs sharded (scalable, complex global rank)"],
+    "alternative_solutions": ["Redis sorted sets (ZADD/ZRANGE/ZRANK) as the primary index", "Custom in-memory skip-list / order-statistics tree service", "Bucketed/segmented ranking (histogram of score ranges) for approximate rank", "Precomputed periodic snapshots for boards that don't need per-event freshness"],
+    "observability": ["Rank/top-N read latency", "Score-update apply lag (store -> index)", "Sorted-set memory per window", "Top-N cache hit ratio", "Drift/reconciliation counts between durable store and index"],
+    "security": ["Validate/authenticate score updates (anti-cheat, server-authoritative scoring)", "Idempotency keys to prevent double-counting", "Rate-limit updates per player", "Do not expose other players' PII beyond display name/avatar"],
+    "reference_answer": "A strong answer recognizes ranking as the crux and reaches for a sorted set / skip-list giving O(log N) update and rank, explaining why a SQL count-based rank does not scale. It keeps a durable source of truth for scores, serves top-N/rank/around-me from the in-memory index, caches top-N, and rotates time-windowed boards. It handles ties by encoding a timestamp into the score, plans to shard huge boards with approximate ranks for the tail, and has a rebuild/sync story (CDC or replay) between the durable store and the index, plus stampede protection on the top-N cache."
+  },
+  "interviewer_notes": "This is a mid-level question, so reward a clean, correct core before pushing scale. The single most important probe is why a naive SQL rank query fails and why a sorted set / skip-list is the right structure — do not let them hand-wave 'just index it'. If they mention Redis/cache, probe rotation and top-N stampede. If they add a durable store, hit the CDC/Debezium sync-and-rebuild probe. Stretch strong candidates on ties, sharding a board too big for one node, and approximate ranks for the long tail."
+}

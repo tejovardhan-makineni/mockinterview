@@ -1,0 +1,62 @@
+{
+  "id": "data-science-case",
+  "title": "Data Science Case: A/B Test on a Checkout Change",
+  "track": "professional",
+  "domain": "data_science",
+  "modality": "conversational",
+  "difficulty": "mid",
+  "tags": ["ab-testing", "experimentation", "statistics", "metrics", "causal-inference"],
+  "prompt": "An e-commerce team ran an A/B test on a new one-click checkout button. Over two weeks, the treatment group's conversion rate is 4.2% vs 4.0% in control, and the p-value is 0.03. The product manager wants to ship it to everyone tomorrow. Walk me through how you'd think about whether this is a real, ship-worthy result — how you'd design or critique the experiment, what statistics you'd check, and how you'd interpret it.",
+  "blurb": "An experimentation case — pressure-tested on experiment design, statistical rigor, and honest interpretation of a borderline-significant result.",
+  "rubric": [
+    { "key": "problem_framing", "label": "Problem framing & metric choice", "description": "Clarifies the business goal and picks the right primary metric (conversion, plus revenue/AOV as a guardrail), distinguishes primary vs secondary/guardrail metrics, and asks what decision the test is meant to drive.", "weight": 1.1 },
+    { "key": "experiment_design", "label": "Experiment design", "description": "Covers randomization unit (user vs session), sample size / power calculation and minimum detectable effect set BEFORE the test, run duration covering weekly seasonality, and avoiding peeking / fixed horizon.", "weight": 1.3 },
+    { "key": "statistical_rigor", "label": "Statistical rigor", "description": "Interprets the p-value correctly, discusses confidence interval on the lift not just significance, multiple-comparison and peeking risks, sample ratio mismatch (SRM), and whether the test was adequately powered.", "weight": 1.3 },
+    { "key": "interpretation", "label": "Interpretation & practical significance", "description": "Separates statistical from practical significance (is +0.2pp worth it?), checks guardrails and segments, considers novelty/primacy effects, and reaches a defensible ship / iterate / don't-ship recommendation.", "weight": 1.2 },
+    { "key": "validity_threats", "label": "Validity threats", "description": "Proactively raises threats to validity: bucketing/instrumentation bugs, SRM, network/interference effects, seasonality, and external events during the window.", "weight": 1.0 },
+    { "key": "communication", "label": "Communication", "description": "Explains the reasoning clearly to a non-statistical PM, is structured, and gives an honest, decision-oriented recommendation rather than hedging or blindly deferring to the p-value.", "weight": 1.0 }
+  ],
+  "reference": {
+    "scenario": "Conversational data-science case at the mid bar. The candidate is handed a borderline A/B result (small absolute lift, p=0.03, two-week run) and a PM eager to ship. There is no single right answer, but a strong candidate resists the reflex to either rubber-stamp or reject on the p-value alone. They reconstruct the experiment: what's the primary metric and decision, was the sample size and minimum detectable effect (MDE) fixed in advance, is the randomization unit correct, did it run long enough to cover weekly cycles, and was significance checked at a pre-planned stopping point or by peeking. They interpret p=0.03 correctly (it is NOT the probability the result is false, and it's close to the 0.05 line), ask for the confidence interval on the lift, check guardrail metrics (revenue per user, AOV, refund/return rate) so a conversion lift isn't bought by lower-value orders, and check for sample ratio mismatch and instrumentation bugs. They separate statistical from practical significance: +0.2pp on a 4% base is a ~5% relative lift — potentially meaningful at scale, but they'd want the CI and the revenue impact before betting. The strongest answers propose a concrete recommendation with conditions (e.g., ship if guardrails are clean, CI excludes zero comfortably, no SRM, and the run covered full weeks; otherwise extend or re-run) and note novelty effects that can fade. Weak answers either ship because p<0.05, reject because the lift 'looks small', confuse the p-value's meaning, ignore guardrails/SRM, or never state a decision.",
+    "model_points": [
+      "Clarify the decision and the primary metric: conversion is the primary, but revenue per visitor / AOV and return rate are guardrails — a conversion win that lowers order value or raises returns isn't a win.",
+      "Was the experiment properly designed up front? Randomization unit (user, not session, to avoid contamination), a pre-committed sample size / power calculation with a stated MDE and alpha, and a fixed run horizon.",
+      "Run duration: two weeks is reasonable IF it covers full weekly cycles (weekday/weekend, paydays); check it wasn't stopped early the moment it crossed significance (peeking inflates false positives).",
+      "Interpret p=0.03 correctly: it's the probability of a result this extreme if there were no true effect — it is close to 0.05, not overwhelming, and does not by itself mean a 97% chance the feature works.",
+      "Ask for the confidence interval on the lift, not just the point estimate — a 95% CI that barely excludes zero (e.g. +0.01pp to +0.39pp) tells a very different story than a tight CI around +0.2pp.",
+      "Check for sample ratio mismatch (is the split actually ~50/50?) and instrumentation/bucketing bugs — SRM is the single most common sign the numbers can't be trusted.",
+      "Watch for multiple comparisons / peeking: if the team checked many metrics or looked daily and stopped at significance, the effective false-positive rate is far above 5%.",
+      "Practical significance: +0.2pp on a 4.0% base is ~+5% relative — quantify the revenue impact at full traffic and weigh it against risk/cost of the change.",
+      "Novelty / primacy effects: an early lift from users trying a new button can decay; segment new vs returning users and look at the trend over the two weeks.",
+      "Recommendation with conditions: ship if guardrails are clean, CI comfortably excludes zero, no SRM, and the run covered full weeks; otherwise extend the test, increase power, or roll out gradually with a holdback to confirm."
+    ],
+    "probes": [
+      { "trigger": "candidate says ship it because p < 0.05", "question": "What does that p-value of 0.03 actually mean, and does crossing 0.05 alone make this ship-worthy? What else would you need to see?" },
+      { "trigger": "candidate ignores guardrail metrics", "question": "Conversion is up 0.2pp. How do you know they didn't buy that by pushing cheaper or more returnable orders? What guardrails would you check?" },
+      { "trigger": "candidate never mentions sample size or power", "question": "Was this test even powered to detect a lift this small? How would you have set the sample size and MDE before starting?" },
+      { "trigger": "candidate doesn't consider peeking / stopping rules", "question": "Suppose the team was watching the dashboard daily and stopped the moment it hit significance. Why is that a problem, and what does it do to your false-positive rate?" },
+      { "trigger": "candidate only looks at the point estimate", "question": "What's the confidence interval on that lift, and how would a wide CI that barely excludes zero change your recommendation?" },
+      { "trigger": "candidate accepts the numbers at face value", "question": "Before trusting any of this, how would you sanity-check that the experiment ran correctly — what's a sample ratio mismatch and why does it matter?" },
+      { "trigger": "candidate never gives a decision", "question": "The PM needs an answer. Ship, don't ship, or iterate — what's your call and under what conditions?" }
+    ],
+    "red_flags": [
+      "Ships purely because p < 0.05 with no guardrails, CI, or validity checks",
+      "Misinterprets the p-value (e.g. '97% chance the feature works')",
+      "Ignores practical significance or never quantifies the business impact",
+      "No awareness of sample size / power / MDE set before the test",
+      "Misses peeking / multiple-comparison inflation of false positives",
+      "Never checks sample ratio mismatch or instrumentation correctness",
+      "Confuses randomization units or ignores contamination between arms",
+      "Refuses to make a recommendation, or rejects the result just because the lift 'looks small'"
+    ],
+    "follow_ups": [
+      "The 95% CI on the lift comes back as +0.01pp to +0.39pp. Now what's your call?",
+      "You find the split is 52/48 instead of 50/50. What do you do and why?",
+      "The lift is strong for new users but flat for returning users. How does that change your interpretation?",
+      "The PM wants to run ten metrics and ship on whichever wins. What's wrong with that and how would you fix it?",
+      "How would you design this experiment from scratch — unit, metric, MDE, sample size, and duration?"
+    ],
+    "exemplar_answer": "A strong candidate reframes before judging: 'First, what decision are we making and what's the primary metric? Conversion is primary, but I'd treat revenue per visitor, average order value, and return rate as guardrails — a checkout change can lift conversion while lowering order value.' On design: 'I'd want to know the MDE and sample size were set before the test, that we randomized on users not sessions, and that two weeks covered full weekly cycles and wasn't stopped early the moment it crossed significance — peeking inflates false positives.' On the statistics: 'p=0.03 means a result at least this extreme would happen 3% of the time if there were truly no effect — it's real-ish but close to the line, not overwhelming. I'd ask for the 95% CI on the lift; +0.2pp on a 4% base is about +5% relative, which matters at scale, but if the CI runs from +0.01pp to +0.39pp I'd be far less confident than a tight interval around +0.2pp.' On validity: 'Before trusting anything I'd check for sample ratio mismatch and bucketing/instrumentation bugs, and rule out an external event or novelty effect by looking at the daily trend and new-vs-returning segments.' Recommendation: 'If guardrails are clean, there's no SRM, the CI comfortably excludes zero, and the run covered full weeks, I'd ship — ideally with a small holdback to confirm the lift holds. If the CI is marginal or guardrails are shaky, I'd extend the test or re-run with adequate power rather than ship on a borderline result.' The answer is decision-oriented, statistically honest, and speaks to the PM in plain terms."
+  },
+  "interviewer_notes": "Run this as a live case, not a lecture. Open with the prompt and let the candidate structure their approach; the strongest signal is whether they resist both reflexes — rubber-stamping on p<0.05 and dismissing the small lift — and instead reconstruct the experiment and reach a conditional decision. Use the p-value probe early if they treat 0.03 as a green light; a mid-level data scientist must interpret it correctly. Push on guardrails and sample ratio mismatch, which weaker candidates skip. If they never mention power or how sample size is set in advance, probe it directly. Reserve a follow-up to hand them the wide CI (+0.01pp to +0.39pp) and see if they revise honestly. Reward candidates who quantify practical significance and give the PM a clear, caveated call; penalize p-value misinterpretation, ignoring guardrails/SRM, and refusing to commit to a recommendation."
+}

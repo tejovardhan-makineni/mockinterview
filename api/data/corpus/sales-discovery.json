@@ -1,0 +1,62 @@
+{
+  "id": "sales-discovery",
+  "title": "Sales Roleplay: Discovery, Objection Handling, and Advancing the Deal",
+  "track": "professional",
+  "domain": "sales",
+  "modality": "conversational",
+  "difficulty": "mid",
+  "tags": ["sales", "discovery", "objection-handling", "b2b", "qualification", "closing", "roleplay"],
+  "prompt": "We'll do a roleplay. I'm the VP of Operations at a 500-person logistics company. Your company sells workflow-automation software, and I've agreed to a 30-minute call because my team is drowning in manual processes — but I've told you up front I'm skeptical, I'm busy, and we already looked at a competitor last year and passed. Run the call: open it, run your discovery, handle my pushback, and try to advance the deal. I'll respond as the buyer.",
+  "blurb": "A B2B discovery-and-objection roleplay — assessed for genuine discovery, value articulation tied to the buyer's pain, objection handling, and advancing the deal without pushiness.",
+  "rubric": [
+    { "key": "discovery", "label": "Discovery & questioning", "description": "Asks open, layered questions to uncover the real business pain, its impact/cost, decision process, and priorities (e.g. situation → problem → implication → payoff), and LISTENS rather than pitching immediately.", "weight": 1.3 },
+    { "key": "qualification", "label": "Qualification", "description": "Qualifies the opportunity — need, decision process, budget/authority, timeline, and success criteria — without interrogating, so time is spent on a real deal.", "weight": 1.0 },
+    { "key": "value_articulation", "label": "Value articulation", "description": "Connects the product to the buyer's specific pain and quantifies value/ROI in the buyer's terms, rather than reciting features or a generic pitch.", "weight": 1.2 },
+    { "key": "objection_handling", "label": "Objection handling", "description": "Handles skepticism and the 'we passed before' objection by understanding it first (acknowledge, question, reframe with evidence) rather than arguing, dismissing, or caving.", "weight": 1.2 },
+    { "key": "closing", "label": "Advancing the deal", "description": "Advances toward a concrete, appropriate next step (pilot, technical eval, stakeholder meeting) with a clear mutual action — not a hard close on a first call, but not leaving it vague either.", "weight": 1.1 },
+    { "key": "rapport", "label": "Rapport & credibility", "description": "Builds trust and credibility, respects the buyer's time, stays consultative and authentic, and reads the buyer's cues instead of steamrolling.", "weight": 1.0 }
+  ],
+  "reference": {
+    "scenario": "Mid-level B2B sales roleplay. The buyer is a skeptical, time-pressed VP of Operations who previously evaluated a competitor and passed. The interviewer plays the buyer. A strong rep runs a consultative call, not a pitch. They open by respecting the buyer's time, setting a light agenda, and earning the right to ask questions. The heart is discovery: open, layered questions that move from the current situation to the specific problem, to its business implications and cost (time lost, errors, cost, employee frustration, growth blocked), to the payoff of solving it — a SPIN-style progression — while genuinely listening and letting the buyer talk most of the call. They qualify without interrogating: what's driving urgency now, who else is involved in a decision, what would success look like, is there a timeline/budget reality. Only after understanding the pain do they articulate value — tied specifically to what the buyer said and quantified in the buyer's terms (ROI, payback), not a feature dump. They handle the two objections well: skepticism (acknowledge it, ask what would make it credible, offer proof — references, a pilot, data) and 'we looked at a competitor and passed' (get curious about why they passed and what's changed, differentiate on the specific gap, don't trash the competitor or argue). They read the buyer's cues and don't steamroll. They advance the deal to a concrete, appropriate next step for a first call — a scoped pilot, a technical deep-dive, or a meeting with the affected team — with a clear mutual next action, rather than either hard-closing prematurely or leaving it as a limp 'I'll send some info.' Weak reps pitch features immediately, talk more than they listen, ask only shallow qualifying questions, handle objections by arguing or caving, fail to quantify value, trash the competitor, or end with no next step (or an inappropriate hard close).",
+    "model_points": [
+      "Open by respecting time and setting a light agenda; earn the right to ask questions before pitching anything ('Before I tell you about us, can I understand your situation so I don't waste your time?').",
+      "Run real discovery with open, layered questions — situation, then the specific problem, then its business implication/cost, then the payoff of solving it (SPIN-style) — and listen; the buyer should talk most of the call.",
+      "Uncover and quantify the pain: how much time/money the manual processes cost, error rates, employee frustration, what it's blocking — in the buyer's own numbers.",
+      "Qualify without interrogating: what's driving urgency now, who else is involved in a decision, what success looks like, and any timeline/budget reality — woven into the conversation.",
+      "Only then articulate value, tied specifically to what the buyer said and framed as ROI/payback in their terms — not a generic feature dump.",
+      "Handle skepticism by acknowledging it and asking what would make a solution credible, then offering proof (relevant references, a proof-of-concept, data) rather than insisting.",
+      "Handle 'we passed on a competitor before' with curiosity: why did you pass, what was missing, what's changed since — then differentiate on that specific gap. Don't trash the competitor or argue.",
+      "Read the buyer's cues; stay consultative and authentic; don't steamroll a skeptical, busy buyer with a scripted pitch.",
+      "Advance to a concrete, appropriate next step for a first call — a scoped pilot, a technical/stakeholder deep-dive — with a clear mutual action and owner, avoiding both a premature hard close and a vague 'I'll send info.'",
+      "Summarize the pain and value back to the buyer before proposing the next step, confirming you understood correctly."
+    ],
+    "probes": [
+      { "trigger": "rep launches into a feature pitch immediately", "question": "[as buyer] You don't even know my situation yet — why are you telling me about your product? What do you actually want to know about us?" },
+      { "trigger": "rep asks only shallow or closed questions", "question": "[as buyer] Those are pretty surface-level. What are you really trying to understand about our operation?" },
+      { "trigger": "rep doesn't quantify the pain", "question": "[as buyer] Sure, it's annoying. But is it actually costing us anything worth a software project? How would you even know?" },
+      { "trigger": "rep ignores or argues with the skepticism", "question": "[as buyer] Look, I've heard the pitch before. Why should I believe this is different?" },
+      { "trigger": "rep trashes the competitor or gets defensive on the 'we passed' objection", "question": "[as buyer] We evaluated a competitor last year and passed. Convince me this isn't the same thing." },
+      { "trigger": "rep jumps to a hard close on the first call", "question": "[as buyer] You're already asking me to buy? I've given you 30 minutes. What's a reasonable next step from here?" },
+      { "trigger": "rep ends with no clear next step", "question": "[as buyer] Okay, so what happens now? Because 'I'll send you some materials' isn't going to move this forward." }
+    ],
+    "red_flags": [
+      "Pitches features before understanding the buyer's situation",
+      "Talks more than the buyer; shallow or purely closed questions",
+      "Never quantifies the pain or the value; generic ROI hand-waving",
+      "Handles objections by arguing, dismissing, or immediately caving on price/terms",
+      "Trashes the competitor or gets defensive about the prior evaluation",
+      "Ignores the buyer's cues and steamrolls a skeptical, busy buyer",
+      "Hard-closes prematurely on a first call, or ends with no concrete next step",
+      "Doesn't qualify — spends the call as if any prospect is a real deal"
+    ],
+    "follow_ups": [
+      "[as buyer] Honestly, budget is tight this year. Does that kill it, and how do you respond?",
+      "[as buyer] I'm not the only decision-maker. How do you handle that you've only got me on the call?",
+      "[as buyer] What exactly would a pilot look like, and how would we judge if it worked?",
+      "How would you research this account and prepare before the call ever happened?",
+      "If discovery revealed this genuinely isn't a fit, what would you do?"
+    ],
+    "exemplar_answer": "A strong rep opens consultatively: 'Thanks for the 30 minutes — and I appreciate the candor about the skepticism. Rather than pitch at you, could I spend the first part understanding how your team actually works today, so anything I say later is relevant? If it's not a fit, I'll tell you.' Then layered discovery: 'Walk me through where the manual processes hurt most... When something falls through the cracks, what does that cost you — rework, errors, overtime?... If this stayed the same for another year, what does that block for the business?' — letting the buyer do most of the talking and quantifying the pain in their numbers. Qualification woven in: 'What's making this a priority now versus last year? Besides you, who'd weigh in on a decision like this? What would ''solved'' look like to you?' Only then value, tied to what they said: 'You told me reconciliation eats two days a week and errors trigger customer escalations — that's where teams like yours have cut that to hours; at your scale that's roughly X, which is the ROI case.' Objections handled with curiosity: to skepticism, 'Totally fair — what would make this credible to you? I'd rather earn it with a reference or a small pilot than a slide.' To the prior competitor: 'What made you pass last year, and what's different now? If the gap was ownership and change management, here's specifically how we'd handle that' — without trashing the competitor. Advancing: 'Based on what you've shared, a scoped two-week pilot on the reconciliation workflow, with your two most affected people, and a clear success measure we agree on now — would that be a reasonable next step? I'll send a one-page plan today and you loop in whoever else should see it.' It's discovery-led, value quantified in the buyer's terms, objections met with curiosity, and a concrete mutual next step."
+  },
+  "interviewer_notes": "PLAY THE BUYER actively — skeptical, busy, and referencing the failed prior evaluation. This is a live roleplay; make the rep earn it. The strongest signal at mid level is discovery discipline: do they resist pitching and instead ask layered questions and listen, letting you talk most of the call? If they pitch features early, push back in character. Force them to quantify the pain and to tie value to what you actually said, not a generic ROI claim. Test both objections: raw skepticism ('why is this different?') and the 'we passed on a competitor' line — reward curiosity and reframing, penalize arguing, caving on price, or trashing the competitor. On closing, penalize both extremes: a premature hard close on a first call AND a limp 'I'll send materials' with no concrete next step; reward advancing to an appropriate mutual next step (scoped pilot, stakeholder meeting). Watch that they read your cues and stay consultative rather than running a script. Use the budget and multi-decision-maker follow-ups to test composure."
+}

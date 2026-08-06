@@ -1,0 +1,53 @@
+{
+  "id": "behavioral-disagree-commit",
+  "title": "Tell me about a time you disagreed with a decision but committed to it",
+  "track": "professional",
+  "domain": "behavioral",
+  "modality": "conversational",
+  "difficulty": "mid",
+  "tags": ["disagree-and-commit", "leadership-principles", "collaboration", "conviction", "star"],
+  "prompt": "Tell me about a time you strongly disagreed with a decision, voiced your concerns, but the group went the other way — and you committed to it anyway. What was the decision, how did you push back, and what did you do once it was made?",
+  "blurb": "Disagree & commit: did they voice a real, reasoned dissent AND then genuinely back the decision — not sandbag it?",
+  "rubric": [
+    { "key": "situation_clarity", "label": "Situation & the decision", "description": "Clearly frames the decision at stake, the stakes involved, and where they stood versus the group.", "weight": 1.0 },
+    { "key": "task_ownership", "label": "Quality of the disagreement", "description": "Shows they raised a substantive, well-reasoned objection through the right channel — data or principle, not just a gut 'no' — and were heard.", "weight": 1.2 },
+    { "key": "action_specificity", "label": "How they committed", "description": "Describes concretely how THEY backed the decision once made — actively supported it, didn't undermine it or say 'I told you so', helped make it succeed.", "weight": 1.3 },
+    { "key": "result_impact", "label": "Result & impact", "description": "States what happened — the decision's outcome, and how their commitment (not just compliance) affected it. Honest even if their side was right or wrong.", "weight": 1.1 },
+    { "key": "reflection", "label": "Reflection & maturity", "description": "Shows they can separate ego from outcome — value team velocity over being right, and update their view based on how it played out.", "weight": 1.2 },
+    { "key": "communication", "label": "Communication & structure", "description": "Structured, concise, and candid about a genuinely uncomfortable situation.", "weight": 0.8 }
+  ],
+  "reference": {
+    "scenario": "The candidate should recall a decision they genuinely opposed — an architecture choice, a product bet, a process change, a hiring or roadmap call — where they made their case, were overruled or the consensus went the other way, and then fully committed. The strongest answers show real dissent (not a token quibble) AND real commitment (not passive-aggressive compliance).",
+    "model_points": [
+      "Situation: a specific, consequential decision and a genuine disagreement — not a trivial one — with the reasons they saw it differently.",
+      "Task: they took responsibility for voicing the concern clearly and through the right forum, with evidence or reasoning, before the decision was locked.",
+      "Action: once the decision was made, they explicitly chose to commit — communicated support to their team, executed as if it were their own idea, and did not relitigate or undermine it.",
+      "Action: where useful, they set up a way to measure whether the decision was working, so the group could course-correct on data rather than on who was right.",
+      "Result: the outcome — sometimes the decision worked and they were glad they committed; sometimes it didn't and the pre-agreed metrics let the team pivot fast. Either is fine if told honestly.",
+      "Reflection: values organizational speed and trust over personal vindication; knows disagree-and-commit means fully committing, and knows the rare cases where a concern is serious enough to escalate rather than commit."
+    ],
+    "probes": [
+      { "trigger": "disagreement sounds trivial or performative", "question": "How strongly did you actually disagree? What was genuinely at stake — walk me through the substance of your objection." },
+      { "trigger": "committed passively / just 'went along with it'", "question": "What did committing actually look like in your day-to-day? Give me a concrete example of you actively supporting a decision you'd argued against." },
+      { "trigger": "hints at 'I told you so' or undermining", "question": "When it hit bumps, how did you talk about it with your team? Did you ever signal you'd been against it?" },
+      { "trigger": "no outcome stated", "question": "How did it turn out? Were you right, wrong, or somewhere in between — and how did you find out?" },
+      { "trigger": "claims they were right", "question": "If you were right, how did the team learn that without it becoming about who won? And if you'd been wrong, would you have known?" }
+    ],
+    "red_flags": [
+      "Never actually disagreed — story is really about agreeing all along, or the disagreement is trivial.",
+      "'Committed' but clearly sandbagged: slow-walked it, relitigated, or told the team it was doomed.",
+      "Says 'I told you so' or frames the whole story as being proven right.",
+      "Couldn't let it go — carried resentment, or escalated a normal decision past the point of reason.",
+      "No mechanism to learn whether the decision worked; commitment was blind compliance with no follow-through.",
+      "Blames the decision-maker for a bad outcome instead of owning their part in executing it."
+    ],
+    "follow_ups": [
+      "Where's the line for you between disagree-and-commit and a concern serious enough that you must escalate or not commit?",
+      "How did you make sure the team behind you didn't lose motivation on a decision you'd opposed?",
+      "Have you ever failed to commit well? What happened?",
+      "How do you disagree in a way that gets you heard rather than dismissed?"
+    ],
+    "exemplar_answer": "Situation: 'My team debated whether to rebuild our data pipeline in-house or adopt a managed service. I argued hard for building in-house — I thought the managed option would lock us in and cost more at scale — and I brought a cost model to back it.' Task: 'I made my case in the design review with numbers, but the tech lead and most of the team weighed faster time-to-market higher, and we went with the managed service.' Action: 'Once the call was made, I committed fully. I owned the integration, wrote the migration plan, and never framed it to the team as the wrong choice. I did propose we track cost-per-GB and lock-in risk quarterly so we'd have data if my concern ever materialized.' Result: 'We shipped roughly two months faster than an in-house build would have allowed, and the cost stayed reasonable at our volume — my concern was real but premature. The quarterly metric later flagged when costs did start climbing, and we revisited it calmly, on data.' Reflection: 'I learned that committing means genuinely rowing in the same direction, and that turning a disagreement into a measurable checkpoint beats being the person who was technically right. I'd still voice the dissent every time — but the value was in how I committed after.'"
+  },
+  "interviewer_notes": "The two failure modes to distinguish: (1) never really disagreed — probe for substance and stakes; (2) never really committed — probe for concrete supportive actions and any hint of sandbagging or 'I told you so'. A strong answer has BOTH a real dissent and a real commitment. Watch for ego: candidates love stories where they were vindicated — push them to show the team learned it on data, not on who won. Senior maturity appears in knowing when disagree-and-commit does NOT apply (ethical or safety concerns warrant escalation, not commitment). Probe I-vs-we on the commitment actions specifically."
+}

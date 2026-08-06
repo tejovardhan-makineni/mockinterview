@@ -1,0 +1,96 @@
+{
+  "id": "fraud-detection",
+  "title": "Design a Real-Time Fraud Detection System",
+  "track": "engineering",
+  "domain": "ml_system_design",
+  "modality": "system_design",
+  "difficulty": "senior",
+  "tags": ["ml-serving", "low-latency", "feature-store", "streaming", "drift", "imbalanced-data"],
+  "prompt": "Design a system that scores card/payment transactions for fraud in real time. Each authorization must be approved or declined within tight latency budgets, features must be computed from both historical and just-happened events, and the model must adapt as fraud patterns shift. Assume a large global payments provider.",
+  "blurb": "Real-time ML scoring under a hard latency budget: online/offline features, training-serving parity, feedback loops, and concept drift.",
+  "rubric": [
+    { "key": "requirements", "label": "Requirements gathering", "description": "Separates functional (score txn, approve/decline, case queue, feedback capture, model rollout) from non-functional (p99 scoring latency inside the auth budget, high availability, no-decision fallback, auditability).", "weight": 1.0 },
+    { "key": "clarifying_questions", "label": "Clarifying questions", "description": "Asks about transaction volume, auth latency budget, cost of false positives vs false negatives, label latency (chargebacks arrive weeks later), regulatory/explainability constraints.", "weight": 1.0 },
+    { "key": "estimations", "label": "Back-of-envelope estimations", "description": "Derives peak TPS, per-request latency budget split across feature fetch + inference, feature store read QPS, model size / CPU-vs-GPU, storage for features and labels.", "weight": 1.1 },
+    { "key": "feature_engineering", "label": "Feature pipeline & store", "description": "Online vs offline features, velocity/aggregation features (counts over sliding windows), point-in-time-correct joins, an online store for low-latency reads and an offline store for training.", "weight": 1.3 },
+    { "key": "model_serving", "label": "Low-latency model serving", "description": "Serving topology, feature fetch + inference path, batching vs single-request, timeout + fallback rule when the model or feature store is slow.", "weight": 1.2 },
+    { "key": "training_serving_skew", "label": "Training-serving parity", "description": "Shared feature definitions/transforms across training and serving, point-in-time correctness to avoid label leakage, logging served features for reproducibility.", "weight": 1.2 },
+    { "key": "feedback_labels", "label": "Feedback & label pipeline", "description": "Handles delayed/uncertain labels (chargebacks, disputes, analyst decisions), class imbalance, retraining cadence and a champion/challenger rollout.", "weight": 1.1 },
+    { "key": "ml_evaluation_drift", "label": "Evaluation & drift", "description": "Offline metrics for imbalanced data (PR-AUC, recall at fixed precision, cost-weighted), online eval (approval rate, fraud basis points), feature/score drift detection and alerting.", "weight": 1.3 },
+    { "key": "high_level_design", "label": "High-level design", "description": "Gateway → feature enrichment (online store + streaming aggregates) → model serving → decision/policy layer; async event stream feeding aggregations, labels, and monitoring.", "weight": 1.2 },
+    { "key": "scaling", "label": "Scaling & reliability", "description": "Horizontal scale of serving, sharded/replicated online store, degrade-gracefully rules, regional failover, keeping the auth path never fully blocked on ML.", "weight": 1.0 },
+    { "key": "observability", "label": "Observability", "description": "Latency SLOs, feature freshness/staleness metrics, score distribution monitoring, model version tracking, alerting on drift and null-feature spikes.", "weight": 0.9 },
+    { "key": "security", "label": "Security, abuse & compliance", "description": "PII handling, adversarial adaptation by fraudsters, explainability/adverse-action requirements, audit trail of decisions and model versions.", "weight": 0.9 }
+  ],
+  "reference": {
+    "functional_requirements": [
+      "Score each transaction for fraud risk in real time",
+      "Emit an approve / decline / step-up (challenge) decision via a policy layer",
+      "Compute velocity/aggregation features from recent events",
+      "Capture feedback labels (chargebacks, disputes, analyst rulings) for retraining",
+      "Route uncertain cases to a human review queue",
+      "Support safe model rollout (shadow, champion/challenger, rollback)"
+    ],
+    "nonfunctional_requirements": [
+      "End-to-end scoring p99 within the auth budget (~50-100ms of a larger auth timeout)",
+      "Very high availability; the auth path must degrade to a rules fallback if ML is unavailable",
+      "Training-serving parity (no skew, no label leakage)",
+      "Auditability: every decision reproducible with the exact features + model version",
+      "Cost-aware: false positives lose good customers, false negatives lose money"
+    ],
+    "clarifying_questions": [
+      "Peak transactions/sec and geographic distribution?",
+      "What is the auth latency budget we must fit inside?",
+      "Relative business cost of a false decline vs a missed fraud?",
+      "How and when do ground-truth labels arrive (chargebacks lag weeks)?",
+      "Are there explainability/regulatory requirements (adverse action, model risk)?",
+      "Do we act autonomously or feed a rules engine / human reviewers?"
+    ],
+    "qualifying_questions": [
+      "Is this card-present, card-not-present, or account-level fraud?",
+      "Single global model or per-region/per-segment models?",
+      "Real-time-only or also batch/near-real-time risk re-scoring?"
+    ],
+    "estimations": {
+      "traffic": "~5K TPS steady, ~20K TPS peak (holiday/flash events); each txn = one scoring request",
+      "latency_budget": "Auth budget ~300ms; ML slice ~80ms p99 = feature fetch (~15ms) + inference (~10ms) + policy + headroom",
+      "feature_store_qps": "20K TPS × ~50 online features each ≈ up to 1M feature reads/s → sharded/replicated in-memory online store",
+      "model": "Gradient-boosted trees or a compact NN; CPU inference feasible at <10ms; avoid GPU unless deep models needed",
+      "storage": "Offline feature/label store: 5K TPS × 86.4K s/day × ~2KB ≈ ~0.9TB/day of event/feature logs; retain 13+ months for seasonality"
+    },
+    "core_components": ["API/auth gateway", "Streaming ingestion (event bus)", "Streaming aggregation / velocity feature compute", "Online feature store (low-latency KV)", "Offline feature store / warehouse", "Model serving service", "Decision/policy engine + rules fallback", "Label/feedback pipeline", "Training + evaluation pipeline", "Model registry", "Drift & monitoring service", "Case-management/human-review queue"],
+    "data_model": ["transactions(txn_id PK, account_id, amount, merchant, mcc, ts, device, geo, decision, score, model_version)", "online_features(entity_key, feature_name, value, updated_at) keyed by account/card/device", "offline_feature_log(txn_id, feature_vector, served_at) for point-in-time training", "labels(txn_id, label, label_source, label_ts)", "cases(txn_id, status, analyst_id, resolution)"],
+    "api_design": [
+      "POST /v1/score { txn_id, account_id, amount, merchant, device, geo, ... } → { score, decision, reason_codes[], model_version }",
+      "POST /v1/feedback { txn_id, label, source } → 202 (async into label store)",
+      "GET /v1/cases?status=open → review queue",
+      "POST /internal/models/{id}/promote → champion/challenger promotion"
+    ],
+    "high_level_design": "The auth gateway calls the scoring service synchronously. Scoring fetches precomputed online features (account/card/device velocity, merchant risk) from the online store, computes any last-mile features, runs inference, and returns a score with reason codes to a policy engine that applies thresholds/rules and decides. In parallel, every transaction is published to an event bus: a streaming job maintains sliding-window aggregates and writes them to the online store (freshness in seconds), while raw events + served feature vectors land in the offline store for point-in-time-correct training. Labels arrive asynchronously (chargebacks, disputes, analyst rulings) and join to transactions by txn_id. A training pipeline periodically retrains, evaluates offline, then rolls out via shadow → challenger → champion with automated drift monitoring.",
+    "deep_dives": [
+      { "topic": "training_serving_skew", "probe": "How do you guarantee the features at training time equal the features at serving time? Talk me through shared transforms and point-in-time joins so you don't leak the future into training." },
+      { "topic": "velocity_features", "probe": "How do you compute 'transactions on this card in the last 5 minutes / 1 hour / 24 hours' at 20K TPS with second-level freshness? Streaming aggregation vs on-read compute?" },
+      { "topic": "latency_fallback", "probe": "The feature store or model server slows past your budget mid-auth. What decision do you return? Design the timeout + rules fallback so you never block the auth." },
+      { "topic": "delayed_labels", "probe": "Ground-truth fraud labels arrive weeks later via chargebacks. How does that shape your retraining cadence, evaluation, and your handling of 'not-yet-labeled' recent data?" },
+      { "topic": "imbalance_eval", "probe": "Fraud is <1% of volume. Why is accuracy useless here? What offline and online metrics do you optimize, and how do you pick the decision threshold given asymmetric costs?" },
+      { "topic": "drift_detection", "probe": "Fraud patterns adapt adversarially. How do you detect concept/feature drift in production before your recall silently collapses?" },
+      { "topic": "cdc_feature_freshness", "probe": "Account attributes (limits, KYC status, prior chargebacks) live in an OLTP database and change constantly. How do those changes propagate into the online feature store so serving isn't reading stale account state?" }
+    ],
+    "followup_bank": [
+      { "trigger": "mentions feature store or features", "question": "When the source account/merchant record changes in the primary DB, how does the online feature store learn about it — CDC/change-stream into the store, or recompute on a schedule? What's your staleness bound?" },
+      { "trigger": "mentions cache or online store", "question": "What's your eviction and TTL policy for cached feature values, and what happens when a feature is stale-after-change — do you serve stale, recompute, or fall back?" },
+      { "trigger": "mentions model or inference", "question": "How do you roll out a new model safely — shadow scoring, champion/challenger, and automatic rollback on what signal?" },
+      { "trigger": "mentions retrain or training", "question": "How do you avoid label leakage and training-serving skew when you rebuild the training set?" },
+      { "trigger": "mentions streaming or kafka or aggregation", "question": "How do you handle late/out-of-order events in your sliding-window velocity features, and what freshness do you guarantee?" },
+      { "trigger": "mentions threshold or precision or recall", "question": "How do you choose the decision threshold given the asymmetric cost of false declines vs missed fraud, and how often do you recalibrate it?" }
+    ],
+    "scaling": ["Stateless, horizontally scaled scoring service behind an LB", "Sharded + replicated online feature store keyed by account/card/device", "Partitioned streaming aggregation by entity key for velocity features", "Regional deployments with failover; models replicated per region", "Autoscale on TPS with pre-warmed capacity for known peak events"],
+    "bottlenecks": ["Feature fetch fan-out (many features per request) on the hot path", "Online store hot keys (high-velocity accounts/merchants)", "Streaming aggregation lag hurting feature freshness", "Model inference tail latency under peak", "Label scarcity + delay limiting retrain quality"],
+    "tradeoffs": ["Richer model (better recall) vs inference latency/cost", "More real-time features (fresher) vs streaming complexity + skew risk", "Aggressive thresholds (catch more fraud) vs false-decline customer harm", "Autonomous decline vs human-in-the-loop review latency", "Single global model (simpler) vs per-segment models (better fit, more ops)"],
+    "alternative_solutions": ["Pure rules engine (explainable, brittle, high maintenance)", "Two-stage: cheap model gates, expensive model only on borderline scores", "Graph-based features / GNN for ring detection as an offline enrichment", "Anomaly detection for unlabeled/novel fraud patterns alongside supervised model"],
+    "observability": ["Scoring latency SLOs (p50/p99) split by stage", "Feature freshness/staleness + null-rate per feature", "Live score distribution vs training baseline (population stability index)", "Approval rate, fraud basis points, false-decline proxy metrics", "Model version in-use + traffic split", "Drift alerts and human-review queue depth"],
+    "security": ["Encrypt/tokenize PAN and PII; strict access control on features", "Adversarial robustness — assume fraudsters probe and adapt; monitor for feature gaming", "Explainability / reason codes for adverse-action and model-risk compliance", "Immutable audit log of decision + features + model version", "Rate limiting and abuse detection on the feedback endpoint"],
+    "reference_answer": "A strong answer fits ML scoring inside a hard auth latency budget, splitting the budget across a low-latency online feature fetch and fast inference, and always provides a rules fallback so the auth never blocks on ML. It builds velocity/aggregation features via streaming with second-level freshness, keeps an offline store for point-in-time-correct training, and explicitly guards against training-serving skew and label leakage using shared transforms and served-feature logging. It treats fraud as a delayed-label, highly imbalanced problem — evaluating with PR-AUC / recall-at-fixed-precision / cost-weighted metrics rather than accuracy, choosing thresholds by asymmetric cost, and retraining on a cadence that respects chargeback lag. It rolls models out via shadow/champion-challenger with automatic rollback, and monitors feature and score drift as a first-class production concern because fraud is adversarial and non-stationary."
+  },
+  "interviewer_notes": "Let the candidate scope the problem before drawing boxes — a senior candidate asks about the auth latency budget and the false-positive/false-negative cost asymmetry early. The moment they place a feature store, hit the CDC/feature-freshness probe: how do source-of-truth account/merchant changes reach the online store, and what staleness do they tolerate. When they add a cache or online store, probe eviction/TTL and stale-after-change behavior. The two senior separators here are (1) training-serving skew + point-in-time correctness — push until they explain shared transforms and served-feature logging, and (2) delayed, imbalanced labels driving evaluation and threshold choice — reject 'accuracy' immediately and make them defend PR-AUC / recall-at-precision / cost-weighted metrics. Always force the degrade-gracefully answer: what decision comes back when the model or feature store blows the budget mid-auth. Reserve the last minutes for drift detection and safe model rollout. Weak candidates treat this as a pure model problem; strong ones treat it as a low-latency data + feedback-loop systems problem with ML in the middle."
+}

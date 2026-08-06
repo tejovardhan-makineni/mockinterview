@@ -1,0 +1,135 @@
+{
+  "id": "lld-ride-hailing",
+  "title": "Design a Ride-Hailing System (Uber) — Object Model",
+  "track": "engineering",
+  "domain": "low_level_design",
+  "modality": "system_design",
+  "difficulty": "senior",
+  "tags": ["ood", "lld", "state-machine", "strategy-pattern", "matching", "pricing"],
+  "prompt": "Design the object model for a ride-hailing service like Uber. Riders request trips, the system matches them to nearby available drivers, the trip goes through a lifecycle (requested → matched → started → completed), and fares are computed. Design the core classes, the trip state machine, the matching abstraction, and the pricing abstraction. Focus on the class design and APIs rather than the geo-distributed infrastructure. Sketch the class diagram.",
+  "blurb": "Trip lifecycle as a state machine, pluggable matching and surge pricing strategies, and driver/rider domain modeling.",
+  "rubric": [
+    { "key": "requirements_clarification", "label": "Requirements clarification", "description": "Separates functional (request, match, trip lifecycle, fare, ratings, cancellation) from non-functional (low-latency matching, no double-assigned driver, fare correctness).", "weight": 1.0 },
+    { "key": "core_entities", "label": "Core entities", "description": "Rider, Driver, Trip, Location, Vehicle, Fare, MatchingService, PricingStrategy — cleanly separated.", "weight": 1.1 },
+    { "key": "class_design", "label": "Class design & responsibilities", "description": "Trip owns lifecycle; Driver holds availability + location; pricing and matching are their own services, not baked into Trip.", "weight": 1.2 },
+    { "key": "relationships", "label": "Relationships & cardinality", "description": "Rider 1..* Trip; Driver 1..* Trip; Trip references one Rider + one Driver + Fare + route; Driver has a Vehicle. Association vs composition reasoned.", "weight": 1.0 },
+    { "key": "design_patterns", "label": "Design patterns", "description": "State pattern for Trip lifecycle, Strategy for matching and pricing (surge), Observer for driver-location / trip-status updates, Factory for trip creation.", "weight": 1.2 },
+    { "key": "solid_principles", "label": "SOLID / OCP", "description": "New pricing model (pool, flat, surge) or matching algorithm (nearest, ETA-based) plugs in without editing Trip; state transitions localized.", "weight": 1.1 },
+    { "key": "api_methods", "label": "API / method design", "description": "requestRide, matchDriver, startTrip, endTrip, cancelTrip, computeFare, rate — clear signatures, who owns each.", "weight": 1.0 },
+    { "key": "state_machine", "label": "Trip state machine", "description": "Explicit states + legal transitions + guards; illegal transitions rejected; cancellation from multiple states handled.", "weight": 1.2 },
+    { "key": "edge_cases", "label": "Edge cases", "description": "No drivers available, driver rejects, rider cancels after match, driver cancels mid-trip, concurrent match of same driver, GPS loss.", "weight": 1.0 },
+    { "key": "concurrency", "label": "Concurrency", "description": "A driver must not be assigned to two riders at once; optimistic/pessimistic locking on driver availability; idempotent request.", "weight": 1.0 },
+    { "key": "extensibility", "label": "Extensibility", "description": "Ride types (X/Pool/XL), scheduled rides, multi-stop, new pricing/matching strategies added cleanly.", "weight": 0.9 },
+    { "key": "communication", "label": "Communication", "description": "Narrates the state diagram and class relationships, states tradeoffs, reasons about matching race.", "weight": 0.8 }
+  ],
+  "reference": {
+    "functional_requirements": [
+      "Rider requests a ride from pickup to drop-off, optionally choosing a ride type",
+      "System finds and offers the trip to nearby available drivers; a driver accepts",
+      "Trip lifecycle: REQUESTED → DRIVER_ASSIGNED → EN_ROUTE_TO_PICKUP → IN_PROGRESS → COMPLETED, with CANCELLED from applicable states",
+      "Compute fare (base + distance + time, with surge multiplier)",
+      "Both parties rate each other after completion",
+      "Cancellation by rider or driver, with optional fee"
+    ],
+    "nonfunctional_requirements": [
+      "Matching latency low (seconds)",
+      "A driver is never concurrently assigned to two active trips",
+      "Fare computation is deterministic and auditable",
+      "Extensible ride types, pricing models, and matching algorithms"
+    ],
+    "clarifying_questions": [
+      "Which ride types at launch — standard, pool, XL? Does pooling change the model?",
+      "Do we support scheduled/future rides or only on-demand?",
+      "Is matching nearest-distance, lowest-ETA, or optimized batch dispatch?",
+      "How is surge determined — supply/demand ratio input, or given to us?",
+      "Are cancellation fees in scope? From which states?",
+      "Do we need multi-stop trips?"
+    ],
+    "core_classes": [
+      { "name": "Rider", "responsibility": "Passenger identity and request entry point.", "key_fields": ["riderId", "name", "Location current", "paymentMethod", "rating"], "key_methods": ["requestRide(pickup, dropoff, rideType)"] },
+      { "name": "Driver", "responsibility": "Driver identity, current location, availability, and vehicle.", "key_fields": ["driverId", "name", "Location current", "DriverStatus status", "Vehicle vehicle", "rating"], "key_methods": ["updateLocation(loc)", "setAvailable(bool)", "acceptTrip(trip)", "rejectTrip(trip)"] },
+      { "name": "Vehicle", "responsibility": "Vehicle details and category.", "key_fields": ["plate", "VehicleType type (X/XL/POOL)", "capacity"], "key_methods": [] },
+      { "name": "Location", "responsibility": "Geo point value object.", "key_fields": ["lat", "lng"], "key_methods": ["distanceTo(other)"] },
+      { "name": "Trip", "responsibility": "One ride; owns its state machine and references to rider/driver/route/fare.", "key_fields": ["tripId", "Rider rider", "Driver driver", "Location pickup", "Location dropoff", "TripState state", "Fare fare", "requestedAt"], "key_methods": ["assignDriver(driver)", "start()", "complete()", "cancel(by)", "canTransitionTo(state)"] },
+      { "name": "TripState", "responsibility": "State pattern base; each concrete state defines legal transitions.", "key_fields": [], "key_methods": ["assign()", "start()", "complete()", "cancel()"] },
+      { "name": "MatchingStrategy", "responsibility": "Abstract: given a request + candidate drivers, select/offer a driver.", "key_fields": [], "key_methods": ["findDriver(TripRequest, List<Driver> nearby) -> Driver"] },
+      { "name": "PricingStrategy", "responsibility": "Abstract: compute a Fare from route + time + surge.", "key_fields": [], "key_methods": ["computeFare(distance, duration, surgeMultiplier) -> Fare"] },
+      { "name": "Fare", "responsibility": "Money breakdown for a trip.", "key_fields": ["Money base", "Money distanceComponent", "Money timeComponent", "double surge", "Money total"], "key_methods": ["total()"] },
+      { "name": "DriverLocationService", "responsibility": "Indexes driver locations (e.g. geohash/quadtree) and returns nearby available drivers.", "key_fields": ["spatialIndex"], "key_methods": ["nearby(location, radius) -> List<Driver>", "update(driverId, loc)"] },
+      { "name": "TripService", "responsibility": "Application service orchestrating request → match → lifecycle → fare.", "key_fields": ["MatchingStrategy matcher", "PricingStrategy pricer", "DriverLocationService locations", "tripRepo"], "key_methods": ["requestRide(...)", "onDriverAccept(...)", "startTrip(id)", "endTrip(id)", "cancel(id, by)"] }
+    ],
+    "relationships": [
+      "Rider 1..* Trip; Driver 1..* Trip (associations, historical).",
+      "Trip references exactly one Rider and (once matched) one Driver; Trip composes a Fare and a TripState.",
+      "Driver has one Vehicle (composition); Driver's status is an enum guarded by TripService.",
+      "TripService depends on MatchingStrategy and PricingStrategy abstractions (DIP) and on DriverLocationService.",
+      "TripState subclasses (Requested, Assigned, EnRoute, InProgress, Completed, Cancelled) each own their legal transitions."
+    ],
+    "design_patterns": [
+      { "pattern": "State", "where": "Trip lifecycle via TripState subclasses", "why": "Legal transitions and guards live in each state object; illegal calls (e.g. complete() before start()) are rejected locally instead of a sprawling switch." },
+      { "pattern": "Strategy", "where": "MatchingStrategy (nearest / lowest-ETA / batch) and PricingStrategy (standard / surge / pool)", "why": "Matching and pricing vary independently and are swapped without touching Trip or TripService (OCP)." },
+      { "pattern": "Observer", "where": "Trip status changes and Driver location updates notify riders/drivers/analytics", "why": "Decouples push notifications and tracking from core state changes." },
+      { "pattern": "Factory", "where": "TripFactory builds a Trip (and picks pricing/ride-type config) from a request", "why": "Centralizes construction and keeps callers decoupled from concrete wiring." }
+    ],
+    "apis": [
+      "requestRide(riderId, pickup, dropoff, rideType) -> Trip (state REQUESTED)",
+      "findDriver(tripId) -> offers trip to candidate drivers",
+      "acceptTrip(driverId, tripId) -> Trip (state DRIVER_ASSIGNED) — must be atomic",
+      "startTrip(tripId) -> IN_PROGRESS",
+      "endTrip(tripId) -> COMPLETED + Fare",
+      "cancelTrip(tripId, cancelledBy) -> CANCELLED (+ optional fee)",
+      "rateTrip(tripId, byRole, stars)"
+    ],
+    "state_transitions": [
+      "REQUESTED → DRIVER_ASSIGNED (a driver accepts) | CANCELLED (rider cancels / no driver found / timeout)",
+      "DRIVER_ASSIGNED → EN_ROUTE_TO_PICKUP → IN_PROGRESS (driver taps start at pickup) | CANCELLED (either party, maybe fee)",
+      "IN_PROGRESS → COMPLETED (driver taps end at dropoff) | CANCELLED (rare, incident)",
+      "COMPLETED and CANCELLED are terminal",
+      "Guards: cannot start() before assigned; cannot complete() before in-progress; cancel() legality depends on current state"
+    ],
+    "edge_cases": [
+      "No available drivers in radius → expand radius / queue / fail with retry",
+      "Driver rejects or times out on the offer → re-offer to next candidate",
+      "Rider cancels after assignment → free the driver, maybe charge cancellation fee",
+      "Driver cancels mid-trip → re-match rider or refund",
+      "Two riders' matches select the same driver simultaneously → only one wins (atomic acceptTrip)",
+      "GPS/location loss during trip → estimate distance from route, degrade gracefully",
+      "Duplicate requestRide from a retrying client → idempotency key dedupes",
+      "Surge changes between request and completion → lock the quoted multiplier at request time"
+    ],
+    "concurrency": [
+      "acceptTrip must atomically flip Driver.status AVAILABLE→ON_TRIP; use a compare-and-set / conditional update / row lock so a driver can't accept two trips",
+      "Offer fan-out to N drivers must guarantee exactly one winner (first successful CAS wins, others get 'trip taken')",
+      "Idempotent requestRide via client requestId",
+      "DriverLocationService updates are high-frequency writes — keep them off the trip's critical section"
+    ],
+    "extensibility": [
+      "Ride types (X, XL, Pool) → VehicleType + a RideType config; Pool adds a shared-trip matching strategy",
+      "Scheduled rides → a Scheduler that submits requests at time T",
+      "Multi-stop trips → Trip holds an ordered list of waypoints; fare sums legs",
+      "New matching (ETA-optimized batch dispatch) or pricing (destination-based, loyalty) → new strategy classes"
+    ],
+    "deep_dives": [
+      { "topic": "trip_state_machine", "probe": "Draw the trip states and every legal transition. Where does the rule 'you can't complete a trip that never started' live in your code, and what happens if that call comes in anyway?" },
+      { "topic": "match_race", "probe": "You offer one trip to five nearby drivers and three tap accept at nearly the same instant. Exactly one must win and the driver must not be double-booked. Show the mechanism." },
+      { "topic": "pricing_strategy", "probe": "Model standard vs surge vs pool pricing. When is the surge multiplier captured, and why does the timing matter for fare disputes?" },
+      { "topic": "driver_index", "probe": "How do you find nearby available drivers efficiently? What structure backs DriverLocationService and how does it handle constant location updates?" },
+      { "topic": "cancellation", "probe": "Cancellation can come from either party in several states. How do you keep the fee logic and driver-freeing consistent across all of them?" }
+    ],
+    "followup_bank": [
+      { "trigger": "mentions state or lifecycle or status", "question": "Where do the legal transitions live? If it's a giant switch on status, how would the State pattern clean that up?" },
+      { "trigger": "mentions match or assign or dispatch", "question": "Two riders match the same driver at the same moment. Walk me through the exact atomic step that makes one win." },
+      { "trigger": "mentions price or fare or surge", "question": "Add pool pricing without editing the Trip class. And when do you lock the surge multiplier — at request or at completion?" },
+      { "trigger": "mentions nearby or location or geo", "question": "What indexes driver locations so nearby() is fast under constant GPS updates — geohash, quadtree, something else?" },
+      { "trigger": "mentions cancel", "question": "From which states is cancellation legal, and who eats the fee in each? Keep it out of a tangle of if-statements." }
+    ],
+    "tradeoffs": [
+      "State pattern (localized, more classes) vs status enum + switch (fewer classes, brittle)",
+      "Nearest-driver matching (simple, greedy) vs batch ETA optimization (better global efficiency, complex)",
+      "Lock surge at request (rider trust) vs at completion (reflects real supply, dispute-prone)",
+      "Pessimistic driver lock (safe, contention) vs optimistic CAS (fast, retry on conflict)"
+    ],
+    "reference_answer": "A strong answer makes Trip a state machine (State pattern) with explicit guards, extracts matching and pricing into Strategy services behind interfaces so ride types and surge plug in via OCP, and keeps Driver availability changes atomic so a driver is never double-booked — the crux is a compare-and-set on driver status when accepting an offer fanned out to several drivers. It uses a spatial index (geohash/quadtree) for nearby-driver lookup off the trip critical path, locks the surge multiplier at request time, and handles cancellation uniformly across states. Senior signal: reasoning about the accept race and the state-machine guards rather than a status enum and if/else."
+  },
+  "interviewer_notes": "Start by having them scope ride types and matching policy. The two differentiators are (1) modeling Trip as a State machine rather than a status field with switches, and (2) the driver double-booking race on accept — drive both hard. If they gloss the accept race, present the 'five drivers tap accept' scenario and insist on the atomic step. Check that pricing and matching are strategies, not code inside Trip; test with 'add pool pricing.' Reserve time for the spatial index and surge-locking timing. Watch that they don't over-index on distributed infra — this is an object-design interview."
+}

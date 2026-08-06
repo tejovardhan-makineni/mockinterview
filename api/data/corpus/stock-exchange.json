@@ -1,0 +1,91 @@
+{
+  "id": "stock-exchange",
+  "title": "Design a Stock Exchange / Matching Engine",
+  "track": "engineering",
+  "domain": "system_design",
+  "modality": "system_design",
+  "difficulty": "staff",
+  "tags": ["matching-engine", "order-book", "low-latency", "determinism", "sequencer", "fairness"],
+  "prompt": "Design a stock exchange matching engine: clients submit limit and market orders for a set of instruments, the engine matches buyers and sellers by price-time priority, and it publishes fills and market data. Optimize for very low, predictable latency and strict fairness, and cover how you stay correct and recoverable.",
+  "blurb": "The low-latency deterministic-core problem — a single-threaded order book with price-time priority, a sequencer for fairness, and event-sourced recovery.",
+  "rubric": [
+    { "key": "requirements", "label": "Requirements gathering", "description": "Separates functional (limit/market orders, cancel/modify, price-time matching, market data feed) from non-functional (ultra-low + predictable latency, fairness, determinism, durability, auditability).", "weight": 1.0 },
+    { "key": "clarifying_questions", "label": "Clarifying questions", "description": "Asks about order types, instrument count, throughput and latency targets (and jitter/tail), fairness rules, regulatory/audit needs.", "weight": 1.0 },
+    { "key": "order_book", "label": "Order book & matching", "description": "Price-time priority, book data structure (price levels + FIFO queues), how a marketable order sweeps levels, partial fills, cancel/modify.", "weight": 1.3 },
+    { "key": "latency_determinism", "label": "Low latency & determinism", "description": "Single-threaded deterministic core, in-memory book, avoiding GC/locks/syscalls on the hot path, kernel-bypass networking, mechanical sympathy, tail-latency focus.", "weight": 1.4 },
+    { "key": "sequencer_fairness", "label": "Sequencer & fairness", "description": "A sequencer imposing one total order of events so matching is deterministic and fair; how arrival order is fixed; preventing queue-jumping.", "weight": 1.3 },
+    { "key": "high_level_design", "label": "High-level design", "description": "Gateways (auth/risk) -> sequencer -> matching engine (per instrument/shard) -> market-data + drop-copy publishers; event log for recovery.", "weight": 1.2 },
+    { "key": "durability_recovery", "label": "Durability & recovery", "description": "Event sourcing / input log, hot-warm replicas fed the same ordered stream, deterministic replay, failover without losing or reordering orders.", "weight": 1.2 },
+    { "key": "risk_controls", "label": "Pre-trade risk & controls", "description": "Pre-trade risk checks off the hot path, circuit breakers / price bands, kill switch, self-trade prevention.", "weight": 1.0 },
+    { "key": "scaling", "label": "Scaling", "description": "Shard by instrument/symbol (independent books), scale gateways and market-data fan-out, keep each book single-threaded.", "weight": 1.0 },
+    { "key": "bottlenecks", "label": "Bottlenecks", "description": "The single-threaded book as a throughput ceiling per symbol, market-data fan-out, tail-latency spikes (GC, contention).", "weight": 1.0 },
+    { "key": "observability", "label": "Observability", "description": "Per-stage latency histograms (esp. tail), sequence-gap detection, book integrity checks, fairness/audit metrics.", "weight": 0.8 }
+  ],
+  "reference": {
+    "functional_requirements": [
+      "Accept limit and market orders, plus cancel/modify",
+      "Match by strict price-time priority; support partial fills",
+      "Maintain a live order book per instrument",
+      "Publish fills (execution reports / drop copy) and market data (L1/L2)",
+      "Enforce pre-trade risk and trading halts"
+    ],
+    "nonfunctional_requirements": [
+      "Ultra-low and predictable latency (low tail jitter, microseconds in the core)",
+      "Strict fairness (deterministic, no queue-jumping)",
+      "Determinism: same inputs -> same outputs (for replay/recovery)",
+      "Durability and full auditability of every order/event",
+      "High availability with fast, correct failover"
+    ],
+    "clarifying_questions": [
+      "Which order types (limit, market, IOC/FOK, stop) must we support?",
+      "How many instruments, and expected orders/sec per symbol at peak?",
+      "Latency target — mean and, more importantly, tail/jitter?",
+      "Fairness model: strict price-time, pro-rata, or hybrid?",
+      "Regulatory/audit requirements (immutable log, drop copy)?",
+      "Co-located clients / kernel-bypass networking in scope?"
+    ],
+    "qualifying_questions": [
+      "Is deterministic replay a hard requirement for recovery?",
+      "Is tail latency (p99.99) or throughput the primary optimization target?",
+      "Single data center / co-lo, or geo-distributed?"
+    ],
+    "estimations": {
+      "throughput": "A liquid symbol can see 100K-1M+ order events/sec at peak; the matching core must process each in well under a microsecond to hold latency.",
+      "book_size": "Active price levels per symbol are modest (hundreds-thousands); the whole book fits in L2/L3 cache — keep it in memory, cache-friendly layout.",
+      "latency": "Core matching target is sub-microsecond to a few microseconds; end-to-end wire-to-wire single-digit microseconds with kernel bypass. Jitter, not mean, is the enemy.",
+      "market_data": "One trade fans out to thousands of subscribers -> market-data publishing, not matching, is often the real volume."
+    },
+    "core_components": ["Order-entry gateways (auth, session, pre-trade risk)", "Sequencer (imposes total order)", "Matching engine per instrument shard (single-threaded, in-memory book)", "Event/input log (durable, ordered)", "Hot/warm replica engines (deterministic replay)", "Market-data publisher (L1/L2)", "Drop-copy / execution-report service", "Risk & control plane (halts, kill switch)"],
+    "data_model": ["order_book: bids/asks as price levels, each a FIFO queue of resting orders (price-time)", "orders(order_id, symbol, side, price, qty, remaining, ts, seq)", "events(seq, type[new/cancel/modify/trade], payload) — the durable input/event log", "trades(trade_id, symbol, price, qty, buy_order, sell_order, seq, ts)"],
+    "api_design": [
+      "Order entry (binary protocol, e.g. FIX/ITCH-like): new/cancel/replace -> ack + seq",
+      "Execution reports / drop copy: fills, partials, rejects",
+      "Market data feed: L1 (top of book) and L2 (depth) incremental updates",
+      "Admin: halt symbol, set price bands, kill switch"
+    ],
+    "high_level_design": "Clients connect to order-entry gateways that handle sessions, authentication, and pre-trade risk (off the matching hot path). Accepted orders flow to a sequencer that stamps every event with a monotonic sequence number, fixing one global (per-shard) total order — this is what makes matching deterministic and fair. The sequenced stream is durably logged and fed to the matching engine for that instrument, a single-threaded, in-memory order book that applies each event in sequence: a marketable order sweeps opposing price levels in price-time order, generating fills; non-marketable remainder rests in the book. Because the engine is deterministic over the ordered input, hot/warm replicas consuming the same log stay bit-identical and can take over on failure by replaying. Fills go to drop-copy/execution-report services; book changes go to the market-data publisher, which fans out L1/L2 updates to many subscribers. The core avoids GC, locks, and syscalls on the hot path (mechanical sympathy, pre-allocation, kernel-bypass NICs) to keep tail latency and jitter minimal.",
+    "deep_dives": [
+      { "topic": "order_book", "probe": "What data structure holds the book so that best-price lookup, insertion, and matching are all fast? Walk a marketable buy order sweeping multiple ask levels with partial fills and price-time priority within a level." },
+      { "topic": "latency_determinism", "probe": "Why single-threaded? How do you keep the hot path free of GC pauses, locks, and syscalls, and why is p99.99 tail latency the metric that matters more than the mean?" },
+      { "topic": "sequencer_fairness", "probe": "How does a sequencer guarantee fairness and determinism? What stops a faster/closer client from jumping the queue, and how do you fix arrival order across multiple gateways?" },
+      { "topic": "durability_recovery", "probe": "The primary matching engine dies mid-session. How do warm replicas take over without losing, reordering, or double-executing orders? Explain the event-sourced replay from the sequenced log." },
+      { "topic": "market_data_fanout", "probe": "A single trade must reach thousands of subscribers with minimal, fair latency. How do you publish market data without the fan-out becoming the bottleneck or advantaging some subscribers?" },
+      { "topic": "cdc_downstream", "probe": "Trades, positions, and order state must reach clearing, surveillance, and analytics systems reliably and in order. You must not slow the matching core. How do you propagate this — change data capture off a trade store, or consuming the immutable sequenced event log downstream — and why is dual-writing from the hot path dangerous?" }
+    ],
+    "followup_bank": [
+      { "trigger": "mentions single thread or single-threaded or in-memory", "question": "How do you keep the hot path free of GC, locks, and syscalls, and how do you measure and control tail latency (p99.99) rather than the mean?" },
+      { "trigger": "mentions sequencer or sequence", "question": "How does the sequencer fix arrival order across multiple gateways to guarantee fairness, and what happens if the sequencer itself fails?" },
+      { "trigger": "mentions cache or in-memory or memory", "question": "The book lives in memory/cache — how do you keep it cache-friendly, and on a cold failover replica how do you avoid a stampede of replay before it's ready to trade?" },
+      { "trigger": "mentions database or store or kafka or log", "question": "How do downstream systems (clearing, surveillance, analytics) consume trade/order state — CDC off a store or consuming the immutable event log — without dual-writing from the latency-critical core?" },
+      { "trigger": "mentions replica or failover or recovery", "question": "Explain deterministic replay: how do replicas stay bit-identical, and how do you fail over without losing, reordering, or double-executing orders?" }
+    ],
+    "scaling": ["Shard by instrument/symbol — each book is independent and single-threaded", "Scale order-entry gateways and pre-trade risk horizontally", "Dedicate market-data publishing to its own fan-out tier", "Co-locate and use kernel-bypass networking for latency", "Keep per-symbol throughput within a single core's budget; add shards, not threads per book"],
+    "bottlenecks": ["Single-threaded book = per-symbol throughput ceiling", "Market-data fan-out volume", "Tail-latency spikes from GC/locks/contention/syscalls", "Sequencer as a per-shard serialization and failure point"],
+    "tradeoffs": ["Single-threaded determinism (fair, replayable, per-core ceiling) vs multi-threaded throughput (faster, harder to keep fair/deterministic)", "Strict price-time (simple, fair) vs pro-rata (favors size, complex)", "In-memory speed vs durability (need event log + replicas for recovery)", "Kernel-bypass/co-lo latency vs cost and operational complexity"],
+    "alternative_solutions": ["LMAX Disruptor-style ring buffer + single-writer core", "Pro-rata or hybrid matching for certain products", "FPGA/hardware matching for extreme latency", "Sharded engines with a global sequencer per symbol group"],
+    "observability": ["Per-stage latency histograms with tail focus (p99/p99.9/p99.99)", "Sequence-gap / out-of-order detection", "Order-book integrity checksums vs replica", "Fill/audit completeness and drop-copy lag", "Fairness metrics (queue position honored), halt/circuit-breaker events"],
+    "security": ["Strong session auth and per-participant entitlements", "Pre-trade risk limits, price bands, and self-trade prevention", "Kill switch and per-symbol halts", "Immutable, tamper-evident audit log for surveillance/regulation", "Isolation between participants; DoS protection at gateways"],
+    "reference_answer": "A staff-level answer centers on a single-threaded, in-memory matching core applying a sequenced total order of events, giving determinism, fairness, and replayability. It designs the order book as price levels with FIFO (price-time) queues and walks a marketable order sweeping levels with partial fills. It puts auth and pre-trade risk on gateways off the hot path, uses a sequencer to fix arrival order (fairness) and to feed durable event-sourced logs that keep warm replicas bit-identical for fast, correct failover. It obsesses over tail latency/jitter (no GC, locks, or syscalls on the hot path; kernel bypass; mechanical sympathy), shards by symbol to scale, treats market-data fan-out as a first-class bottleneck, and propagates trades to clearing/surveillance by consuming the immutable log or CDC rather than dual-writing from the latency-critical core."
+  },
+  "interviewer_notes": "This is a staff-level, latency-first design; the signal is mechanical sympathy and determinism, not a sprawling microservice diagram. Insist on a single-threaded deterministic core and a sequenced total order — if they propose multi-threaded matching, probe how they preserve fairness and determinism. Make them design the order book concretely (price levels + FIFO) and walk a sweep with partial fills. Push tail latency (p99.99) over mean, and the no-GC/no-locks/no-syscalls hot path. If they mention in-memory/cache, probe cold-replica replay stampede on failover; if they mention a store/log/Kafka, hit the CDC-vs-dual-write probe for clearing/surveillance. Ensure recovery is event-sourced deterministic replay, not ad hoc."
+}

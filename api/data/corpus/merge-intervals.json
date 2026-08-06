@@ -1,0 +1,70 @@
+{
+  "id": "merge-intervals",
+  "title": "Merge Overlapping Intervals",
+  "track": "engineering",
+  "domain": "coding",
+  "modality": "coding",
+  "difficulty": "mid",
+  "tags": ["sorting", "intervals", "greedy", "arrays"],
+  "prompt": "Given an array of intervals where intervals[i] = [start_i, end_i], merge all overlapping intervals and return an array of the non-overlapping intervals that cover all the intervals in the input. As a follow-up: given an already-sorted, non-overlapping set of intervals, insert a new interval and merge as needed.",
+  "blurb": "Sort by start, then sweep once and coalesce — the canonical interval-merging pattern with an insert-interval twist.",
+  "rubric": [
+    { "key": "problem_understanding", "label": "Problem understanding", "description": "Clarifies whether touching endpoints ([1,4],[4,5]) count as overlapping, and whether the input is pre-sorted.", "weight": 1.0 },
+    { "key": "approach", "label": "Approach", "description": "Sort by start time, then linear sweep merging when current.start <= last.end. Recognizes sorting is the enabling insight.", "weight": 1.3 },
+    { "key": "correctness", "label": "Correctness", "description": "Merges by taking max of ends (handles fully-nested intervals), extends the open interval in place, and starts a new one only when there's a real gap.", "weight": 1.3 },
+    { "key": "complexity_analysis", "label": "Complexity analysis", "description": "O(n log n) dominated by the sort; O(n) or O(sort) space. For the sorted follow-up, notes O(n) single pass with no sort.", "weight": 1.0 },
+    { "key": "code_quality", "label": "Code quality", "description": "Clean sweep with a single 'last merged' reference; no repeated index juggling; readable comparison.", "weight": 1.0 },
+    { "key": "edge_cases", "label": "Edge cases", "description": "Empty input, single interval, fully-nested interval, touching endpoints, all-overlapping, all-disjoint.", "weight": 1.1 },
+    { "key": "testing", "label": "Testing", "description": "Tests nested and touching cases explicitly, not just the happy path.", "weight": 0.8 },
+    { "key": "communication", "label": "Communication", "description": "Explains why max(end) matters and walks a small example through the sweep.", "weight": 0.8 }
+  ],
+  "reference": {
+    "constraints": [
+      "1 <= intervals.length <= 10^4",
+      "intervals[i].length == 2, 0 <= start_i <= end_i <= 10^4",
+      "Intervals may be given in any order and may be nested or touching"
+    ],
+    "examples": [
+      {
+        "input": "[[1,3],[2,6],[8,10],[15,18]]",
+        "output": "[[1,6],[8,10],[15,18]]",
+        "explanation": "[1,3] and [2,6] overlap (2 <= 3) and merge into [1,6]. The rest are disjoint."
+      },
+      {
+        "input": "[[1,4],[4,5]]",
+        "output": "[[1,5]]",
+        "explanation": "They touch at 4; treated as overlapping and merged."
+      }
+    ],
+    "test_cases": [
+      { "input": "[[1,4],[2,3]]", "expected": "[[1,4]] — [2,3] is fully nested inside [1,4]; end must stay 4, not 3" },
+      { "input": "[[1,4],[0,4]]", "expected": "[[0,4]] — unsorted input; sort first" },
+      { "input": "[[1,4]]", "expected": "[[1,4]] — single interval" },
+      { "input": "[[1,4],[5,6]]", "expected": "[[1,4],[5,6]] — a real gap (5 > 4), no merge" },
+      { "input": "insert [2,5] into [[1,3],[6,9]]", "expected": "[[1,5],[6,9]] — follow-up: merges left, keeps right" },
+      { "input": "insert [4,8] into [[1,2],[3,5],[6,7],[8,10],[12,16]]", "expected": "[[1,2],[3,10],[12,16]] — new interval swallows [3,5],[6,7],[8,10]" }
+    ],
+    "optimal_time": "O(n log n) for merge (sort-bound); O(n) for insert into a pre-sorted list",
+    "optimal_space": "O(n) for the output (or O(log n)-O(n) auxiliary for the sort)",
+    "approaches": [
+      { "name": "brute force (pairwise merge to fixpoint)", "idea": "Repeatedly scan all pairs, merge any overlapping pair, and restart until no merges happen in a full pass.", "time": "O(n^2) or worse", "space": "O(n)" },
+      { "name": "optimal: sort + linear sweep", "idea": "Sort intervals by start. Initialize result with the first interval. For each next interval, if its start <= result.last.end, extend result.last.end = max(result.last.end, interval.end); otherwise append it as a new interval. Sorting guarantees any overlap is with the most recently appended interval, so one pass suffices.", "time": "O(n log n)", "space": "O(n)" },
+      { "name": "insert-interval (sorted input, no sort)", "idea": "Single pass over the sorted, non-overlapping list in three phases: (1) append all intervals ending before newInterval.start; (2) merge all intervals overlapping newInterval by expanding newInterval.start=min(...), newInterval.end=max(...), then append it once; (3) append all remaining intervals starting after newInterval.end.", "time": "O(n)", "space": "O(n)" }
+    ],
+    "follow_ups": [
+      "Insert Interval into an already-sorted, non-overlapping list in O(n) without re-sorting (the three-phase sweep above).",
+      "Given many intervals, find the minimum number of conference rooms needed (min-heap of end times, or the sweep-line +1/-1 events).",
+      "Interval intersection: given two sorted interval lists, return their pairwise intersections (two-pointer).",
+      "Employee free time: merge across all employees' busy intervals, then return the gaps.",
+      "Streaming variant: maintain merged intervals as new ones arrive online (balanced BST / interval tree keyed by start)."
+    ],
+    "reference_solution": "merge(intervals): sort intervals by start ascending. result = [intervals[0]]. for each iv in intervals[1:]: last = result[-1]; if iv.start <= last.end: last.end = max(last.end, iv.end)  // in-place extend; handles nested intervals via max; else: result.append(iv). return result. The max on end is the subtle correctness point: a nested interval [2,3] inside [1,4] must not shrink the end to 3. Touching endpoints merge because the comparison uses <=; if the problem says touching should NOT merge, use strict <. Follow-up insert(intervals, newIv): res=[]; i=0; n=len(intervals); while i<n and intervals[i].end < newIv.start: res.append(intervals[i]); i++. while i<n and intervals[i].start <= newIv.end: newIv.start=min(newIv.start,intervals[i].start); newIv.end=max(newIv.end,intervals[i].end); i++. res.append(newIv). while i<n: res.append(intervals[i]); i++. return res.",
+    "pitfalls": [
+      "Using interval.end instead of max(last.end, interval.end) — breaks on nested intervals.",
+      "Sorting by end instead of start, which breaks the 'overlap is only with the last appended' invariant.",
+      "Off-by-one on the touching case: decide < vs <= deliberately based on the clarified definition.",
+      "Mutating the input while iterating in the brute-force version."
+    ]
+  },
+  "interviewer_notes": "First signal: do they ask whether touching intervals merge and whether input is sorted? If they don't, let them assume, then challenge with [[1,4],[4,5]] during testing. Stay silent through the sort-and-sweep; the one nudge worth giving if they use interval.end instead of max is to hand them the nested test [[1,4],[2,3]] and ask what it returns. Once merge is clean and correct, escalate to the Insert Interval follow-up and push for the O(n) no-re-sort three-phase solution — that separates mid from senior. If they finish that fast, go to meeting-rooms-II (min-heap) as a heap-warm-up."
+}

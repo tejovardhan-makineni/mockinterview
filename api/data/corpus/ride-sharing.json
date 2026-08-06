@@ -1,0 +1,103 @@
+{
+  "id": "ride-sharing",
+  "title": "Design a Ride-Sharing Service (Uber/Lyft)",
+  "track": "engineering",
+  "domain": "system_design",
+  "modality": "system_design",
+  "difficulty": "senior",
+  "tags": ["geospatial", "matching", "real-time", "streaming", "state-machine", "surge"],
+  "prompt": "Design the backend for a ride-sharing service like Uber or Lyft. Riders request rides, the system matches them to nearby drivers, tracks the trip in real time, computes ETAs and fares, and applies surge pricing when demand is high. Assume a large metro deployment with millions of drivers streaming location updates.",
+  "blurb": "Geospatial indexing under a firehose of GPS updates, low-latency matching, and a trip state machine that must not double-charge.",
+  "rubric": [
+    { "key": "requirements", "label": "Requirements gathering", "description": "Separates functional (request ride, match driver, live tracking, ETA, fare, surge, trip lifecycle) from non-functional (match latency, location freshness, availability, consistency of payment).", "weight": 1.0 },
+    { "key": "clarifying_questions", "label": "Clarifying questions", "description": "Asks about driver/rider counts, location update frequency, match SLA, geographic scope, pooling, payment scope.", "weight": 1.0 },
+    { "key": "estimations", "label": "Back-of-envelope estimations", "description": "Location update QPS (millions of drivers × frequency), match QPS, storage for trips/locations, bandwidth.", "weight": 1.1 },
+    { "key": "geospatial_index", "label": "Geospatial indexing depth", "description": "Geohash/S2/QuadTree/H3 for nearest-driver queries; index update strategy under a write firehose; cell granularity tradeoffs. Key senior signal.", "weight": 1.4 },
+    { "key": "matching", "label": "Matching algorithm", "description": "Candidate search radius, ranking (ETA, rating, acceptance), dispatch/offer flow, avoiding double-assignment, timeouts and retries.", "weight": 1.3 },
+    { "key": "api_design", "label": "API design", "description": "requestRide, driver location update, accept/decline offer, trip status; websocket/streaming vs REST choices.", "weight": 0.9 },
+    { "key": "data_model", "label": "Data model", "description": "drivers, riders, trips (state machine), driver_locations, pricing zones; store choices per access pattern.", "weight": 1.0 },
+    { "key": "high_level_design", "label": "High-level design", "description": "Location ingestion path vs matching path vs trip-management path; streaming backbone.", "weight": 1.2 },
+    { "key": "trip_lifecycle", "label": "Trip state machine & consistency", "description": "requested→matched→enroute→in_progress→completed, idempotent transitions, exactly-once charge, handling driver cancel/crash.", "weight": 1.1 },
+    { "key": "surge_eta", "label": "Surge pricing & ETA", "description": "Demand/supply ratio per zone, streaming aggregation, ETA via road-network/traffic; freshness vs stability.", "weight": 0.9 },
+    { "key": "scaling", "label": "Scaling", "description": "Sharding by geography, in-memory location store, regional cells, decoupling ingestion via streams.", "weight": 1.0 },
+    { "key": "bottlenecks", "label": "Bottlenecks", "description": "Location write firehose, hot cells in dense areas, matching contention, geo-index update cost.", "weight": 1.0 },
+    { "key": "observability", "label": "Observability & reliability", "description": "Match latency, location staleness, failed-match rate, driver crash recovery, regional failover.", "weight": 0.8 }
+  ],
+  "reference": {
+    "functional_requirements": [
+      "Rider requests a ride (pickup + destination)",
+      "Match rider to a nearby available driver",
+      "Real-time driver location ingestion and live trip tracking",
+      "ETA estimation to pickup and to destination",
+      "Fare calculation with surge pricing during high demand",
+      "Trip lifecycle management (request → complete), cancellations",
+      "Payment/charge on completion"
+    ],
+    "nonfunctional_requirements": [
+      "Match latency (request → driver offered) < a few seconds",
+      "Driver location freshness within a few seconds",
+      "High availability regionally; a region outage must not affect others",
+      "Strong consistency / exactly-once on trip charge",
+      "Handle dense-city hot spots and event spikes"
+    ],
+    "clarifying_questions": [
+      "How many active drivers/riders per metro, and how often do drivers report location (e.g., every 4s)?",
+      "Target match latency and search radius?",
+      "Do we support pooled rides (multiple riders per trip) at launch?",
+      "Is this single-metro or global multi-region?",
+      "Scope: do we own payment/fare, or integrate an external processor?",
+      "How stable must surge be — can the price change between quote and confirm?"
+    ],
+    "qualifying_questions": [
+      "Do we need road-network ETAs (traffic-aware) or is haversine good enough initially?",
+      "What happens when no drivers are available — queue, expand radius, or fail?",
+      "Regulatory/geographic partitioning constraints?"
+    ],
+    "estimations": {
+      "traffic": "3M active drivers in peak, location update every 4s → ~750K location writes/s per region cluster (globally millions/s). Ride requests: ~1-2K/s peak per large metro.",
+      "storage": "Live locations are ephemeral (in-memory, TTL'd). Trips: ~10M trips/day × ~2KB ≈ 20GB/day persisted for history/billing. Location history for audit sampled/compacted.",
+      "index": "Partition space into S2/H3 cells; a dense downtown cell may hold thousands of drivers — needs sub-partitioning and read fanout across neighbor cells.",
+      "bandwidth": "Location updates are tiny (~100B) but high-frequency; matching + tracking pushed to clients over persistent connections."
+    },
+    "core_components": ["API gateway + persistent connection layer (WebSocket/gRPC)", "Location ingestion service", "Geospatial index (in-memory, S2/H3-cell partitioned)", "Matching/dispatch service", "Trip service (state machine)", "Pricing/surge service", "ETA/routing service", "Streaming backbone (Kafka)", "Trip store", "Payment service", "Notification/push"],
+    "data_model": [
+      "drivers(driver_id PK, status, vehicle, rating, current_cell)",
+      "driver_locations: in-memory geo-index cell → {driver_id, lat, lng, ts} (TTL ~10s)",
+      "trips(trip_id PK, rider_id, driver_id, state, pickup, dropoff, requested_at, fare, surge_mult) — state machine",
+      "pricing_zones(zone_id, surge_multiplier, updated_at)",
+      "trip_events(trip_id, event, ts) — append-only for audit/idempotency"
+    ],
+    "api_design": [
+      "POST /v1/rides { pickup, dropoff, product } (Idempotency-Key) → { trip_id, quote }",
+      "WS driver→server: location {driver_id, lat, lng, ts} (high frequency)",
+      "WS server→driver: ride_offer {trip_id, pickup, eta}; driver POST /v1/offers/{id}/accept | /decline",
+      "WS server→rider: trip_update {state, driver_loc, eta}",
+      "POST /v1/trips/{id}/complete → charge + receipt"
+    ],
+    "high_level_design": "Location path: drivers stream location over persistent connections to the ingestion service, which updates an in-memory geospatial index (space partitioned into S2/H3 cells) and publishes to Kafka for analytics/surge. Matching path: a ride request hits the trip service, which queries the geo-index for candidate drivers in the pickup cell + neighboring cells within a radius, ranks them (ETA-to-pickup, rating, acceptance likelihood), and dispatches sequential/broadcast offers; the first accept wins via an atomic compare-and-set on the trip state to avoid double assignment; on timeout/decline it expands radius or moves to the next candidate. Trip path: the trip advances through a persisted state machine; each transition is idempotent and event-sourced. Surge path: a streaming job aggregates demand (requests) vs supply (available drivers) per zone in sliding windows and publishes surge multipliers consumed at quote time. Everything is partitioned by geography so a region is an independent failure domain.",
+    "deep_dives": [
+      { "topic": "geospatial_index", "probe": "How do you find the nearest available drivers for a pickup point in a few milliseconds under 750K location updates/s? Compare geohash vs S2/H3 cells vs a quadtree, and tell me how a dense downtown cell with thousands of drivers is handled and how neighbor-cell fanout works." },
+      { "topic": "matching", "probe": "Two riders request rides near the same driver at the same instant. How do you guarantee the driver isn't double-assigned? Walk through the offer/accept/timeout flow and the atomic state transition." },
+      { "topic": "trip_lifecycle", "probe": "The driver's phone crashes mid-trip, then reconnects. How does your state machine recover without losing the trip or double-charging on completion? What makes each transition idempotent?" },
+      { "topic": "location_firehose", "probe": "You have a firehose of location writes. Why keep the live index in memory rather than a database, and how do you rebuild it if a matching node restarts?" },
+      { "topic": "cache_stampede", "probe": "Surge multipliers and hot-zone driver lists are cached. During a concert letting out, that cache expires under a request spike. How do you avoid a stampede recomputing surge/candidates — coalescing, jittered TTL, logical expiry?" },
+      { "topic": "cdc_analytics", "probe": "Trips persist to your operational store but need to reach billing, fraud, and analytics. How do you propagate changes — CDC/Debezium off the trip store vs dual writes — and how do you keep the trip-event stream exactly-once for billing?" },
+      { "topic": "surge_eta", "probe": "How is surge computed and how often does it change? How do you keep a quoted price stable for the rider even though demand moves? How do you compute traffic-aware ETAs at scale?" }
+    ],
+    "followup_bank": [
+      { "trigger": "mentions geohash or quadtree or s2 or h3", "question": "What cell granularity do you choose and why? How do you handle a hot dense cell and query across neighbor cells at a boundary?" },
+      { "trigger": "mentions cache or redis", "question": "Eviction for the surge/candidate cache — TTL vs LRU? And how do you prevent a stampede recomputing surge when a hot zone's entry expires during a spike?" },
+      { "trigger": "mentions database or store or postgres", "question": "How do trip changes reach billing/fraud/analytics — CDC/Debezium vs dual writes — and how do you make the billing stream exactly-once?" },
+      { "trigger": "mentions match or dispatch", "question": "How do you prevent double-assignment of one driver to two riders under concurrency?" },
+      { "trigger": "mentions kafka or stream or queue", "question": "How do you partition the location/event stream so ordering per driver/trip is preserved without hot partitions in dense cities?" }
+    ],
+    "scaling": ["Partition everything by geography/region (independent failure domains)", "In-memory geo-index sharded by cell with replicas", "Kafka to decouple location ingestion from matching and surge", "Sub-partition hot cells; fanout reads across neighbor cells", "Stateless matching workers behind consistent-hash routing on cell"],
+    "bottlenecks": ["Location write firehose overwhelming the index", "Hot geo-cells in dense areas / events", "Matching contention and double-assignment under concurrency", "Geo-index update + query cost at cell boundaries", "Surge recompute stampede during spikes"],
+    "tradeoffs": ["In-memory index (fast, volatile, needs rebuild) vs DB-backed geo (durable, slow)", "Broadcast offers (fast match, driver spam) vs sequential offers (clean, slower)", "Fine cells (precise, more boundary fanout) vs coarse cells (fewer queries, hot cells)", "Fresh surge (accurate, jittery price) vs stable quote (predictable, may be stale)", "Strong consistency on trip/charge vs availability of location tracking"],
+    "alternative_solutions": ["Redis GEO commands for the index instead of custom S2/H3", "Uber-H3-style hex grid with precomputed neighbor rings", "Pull-based matching (drivers poll) vs push offers", "Batch matching windows (collect requests for ~1s, optimize assignment globally) vs greedy per-request"],
+    "observability": ["Match latency and failed/expired-match rate", "Location staleness per region", "Offer accept rate and time-to-accept", "Surge computation lag", "Trip state-machine stuck/abandoned trips", "Regional health + failover drills"],
+    "security": ["AuthN drivers/riders; verify driver identity", "Rate-limit ride requests to curb abuse", "Protect location privacy (fuzz/expire history)", "Exactly-once, idempotent charging; fraud detection on trips", "PII encryption; scoped access to location data"],
+    "reference_answer": "A strong answer separates the three paths (location ingestion, matching, trip lifecycle), keeps a live geospatial index in memory partitioned by S2/H3 cells with explicit handling of dense hot cells and neighbor-cell fanout, and ingests the location firehose through Kafka rather than hammering a DB. Matching queries candidate drivers by cell + radius, ranks by ETA/rating/acceptance, and dispatches offers with an atomic compare-and-set on trip state to prevent double assignment, with timeout/radius-expansion fallback. The trip is an event-sourced, idempotent state machine that survives client crashes and charges exactly-once, propagating to billing/fraud/analytics via CDC. Surge is a streaming demand/supply aggregation per zone consumed at quote time, with a stable-quote story. The candidate names the location firehose, hot cells, and match contention as the key bottlenecks and gives concrete mitigations, plus regional isolation for failure domains."
+  },
+  "interviewer_notes": "This question rewards candidates who recognize two very different workloads: a high-frequency location firehose and low-latency matching. Push hard on the geospatial index deep-dive (S2/H3/geohash + hot-cell handling) and on preventing double-assignment — those separate senior from mid. Drop the cache stampede probe when they cache surge/candidates, and the CDC probe when trips hit a datastore feeding billing/analytics. Make sure they treat the trip as an idempotent state machine and address exactly-once charging and driver-crash recovery. Bonus signal: geographic partitioning as failure domains, and batch vs greedy matching. Reserve the last minutes for surge/ETA and observability."
+}

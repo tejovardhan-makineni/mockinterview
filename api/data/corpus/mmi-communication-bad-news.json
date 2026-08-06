@@ -1,0 +1,63 @@
+{
+  "id": "mmi-communication-bad-news",
+  "title": "Breaking Bad News with SPIKES",
+  "track": "professional",
+  "domain": "medicine",
+  "modality": "conversational",
+  "difficulty": "mid",
+  "tags": ["communication", "spikes", "breaking-bad-news", "empathy", "patient-centered"],
+  "prompt": "A 58-year-old patient has come in to discuss the results of a CT scan performed after several weeks of abdominal symptoms. The scan shows a mass in the pancreas that is very likely to be cancer, with signs suggesting it may not be curable. The patient came alone and is expecting the results today. Walk me through how you would conduct this conversation.",
+  "blurb": "A breaking-bad-news station structured around the SPIKES framework — delivering a serious diagnosis with clarity and compassion.",
+  "rubric": [
+    { "key": "structure_spikes", "label": "Structure (SPIKES)", "description": "Uses a recognizable framework — Setting, Perception, Invitation, Knowledge, Emotions, Strategy/Summary — to organize the encounter rather than improvising.", "weight": 1.3 },
+    { "key": "setting_preparation", "label": "Setting & preparation", "description": "Ensures privacy, adequate time, sitting down, minimizing interruptions; checks who the patient wants present; prepares by knowing the facts.", "weight": 1.0 },
+    { "key": "perception_invitation", "label": "Perception & invitation", "description": "Asks what the patient already understands and how much they want to know before disclosing (ask-before-tell); calibrates to the patient.", "weight": 1.1 },
+    { "key": "delivering_knowledge", "label": "Delivering the news", "description": "Gives a warning shot, uses plain language (avoids jargon and euphemism), delivers information in small chunks, checks understanding.", "weight": 1.2 },
+    { "key": "empathy", "label": "Empathy & responding to emotion", "description": "Names and acknowledges emotions, uses silence, responds to distress with empathic statements (NURSE-type responses) before rushing to plans.", "weight": 1.3 },
+    { "key": "communication", "label": "Communication skills", "description": "Clear, paced, honest without being blunt; avoids false reassurance and premature detail; checks in throughout.", "weight": 1.1 },
+    { "key": "strategy_followup", "label": "Strategy, summary & follow-up", "description": "Offers hope realistically, outlines next steps (MDT, specialist, further staging, support), does not abandon the patient, arranges follow-up and support person.", "weight": 1.0 },
+    { "key": "professionalism", "label": "Professionalism & honesty", "description": "Honest about uncertainty and prognosis without removing all hope; maintains dignity; avoids withholding or over-disclosing.", "weight": 0.9 }
+  ],
+  "reference": {
+    "scenario": "The candidate must break the news of a probable, possibly incurable pancreatic malignancy to a patient who came alone and expects results today. The station tests use of a structured framework (SPIKES) combined with genuine empathy — the ability to be honest about a devastating diagnosis while responding to the patient as a person. The interviewer may role-play the patient's reactions to probe empathy and adaptability.",
+    "model_points": [
+      "S — Setting: private room, sit down, enough uninterrupted time, silence phone/pager, ask if the patient would like someone with them and offer to call a support person given they came alone.",
+      "P — Perception: 'What's your understanding of why we did the scan / what you've been told so far?' — find out what they already know and their health literacy.",
+      "I — Invitation: ask how much detail they want today — 'Some people like all the details, others prefer the big picture first — what suits you?'",
+      "K — Knowledge: fire a warning shot ('I'm afraid the scan shows something serious'), pause, then deliver in plain language and small chunks — name that the scan shows a mass in the pancreas that is very likely cancer; avoid jargon and euphemisms; check understanding after each chunk.",
+      "E — Emotions: stop and respond to the patient's reaction; use silence; acknowledge and name emotion ('I can see this is a shock'); empathic and exploratory statements before any plan.",
+      "S — Strategy & Summary: outline concrete next steps (discussion at a multidisciplinary team meeting, referral to specialists, further tests/staging, symptom and psychological support), give realistic hope, summarize, check understanding, and arrange clear follow-up and contact.",
+      "Honesty about uncertainty: it is 'very likely' cancer and staging is not complete — be truthful without giving a definitive prognosis prematurely or destroying all hope.",
+      "Ask-before-tell throughout; go at the patient's pace; do not information-dump.",
+      "Safety-net: ensure the patient is not left alone in distress, offer written information, a follow-up appointment, and a point of contact.",
+      "Reflects on self-care and debriefing after difficult conversations (briefly)."
+    ],
+    "probes": [
+      { "trigger": "candidate starts listing the diagnosis and treatment immediately", "question": "Before you tell them the results, is there anything you'd want to establish first?" },
+      { "trigger": "candidate uses jargon or euphemism (e.g., 'a shadow', 'a growth', 'neoplasm')", "question": "The patient looks confused and asks, 'So is it cancer or not?' How do you answer?" },
+      { "trigger": "candidate rushes past the emotional reaction to the plan", "question": "The patient goes silent, then starts crying and says 'I can't believe this.' What do you do in this moment?" },
+      { "trigger": "candidate gives a specific prognosis or timeline", "question": "The patient asks 'How long have I got?' You don't yet have full staging. How do you respond?" },
+      { "trigger": "candidate offers false reassurance", "question": "The patient asks 'But you can cure it, right?' The scan suggests it may not be curable. What do you say?" },
+      { "trigger": "candidate omits support/next steps", "question": "The patient came alone and has to drive home. How do you close the conversation safely?" }
+    ],
+    "red_flags": [
+      "Blurting the diagnosis without setting, perception, or a warning shot.",
+      "Using euphemisms or jargon that leave the patient unsure whether they have cancer.",
+      "Rushing to treatment plans while ignoring or talking over the emotional reaction.",
+      "Giving a precise prognosis or survival time before staging is complete.",
+      "False reassurance ('I'm sure it'll be fine', 'we'll definitely cure it').",
+      "Information-dumping without checking understanding or the patient's wish for detail.",
+      "Leaving the patient alone and distressed with no follow-up, support, or contact.",
+      "Cold, purely factual delivery with no acknowledgement of emotion."
+    ],
+    "follow_ups": [
+      "How would you adapt if the patient told you upfront they don't want to know any details?",
+      "How would you handle it if a family member later asked you not to tell the patient?",
+      "What would you do differently if the patient had brought their spouse?",
+      "How do you respond when you genuinely don't yet know the answer to their question?",
+      "How do you look after yourself after conversations like this?"
+    ],
+    "exemplar_answer": "I'd use the SPIKES framework to keep the conversation structured but patient-centered. First the setting: I'd make sure we're in a private room, sit down, give myself uninterrupted time and silence my pager, and since the patient came alone I'd ask whether they'd like to call someone to be with them. Then perception — I'd ask what their understanding is of why we did the scan and what they've been told, so I meet them where they are. Next, invitation: I'd check how much detail they'd like today. When I deliver the news I'd start with a warning shot — 'I'm afraid the scan has shown something serious' — pause, and then say plainly that it shows a mass in the pancreas that is very likely to be cancer, avoiding jargon and euphemism, and I'd deliver it in small pieces, checking understanding as I go. Then I'd stop and attend to their emotion — expect shock, use silence, and name what I see, something like 'I can see this is a huge shock, take whatever time you need,' before moving to anything practical. If they asked 'how long have I got,' I'd be honest that we don't have the full picture yet because staging isn't complete, while not offering false reassurance about cure since the scan suggests it may not be curable. Finally, strategy and summary: I'd explain the next steps — discussion at a multidisciplinary meeting, referral to specialists, further tests to stage it, and support for symptoms and coping — give realistic hope, summarize, check their understanding, offer written information and a clear follow-up and contact, and make sure they're not leaving alone in acute distress. Afterwards I'd take a moment to debrief myself, because these conversations are hard on clinicians too."
+  },
+  "interviewer_notes": "Mid-level breaking-bad-news station. Consider lightly role-playing the patient to test empathy in real time — go silent or ask 'is it cancer?' to see if the candidate stays present or flees to logistics. Reward a recognizable framework (SPIKES or equivalent) plus genuine warmth; a framework recited robotically without empathy should not score top marks, nor should a warm improviser with no structure. Key probes: force them off euphemism ('so is it cancer?'), test whether they give a premature prognosis ('how long have I got?'), and check they don't offer false reassurance. Ensure they close safely given the patient is alone. Do not require exact SPIKES letter labels — the behaviors matter more than the acronym."
+}

@@ -1,0 +1,142 @@
+{
+  "id": "recommendation-system",
+  "title": "Design a Large-Scale Recommendation System",
+  "track": "engineering",
+  "domain": "ml_system_design",
+  "modality": "system_design",
+  "difficulty": "senior",
+  "tags": ["recsys", "candidate-generation", "ranking", "embeddings", "feature-pipeline", "feedback-loop"],
+  "prompt": "Design a recommendation system that picks personalized items (feed posts, videos, or products) for hundreds of millions of users from a catalog of tens of millions of items. Cover candidate generation, ranking, the feature pipeline, embeddings, the online/offline split, and how you handle feedback loops and freshness.",
+  "blurb": "The two-stage recsys — candidate generation and ranking, feature/embedding pipelines, online serving, and the feedback loop.",
+  "rubric": [
+    { "key": "requirements", "label": "Requirements gathering", "description": "Separates functional (retrieve, rank, personalize, diversify) from non-functional (serving latency, freshness, throughput) and clarifies the business objective/metric being optimized.", "weight": 1.0 },
+    { "key": "clarifying_questions", "label": "Clarifying questions", "description": "Asks about the optimization objective (engagement, revenue, retention), user/item scale, latency budget, cold-start needs, and how success is measured (online metric).", "weight": 1.0 },
+    { "key": "estimations", "label": "Back-of-envelope estimations", "description": "Estimates request QPS, candidates per stage (millions → hundreds → tens), embedding index size, feature-store read fanout, and ranking model latency budget.", "weight": 1.1 },
+    { "key": "candidate_generation", "label": "Candidate generation", "description": "Multiple retrieval sources — two-tower embeddings + ANN, collaborative filtering, popularity/recency, graph — narrowing millions of items to a few hundred cheaply.", "weight": 1.3 },
+    { "key": "ranking", "label": "Ranking", "description": "Heavy ranker scoring candidates with rich features, multi-task (click/like/dwell/convert) objectives, calibration, and re-ranking for diversity/business rules.", "weight": 1.2 },
+    { "key": "feature_pipeline", "label": "Feature pipeline", "description": "Batch + streaming features, a feature store with online/offline parity, point-in-time correctness for training, and freshness of real-time features.", "weight": 1.2 },
+    { "key": "embeddings", "label": "Embeddings", "description": "Learning user/item embeddings (two-tower), keeping item embeddings fresh for new items, and serving them via an ANN index.", "weight": 1.0 },
+    { "key": "online_offline", "label": "Online/offline split", "description": "Offline training + precompute vs online scoring; nearline updates; what's precomputed vs computed at request time.", "weight": 1.1 },
+    { "key": "feedback_loop", "label": "Feedback loops & bias", "description": "Logging impressions/labels, position/exposure bias, popularity feedback loops, exploration, and delayed/implicit labels.", "weight": 1.1 },
+    { "key": "ml_specifics", "label": "ML system specifics", "description": "Training/serving skew, model retraining cadence, cold-start strategy, offline-online metric alignment, and A/B evaluation.", "weight": 1.1 },
+    { "key": "scaling", "label": "Scaling", "description": "Sharding the ANN index and feature store, caching, precomputation, and horizontal scale of the ranking tier.", "weight": 1.0 },
+    { "key": "observability", "label": "Observability & evaluation", "description": "Online metrics + guardrails, offline replay/NDCG, feature/prediction drift, and A/B testing infrastructure.", "weight": 0.9 }
+  ],
+  "reference": {
+    "functional_requirements": [
+      "Return a ranked, personalized list of items per user request",
+      "Retrieve candidates from multiple sources and rank them",
+      "Incorporate real-time user context (recent actions, session)",
+      "Handle new users and new items (cold start)",
+      "Apply business rules / diversity / dedup before returning"
+    ],
+    "nonfunctional_requirements": [
+      "Serving latency < ~150ms p99 end-to-end",
+      "High throughput (100k+ QPS at peak)",
+      "Feature and item freshness (minutes for new items, seconds for session signals)",
+      "Consistent features between training and serving",
+      "Support frequent model retraining and A/B experiments"
+    ],
+    "clarifying_questions": [
+      "What are we optimizing — engagement, watch time, revenue, retention?",
+      "How many users and items, and what's the request QPS?",
+      "Latency budget per request?",
+      "How important is cold-start (new items/users) and content freshness?",
+      "How do we measure success online, and can we A/B test?",
+      "Any hard business/policy constraints (diversity, dedup, blocked content)?"
+    ],
+    "qualifying_questions": [
+      "Is this a feed (many items) or single next-item recommendation?",
+      "Real-time personalization required, or is daily precompute acceptable?"
+    ],
+    "estimations": {
+      "traffic": "200M DAU x ~20 requests/day ≈ ~50k QPS avg, ~150k+ peak",
+      "funnel": "Catalog ~50M → candidate generation ~500-1000 → ranking scores all → return top ~20",
+      "embedding_index": "50M item vectors x 128 dims x 4B ≈ 25GB — ANN index fits in RAM, sharded",
+      "feature_reads": "Ranking ~500 candidates x dozens of features each = thousands of feature-store reads/request → must be batched/cached",
+      "ranker_budget": "~500 candidates scored within ~50ms → a compact DNN/GBDT with batched inference on GPU/CPU"
+    },
+    "core_components": [
+      "Candidate generators (two-tower ANN, CF, popularity/recency, graph)",
+      "Item embedding index (ANN) + embedding trainer",
+      "Feature store (online KV + offline warehouse)",
+      "Streaming feature pipeline (session/real-time signals)",
+      "Ranking service (heavy model) + re-ranker (diversity/business rules)",
+      "Model training + registry + A/B experiment framework",
+      "Logging pipeline (impressions, labels) for training and eval",
+      "Caches (per-user candidates, embeddings)"
+    ],
+    "data_model": [
+      "users(user_id, static_features, embedding, updated_at)",
+      "items(item_id, static_features, embedding, created_at, stats)",
+      "interactions(user_id, item_id, action, dwell, position, ts) — event log",
+      "features_online(entity_id → feature_vector) — low-latency KV",
+      "features_offline(entity_id, feature, value, event_ts) — point-in-time table",
+      "models(model_id, version, stage, metrics)"
+    ],
+    "api_design": [
+      "POST /recommend { user_id, context, count } → { items:[{item_id, score, reason}] }",
+      "POST /feedback { user_id, item_id, action, position, ts } → { ok }",
+      "Internal: GET /candidates?user_id=... → candidate set",
+      "Internal: POST /rank { user_id, candidate_ids } → scored list"
+    ],
+    "high_level_design": "On a request, the service fetches the user's features/embedding from the online feature store and recent session signals from the streaming layer. Candidate generation runs several retrievers in parallel — a two-tower model embeds the user and does ANN lookup over item embeddings, plus collaborative-filtering, recently-popular, and graph sources — union/dedupe to a few hundred candidates. The ranking service pulls rich user x item x context features (batched from the feature store), scores all candidates with a multi-task model (predicting click/like/dwell/convert, calibrated and blended into one value), and a final re-ranker applies diversity, dedup, and business rules. Impressions and subsequent actions are logged to build training labels. Offline, models and item/user embeddings are retrained on point-in-time-correct features; embeddings and popularity candidates are precomputed nearline; the online path stays light. Everything ships behind A/B experiments measuring the north-star online metric.",
+    "deep_dives": [
+      { "topic": "candidate_generation", "probe": "Explain the two-tower model and why candidate generation is a separate cheap stage. How do you retrieve a few hundred from 50M in single-digit ms, and how do you blend multiple retrieval sources?" },
+      { "topic": "feature_pipeline", "probe": "How do you guarantee the features used at serving match training — online/offline parity — and get point-in-time correctness so you don't leak future information into labels?" },
+      { "topic": "feedback_loop", "probe": "Your logs are biased: users only click what you showed, and popular items get more exposure. How do you handle position/exposure bias and avoid a popularity feedback loop — exploration, inverse-propensity weighting?" },
+      { "topic": "ranking", "probe": "You optimize multiple objectives (clicks, dwell, conversions). How do you combine them, calibrate probabilities, and avoid clickbait while hitting the business metric?" },
+      { "topic": "online_offline", "probe": "What's precomputed vs computed at request time? How fresh are item embeddings for an item uploaded 2 minutes ago (cold start)?" },
+      { "topic": "ml_specifics", "probe": "How often do you retrain, how do you detect that a deployed model has degraded (drift), and how do you validate a new model before full rollout?" }
+    ],
+    "followup_bank": [
+      { "trigger": "mentions embeddings or two-tower or ANN or item vectors", "question": "When an item's attributes change or a new item is added, how do its embeddings stay in sync and become retrievable — nearline re-embedding, CDC from the catalog, index upsert? What's the freshness lag for a brand-new item?" },
+      { "trigger": "mentions cache or caching or precompute", "question": "You cache per-user candidates or features. What's the eviction/TTL policy, and how do you avoid a stampede or serving stale recommendations right after the user's context changes?" },
+      { "trigger": "mentions feature store or database or warehouse", "question": "How do features get from the source-of-truth data into the online store consistently — CDC/streaming vs batch materialization — and how do you avoid online/offline skew?" },
+      { "trigger": "mentions model or retrain", "question": "How do you detect model/feature drift in production and decide when to retrain or roll back?" }
+    ],
+    "scaling": [
+      "Shard the ANN item index and replicate for QPS",
+      "Batch feature-store reads and cache hot user/item features",
+      "Precompute candidates/embeddings nearline; keep the request path light",
+      "Horizontally scale the stateless ranking tier; batch inference",
+      "Tiered candidate budgets to control cost at peak"
+    ],
+    "bottlenecks": [
+      "Feature-store read fanout during ranking",
+      "ANN retrieval latency and index freshness for new items",
+      "Ranking model latency on hundreds of candidates",
+      "Feedback-loop bias degrading long-term quality",
+      "Training/serving skew from divergent feature computation"
+    ],
+    "tradeoffs": [
+      "More candidates (recall/quality) vs ranking latency and cost",
+      "Fresher embeddings (nearline cost) vs staleness for new items",
+      "Heavier ranker (accuracy) vs latency budget",
+      "Exploration (long-term quality) vs short-term engagement",
+      "Single blended objective (simple) vs multi-task calibration (accurate)"
+    ],
+    "alternative_solutions": [
+      "Single-stage ranking (only viable for small catalogs)",
+      "Pure collaborative filtering / matrix factorization (weak on cold start, context)",
+      "Rules/heuristics + popularity (baseline, no personalization depth)",
+      "Sequence/transformer models over session history for next-item prediction"
+    ],
+    "observability": [
+      "Online north-star metric + guardrails (diversity, complaints) via A/B",
+      "Offline replay metrics (NDCG, AUC, calibration) before rollout",
+      "Feature and prediction drift monitoring",
+      "Candidate-generation recall and ranking latency SLOs",
+      "Embedding freshness lag and cold-start coverage"
+    ],
+    "security": [
+      "Per-user data isolation and privacy (PII minimization in features)",
+      "Policy filtering of disallowed/unsafe items before serving",
+      "Abuse/gaming detection (bots inflating engagement signals)",
+      "Auditability of why an item was recommended",
+      "Consent/opt-out handling for personalization"
+    ],
+    "reference_answer": "A strong answer first pins down the optimization objective and how it's measured online, then designs the classic two-stage funnel: cheap multi-source candidate generation (two-tower + ANN, CF, popularity, graph) narrowing 50M items to a few hundred, followed by a heavy multi-task ranker with rich, freshly-fetched features and a diversity/business re-ranker. It treats the feature pipeline as first-class — a feature store with online/offline parity and point-in-time correctness to avoid training/serving skew and label leakage — and explains the online/offline split (precompute embeddings/candidates nearline, keep the request path light). It confronts feedback loops directly (position/exposure bias, popularity loops, exploration/IPW), keeps item embeddings fresh for cold-start items, and validates every change via A/B tests with drift monitoring and offline replay. It names feature-read fanout, ranking latency, and feedback bias as the key bottlenecks."
+  },
+  "interviewer_notes": "Insist the candidate state the optimization objective and its online metric before designing — a recsys without a defined objective is a red flag. The two-stage funnel (candidate generation vs ranking) is table stakes; the senior signal is in the feature pipeline and feedback loops. Push the point-in-time-correctness / online-offline-parity probe hard — candidates who don't understand label leakage or training/serving skew are missing the core ML-systems hazard. The feedback-loop/bias deep dive separates strong candidates: expect position bias, popularity loops, and some exploration story. Use the embedding-freshness follow-up (new-item cold start, CDC from catalog) and the caching follow-up as interrupts. Reserve time for how they'd detect a degraded model in production (drift) and safely roll out via A/B."
+}

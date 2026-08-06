@@ -1,0 +1,132 @@
+{
+  "id": "distributed-cache",
+  "title": "Design a Distributed Cache (Memcached/Redis-like)",
+  "track": "engineering",
+  "domain": "system_design",
+  "modality": "system_design",
+  "difficulty": "senior",
+  "tags": ["caching", "consistent-hashing", "eviction", "replication", "hot-keys", "invalidation"],
+  "prompt": "Design a distributed in-memory cache like Memcached or Redis that many application servers use to speed up reads. It should spread data across many nodes, handle node failures gracefully, evict under memory pressure, deal with hot keys, and keep cached data reasonably consistent with the source of truth.",
+  "blurb": "Consistent hashing, eviction policies, replication, hot keys, and cache invalidation.",
+  "rubric": [
+    { "key": "requirements", "label": "Requirements gathering", "description": "Separates functional (get/set/delete, TTL, eviction) from non-functional (low latency, high throughput, availability, elasticity).", "weight": 1.0 },
+    { "key": "clarifying_questions", "label": "Clarifying questions", "description": "Asks about read/write mix, value sizes, consistency needs, eviction policy, persistence, cluster size/elasticity.", "weight": 1.0 },
+    { "key": "estimations", "label": "Estimations", "description": "Estimates QPS, working-set size, memory per node, node count, hit-ratio targets.", "weight": 0.9 },
+    { "key": "partitioning", "label": "Partitioning / consistent hashing", "description": "Consistent hashing with virtual nodes; why not modulo hashing; minimal reshuffling on membership change; client vs proxy routing.", "weight": 1.4 },
+    { "key": "api_design", "label": "API design", "description": "get/set/delete/incr, TTL, CAS/compare-and-set; client protocol and routing responsibility.", "weight": 0.9 },
+    { "key": "eviction", "label": "Eviction policy", "description": "LRU/LFU/TTL, approximate LRU, memory management (slabs), when to evict vs reject writes.", "weight": 1.2 },
+    { "key": "high_level_design", "label": "High-level design", "description": "Client → routing (consistent hash) → cache node (in-memory store); read/write and lookaside vs write-through patterns.", "weight": 1.2 },
+    { "key": "replication", "label": "Replication & availability", "description": "Replica per shard, primary/replica reads, failover, membership/gossip, rebalancing on add/remove.", "weight": 1.2 },
+    { "key": "hot_keys", "label": "Hot keys & stampede", "description": "Detecting hot keys, replication/local caching to spread load, stampede prevention (locking, request coalescing, early recompute).", "weight": 1.3 },
+    { "key": "invalidation", "label": "Consistency & invalidation", "description": "Keeping cache consistent with the DB — TTL, explicit invalidation, write-through/behind, the thundering-herd on invalidation.", "weight": 1.2 },
+    { "key": "observability", "label": "Observability", "description": "Hit ratio, eviction rate, per-key/hot-key metrics, memory pressure, latency.", "weight": 0.8 }
+  ],
+  "reference": {
+    "functional_requirements": [
+      "GET / SET / DELETE by key with optional TTL",
+      "Evict entries under memory pressure",
+      "Distribute keys across many nodes",
+      "Survive node failures without full cache loss",
+      "Support atomic ops (incr, CAS) for common patterns"
+    ],
+    "nonfunctional_requirements": [
+      "Sub-millisecond in-memory access, very high throughput",
+      "High availability; a node loss degrades but doesn't break the service",
+      "Elastic — add/remove nodes with minimal disruption",
+      "Tunable consistency with the backing store (cache is not source of truth)"
+    ],
+    "clarifying_questions": [
+      "Read/write ratio and value size distribution?",
+      "Is the cache lookaside (app manages) or inline (read/write-through)?",
+      "Consistency expectation vs the DB — how stale is acceptable?",
+      "Eviction policy preference (LRU/LFU/TTL)?",
+      "Do we need persistence/warm restart, or pure volatile cache?",
+      "How often does cluster membership change (elasticity)?"
+    ],
+    "qualifying_questions": [
+      "Single-region or multi-region cache?",
+      "Are there known hot keys (celebrity objects, config blobs)?"
+    ],
+    "estimations": {
+      "traffic": "1M+ ops/s across the cluster; each node handles ~100K+ ops/s in memory",
+      "working_set": "e.g. 2TB working set / 64GB per node ≈ ~32 data nodes (plus replicas)",
+      "memory": "Account for object overhead + metadata; slab allocation to limit fragmentation",
+      "hit_ratio": "Target 90%+ hit ratio; below that, backing store QPS spikes dangerously"
+    },
+    "core_components": ["Client library / routing layer (or proxy like mcrouter/twemproxy)", "Consistent-hash ring + virtual nodes", "Cache nodes (in-memory store + eviction)", "Replica nodes per shard", "Membership/gossip / cluster manager", "Invalidation mechanism", "Metrics/monitoring"],
+    "data_model": [
+      "In-memory hash map: key → {value, expiry, last_access/freq metadata}",
+      "Consistent-hash ring: node → set of virtual-node hash positions",
+      "Eviction metadata: LRU list or approximate-LRU sampling / LFU counters",
+      "Replica map: shard → {primary, replicas}"
+    ],
+    "api_design": [
+      "get(key) → value | miss",
+      "set(key, value, ttl?) → ok",
+      "delete(key) → ok",
+      "incr(key, n) / cas(key, expected, new) → atomic ops",
+      "Routing: client hashes key onto the ring to pick the node (or a proxy does it)"
+    ],
+    "high_level_design": "Application servers use the cache lookaside: on read, hash the key onto a consistent-hash ring (with virtual nodes for balance) to find its node, GET; on miss, read the DB, then SET into the cache with a TTL. Writes to the DB either invalidate or update the cached key. Each shard has a primary plus one or more replicas; reads can serve from replicas, and on primary failure a replica is promoted. A membership/gossip layer tracks node liveness and drives rebalancing, which — thanks to consistent hashing — only remaps a small fraction of keys when a node joins/leaves. Each node manages its own memory with slab allocation and an eviction policy (approximate LRU/LFU/TTL) to stay within its limit. Hot keys are detected and mitigated by replicating them to multiple nodes and/or a small client-local cache, and stampedes are prevented with request coalescing / per-key locks / early recompute.",
+    "deep_dives": [
+      { "topic": "partitioning", "probe": "Why consistent hashing over simple hash(key) % N? Show me what happens to the key distribution when you add or remove one node under each scheme, and what virtual nodes buy you." },
+      { "topic": "eviction", "probe": "Memory is full and a SET arrives. Walk me through eviction — true LRU is expensive, so how does an approximate LRU (sampling) or LFU work, and when would you reject the write instead of evicting?" },
+      { "topic": "hot_keys", "probe": "One key (a viral object) gets 500K reads/s — all hitting one node. That node is saturated. How do you detect and spread a single hot key without losing consistency?" },
+      { "topic": "invalidation", "probe": "The DB row behind a cached key changes. How do you keep the cache consistent — TTL, explicit delete, write-through? What are the race conditions between a concurrent read-through and a write invalidation?" },
+      { "topic": "cache_stampede", "probe": "A very popular key's entry expires (or is invalidated) and 10K requests miss simultaneously, all hitting the DB. How do you prevent this stampede — locking/leasing, request coalescing, or serving stale while one recomputes?" },
+      { "topic": "replication", "probe": "A cache node dies. What happens to its keys, how does a replica take over, and how do you avoid a cold-cache thundering herd onto the DB during failover?" },
+      { "topic": "cdc_invalidation", "probe": "You want cache entries invalidated the instant the source DB changes. How would you drive invalidation from database change data capture (CDC/Debezium) instead of relying only on TTLs or app-side deletes?" }
+    ],
+    "followup_bank": [
+      { "trigger": "mentions hashing or partition or shard", "question": "Why consistent hashing over modulo hashing, and what do virtual nodes solve? How many keys move when one node is added?" },
+      { "trigger": "mentions eviction or lru", "question": "True LRU is costly at scale — how does approximate LRU (random sampling) or LFU work, and when do you reject a write instead of evicting?" },
+      { "trigger": "mentions hot key or hotspot", "question": "How do you detect a single hot key and spread its load (replication, client-local cache) without breaking consistency?" },
+      { "trigger": "mentions cache or expiry or ttl", "question": "How do you prevent a cache stampede when a hot key expires or is invalidated — leasing, request coalescing, or serve-stale-while-revalidate?" },
+      { "trigger": "mentions database or invalidation", "question": "How do you keep the cache consistent with the DB — TTL vs explicit invalidation vs CDC/Debezium-driven invalidation — and what races exist between read-through and write?" },
+      { "trigger": "mentions replication or failover", "question": "When a node dies, how do replicas take over and how do you avoid a cold-cache herd hammering the DB during failover?" },
+      { "trigger": "mentions consistency", "question": "Write-through, write-behind, or cache-aside — what consistency/latency/durability tradeoffs does each make?" }
+    ],
+    "scaling": [
+      "Consistent hashing with virtual nodes for balanced, low-churn rebalancing",
+      "Replicas per shard to spread hot reads and enable failover",
+      "Hot-key replication + optional client-local (L1) cache",
+      "Proxy layer (mcrouter/twemproxy) to centralize routing and pooling",
+      "Slab allocation and per-node memory caps to avoid fragmentation/OOM"
+    ],
+    "bottlenecks": [
+      "Single hot key saturating one node",
+      "Cache stampede on expiry/invalidation flooding the DB",
+      "Rebalancing churn on membership changes (minimized by consistent hashing)",
+      "Memory pressure driving high eviction and hit-ratio collapse",
+      "Cold-cache thundering herd after node failure/restart"
+    ],
+    "tradeoffs": [
+      "Cache-aside (simple, app-managed, race on invalidation) vs write-through (consistent, higher write latency) vs write-behind (fast, durability risk)",
+      "TTL-based staleness (simple) vs explicit/CDC invalidation (fresh, complex)",
+      "True LRU (accurate, costly) vs approximate LRU/LFU (cheap, slightly less optimal)",
+      "Strong replication (consistent, slower) vs async replica (fast, may lose recent writes)",
+      "More replicas (availability, hot-read spread) vs memory cost"
+    ],
+    "alternative_solutions": [
+      "Client-side consistent-hash routing vs a routing proxy (mcrouter/twemproxy/Envoy)",
+      "Redis Cluster (hash slots, built-in replication) vs Memcached (simpler, no replication)",
+      "Two-tier cache: local in-process L1 + shared distributed L2",
+      "Read-through library that also owns invalidation via CDC stream"
+    ],
+    "observability": [
+      "Global and per-node hit ratio and miss rate",
+      "Eviction rate and memory utilization per node",
+      "Hot-key detection metrics (per-key op rates)",
+      "Latency percentiles and node liveness/failover events",
+      "Backing-store QPS (spikes signal stampede or hit-ratio drop)"
+    ],
+    "security": [
+      "Restrict cache access to trusted app tier (network isolation/auth)",
+      "Avoid caching sensitive data unencrypted if the tier is shared",
+      "Guard against cache-poisoning via untrusted keys/values",
+      "Rate-limit/protect against a client evicting others' hot data (noisy neighbor)"
+    ],
+    "reference_answer": "A strong answer routes keys with consistent hashing plus virtual nodes — explaining explicitly why modulo hashing reshuffles almost everything on membership change while consistent hashing moves only ~1/N of keys — and chooses client-side or proxy routing. It designs per-node memory management (slabs) with an approximate-LRU/LFU/TTL eviction policy, and per-shard replication with replica reads and promotion on failure, tracked by gossip/membership. The two hardest problems it must raise proactively are hot keys (detect + replicate the key or add a client-local cache) and cache stampede (leasing/locks, request coalescing, or serve-stale-while-one-recomputes), plus the cold-cache thundering herd on failover. It reasons about consistency with the DB — cache-aside vs write-through vs write-behind, TTL vs explicit vs CDC/Debezium-driven invalidation — and the read-through/write race. It ties it together with hit-ratio and backing-store QPS as the health signals."
+  },
+  "interviewer_notes": "Consistent hashing is table stakes at senior — make them contrast it with modulo hashing and explain virtual nodes; if they just say 'consistent hashing' probe what it actually buys. The two differentiators are hot keys and stampede: drive the single-hot-key scenario (500K reads/s on one node) and the mass-expiry stampede, and expect concrete mitigations (key replication, leasing/coalescing, serve-stale). Eviction depth matters — push past 'use LRU' to approximate LRU/sampling and evict-vs-reject. On invalidation, fire the CDC/Debezium probe (invalidate on DB change) and separately the eviction/stampede probe — both are core here. Reserve the end for replication/failover and the cold-cache herd."
+}

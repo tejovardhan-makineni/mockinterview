@@ -1,0 +1,129 @@
+{
+  "id": "typeahead-autocomplete",
+  "title": "Design Search Autocomplete / Typeahead",
+  "track": "engineering",
+  "domain": "system_design",
+  "modality": "system_design",
+  "difficulty": "senior",
+  "tags": ["trie", "top-k", "prefix", "low-latency", "ranking", "sharding"],
+  "prompt": "Design the search autocomplete system that suggests completions as a user types — like the dropdown under a search box. For each keystroke it should return the top few most relevant suggestions for the current prefix, extremely fast, at web scale.",
+  "blurb": "Trie-based top-k over prefixes: precomputation, sharding, ranking, and single-digit-millisecond latency.",
+  "rubric": [
+    { "key": "requirements", "label": "Requirements gathering", "description": "Separates functional (top-k suggestions per prefix, freshness, personalization) from non-functional (very low latency, high availability, scale).", "weight": 1.0 },
+    { "key": "clarifying_questions", "label": "Clarifying questions", "description": "Asks about number of suggestions, latency budget, ranking signal, freshness, personalization, languages.", "weight": 1.0 },
+    { "key": "estimations", "label": "Estimations", "description": "Estimates query QPS (per keystroke), unique prefixes/terms, trie memory, update volume.", "weight": 1.0 },
+    { "key": "data_structure", "label": "Core data structure (trie)", "description": "Trie/prefix tree with precomputed top-k per node; why not query at read time; memory vs compute tradeoff.", "weight": 1.3 },
+    { "key": "topk_ranking", "label": "Top-k & ranking", "description": "Ranking by frequency/recency/personalization; storing top-k at each node; how top-k is aggregated bottom-up.", "weight": 1.2 },
+    { "key": "api_design", "label": "API design", "description": "GET /suggest?q=prefix contract, debounce, response shape, prefix normalization.", "weight": 0.9 },
+    { "key": "high_level_design", "label": "High-level design", "description": "Read path (edge/cache → trie service) separated from the offline pipeline that builds/updates the trie from query logs.", "weight": 1.3 },
+    { "key": "sharding", "label": "Prefix sharding & scaling", "description": "Sharding the trie by prefix, hot-prefix balancing, replication, keeping shards in memory.", "weight": 1.2 },
+    { "key": "freshness", "label": "Freshness / update pipeline", "description": "Aggregating query logs, rebuilding/patching the trie, trending terms, batch vs incremental updates.", "weight": 1.1 },
+    { "key": "latency", "label": "Latency engineering", "description": "Debouncing, caching popular prefixes at the edge, in-memory serving, avoiding per-keystroke DB hits.", "weight": 1.1 },
+    { "key": "observability", "label": "Observability", "description": "Suggest latency, cache hit ratio, click-through on suggestions, trie build lag.", "weight": 0.8 }
+  ],
+  "reference": {
+    "functional_requirements": [
+      "Return top-k (e.g. 5-10) suggestions for a typed prefix",
+      "Suggestions ranked by relevance (popularity/recency)",
+      "Update suggestions as new queries trend (freshness)",
+      "Optional personalization / locale awareness",
+      "Handle typos/normalization (baseline)"
+    ],
+    "nonfunctional_requirements": [
+      "Very low latency — < 50-100ms end-to-end per keystroke (ideally single-digit ms server side)",
+      "Extremely high read QPS (a query = many keystrokes)",
+      "High availability; stale suggestions acceptable briefly",
+      "Scales to hundreds of millions of terms"
+    ],
+    "clarifying_questions": [
+      "How many suggestions per prefix (5? 10?)?",
+      "What's the latency budget per keystroke?",
+      "Ranking signal — global popularity, recency, personalization?",
+      "How fresh must trending terms be — minutes or a day?",
+      "Multiple languages/locales? Case/diacritic handling?"
+    ],
+    "qualifying_questions": [
+      "Do we suggest full queries (search-log driven) or dictionary terms?",
+      "Is personalization in scope for v1 or later?"
+    ],
+    "estimations": {
+      "traffic": "10B searches/day, ~20 keystrokes each → ~200B suggest calls/day ≈ ~2.3M QPS; debounce cuts this materially",
+      "terms": "~100M-1B unique query strings; store top-k per prefix node in a trie",
+      "memory": "Trie with precomputed top-k per node for 100M+ terms → tens of GB per full copy; shard + replicate across memory",
+      "updates": "Aggregate query logs hourly/daily; incremental trending updates more frequently"
+    },
+    "core_components": ["Edge/CDN + prefix cache", "Suggest (trie) service (in-memory shards)", "Trie build/update pipeline (offline)", "Query-log aggregation (Kafka + batch)", "Ranking/scoring", "Personalization service (optional)"],
+    "data_model": [
+      "trie nodes: each node = prefix; stores precomputed top-k {term, score} for that subtree",
+      "term_frequency(term, count, last_seen) aggregated from logs",
+      "prefix_cache: prefix → top-k suggestions (edge/Redis, short TTL)",
+      "trie shards keyed by prefix range or first-N chars"
+    ],
+    "api_design": [
+      "GET /suggest?q={prefix}&limit=10&locale=en → { suggestions: [{term, score}] }",
+      "Client debounces (~100-300ms) and cancels stale in-flight requests",
+      "Prefix normalized (lowercase, trim, unicode-fold) before lookup"
+    ],
+    "high_level_design": "The read path is engineered for latency: the client debounces keystrokes and calls /suggest; an edge/prefix cache answers the most popular prefixes; misses hit the in-memory trie service. The trie is precomputed so that each node already stores the top-k completions for its subtree — a lookup is O(prefix length) to walk to the node, then return its stored top-k, with no read-time aggregation. The trie is sharded by prefix across many in-memory replicas. Separately, an offline pipeline consumes query logs (Kafka), aggregates term frequencies with recency weighting, recomputes top-k per node, and ships a new trie (full rebuild periodically + incremental patches for trending terms) to the serving replicas. Personalization, when enabled, re-ranks the global top-k with per-user signals.",
+    "deep_dives": [
+      { "topic": "data_structure", "probe": "Why precompute top-k at every trie node instead of walking the subtree at query time? Walk me through the memory-vs-latency tradeoff and how you aggregate top-k bottom-up when building the trie." },
+      { "topic": "topk_ranking", "probe": "Two terms share a prefix. How do you rank them — frequency, recency, both? How is the top-k at a parent node derived from its children, and how big does k need to be at each node?" },
+      { "topic": "sharding", "probe": "The trie doesn't fit on one box, and prefixes like 'a' are far hotter than 'z'. How do you shard so no single shard is overloaded, and how do you route a lookup to the right shard?" },
+      { "topic": "freshness", "probe": "A term suddenly trends (breaking news). Your trie was built this morning. How do you surface it within minutes without a full rebuild — incremental patch, overlay, or streaming update?" },
+      { "topic": "latency", "probe": "You must answer per keystroke in single-digit ms. What do you cache at the edge, how does debounce help, and how do you keep DB/disk entirely off the read path?" },
+      { "topic": "cache_stampede", "probe": "You cache top-k per popular prefix with a short TTL. When a very hot prefix's cache entry expires under 2M QPS, how do you prevent a stampede onto the trie service?" },
+      { "topic": "cdc_logs", "probe": "Query events land in a datastore/log. How do you feed the trie-build and trending pipelines off it — change data capture with Debezium, or streaming the query log directly? How do you weight recency vs total frequency?" }
+    ],
+    "followup_bank": [
+      { "trigger": "mentions trie or prefix tree", "question": "Do you store the top-k completions at each node or compute them at read time? Justify the memory cost of precomputation." },
+      { "trigger": "mentions top-k or ranking", "question": "How is a node's top-k derived from its children's top-k during the build, and how large must k be at intermediate nodes to stay correct?" },
+      { "trigger": "mentions shard", "question": "Prefixes are wildly skewed (many words start with 's', few with 'x'). How do you shard the trie to balance load and route lookups?" },
+      { "trigger": "mentions cache", "question": "What's the eviction/TTL for the prefix cache, and how do you avoid a stampede when a hot prefix's entry expires under millions of QPS?" },
+      { "trigger": "mentions database or logs or store", "question": "How do you feed the trie-build pipeline from query logs — CDC/Debezium vs streaming — and how do you incorporate recency vs raw frequency?" },
+      { "trigger": "mentions freshness or trending", "question": "How do you surface a newly trending term within minutes without rebuilding the whole trie?" },
+      { "trigger": "mentions latency or debounce", "question": "Where does debouncing happen, and how do you guarantee no disk/DB access on the per-keystroke read path?" }
+    ],
+    "scaling": [
+      "Keep the trie fully in memory; shard by prefix across replicas",
+      "Replicate hot shards to spread skewed prefix load",
+      "Edge/CDN caching of the hottest prefixes with short TTLs",
+      "Client debounce + request cancellation to cut effective QPS",
+      "Separate the heavy offline build pipeline from the light read path"
+    ],
+    "bottlenecks": [
+      "Read-path latency under millions of QPS",
+      "Skewed prefix distribution creating hot shards",
+      "Trie memory footprint at hundreds of millions of terms",
+      "Rebuild lag limiting freshness for trending terms",
+      "Personalization re-ranking adding read-path cost"
+    ],
+    "tradeoffs": [
+      "Precomputed top-k per node (fast reads, more memory + build cost) vs read-time aggregation (less memory, slower)",
+      "Full periodic rebuild (simple, stale between builds) vs incremental streaming updates (fresh, complex)",
+      "Global ranking (cacheable, shared) vs personalized (fresh per user, uncacheable)",
+      "Freshness vs build cost",
+      "Larger k at nodes (more correct merges, more memory) vs smaller k"
+    ],
+    "alternative_solutions": [
+      "Elasticsearch/inverted-index completion suggester instead of a bespoke trie",
+      "FST (finite state transducer) for compact prefix storage",
+      "Ternary search tree for memory efficiency over a plain trie",
+      "Precomputed prefix→top-k KV map (no tree) served from an in-memory store for a bounded prefix set"
+    ],
+    "observability": [
+      "Suggest latency percentiles (p50/p99) and QPS",
+      "Prefix cache hit ratio",
+      "Click-through / selection rate on suggestions (quality)",
+      "Trie build lag and freshness of trending terms",
+      "Per-shard load balance / hot-shard alerts"
+    ],
+    "security": [
+      "Filter offensive/unsafe or private strings out of the suggestion set",
+      "Rate-limit the suggest endpoint to prevent scraping/abuse",
+      "Avoid leaking other users' private queries via personalization",
+      "Sanitize/normalize input to prevent injection into logs/index"
+    ],
+    "reference_answer": "A strong answer builds around a trie with precomputed top-k completions stored at every node, so a per-keystroke lookup is just an O(prefix-length) walk returning the node's stored list — no read-time aggregation. It explains the memory-vs-latency tradeoff of precomputation, how a node's top-k is merged bottom-up from its children during an offline build, and how the trie is sharded by prefix (with hot-prefix replication) and kept fully in memory. It separates the light read path — client debounce, edge prefix cache, in-memory serving with no disk/DB on the path — from the heavy offline pipeline that aggregates query logs (with recency weighting) and rebuilds/patches the trie, plus an incremental path for trending terms. It proactively raises read-path latency, prefix skew/hot shards, trie memory, and rebuild-freshness as the main bottlenecks, and addresses cache stampede on hot prefixes and personalization's uncacheable cost."
+  },
+  "interviewer_notes": "The core signal is realizing you must precompute top-k at each trie node rather than aggregate at read time — steer them there if they propose scanning subtrees per query. Then push on how top-k merges bottom-up during the build and how big k must be. Prefix skew (hot shards) is the key scaling probe; make them balance/route. Freshness for trending terms separates good from great — force an incremental-update story, not just 'rebuild nightly'. This is latency-obsessed: interrupt any design that touches disk/DB on the keystroke path. If they mention a query-log datastore, fire the CDC/Debezium probe; if they add a prefix cache, fire the eviction/stampede probe."
+}

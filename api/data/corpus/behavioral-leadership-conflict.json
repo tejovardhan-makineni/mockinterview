@@ -1,0 +1,55 @@
+{
+  "id": "behavioral-leadership-conflict",
+  "title": "Behavioral: Leading Through Conflict or Failure",
+  "track": "professional",
+  "domain": "behavioral",
+  "modality": "conversational",
+  "difficulty": "mid",
+  "tags": ["behavioral", "star", "leadership", "conflict", "ownership", "reflection"],
+  "prompt": "Tell me about a time you had to lead a team or a project through a serious conflict or a failure. What was the situation, what did you do, and how did it turn out?",
+  "blurb": "A STAR behavioral question on leadership under conflict — assessed for structure, ownership, measurable result, and honest reflection.",
+  "rubric": [
+    { "key": "situation_clarity", "label": "Situation & task clarity", "description": "Sets up a specific, real situation concisely: the context, the stakes, the candidate's actual role, and what the conflict/failure and the goal were — without drowning in backstory.", "weight": 1.1 },
+    { "key": "action_ownership", "label": "Action & ownership", "description": "Describes what THEY specifically did (leadership behaviors: listening to both sides, addressing it directly, deciding, aligning the team), using 'I' not just 'we', and takes genuine ownership rather than blaming others.", "weight": 1.3 },
+    { "key": "result_impact", "label": "Result & impact", "description": "States a concrete, ideally quantified outcome tied to their actions, and closes the loop — the story actually resolves rather than trailing off.", "weight": 1.2 },
+    { "key": "reflection", "label": "Reflection & learning", "description": "Reflects honestly on what they learned or would do differently, showing self-awareness and growth — especially important for a failure story.", "weight": 1.1 },
+    { "key": "communication", "label": "Communication & structure", "description": "Follows a clear STAR arc, is concise and easy to follow, stays on the point of the question, and doesn't ramble.", "weight": 1.0 }
+  ],
+  "reference": {
+    "scenario": "Open behavioral prompt assessing leadership through conflict or failure via the STAR method (Situation, Task, Action, Result). There is no 'correct' story; the interviewer scores whether the answer is specific, structured, ownership-driven, resolved with a real result, and honestly reflective. The strongest answers pick a genuinely hard conflict (a team split on direction, a peer/report clash, a project failing) where the candidate personally intervened, describe concrete leadership actions in the first person, land a measurable outcome, and end with an honest lesson. Weak answers are vague, hero-narratives with no real conflict, 'we'-only with no personal action, blame-shifting, or a story that rambles with no result. Interviewer should push for specifics, for the candidate's own role, and for the result and the learning if any are missing.",
+    "model_points": [
+      "Situation: quickly establish a specific, real context and the stakes — a project at risk, a team divided, a failure unfolding — and when/where it happened, without excessive backstory.",
+      "Task: make clear what the candidate was responsible for and what needed to happen (their role in the conflict/failure and the goal).",
+      "Action: the core — describe concrete leadership behaviors in the first person: surfacing the conflict directly rather than avoiding it, listening to each side to understand root cause, finding common ground or making a hard call, communicating a decision, and re-aligning the team; if a failure, owning it and driving the recovery.",
+      "Result: a concrete, ideally quantified outcome tied to those actions (project shipped, relationship repaired, metric recovered), and closing the loop so the story resolves.",
+      "Reflection: an honest, specific lesson — what they learned about leadership or conflict, and what they'd do differently — demonstrating growth, which is the point of a failure/conflict story.",
+      "Ownership throughout: 'I' for personal actions, credit to the team where due, and no blame-shifting even when others contributed to the problem.",
+      "Conciseness: spend most of the time on Action and Result, keep Situation tight, and stay on the question asked."
+    ],
+    "probes": [
+      { "trigger": "candidate is vague about the situation", "question": "Give me the specifics — what exactly was the conflict, who was involved, and what was at stake?" },
+      { "trigger": "candidate says 'we' throughout with no personal action", "question": "What did YOU personally do? I want your specific actions and decisions, not the team's." },
+      { "trigger": "candidate blames the other party", "question": "What was your own contribution to the conflict, and what would you own looking back?" },
+      { "trigger": "candidate never states an outcome", "question": "How did it actually turn out? What was the result, and can you quantify it?" },
+      { "trigger": "candidate gives a tidy success with no learning", "question": "What did you learn from it, and what would you do differently if it happened again?" },
+      { "trigger": "candidate rambles without structure", "question": "Let's tighten this up — in a sentence each: the situation, what you did, and the result." }
+    ],
+    "red_flags": [
+      "Vague or generic story with no specific situation, people, or stakes",
+      "All 'we', no 'I' — never states what the candidate personally did",
+      "Blame-shifting; casts self as blameless hero and others as the whole problem",
+      "No result, or the story trails off without resolution",
+      "No reflection or learning, especially glaring for a failure prompt",
+      "Rambling, disorganized, or answering a different question than asked",
+      "Picks a trivial 'conflict' with no real stakes to look safe"
+    ],
+    "follow_ups": [
+      "If that same conflict happened again tomorrow, what would you do differently from the start?",
+      "How did the other person or side feel about how you handled it — did you check?",
+      "What's a situation where your approach to conflict did NOT work, and why?",
+      "How do you decide when to push for consensus versus just make the call as the leader?"
+    ],
+    "exemplar_answer": "A strong answer is tightly STAR-structured and specific. Situation/Task: 'On a product launch I was leading, two senior engineers were deadlocked on the architecture two weeks from deadline; the team had split into camps and progress had stalled — my job was to ship on time without losing either of them.' Action (the bulk, first-person and ownership-driven): 'I first met each of them one-on-one to understand the real concern beneath the technical debate — it turned out to be about ownership and risk, not just the design. I reframed the decision around our shared constraint, the deadline and reliability bar, ran a short time-boxed spike to get data instead of opinions, and then made the call explicitly, explaining the reasoning and giving the person whose approach I didn't pick a clear leading role elsewhere. I also owned that I'd let the disagreement fester too long before stepping in.' Result: 'We shipped on schedule, the feature hit its reliability target, and both engineers stayed and later told me the process felt fair.' Reflection: 'I learned to surface conflict early rather than hoping it resolves itself, and to separate the emotional root cause from the stated technical one — I now check in the moment I sense a team splitting rather than waiting.' It's honest, resolves clearly, quantifies where it can, and takes genuine personal ownership."
+  },
+  "interviewer_notes": "Assess against STAR completeness, not the story's content. Let the candidate tell it, then use probes to fill any missing element: force specificity if the Situation is vague, force 'I' if they hide behind 'we', force a Result if the story trails off, and force a lesson if they give a tidy success with no reflection. The strongest signal for a mid-level candidate is genuine ownership (including their own contribution to the conflict) plus a concrete, resolved outcome and an honest learning. Penalize blame-shifting, rambling, trivial low-stakes 'conflicts', and hero narratives with no real difficulty. Keep them concise — if they ramble, ask for the one-sentence-each summary. Close with the 'what would you do differently' follow-up to test reflection depth."
+}

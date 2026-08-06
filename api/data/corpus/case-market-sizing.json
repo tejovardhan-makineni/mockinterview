@@ -1,0 +1,55 @@
+{
+  "id": "case-market-sizing",
+  "title": "Market Sizing: Estimate the Annual Market for Product X",
+  "track": "professional",
+  "domain": "consulting_case",
+  "modality": "conversational",
+  "difficulty": "mid",
+  "tags": ["market-sizing", "guesstimate", "estimation", "structure", "assumptions"],
+  "prompt": "I'd like you to estimate the size of the annual market for disposable coffee cups sold to coffee shops in the United States, in units per year. Walk me through your thinking out loud.",
+  "blurb": "A structured guesstimate — build a top-down or bottom-up estimate with stated assumptions and a sanity check.",
+  "rubric": [
+    { "key": "structure", "label": "Estimation structure", "description": "Chooses a clear top-down or bottom-up path and lays out the equation before plugging numbers (e.g. population x coffee-shop-coffee frequency x cups, or # shops x cups/shop/day x days).", "weight": 1.3 },
+    { "key": "assumptions", "label": "Assumptions", "description": "States each assumption explicitly, uses round anchor numbers that are defensible (US population ~330M, workdays, participation rates), and flags which assumptions are most uncertain.", "weight": 1.2 },
+    { "key": "quantitative", "label": "Quantitative execution", "description": "Does the arithmetic cleanly, carries units end to end, keeps the orders of magnitude straight, and arrives at a specific number.", "weight": 1.2 },
+    { "key": "business_judgment", "label": "Sanity check & judgment", "description": "Sanity-checks the result against a second method or a known anchor, discusses sensitivity to the biggest driver, and knows the answer is a range not a point.", "weight": 1.1 },
+    { "key": "synthesis", "label": "Synthesis", "description": "States the final estimate clearly with the key drivers and the largest source of uncertainty.", "weight": 0.9 },
+    { "key": "communication", "label": "Communication", "description": "Thinks out loud in an organized, easy-to-follow way; segments the population sensibly; invites the interviewer to challenge an assumption.", "weight": 0.9 }
+  ],
+  "reference": {
+    "scenario": "Estimating US annual disposable coffee cups sold to coffee shops (i.e. to-go cups used by cafes, not retail/home). There is no single 'right' answer; the interviewer evaluates structure, assumptions, arithmetic, and sanity-checking. A reasonable bottom-up path: US population ~330M; ~60% drink coffee (~200M); of those, some fraction buy from coffee shops (vs brewing at home) on a given day — say ~40% buy a coffee-shop coffee on an average day (~80M), at ~1 to-go cup each on average across the week → on the order of ~60-80M to-go cups/day; x ~360 days ≈ ~25-30B cups/year. A top-down cross-check: ~35-40k coffee shops (chains + independents) averaging perhaps ~300-500 to-go drinks/day x ~360 days ≈ ~4-7B from named shops, plus convenience stores/fast food dispensing coffee push the total higher — the two methods should be reconciled and the scope (coffee shops only vs all foodservice) clarified. A defensible answer lands somewhere in the ~10-30B cups/year range with transparent assumptions; the exact figure matters far less than the method.",
+    "model_points": [
+      "Clarify scope first: 'coffee shops' only (Starbucks-type cafes + independents) or all foodservice that dispenses coffee? To-go disposable cups only, excluding for-here ceramic? US only, one year.",
+      "Pick an approach and state the equation before numbers: bottom-up demand (people x frequency x cups) or bottom-up supply (# shops x cups/shop/day x days) — ideally do one and cross-check with the other.",
+      "Segment the population sensibly rather than one blunt average: e.g. coffee drinkers vs non-drinkers, and home-brewers vs shop-buyers, with a stated participation rate.",
+      "Use round, defensible anchors: US pop ~330M, ~60-65% coffee drinkers, a stated share buying from shops per day, ~360 operating days/year.",
+      "Carry units the whole way (people -> cups/day -> cups/year) and keep orders of magnitude straight — this is where candidates slip.",
+      "Sanity-check with a second method or a known anchor (number of coffee shops, or per-capita cups/year) and reconcile any large gap by revisiting the scope or the weakest assumption.",
+      "Discuss sensitivity: identify the one assumption the answer is most sensitive to (usually the 'share who buy from shops' or 'cups per person per day') and give a range, not a false-precision point estimate."
+    ],
+    "probes": [
+      { "trigger": "candidate starts multiplying without stating scope", "question": "Before you compute — does 'coffee shops' include gas stations and fast food that pour coffee, or just cafes? And are we counting only disposable to-go cups?" },
+      { "trigger": "candidate uses one blunt average frequency", "question": "You applied one coffee-per-person number across everyone. Would segmenting the population change the estimate much? Which segments matter?" },
+      { "trigger": "candidate reaches a number with no check", "question": "You got a number from the demand side — now sanity-check it a different way, say from the number of coffee shops. Do the two roughly agree?" },
+      { "trigger": "candidate's methods disagree by 5x", "question": "Your two estimates are far apart. Which assumption is most likely wrong, and how would you reconcile them?" },
+      { "trigger": "candidate gives a single precise number", "question": "How confident are you in that figure? Which single assumption is it most sensitive to, and what's your plausible range?" },
+      { "trigger": "candidate forgets days per year or a unit", "question": "Walk me back through the units — are we at cups per day or per year, and did the day count get applied?" }
+    ],
+    "red_flags": [
+      "No structure — starts multiplying random numbers before laying out the equation",
+      "Never clarifies scope (all foodservice vs cafes, to-go vs for-here)",
+      "Arithmetic or order-of-magnitude errors, or dropped units (cups/day reported as cups/year)",
+      "Uses one blunt average with no population segmentation and no acknowledgment of the simplification",
+      "No sanity check and no second method",
+      "Presents a single precise number as if it were exact, with no range or sensitivity"
+    ],
+    "follow_ups": [
+      "If a client wanted to enter this market, which segment of demand would you double-check first before trusting your estimate?",
+      "How would the number change if you included convenience stores and fast-food coffee?",
+      "Suppose reusable-cup adoption grows to 20% of shop coffees — how does that move the disposable-cup market?",
+      "If your two methods gave 8B and 25B, how would you decide which to present to a client?"
+    ],
+    "exemplar_answer": "A strong candidate clarifies scope (US, one year, disposable to-go cups from cafes; asks whether to include gas-station/fast-food coffee), then states the equation before touching numbers. Going bottom-up from demand: US pop ~330M x ~60% coffee drinkers ≈ 200M; assume ~40% buy a coffee-shop coffee on an average day at ~1 to-go cup → ~80M cups/day; x ~360 days ≈ ~25-29B cups/year — segmenting instead of using one blunt average, and naming the 'share buying from shops' as the shakiest input. They then cross-check top-down: ~35-40k coffee shops x ~300-500 to-go drinks/day x 360 ≈ ~4-7B from named cafes, note that gas stations and fast food add a lot, and reconcile the gap by revisiting scope. They land on a transparent range (~15-30B cups/year), flag the single most sensitive assumption, and present it as an estimate with a stated confidence rather than false precision. Units are carried cleanly from people to cups per year throughout."
+  },
+  "interviewer_notes": "Market sizing tests structure and composure, not trivia. Reward clarifying scope up front and stating the equation before plugging numbers — penalize candidates who start multiplying immediately. Let them pick top-down or bottom-up, then push for the OTHER method as a sanity check; watch whether they reconcile a mismatch by revisiting the weakest assumption rather than fudging. Keep the arithmetic honest: interrupt on any dropped unit or order-of-magnitude slip. The exact final number does not matter — a defensible ~10-30B with clear assumptions is full marks. Close by asking for the single most sensitive assumption and a range."
+}

@@ -1,0 +1,76 @@
+{
+  "id": "two-sum-variants",
+  "title": "Two Sum and Three Sum",
+  "track": "engineering",
+  "domain": "coding",
+  "modality": "coding",
+  "difficulty": "junior",
+  "tags": ["hashing", "two-pointer", "arrays", "sorting"],
+  "prompt": "Given an array of integers nums and an integer target, return the indices of the two numbers that add up to target. You may assume exactly one solution exists and you may not use the same element twice. As a follow-up: given an array nums, return all unique triplets [a, b, c] such that a + b + c == 0 (3-Sum), with no duplicate triplets in the result.",
+  "blurb": "The gateway hashing problem — a one-pass hash map for Two Sum, generalized to the sort + two-pointer sweep of 3-Sum.",
+  "rubric": [
+    { "key": "problem_understanding", "label": "Problem understanding", "description": "Clarifies whether the array is sorted, whether indices or values are returned, whether duplicates exist, and (for 3-Sum) that TRIPLET values must be unique, not index tuples.", "weight": 1.0 },
+    { "key": "approach", "label": "Approach", "description": "For Two Sum reaches the one-pass hash map storing value->index and looking up target-x; recognizes the O(n^2) nested loop as the naive baseline. For 3-Sum reaches sort + fix one element + two-pointer, and connects it back to Two Sum.", "weight": 1.3 },
+    { "key": "correctness", "label": "Correctness", "description": "Two Sum: checks the complement is already in the map before inserting so an element isn't used twice. 3-Sum: skips duplicate values for the fixed index AND for both pointers after a match to avoid duplicate triplets; moves both pointers only on a hit.", "weight": 1.3 },
+    { "key": "complexity_analysis", "label": "Complexity analysis", "description": "Two Sum O(n) time / O(n) space with the hash map, vs O(n^2)/O(1) brute force or O(n log n)/O(1) sort+two-pointer (which loses original indices). 3-Sum O(n^2) time / O(1) or O(n) space.", "weight": 1.0 },
+    { "key": "code_quality", "label": "Code quality", "description": "Two Sum is a tight single loop; 3-Sum factors the inner two-pointer scan cleanly and handles the duplicate-skipping with readable while-loops rather than tangled conditionals.", "weight": 1.0 },
+    { "key": "edge_cases", "label": "Edge cases", "description": "Empty/size<2 arrays, negatives, a value that is exactly half the target appearing once vs twice, all zeros for 3-Sum, fewer than 3 elements, no valid triplet.", "weight": 1.1 },
+    { "key": "testing", "label": "Testing", "description": "Tests the duplicate-value cases explicitly (e.g. [0,0,0], [-1,-1,2]) rather than only a happy path, and verifies no duplicate triplets are emitted.", "weight": 0.8 },
+    { "key": "communication", "label": "Communication", "description": "Explains why the complement-check order matters, and why sorting enables the two-pointer sweep in the follow-up.", "weight": 0.8 }
+  ],
+  "reference": {
+    "constraints": [
+      "Two Sum: 2 <= nums.length <= 10^4, -10^9 <= nums[i], target <= 10^9, exactly one valid answer",
+      "3-Sum: 0 <= nums.length <= 3000, -10^5 <= nums[i] <= 10^5",
+      "3-Sum answer must contain no duplicate triplets; order of triplets and of values within a triplet does not matter"
+    ],
+    "examples": [
+      {
+        "input": "Two Sum: nums=[2,7,11,15], target=9",
+        "output": "[0,1]",
+        "explanation": "nums[0] + nums[1] = 2 + 7 = 9, so the indices are 0 and 1."
+      },
+      {
+        "input": "Two Sum: nums=[3,3], target=6",
+        "output": "[0,1]",
+        "explanation": "The same value appears twice at different indices; the complement of the second 3 is the first 3, already in the map."
+      },
+      {
+        "input": "3-Sum: nums=[-1,0,1,2,-1,-4]",
+        "output": "[[-1,-1,2],[-1,0,1]]",
+        "explanation": "After sorting to [-4,-1,-1,0,1,2], the two distinct zero-sum triplets are found; the duplicate -1 is skipped so [-1,0,1] is not emitted twice."
+      }
+    ],
+    "test_cases": [
+      { "input": "Two Sum: nums=[3,2,4], target=6", "expected": "[1,2] — must not pick index 0 twice; 3+3 is invalid, 2+4=6" },
+      { "input": "Two Sum: nums=[-3,4,3,90], target=0", "expected": "[0,2] — handles negatives (-3 + 3 = 0)" },
+      { "input": "3-Sum: nums=[]", "expected": "[] — empty input" },
+      { "input": "3-Sum: nums=[0,0,0,0]", "expected": "[[0,0,0]] — a single triplet despite four zeros; duplicate-skip prevents repeats" },
+      { "input": "3-Sum: nums=[1,2,-2,-1]", "expected": "[] — no triplet sums to 0" },
+      { "input": "3-Sum: nums=[-2,0,1,1,2]", "expected": "[[-2,0,2],[-2,1,1]] — both valid, second uses the repeated 1s legitimately" }
+    ],
+    "optimal_time": "Two Sum O(n); 3-Sum O(n^2)",
+    "optimal_space": "Two Sum O(n) for the hash map; 3-Sum O(1) beyond the output (sort in place) or O(n) if the sort is not in place",
+    "approaches": [
+      { "name": "brute force (nested loops)", "idea": "Two Sum: for every i, scan every j>i checking nums[i]+nums[j]==target. 3-Sum: three nested loops over all index triples plus a set to dedupe. Straightforward, no extra insight, but quadratic/cubic.", "time": "Two Sum O(n^2); 3-Sum O(n^3)", "space": "O(1) (or O(triplets) for the dedupe set)" },
+      { "name": "optimal Two Sum: one-pass hash map", "idea": "Iterate once. For each x=nums[i], compute need=target-x. If need is already a key in the map, return [map[need], i]. Otherwise store map[x]=i and continue. Checking BEFORE inserting guarantees the two indices are distinct, and the single pass is what makes it O(n).", "time": "O(n)", "space": "O(n)" },
+      { "name": "sort + two-pointer (value-return variant / 3-Sum core)", "idea": "Sort. For Two-Sum-by-value, walk a left and right pointer inward: if sum<target move left up, if sum>target move right down, else record. This is O(n log n) and O(1) but destroys original indices, so it fits when values (not indices) are wanted. 3-Sum reuses it: sort, then for each index i (skipping duplicate nums[i]), run the two-pointer sweep on the subarray to its right targeting -nums[i], skipping duplicate values on both pointers after each hit.", "time": "sort O(n log n); 3-Sum O(n^2)", "space": "O(1) beyond the sort" }
+    ],
+    "follow_ups": [
+      "Return VALUES instead of indices — now the sort + two-pointer approach becomes attractive (O(1) extra space).",
+      "3-Sum (above): all unique triplets summing to 0 — the canonical generalization.",
+      "3-Sum Closest: return the triplet sum nearest to target; track the best absolute difference during the same sweep.",
+      "4-Sum / k-Sum: recurse — fix one element and reduce to (k-1)-Sum, bottoming out at the two-pointer Two-Sum; O(n^(k-1)).",
+      "Two Sum on a sorted input stream / with duplicates counted, or Two Sum III where add() and find() are separate online operations."
+    ],
+    "reference_solution": "twoSum(nums, target): seen = {}  // value -> index. for i, x in enumerate(nums): need = target - x; if need in seen: return [seen[need], i]; seen[x] = i. return []  // per constraints, unreachable. The check-before-insert order is the correctness crux: it prevents using nums[i] as both operands and it returns the earliest valid pair.\n\nthreeSum(nums): sort(nums); res = []; n = len(nums). for i in range(n-2): if nums[i] > 0: break  // sorted, no positive lead can sum to 0. if i > 0 and nums[i] == nums[i-1]: continue  // skip duplicate anchor. lo = i+1; hi = n-1. while lo < hi: s = nums[i] + nums[lo] + nums[hi]; if s < 0: lo += 1; elif s > 0: hi -= 1; else: res.append([nums[i], nums[lo], nums[hi]]); lo += 1; hi -= 1; while lo < hi and nums[lo] == nums[lo-1]: lo += 1; while lo < hi and nums[hi] == nums[hi+1]: hi -= 1. return res. Three independent duplicate skips (anchor, and both pointers after a hit) are what keep triplets unique without a hash set.",
+    "pitfalls": [
+      "Two Sum: inserting into the map before checking the complement, which can match an element with itself.",
+      "3-Sum: forgetting to skip duplicate anchor values, producing repeated triplets.",
+      "3-Sum: skipping duplicates on only one pointer, or advancing only one pointer on a hit (infinite loop / missed pairs).",
+      "Using a hash-set dedupe on triplets as a crutch instead of the ordered skip — works but O(n) extra space and hides understanding.",
+      "Returning indices from the sorted 3-Sum when the original indices were required."
+    ]
+  },
+  "interviewer_notes": "This is a warm-up; let the candidate solve Two Sum quickly. If they open with the O(n^2) double loop, accept it, then ask 'can you do it in one pass?' to steer them to the hash map — reaching it unprompted is the junior signal. Watch that they check the complement before inserting; if they don't, hand them nums=[3,3],target=6 and ask what happens. Once Two Sum is clean, escalate to 3-Sum: the key transitions are (a) sorting to enable two pointers and (b) the three duplicate-skips. Stay silent while they wire the two-pointer sweep; nudge only if they stall on de-duplication, and the best nudge is the test [0,0,0,0]. A strong candidate connects 3-Sum back to Two Sum ('I fix one number and two-sum the rest'). If they finish fast, push to 3-Sum Closest or the k-Sum recursion."
+}

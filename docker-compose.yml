@@ -1,0 +1,22 @@
+# Local dev dependency: Postgres only. The API and web run on the host via
+# `make dev`. This mirrors prod shape (Cloud SQL Postgres) without extra weight.
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: mockinterview-pg
+    environment:
+      POSTGRES_USER: mockinterview
+      POSTGRES_PASSWORD: mockinterview
+      POSTGRES_DB: mockinterview
+    ports:
+      - "5432:5432"
+    volumes:
+      - mockinterview_pg:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U mockinterview"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+volumes:
+  mockinterview_pg:

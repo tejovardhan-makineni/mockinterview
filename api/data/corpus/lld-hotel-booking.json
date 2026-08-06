@@ -1,0 +1,132 @@
+{
+  "id": "lld-hotel-booking",
+  "title": "Design a Hotel Reservation System — Object Model",
+  "track": "engineering",
+  "domain": "low_level_design",
+  "modality": "system_design",
+  "difficulty": "mid",
+  "tags": ["ood", "lld", "availability", "booking", "state-machine", "strategy-pattern"],
+  "prompt": "Design the object model for a hotel reservation system. Users search for available rooms for a date range, book a room, pay, and can cancel. The system must never double-book a room for overlapping dates. Design the core classes, the availability/booking model, the reservation lifecycle, and pricing. Focus on class design and APIs rather than the distributed backend. Sketch the class diagram.",
+  "blurb": "Availability over date ranges without double-booking, a reservation state machine, and pluggable pricing.",
+  "rubric": [
+    { "key": "requirements_clarification", "label": "Requirements clarification", "description": "Separates functional (search by dates, book, pay, cancel, room types) from non-functional (no double-booking, availability correctness, extensible pricing).", "weight": 1.0 },
+    { "key": "core_entities", "label": "Core entities", "description": "Hotel, Room, RoomType, Reservation, Guest, DateRange, Payment, Inventory/Availability — cleanly separated.", "weight": 1.1 },
+    { "key": "class_design", "label": "Class design & responsibilities", "description": "Availability is its own concept over a DateRange; Room vs RoomType distinction; Reservation owns its lifecycle.", "weight": 1.2 },
+    { "key": "relationships", "label": "Relationships & cardinality", "description": "Hotel 1..* Room; RoomType groups Rooms; Reservation references a Room/RoomType + DateRange + Guest. Composition vs association reasoned.", "weight": 1.0 },
+    { "key": "design_patterns", "label": "Design patterns", "description": "State for reservation lifecycle, Strategy for pricing (seasonal/dynamic), Repository for storage, optionally Observer for confirmations.", "weight": 1.1 },
+    { "key": "solid_principles", "label": "SOLID / OCP", "description": "New pricing rule or room type plugs in without editing Reservation; availability logic isolated.", "weight": 1.0 },
+    { "key": "api_methods", "label": "API / method design", "description": "searchRooms(dateRange, type), book, confirm, cancel, checkIn/Out, isAvailable — clear signatures.", "weight": 1.0 },
+    { "key": "state_machine", "label": "Reservation state machine", "description": "Explicit states + legal transitions; cancellation and no-show handled; guards enforced.", "weight": 1.1 },
+    { "key": "edge_cases", "label": "Edge cases", "description": "Overlapping-date conflict, same-day checkout/checkin boundary, cancellation policy windows, payment failure after hold, over-search inventory.", "weight": 1.1 },
+    { "key": "concurrency", "label": "Concurrency", "description": "Two guests booking the last room for overlapping dates; holds/locks; idempotent booking. THE core challenge.", "weight": 1.2 },
+    { "key": "extensibility", "label": "Extensibility", "description": "Multiple hotels, amenities, loyalty pricing, group bookings, overbooking policy added cleanly.", "weight": 0.8 },
+    { "key": "communication", "label": "Communication", "description": "Narrates availability model and state diagram, states tradeoffs, reasons about the double-booking race.", "weight": 0.8 }
+  ],
+  "reference": {
+    "functional_requirements": [
+      "Search rooms available for a given date range and room type",
+      "Book a specific room/room-type for a date range for a guest",
+      "Pay for the reservation; hold inventory during checkout",
+      "Cancel a reservation subject to a cancellation policy",
+      "Check-in and check-out; mark no-shows",
+      "Room types with different capacities, amenities, and prices"
+    ],
+    "nonfunctional_requirements": [
+      "A room is never double-booked for overlapping dates — the hard invariant",
+      "Availability queries are correct and reasonably fast",
+      "Pricing is extensible (seasonal, dynamic, promotional)",
+      "Reservation lifecycle is auditable"
+    ],
+    "clarifying_questions": [
+      "Do guests book a specific room or just a room type (inventory of N)?",
+      "Single property or a chain of hotels?",
+      "Is check-in date inclusive and check-out exclusive (a room frees on checkout day)?",
+      "What's the cancellation policy — free window, partial refund, non-refundable rates?",
+      "Do we allow overbooking to hedge no-shows?",
+      "Pricing model — fixed, seasonal, or dynamic by occupancy?"
+    ],
+    "core_classes": [
+      { "name": "Hotel", "responsibility": "A property with rooms and a pricing policy.", "key_fields": ["hotelId", "name", "Address address", "List<Room> rooms", "List<RoomType> roomTypes"], "key_methods": ["searchAvailable(dateRange, type)"] },
+      { "name": "RoomType", "responsibility": "A category (Standard/Deluxe/Suite) with capacity, amenities, base price.", "key_fields": ["typeId", "name", "capacity", "Set<Amenity> amenities", "Money basePrice"], "key_methods": [] },
+      { "name": "Room", "responsibility": "A physical bookable unit of a RoomType.", "key_fields": ["roomId", "RoomType type", "floor", "RoomStatus status"], "key_methods": ["isAvailable(dateRange)"] },
+      { "name": "DateRange", "responsibility": "Value object for [checkIn, checkOut); provides overlap test.", "key_fields": ["LocalDate checkIn", "LocalDate checkOut"], "key_methods": ["overlaps(other) -> bool", "nights()"] },
+      { "name": "Availability / InventoryCalendar", "responsibility": "Tracks, per room or room-type, which date ranges are taken; answers isAvailable and holds dates.", "key_fields": ["Map<roomId, Set<DateRange>> booked  // or per-day counts per type"], "key_methods": ["isAvailable(room, range)", "hold(room, range, ttl)", "commit(hold)", "release(hold)"] },
+      { "name": "Reservation", "responsibility": "A booking: guest, room/type, date range, price, and lifecycle state.", "key_fields": ["reservationId", "Guest guest", "Room room", "DateRange dates", "Money totalPrice", "ReservationState state", "Payment payment"], "key_methods": ["confirm()", "cancel()", "checkIn()", "checkOut()"] },
+      { "name": "ReservationState", "responsibility": "State pattern base; concrete states define legal transitions.", "key_fields": [], "key_methods": ["confirm()", "cancel()", "checkIn()", "checkOut()", "noShow()"] },
+      { "name": "PricingStrategy", "responsibility": "Abstract: compute total for a room type + date range (seasonal/dynamic).", "key_fields": [], "key_methods": ["price(RoomType, DateRange, occupancy) -> Money"] },
+      { "name": "Guest", "responsibility": "Booking party and contact/payment info.", "key_fields": ["guestId", "name", "contact", "loyaltyTier"], "key_methods": [] },
+      { "name": "CancellationPolicy", "responsibility": "Determines refund based on time-to-checkin and rate type.", "key_fields": ["freeWindow", "penaltyRules"], "key_methods": ["refundFor(reservation, now) -> Money"] },
+      { "name": "BookingService", "responsibility": "Orchestrates search → hold → pay → confirm; enforces the no-double-book invariant.", "key_fields": ["Availability inventory", "PricingStrategy pricing", "PaymentGateway payment", "reservationRepo"], "key_methods": ["search(range, type)", "book(guest, roomType, range)", "cancel(id)"] }
+    ],
+    "relationships": [
+      "Hotel composes Rooms and defines RoomTypes; each Room is-a instance of one RoomType (association).",
+      "Reservation references one Room (or RoomType inventory slot), one Guest, one DateRange, and composes a Payment and ReservationState.",
+      "Availability/InventoryCalendar is the single source of truth for what's taken; BookingService mutates it under a lock.",
+      "BookingService depends on PricingStrategy, CancellationPolicy, PaymentGateway abstractions (DIP)."
+    ],
+    "design_patterns": [
+      { "pattern": "State", "where": "ReservationState (Pending/Confirmed/CheckedIn/CheckedOut/Cancelled/NoShow)", "why": "Localizes legal transitions and guards; e.g. can't check in a cancelled reservation." },
+      { "pattern": "Strategy", "where": "PricingStrategy (seasonal/dynamic) and CancellationPolicy", "why": "Pricing and refund rules vary independently and plug in without editing Reservation (OCP)." },
+      { "pattern": "Repository", "where": "ReservationRepository / InventoryStore", "why": "Abstracts persistence and enables the atomic availability check." },
+      { "pattern": "Value Object", "where": "DateRange with overlap()", "why": "Encapsulates the interval math the whole design depends on." }
+    ],
+    "apis": [
+      "searchRooms(dateRange, roomType) -> List<RoomOffer{room, price}>",
+      "book(guestId, roomType, dateRange) -> Reservation (state PENDING, inventory held)",
+      "confirmBooking(reservationId, paymentToken) -> CONFIRMED",
+      "cancel(reservationId) -> refund per policy",
+      "checkIn(reservationId) / checkOut(reservationId)"
+    ],
+    "state_transitions": [
+      "PENDING → CONFIRMED (payment succeeds) | EXPIRED (hold TTL elapses) | CANCELLED",
+      "CONFIRMED → CHECKED_IN (arrival) | CANCELLED (per policy) | NO_SHOW (didn't arrive)",
+      "CHECKED_IN → CHECKED_OUT (terminal)",
+      "CANCELLED, EXPIRED, NO_SHOW, CHECKED_OUT are terminal",
+      "Guards: can't check in before CONFIRMED; can't cancel after CHECKED_IN"
+    ],
+    "edge_cases": [
+      "Two guests book the last matching room for overlapping dates → exactly one succeeds",
+      "Check-out day == another booking's check-in day → not an overlap ([in, out) half-open)",
+      "Payment fails after inventory hold → release the hold on timeout",
+      "Cancellation inside the free window (full refund) vs after (penalty) vs non-refundable rate (no refund)",
+      "Search returns a room that gets booked before this user checks out → re-validate at book time",
+      "No-show handling and late-checkout overlaps",
+      "Duplicate book request from a retry → idempotency key"
+    ],
+    "concurrency": [
+      "THE core problem: prevent double-booking overlapping dates. Options: pessimistic lock on the room/room-type row while checking availability + inserting; a unique constraint on (room_id, date) or a range-exclusion constraint; or an atomic conditional insert.",
+      "Hold pattern: reserve inventory with a short TTL during checkout, commit on payment, auto-release on timeout to avoid inventory leaks",
+      "Idempotent book via client requestId",
+      "Availability read must be consistent with the write that commits the booking"
+    ],
+    "extensibility": [
+      "Chain of hotels → Hotel is one aggregate; search spans properties",
+      "Overbooking policy → allow N+k holds per type, strategy-controlled",
+      "Loyalty/dynamic pricing → new PricingStrategy",
+      "Group bookings / room blocks → reserve multiple rooms atomically",
+      "Amenities and add-ons → composed onto RoomType/Reservation"
+    ],
+    "deep_dives": [
+      { "topic": "double_booking", "probe": "Two users try to grab the last deluxe room for July 4–6. Walk me through the exact mechanism that guarantees only one wins. Lock, unique constraint, or atomic conditional write — pick one and defend it." },
+      { "topic": "availability_model", "probe": "How do you represent availability so isAvailable(room, range) is correct and fast? Per-day rows, interval set, or occupancy counts per type? What are the tradeoffs?" },
+      { "topic": "hold_ttl", "probe": "A user holds a room during checkout but abandons the payment. How do you avoid leaking that inventory forever? Describe the hold/commit/release lifecycle." },
+      { "topic": "date_boundaries", "probe": "Is check-out day bookable by the next guest? Model the interval so a same-day turnover isn't a false conflict." },
+      { "topic": "cancellation_policy", "probe": "Model free-window vs penalty vs non-refundable so adding a new rate type doesn't touch Reservation." }
+    ],
+    "followup_bank": [
+      { "trigger": "mentions available or availability or search", "question": "How is availability stored so overlap checks are correct — per-day rows, interval set, or per-type counts?" },
+      { "trigger": "mentions book or reservation", "question": "Two people book the last room for overlapping dates at the same instant. What exact mechanism makes one fail?" },
+      { "trigger": "mentions hold or lock", "question": "If a user holds a room then vanishes, how does that inventory get released? What's the TTL story?" },
+      { "trigger": "mentions cancel", "question": "Model the refund so a new non-refundable rate type doesn't require editing Reservation." },
+      { "trigger": "mentions date or range", "question": "Is checkout day an overlap with the next checkin? How does your DateRange handle the boundary?" }
+    ],
+    "tradeoffs": [
+      "Book specific room (deterministic, less flexible) vs book room-type inventory (flexible, assign room at check-in)",
+      "Pessimistic lock (simple, correct, contention) vs unique/exclusion constraint (DB-enforced, elegant) vs optimistic retry",
+      "Per-day availability rows (simple overlap) vs interval sets (compact, trickier)",
+      "Holds with TTL (no leaks, more moving parts) vs book-then-pay (simpler, risk of no-pay bookings)"
+    ],
+    "reference_answer": "A strong mid-level answer treats availability as a first-class concept over a half-open DateRange, distinguishes Room from RoomType, and centers the design on the no-double-book invariant — enforced by a pessimistic lock on the room/type while checking-and-inserting, or better, a database unique/exclusion constraint on (room, date). It uses a hold/commit/release pattern with a TTL so abandoned checkouts don't leak inventory, models the reservation lifecycle as a State machine with guards, and extracts pricing and cancellation into Strategy objects. It gets the [checkIn, checkOut) boundary right so same-day turnover isn't a false conflict, and makes booking idempotent. Signal: naming a concrete concurrency mechanism rather than hand-waving 'we lock it.'"
+  },
+  "interviewer_notes": "This is the mid-level bar, so the concurrency invariant — never double-book — is the make-or-break. Let them build the entities, then present 'two users grab the last room for overlapping dates' and insist on a concrete mechanism (lock, unique/exclusion constraint, or atomic conditional write), not 'we'll lock it.' Check they distinguish Room from RoomType and get the half-open date boundary right (checkout day is bookable). Probe the hold/TTL pattern for abandoned checkouts. Pricing and cancellation as strategies is a plus but secondary. Keep them out of infra weeds — this is object design."
+}

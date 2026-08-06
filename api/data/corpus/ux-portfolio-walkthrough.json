@@ -1,0 +1,61 @@
+{
+  "id": "ux-portfolio-walkthrough",
+  "title": "Portfolio Walkthrough: A Design Decision and Its Tradeoffs",
+  "track": "professional",
+  "domain": "ux_design",
+  "modality": "conversational",
+  "difficulty": "mid",
+  "tags": ["ux", "portfolio", "design-process", "tradeoffs", "storytelling", "impact"],
+  "prompt": "Walk me through a project from your portfolio — pick one where you made a meaningful design decision that involved a real tradeoff. Tell me the problem, your process, the decision you made and what you chose against, and how it turned out. I'll dig in as you go.",
+  "blurb": "A portfolio walkthrough — assessed for a clear problem-to-impact narrative, sound process, and honest reasoning about a real design tradeoff.",
+  "rubric": [
+    { "key": "problem_framing", "label": "Problem & context framing", "description": "Sets up the user problem, business context, constraints, and their specific role concisely — what they were solving and why it mattered — without drowning in backstory.", "weight": 1.1 },
+    { "key": "process", "label": "Design process", "description": "Shows a real, appropriate process: research/insight, framing, ideation, iteration, and testing — matched to the constraints, not a rote 'double-diamond' recital, and grounded in evidence about users.", "weight": 1.2 },
+    { "key": "decision_tradeoffs", "label": "Decision & tradeoffs", "description": "Articulates the actual decision, the alternatives considered, what was traded off and why, and the criteria used — demonstrating judgment rather than presenting the outcome as obvious.", "weight": 1.3 },
+    { "key": "user_evidence", "label": "User & data evidence", "description": "Backs the decision and outcome with evidence (usability findings, metrics, qualitative signal) rather than asserting it worked; ties the design back to user needs.", "weight": 1.1 },
+    { "key": "impact_reflection", "label": "Impact & reflection", "description": "States a concrete outcome/impact and reflects honestly on what they'd do differently or what didn't work — showing growth, not just a success story.", "weight": 1.1 },
+    { "key": "communication", "label": "Communication & ownership", "description": "Clear narrative arc, uses 'I' for their own contribution while crediting collaborators, handles probes without getting defensive, and stays concise.", "weight": 1.0 }
+  ],
+  "reference": {
+    "scenario": "Conversational portfolio walkthrough at the mid bar. There is no correct project; the interviewer assesses whether the candidate can tell a coherent problem-to-impact story, show a real design process, and — most importantly — reason honestly about a genuine tradeoff. A strong walkthrough frames the user problem and business context tightly, states the candidate's specific role, and then centers on a real decision: what they chose, the alternatives they weighed, what they deliberately traded off (e.g. simplicity vs power, speed to ship vs completeness, one user segment's needs vs another's, discoverability vs screen real estate), and the criteria that drove the call. They back it with evidence — research insights that framed the problem, usability testing that shaped iterations, and outcome metrics or qualitative signal — and tie everything back to user needs. Crucially, they reflect honestly: what didn't work, what they'd change, what they learned. They use 'I' for their own work while crediting the team, and they handle the interviewer's probes (why not the alternative? how did you know it worked? what would you do differently?) with curiosity rather than defensiveness. Weak walkthroughs are a feature tour with no decision or tradeoff, a rote process recital detached from the actual project, a flawless-hero narrative with no honest reflection, claims of impact with no evidence, or 'we' throughout with no clear personal contribution.",
+    "model_points": [
+      "Frame tightly: the user problem, the business context and constraints (timeline, platform, existing system), and the candidate's specific role — enough to understand the stakes without excessive backstory.",
+      "Show a real process matched to constraints: how they understood the problem (research, data, stakeholder input), how they framed it, how they explored options, and how they iterated and tested — not a textbook 'double-diamond' recital.",
+      "Center the decision: state the actual choice, the alternatives seriously considered, and the criteria used to decide (user impact, feasibility, business goals).",
+      "Name the tradeoff explicitly: what was given up and why — e.g. simplicity vs flexibility, ship-now vs do-more, optimizing for the primary segment at the expense of an edge case, discoverability vs a cleaner default. Judgment lives in what they chose against.",
+      "Ground it in the user: tie both the problem and the decision back to real user needs and evidence, not the candidate's aesthetic preference.",
+      "Back the outcome with evidence: usability findings, quantitative metrics (task success, conversion, engagement, support tickets), or qualitative signal — and be honest if the evidence is partial.",
+      "Reflect honestly: what didn't work, what surprised them, what they'd do differently now — a real learning, which is the strongest signal of a maturing designer.",
+      "Ownership and collaboration: 'I' for their contribution, credit to researchers/engineers/PMs, and how they navigated disagreement or constraints.",
+      "Handle probes with curiosity: engage seriously with 'why not the alternative?' rather than defending the decision as obviously correct."
+    ],
+    "probes": [
+      { "trigger": "candidate tours features without a decision", "question": "Stop me at the hardest decision in this project — what were the real options and why did you pick the one you did?" },
+      { "trigger": "candidate presents the choice as obvious", "question": "What did you give up by going that way? What's the strongest case for the alternative you rejected?" },
+      { "trigger": "candidate recites a generic process", "question": "Skip the framework — what did you actually do on THIS project, and what did the research or testing actually tell you?" },
+      { "trigger": "candidate claims success with no evidence", "question": "How did you know it worked? What did you measure or observe, and what would have told you it failed?" },
+      { "trigger": "candidate says 'we' throughout", "question": "What was YOUR specific contribution versus the rest of the team's?" },
+      { "trigger": "candidate gives a flawless success story", "question": "What didn't work, or what would you do differently if you ran it again?" },
+      { "trigger": "candidate gets defensive under questioning", "question": "Fair enough — but if a teammate pushed back with that alternative, how would you weigh it now?" }
+    ],
+    "red_flags": [
+      "A feature tour with no real decision or tradeoff",
+      "Rote process recital disconnected from the actual project",
+      "Presents the decision as obvious; can't articulate what was traded off",
+      "Claims impact with no evidence, or no metrics/qualitative signal at all",
+      "All 'we', no clear personal contribution",
+      "Flawless-hero narrative with no honest reflection or learning",
+      "Gets defensive or dismissive when probed on alternatives",
+      "Design driven by personal taste rather than user needs and evidence"
+    ],
+    "follow_ups": [
+      "If the same project landed on your desk today, what would you do differently from the start?",
+      "How did you handle a stakeholder or engineer who disagreed with the direction?",
+      "What was the riskiest assumption in your design, and how did you de-risk it?",
+      "If the metric hadn't moved, how would you have diagnosed whether it was the design or the measurement?",
+      "Which constraint shaped the design most, and how would the design change if it were lifted?"
+    ],
+    "exemplar_answer": "A strong walkthrough is structured and decision-centered. Framing: 'On a budgeting app, new users were setting up their first budget but abandoning before finishing — research showed the setup felt overwhelming. I led design; we had one sprint and an existing design system to work within.' Process grounded in evidence: 'From five usability sessions I saw people stalling on the ''categorize every expense'' step, so I reframed the problem from ''make categorization easier'' to ''let people get a useful budget without categorizing everything up front.''' The decision and tradeoff — the heart of it: 'The real choice was between a guided, comprehensive setup that produced an accurate budget but was long, versus a lightweight ''smart default'' budget users could refine later. I chose the lightweight path. What I traded off was initial accuracy — the auto-generated budget was rougher — and I chose against the comprehensive flow because our data said the bigger risk was abandonment, not imprecision, and users could refine over time. I set the criterion as completion of a first useful budget, not completeness.' Evidence: 'Setup completion rose meaningfully in the A/B test and week-one retention improved; qualitatively, people said it felt ''doable.''' Honest reflection: 'What I'd do differently: I underinvested in the refine-later flow, so some users never corrected the rough defaults — next time I'd design the correction path as a first-class part of the experience, not an afterthought.' Ownership: clear 'I' for the design decisions, credit to the researcher and engineers, and when I probe the rejected alternative they engage with it seriously rather than defending. Problem-to-impact, a real tradeoff, evidence, and an honest lesson."
+  },
+  "interviewer_notes": "Let the candidate drive the narrative, then dig in — the walkthrough is a vehicle for testing design judgment, not storytelling polish. The single most important signal is whether they can name a real tradeoff: what they chose against and why. If they tour features, redirect them to the hardest decision; if they present the choice as obvious, make them argue the rejected alternative's best case. Push past rote process recitals to what they actually did and what the research/testing actually showed. Demand evidence for claimed impact, and force honest reflection if the story is a flawless success. Watch how they handle pushback — curiosity and openness to the alternative score well; defensiveness is a flag. Ensure they distinguish their own contribution ('I') from the team's while still crediting collaborators. Penalize taste-driven design with no user grounding, unsubstantiated impact claims, and an inability to articulate any tradeoff at all."
+}

@@ -1,0 +1,62 @@
+{
+  "id": "clinical-reasoning-chest-pain",
+  "title": "Clinical Reasoning: Acute Chest Pain",
+  "track": "professional",
+  "domain": "medicine",
+  "modality": "conversational",
+  "difficulty": "mid",
+  "tags": ["clinical-reasoning", "chest-pain", "differential-diagnosis", "acute-care", "safety"],
+  "prompt": "A 55-year-old presents to the emergency department with chest pain that started two hours ago. Walk me through your structured approach — how you take the history, the differential you're considering, the investigations you'd order, and your initial management.",
+  "blurb": "A structured approach to acute chest pain — history, life-threatening differential, focused workup, and safe initial management.",
+  "rubric": [
+    { "key": "data_gathering", "label": "History & data gathering", "description": "Takes a focused, systematic pain history (site, onset, character, radiation, timing, exacerbating/relieving, severity), relevant associated symptoms, cardiac risk factors, and red-flag features; asks about medications and prior events.", "weight": 1.2 },
+    { "key": "differential_diagnosis", "label": "Differential diagnosis", "description": "Generates a prioritized differential that front-loads life-threatening causes (ACS, aortic dissection, pulmonary embolism, tension pneumothorax, esophageal rupture) alongside common ones (musculoskeletal, GERD, pericarditis); reasons about likelihood and risk.", "weight": 1.3 },
+    { "key": "clinical_reasoning", "label": "Clinical reasoning", "description": "Uses history and exam findings to raise or lower specific diagnoses; explains what discriminates them; avoids anchoring on one diagnosis; adapts as data arrives.", "weight": 1.2 },
+    { "key": "investigations", "label": "Investigations", "description": "Orders a focused, justified workup — ECG early (within 10 minutes), troponin (with serial timing), vitals/O2, CXR, bloods, and targeted tests when a specific diagnosis is suspected (e.g., D-dimer/CTPA, CT aortogram); explains rationale.", "weight": 1.1 },
+    { "key": "management_plan", "label": "Initial management", "description": "Starts with ABC/monitoring, IV access, oxygen if hypoxic, analgesia; gives safe initial ACS management appropriately and escalates; avoids inappropriate treatment before clarifying the diagnosis.", "weight": 1.1 },
+    { "key": "safety", "label": "Safety & prioritization", "description": "Treats it as potentially life-threatening from the outset, does the time-critical steps first (ECG, monitoring), and states clear safety-netting and escalation.", "weight": 1.2 },
+    { "key": "communication", "label": "Communication & structure", "description": "Presents reasoning in an organized, systematic way; thinks aloud; would communicate clearly with the patient and team.", "weight": 0.9 }
+  ],
+  "reference": {
+    "scenario": "A 55-year-old with two hours of chest pain in the ED. The station tests whether the candidate approaches undifferentiated chest pain safely and systematically: a focused history, a differential that puts life-threatening causes first, an appropriate time-critical workup (ECG early, serial troponin), and safe initial management. The interviewer can feed additional data (vitals, ECG findings, exam) to see how the candidate's reasoning evolves. This is educational and generic — not a treatment protocol for real patients.",
+    "model_points": [
+      "Frames chest pain as potentially life-threatening and starts with an ABC/stability check and continuous monitoring, IV access, and early vital signs.",
+      "History: characterizes the pain systematically (SOCRATES — site, onset, character, radiation, associations, timing, exacerbating/relieving, severity).",
+      "Associated symptoms: dyspnea, diaphoresis, nausea, syncope, palpitations, radiation to arm/jaw/back, tearing/interscapular pain, pleuritic vs exertional nature.",
+      "Risk factors and history: age, hypertension, diabetes, smoking, hyperlipidemia, family history, prior cardiac disease, recent immobility/surgery (VTE risk), medications, cocaine use.",
+      "Differential front-loads immediately life-threatening causes: acute coronary syndrome, aortic dissection, pulmonary embolism, tension pneumothorax, esophageal rupture (Boerhaave), cardiac tamponade.",
+      "Also considers common/less-dangerous causes: stable angina, pericarditis/myocarditis, GERD/esophageal spasm, musculoskeletal/costochondritis, pneumonia, anxiety.",
+      "Reasons about discriminators: exertional crushing radiating pain with diaphoresis (ACS); sudden tearing pain radiating to back with unequal BPs/pulses (dissection); pleuritic pain with dyspnea and VTE risk (PE); sudden pleuritic pain with breathlessness and reduced breath sounds (pneumothorax).",
+      "Investigations, time-critical first: 12-lead ECG within ~10 minutes, cardiac monitoring, SpO2, serial troponin (baseline and repeat), CXR, FBC/U&E/glucose; targeted tests based on suspicion — CTPA or D-dimer with a validated pretest score for PE, CT aortogram for suspected dissection, echo where relevant.",
+      "Initial management: ABC, oxygen only if hypoxic, IV access, analgesia, aspirin and further ACS therapy if ACS suspected and no contraindication, early escalation to cardiology/senior for STEMI (reperfusion pathway); avoids anticoagulating before excluding dissection when that's a concern.",
+      "Continual reassessment and safety-netting; clear escalation and disposition plan; would explain to the patient what is happening."
+    ],
+    "probes": [
+      { "trigger": "candidate jumps to management or a diagnosis before building a differential", "question": "Before you treat, what's on your differential for a 55-year-old with chest pain, and which ones could kill them in the next hour?" },
+      { "trigger": "candidate anchors only on ACS", "question": "The pain is sudden, tearing, and radiates to the back, and the blood pressure differs between arms. Does that change your thinking?" },
+      { "trigger": "candidate delays or omits the ECG", "question": "What single investigation do you want first and how quickly, and why?" },
+      { "trigger": "candidate orders a broad panel without justification", "question": "Talk me through why each of those tests, and what result would move you toward or away from a diagnosis." },
+      { "trigger": "candidate proposes anticoagulation for presumed PE without caution", "question": "What would you want to be confident you're NOT dealing with before you anticoagulate?" },
+      { "trigger": "candidate gives a normal first troponin as reassurance", "question": "The first troponin is normal. Does that rule out ACS? What do you do next?" }
+    ],
+    "red_flags": [
+      "Jumping straight to a single diagnosis or to management without a differential.",
+      "Omitting or delaying the ECG in acute chest pain.",
+      "Failing to include the immediately life-threatening causes (ACS, dissection, PE, pneumothorax).",
+      "Anchoring on one diagnosis and ignoring discordant data.",
+      "Treating a normal single troponin as ruling out ACS (ignoring serial testing / early presentation).",
+      "Reflexively anticoagulating without considering aortic dissection when the picture fits.",
+      "Giving high-flow oxygen routinely regardless of saturation.",
+      "No safety-netting, escalation, or reassessment plan."
+    ],
+    "follow_ups": [
+      "The ECG shows ST elevation in two contiguous leads. What now?",
+      "How would your workup differ if you strongly suspected pulmonary embolism instead?",
+      "What features would make you worried about aortic dissection, and how does that change management?",
+      "The patient's pain settles and all first-line tests are normal — how do you decide on safe disposition?",
+      "How would you explain the plan to the patient while the workup is ongoing?"
+    ],
+    "exemplar_answer": "I'd treat this as potentially life-threatening from the outset. In parallel with a focused history I'd assess ABCs, put the patient on a monitor, get IV access, check vitals including oxygen saturation and blood pressure in both arms, and — critically — get a 12-lead ECG within about ten minutes. For the history I'd characterize the pain systematically using SOCRATES and ask about associated features: exertional versus pleuritic versus tearing pain, radiation to arm, jaw or back, diaphoresis, breathlessness, syncope, and about risk factors — hypertension, diabetes, smoking, lipids, family history, prior cardiac events, recent immobility or surgery, and any cocaine use. My differential deliberately front-loads the killers: acute coronary syndrome, aortic dissection, pulmonary embolism, tension pneumothorax, and esophageal rupture, then the commoner causes like pericarditis, GERD, and musculoskeletal pain. I'd let the story discriminate — crushing exertional pain with diaphoresis points to ACS; sudden tearing pain to the back with unequal arm pressures raises dissection; pleuritic pain with breathlessness and VTE risk raises PE. Investigations, time-critical first: ECG, continuous monitoring, serial troponin because a single early troponin doesn't exclude ACS, CXR, and baseline bloods, then targeted tests — a CT aortogram if I'm worried about dissection, or CTPA guided by a pretest probability score for PE. Management runs alongside: ABC, oxygen only if hypoxic, analgesia, and if ACS is likely and there's no contraindication, aspirin and escalation to cardiology, with the STEMI pathway if the ECG shows it — but I'd be careful not to anticoagulate if dissection is still in play. Throughout I'd reassess as data returns, keep the patient informed, and have a clear escalation and safety-netting plan."
+  },
+  "interviewer_notes": "Mid-level clinical reasoning station. Let the candidate lay out their structure, then feed data to test adaptability: offer a tearing-pain/unequal-BP vignette to see if they broaden beyond ACS, or a normal first troponin to check they understand serial testing. The single most important safety behavior is getting an early ECG and treating the presentation as potentially lethal — flag if they omit it. Reward a prioritized differential that leads with life-threatening causes and reasoning that visibly updates as data arrives. Penalize anchoring, premature management, and reflexive anticoagulation without excluding dissection. This is a reasoning exercise, not a protocol recitation — do not require exact drug doses."
+}
