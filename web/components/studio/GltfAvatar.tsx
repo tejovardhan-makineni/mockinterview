@@ -77,33 +77,36 @@ function GltfAvatarImpl({ url, drive, onError }: { url: string; drive: MutableRe
         });
         scene.add(root);
 
-        // FIT THE CAMERA TO THE HEAD's actual bounding box (from the head/eye/teeth
-        // meshes), not the whole model — this centers on the head at whatever
-        // position/scale the source avatar happens to use, so every avatar frames
-        // as a clean, centered head-and-shoulders portrait.
+        // ANCHOR THE CAMERA TO THE SKELETON, not a bounding box. RPM meshes are
+        // SKINNED: Box3.setFromObject/expandByObject read the bind-pose geometry
+        // through the mesh's (near-identity) world matrix, which does NOT reflect
+        // where the skinned vertices actually render — that mismatch is what kept
+        // pushing the head off-centre. The bones' world positions ARE correct, so
+        // we frame off the eye bones (gaze centre) with a head-bone / bbox fallback.
         root.updateMatrixWorld(true);
         baseY = root.position.y;
-        const headBox = new THREE.Box3();
+        let leftEye: THREE.Object3D | null = null, rightEye: THREE.Object3D | null = null, headBone: THREE.Object3D | null = null;
         root.traverse((o) => {
-          const m = o as THREE.Mesh;
-          if (m.isMesh && /wolf3d_head|(^|_)head|teeth|eyeleft|eyeright/i.test(m.name) && !/lash|brow/i.test(m.name)) {
-            headBox.expandByObject(m);
-          }
+          if (!/bone/i.test(o.type)) return;
+          if (/lefteye/i.test(o.name)) leftEye = o;
+          else if (/righteye/i.test(o.name)) rightEye = o;
+          else if (/^head$/i.test(o.name)) headBone = o;
         });
-        let hc: THREE.Vector3, headH: number;
-        if (!headBox.isEmpty()) {
-          hc = headBox.getCenter(new THREE.Vector3());
-          headH = Math.max(0.15, headBox.getSize(new THREE.Vector3()).y);
+        const wp = (o: THREE.Object3D) => o.getWorldPosition(new THREE.Vector3());
+        let anchor: THREE.Vector3;
+        if (leftEye && rightEye) {
+          anchor = wp(leftEye).add(wp(rightEye)).multiplyScalar(0.5);
+        } else if (headBone) {
+          anchor = wp(headBone); anchor.y += 0.08; // head bone sits at skull base; lift to eye level
         } else {
           const full = new THREE.Box3().setFromObject(root);
-          const s = full.getSize(new THREE.Vector3());
-          hc = new THREE.Vector3((full.min.x + full.max.x) / 2, full.max.y - s.y * 0.08, (full.min.z + full.max.z) / 2);
-          headH = 0.23;
+          anchor = new THREE.Vector3((full.min.x + full.max.x) / 2, full.max.y - full.getSize(new THREE.Vector3()).y * 0.12, (full.min.z + full.max.z) / 2);
         }
-        const dist = headH * 2.7 + 0.15; // head + a little shoulders
+        // Head-and-shoulders portrait: eyes a touch above centre, look slightly
+        // below them so the chin and shoulders stay in frame.
         camera.fov = 24;
-        camera.position.set(hc.x, hc.y - headH * 0.15, hc.z + dist);
-        camera.lookAt(hc.x, hc.y - headH * 0.3, hc.z);
+        camera.position.set(anchor.x, anchor.y + 0.02, anchor.z + 0.66);
+        camera.lookAt(anchor.x, anchor.y - 0.09, anchor.z);
         camera.updateProjectionMatrix();
         resize();
 
