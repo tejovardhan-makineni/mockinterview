@@ -77,23 +77,23 @@ function GltfAvatarImpl({ url, drive, onError }: { url: string; drive: MutableRe
         });
         scene.add(root);
 
-        // NORMALIZE every model to a standard full-body height, centered with feet
-        // at y=0. Source avatars vary wildly in scale/position/pose; after this,
-        // the head always sits at ~1.6, so ONE fixed camera frames every avatar as
-        // a clean, centered head-and-shoulders portrait.
+        // NORMALIZE every model to a standard ~1.7m height with feet at y=0, so a
+        // single fixed camera frames any avatar (whatever its source scale) as a
+        // clean head-and-shoulders portrait. RPM avatars are already centered on
+        // X, so we do NOT recenter horizontally — doing so (by bounding-box center)
+        // would drift with asymmetric hair/pose and push the head off to the side.
+        root.updateMatrixWorld(true);
         const box = new THREE.Box3().setFromObject(root);
         const size = box.getSize(new THREE.Vector3());
-        const scale = 1.7 / Math.max(0.3, size.y); // treat as ~1.7m human
-        root.scale.setScalar(scale);
+        root.scale.setScalar(1.7 / Math.max(0.3, size.y));
+        root.updateMatrixWorld(true);
         const b2 = new THREE.Box3().setFromObject(root);
-        const c2 = b2.getCenter(new THREE.Vector3());
-        root.position.x -= c2.x;                    // center horizontally
-        root.position.z -= c2.z;
         root.position.y -= b2.min.y;                // feet on the ground plane
+        root.updateMatrixWorld(true);
         baseY = root.position.y;
         camera.fov = 24;
         camera.position.set(0, 1.58, 0.85);         // head-and-shoulders of a 1.7m avatar
-        camera.lookAt(0, 1.48, 0);
+        camera.lookAt(0, 1.5, 0);
         camera.updateProjectionMatrix();
         resize();
 
