@@ -72,10 +72,11 @@ export function AppShell({ active, children }: { active: NavKey; children: React
       </Link>
       {NavLinks}
       <div className="mt-2 space-y-2 border-t border-[var(--color-line)] pt-4">
-        {/* Language selector — above the theme row. */}
-        <div className="flex items-center justify-between gap-2 px-1">
+        {/* Language selector — stacked (full-width select under the label) so long
+            "endonym (English)" values never overflow the sidebar. */}
+        <div className="px-1">
           <span className="text-xs font-medium text-[var(--color-muted)]">{t("Language")}</span>
-          <LanguageSelect variant="sidebar" />
+          <div className="mt-1"><LanguageSelect variant="sidebar" /></div>
         </div>
         {/* Theme switcher — its own labeled row above the account info. */}
         <div className="flex items-center justify-between gap-2 px-1">
