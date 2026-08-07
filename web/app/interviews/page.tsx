@@ -101,7 +101,7 @@ export default function InterviewsPage() {
           <h1 className="text-3xl font-extrabold tracking-tight">{t("Interview Catalog")}</h1>
           <p className="mt-1 text-[var(--color-muted)]">{t("Pick an area and a domain — software, mechanical, electrical & civil engineering, plus clinical, legal, case, and more.")} {questions.length} {t("interviews across")} {areas.length} {t("areas.")}</p>
         </div>
-        {recommended && questions.some((q) => q.domain === recommended) && <Badge tone="accent">{t("Recommended:")} {t(pretty(recommended))}</Badge>}
+        {recommended && questions.some((q) => q.domain === recommended) && <Badge tone="accent">{t("Recommended:")} {pretty(recommended)}</Badge>}
       </div>
 
       {/* Search + Area/Domain selects */}
@@ -117,7 +117,7 @@ export default function InterviewsPage() {
             <span className="relative inline-flex items-center">
               <select value={area} onChange={(e) => onArea(e.target.value)} className={selectCls}>
                 <option value="all">{t("All areas")}</option>
-                {areas.map((a) => <option key={a} value={a}>{t(pretty(a))}</option>)}
+                {areas.map((a) => <option key={a} value={a}>{pretty(a)}</option>)}
               </select>
               <Chevron />
             </span>
@@ -127,7 +127,7 @@ export default function InterviewsPage() {
             <span className="relative inline-flex items-center">
               <select value={domain} onChange={(e) => setDomain(e.target.value)} className={selectCls}>
                 <option value="all">{t("All domains")}</option>
-                {domains.map((d) => <option key={d} value={d}>{t(pretty(d))}</option>)}
+                {domains.map((d) => <option key={d} value={d}>{pretty(d)}</option>)}
               </select>
               <Chevron />
             </span>
@@ -144,15 +144,16 @@ export default function InterviewsPage() {
           {filtered.map((q) => (
             <Panel key={q.id} className="flex h-full flex-col p-5">
               <div className="flex items-start justify-between gap-2">
-                <h3 className="text-base font-semibold leading-snug">{t(q.title)}</h3>
-                <Badge tone={DIFF_TONE[q.difficulty] ?? "muted"}>{t(q.difficulty)}</Badge>
+                {/* Catalog title/blurb + known metadata stay in English (our data). */}
+                <h3 className="text-base font-semibold leading-snug">{q.title}</h3>
+                <Badge tone={DIFF_TONE[q.difficulty] ?? "muted"}>{q.difficulty}</Badge>
               </div>
               <div className="mt-2 flex flex-wrap gap-1.5">
-                <span className="rounded-md bg-[var(--color-panel-2)] px-2 py-0.5 text-xs text-[var(--color-ink)]">{t(MODALITY_LABEL[q.modality] ?? q.modality)}</span>
-                <span className="rounded-md border border-[var(--color-line)] px-2 py-0.5 text-xs text-[var(--color-muted)]">{t(pretty(q.domain))}</span>
+                <span className="rounded-md bg-[var(--color-panel-2)] px-2 py-0.5 text-xs text-[var(--color-ink)]">{MODALITY_LABEL[q.modality] ?? q.modality}</span>
+                <span className="rounded-md border border-[var(--color-line)] px-2 py-0.5 text-xs text-[var(--color-muted)]">{pretty(q.domain)}</span>
                 <span className="rounded-md border border-[var(--color-line)] px-2 py-0.5 text-xs text-[var(--color-faint)]">⏱ ~{estMinutes(q.modality)} {t("minutes")}</span>
               </div>
-              <p className="mt-2 flex-1 text-sm text-[var(--color-muted)]">{t(q.blurb)}</p>
+              <p className="mt-2 flex-1 text-sm text-[var(--color-muted)]">{q.blurb}</p>
               <Button href={`/setup?q=${q.id}`} className="mt-4 self-start">{t("Start →")}</Button>
             </Panel>
           ))}
