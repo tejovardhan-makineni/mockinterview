@@ -7,7 +7,7 @@ import type { Face, InterviewConfig, Personality, Resume, Voice } from "@/lib/ty
 import { Badge, Button, Field, Panel } from "@/components/ui";
 import { Avatar3D, type AvatarDrive } from "@/components/studio/Avatar3D";
 import { previewVoiceSample, stopPreview, prefetchPreview } from "@/lib/voicePreview";
-import { useLang, useT, LANGUAGES } from "@/lib/i18n";
+import { useLang, useT, LANGUAGES, labelFor } from "@/lib/i18n";
 import { IconPlay, IconStop } from "@/components/icons";
 
 const PERSONAS: { id: Personality; label: string; desc: string }[] = [
@@ -174,12 +174,12 @@ function SetupInner() {
         </Field>
 
         <div className="mt-5 grid gap-5 sm:grid-cols-2">
-          <Field label={`Intensity — ${cfg.intensity}/5`}>
+          <Field label={`${t("Intensity")} — ${cfg.intensity}/5`}>
             <input type="range" min={1} max={5} value={cfg.intensity}
               onChange={(e) => setCfg({ ...cfg, intensity: Number(e.target.value) })}
               className="w-full accent-[var(--color-accent)]" />
           </Field>
-          <Field label={`${t("Interview length")} — ${minutes} ${t("min")}`}>
+          <Field label={`${t("Interview length")} — ${minutes} ${t("minutes")}`}>
             <input type="range" min={10} max={60} step={5} value={minutes}
               onChange={(e) => setMinutes(Number(e.target.value))}
               className="w-full accent-[var(--color-accent)]" aria-label="Interview length in minutes" />
@@ -188,7 +188,7 @@ function SetupInner() {
             <select value={interviewLang} onChange={(e) => setInterviewLang(e.target.value)}
               aria-label="Interview language"
               className="w-full rounded-xl border border-[var(--color-line)] bg-[var(--color-studio)] px-3 py-2.5 text-sm">
-              {LANGUAGES.map((l) => <option key={l.code} value={l.code}>{l.label}</option>)}
+              {LANGUAGES.map((l) => <option key={l.code} value={l.code}>{labelFor(l)}</option>)}
             </select>
             <p className="mt-1 text-xs text-[var(--color-faint)]">{t("The interviewer will speak and write in this language.")}</p>
           </Field>

@@ -150,7 +150,7 @@ export default function InterviewsPage() {
               <div className="mt-2 flex flex-wrap gap-1.5">
                 <span className="rounded-md bg-[var(--color-panel-2)] px-2 py-0.5 text-xs text-[var(--color-ink)]">{t(MODALITY_LABEL[q.modality] ?? q.modality)}</span>
                 <span className="rounded-md border border-[var(--color-line)] px-2 py-0.5 text-xs text-[var(--color-muted)]">{t(pretty(q.domain))}</span>
-                <span className="rounded-md border border-[var(--color-line)] px-2 py-0.5 text-xs text-[var(--color-faint)]">⏱ ~{estMinutes(q.modality)} {t("min")}</span>
+                <span className="rounded-md border border-[var(--color-line)] px-2 py-0.5 text-xs text-[var(--color-faint)]">⏱ ~{estMinutes(q.modality)} {t("minutes")}</span>
               </div>
               <p className="mt-2 flex-1 text-sm text-[var(--color-muted)]">{t(q.blurb)}</p>
               <Button href={`/setup?q=${q.id}`} className="mt-4 self-start">{t("Start →")}</Button>

@@ -7,6 +7,7 @@ import type { Resume, ResumeReview, ResumeMatch, ResumeParsed } from "@/lib/type
 import { Badge, Button, Panel } from "@/components/ui";
 import { AppShell } from "@/components/AppShell";
 import { ResumeDoc, type Mark } from "@/components/resume/ResumeDoc";
+import { useT } from "@/lib/i18n";
 
 type Tab = "review" | "match";
 
@@ -60,6 +61,7 @@ function clearCache(id: string) {
 }
 
 export default function ResumePage() {
+  const t = useT();
   const router = useRouter();
   const [tab, setTab] = useState<Tab>("review");
   const [resume, setResume] = useState<Resume | null>(null);
@@ -109,7 +111,7 @@ export default function ResumePage() {
       const r = await api.uploadResume(file);
       setResume(r);
       clearCache(r.id); // fresh upload — start clean even if the id is reused
-    } catch (e) { setErr(e instanceof Error ? e.message : "Upload failed"); }
+    } catch (e) { setErr(e instanceof Error ? e.message : t("Upload failed")); }
     finally { setUploading(false); }
   }
   function onFile(e: React.ChangeEvent<HTMLInputElement>) {
@@ -130,7 +132,7 @@ export default function ResumePage() {
       setReview(rv); setApplied(new Set());
       if (resume) { writeCache(REVIEW_KEY(resume.id), rv); writeCache(APPLIED_KEY(resume.id), []); }
     }
-    catch (e) { setErr(e instanceof Error ? e.message : "Review failed"); }
+    catch (e) { setErr(e instanceof Error ? e.message : t("Review failed")); }
     finally { setBusy(false); }
   }
   async function runMatch(text: string) {
@@ -139,7 +141,7 @@ export default function ResumePage() {
       const m = await api.matchResume(text);
       setMatch(m); setJd(text); setModalOpen(false);
       if (resume) writeCache(MATCH_KEY(resume.id), m);
-    } catch (e) { setErr(e instanceof Error ? e.message : "Match failed"); }
+    } catch (e) { setErr(e instanceof Error ? e.message : t("Match failed")); }
     finally { setBusy(false); }
   }
 
@@ -194,37 +196,37 @@ export default function ResumePage() {
     <AppShell active="resume">
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-extrabold tracking-tight">Resume</h1>
-          <p className="mt-1 text-[var(--color-muted)]">Get a scored critique with inline fixes, or match your resume against a specific job.</p>
+          <h1 className="text-3xl font-extrabold tracking-tight">{t("Resume")}</h1>
+          <p className="mt-1 text-[var(--color-muted)]">{t("Get a scored critique with inline fixes, or match your resume against a specific job.")}</p>
         </div>
         {resume && (
           <div className="flex flex-wrap items-center gap-2">
             <input ref={fileRef} type="file" accept=".pdf,.docx,.txt,.md" hidden onChange={onFile} />
-            <Button variant="ghost" onClick={() => fileRef.current?.click()} disabled={uploading}>{uploading ? "Uploading…" : "Replace"}</Button>
+            <Button variant="ghost" onClick={() => fileRef.current?.click()} disabled={uploading}>{uploading ? t("Uploading…") : t("Replace")}</Button>
             {tab === "review" ? (
               <>
-                {review && <Button variant="ghost" onClick={applyAll} title="Apply every suggested edit">Apply all</Button>}
-                {review && <Button variant="ghost" onClick={download} title="Download the revised resume">⬇ Download</Button>}
-                <Button onClick={runReview} disabled={busy}>{busy ? "Reviewing…" : review ? "Re-review" : "Review"}</Button>
+                {review && <Button variant="ghost" onClick={applyAll} title={t("Apply every suggested edit")}>{t("Apply all")}</Button>}
+                {review && <Button variant="ghost" onClick={download} title={t("Download the revised resume")}>{t("⬇ Download")}</Button>}
+                <Button onClick={runReview} disabled={busy}>{busy ? t("Reviewing…") : review ? t("Re-review") : t("Review")}</Button>
               </>
             ) : (
-              <Button onClick={() => setModalOpen(true)} disabled={busy}>{match ? "Re-match / new job" : "Match to a job"}</Button>
+              <Button onClick={() => setModalOpen(true)} disabled={busy}>{match ? t("Re-match / new job") : t("Match to a job")}</Button>
             )}
           </div>
         )}
       </div>
 
       {/* Tabs */}
-      <div role="tablist" aria-label="Resume tools" className="mt-5 inline-flex rounded-xl border border-[var(--color-line)] bg-[var(--color-panel)] p-1">
-        {(["review", "match"] as Tab[]).map((t) => (
+      <div role="tablist" aria-label={t("Resume tools")} className="mt-5 inline-flex rounded-xl border border-[var(--color-line)] bg-[var(--color-panel)] p-1">
+        {(["review", "match"] as Tab[]).map((tabId) => (
           <button
-            key={t}
+            key={tabId}
             role="tab"
-            aria-selected={tab === t}
-            onClick={() => setTab(t)}
-            className={`rounded-lg px-4 py-1.5 text-sm font-semibold transition ${tab === t ? "bg-[var(--color-accent)] text-[#0b0d12]" : "text-[var(--color-muted)] hover:text-[var(--color-ink)]"}`}
+            aria-selected={tab === tabId}
+            onClick={() => setTab(tabId)}
+            className={`rounded-lg px-4 py-1.5 text-sm font-semibold transition ${tab === tabId ? "bg-[var(--color-accent)] text-[#0b0d12]" : "text-[var(--color-muted)] hover:text-[var(--color-ink)]"}`}
           >
-            {t === "review" ? "General Review" : "Job Match"}
+            {tabId === "review" ? t("General Review") : t("Job Match")}
           </button>
         ))}
       </div>
@@ -241,7 +243,7 @@ export default function ResumePage() {
             onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
             onDragLeave={() => setDragOver(false)}
             onDrop={onDrop}
-            aria-label="Upload resume: drag and drop or click to browse"
+            aria-label={t("Upload resume: drag and drop or click to browse")}
             className={`mi-panel flex w-full flex-col items-center justify-center rounded-2xl border-2 border-dashed px-6 py-20 text-center transition ${dragOver ? "border-[var(--color-accent)] bg-[color-mix(in_srgb,var(--color-accent)_8%,transparent)]" : "border-[var(--color-line)] hover:border-[var(--color-accent)]"}`}
           >
             <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="var(--color-accent)" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
@@ -249,8 +251,8 @@ export default function ResumePage() {
               <polyline points="17 8 12 3 7 8" />
               <line x1="12" y1="3" x2="12" y2="15" />
             </svg>
-            <p className="mt-4 text-lg font-semibold">{uploading ? "Uploading…" : "Drag & Drop Resume"}</p>
-            <p className="mt-1 text-sm text-[var(--color-muted)]">or click to browse (PDF, DOCX, TXT, MD)</p>
+            <p className="mt-4 text-lg font-semibold">{uploading ? t("Uploading…") : t("Drag & Drop Resume")}</p>
+            <p className="mt-1 text-sm text-[var(--color-muted)]">{t("or click to browse (PDF, DOCX, TXT, MD)")}</p>
           </button>
         </div>
       )}
@@ -263,14 +265,14 @@ export default function ResumePage() {
             <div className="flex items-center justify-between border-b border-[var(--color-line)] px-4 py-2 text-xs text-[var(--color-faint)]">
               <span className="truncate">{resume.filename}</span>
               {tab === "review" && review ? (
-                <span className="flex flex-none items-center gap-3" title="Colored highlights in the resume below mark what to change and what's already strong.">
-                  <Swatch color="var(--color-warn)" label="Suggested fix" />
-                  <Swatch color="var(--color-good)" label="Applied / strong" />
+                <span className="flex flex-none items-center gap-3" title={t("Colored highlights in the resume below mark what to change and what's already strong.")}>
+                  <Swatch color="var(--color-warn)" label={t("Suggested fix")} />
+                  <Swatch color="var(--color-good)" label={t("Applied / strong")} />
                 </span>
               ) : tab === "match" && match ? (
-                <span className="flex flex-none items-center gap-3" title="Highlights show how your resume overlaps the job description.">
-                  <Swatch color="var(--color-accent)" label="Matched" />
-                  <Swatch color="var(--color-bad)" label="Missing" />
+                <span className="flex flex-none items-center gap-3" title={t("Highlights show how your resume overlaps the job description.")}>
+                  <Swatch color="var(--color-accent)" label={t("Matched")} />
+                  <Swatch color="var(--color-bad)" label={t("Missing")} />
                 </span>
               ) : <span />}
             </div>
@@ -300,11 +302,12 @@ function ReviewPanel({
   review: ResumeReview | null; busy: boolean; applied: Set<number>; workingText: string;
   onToggle: (i: number, on: boolean) => void; onRun: () => void;
 }) {
+  const t = useT();
   if (!review) {
     return (
       <Panel className="p-6 text-sm text-[var(--color-muted)]">
-        Click <b className="text-[var(--color-ink)]">Review</b> for a scored critique with inline, line-by-line fixes you can apply and undo.
-        <div className="mt-4"><Button onClick={onRun} disabled={busy}>{busy ? "Reviewing…" : "Review my resume"}</Button></div>
+        {t("Click")} <b className="text-[var(--color-ink)]">{t("Review")}</b> {t("for a scored critique with inline, line-by-line fixes you can apply and undo.")}
+        <div className="mt-4"><Button onClick={onRun} disabled={busy}>{busy ? t("Reviewing…") : t("Review my resume")}</Button></div>
       </Panel>
     );
   }
@@ -323,7 +326,7 @@ function ReviewPanel({
         <div className="flex items-center gap-4">
           <ScoreRing pct={Math.max(0, Math.min(1, score / 5))} color={reviewColor(score)} big={score.toFixed(1)} small="/ 5" />
           <div className="flex-1">
-            <div className="text-sm font-semibold">Overall score</div>
+            <div className="text-sm font-semibold">{t("Overall score")}</div>
             <p className="mt-1 text-sm text-[var(--color-muted)]">{review.summary ?? ""}</p>
           </div>
         </div>
@@ -332,9 +335,9 @@ function ReviewPanel({
       {/* Critical fixes — with inline apply/undo where an original phrase exists */}
       <Panel className="p-5">
         <h3 className="mb-3 flex items-center gap-2 text-sm font-semibold">
-          Critical fixes
+          {t("Critical fixes")}
           <span className="rounded-full bg-[color-mix(in_srgb,var(--color-bad)_22%,transparent)] px-2 py-0.5 text-xs text-[var(--color-bad)]">{fixes.length || edits.length}</span>
-          <span className="ml-auto text-xs font-normal text-[var(--color-faint)]">{applied.size}/{edits.length} applied</span>
+          <span className="ml-auto text-xs font-normal text-[var(--color-faint)]">{applied.size}/{edits.length} {t("applied")}</span>
         </h3>
         <div className="space-y-3">
           {fixes.map((f, i) => {
@@ -366,7 +369,7 @@ function ReviewPanel({
       {/* Quantifiable impacts (green) */}
       {impacts.length > 0 && (
         <Panel className="p-5">
-          <h3 className="mb-3 text-sm font-semibold">Quantifiable impact</h3>
+          <h3 className="mb-3 text-sm font-semibold">{t("Quantifiable impact")}</h3>
           <ul className="space-y-2">
             {impacts.map((q, i) => (
               <li key={i} className="flex gap-2 text-sm">
@@ -380,30 +383,30 @@ function ReviewPanel({
 
       {/* Strengths / gaps */}
       <div className="grid gap-4 sm:grid-cols-2">
-        <Panel className="p-4"><h3 className="mb-2 text-sm font-semibold"><Badge tone="good">Strengths</Badge></h3>{strengths.length > 0 ? <ul className="space-y-1 text-xs text-[var(--color-muted)]">{strengths.map((s, i) => <li key={i}>• {s}</li>)}</ul> : <p className="text-xs italic text-[var(--color-faint)]">None noted</p>}</Panel>
-        <Panel className="p-4"><h3 className="mb-2 text-sm font-semibold"><Badge tone="warn">Gaps</Badge></h3>{gaps.length > 0 ? <ul className="space-y-1 text-xs text-[var(--color-muted)]">{gaps.map((s, i) => <li key={i}>• {s}</li>)}</ul> : <p className="text-xs italic text-[var(--color-faint)]">None noted — solid across the board</p>}</Panel>
+        <Panel className="p-4"><h3 className="mb-2 text-sm font-semibold"><Badge tone="good">{t("Strengths")}</Badge></h3>{strengths.length > 0 ? <ul className="space-y-1 text-xs text-[var(--color-muted)]">{strengths.map((s, i) => <li key={i}>• {s}</li>)}</ul> : <p className="text-xs italic text-[var(--color-faint)]">{t("None noted")}</p>}</Panel>
+        <Panel className="p-4"><h3 className="mb-2 text-sm font-semibold"><Badge tone="warn">{t("Gaps")}</Badge></h3>{gaps.length > 0 ? <ul className="space-y-1 text-xs text-[var(--color-muted)]">{gaps.map((s, i) => <li key={i}>• {s}</li>)}</ul> : <p className="text-xs italic text-[var(--color-faint)]">{t("None noted — solid across the board")}</p>}</Panel>
       </div>
 
       {/* ATS compatibility */}
       <Panel className="p-5">
-        <h3 className="mb-3 text-sm font-semibold">ATS compatibility</h3>
+        <h3 className="mb-3 text-sm font-semibold">{t("ATS compatibility")}</h3>
         {ats && (
           <>
             <div className="flex items-center gap-2 text-sm">
-              <span className="text-[var(--color-muted)]">Formatting</span>
+              <span className="text-[var(--color-muted)]">{t("Formatting")}</span>
               <AtsBadge status={ats.formatting} />
-              <span className="ml-auto text-[var(--color-muted)]">Keyword match</span>
+              <span className="ml-auto text-[var(--color-muted)]">{t("Keyword match")}</span>
               <span className="font-semibold">{Math.round(Number(ats.keyword_match) || 0)}%</span>
             </div>
             <div className="mt-2.5"><Bar pct={(Number(ats.keyword_match) || 0) / 100} color={matchColor(Number(ats.keyword_match) || 0)} /></div>
             <p className="mt-2 text-xs text-[var(--color-muted)]">{ats.notes}</p>
           </>
         )}
-        <h4 className="mb-1 mt-3 text-xs font-semibold text-[var(--color-faint)]">Notes</h4>
+        <h4 className="mb-1 mt-3 text-xs font-semibold text-[var(--color-faint)]">{t("Notes")}</h4>
         <p className="text-xs text-[var(--color-muted)]">{review.ats_notes ?? ""}</p>
         {impactSuggestions.length > 0 && (
           <>
-            <h4 className="mb-1 mt-3 text-xs font-semibold text-[var(--color-faint)]">Impact suggestions</h4>
+            <h4 className="mb-1 mt-3 text-xs font-semibold text-[var(--color-faint)]">{t("Impact suggestions")}</h4>
             <ul className="space-y-1 text-xs text-[var(--color-muted)]">{impactSuggestions.map((s, i) => <li key={i}>• {s}</li>)}</ul>
           </>
         )}
@@ -417,6 +420,7 @@ function EditRow({
 }: {
   edit: { original: string; improved: string }; idx: number; applied: Set<number>; workingText: string; onToggle: (i: number, on: boolean) => void;
 }) {
+  const t = useT();
   const isApplied = applied.has(idx);
   const canApply = workingText.includes(edit.original) || isApplied;
   return (
@@ -425,8 +429,8 @@ function EditRow({
       <div className="mt-1 text-[var(--color-good)]">{edit.improved}</div>
       <div className="mt-2">
         {isApplied
-          ? <button onClick={() => onToggle(idx, false)} className="text-xs text-[var(--color-muted)] hover:text-[var(--color-ink)]">↩ undo</button>
-          : <button onClick={() => onToggle(idx, true)} disabled={!canApply} className="rounded-md bg-[var(--color-accent)] px-2.5 py-1 text-xs font-semibold text-[#0b0d12] disabled:opacity-40">Apply</button>}
+          ? <button onClick={() => onToggle(idx, false)} className="text-xs text-[var(--color-muted)] hover:text-[var(--color-ink)]">{t("↩ undo")}</button>
+          : <button onClick={() => onToggle(idx, true)} disabled={!canApply} className="rounded-md bg-[var(--color-accent)] px-2.5 py-1 text-xs font-semibold text-[#0b0d12] disabled:opacity-40">{t("Apply")}</button>}
       </div>
     </div>
   );
@@ -451,11 +455,12 @@ function AtsBadge({ status }: { status: string }) {
 
 // ---------------- Match panel ----------------
 function MatchPanel({ match, busy, onOpen }: { match: ResumeMatch | null; busy: boolean; onOpen: () => void }) {
+  const t = useT();
   if (!match) {
     return (
       <Panel className="p-6 text-sm text-[var(--color-muted)]">
-        Paste a job description and we&apos;ll score how well your resume fits — matched vs. missing keywords and specific tailoring suggestions. The job description stays private and is never shown on the page.
-        <div className="mt-4"><Button onClick={onOpen} disabled={busy}>Paste job description</Button></div>
+        {t("Paste a job description and we'll score how well your resume fits — matched vs. missing keywords and specific tailoring suggestions. The job description stays private and is never shown on the page.")}
+        <div className="mt-4"><Button onClick={onOpen} disabled={busy}>{t("Paste job description")}</Button></div>
       </Panel>
     );
   }
@@ -470,22 +475,22 @@ function MatchPanel({ match, busy, onOpen }: { match: ResumeMatch | null; busy: 
         <div className="flex items-center gap-4">
           <ScoreRing pct={Math.max(0, Math.min(1, matchScore / 100))} color={matchColor(matchScore)} big={`${Math.round(matchScore)}`} small="%" />
           <div className="flex-1">
-            <div className="text-sm font-semibold">Match score</div>
+            <div className="text-sm font-semibold">{t("Match score")}</div>
             <p className="mt-1 text-sm text-[var(--color-muted)]">{match.verdict ?? ""}</p>
           </div>
         </div>
         <div className="mt-4">
-          <div className="mb-1 flex justify-between text-xs text-[var(--color-faint)]"><span>ATS keyword coverage</span><span>{Math.round(atsKeyword)}%</span></div>
+          <div className="mb-1 flex justify-between text-xs text-[var(--color-faint)]"><span>{t("ATS keyword coverage")}</span><span>{Math.round(atsKeyword)}%</span></div>
           <Bar pct={atsKeyword / 100} color={matchColor(atsKeyword)} />
         </div>
       </Panel>
 
       <Panel className="p-5">
-        <h3 className="mb-2 text-sm font-semibold">Matched <span className="text-xs font-normal text-[var(--color-faint)]">({matched.length})</span></h3>
+        <h3 className="mb-2 text-sm font-semibold">{t("Matched")} <span className="text-xs font-normal text-[var(--color-faint)]">({matched.length})</span></h3>
         <div className="flex flex-wrap gap-1.5">
           {matched.map((k, i) => <Chip key={i} tone="good">{k}</Chip>)}
         </div>
-        <h3 className="mb-2 mt-4 text-sm font-semibold">Missing / gaps <span className="text-xs font-normal text-[var(--color-faint)]">({missing.length})</span></h3>
+        <h3 className="mb-2 mt-4 text-sm font-semibold">{t("Missing / gaps")} <span className="text-xs font-normal text-[var(--color-faint)]">({missing.length})</span></h3>
         <div className="flex flex-wrap gap-1.5">
           {missing.map((k, i) => <Chip key={i} tone="bad">{k}</Chip>)}
         </div>
@@ -493,7 +498,7 @@ function MatchPanel({ match, busy, onOpen }: { match: ResumeMatch | null; busy: 
 
       {suggestions.length > 0 && (
         <Panel className="p-5">
-          <h3 className="mb-3 text-sm font-semibold">AI tailoring suggestions</h3>
+          <h3 className="mb-3 text-sm font-semibold">{t("AI tailoring suggestions")}</h3>
           <div className="space-y-3">
             {suggestions.map((s, i) => (
               <div key={i} className="rounded-xl border border-[var(--color-line)] p-3 text-sm [overflow-wrap:anywhere]">
@@ -518,6 +523,7 @@ function Chip({ children, tone }: { children: React.ReactNode; tone: "good" | "b
 
 // ---------------- JD modal ----------------
 function JdModal({ busy, onClose, onSubmit, initial }: { busy: boolean; onClose: () => void; onSubmit: (jd: string) => void; initial: string }) {
+  const t = useT();
   const [text, setText] = useState(initial);
   const taRef = useRef<HTMLTextAreaElement>(null);
   useEffect(() => {
@@ -536,20 +542,20 @@ function JdModal({ busy, onClose, onSubmit, initial }: { busy: boolean; onClose:
         onMouseDown={(e) => e.stopPropagation()}
         className="mi-panel relative flex max-h-[85vh] w-full max-w-2xl flex-col rounded-2xl border border-[var(--color-line)] bg-[var(--color-panel)] p-6"
       >
-        <h2 id="jd-title" className="text-lg font-bold">Paste the job description</h2>
-        <p className="mt-1 text-sm text-[var(--color-muted)]">We analyze it against your resume and show only the results — the description is not displayed on the page.</p>
-        <label htmlFor="jd-text" className="sr-only">Job description</label>
+        <h2 id="jd-title" className="text-lg font-bold">{t("Paste the job description")}</h2>
+        <p className="mt-1 text-sm text-[var(--color-muted)]">{t("We analyze it against your resume and show only the results — the description is not displayed on the page.")}</p>
+        <label htmlFor="jd-text" className="sr-only">{t("Job description")}</label>
         <textarea
           id="jd-text"
           ref={taRef}
           value={text}
           onChange={(e) => setText(e.target.value)}
-          placeholder="Paste the full job description here…"
+          placeholder={t("Paste the full job description here…")}
           className="mt-4 h-64 w-full flex-1 resize-none overflow-auto rounded-xl border border-[var(--color-line)] bg-[var(--color-studio)] p-3.5 text-sm text-[var(--color-ink)] outline-none placeholder:text-[var(--color-faint)] focus:border-[var(--color-accent)]"
         />
         <div className="mt-4 flex items-center justify-end gap-2">
-          <Button variant="ghost" onClick={onClose}>Cancel</Button>
-          <Button onClick={() => onSubmit(text.trim())} disabled={busy || text.trim().length === 0}>{busy ? "Analyzing…" : "Analyze match"}</Button>
+          <Button variant="ghost" onClick={onClose}>{t("Cancel")}</Button>
+          <Button onClick={() => onSubmit(text.trim())} disabled={busy || text.trim().length === 0}>{busy ? t("Analyzing…") : t("Analyze match")}</Button>
         </div>
       </div>
     </div>

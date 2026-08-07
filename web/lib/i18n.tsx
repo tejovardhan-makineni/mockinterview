@@ -12,18 +12,26 @@
 import { createContext, useCallback, useContext, useEffect, useRef, useState } from "react";
 import { BASE, authHeader } from "./http";
 
-export const LANGUAGES: { code: string; label: string }[] = [
-  { code: "en", label: "English" },
-  { code: "es", label: "Español" },
-  { code: "fr", label: "Français" },
-  { code: "de", label: "Deutsch" },
-  { code: "pt", label: "Português" },
-  { code: "hi", label: "हिन्दी" },
-  { code: "te", label: "తెలుగు" },
-  { code: "zh", label: "中文" },
-  { code: "ja", label: "日本語" },
-  { code: "ar", label: "العربية" },
+// `label` is the endonym (native name); `en` is the English name. The picker
+// shows "endonym (English)" so a user who accidentally switches into a script
+// they can't read can still recognize and get back to English.
+export const LANGUAGES: { code: string; label: string; en: string }[] = [
+  { code: "en", label: "English", en: "English" },
+  { code: "es", label: "Español", en: "Spanish" },
+  { code: "fr", label: "Français", en: "French" },
+  { code: "de", label: "Deutsch", en: "German" },
+  { code: "pt", label: "Português", en: "Portuguese" },
+  { code: "hi", label: "हिन्दी", en: "Hindi" },
+  { code: "te", label: "తెలుగు", en: "Telugu" },
+  { code: "zh", label: "中文", en: "Chinese" },
+  { code: "ja", label: "日本語", en: "Japanese" },
+  { code: "ar", label: "العربية", en: "Arabic" },
 ];
+
+// labelFor renders the option text: plain "English" for English, else
+// "endonym (English)" so it stays recoverable in any script.
+export const labelFor = (l: { code: string; label: string; en: string }) =>
+  l.code === "en" ? l.label : `${l.label} (${l.en})`;
 const CODES = new Set(LANGUAGES.map((l) => l.code));
 export const isRTL = (code: string) => code === "ar";
 

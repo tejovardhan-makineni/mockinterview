@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useT } from "@/lib/i18n";
 
 // A segmented control for the three themes (Dark / Light / Quantum): all options
 // are visible at once and one click jumps straight to any of them — clearer than
@@ -11,6 +12,7 @@ const ICON: Record<Theme, string> = { dark: "🌙", light: "☀️", quantum: "�
 const LABEL: Record<Theme, string> = { dark: "Dark", light: "Light", quantum: "Quantum" };
 
 export function ThemeToggle() {
+  const tr = useT();
   // Read the stored theme in a lazy initializer (the layout's inline script has
   // already applied <html data-theme> before paint, so this just mirrors it).
   const [theme, setTheme] = useState<Theme>(() => {
@@ -35,8 +37,8 @@ export function ThemeToggle() {
             key={t}
             role="radio"
             aria-checked={active}
-            title={LABEL[t]}
-            aria-label={LABEL[t]}
+            title={tr(LABEL[t])}
+            aria-label={tr(LABEL[t])}
             onClick={() => select(t)}
             className={`flex h-7 items-center gap-1 rounded-md px-2 text-sm transition ${
               active
@@ -45,7 +47,7 @@ export function ThemeToggle() {
             }`}
           >
             <span aria-hidden="true">{ICON[t]}</span>
-            {active && <span className="text-xs font-semibold">{LABEL[t]}</span>}
+            {active && <span className="text-xs font-semibold">{tr(LABEL[t])}</span>}
           </button>
         );
       })}

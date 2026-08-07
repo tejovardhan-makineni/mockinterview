@@ -4,7 +4,7 @@
 // app shell footer) and "header" (compact, for the interview top bar). Changing
 // it re-localizes the whole UI (and, for a newly started interview, the language
 // the interviewer speaks).
-import { LANGUAGES, useLang } from "@/lib/i18n";
+import { LANGUAGES, labelFor, useLang } from "@/lib/i18n";
 
 export function LanguageSelect({ variant = "sidebar" }: { variant?: "sidebar" | "header" }) {
   const { lang, setLang } = useLang();
@@ -18,7 +18,7 @@ export function LanguageSelect({ variant = "sidebar" }: { variant?: "sidebar" | 
       <span aria-hidden="true" className="text-sm">🌐</span>
       <select aria-label="Language" value={lang} onChange={(e) => setLang(e.target.value)} className={cls}>
         {LANGUAGES.map((l) => (
-          <option key={l.code} value={l.code}>{l.label}</option>
+          <option key={l.code} value={l.code}>{labelFor(l)}</option>
         ))}
       </select>
     </label>
