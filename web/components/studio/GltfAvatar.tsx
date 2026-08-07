@@ -41,6 +41,7 @@ function GltfAvatarImpl({ url, drive, onError }: { url: string; drive: MutableRe
     const ro = new ResizeObserver(resize);
 
     // Morph lookup: a viseme/blendshape can live on several meshes (head + teeth).
+    let baseY = 0; // model's grounded Y after normalization (idle bob adds to this)
     const morphs: Record<string, MorphTarget[]> = {};
     const setMorph = (name: string, value: number) => {
       const t = morphs[name];
@@ -76,28 +77,24 @@ function GltfAvatarImpl({ url, drive, onError }: { url: string; drive: MutableRe
         });
         scene.add(root);
 
-        // Some exported avatars aren't centered at the origin — recenter on X/Z
-        // so the head sits in front of the camera instead of off to the side.
-        const box0 = new THREE.Box3().setFromObject(root);
-        const c = box0.getCenter(new THREE.Vector3());
-        root.position.x -= c.x;
-        root.position.z -= c.z;
-
-        // Anchor the framing to the EYES, not the bounding box — box.max.y
-        // includes hair/hats, so tall hairstyles were cropping the face. RPM
-        // avatars expose eye meshes; fall back to a head-height estimate.
+        // NORMALIZE every model to a standard full-body height, centered with feet
+        // at y=0. Source avatars vary wildly in scale/position/pose; after this,
+        // the head always sits at ~1.6, so ONE fixed camera frames every avatar as
+        // a clean, centered head-and-shoulders portrait.
         const box = new THREE.Box3().setFromObject(root);
-        const ev = new THREE.Vector3();
-        let eyeY: number | null = null;
-        root.traverse((o) => {
-          if (eyeY === null && /eye/i.test(o.name) && !/brow|lash|eyewear|glass/i.test(o.name)) {
-            o.getWorldPosition(ev);
-            eyeY = ev.y;
-          }
-        });
-        const focusY = (eyeY ?? box.max.y - 0.18) - 0.03; // eye level, nudged down toward the nose
-        camera.position.set(0, focusY, 0.9);               // fixed distance = clean head-and-shoulders
-        camera.lookAt(0, focusY - 0.06, 0);
+        const size = box.getSize(new THREE.Vector3());
+        const scale = 1.7 / Math.max(0.3, size.y); // treat as ~1.7m human
+        root.scale.setScalar(scale);
+        const b2 = new THREE.Box3().setFromObject(root);
+        const c2 = b2.getCenter(new THREE.Vector3());
+        root.position.x -= c2.x;                    // center horizontally
+        root.position.z -= c2.z;
+        root.position.y -= b2.min.y;                // feet on the ground plane
+        baseY = root.position.y;
+        camera.fov = 24;
+        camera.position.set(0, 1.58, 0.85);         // head-and-shoulders of a 1.7m avatar
+        camera.lookAt(0, 1.48, 0);
+        camera.updateProjectionMatrix();
         resize();
 
         el.appendChild(renderer.domElement); // ensure attached
@@ -146,7 +143,7 @@ function GltfAvatarImpl({ url, drive, onError }: { url: string; drive: MutableRe
         const t = performance.now() / 1000;
         root.rotation.y = Math.sin(t * 0.5) * 0.05 * (speaking ? 1 : 0.5);
         root.rotation.x = Math.sin(t * 0.8) * 0.02;
-        root.position.y = Math.sin(t * 1.4) * 0.004;
+        root.position.y = baseY + Math.sin(t * 1.4) * 0.004;
       }
       renderer.render(scene, camera);
     };
