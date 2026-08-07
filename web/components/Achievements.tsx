@@ -3,6 +3,7 @@
 // strip so they never lengthen the page. Hovering a badge explains what it is
 // and, if still locked, how to unlock it. Logic lives in lib/features/achievements.
 import type { Badge, BadgeTier, StreakInfo } from "@/lib/features/achievements";
+import { useT } from "@/lib/i18n";
 
 // Per-tier medallion gradient + glow. Kept theme-neutral (works on light/dark).
 const TIER: Record<BadgeTier, { grad: string; ring: string; glow: string; label: string }> = {
@@ -14,13 +15,14 @@ const TIER: Record<BadgeTier, { grad: string; ring: string; glow: string; label:
 
 // Compact streak pill for the dashboard header.
 export function StreakPill({ streak }: { streak: StreakInfo }) {
+  const tr = useT();
   const alive = streak.current > 0;
   return (
     <span
       className="inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-sm"
       title={alive
-        ? `${streak.activeToday ? "Practiced today — keep it going!" : "Practice today to extend your streak."} · Longest: ${streak.longest} ${streak.longest === 1 ? "day" : "days"}`
-        : "Take an interview to start a streak."}
+        ? `${streak.activeToday ? tr("Practiced today — keep it going!") : tr("Practice today to extend your streak.")} · ${tr("Longest")}: ${streak.longest} ${streak.longest === 1 ? tr("day") : tr("days")}`
+        : tr("Take an interview to start a streak.")}
       style={{
         borderColor: alive ? "color-mix(in srgb, var(--color-live) 45%, transparent)" : "var(--color-line)",
         background: alive ? "color-mix(in srgb, var(--color-live) 12%, transparent)" : "transparent",
@@ -28,17 +30,18 @@ export function StreakPill({ streak }: { streak: StreakInfo }) {
     >
       <span style={{ filter: alive ? "none" : "grayscale(1) opacity(0.6)" }}>🔥</span>
       <span className="font-bold" style={{ color: alive ? "var(--color-live)" : "var(--color-faint)" }}>{streak.current}</span>
-      <span className="text-[var(--color-muted)]">day{streak.current === 1 ? "" : "s"} streak</span>
+      <span className="text-[var(--color-muted)]">{streak.current === 1 ? tr("day streak") : tr("days streak")}</span>
     </span>
   );
 }
 
 export function Achievements({ badges, earnedCount }: { badges: Badge[]; earnedCount: number }) {
+  const tr = useT();
   return (
     <div className="mi-panel mt-4 rounded-2xl border border-[var(--color-line)] bg-[var(--color-panel)] p-5">
       <div className="mb-3 flex items-baseline justify-between">
-        <h2 className="font-semibold">Achievements</h2>
-        <span className="text-xs text-[var(--color-faint)]">{earnedCount} / {badges.length} unlocked</span>
+        <h2 className="font-semibold">{tr("Achievements")}</h2>
+        <span className="text-xs text-[var(--color-faint)]">{earnedCount} / {badges.length} {tr("unlocked")}</span>
       </div>
       {/* One scrollable row — keeps the dashboard short no matter how many badges.
           pt-2 gives the hover-lift room so the circle top isn't clipped (overflow-x
@@ -51,12 +54,13 @@ export function Achievements({ badges, earnedCount }: { badges: Badge[]; earnedC
 }
 
 function BadgeMedallion({ badge }: { badge: Badge }) {
+  const tr = useT();
   const t = TIER[badge.tier];
   const earned = badge.earned;
   // Hover explains the badge and, when locked, exactly how to unlock it.
   const tip = earned
-    ? `${badge.name} — ${badge.desc} · Earned (${t.label})`
-    : `${badge.name} — ${badge.desc} · How to unlock: ${badge.current}/${badge.target}`;
+    ? `${tr(badge.name)} — ${tr(badge.desc)} · ${tr("Earned")} (${tr(t.label)})`
+    : `${tr(badge.name)} — ${tr(badge.desc)} · ${tr("How to unlock")}: ${badge.current}/${badge.target}`;
   return (
     <div className="group flex w-16 shrink-0 flex-col items-center text-center" title={tip}>
       <div
@@ -75,7 +79,7 @@ function BadgeMedallion({ badge }: { badge: Badge }) {
         )}
       </div>
       <div className={`mt-2 line-clamp-2 text-[11px] font-semibold leading-tight ${earned ? "text-[var(--color-ink)]" : "text-[var(--color-faint)]"}`}>
-        {badge.name}
+        {tr(badge.name)}
       </div>
       {!earned && (
         <div className="mt-1 w-full">
