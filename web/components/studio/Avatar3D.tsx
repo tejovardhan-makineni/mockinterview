@@ -14,11 +14,10 @@ import { GltfAvatar } from "./GltfAvatar";
 // realistic glTF avatar's viseme lip-sync (openness + vowel color); the
 // procedural avatar uses `amplitude`.
 export type AvatarDrive = { speaking: boolean; amplitude: number; mood: Mood; level?: number; bright?: number };
-// Side-effect imports register the builders (each with its own palette) and the
-// realistic glTF faces.
+// Side-effect imports register the realistic glTF faces, plus the procedural
+// human builders which remain only as a graceful fallback if a glTF fails to
+// load or a legacy/unknown face id is requested.
 import "./avatars/humans";
-import "./avatars/fun-a";
-import "./avatars/fun-b";
 import "./avatars/realistic";
 
 function webglOK() {
@@ -108,7 +107,10 @@ function ProceduralAvatar({ faceId, drive }: { faceId: string; drive: MutableRef
 // back to procedural so the room always has a face. Memoized on faceId + drive
 // so audio updates (via the ref) never re-render.
 function Avatar3DImpl({ faceId, drive }: { faceId: string; drive: MutableRefObject<AvatarDrive> }) {
-  const gltf = getGltf(faceId);
+  // Every offered face is a realistic glTF; an unknown/legacy id (e.g. a removed
+  // "fun" character from an old saved config) falls back to the default realistic
+  // face rather than a procedural head.
+  const gltf = getGltf(faceId) ?? getGltf("sophia");
   // Track which face failed to load (derived, so switching faces auto-resets the
   // fallback without a setState-in-effect).
   const [failedFace, setFailedFace] = useState<string | null>(null);

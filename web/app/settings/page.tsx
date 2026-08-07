@@ -100,7 +100,7 @@ export default function SettingsPage() {
             </button>
           </div>
           <div className="space-y-4">
-            <Field label="Face (humans + fun characters)">
+            <Field label="Interviewer face">
               <div className="grid grid-cols-4 gap-2">
                 {faces.map((f) => (
                   <button key={f.id} onClick={() => setCfg({ ...cfg, face_id: f.id })}

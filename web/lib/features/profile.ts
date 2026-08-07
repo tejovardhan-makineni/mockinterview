@@ -50,7 +50,7 @@ export interface ProfileSlice {
   deleteAccount(): Promise<void>;
 }
 
-export const DEFAULT_CONFIG: InterviewConfig = { voice_id: "aoede", face_id: "ava", personality: "neutral", intensity: 3 };
+export const DEFAULT_CONFIG: InterviewConfig = { voice_id: "aoede", face_id: "sophia", personality: "neutral", intensity: 3 };
 
 export const profileHttp: ProfileSlice = {
   getConfig() { return req<InterviewConfig>("/api/v1/config"); },
@@ -84,10 +84,6 @@ export const MOCK_VOICES: Voice[] = [
 
 export const MOCK_FACES: Face[] = [
   { id: "sophia", label: "Sophia", gltf: "/avatars/rpm-female.glb" },
-  { id: "pumpkin", label: "Pumpkin Professor", gltf: "" },
-  { id: "robot", label: "Interviewer-9000 (Robot)", gltf: "" },
-  { id: "wizard", label: "The Wizard", gltf: "" },
-  { id: "alien", label: "Zorp (Alien)", gltf: "" },
 ];
 
 export const profileMock: ProfileSlice = {

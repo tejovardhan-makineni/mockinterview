@@ -1,27 +1,21 @@
 package persona
 
-// Face is a client-rendered 3D avatar style. Kind is "human" for standard
-// interviews or "fun" for themed characters (e.g. a Pumpkin Professor for
-// academic/PhD interviews). Gltf is a hook for a future real glTF model URL;
-// empty means the client builds the head procedurally from its avatar registry
-// (web/components/studio/avatars/*). The web registry keys off the same ID.
+// Face is a client-rendered 3D avatar. Kind is "realistic" for the rigged glTF
+// interviewers rendered by GltfAvatar with viseme lip-sync. Gltf points at the
+// bundled model under web/public/avatars; the web registry keys off the same ID.
 type Face struct {
 	ID    string `json:"id"`
 	Label string `json:"label"`
 	Gltf  string `json:"gltf"`
-	Kind  string `json:"kind"` // human | fun
+	Kind  string `json:"kind"` // realistic
 }
 
-// Faces is the catalog served to clients. To add a face, append one line here
-// and register a matching builder under the same ID in the web avatar registry.
+// Faces is the catalog served to clients. To add a face, bundle a rigged .glb
+// under web/public/avatars, append one line here, and registerGltf() it under
+// the same ID in web/components/studio/avatars/realistic.ts.
 var Faces = []Face{
 	// Realistic glTF interviewers (rendered by GltfAvatar with viseme lip-sync).
 	{ID: "sophia", Label: "Sophia", Kind: "realistic", Gltf: "/avatars/rpm-female.glb"},
-	// Fun themed characters (deliberately stylized novelty, not realism).
-	{ID: "pumpkin", Label: "Pumpkin Professor", Kind: "fun"},
-	{ID: "robot", Label: "Interviewer-9000 (Robot)", Kind: "fun"},
-	{ID: "wizard", Label: "The Wizard", Kind: "fun"},
-	{ID: "alien", Label: "Zorp (Alien)", Kind: "fun"},
 }
 
 // FaceByID returns the catalog entry and whether it was found.
