@@ -76,6 +76,13 @@ function GltfAvatarImpl({ url, drive, onError }: { url: string; drive: MutableRe
         });
         scene.add(root);
 
+        // Some exported avatars aren't centered at the origin — recenter on X/Z
+        // so the head sits in front of the camera instead of off to the side.
+        const box0 = new THREE.Box3().setFromObject(root);
+        const c = box0.getCenter(new THREE.Vector3());
+        root.position.x -= c.x;
+        root.position.z -= c.z;
+
         // Frame a head-and-shoulders portrait RELATIVE to the head, so avatars
         // with different proportions/heights (full-body vs half-body RPM models)
         // all get the same clean crop instead of a too-tight face.
