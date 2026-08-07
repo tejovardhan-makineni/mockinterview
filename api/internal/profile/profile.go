@@ -40,8 +40,9 @@ func New(st Repo, geminiKey, ttsModel string) *Service {
 // PreviewVoice returns a short WAV sample of the actual Gemini voice so users
 // hear the real interviewer voice when choosing. Falls back (503) if TTS is off.
 func (s *Service) PreviewVoice(w http.ResponseWriter, r *http.Request) {
-	name := persona.GeminiVoiceName(r.URL.Query().Get("voice"))
-	text := "Hi, I'm your interviewer. Let's start — tell me a bit about yourself and a project you're proud of."
+	id := r.URL.Query().Get("voice")
+	name := persona.GeminiVoiceName(id)
+	text := persona.SampleLine(id) // unique, personable line per voice
 	wav, err := tts.Synthesize(r.Context(), s.geminiKey, s.ttsModel, name, text)
 	if err != nil {
 		httpx.WriteProblem(w, http.StatusServiceUnavailable, "voice preview unavailable")

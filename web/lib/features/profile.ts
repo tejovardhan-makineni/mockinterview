@@ -74,20 +74,18 @@ const CFG_KEY = "mi_mock_cfg";
 const PROFILE_KEY = "mi_mock_profile";
 
 export const MOCK_VOICES: Voice[] = [
-  { id: "aoede", label: "Aoede", gender: "female" },
-  { id: "kore", label: "Kore", gender: "female" },
-  { id: "leda", label: "Leda", gender: "female" },
-  { id: "charon", label: "Charon", gender: "male" },
-  { id: "fenrir", label: "Fenrir", gender: "male" },
-  { id: "orus", label: "Orus", gender: "male" },
+  { id: "aoede", label: "Aoede", gender: "female", sample: "Hi, I'm Aoede — I flew in from Lisbon this morning, running on three espressos and mild jet lag. Let's see what you've got." },
+  { id: "kore", label: "Kore", gender: "female", sample: "Hey there, Kore here, dialing in from a very rainy Seattle. Fun fact: I have never lost a staring contest. Shall we begin?" },
+  { id: "leda", label: "Leda", gender: "female", sample: "Hello! Leda, live from Buenos Aires. I promise to be tough but fair — okay, mostly fair. Ready when you are." },
+  { id: "charon", label: "Charon", gender: "male", sample: "Hey, Charon speaking, straight out of Chicago. I like strong coffee and even stronger system designs. Let's dig in." },
+  { id: "fenrir", label: "Fenrir", gender: "male", sample: "What's up — I'm Fenrir, Reykjavik born, which explains the cold takes. Don't worry, I only bite bad assumptions." },
+  { id: "orus", label: "Orus", gender: "male", sample: "Greetings, Orus here from Bangalore. My hobbies include long walks and short feedback loops. Let's do this." },
 ];
 
 export const MOCK_FACES: Face[] = [
-  { id: "sophia", label: "Sophia — Realistic", gltf: "/avatars/rpm-female.glb" },
-  { id: "ava", label: "Ava", gltf: "" },
-  { id: "maya", label: "Maya", gltf: "" },
-  { id: "leo", label: "Leo", gltf: "" },
-  { id: "noah", label: "Noah", gltf: "" },
+  { id: "sophia", label: "Sophia", gltf: "/avatars/rpm-female.glb" },
+  { id: "mia", label: "Mia", gltf: "/avatars/rpm-b.glb" },
+  { id: "kai", label: "Kai", gltf: "/avatars/rpm-c.glb" },
   { id: "pumpkin", label: "Pumpkin Professor", gltf: "" },
   { id: "robot", label: "Interviewer-9000 (Robot)", gltf: "" },
   { id: "wizard", label: "The Wizard", gltf: "" },

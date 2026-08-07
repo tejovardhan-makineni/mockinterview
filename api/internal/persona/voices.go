@@ -12,17 +12,34 @@ type Voice struct {
 	ID         string `json:"id"`
 	Label      string `json:"label"`
 	Gender     string `json:"gender"`
+	Sample     string `json:"sample"` // the unique line spoken in the voice preview
 	GeminiName string `json:"-"`
 }
 
-// Voices is the catalog served to clients. To add a voice, append one line.
+// Voices is the catalog served to clients. Each carries a UNIQUE, personable
+// preview line (a name, a place, a bit of character) so "hear this interviewer"
+// feels distinct per voice — not a vanilla greeting. To add a voice, append one.
 var Voices = []Voice{
-	{ID: "aoede", Label: "Aoede", Gender: "female", GeminiName: "Aoede"},
-	{ID: "kore", Label: "Kore", Gender: "female", GeminiName: "Kore"},
-	{ID: "leda", Label: "Leda", Gender: "female", GeminiName: "Leda"},
-	{ID: "charon", Label: "Charon", Gender: "male", GeminiName: "Charon"},
-	{ID: "fenrir", Label: "Fenrir", Gender: "male", GeminiName: "Fenrir"},
-	{ID: "orus", Label: "Orus", Gender: "male", GeminiName: "Orus"},
+	{ID: "aoede", Label: "Aoede", Gender: "female", GeminiName: "Aoede",
+		Sample: "Hi, I'm Aoede — I flew in from Lisbon this morning, running on three espressos and mild jet lag. Let's see what you've got."},
+	{ID: "kore", Label: "Kore", Gender: "female", GeminiName: "Kore",
+		Sample: "Hey there, Kore here, dialing in from a very rainy Seattle. Fun fact: I have never lost a staring contest. Shall we begin?"},
+	{ID: "leda", Label: "Leda", Gender: "female", GeminiName: "Leda",
+		Sample: "Hello! Leda, live from Buenos Aires. I promise to be tough but fair — okay, mostly fair. Ready when you are."},
+	{ID: "charon", Label: "Charon", Gender: "male", GeminiName: "Charon",
+		Sample: "Hey, Charon speaking, straight out of Chicago. I like strong coffee and even stronger system designs. Let's dig in."},
+	{ID: "fenrir", Label: "Fenrir", Gender: "male", GeminiName: "Fenrir",
+		Sample: "What's up — I'm Fenrir, Reykjavik born, which explains the cold takes. Don't worry, I only bite bad assumptions."},
+	{ID: "orus", Label: "Orus", Gender: "male", GeminiName: "Orus",
+		Sample: "Greetings, Orus here from Bangalore. My hobbies include long walks and short feedback loops. Let's do this."},
+}
+
+// SampleLine returns the preview line for a voice id (default if unknown).
+func SampleLine(id string) string {
+	if v, ok := VoiceByID(id); ok && v.Sample != "" {
+		return v.Sample
+	}
+	return "Hi, I'm your interviewer. Let's start — tell me a bit about yourself and a project you're proud of."
 }
 
 // DefaultVoiceGeminiName is used when an unknown id is requested.

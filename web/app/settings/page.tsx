@@ -31,7 +31,7 @@ export default function SettingsPage() {
   const previewVoice = (voiceId = cfg.voice_id) => {
     if (previewing) { stopPreview(pv); setPreviewing(false); return; }
     setPreviewing(true);
-    void previewVoiceSample(voiceId, pv, () => setPreviewing(false));
+    void previewVoiceSample(voiceId, pv, () => setPreviewing(false), voices.find((v) => v.id === voiceId)?.sample);
   };
 
   useEffect(() => {

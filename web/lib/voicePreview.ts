@@ -22,12 +22,12 @@ function clearAmp() {
   if (ampInterval !== undefined) { clearInterval(ampInterval); ampInterval = undefined; }
 }
 
-export async function previewVoiceSample(voiceId: string, drive: MutableRefObject<AvatarDrive>, onEnd?: () => void) {
+export async function previewVoiceSample(voiceId: string, drive: MutableRefObject<AvatarDrive>, onEnd?: () => void, line?: string) {
   stopPreview(drive);
   onEndCb = onEnd;
   const blob = await api.voicePreview(voiceId);
-  if (blob) { playReal(blob, drive); return; }
-  fallbackTTS(voiceId, drive);
+  if (blob) { playReal(blob, drive); return; } // real Gemini WAV already speaks the per-voice line
+  fallbackTTS(voiceId, drive, line);            // browser-TTS fallback uses the same line
 }
 
 export function stopPreview(drive: MutableRefObject<AvatarDrive>) {
@@ -66,9 +66,9 @@ function playReal(blob: Blob, drive: MutableRefObject<AvatarDrive>) {
 }
 
 // Fallback: browser TTS with a gender-matched voice (robotic but always works).
-function fallbackTTS(voiceId: string, drive: MutableRefObject<AvatarDrive>) {
+function fallbackTTS(voiceId: string, drive: MutableRefObject<AvatarDrive>, line?: string) {
   if (typeof window === "undefined" || !("speechSynthesis" in window)) return;
-  const u = new SpeechSynthesisUtterance("Hi, I'm your interviewer. Let's start — tell me a bit about yourself and a project you're proud of.");
+  const u = new SpeechSynthesisUtterance(line || "Hi, I'm your interviewer. Let's start — tell me a bit about yourself and a project you're proud of.");
   const female = ["aoede", "kore", "leda"].includes(voiceId);
   const fem = /(female|woman|samantha|victoria|karen|moira|tessa|fiona|serena|zira|susan|allison|ava|jenny|aria)/i;
   const male = /(male|\bman\b|daniel|alex|fred|thomas|oliver|arthur|george|david|mark|guy|ryan)/i;

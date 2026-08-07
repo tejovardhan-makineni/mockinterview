@@ -15,11 +15,11 @@ type Face struct {
 // Faces is the catalog served to clients. To add a face, append one line here
 // and register a matching builder under the same ID in the web avatar registry.
 var Faces = []Face{
-	{ID: "sophia", Label: "Sophia — Realistic", Kind: "realistic", Gltf: "/avatars/rpm-female.glb"},
-	{ID: "ava", Label: "Ava", Kind: "human"},
-	{ID: "maya", Label: "Maya", Kind: "human"},
-	{ID: "leo", Label: "Leo", Kind: "human"},
-	{ID: "noah", Label: "Noah", Kind: "human"},
+	// Realistic glTF interviewers (rendered by GltfAvatar with viseme lip-sync).
+	{ID: "sophia", Label: "Sophia", Kind: "realistic", Gltf: "/avatars/rpm-female.glb"},
+	{ID: "mia", Label: "Mia", Kind: "realistic", Gltf: "/avatars/rpm-b.glb"},
+	{ID: "kai", Label: "Kai", Kind: "realistic", Gltf: "/avatars/rpm-c.glb"},
+	// Fun themed characters (deliberately stylized novelty, not realism).
 	{ID: "pumpkin", Label: "Pumpkin Professor", Kind: "fun"},
 	{ID: "robot", Label: "Interviewer-9000 (Robot)", Kind: "fun"},
 	{ID: "wizard", Label: "The Wizard", Kind: "fun"},

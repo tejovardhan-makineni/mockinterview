@@ -10,3 +10,5 @@
 import { registerGltf } from "./kit";
 
 registerGltf("sophia", "/avatars/rpm-female.glb");
+registerGltf("mia", "/avatars/rpm-b.glb");
+registerGltf("kai", "/avatars/rpm-c.glb");

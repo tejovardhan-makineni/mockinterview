@@ -96,19 +96,21 @@ function GltfAvatarImpl({ url, drive, onError }: { url: string; drive: MutableRe
       raf = requestAnimationFrame(loop);
       const d = drive.current;
       if (root) {
-        // ---- lip-sync from live audio (level = openness, bright = vowel color)
+        // ---- lip-sync from live audio (level = openness, bright = vowel color).
+        // Deliberately restrained: real speech barely parts the lips, so the
+        // openness is capped well below a full gape and the jaw contributes little.
         const speaking = d.speaking;
-        const level = speaking ? Math.min(1, (d.level ?? d.amplitude ?? 0) * 1.4) : 0;
+        const level = speaking ? Math.min(1, d.level ?? d.amplitude ?? 0) : 0;
         const hi = d.bright ?? 0.5; // 1 = front/sibilant (E/I/SS), 0 = back/round (O/U)
-        const open = level;
-        ease("viseme_aa", open * (0.55 + 0.45 * (1 - hi)));
-        ease("viseme_E", open * hi * 0.9);
-        ease("viseme_I", open * hi * 0.5);
-        ease("viseme_O", open * (1 - hi) * 0.6);
-        ease("viseme_U", open * (1 - hi) * 0.35);
-        ease("viseme_SS", Math.min(1, hi * level * 2) * 0.35);
-        if (hasMorph("jawOpen")) ease("jawOpen", open * 0.32);
-        if (hasMorph("mouthClose")) ease("mouthClose", level < 0.03 ? 0.15 : 0);
+        const open = Math.min(0.6, level); // hard cap so it never yawns
+        ease("viseme_aa", open * (0.38 + 0.26 * (1 - hi)));
+        ease("viseme_E", open * hi * 0.5);
+        ease("viseme_I", open * hi * 0.3);
+        ease("viseme_O", open * (1 - hi) * 0.38);
+        ease("viseme_U", open * (1 - hi) * 0.24);
+        ease("viseme_SS", Math.min(1, hi * level * 2) * 0.2);
+        if (hasMorph("jawOpen")) ease("jawOpen", open * 0.1);
+        if (hasMorph("mouthClose")) ease("mouthClose", level < 0.03 ? 0.2 : 0);
 
         // ---- blink (ARKit eyeBlinkLeft/Right)
         blink.t += 1;

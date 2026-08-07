@@ -21,7 +21,7 @@ func TestGeminiVoiceNameFallback(t *testing.T) {
 }
 
 func TestValidFace(t *testing.T) {
-	if !ValidFace("ava") || !ValidFace("pumpkin") {
+	if !ValidFace("sophia") || !ValidFace("pumpkin") {
 		t.Error("ava and pumpkin should be valid faces")
 	}
 	if ValidFace("ghost") {

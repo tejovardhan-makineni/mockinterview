@@ -375,7 +375,7 @@ export class LiveSession {
     // Viseme drive: RMS = mouth openness, zero-crossing rate ≈ vowel brightness
     // (low = round/back O·U, high = spread/sibilant E·I·S).
     const rms = Math.sqrt(sq / pcm.length);
-    this.emit("viseme", { level: Math.min(1, rms * 3), bright: Math.min(1, (zc / pcm.length) * 10) });
+    this.emit("viseme", { level: Math.min(1, rms * 2.4), bright: Math.min(1, (zc / pcm.length) * 10) });
     node.onended = () => { if (this.playHead - ctx.currentTime < 0.05) { this.aiSpeaking = false; this.emit("speaking", false); this.emit("amplitude", 0); this.emit("viseme", { level: 0, bright: 0.5 }); } };
   }
 

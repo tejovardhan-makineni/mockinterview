@@ -117,7 +117,7 @@ func TestInterviewHappyPath(t *testing.T) {
 	if res, _ := c.do("PUT", "/api/v1/config", bad); res.StatusCode != http.StatusBadRequest {
 		t.Fatalf("invalid config should be 400, got %d", res.StatusCode)
 	}
-	good := map[string]any{"voice_id": "aoede", "face_id": "ava", "personality": "neutral", "intensity": 3}
+	good := map[string]any{"voice_id": "aoede", "face_id": "sophia", "personality": "neutral", "intensity": 3}
 	if res, _ := c.do("PUT", "/api/v1/config", good); res.StatusCode != 200 {
 		t.Fatalf("valid config should be 200, got %d", res.StatusCode)
 	}
