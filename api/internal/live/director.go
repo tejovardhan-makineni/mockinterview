@@ -120,7 +120,7 @@ func interviewerRole(q corpus.Question) string {
 // SystemPrompt builds the full interviewer system instruction for a session.
 // resumeSummary and canvasContext may be empty. voice is the selected voice id;
 // the interviewer takes that voice's name as their own (e.g. "Charon").
-func SystemPrompt(q corpus.Question, persona string, intensity int, phase, resumeSummary, canvasContext string, durationMin int, voice string) string {
+func SystemPrompt(q corpus.Question, persona string, intensity int, phase, resumeSummary, canvasContext string, durationMin int, voice, language string) string {
 	name := "your interviewer"
 	if v, ok := personapkg.VoiceByID(voice); ok && v.Label != "" {
 		name = v.Label
@@ -128,6 +128,13 @@ func SystemPrompt(q corpus.Question, persona string, intensity int, phase, resum
 	role := interviewerRole(q)
 
 	var b strings.Builder
+	// Language directive FIRST so it dominates: the interviewer must run the whole
+	// interview in the selected language regardless of the (English) instructions
+	// below or the language the candidate happens to use.
+	if language != "" && language != personapkg.DefaultLanguageCode() {
+		ln := personapkg.LanguageName(language)
+		fmt.Fprintf(&b, "CRITICAL LANGUAGE RULE: Conduct this ENTIRE interview in %s. Every word you speak and any text you write MUST be in %s — greetings, questions, follow-ups, and the closing. Speak natural, fluent, native %s. Do this even if the candidate speaks or writes in another language (you may briefly accommodate, but you continue in %s). This rule overrides any example wording below.\n\n", ln, ln, ln, ln)
+	}
 	b.WriteString("You are a real, experienced human interviewer on a live video call — NOT an AI assistant. ")
 	b.WriteString("Your ONE GOAL is to ASSESS whether this candidate has the capability for the role — by asking, observing, waiting, and following up. You are gathering signal, not teaching.\n\n")
 	fmt.Fprintf(&b, "YOUR IDENTITY: You are %s, %s. That is who you are on this call. Introduce yourself by your first name (%s) at the start, and if the candidate asks your name or who you are, answer naturally IN CHARACTER — your name and, briefly, your role. NEVER say you are an AI, a model, or an assistant, and never say you have no name. Keep any employer reference generic (\"the team here\", \"our side\") — do not invent a specific company name.\n\n", name, role, name)

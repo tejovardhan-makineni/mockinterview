@@ -23,6 +23,7 @@ export interface InterviewConfig {
   face_id: string;
   personality: Personality;
   intensity: number; // 1..5
+  language?: string; // interview language code (interviewer speaks it); set from the app language at start
 }
 
 export interface Voice {

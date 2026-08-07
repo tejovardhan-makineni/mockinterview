@@ -11,9 +11,12 @@ import { Workspace } from "@/components/studio/Workspace";
 import { Webcam } from "@/components/studio/Webcam";
 import { LiveHUD, ConnChip, type AiState } from "@/components/studio/LiveHUD";
 import { Button } from "@/components/ui";
+import { LanguageSelect } from "@/components/LanguageSelect";
+import { useT } from "@/lib/i18n";
 
 function StudioInner() {
   const router = useRouter();
+  const t = useT();
   const params = useSearchParams();
   const sid = params.get("s") || "";
   const [session, setSession] = useState<Session | null>(null);
@@ -179,18 +182,19 @@ function StudioInner() {
       <header className="flex flex-wrap items-center justify-between gap-2 border-b border-[var(--color-line)] px-4 py-2.5 sm:px-5">
         <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm">
           <span className="live-dot inline-block h-2 w-2 rounded-full bg-[var(--color-live)]" />
-          <span className="font-semibold">Interview in progress</span>
+          <span className="font-semibold">{t("Interview in progress")}</span>
           <span className="hidden rounded-full border border-[var(--color-line)] px-2 py-0.5 text-xs text-[var(--color-muted)] sm:inline">{status}</span>
           <span className="hidden text-xs text-[var(--color-faint)] sm:inline">{modality.replace("_", " ")}</span>
         </div>
         <div className="flex items-center gap-3">
+          <LanguageSelect variant="header" />
           <ConnChip conn={conn} onReconnect={() => { setConn("reconnecting"); live.current?.reconnect(); }} />
           {remainingMs !== null && (
             <span className={`rounded-full border px-3 py-1 font-mono text-sm ${remainingMs < 120000 ? "border-[var(--color-bad)] text-[var(--color-bad)]" : "border-[var(--color-line)] text-[var(--color-muted)]"}`}>
               ⏱ {fmtTime(remainingMs)}
             </span>
           )}
-          <Button variant="danger" onClick={end} disabled={ending}>{ending ? "Scoring…" : "End & get report"}</Button>
+          <Button variant="danger" onClick={end} disabled={ending}>{ending ? t("Scoring…") : t("End & get report")}</Button>
         </div>
       </header>
 
@@ -212,7 +216,7 @@ function StudioInner() {
                 </p>
               ) : (
                 <p key={i} className={`mb-2 ${c.role === "interviewer" ? "text-[var(--color-ink)]" : "text-[var(--color-muted)]"}`}>
-                  <span className="text-xs font-semibold text-[var(--color-faint)]">{c.role === "interviewer" ? "Interviewer" : "You"}: </span>
+                  <span className="text-xs font-semibold text-[var(--color-faint)]">{c.role === "interviewer" ? t("Interviewer") : t("You")}: </span>
                   {c.text}
                 </p>
               )

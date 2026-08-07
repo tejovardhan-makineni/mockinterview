@@ -11,6 +11,11 @@ type InterviewConfig struct {
 	FaceID      string `json:"face_id"`
 	Personality string `json:"personality"`
 	Intensity   int    `json:"intensity"`
+	// Language is the interview language (the interviewer speaks/writes in it). It
+	// rides along in the per-session config JSON (read by the live relay); it is
+	// NOT a column on interview_configs, so the saved user default doesn't persist
+	// it — the client sets it per interview from the app-wide language selection.
+	Language string `json:"language,omitempty"`
 }
 
 // DefaultConfig derives the new-user defaults from the persona catalogs (their

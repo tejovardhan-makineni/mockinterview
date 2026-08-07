@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import { LanguageProvider } from "@/lib/i18n";
 
 export const metadata: Metadata = {
   title: "mockinterview.live — AI System Design Interviews",
@@ -15,7 +16,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <script dangerouslySetInnerHTML={{ __html: `try{document.documentElement.setAttribute('data-theme',localStorage.getItem('mi_theme')||'dark')}catch(e){}` }} />
       </head>
       <body>
-        <div style={{ position: "relative", zIndex: 1 }}>{children}</div>
+        <LanguageProvider>
+          <div style={{ position: "relative", zIndex: 1 }}>{children}</div>
+        </LanguageProvider>
       </body>
     </html>
   );

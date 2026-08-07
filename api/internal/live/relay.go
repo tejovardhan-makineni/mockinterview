@@ -100,7 +100,7 @@ func (r *Relay) Handle(w http.ResponseWriter, req *http.Request) {
 	// can't stream an unbounded message up. 1 MB is far above any real frame.
 	conn.SetReadLimit(1 << 20)
 
-	persona, intensity, voice := parseConfig(sess.Config)
+	personaID, intensity, voice, language := parseConfig(sess.Config)
 	resumeSummary := r.resumeSummary(req.Context(), uid)
 	durationMin := 30
 	if v := req.URL.Query().Get("minutes"); v != "" {
@@ -108,7 +108,7 @@ func (r *Relay) Handle(w http.ResponseWriter, req *http.Request) {
 			durationMin = n
 		}
 	}
-	system := SystemPrompt(q, persona, intensity, "intro", resumeSummary, "", durationMin, voice)
+	system := SystemPrompt(q, personaID, intensity, "intro", resumeSummary, "", durationMin, voice, language)
 
 	_ = r.store.UpdateSessionStatus(req.Context(), sessionID, "active")
 
@@ -440,23 +440,28 @@ func (r *Relay) resumeSummary(ctx context.Context, uid string) string {
 	return out
 }
 
-func parseConfig(cfg json.RawMessage) (persona string, intensity int, voice string) {
+func parseConfig(cfg json.RawMessage) (personaID string, intensity int, voice, language string) {
 	def := store.DefaultConfig() // single source of truth for defaults (from persona catalogs)
-	persona, intensity, voice = def.Personality, def.Intensity, def.VoiceID
+	personaID, intensity, voice = def.Personality, def.Intensity, def.VoiceID
+	language = persona.DefaultLanguageCode()
 	var c struct {
 		Personality string `json:"personality"`
 		Intensity   int    `json:"intensity"`
 		VoiceID     string `json:"voice_id"`
+		Language    string `json:"language"`
 	}
 	if json.Unmarshal(cfg, &c) == nil {
 		if c.Personality != "" {
-			persona = c.Personality
+			personaID = c.Personality
 		}
 		if c.Intensity >= 1 && c.Intensity <= 5 {
 			intensity = c.Intensity
 		}
 		if c.VoiceID != "" {
 			voice = c.VoiceID
+		}
+		if c.Language != "" {
+			language = persona.NormalizeLanguage(c.Language)
 		}
 	}
 	return

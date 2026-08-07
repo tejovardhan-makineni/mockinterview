@@ -11,6 +11,7 @@ import (
 	"github.com/tejo/mockinterview-api/internal/config"
 	"github.com/tejo/mockinterview-api/internal/corpus"
 	"github.com/tejo/mockinterview-api/internal/httpx"
+	"github.com/tejo/mockinterview-api/internal/i18n"
 	"github.com/tejo/mockinterview-api/internal/interview"
 	"github.com/tejo/mockinterview-api/internal/live"
 	"github.com/tejo/mockinterview-api/internal/llm"
@@ -61,6 +62,7 @@ func (a *App) Routes(r chi.Router) {
 	resumeSvc := resume.New(a.Store, a.LLM, a.Cfg.LLMModel)
 	profileSvc := profile.New(a.Store, a.Cfg.GeminiAPIKey, a.Cfg.ModelTTS)
 	corpusSvc := corpus.NewService(a.Corpus)
+	i18nSvc := i18n.New(a.LLM, a.Cfg.LLMModel)
 	scorer := scoring.New(a.LLM, a.Cfg.LLMModel)
 	interviewSvc := interview.New(a.Store, a.Corpus, scorer, a.Cfg.AdminEmails, a.Cfg.FreeDailyLimit)
 
@@ -86,6 +88,11 @@ func (a *App) Routes(r chi.Router) {
 		r.With(perUser).Get("/voices/preview", profileSvc.PreviewVoice) // TTS costs money
 		r.Get("/faces", profileSvc.ListFaces)
 		r.Get("/personalities", profileSvc.ListPersonalities)
+
+		// UI localization: list languages + translate app-owned strings (LLM,
+		// per-user rate-limited; the client caches heavily so this is rare).
+		r.Get("/languages", i18nSvc.ListLanguages)
+		r.With(perUser).Post("/i18n/translate", i18nSvc.Translate)
 
 		// User profile + account deletion.
 		r.Get("/profile", profileSvc.GetProfile)

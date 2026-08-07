@@ -7,6 +7,7 @@ import type { Face, InterviewConfig, Personality, Resume, Voice } from "@/lib/ty
 import { Badge, Button, Field, Panel } from "@/components/ui";
 import { Avatar3D, type AvatarDrive } from "@/components/studio/Avatar3D";
 import { previewVoiceSample, stopPreview, prefetchPreview } from "@/lib/voicePreview";
+import { useLang } from "@/lib/i18n";
 import { IconPlay, IconStop } from "@/components/icons";
 
 const PERSONAS: { id: Personality; label: string; desc: string }[] = [
@@ -32,6 +33,7 @@ function SetupInner() {
   const fileRef = useRef<HTMLInputElement>(null);
   const pv = useRef<AvatarDrive>({ speaking: false, amplitude: 0, mood: "neutral" });
   const [previewing, setPreviewing] = useState(false);
+  const { lang } = useLang();
   const previewReq = { voiceId: cfg.voice_id, faceId: cfg.face_id, personality: cfg.personality, intensity: cfg.intensity };
   const toggleVoice = () => {
     if (previewing) { stopPreview(pv); setPreviewing(false); return; }
@@ -68,8 +70,11 @@ function SetupInner() {
   async function start() {
     setStarting(true); setStartErr("");
     try {
+      // The interviewer speaks the app-selected language; carry it into the
+      // session config (it rides the per-session JSON, read by the live relay).
+      const withLang = { ...cfg, language: lang };
       await api.saveConfig(cfg);
-      const s = await api.createSession(questionId, cfg);
+      const s = await api.createSession(questionId, withLang);
       router.push(`/interview?s=${s.id}&minutes=${minutes}`);
     } catch (e) {
       setStartErr(e instanceof Error ? e.message : "Could not start the interview.");

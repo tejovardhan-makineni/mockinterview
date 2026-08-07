@@ -9,6 +9,8 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { api } from "@/lib/api";
 import { ThemeToggle } from "./ThemeToggle";
+import { LanguageSelect } from "./LanguageSelect";
+import { useT } from "@/lib/i18n";
 import {
   IconDashboard, IconInterview, IconResume, IconResults, IconSettings, IconSignOut, LogoM,
 } from "@/components/icons";
@@ -27,6 +29,7 @@ const NAV: { key: NavKey; href: string; label: string; Icon: IconType }[] = [
 
 export function AppShell({ active, children }: { active: NavKey; children: ReactNode }) {
   const router = useRouter();
+  const t = useT();
   const [email, setEmail] = useState<string>("");
   const [open, setOpen] = useState(false); // mobile drawer
   const drawerRef = useRef<HTMLDivElement>(null);
@@ -54,7 +57,7 @@ export function AppShell({ active, children }: { active: NavKey; children: React
                 : "text-[var(--color-muted)] hover:bg-[var(--color-panel-2)] hover:text-[var(--color-ink)]"
             }`}>
             <Icon className="h-5 w-5" />
-            <span>{n.label}</span>
+            <span>{t(n.label)}</span>
           </Link>
         );
       })}
@@ -69,9 +72,14 @@ export function AppShell({ active, children }: { active: NavKey; children: React
       </Link>
       {NavLinks}
       <div className="mt-2 space-y-2 border-t border-[var(--color-line)] pt-4">
+        {/* Language selector — above the theme row. */}
+        <div className="flex items-center justify-between gap-2 px-1">
+          <span className="text-xs font-medium text-[var(--color-muted)]">{t("Language")}</span>
+          <LanguageSelect variant="sidebar" />
+        </div>
         {/* Theme switcher — its own labeled row above the account info. */}
         <div className="flex items-center justify-between gap-2 px-1">
-          <span className="text-xs font-medium text-[var(--color-muted)]">Theme</span>
+          <span className="text-xs font-medium text-[var(--color-muted)]">{t("Theme")}</span>
           <ThemeToggle />
         </div>
         {/* Account email */}
@@ -82,7 +90,7 @@ export function AppShell({ active, children }: { active: NavKey; children: React
         <button onClick={() => { api.logout(); router.replace("/login"); }}
           className="flex w-full items-center justify-center gap-2 rounded-lg border border-[var(--color-line)] px-4 py-2.5 text-sm font-medium text-[var(--color-bad)] transition hover:border-[var(--color-bad)] hover:bg-[color-mix(in_srgb,var(--color-bad)_10%,transparent)]">
           <IconSignOut className="h-4 w-4" />
-          Sign out
+          {t("Sign out")}
         </button>
       </div>
     </div>

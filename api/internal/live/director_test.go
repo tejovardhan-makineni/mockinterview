@@ -14,7 +14,7 @@ func TestSystemPromptIncludesPersonaAndProbes(t *testing.T) {
 		Rubric:    []corpus.RubricDim{{Key: "hld", Label: "High-level design", Description: "components", Weight: 1}},
 		Reference: json.RawMessage(`{"deep_dives":[{"topic":"cdc","probe":"how do you capture DB changes, Debezium?"}]}`),
 	}
-	sp := SystemPrompt(q, "annoying", 5, "deepdive", "7y backend eng", "candidate drew a Postgres box", 30, "charon")
+	sp := SystemPrompt(q, "annoying", 5, "deepdive", "7y backend eng", "candidate drew a Postgres box", 30, "charon", "en")
 	for _, want := range []string{"impatient", "Debezium", "High-level design", "deepdive", "Postgres", "Charon"} {
 		if !strings.Contains(sp, want) {
 			t.Errorf("system prompt missing %q", want)
