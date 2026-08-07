@@ -7,9 +7,27 @@ import (
 	"context"
 	"encoding/binary"
 	"fmt"
+	"sync"
 
 	"google.golang.org/genai"
 )
+
+// The genai client is safe for concurrent reuse and holds pooled HTTP
+// connections, so we build it once and share it across previews rather than
+// paying client-setup + a fresh TLS handshake on every synthesis (that setup
+// cost was a real chunk of the voice-preview latency).
+var (
+	clientOnce sync.Once
+	client     *genai.Client
+	clientErr  error
+)
+
+func sharedClient(apiKey string) (*genai.Client, error) {
+	clientOnce.Do(func() {
+		client, clientErr = genai.NewClient(context.Background(), &genai.ClientConfig{APIKey: apiKey, Backend: genai.BackendGeminiAPI})
+	})
+	return client, clientErr
+}
 
 // Synthesize returns 24kHz 16-bit mono WAV audio of `text` spoken in `voiceName`
 // (a Gemini prebuilt voice, e.g. "Aoede"). Returns an error if TTS is
@@ -18,7 +36,7 @@ func Synthesize(ctx context.Context, apiKey, model, voiceName, text string) ([]b
 	if apiKey == "" {
 		return nil, fmt.Errorf("tts unavailable: no api key")
 	}
-	client, err := genai.NewClient(ctx, &genai.ClientConfig{APIKey: apiKey, Backend: genai.BackendGeminiAPI})
+	client, err := sharedClient(apiKey)
 	if err != nil {
 		return nil, err
 	}

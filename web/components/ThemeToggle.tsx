@@ -2,28 +2,53 @@
 
 import { useEffect, useState } from "react";
 
-// Cycles the three themes: Dark → Light → Quantum. Persisted + applied via
-// <html data-theme>. Same layout across all three.
+// A segmented control for the three themes (Dark / Light / Quantum): all options
+// are visible at once and one click jumps straight to any of them — clearer than
+// a blind cycle button. Persisted + applied via <html data-theme>.
 type Theme = "dark" | "light" | "quantum";
 const ORDER: Theme[] = ["dark", "light", "quantum"];
 const ICON: Record<Theme, string> = { dark: "🌙", light: "☀️", quantum: "⚡" };
 const LABEL: Record<Theme, string> = { dark: "Dark", light: "Light", quantum: "Quantum" };
 
 export function ThemeToggle() {
-  const [theme, setTheme] = useState<Theme>(() =>
-    typeof window !== "undefined" ? ((localStorage.getItem("mi_theme") as Theme) || "dark") : "dark"
-  );
+  // Read the stored theme in a lazy initializer (the layout's inline script has
+  // already applied <html data-theme> before paint, so this just mirrors it).
+  const [theme, setTheme] = useState<Theme>(() => {
+    const stored = typeof window !== "undefined" ? (localStorage.getItem("mi_theme") as Theme) : null;
+    return stored && ORDER.includes(stored) ? stored : "dark";
+  });
+
   useEffect(() => { document.documentElement.setAttribute("data-theme", theme); }, [theme]);
-  const cycle = () => {
-    const next = ORDER[(ORDER.indexOf(theme) + 1) % ORDER.length];
-    if (typeof window !== "undefined") localStorage.setItem("mi_theme", next);
-    setTheme(next);
+
+  const select = (t: Theme) => {
+    if (typeof window !== "undefined") localStorage.setItem("mi_theme", t);
+    setTheme(t);
   };
+
   return (
-    <button onClick={cycle} title={`Theme: ${LABEL[theme]} (click to switch)`}
-      className="flex h-9 items-center gap-1.5 rounded-lg border border-[var(--color-line)] px-2.5 text-sm hover:bg-[var(--color-panel-2)]">
-      <span>{ICON[theme]}</span>
-      <span className="hidden text-xs text-[var(--color-muted)] sm:inline">{LABEL[theme]}</span>
-    </button>
+    <div role="radiogroup" aria-label="Theme"
+      className="inline-flex items-center gap-0.5 rounded-lg border border-[var(--color-line)] bg-[var(--color-panel-2)] p-0.5">
+      {ORDER.map((t) => {
+        const active = theme === t;
+        return (
+          <button
+            key={t}
+            role="radio"
+            aria-checked={active}
+            title={LABEL[t]}
+            aria-label={LABEL[t]}
+            onClick={() => select(t)}
+            className={`flex h-7 items-center gap-1 rounded-md px-2 text-sm transition ${
+              active
+                ? "bg-[var(--color-accent)] text-[#0b0d12] shadow-sm"
+                : "text-[var(--color-muted)] hover:bg-[var(--color-panel)] hover:text-[var(--color-ink)]"
+            }`}
+          >
+            <span aria-hidden="true">{ICON[t]}</span>
+            {active && <span className="text-xs font-semibold">{LABEL[t]}</span>}
+          </button>
+        );
+      })}
+    </div>
   );
 }

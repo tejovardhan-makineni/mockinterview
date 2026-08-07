@@ -74,13 +74,16 @@ export const IconClock = (p: IconProps) => (
 
 // ---- Brand ----
 // A clean single lowercase "m" in a rounded badge — the mockinterview.live mark.
+// The "m" is a geometric stroked path (two even semicircular shoulders + three
+// legs) rather than a font glyph, so it is ALWAYS perfectly centred in the tile
+// regardless of whether the webfont has loaded or the platform's baseline
+// metrics. app/icon.svg mirrors this exact path so the browser-tab favicon matches.
 export const LogoM = ({ className }: { className?: string }) => (
   <svg viewBox="0 0 32 32" width="1em" height="1em" className={className} aria-hidden="true">
     <rect x="1" y="1" width="30" height="30" rx="8" fill="var(--color-accent)" />
-    <text
-      x="16" y="17" textAnchor="middle" dominantBaseline="central"
-      fontFamily="'Hanken Grotesk', ui-sans-serif, sans-serif" fontWeight="800" fontSize="19"
-      fill="var(--color-studio)"
-    >m</text>
+    <path
+      d="M9 20.5 L9 15 A3.5 3.5 0 0 0 16 15 A3.5 3.5 0 0 0 23 15 L23 20.5 M16 15 L16 20.5"
+      fill="none" stroke="var(--color-studio)" strokeWidth="2.8" strokeLinecap="round" strokeLinejoin="round"
+    />
   </svg>
 );

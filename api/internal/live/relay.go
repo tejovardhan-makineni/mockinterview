@@ -206,6 +206,12 @@ func (r *Relay) runGemini(conn *websocket.Conn, sessionID string, q corpus.Quest
 				SilenceDurationMs:        genai.Ptr(int32(1200)),
 			},
 		},
+		// Keep the session alive for the full interview. Without this, Gemini
+		// terminates the native-audio session once its context window fills (well
+		// under our 30-min cap in a talky interview) — which surfaced as the
+		// intermittent mid-interview drops that then auto-reconnected. A sliding
+		// window compresses older turns instead of ending the session.
+		ContextWindowCompression: &genai.ContextWindowCompressionConfig{SlidingWindow: &genai.SlidingWindow{}},
 		// The interviewer can end the interview itself (time up / wrapping up /
 		// candidate asks to end).
 		Tools: []*genai.Tool{{

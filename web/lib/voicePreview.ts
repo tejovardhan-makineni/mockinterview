@@ -16,13 +16,49 @@ let ampRaf: number | undefined;
 let ampInterval: number | undefined;
 let audioCtx: AudioContext | undefined;
 let current: HTMLAudioElement | undefined;
+let currentUrl: string | undefined;                 // object URL to revoke on stop/end
+let currentSrc: MediaElementAudioSourceNode | undefined;
+let currentAnalyser: AnalyserNode | undefined;
 let onEndCb: (() => void) | undefined;
 
 // Combo -> in-flight/settled blob fetch. A promise (not a blob) so concurrent
 // callers for the same combo share one request and a prefetch is awaited, not
-// duplicated.
+// duplicated. Backed by a PERSISTENT IndexedDB store so a given interviewer
+// preview is fetched from the server at most once per browser, ever — reloads
+// and later visits replay it instantly with no network call.
 const blobCache = new Map<string, Promise<Blob | null>>();
 const keyOf = (r: PreviewReq) => `${r.voiceId}|${r.faceId}|${r.personality}|${r.intensity}`;
+
+// ---- IndexedDB blob store (best-effort; degrades to memory-only) ----
+const IDB_NAME = "mi_media", IDB_STORE = "voice_previews";
+let idbPromise: Promise<IDBDatabase | null> | undefined;
+function idb(): Promise<IDBDatabase | null> {
+  if (idbPromise) return idbPromise;
+  idbPromise = new Promise((resolve) => {
+    try {
+      if (typeof indexedDB === "undefined") return resolve(null);
+      const req = indexedDB.open(IDB_NAME, 1);
+      req.onupgradeneeded = () => { if (!req.result.objectStoreNames.contains(IDB_STORE)) req.result.createObjectStore(IDB_STORE); };
+      req.onsuccess = () => resolve(req.result);
+      req.onerror = () => resolve(null);
+    } catch { resolve(null); }
+  });
+  return idbPromise;
+}
+async function idbGet(key: string): Promise<Blob | null> {
+  const db = await idb(); if (!db) return null;
+  return new Promise((resolve) => {
+    try {
+      const r = db.transaction(IDB_STORE, "readonly").objectStore(IDB_STORE).get(key);
+      r.onsuccess = () => resolve(r.result instanceof Blob ? r.result : null);
+      r.onerror = () => resolve(null);
+    } catch { resolve(null); }
+  });
+}
+async function idbPut(key: string, blob: Blob): Promise<void> {
+  const db = await idb(); if (!db) return;
+  try { db.transaction(IDB_STORE, "readwrite").objectStore(IDB_STORE).put(blob, key); } catch { /* ignore */ }
+}
 
 function clearAmp() {
   if (ampRaf !== undefined) { cancelAnimationFrame(ampRaf); ampRaf = undefined; }
@@ -30,12 +66,19 @@ function clearAmp() {
 }
 
 // prefetchPreview warms the cache for a combo without playing anything. Safe to
-// call on every selection change — it dedups by combo.
+// call on every selection change — it dedups by combo and checks the persistent
+// store before ever hitting the network.
 export function prefetchPreview(req: PreviewReq): Promise<Blob | null> {
   const key = keyOf(req);
   let p = blobCache.get(key);
   if (!p) {
-    p = api.voicePreview(req).catch(() => null);
+    p = (async () => {
+      const cached = await idbGet(key);
+      if (cached) return cached;
+      const fresh = await api.voicePreview(req).catch(() => null);
+      if (fresh) void idbPut(key, fresh); // persist for future sessions
+      return fresh;
+    })();
     blobCache.set(key, p);
     // Drop a failed fetch so a later attempt can retry (transient offline, etc.).
     void p.then((b) => { if (!b) blobCache.delete(key); });
@@ -56,6 +99,11 @@ export async function previewVoiceSample(req: PreviewReq, drive: MutableRefObjec
 export function stopPreview(drive: MutableRefObject<AvatarDrive>) {
   clearAmp();
   if (current) { current.pause(); current = undefined; }
+  // Release audio-graph nodes and the object URL — pause() never fires onended,
+  // so without this each stopped/switched preview leaks a node + a blob URL.
+  currentSrc?.disconnect(); currentSrc = undefined;
+  currentAnalyser?.disconnect(); currentAnalyser = undefined;
+  if (currentUrl) { URL.revokeObjectURL(currentUrl); currentUrl = undefined; }
   if (typeof window !== "undefined" && "speechSynthesis" in window) window.speechSynthesis.cancel();
   drive.current.speaking = false; drive.current.amplitude = 0;
   const cb = onEndCb; onEndCb = undefined; cb?.();
@@ -64,6 +112,7 @@ export function stopPreview(drive: MutableRefObject<AvatarDrive>) {
 // Play the real Gemini WAV through an analyser and drive lips from its RMS.
 function playReal(blob: Blob, drive: MutableRefObject<AvatarDrive>) {
   const url = URL.createObjectURL(blob);
+  currentUrl = url;
   const audio = new Audio(url);
   current = audio;
   audioCtx = audioCtx ?? new AudioContext();
@@ -72,6 +121,7 @@ function playReal(blob: Blob, drive: MutableRefObject<AvatarDrive>) {
   const analyser = ctx.createAnalyser();
   analyser.fftSize = 256;
   src.connect(analyser); analyser.connect(ctx.destination);
+  currentSrc = src; currentAnalyser = analyser;
   const data = new Uint8Array(analyser.frequencyBinCount);
   const tick = () => {
     analyser.getByteTimeDomainData(data);
@@ -84,7 +134,12 @@ function playReal(blob: Blob, drive: MutableRefObject<AvatarDrive>) {
     ampRaf = requestAnimationFrame(tick);
   };
   audio.onplay = () => { drive.current.speaking = true; void ctx.resume(); tick(); };
-  audio.onended = () => { drive.current.speaking = false; drive.current.amplitude = 0; drive.current.level = 0; clearAmp(); URL.revokeObjectURL(url); const cb = onEndCb; onEndCb = undefined; cb?.(); };
+  audio.onended = () => {
+    drive.current.speaking = false; drive.current.amplitude = 0; drive.current.level = 0; clearAmp();
+    src.disconnect(); analyser.disconnect(); currentSrc = undefined; currentAnalyser = undefined;
+    if (currentUrl === url) { URL.revokeObjectURL(url); currentUrl = undefined; }
+    const cb = onEndCb; onEndCb = undefined; cb?.();
+  };
   void audio.play().catch(() => { /* autoplay blocked; ignore */ });
 }
 

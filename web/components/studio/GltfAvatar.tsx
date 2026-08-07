@@ -179,14 +179,25 @@ function GltfAvatarImpl({ url, drive, onError }: { url: string; drive: MutableRe
       disposed = true;
       cancelAnimationFrame(raf);
       ro.disconnect();
-      renderer.dispose();
+      // Dispose geometry AND every texture each material references (RPM avatars
+      // carry base-color/normal/roughness/metalness/emissive maps). material.dispose()
+      // alone leaks those GPU textures; switching faces repeatedly would exhaust
+      // both GPU memory and the browser's live-WebGL-context cap.
+      const disposeMat = (m: THREE.Material) => {
+        for (const k of ["map", "normalMap", "roughnessMap", "metalnessMap", "emissiveMap", "aoMap", "alphaMap"] as const) {
+          (m as unknown as Record<string, THREE.Texture | null>)[k]?.dispose?.();
+        }
+        m.dispose();
+      };
       scene.traverse((o) => {
         const m = o as THREE.Mesh;
         m.geometry?.dispose?.();
         const mat = m.material as THREE.Material | THREE.Material[] | undefined;
-        if (Array.isArray(mat)) mat.forEach((x) => x.dispose());
-        else mat?.dispose?.();
+        if (Array.isArray(mat)) mat.forEach(disposeMat);
+        else if (mat) disposeMat(mat);
       });
+      renderer.forceContextLoss(); // release the WebGL context so it isn't held until GC
+      renderer.dispose();
       if (renderer.domElement.parentNode === el) el.removeChild(renderer.domElement);
     };
     // drive is a stable ref read each frame; rebuild only when the model changes.

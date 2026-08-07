@@ -51,7 +51,7 @@ function SetupInner() {
   // Warm the preview clip when the combo changes so playback is instant.
   useEffect(() => {
     if (!voices.length) return;
-    const t = setTimeout(() => { void prefetchPreview(previewReq); }, 350);
+    const t = setTimeout(() => { void prefetchPreview(previewReq); }, 150);
     return () => clearTimeout(t);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [cfg.voice_id, cfg.face_id, cfg.personality, cfg.intensity, voices.length]);

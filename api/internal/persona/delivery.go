@@ -77,42 +77,32 @@ func paceFor(intensity int) string {
 	}
 }
 
-// lineFor composes the WORDS — distinct wording per personality (not merely a
-// different tone over the same sentence), nudged by intensity, in first person
-// from the face's persona.
+// lineFor composes the WORDS — one short, punchy line (kept brief so the preview
+// synthesises fast and plays quickly), distinct per personality, nudged by
+// intensity, in first person from the face's persona.
 func lineFor(p facePersona, personality string, intensity int) string {
-	var b strings.Builder
 	switch personality {
 	case "supportive":
-		fmt.Fprintf(&b, "Hi there — I'm %s, %s. I'm really glad you're here, and I want to see you do your best today.", p.name, p.role)
 		if intensity <= 2 {
-			b.WriteString(" There's no rush at all, so take a breath and let's just have a good conversation.")
-		} else {
-			b.WriteString(" We've got a fair bit to cover, so let's dive in whenever you're ready.")
+			return fmt.Sprintf("Hi, I'm %s — really glad you're here. No rush; let's just have a good conversation.", p.name)
 		}
+		return fmt.Sprintf("Hi, I'm %s — glad you're here. We've a fair bit to cover, so let's dive in.", p.name)
 	case "interruptive":
-		fmt.Fprintf(&b, "I'm %s, %s. Quick heads-up: I run a tight interview and I'll jump in the moment something's worth digging into.", p.name, p.role)
 		if intensity >= 4 {
-			b.WriteString(" So keep it sharp and let's not waste any time. Ready?")
-		} else {
-			b.WriteString(" Don't let that throw you — it just means I'm engaged. Let's get started.")
+			return fmt.Sprintf("I'm %s. I run a tight interview and I'll jump in fast — so keep it sharp. Ready?", p.name)
 		}
+		return fmt.Sprintf("I'm %s. Heads-up: I'll interrupt with follow-ups the moment something's worth digging into.", p.name)
 	case "annoying":
-		fmt.Fprintf(&b, "%s here, %s. Let's be efficient — I've been through a stack of interviews today and I've got very little patience for hand-waving.", p.name, p.role)
 		if intensity >= 4 {
-			b.WriteString(" So no fluff. Show me you actually know your stuff.")
-		} else {
-			b.WriteString(" Give me specifics and we'll get along fine.")
+			return fmt.Sprintf("%s. Let's be efficient — no fluff, no hand-waving. Show me you know your stuff.", p.name)
 		}
+		return fmt.Sprintf("%s here. I want specifics, not hand-waving — give me those and we'll get along fine.", p.name)
 	default: // neutral
-		fmt.Fprintf(&b, "Hello, I'm %s, %s. I'll be running your interview today.", p.name, p.role)
 		if intensity >= 4 {
-			b.WriteString(" I'd like to move at a good clip, so let's get straight into it.")
-		} else {
-			b.WriteString(" I'll keep things professional and let your answers speak for themselves.")
+			return fmt.Sprintf("Hello, I'm %s, %s. Let's move at a good clip and get straight into it.", p.name, p.role)
 		}
+		return fmt.Sprintf("Hello, I'm %s, %s. I'll keep this professional and let your answers speak for themselves.", p.name, p.role)
 	}
-	return b.String()
 }
 
 // NormalizeVoiceID / NormalizeFaceID / NormalizePersonalityID coerce a

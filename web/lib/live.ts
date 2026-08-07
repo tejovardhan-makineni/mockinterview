@@ -200,7 +200,16 @@ export class LiveSession {
       }
       case "interrupted": this.cancelSpeech(); break;
       case "turn_complete": if (this.candidateIdle) { clearTimeout(this.candidateIdle); this.candidateIdle = undefined; } break;
-      case "ended": this.emit("ended"); break;
+      case "ended": {
+        // The interviewer's closing line is streamed as audio scheduled INTO THE
+        // FUTURE (node.start(playHead)); "ended" arrives right after. If we tore
+        // down immediately the audioCtx would close before that farewell plays —
+        // the caption showed but the voice was cut off. Wait for the queued audio
+        // to drain (plus a small tail) before signalling end.
+        const drainMs = this.audioCtx ? Math.max(0, (this.playHead - this.audioCtx.currentTime) * 1000) : 0;
+        window.setTimeout(() => this.emit("ended"), drainMs + 400);
+        break;
+      }
     }
   }
 
