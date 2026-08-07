@@ -14,4 +14,6 @@ import { registerGltf } from "./kit";
 // (unlike random re-exports), so framing is consistent. Bundled Sophia stays as
 // the always-available default; the CDN ones are additional options.
 
-registerGltf("sophia", "/avatars/rpm-female.glb");
+registerGltf("sophia", "/avatars/rpm-female.glb");   // young woman (full viseme rig)
+registerGltf("marcus", "/avatars/marcus.glb");       // man, brown hair + red beard (full viseme rig)
+registerGltf("richard", "/avatars/richard.glb");     // older man, bald + gray beard (ARKit-only rig)

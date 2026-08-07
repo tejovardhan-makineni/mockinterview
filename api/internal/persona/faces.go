@@ -16,6 +16,8 @@ type Face struct {
 var Faces = []Face{
 	// Realistic glTF interviewers (rendered by GltfAvatar with viseme lip-sync).
 	{ID: "sophia", Label: "Sophia", Kind: "realistic", Gltf: "/avatars/rpm-female.glb"},
+	{ID: "marcus", Label: "Marcus", Kind: "realistic", Gltf: "/avatars/marcus.glb"},
+	{ID: "richard", Label: "Richard", Kind: "realistic", Gltf: "/avatars/richard.glb"},
 }
 
 // FaceByID returns the catalog entry and whether it was found.

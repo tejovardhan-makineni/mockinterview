@@ -132,13 +132,23 @@ function GltfAvatarImpl({ url, drive, onError }: { url: string; drive: MutableRe
         const level = speaking ? Math.min(1, d.level ?? d.amplitude ?? 0) : 0;
         const hi = d.bright ?? 0.5; // 1 = front/sibilant (E/I/SS), 0 = back/round (O/U)
         const open = Math.min(0.6, level); // hard cap so it never yawns
-        ease("viseme_aa", open * (0.38 + 0.26 * (1 - hi)));
-        ease("viseme_E", open * hi * 0.5);
-        ease("viseme_I", open * hi * 0.3);
-        ease("viseme_O", open * (1 - hi) * 0.38);
-        ease("viseme_U", open * (1 - hi) * 0.24);
-        ease("viseme_SS", Math.min(1, hi * level * 2) * 0.2);
-        if (hasMorph("jawOpen")) ease("jawOpen", open * 0.1);
+        if (hasMorph("viseme_aa")) {
+          // Full Oculus-viseme rig: restrained, realistic mouth shapes; jaw barely moves.
+          ease("viseme_aa", open * (0.38 + 0.26 * (1 - hi)));
+          ease("viseme_E", open * hi * 0.5);
+          ease("viseme_I", open * hi * 0.3);
+          ease("viseme_O", open * (1 - hi) * 0.38);
+          ease("viseme_U", open * (1 - hi) * 0.24);
+          ease("viseme_SS", Math.min(1, hi * level * 2) * 0.2);
+          if (hasMorph("jawOpen")) ease("jawOpen", open * 0.1);
+        } else {
+          // ARKit-only rig (no visemes): the jaw + lip funnel/stretch carry the
+          // motion, or the avatar would look almost mute.
+          if (hasMorph("jawOpen")) ease("jawOpen", open * 0.42);
+          if (hasMorph("mouthFunnel")) ease("mouthFunnel", open * (1 - hi) * 0.4);
+          if (hasMorph("mouthPucker")) ease("mouthPucker", open * (1 - hi) * 0.22);
+          if (hasMorph("mouthStretchLeft")) { ease("mouthStretchLeft", open * hi * 0.3); ease("mouthStretchRight", open * hi * 0.3); }
+        }
         if (hasMorph("mouthClose")) ease("mouthClose", level < 0.03 ? 0.2 : 0);
 
         // ---- blink (ARKit eyeBlinkLeft/Right)

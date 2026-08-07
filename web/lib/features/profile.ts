@@ -84,6 +84,8 @@ export const MOCK_VOICES: Voice[] = [
 
 export const MOCK_FACES: Face[] = [
   { id: "sophia", label: "Sophia", gltf: "/avatars/rpm-female.glb" },
+  { id: "marcus", label: "Marcus", gltf: "/avatars/marcus.glb" },
+  { id: "richard", label: "Richard", gltf: "/avatars/richard.glb" },
 ];
 
 export const profileMock: ProfileSlice = {
