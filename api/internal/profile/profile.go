@@ -8,6 +8,8 @@ import (
 	"context"
 	"encoding/json"
 	"net/http"
+	"strconv"
+	"sync"
 
 	"github.com/tejo/mockinterview-api/internal/auth"
 	"github.com/tejo/mockinterview-api/internal/httpx"
@@ -31,26 +33,86 @@ type Service struct {
 	store     Repo
 	geminiKey string
 	ttsModel  string
+
+	// previewCache memoises synthesized WAVs keyed by the full delivery combo
+	// (voice+face+personality+intensity) so a given interviewer preview is sent
+	// to Gemini at most once per warm instance — repeat plays are instant. The
+	// combo space is small and bounded; we cap entries to keep memory flat.
+	mu           sync.Mutex
+	previewCache map[string][]byte
+	previewOrder []string
 }
+
+const previewCacheMax = 96
 
 func New(st Repo, geminiKey, ttsModel string) *Service {
-	return &Service{store: st, geminiKey: geminiKey, ttsModel: ttsModel}
+	return &Service{store: st, geminiKey: geminiKey, ttsModel: ttsModel, previewCache: map[string][]byte{}}
 }
 
-// PreviewVoice returns a short WAV sample of the actual Gemini voice so users
-// hear the real interviewer voice when choosing. Falls back (503) if TTS is off.
+func (s *Service) cachedPreview(key string) ([]byte, bool) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	w, ok := s.previewCache[key]
+	return w, ok
+}
+
+func (s *Service) storePreview(key string, wav []byte) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	if _, exists := s.previewCache[key]; !exists {
+		if len(s.previewOrder) >= previewCacheMax {
+			oldest := s.previewOrder[0]
+			s.previewOrder = s.previewOrder[1:]
+			delete(s.previewCache, oldest)
+		}
+		s.previewOrder = append(s.previewOrder, key)
+	}
+	s.previewCache[key] = wav
+}
+
+// PreviewVoice returns a short WAV of the actual Gemini interviewer speaking a
+// line whose WORDS and DELIVERY reflect the full config — voice (timbre), face
+// (the person), personality (temperament) and intensity (pressure). Results are
+// cached per-combo so previews are instant after the first synthesis. Falls back
+// (503) if TTS is off (no key).
 func (s *Service) PreviewVoice(w http.ResponseWriter, r *http.Request) {
-	id := r.URL.Query().Get("voice")
-	name := persona.GeminiVoiceName(id)
-	text := persona.SampleLine(id) // unique, personable line per voice
-	wav, err := tts.Synthesize(r.Context(), s.geminiKey, s.ttsModel, name, text)
+	q := r.URL.Query()
+	voice := persona.NormalizeVoiceID(q.Get("voice"))
+	face := persona.NormalizeFaceID(q.Get("face"))
+	personality := persona.NormalizePersonalityID(q.Get("personality"))
+	intensity := clampIntensity(q.Get("intensity"))
+
+	key := voice + "|" + face + "|" + personality + "|" + strconv.Itoa(intensity)
+	if wav, ok := s.cachedPreview(key); ok {
+		writeWAV(w, wav)
+		return
+	}
+
+	d := persona.PreviewDelivery(voice, face, personality, intensity)
+	wav, err := tts.Synthesize(r.Context(), s.geminiKey, s.ttsModel, persona.GeminiVoiceName(voice), d.TTSPrompt())
 	if err != nil {
 		httpx.WriteProblem(w, http.StatusServiceUnavailable, "voice preview unavailable")
 		return
 	}
+	s.storePreview(key, wav)
+	writeWAV(w, wav)
+}
+
+func writeWAV(w http.ResponseWriter, wav []byte) {
 	w.Header().Set("Content-Type", "audio/wav")
 	w.Header().Set("Cache-Control", "public, max-age=86400")
 	_, _ = w.Write(wav)
+}
+
+func clampIntensity(s string) int {
+	n, err := strconv.Atoi(s)
+	if err != nil || n < 1 {
+		return 3
+	}
+	if n > 5 {
+		return 5
+	}
+	return n
 }
 
 func (s *Service) ListVoices(w http.ResponseWriter, _ *http.Request) {

@@ -6,7 +6,7 @@ import { api } from "@/lib/api";
 import type { Face, InterviewConfig, Personality, Resume, Voice } from "@/lib/types";
 import { Badge, Button, Field, Panel } from "@/components/ui";
 import { Avatar3D, type AvatarDrive } from "@/components/studio/Avatar3D";
-import { previewVoiceSample, stopPreview } from "@/lib/voicePreview";
+import { previewVoiceSample, stopPreview, prefetchPreview } from "@/lib/voicePreview";
 import { IconPlay, IconStop } from "@/components/icons";
 
 const PERSONAS: { id: Personality; label: string; desc: string }[] = [
@@ -24,7 +24,7 @@ function SetupInner() {
   const [resume, setResume] = useState<Resume | null>(null);
   const [voices, setVoices] = useState<Voice[]>([]);
   const [faces, setFaces] = useState<Face[]>([]);
-  const [cfg, setCfg] = useState<InterviewConfig>({ voice_id: "aoede", face_id: "ava", personality: "neutral", intensity: 3 });
+  const [cfg, setCfg] = useState<InterviewConfig>({ voice_id: "aoede", face_id: "sophia", personality: "neutral", intensity: 3 });
   const [uploading, setUploading] = useState(false);
   const [starting, setStarting] = useState(false);
   const [startErr, setStartErr] = useState("");
@@ -32,10 +32,11 @@ function SetupInner() {
   const fileRef = useRef<HTMLInputElement>(null);
   const pv = useRef<AvatarDrive>({ speaking: false, amplitude: 0, mood: "neutral" });
   const [previewing, setPreviewing] = useState(false);
-  const toggleVoice = (voiceId: string) => {
+  const previewReq = { voiceId: cfg.voice_id, faceId: cfg.face_id, personality: cfg.personality, intensity: cfg.intensity };
+  const toggleVoice = () => {
     if (previewing) { stopPreview(pv); setPreviewing(false); return; }
     setPreviewing(true);
-    void previewVoiceSample(voiceId, pv, () => setPreviewing(false), voices.find((v) => v.id === voiceId)?.sample);
+    void previewVoiceSample(previewReq, pv, () => setPreviewing(false));
   };
 
   useEffect(() => {
@@ -46,6 +47,14 @@ function SetupInner() {
       setResume(r); setVoices(v); setFaces(f); setCfg(c);
     })();
   }, [router]);
+
+  // Warm the preview clip when the combo changes so playback is instant.
+  useEffect(() => {
+    if (!voices.length) return;
+    const t = setTimeout(() => { void prefetchPreview(previewReq); }, 350);
+    return () => clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [cfg.voice_id, cfg.face_id, cfg.personality, cfg.intensity, voices.length]);
 
   async function onFile(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
@@ -114,7 +123,7 @@ function SetupInner() {
           <div className="text-sm">
             <div className="font-semibold">{faces.find((f) => f.id === cfg.face_id)?.label ?? cfg.face_id}</div>
             <div className="text-[var(--color-muted)]">Voice: {voices.find((v) => v.id === cfg.voice_id)?.label ?? cfg.voice_id} · {cfg.personality}, intensity {cfg.intensity}/5</div>
-            <button onClick={() => toggleVoice(cfg.voice_id)} className="mt-1 inline-flex items-center gap-1.5 rounded-md border border-[var(--color-line)] px-2 py-1 text-xs font-medium text-[var(--color-accent)] transition hover:bg-[var(--color-panel)]">
+            <button onClick={() => toggleVoice()} className="mt-1 inline-flex items-center gap-1.5 rounded-md border border-[var(--color-line)] px-2 py-1 text-xs font-medium text-[var(--color-accent)] transition hover:bg-[var(--color-panel)]">
               {previewing ? <IconStop className="h-3.5 w-3.5" /> : <IconPlay className="h-3.5 w-3.5" />}
               {previewing ? "Stop" : "Hear this interviewer"}
             </button>

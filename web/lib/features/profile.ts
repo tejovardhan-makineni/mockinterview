@@ -39,12 +39,22 @@ export interface Face {
   thumb?: string;
 }
 
+// PreviewReq is the full interviewer combo whose delivery (words + tone + pace)
+// the voice preview reflects. Face = the person, voice = the timbre, personality
+// = temperament, intensity = pressure.
+export interface PreviewReq {
+  voiceId: string;
+  faceId: string;
+  personality: string;
+  intensity: number;
+}
+
 export interface ProfileSlice {
   getConfig(): Promise<InterviewConfig>;
   saveConfig(cfg: InterviewConfig): Promise<InterviewConfig>;
   listVoices(): Promise<Voice[]>;
   listFaces(): Promise<Face[]>;
-  voicePreview(voiceId: string): Promise<Blob | null>;
+  voicePreview(req: PreviewReq): Promise<Blob | null>;
   getProfile(): Promise<Profile>;
   saveProfile(p: Profile): Promise<Profile>;
   deleteAccount(): Promise<void>;
@@ -57,9 +67,12 @@ export const profileHttp: ProfileSlice = {
   saveConfig(cfg) { return req<InterviewConfig>("/api/v1/config", { method: "PUT", body: JSON.stringify(cfg) }); },
   listVoices() { return req<Voice[]>("/api/v1/voices"); },
   listFaces() { return req<Face[]>("/api/v1/faces"); },
-  async voicePreview(voiceId) {
+  async voicePreview(req) {
     try {
-      const res = await fetch(`${BASE}/api/v1/voices/preview?voice=${encodeURIComponent(voiceId)}`, { headers: authHeader() });
+      const qs = new URLSearchParams({
+        voice: req.voiceId, face: req.faceId, personality: req.personality, intensity: String(req.intensity),
+      }).toString();
+      const res = await fetch(`${BASE}/api/v1/voices/preview?${qs}`, { headers: authHeader() });
       if (!res.ok) return null;
       return await res.blob();
     } catch { return null; }
@@ -97,7 +110,7 @@ export const profileMock: ProfileSlice = {
   async saveConfig(cfg) { window.localStorage.setItem(CFG_KEY, JSON.stringify(cfg)); return cfg; },
   async listVoices() { return MOCK_VOICES; },
   async listFaces() { return MOCK_FACES; },
-  async voicePreview() { return null; },
+  async voicePreview() { return null; }, // mock has no real TTS; UI falls back to browser speech
   async getProfile() {
     if (typeof window === "undefined") return {};
     const raw = window.localStorage.getItem(PROFILE_KEY);

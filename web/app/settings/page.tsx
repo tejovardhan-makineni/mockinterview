@@ -7,7 +7,7 @@ import type { Face, InterviewConfig, Personality, Profile, Voice } from "@/lib/t
 import { Badge, Button, Field, Input, Panel } from "@/components/ui";
 import { AppShell } from "@/components/AppShell";
 import { Avatar3D, type AvatarDrive } from "@/components/studio/Avatar3D";
-import { previewVoiceSample, stopPreview } from "@/lib/voicePreview";
+import { previewVoiceSample, stopPreview, prefetchPreview } from "@/lib/voicePreview";
 import { IconPlay, IconStop } from "@/components/icons";
 
 const DOMAINS = [
@@ -21,17 +21,18 @@ const pretty = (s: string) => s.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toU
 export default function SettingsPage() {
   const router = useRouter();
   const [profile, setProfile] = useState<Profile>({});
-  const [cfg, setCfg] = useState<InterviewConfig>({ voice_id: "aoede", face_id: "ava", personality: "neutral", intensity: 3 });
+  const [cfg, setCfg] = useState<InterviewConfig>({ voice_id: "aoede", face_id: "sophia", personality: "neutral", intensity: 3 });
   const [voices, setVoices] = useState<Voice[]>([]);
   const [faces, setFaces] = useState<Face[]>([]);
   const [saved, setSaved] = useState("");
   const [confirmDelete, setConfirmDelete] = useState(false);
   const pv = useRef<AvatarDrive>({ speaking: false, amplitude: 0, mood: "neutral" });
   const [previewing, setPreviewing] = useState(false);
-  const previewVoice = (voiceId = cfg.voice_id) => {
+  const previewReq = { voiceId: cfg.voice_id, faceId: cfg.face_id, personality: cfg.personality, intensity: cfg.intensity };
+  const previewVoice = () => {
     if (previewing) { stopPreview(pv); setPreviewing(false); return; }
     setPreviewing(true);
-    void previewVoiceSample(voiceId, pv, () => setPreviewing(false), voices.find((v) => v.id === voiceId)?.sample);
+    void previewVoiceSample(previewReq, pv, () => setPreviewing(false));
   };
 
   useEffect(() => {
@@ -42,6 +43,15 @@ export default function SettingsPage() {
       setProfile(p || {}); setCfg(c); setVoices(v); setFaces(f);
     })();
   }, [router]);
+
+  // Warm the preview clip whenever the combo changes so "Hear this voice & face"
+  // plays instantly. Debounced so dragging the intensity slider fires one fetch.
+  useEffect(() => {
+    if (!voices.length) return; // wait until config is loaded
+    const t = setTimeout(() => { void prefetchPreview(previewReq); }, 350);
+    return () => clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [cfg.voice_id, cfg.face_id, cfg.personality, cfg.intensity, voices.length]);
 
   async function saveProfile() { await api.saveProfile(profile); flash("Profile saved"); }
   async function saveCfg() { await api.saveConfig(cfg); flash("Interviewer saved"); }
