@@ -76,12 +76,17 @@ function GltfAvatarImpl({ url, drive, onError }: { url: string; drive: MutableRe
         });
         scene.add(root);
 
-        // Frame a head-and-shoulders portrait from the model's bounding box.
+        // Frame a head-and-shoulders portrait RELATIVE to the head, so avatars
+        // with different proportions/heights (full-body vs half-body RPM models)
+        // all get the same clean crop instead of a too-tight face.
         const box = new THREE.Box3().setFromObject(root);
-        const topY = box.max.y;                 // crown of the head
-        const headY = topY - 0.18;              // eye/face height
-        camera.position.set(0, headY, 0.62);
-        camera.lookAt(0, headY - 0.02, 0);
+        const headTop = box.max.y;              // crown of the head
+        const focusY = headTop - 0.22;          // ~nose height
+        const frameHalf = 0.3;                  // half the vertical window (~0.6 units)
+        const fovRad = (camera.fov * Math.PI) / 180;
+        const dist = frameHalf / Math.tan(fovRad / 2);
+        camera.position.set(0, focusY, dist);
+        camera.lookAt(0, focusY, 0);
         resize();
 
         el.appendChild(renderer.domElement); // ensure attached
