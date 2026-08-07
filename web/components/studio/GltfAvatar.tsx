@@ -35,7 +35,10 @@ function GltfAvatarImpl({ url, drive, onError }: { url: string; drive: MutableRe
 
     const resize = () => {
       const w = el.clientWidth, h = el.clientHeight;
-      renderer.setSize(w, h, false);
+      // updateStyle MUST stay on (default): with setPixelRatio(2) the drawing
+      // buffer is 2×, so the canvas CSS size has to be set back to w×h or it
+      // displays at buffer size and gets clipped to the top-left quadrant.
+      renderer.setSize(w, h);
       camera.aspect = w / h; camera.updateProjectionMatrix();
     };
     const ro = new ResizeObserver(resize);
