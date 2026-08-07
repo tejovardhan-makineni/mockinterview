@@ -74,16 +74,18 @@ export const IconClock = (p: IconProps) => (
 
 // ---- Brand ----
 // A clean single lowercase "m" in a rounded badge — the mockinterview.live mark.
-// The "m" is a geometric stroked path (two even semicircular shoulders + three
-// legs) rather than a font glyph, so it is ALWAYS perfectly centred in the tile
-// regardless of whether the webfont has loaded or the platform's baseline
-// metrics. app/icon.svg mirrors this exact path so the browser-tab favicon matches.
+// A simple, unmistakable lowercase "m" glyph, centred in the tile. Positioned by
+// an explicit alphabetic baseline (y=21.5) + text-anchor=middle rather than
+// dominant-baseline (whose vertical centring drifts between renderers), and a
+// system-sans stack so it renders identically without the webfont. app/icon.svg
+// mirrors this exactly so the browser-tab favicon matches the header logo.
 export const LogoM = ({ className }: { className?: string }) => (
   <svg viewBox="0 0 32 32" width="1em" height="1em" className={className} aria-hidden="true">
     <rect x="1" y="1" width="30" height="30" rx="8" fill="var(--color-accent)" />
-    <path
-      d="M10 21.5 L10 13.5 A3 3 0 0 0 16 13.5 A3 3 0 0 0 22 13.5 L22 21.5 M16 13.5 L16 21.5"
-      fill="none" stroke="var(--color-studio)" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round"
-    />
+    <text
+      x="16" y="21.5" textAnchor="middle"
+      fontFamily="ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif"
+      fontWeight="800" fontSize="19" fill="var(--color-studio)"
+    >m</text>
   </svg>
 );
