@@ -14,7 +14,8 @@ import { Button } from "@/components/ui";
 
 function StudioInner() {
   const router = useRouter();
-  const sid = useSearchParams().get("s") || "";
+  const params = useSearchParams();
+  const sid = params.get("s") || "";
   const [session, setSession] = useState<Session | null>(null);
   const [captions, setCaptions] = useState<Caption[]>([]);
   const avatar = useRef<AvatarDrive>({ speaking: false, amplitude: 0, mood: "neutral" });
@@ -94,7 +95,10 @@ function StudioInner() {
         .on("ended", () => { void end(); });
 
       // Timed interview: the interviewer knows the clock and wraps up on its own.
-      const minutes = pickMinutes(s.modality);
+      // Duration: the user's chosen minutes (from the setup slider) if valid,
+      // else a modality default.
+      const chosen = parseInt(params.get("minutes") ?? "", 10);
+      const minutes = chosen >= 5 && chosen <= 60 ? chosen : pickMinutes(s.modality);
       const endAt = Date.now() + minutes * 60000;
       setRemainingMs(minutes * 60000);
       let lastTimeSent = 0;

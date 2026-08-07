@@ -85,8 +85,30 @@ function ReportInner() {
       </div>
 
       <div className="mt-8 grid gap-4 lg:grid-cols-2">
-        <Panel className="flex items-center justify-center p-6">
-          <Radar data={assessed.map((s) => ({ label: pretty(s.dimension), value: s.score }))} />
+        <Panel className="flex flex-col items-center justify-center p-6">
+          {(() => {
+            // Prefer assessed dims; if too few, fall back to ALL rubric dims
+            // (uncovered ones plotted at 0) so the radar is never blank/confusing.
+            const source = assessed.length >= 3 ? assessed : rep.scores;
+            const data = source.map((s) => ({ label: pretty(s.dimension), value: s.assessed === false ? 0 : s.score }));
+            if (data.length >= 3) {
+              return (
+                <>
+                  <Radar data={data} />
+                  {assessed.length < 3 && (
+                    <p className="mt-2 text-center text-xs text-[var(--color-faint)]">Limited data — dimensions you didn&apos;t cover are shown at 0.</p>
+                  )}
+                </>
+              );
+            }
+            return (
+              <div className="py-8 text-center">
+                <div className="mx-auto mb-3 grid h-16 w-16 place-items-center rounded-full border-2 border-dashed border-[var(--color-line)] text-2xl text-[var(--color-faint)]">📊</div>
+                <p className="text-sm text-[var(--color-muted)]">Not enough of the interview was completed to plot a skill radar.</p>
+                <p className="mt-1 text-xs text-[var(--color-faint)]">Finish a fuller attempt to see your dimension breakdown.</p>
+              </div>
+            );
+          })()}
         </Panel>
         <div className="grid gap-4">
           <Panel className="p-5">

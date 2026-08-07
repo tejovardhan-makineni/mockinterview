@@ -7,7 +7,7 @@ import type { SessionHistoryItem } from "@/lib/types";
 import { Badge, Button, Panel } from "@/components/ui";
 import { AppShell } from "@/components/AppShell";
 import { Radar } from "@/components/Radar";
-import { Achievements } from "@/components/Achievements";
+import { Achievements, StreakPill } from "@/components/Achievements";
 import { computeAchievements, type QuestionMeta } from "@/lib/features/achievements";
 
 const MOD_LABEL: Record<string, string> = { system_design: "Whiteboard", coding: "Coding", written: "Written", conversational: "Spoken" };
@@ -53,8 +53,13 @@ export default function DashboardPage() {
 
   return (
     <AppShell active="dashboard">
-      <h1 className="text-3xl font-extrabold tracking-tight">Dashboard</h1>
-      <p className="mt-1 text-[var(--color-muted)]">Your progress across interviews — scores, strengths, and where to focus.</p>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <h1 className="text-3xl font-extrabold tracking-tight">Dashboard</h1>
+          <p className="mt-1 text-[var(--color-muted)]">Your progress across interviews — scores, strengths, and where to focus.</p>
+        </div>
+        {!loading && items.length > 0 && <StreakPill streak={achievements.streak} />}
+      </div>
 
       {loading ? (
         <p className="mt-10 text-[var(--color-muted)]">Loading…</p>
@@ -73,8 +78,8 @@ export default function DashboardPage() {
             <Stat label="Best score" value={scored.length ? `${best.toFixed(1)}/4` : "—"} tone={scored.length ? tone(best) : undefined} />
           </div>
 
-          {/* Gamification — streak + achievement badges */}
-          <Achievements streak={achievements.streak} badges={achievements.badges} earnedCount={achievements.earnedCount} />
+          {/* Gamification — achievement badges (streak is in the header) */}
+          <Achievements badges={achievements.badges} earnedCount={achievements.earnedCount} />
 
           <div className="mt-4 grid gap-4 lg:grid-cols-[1.3fr_1fr]">
             {/* Recent sessions */}
@@ -105,8 +110,8 @@ export default function DashboardPage() {
               <h2 className="mb-2 font-semibold">Skill radar</h2>
               {byMod.length >= 3
                 ? (
-                  <div className="flex min-h-[240px] flex-1 items-center justify-center">
-                    <Radar data={byMod.map((m) => ({ label: MOD_LABEL[m.modality] ?? m.modality, value: m.avg }))} size={280} fill />
+                  <div className="flex flex-1 items-center justify-center">
+                    <Radar data={byMod.map((m) => ({ label: MOD_LABEL[m.modality] ?? m.modality, value: m.avg }))} size={190} />
                   </div>
                 )
                 : <p className="flex flex-1 items-center justify-center py-10 text-center text-sm text-[var(--color-faint)]">Complete interviews in 3+ formats to see your skill radar.</p>}

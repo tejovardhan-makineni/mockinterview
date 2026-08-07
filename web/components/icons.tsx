@@ -73,20 +73,14 @@ export const IconClock = (p: IconProps) => (
 );
 
 // ---- Brand ----
-// The "m" monogram — matches the mockinterview.live wordmark.
+// A clean single lowercase "m" in a rounded badge — the mockinterview.live mark.
 export const LogoM = ({ className }: { className?: string }) => (
   <svg viewBox="0 0 32 32" width="1em" height="1em" className={className} aria-hidden="true">
-    <defs>
-      <linearGradient id="mi-logo-grad" x1="0" y1="0" x2="1" y2="1">
-        <stop offset="0" stopColor="var(--color-accent)" />
-        <stop offset="1" stopColor="var(--color-accent-2)" />
-      </linearGradient>
-    </defs>
-    <rect x="1" y="1" width="30" height="30" rx="8" fill="url(#mi-logo-grad)" />
-    <path
-      d="M8 22V11.5c0-.5.6-.8 1-.4l3 3 3-3c.4-.4 1-.1 1 .4V22M16 11.1c0-.5.6-.8 1-.4l3 3 3-3c.4-.4 1-.1 1 .4V22"
-      transform="translate(-1.5 0)"
-      fill="none" stroke="var(--color-studio)" strokeWidth={2.4} strokeLinecap="round" strokeLinejoin="round"
-    />
+    <rect x="1" y="1" width="30" height="30" rx="8" fill="var(--color-accent)" />
+    <text
+      x="16" y="17" textAnchor="middle" dominantBaseline="central"
+      fontFamily="'Hanken Grotesk', ui-sans-serif, sans-serif" fontWeight="800" fontSize="19"
+      fill="var(--color-studio)"
+    >m</text>
   </svg>
 );

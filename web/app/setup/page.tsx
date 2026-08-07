@@ -28,6 +28,7 @@ function SetupInner() {
   const [uploading, setUploading] = useState(false);
   const [starting, setStarting] = useState(false);
   const [startErr, setStartErr] = useState("");
+  const [minutes, setMinutes] = useState(30); // interview length, user-chosen
   const fileRef = useRef<HTMLInputElement>(null);
   const pv = useRef<AvatarDrive>({ speaking: false, amplitude: 0, mood: "neutral" });
   const [previewing, setPreviewing] = useState(false);
@@ -60,7 +61,7 @@ function SetupInner() {
     try {
       await api.saveConfig(cfg);
       const s = await api.createSession(questionId, cfg);
-      router.push(`/interview?s=${s.id}`);
+      router.push(`/interview?s=${s.id}&minutes=${minutes}`);
     } catch (e) {
       setStartErr(e instanceof Error ? e.message : "Could not start the interview.");
       setStarting(false);
@@ -155,11 +156,16 @@ function SetupInner() {
           </div>
         </Field>
 
-        <div className="mt-5">
+        <div className="mt-5 grid gap-5 sm:grid-cols-2">
           <Field label={`Intensity — ${cfg.intensity}/5`}>
             <input type="range" min={1} max={5} value={cfg.intensity}
               onChange={(e) => setCfg({ ...cfg, intensity: Number(e.target.value) })}
               className="w-full accent-[var(--color-accent)]" />
+          </Field>
+          <Field label={`Interview length — ${minutes} min`}>
+            <input type="range" min={10} max={60} step={5} value={minutes}
+              onChange={(e) => setMinutes(Number(e.target.value))}
+              className="w-full accent-[var(--color-accent)]" aria-label="Interview length in minutes" />
           </Field>
         </div>
       </Panel>

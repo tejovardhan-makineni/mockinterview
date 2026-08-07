@@ -12,6 +12,8 @@ import { AppShell } from "@/components/AppShell";
 const DIFF_TONE = { junior: "good", entry: "good", mid: "accent", senior: "warn", staff: "bad" } as const;
 const MODALITY_LABEL: Record<string, string> = { system_design: "🧩 Whiteboard", coding: "⌨️ Coding (doc)", written: "📝 Written", conversational: "🎙️ Spoken" };
 const pretty = (s: string) => s.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
+// Typical length per modality (users can change it on the start screen).
+const estMinutes = (m: string) => (m === "conversational" ? 18 : m === "written" ? 22 : 30);
 
 const FILTER_KEY = "mi_catalog_filters";
 
@@ -146,6 +148,7 @@ export default function InterviewsPage() {
               <div className="mt-2 flex flex-wrap gap-1.5">
                 <span className="rounded-md bg-[var(--color-panel-2)] px-2 py-0.5 text-xs text-[var(--color-ink)]">{MODALITY_LABEL[q.modality] ?? q.modality}</span>
                 <span className="rounded-md border border-[var(--color-line)] px-2 py-0.5 text-xs text-[var(--color-muted)]">{pretty(q.domain)}</span>
+                <span className="rounded-md border border-[var(--color-line)] px-2 py-0.5 text-xs text-[var(--color-faint)]">⏱ ~{estMinutes(q.modality)} min</span>
               </div>
               <p className="mt-2 flex-1 text-sm text-[var(--color-muted)]">{q.blurb}</p>
               <Button href={`/setup?q=${q.id}`} className="mt-4 self-start">Start →</Button>

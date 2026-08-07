@@ -17,6 +17,8 @@ type Face struct {
 var Faces = []Face{
 	// Realistic glTF interviewers (rendered by GltfAvatar with viseme lip-sync).
 	{ID: "sophia", Label: "Sophia", Kind: "realistic", Gltf: "/avatars/rpm-female.glb"},
+	{ID: "marcus", Label: "Marcus", Kind: "realistic", Gltf: "/avatars/rpm-d.glb"},
+	{ID: "diana", Label: "Diana", Kind: "realistic", Gltf: "/avatars/rpm-e.glb"},
 	// Fun themed characters (deliberately stylized novelty, not realism).
 	{ID: "pumpkin", Label: "Pumpkin Professor", Kind: "fun"},
 	{ID: "robot", Label: "Interviewer-9000 (Robot)", Kind: "fun"},
