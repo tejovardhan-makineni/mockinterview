@@ -88,7 +88,17 @@ function StudioInner() {
         .on("viseme", (v) => { avatar.current.level = v.level; avatar.current.bright = v.bright; })
         .on("mode", (m) => { setMode(m); setStatus(m === "voice" ? "live voice" : m === "text" ? "voice (browser)" : "demo mode"); })
         .on("status", setStatus)
-        .on("connection", setConn)
+        .on("connection", (s) => {
+          setConn(s);
+          // On a real drop, warn the candidate (in red) that their last words may
+          // not have been captured — don't leave them guessing why it went quiet.
+          if (s === "reconnecting" || s === "failed") {
+            setCaptions((prev) => {
+              if (prev[prev.length - 1]?.role === "system") return prev; // no spam
+              return [...prev.slice(-60), { role: "system", text: "⚠ Connection issue — reconnecting. Anything you just said may not have been captured; please repeat it when the interviewer is back." }];
+            });
+          }
+        })
         .on("filler", () => { tracker.current?.addEvent("filler"); avatar.current.mood = "curious"; })
         .on("pause", () => { tracker.current?.addEvent("long_pause"); })
         .on("help", () => { tracker.current?.addEvent("help_request"); })
@@ -196,10 +206,16 @@ function StudioInner() {
           <div ref={transcriptRef} className="mi-panel mt-3 max-h-[40vh] flex-1 overflow-y-auto rounded-xl border border-[var(--color-line)] bg-[var(--color-panel)] p-3 text-sm lg:max-h-[52vh]">
             {captions.length === 0 && <p className="text-[var(--color-faint)]">The interviewer will begin shortly…</p>}
             {captions.map((c, i) => (
-              <p key={i} className={`mb-2 ${c.role === "interviewer" ? "text-[var(--color-ink)]" : "text-[var(--color-muted)]"}`}>
-                <span className="text-xs font-semibold text-[var(--color-faint)]">{c.role === "interviewer" ? "Interviewer" : "You"}: </span>
-                {c.text}
-              </p>
+              c.role === "system" ? (
+                <p key={i} className="mb-2 rounded-md border border-[var(--color-bad)] bg-[color-mix(in_srgb,var(--color-bad)_12%,transparent)] px-2 py-1 text-xs font-medium text-[var(--color-bad)]">
+                  {c.text}
+                </p>
+              ) : (
+                <p key={i} className={`mb-2 ${c.role === "interviewer" ? "text-[var(--color-ink)]" : "text-[var(--color-muted)]"}`}>
+                  <span className="text-xs font-semibold text-[var(--color-faint)]">{c.role === "interviewer" ? "Interviewer" : "You"}: </span>
+                  {c.text}
+                </p>
+              )
             ))}
           </div>
           {/* typed answer fallback (if mic unavailable) */}

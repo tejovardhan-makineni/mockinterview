@@ -327,9 +327,10 @@ func (r *Relay) runGemini(conn *websocket.Conn, sessionID string, q corpus.Quest
 			Turns:        []*genai.Content{genai.NewContentFromText(b.String(), genai.RoleUser)},
 			TurnComplete: genai.Ptr(false),
 		})
-		// Now prompt one continuing turn.
+		// Now prompt one continuing turn — acknowledge the network blip and ask
+		// the candidate to repeat, since their last words may have been lost.
 		_ = session.SendClientContent(genai.LiveClientContentInput{
-			Turns:        []*genai.Content{genai.NewContentFromText("(Reconnected.) Continue the interview naturally from the last exchange above — pick up exactly where you left off. No greeting, no restart.", genai.RoleUser)},
+			Turns:        []*genai.Content{genai.NewContentFromText("(You just reconnected after a brief NETWORK ISSUE — the candidate's last words may have been cut off and not captured.) In ONE short, natural line, acknowledge the hiccup and ask them to repeat their last point — e.g. \"Sorry, I think we had a brief connection issue there — could you repeat that last part?\" Then continue from where you left off. Do NOT greet, do NOT restart, do NOT re-introduce yourself.", genai.RoleUser)},
 			TurnComplete: genai.Ptr(true),
 		})
 	}

@@ -9,4 +9,16 @@
 // "ARKit,Oculus Visemes"), drop the .glb in public/avatars, and registerGltf().
 import { registerGltf } from "./kit";
 
+// Ready Player Me CDN avatars, requested WITH the viseme + ARKit rig so
+// GltfAvatar can lip-sync/blink them. These load correctly-centered/scaled
+// (unlike random re-exports), so framing is consistent. Bundled Sophia stays as
+// the always-available default; the CDN ones are additional options.
+const rpm = (id: string) => `https://models.readyplayer.me/${id}.glb?morphTargets=ARKit,Oculus%20Visemes&textureAtlas=1024`;
+
 registerGltf("sophia", "/avatars/rpm-female.glb");
+registerGltf("cand1", rpm("68e7de6f3448aa53bed9b8a1"));
+registerGltf("cand2", rpm("68eba1d1715955684cd37e23"));
+registerGltf("cand3", rpm("68eba3d4f7af368e4e3a7ae3"));
+registerGltf("cand4", rpm("68eba4c70823a207ba1e82f0"));
+registerGltf("cand5", rpm("641abfe8398f7e86e69897bb"));
+registerGltf("cand6", rpm("641ac17c04207164c855f2d5"));

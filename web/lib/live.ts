@@ -10,7 +10,7 @@
 
 import { api, IS_MOCK } from "./api";
 
-export type Caption = { role: "interviewer" | "candidate"; text: string; streaming?: boolean };
+export type Caption = { role: "interviewer" | "candidate" | "system"; text: string; streaming?: boolean };
 
 // Connection lifecycle the studio surfaces to the candidate. "reconnecting"
 // means we dropped and are auto-retrying; "failed" means auto-retry gave up and
