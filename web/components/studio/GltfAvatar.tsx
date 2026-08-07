@@ -77,23 +77,15 @@ function GltfAvatarImpl({ url, drive, onError }: { url: string; drive: MutableRe
         });
         scene.add(root);
 
-        // NORMALIZE every model to a standard ~1.7m height with feet at y=0, so a
-        // single fixed camera frames any avatar (whatever its source scale) as a
-        // clean head-and-shoulders portrait. RPM avatars are already centered on
-        // X, so we do NOT recenter horizontally — doing so (by bounding-box center)
-        // would drift with asymmetric hair/pose and push the head off to the side.
+        // The framing that renders Sophia cleanly: crown-relative, close portrait.
+        // (Kept simple/known-good; RPM avatars are centered on X natively.)
         root.updateMatrixWorld(true);
         const box = new THREE.Box3().setFromObject(root);
-        const size = box.getSize(new THREE.Vector3());
-        root.scale.setScalar(1.7 / Math.max(0.3, size.y));
-        root.updateMatrixWorld(true);
-        const b2 = new THREE.Box3().setFromObject(root);
-        root.position.y -= b2.min.y;                // feet on the ground plane
-        root.updateMatrixWorld(true);
+        const headY = box.max.y - 0.18;
         baseY = root.position.y;
-        camera.fov = 24;
-        camera.position.set(0, 1.58, 0.85);         // head-and-shoulders of a 1.7m avatar
-        camera.lookAt(0, 1.5, 0);
+        camera.fov = 22;
+        camera.position.set(0, headY, 0.62);
+        camera.lookAt(0, headY - 0.02, 0);
         camera.updateProjectionMatrix();
         resize();
 
