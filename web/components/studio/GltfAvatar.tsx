@@ -77,15 +77,33 @@ function GltfAvatarImpl({ url, drive, onError }: { url: string; drive: MutableRe
         });
         scene.add(root);
 
-        // The framing that renders Sophia cleanly: crown-relative, close portrait.
-        // (Kept simple/known-good; RPM avatars are centered on X natively.)
+        // FIT THE CAMERA TO THE HEAD's actual bounding box (from the head/eye/teeth
+        // meshes), not the whole model — this centers on the head at whatever
+        // position/scale the source avatar happens to use, so every avatar frames
+        // as a clean, centered head-and-shoulders portrait.
         root.updateMatrixWorld(true);
-        const box = new THREE.Box3().setFromObject(root);
-        const headY = box.max.y - 0.18;
         baseY = root.position.y;
-        camera.fov = 22;
-        camera.position.set(0, headY, 0.62);
-        camera.lookAt(0, headY - 0.02, 0);
+        const headBox = new THREE.Box3();
+        root.traverse((o) => {
+          const m = o as THREE.Mesh;
+          if (m.isMesh && /wolf3d_head|(^|_)head|teeth|eyeleft|eyeright/i.test(m.name) && !/lash|brow/i.test(m.name)) {
+            headBox.expandByObject(m);
+          }
+        });
+        let hc: THREE.Vector3, headH: number;
+        if (!headBox.isEmpty()) {
+          hc = headBox.getCenter(new THREE.Vector3());
+          headH = Math.max(0.15, headBox.getSize(new THREE.Vector3()).y);
+        } else {
+          const full = new THREE.Box3().setFromObject(root);
+          const s = full.getSize(new THREE.Vector3());
+          hc = new THREE.Vector3((full.min.x + full.max.x) / 2, full.max.y - s.y * 0.08, (full.min.z + full.max.z) / 2);
+          headH = 0.23;
+        }
+        const dist = headH * 2.7 + 0.15; // head + a little shoulders
+        camera.fov = 24;
+        camera.position.set(hc.x, hc.y - headH * 0.15, hc.z + dist);
+        camera.lookAt(hc.x, hc.y - headH * 0.3, hc.z);
         camera.updateProjectionMatrix();
         resize();
 
