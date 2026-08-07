@@ -8,6 +8,7 @@ import { matchScore } from "@/lib/features/catalog";
 import type { QuestionSummary } from "@/lib/features/catalog";
 import { Badge, Button, Panel } from "@/components/ui";
 import { AppShell } from "@/components/AppShell";
+import { useT } from "@/lib/i18n";
 
 const DIFF_TONE = { junior: "good", entry: "good", mid: "accent", senior: "warn", staff: "bad" } as const;
 const MODALITY_LABEL: Record<string, string> = { system_design: "🧩 Whiteboard", coding: "⌨️ Coding (doc)", written: "📝 Written", conversational: "🎙️ Spoken" };
@@ -18,6 +19,7 @@ const estMinutes = (m: string) => (m === "conversational" ? 18 : m === "written"
 const FILTER_KEY = "mi_catalog_filters";
 
 export default function InterviewsPage() {
+  const t = useT();
   const router = useRouter();
   const [questions, setQuestions] = useState<QuestionSummary[]>([]);
   const [loading, setLoading] = useState(true);
@@ -96,65 +98,65 @@ export default function InterviewsPage() {
     <AppShell active="interview">
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-extrabold tracking-tight">Interview Catalog</h1>
-          <p className="mt-1 text-[var(--color-muted)]">Pick an area and a domain — software, mechanical, electrical & civil engineering, plus clinical, legal, case, and more. {questions.length} interviews across {areas.length} areas.</p>
+          <h1 className="text-3xl font-extrabold tracking-tight">{t("Interview Catalog")}</h1>
+          <p className="mt-1 text-[var(--color-muted)]">{t("Pick an area and a domain — software, mechanical, electrical & civil engineering, plus clinical, legal, case, and more.")} {questions.length} {t("interviews across")} {areas.length} {t("areas.")}</p>
         </div>
-        {recommended && questions.some((q) => q.domain === recommended) && <Badge tone="accent">Recommended: {pretty(recommended)}</Badge>}
+        {recommended && questions.some((q) => q.domain === recommended) && <Badge tone="accent">{t("Recommended:")} {t(pretty(recommended))}</Badge>}
       </div>
 
       {/* Search + Area/Domain selects */}
       <div className="mt-6 flex flex-col gap-3">
         <input
           value={query} onChange={(e) => setQuery(e.target.value)}
-          placeholder="🔍 Search — e.g. 'rate limiting', 'kafka', 'ownership', 'chest pain'…"
+          placeholder={t("🔍 Search — e.g. 'rate limiting', 'kafka', 'ownership', 'chest pain'…")}
           className="w-full rounded-xl border border-[var(--color-line)] bg-[var(--color-panel)] px-4 py-3 text-sm outline-none focus:border-[var(--color-accent)]"
         />
         <div className="flex flex-wrap items-center gap-2">
           <label className="flex items-center gap-2 text-sm text-[var(--color-muted)]">
-            <span className="text-[var(--color-faint)]">Area</span>
+            <span className="text-[var(--color-faint)]">{t("Area")}</span>
             <span className="relative inline-flex items-center">
               <select value={area} onChange={(e) => onArea(e.target.value)} className={selectCls}>
-                <option value="all">All areas</option>
-                {areas.map((a) => <option key={a} value={a}>{pretty(a)}</option>)}
+                <option value="all">{t("All areas")}</option>
+                {areas.map((a) => <option key={a} value={a}>{t(pretty(a))}</option>)}
               </select>
               <Chevron />
             </span>
           </label>
           <label className="flex items-center gap-2 text-sm text-[var(--color-muted)]">
-            <span className="text-[var(--color-faint)]">Domain</span>
+            <span className="text-[var(--color-faint)]">{t("Domain")}</span>
             <span className="relative inline-flex items-center">
               <select value={domain} onChange={(e) => setDomain(e.target.value)} className={selectCls}>
-                <option value="all">All domains</option>
-                {domains.map((d) => <option key={d} value={d}>{pretty(d)}</option>)}
+                <option value="all">{t("All domains")}</option>
+                {domains.map((d) => <option key={d} value={d}>{t(pretty(d))}</option>)}
               </select>
               <Chevron />
             </span>
           </label>
-          {hasFilters && <button onClick={clear} className="text-sm text-[var(--color-accent)] hover:brightness-125">Clear filters</button>}
-          <span className="ml-auto text-xs text-[var(--color-faint)]">{filtered.length} shown</span>
+          {hasFilters && <button onClick={clear} className="text-sm text-[var(--color-accent)] hover:brightness-125">{t("Clear filters")}</button>}
+          <span className="ml-auto text-xs text-[var(--color-faint)]">{filtered.length} {t("shown")}</span>
         </div>
       </div>
 
       {loading ? (
-        <p className="mt-10 text-[var(--color-muted)]">Loading…</p>
+        <p className="mt-10 text-[var(--color-muted)]">{t("Loading…")}</p>
       ) : (
         <div className="mt-5 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           {filtered.map((q) => (
             <Panel key={q.id} className="flex h-full flex-col p-5">
               <div className="flex items-start justify-between gap-2">
-                <h3 className="text-base font-semibold leading-snug">{q.title}</h3>
-                <Badge tone={DIFF_TONE[q.difficulty] ?? "muted"}>{q.difficulty}</Badge>
+                <h3 className="text-base font-semibold leading-snug">{t(q.title)}</h3>
+                <Badge tone={DIFF_TONE[q.difficulty] ?? "muted"}>{t(q.difficulty)}</Badge>
               </div>
               <div className="mt-2 flex flex-wrap gap-1.5">
-                <span className="rounded-md bg-[var(--color-panel-2)] px-2 py-0.5 text-xs text-[var(--color-ink)]">{MODALITY_LABEL[q.modality] ?? q.modality}</span>
-                <span className="rounded-md border border-[var(--color-line)] px-2 py-0.5 text-xs text-[var(--color-muted)]">{pretty(q.domain)}</span>
-                <span className="rounded-md border border-[var(--color-line)] px-2 py-0.5 text-xs text-[var(--color-faint)]">⏱ ~{estMinutes(q.modality)} min</span>
+                <span className="rounded-md bg-[var(--color-panel-2)] px-2 py-0.5 text-xs text-[var(--color-ink)]">{t(MODALITY_LABEL[q.modality] ?? q.modality)}</span>
+                <span className="rounded-md border border-[var(--color-line)] px-2 py-0.5 text-xs text-[var(--color-muted)]">{t(pretty(q.domain))}</span>
+                <span className="rounded-md border border-[var(--color-line)] px-2 py-0.5 text-xs text-[var(--color-faint)]">⏱ ~{estMinutes(q.modality)} {t("min")}</span>
               </div>
-              <p className="mt-2 flex-1 text-sm text-[var(--color-muted)]">{q.blurb}</p>
-              <Button href={`/setup?q=${q.id}`} className="mt-4 self-start">Start →</Button>
+              <p className="mt-2 flex-1 text-sm text-[var(--color-muted)]">{t(q.blurb)}</p>
+              <Button href={`/setup?q=${q.id}`} className="mt-4 self-start">{t("Start →")}</Button>
             </Panel>
           ))}
-          {filtered.length === 0 && <Panel className="col-span-full p-10 text-center text-[var(--color-muted)]">No interviews match. <button onClick={clear} className="text-[var(--color-accent)]">Clear filters</button></Panel>}
+          {filtered.length === 0 && <Panel className="col-span-full p-10 text-center text-[var(--color-muted)]">{t("No interviews match.")} <button onClick={clear} className="text-[var(--color-accent)]">{t("Clear filters")}</button></Panel>}
         </div>
       )}
     </AppShell>

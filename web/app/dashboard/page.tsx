@@ -9,12 +9,14 @@ import { AppShell } from "@/components/AppShell";
 import { Radar } from "@/components/Radar";
 import { Achievements, StreakPill } from "@/components/Achievements";
 import { computeAchievements, type QuestionMeta } from "@/lib/features/achievements";
+import { useT } from "@/lib/i18n";
 
 const MOD_LABEL: Record<string, string> = { system_design: "Whiteboard", coding: "Coding", written: "Written", conversational: "Spoken" };
 const tone = (s: number) => (s >= 3 ? "good" : s >= 2 ? "warn" : "bad");
 const pretty = (s: string) => s.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
 
 export default function DashboardPage() {
+  const t = useT();
   const router = useRouter();
   const [items, setItems] = useState<SessionHistoryItem[]>([]);
   const [metaByQid, setMetaByQid] = useState<Record<string, QuestionMeta>>({});
@@ -55,27 +57,27 @@ export default function DashboardPage() {
     <AppShell active="dashboard">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h1 className="text-3xl font-extrabold tracking-tight">Dashboard</h1>
-          <p className="mt-1 text-[var(--color-muted)]">Your progress across interviews — scores, strengths, and where to focus.</p>
+          <h1 className="text-3xl font-extrabold tracking-tight">{t("Dashboard")}</h1>
+          <p className="mt-1 text-[var(--color-muted)]">{t("Your progress across interviews — scores, strengths, and where to focus.")}</p>
         </div>
         {!loading && items.length > 0 && <StreakPill streak={achievements.streak} />}
       </div>
 
       {loading ? (
-        <p className="mt-10 text-[var(--color-muted)]">Loading…</p>
+        <p className="mt-10 text-[var(--color-muted)]">{t("Loading…")}</p>
       ) : items.length === 0 ? (
         <Panel className="mt-8 p-10 text-center">
-          <p className="text-[var(--color-muted)]">No interviews yet — take your first one to start tracking progress.</p>
-          <Button href="/interviews" className="mt-4">Browse interviews →</Button>
+          <p className="text-[var(--color-muted)]">{t("No interviews yet — take your first one to start tracking progress.")}</p>
+          <Button href="/interviews" className="mt-4">{t("Browse interviews →")}</Button>
         </Panel>
       ) : (
         <>
           {/* Stat tiles */}
           <div className="mt-6 grid grid-cols-2 gap-4 md:grid-cols-4">
-            <Stat label="Interviews" value={String(items.length)} />
-            <Stat label="Completed" value={String(items.filter((i) => i.status === "complete").length)} />
-            <Stat label="Avg score" value={scored.length ? `${avg.toFixed(1)}/4` : "—"} tone={scored.length ? tone(avg) : undefined} />
-            <Stat label="Best score" value={scored.length ? `${best.toFixed(1)}/4` : "—"} tone={scored.length ? tone(best) : undefined} />
+            <Stat label={t("Interviews")} value={String(items.length)} />
+            <Stat label={t("Completed")} value={String(items.filter((i) => i.status === "complete").length)} />
+            <Stat label={t("Avg score")} value={scored.length ? `${avg.toFixed(1)}/4` : "—"} tone={scored.length ? tone(avg) : undefined} />
+            <Stat label={t("Best score")} value={scored.length ? `${best.toFixed(1)}/4` : "—"} tone={scored.length ? tone(best) : undefined} />
           </div>
 
           {/* Gamification — achievement badges (streak is in the header) */}
@@ -85,20 +87,20 @@ export default function DashboardPage() {
             {/* Recent sessions */}
             <Panel className="p-5">
               <div className="mb-3 flex items-center justify-between">
-                <h2 className="font-semibold">Recent sessions</h2>
-                <Button href="/results" variant="ghost">All results →</Button>
+                <h2 className="font-semibold">{t("Recent sessions")}</h2>
+                <Button href="/results" variant="ghost">{t("All results →")}</Button>
               </div>
               <div className="space-y-2">
                 {recent.map((it) => (
                   <div key={it.id} className="flex items-center justify-between gap-3 rounded-lg border border-[var(--color-line)] p-3">
                     <div className="min-w-0">
                       <div className="truncate text-sm font-medium">{it.title}</div>
-                      <div className="text-xs text-[var(--color-faint)]">{new Date(it.created_at).toLocaleDateString()} · {MOD_LABEL[it.modality] ?? it.modality} · {it.status}</div>
+                      <div className="text-xs text-[var(--color-faint)]">{new Date(it.created_at).toLocaleDateString()} · {t(MOD_LABEL[it.modality] ?? it.modality)} · {it.status}</div>
                     </div>
                     <div className="flex shrink-0 items-center gap-2">
-                      {it.status === "complete" && it.scored === false && <Badge tone="warn">n/a</Badge>}
+                      {it.status === "complete" && it.scored === false && <Badge tone="warn">{t("n/a")}</Badge>}
                       {it.status === "complete" && it.scored !== false && typeof it.overall === "number" && <Badge tone={tone(it.overall)}>{it.overall.toFixed(1)}</Badge>}
-                      <Button href={it.status === "complete" ? `/report?s=${it.id}` : `/interview?s=${it.id}`} variant="ghost">{it.status === "complete" ? "View" : "Resume"}</Button>
+                      <Button href={it.status === "complete" ? `/report?s=${it.id}` : `/interview?s=${it.id}`} variant="ghost">{it.status === "complete" ? t("View") : t("Resume")}</Button>
                     </div>
                   </div>
                 ))}
@@ -107,14 +109,14 @@ export default function DashboardPage() {
 
             {/* Skill radar */}
             <Panel className="flex flex-col p-5">
-              <h2 className="mb-2 font-semibold">Skill radar</h2>
+              <h2 className="mb-2 font-semibold">{t("Skill radar")}</h2>
               {byMod.length >= 3
                 ? (
                   <div className="flex flex-1 items-center justify-center">
-                    <Radar data={byMod.map((m) => ({ label: MOD_LABEL[m.modality] ?? m.modality, value: m.avg }))} size={190} />
+                    <Radar data={byMod.map((m) => ({ label: t(MOD_LABEL[m.modality] ?? m.modality), value: m.avg }))} size={240} />
                   </div>
                 )
-                : <p className="flex flex-1 items-center justify-center py-10 text-center text-sm text-[var(--color-faint)]">Complete interviews in 3+ formats to see your skill radar.</p>}
+                : <p className="flex flex-1 items-center justify-center py-10 text-center text-sm text-[var(--color-faint)]">{t("Complete interviews in 3+ formats to see your skill radar.")}</p>}
             </Panel>
           </div>
 
@@ -125,20 +127,20 @@ export default function DashboardPage() {
             const strong = byMod.slice(0, Math.min(mid, 3));
             const weak = byMod.slice(mid).slice(0, 3); // the lower-ranked half, no overlap
             const Row = (m: { modality: string; avg: number }) => (
-              <li key={m.modality} className="flex justify-between"><span className="text-[var(--color-muted)]">{MOD_LABEL[m.modality] ?? m.modality}</span><span className="font-mono">{m.avg.toFixed(1)}/4</span></li>
+              <li key={m.modality} className="flex justify-between"><span className="text-[var(--color-muted)]">{t(MOD_LABEL[m.modality] ?? m.modality)}</span><span className="font-mono">{m.avg.toFixed(1)}/4</span></li>
             );
             return (
               <div className="mt-4 grid gap-4 md:grid-cols-2">
                 <Panel className="p-5">
-                  <h2 className="mb-3 font-semibold"><Badge tone="good">Strong areas</Badge></h2>
+                  <h2 className="mb-3 font-semibold"><Badge tone="good">{t("Strong areas")}</Badge></h2>
                   <ul className="space-y-2 text-sm">{strong.map(Row)}</ul>
                 </Panel>
                 <Panel className="p-5">
-                  <h2 className="mb-3 font-semibold"><Badge tone="warn">To prepare</Badge></h2>
+                  <h2 className="mb-3 font-semibold"><Badge tone="warn">{t("To prepare")}</Badge></h2>
                   {weak.length > 0
                     ? <ul className="space-y-2 text-sm">{weak.map(Row)}</ul>
-                    : <p className="text-sm text-[var(--color-muted)]">Take interviews in more formats to see where to focus.</p>}
-                  <Button href="/interviews" className="mt-4">Practice interview →</Button>
+                    : <p className="text-sm text-[var(--color-muted)]">{t("Take interviews in more formats to see where to focus.")}</p>}
+                  <Button href="/interviews" className="mt-4">{t("Practice interview →")}</Button>
                 </Panel>
               </div>
             );

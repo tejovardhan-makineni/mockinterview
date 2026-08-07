@@ -19,6 +19,7 @@ var Languages = []Language{
 	{"de", "Deutsch", "German"},
 	{"pt", "Português", "Portuguese"},
 	{"hi", "हिन्दी", "Hindi"},
+	{"te", "తెలుగు", "Telugu"},
 	{"zh", "中文", "Chinese (Simplified)"},
 	{"ja", "日本語", "Japanese"},
 	{"ar", "العربية", "Arabic"},

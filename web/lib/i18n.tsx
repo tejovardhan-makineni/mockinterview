@@ -19,6 +19,7 @@ export const LANGUAGES: { code: string; label: string }[] = [
   { code: "de", label: "Deutsch" },
   { code: "pt", label: "Português" },
   { code: "hi", label: "हिन्दी" },
+  { code: "te", label: "తెలుగు" },
   { code: "zh", label: "中文" },
   { code: "ja", label: "日本語" },
   { code: "ar", label: "العربية" },

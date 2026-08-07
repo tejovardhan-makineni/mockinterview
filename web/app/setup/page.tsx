@@ -7,7 +7,7 @@ import type { Face, InterviewConfig, Personality, Resume, Voice } from "@/lib/ty
 import { Badge, Button, Field, Panel } from "@/components/ui";
 import { Avatar3D, type AvatarDrive } from "@/components/studio/Avatar3D";
 import { previewVoiceSample, stopPreview, prefetchPreview } from "@/lib/voicePreview";
-import { useLang } from "@/lib/i18n";
+import { useLang, useT, LANGUAGES } from "@/lib/i18n";
 import { IconPlay, IconStop } from "@/components/icons";
 
 const PERSONAS: { id: Personality; label: string; desc: string }[] = [
@@ -34,6 +34,8 @@ function SetupInner() {
   const pv = useRef<AvatarDrive>({ speaking: false, amplitude: 0, mood: "neutral" });
   const [previewing, setPreviewing] = useState(false);
   const { lang } = useLang();
+  const t = useT();
+  const [interviewLang, setInterviewLang] = useState(lang); // defaults to app language, overridable per interview
   const previewReq = { voiceId: cfg.voice_id, faceId: cfg.face_id, personality: cfg.personality, intensity: cfg.intensity };
   const toggleVoice = () => {
     if (previewing) { stopPreview(pv); setPreviewing(false); return; }
@@ -70,9 +72,10 @@ function SetupInner() {
   async function start() {
     setStarting(true); setStartErr("");
     try {
-      // The interviewer speaks the app-selected language; carry it into the
-      // session config (it rides the per-session JSON, read by the live relay).
-      const withLang = { ...cfg, language: lang };
+      // The interviewer speaks the language chosen for THIS interview (defaults to
+      // the app language, but can be overridden above); carry it into the session
+      // config (it rides the per-session JSON, read by the live relay).
+      const withLang = { ...cfg, language: interviewLang };
       await api.saveConfig(cfg);
       const s = await api.createSession(questionId, withLang);
       router.push(`/interview?s=${s.id}&minutes=${minutes}`);
@@ -85,24 +88,24 @@ function SetupInner() {
   return (
     <main className="mx-auto max-w-4xl px-6 py-8">
       <div className="flex items-center justify-between">
-        <Button href="/dashboard" variant="ghost">← Dashboard</Button>
-        {questionId && <Badge tone="accent">Question: {questionId}</Badge>}
+        <Button href="/dashboard" variant="ghost">← {t("Dashboard")}</Button>
+        {questionId && <Badge tone="accent">{t("Question")}: {questionId}</Badge>}
       </div>
-      <h1 className="mt-6 text-3xl font-bold">Set up your interview</h1>
-      <p className="mt-2 text-[var(--color-muted)]">Upload your resume and shape your interviewer. You can change these anytime.</p>
+      <h1 className="mt-6 text-3xl font-bold">{t("Set up your interview")}</h1>
+      <p className="mt-2 text-[var(--color-muted)]">{t("Upload your resume and shape your interviewer. You can change these anytime.")}</p>
 
       {/* Resume */}
       <Panel className="mt-8 p-6">
         <div className="flex items-center justify-between">
-          <h2 className="text-lg font-semibold">Resume</h2>
-          {resume && <Button href="/resume-review" variant="ghost">Review my resume →</Button>}
+          <h2 className="text-lg font-semibold">{t("Resume")}</h2>
+          {resume && <Button href="/resume-review" variant="ghost">{t("Review my resume →")}</Button>}
         </div>
         <div className="mt-4 flex items-center gap-4">
           <Button onClick={() => fileRef.current?.click()} disabled={uploading}>
-            {uploading ? "Uploading…" : resume ? "Replace file" : "Upload PDF / DOCX / .txt"}
+            {uploading ? t("Uploading…") : resume ? t("Replace file") : t("Upload PDF / DOCX / .txt")}
           </Button>
           <input ref={fileRef} type="file" accept=".pdf,.docx,.txt,.md" hidden onChange={onFile} />
-          <span className="text-sm text-[var(--color-muted)]">{resume ? resume.filename : "No resume yet"}</span>
+          <span className="text-sm text-[var(--color-muted)]">{resume ? resume.filename : t("No resume yet")}</span>
         </div>
         {resume?.parsed?.name && (
           <div className="mt-4 rounded-xl border border-[var(--color-line)] bg-[var(--color-panel-2)] p-4 text-sm">
@@ -119,7 +122,7 @@ function SetupInner() {
 
       {/* Interviewer */}
       <Panel className="mt-4 p-6">
-        <h2 className="text-lg font-semibold">Your interviewer</h2>
+        <h2 className="text-lg font-semibold">{t("Your interviewer")}</h2>
         {/* live preview of who's interviewing */}
         <div className="mt-4 flex items-center gap-4 rounded-xl border border-[var(--color-line)] bg-[var(--color-panel-2)] p-4">
           <div className="h-24 w-24 shrink-0 overflow-hidden rounded-xl bg-[var(--color-panel)]">
@@ -127,25 +130,25 @@ function SetupInner() {
           </div>
           <div className="text-sm">
             <div className="font-semibold">{faces.find((f) => f.id === cfg.face_id)?.label ?? cfg.face_id}</div>
-            <div className="text-[var(--color-muted)]">Voice: {voices.find((v) => v.id === cfg.voice_id)?.label ?? cfg.voice_id} · {cfg.personality}, intensity {cfg.intensity}/5</div>
+            <div className="text-[var(--color-muted)]">{t("Voice")}: {voices.find((v) => v.id === cfg.voice_id)?.label ?? cfg.voice_id} · {t(cfg.personality)}, {t("intensity")} {cfg.intensity}/5</div>
             <button onClick={() => toggleVoice()} className="mt-1 inline-flex items-center gap-1.5 rounded-md border border-[var(--color-line)] px-2 py-1 text-xs font-medium text-[var(--color-accent)] transition hover:bg-[var(--color-panel)]">
               {previewing ? <IconStop className="h-3.5 w-3.5" /> : <IconPlay className="h-3.5 w-3.5" />}
-              {previewing ? "Stop" : "Hear this interviewer"}
+              {previewing ? t("Stop") : t("Hear this interviewer")}
             </button>
           </div>
         </div>
         <div className="mt-5 grid gap-6 md:grid-cols-2">
-          <Field label="Voice">
+          <Field label={t("Voice")}>
             <div className="grid grid-cols-3 gap-2">
               {voices.map((v) => (
                 <button key={v.id} onClick={() => { if (previewing) { stopPreview(pv); setPreviewing(false); } setCfg({ ...cfg, voice_id: v.id }); }}
                   className={`rounded-xl border px-3 py-2 text-sm transition ${cfg.voice_id === v.id ? "border-[var(--color-accent)] bg-[var(--color-panel-2)]" : "border-[var(--color-line)] hover:bg-[var(--color-panel-2)]"}`}>
-                  {v.label}<span className="block text-xs text-[var(--color-faint)]">{v.gender}</span>
+                  {v.label}<span className="block text-xs text-[var(--color-faint)]">{t(v.gender)}</span>
                 </button>
               ))}
             </div>
           </Field>
-          <Field label="Face">
+          <Field label={t("Face")}>
             <div className="grid grid-cols-4 gap-2">
               {faces.map((f) => (
                 <button key={f.id} onClick={() => setCfg({ ...cfg, face_id: f.id })}
@@ -158,13 +161,13 @@ function SetupInner() {
           </Field>
         </div>
 
-        <Field label="Temperament">
+        <Field label={t("Temperament")}>
           <div className="grid gap-2 md:grid-cols-4">
             {PERSONAS.map((p) => (
               <button key={p.id} onClick={() => setCfg({ ...cfg, personality: p.id })}
                 className={`rounded-xl border p-3 text-left transition ${cfg.personality === p.id ? "border-[var(--color-accent)] bg-[var(--color-panel-2)]" : "border-[var(--color-line)] hover:bg-[var(--color-panel-2)]"}`}>
-                <div className="text-sm font-semibold">{p.label}</div>
-                <div className="mt-1 text-xs text-[var(--color-faint)]">{p.desc}</div>
+                <div className="text-sm font-semibold">{t(p.label)}</div>
+                <div className="mt-1 text-xs text-[var(--color-faint)]">{t(p.desc)}</div>
               </button>
             ))}
           </div>
@@ -176,19 +179,27 @@ function SetupInner() {
               onChange={(e) => setCfg({ ...cfg, intensity: Number(e.target.value) })}
               className="w-full accent-[var(--color-accent)]" />
           </Field>
-          <Field label={`Interview length — ${minutes} min`}>
+          <Field label={`${t("Interview length")} — ${minutes} ${t("min")}`}>
             <input type="range" min={10} max={60} step={5} value={minutes}
               onChange={(e) => setMinutes(Number(e.target.value))}
               className="w-full accent-[var(--color-accent)]" aria-label="Interview length in minutes" />
+          </Field>
+          <Field label={t("Interview language")}>
+            <select value={interviewLang} onChange={(e) => setInterviewLang(e.target.value)}
+              aria-label="Interview language"
+              className="w-full rounded-xl border border-[var(--color-line)] bg-[var(--color-studio)] px-3 py-2.5 text-sm">
+              {LANGUAGES.map((l) => <option key={l.code} value={l.code}>{l.label}</option>)}
+            </select>
+            <p className="mt-1 text-xs text-[var(--color-faint)]">{t("The interviewer will speak and write in this language.")}</p>
           </Field>
         </div>
       </Panel>
 
       <div className="mt-6 flex items-center justify-between">
-        <Button variant="ghost" onClick={save}>Save settings</Button>
+        <Button variant="ghost" onClick={save}>{t("Save settings")}</Button>
         {questionId
-          ? <Button onClick={start} disabled={starting} className="px-6">{starting ? "Starting…" : "Start interview →"}</Button>
-          : <Button href="/dashboard">Pick a question →</Button>}
+          ? <Button onClick={start} disabled={starting} className="px-6">{starting ? t("Starting…") : t("Start interview →")}</Button>
+          : <Button href="/dashboard">{t("Pick a question →")}</Button>}
       </div>
       {startErr && <p className="mt-3 text-right text-sm text-[var(--color-bad)]">{startErr}</p>}
     </main>

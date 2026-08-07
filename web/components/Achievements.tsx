@@ -40,8 +40,10 @@ export function Achievements({ badges, earnedCount }: { badges: Badge[]; earnedC
         <h2 className="font-semibold">Achievements</h2>
         <span className="text-xs text-[var(--color-faint)]">{earnedCount} / {badges.length} unlocked</span>
       </div>
-      {/* One scrollable row — keeps the dashboard short no matter how many badges. */}
-      <div className="mi-doc-scroll flex gap-5 overflow-x-auto pb-2">
+      {/* One scrollable row — keeps the dashboard short no matter how many badges.
+          pt-2 gives the hover-lift room so the circle top isn't clipped (overflow-x
+          auto forces vertical clipping too). */}
+      <div className="mi-doc-scroll flex gap-5 overflow-x-auto pt-2 pb-2">
         {badges.map((b) => <BadgeMedallion key={b.id} badge={b} />)}
       </div>
     </div>
