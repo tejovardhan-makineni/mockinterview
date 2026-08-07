@@ -4,14 +4,17 @@
   "track": "professional",
   "domain": "behavioral",
   "areas": [
-    "engineering",
+    "software_engineering",
     "data_science",
     "medicine",
     "nursing",
     "law",
     "consulting",
     "product_management",
-    "finance"
+    "finance",
+    "mechanical_engineering",
+    "electrical_engineering",
+    "civil_engineering"
   ],
   "modality": "conversational",
   "difficulty": "entry",

@@ -1,0 +1,125 @@
+{
+  "id": "rc-filter-design",
+  "title": "Design a Low-Pass Filter",
+  "track": "engineering",
+  "domain": "signals_systems",
+  "areas": [
+    "electrical_engineering"
+  ],
+  "modality": "conversational",
+  "difficulty": "mid",
+  "tags": [
+    "filter-design",
+    "low-pass",
+    "rc-filter",
+    "bode-plot",
+    "sallen-key",
+    "signals-systems"
+  ],
+  "prompt": "I need a low-pass filter that passes signals below a target cutoff and rolls off everything above it. Walk me through your design — how you set the cutoff with a simple RC, what the transfer function and roll-off look like, how you pick R and C, and when you'd move to an active second-order filter instead of a passive one. Pick a target cutoff and give me real component values.",
+  "blurb": "Spoken station — design a low-pass filter to a cutoff spec: RC cutoff, transfer function and Bode roll-off, choosing R and C, and when to go active (Sallen-Key) with Q and Butterworth flatness.",
+  "rubric": [
+    {
+      "key": "cutoff_relation",
+      "label": "Cutoff & RC relation",
+      "description": "States the first-order RC cutoff fc = 1/(2πRC), explains it's the -3 dB point where |H| = 1/√2 and the reactance of C equals R, and can move between angular ω and Hz correctly.",
+      "weight": 1.2
+    },
+    {
+      "key": "transfer_function",
+      "label": "Transfer function & roll-off",
+      "description": "Writes the first-order low-pass transfer function H(s) = 1/(1 + sRC) (or 1/(1 + jω/ωc)), and reads the Bode behavior: flat passband, a pole at ωc, and -20 dB/decade roll-off per pole above cutoff, with -45 deg phase at the pole.",
+      "weight": 1.3
+    },
+    {
+      "key": "component_choice",
+      "label": "Choosing R and C",
+      "description": "Picks R and C sensibly for the target fc — avoiding extreme values (too-low R loads the source, too-high R adds noise/bias issues), snapping to standard E-series parts, and noting the R/C degree of freedom is set by impedance level.",
+      "weight": 1.1
+    },
+    {
+      "key": "active_vs_passive",
+      "label": "Active vs passive / order",
+      "description": "Explains when a single passive RC is inadequate (needs sharper roll-off, no loading, or gain) and moves to an active second-order stage like Sallen-Key for -40 dB/decade, and how cascading/order increases roll-off steepness.",
+      "weight": 1.2
+    },
+    {
+      "key": "q_damping",
+      "label": "Q, damping & response shape",
+      "description": "Discusses the second-order damping/Q, the Butterworth maximally-flat choice (Q = 0.707), the tradeoff between flatness, peaking, and transient overshoot/ringing, and briefly other alignments (Bessel/Chebyshev).",
+      "weight": 1.0
+    },
+    {
+      "key": "loading_impedance",
+      "label": "Loading & impedance concerns",
+      "description": "Recognizes that cascading passive stages loads earlier ones and shifts the cutoff, that source and load impedance interact with the filter, and that a buffer/active stage isolates them.",
+      "weight": 1.0
+    },
+    {
+      "key": "worked_example",
+      "label": "Worked numeric example",
+      "description": "Carries a concrete design: target fc, chosen R and C that hit it (with correct units), and verifies fc = 1/(2πRC) numerically; ideally names a standard-value pair.",
+      "weight": 1.1
+    }
+  ],
+  "reference": {
+    "scenario": "A candidate is asked to design a low-pass filter to a cutoff specification. The station tests whether they can go from a spec to a concrete circuit: set the cutoff with a first-order RC, write and interpret the transfer function and Bode roll-off, choose reasonable component values, and know when a passive first-order filter is not enough — moving to an active second-order Sallen-Key stage for a sharper response, with an informed choice of Q/damping and awareness of loading. A strong candidate reasons quantitatively and works a real numeric example. This is an educational reasoning exercise, not a substitute for real filter synthesis tools, simulation, or hardware verification.",
+    "model_points": [
+      "First-order passive RC low-pass cutoff: fc = 1/(2πRC) (ωc = 1/RC). This is the -3 dB frequency where the output is 1/√2 (about 0.707) of the input and the capacitor's reactance 1/(ωC) equals R.",
+      "Transfer function H(s) = 1/(1 + sRC), i.e. 1/(1 + jω/ωc): magnitude is flat (≈1) well below cutoff, -3 dB at cutoff, then rolls off at -20 dB/decade (6 dB/octave) for a single pole; phase goes from 0 to -90 deg, passing -45 deg at ωc.",
+      "Roll-off steepness scales with order: each additional pole adds another -20 dB/decade, so a second-order filter rolls off at -40 dB/decade. Order is chosen from how much stopband attenuation is needed at a given frequency.",
+      "Choosing R and C: fc fixes the RC product but not R and C individually — that's set by impedance level. Keep R moderate (roughly hundreds of ohms to tens of kΩ) so it neither loads the source (too small) nor adds excess Johnson noise and bias-current error (too large); pick a standard capacitor then solve for R, and snap to E12/E24 values.",
+      "When passive isn't enough: a single RC gives only -20 dB/decade, no gain, and gets loaded by the next stage. For a sharper cut, gain, or buffered high-Z output, use an active filter — a Sallen-Key second-order low-pass built around one op-amp gives -40 dB/decade and a controllable Q.",
+      "Second-order response is defined by cutoff ωc and quality factor Q (or damping ζ = 1/2Q). Q sets the shape near cutoff: Q = 0.707 is the Butterworth maximally-flat magnitude (no passband peaking); higher Q peaks and rings; lower Q is over-damped and droops early.",
+      "Filter alignments trade off differently: Butterworth = flat passband; Chebyshev = steeper roll-off at the cost of passband ripple; Bessel = linear phase / minimal overshoot (best transient/step response). Choose based on whether flatness, sharpness, or phase/transient fidelity matters.",
+      "Loading and impedance: cascading two passive RC sections is NOT just two independent poles — the second stage loads the first, shifting the effective cutoff and reducing Q; op-amp buffers or the active topology isolate stages. Source resistance adds to R; load capacitance/resistance interacts with the output.",
+      "Sanity checks: passband gain (0 dB for a passive RC, or the set gain for active), attenuation at a decade above cutoff (~-20 dB first order, ~-40 dB second order), and step response overshoot linked to Q.",
+      "Worked example: target fc = 1 kHz. Pick C = 100 nF, then R = 1/(2π·fc·C) = 1/(2π·1000·100e-9) ≈ 1592 Ω, so use a standard 1.6 kΩ resistor; check fc = 1/(2π·1.6k·100n) ≈ 995 Hz, within tolerance. For a sharper cut I'd build a unity-gain Sallen-Key second-order Butterworth around the same 1 kHz to get -40 dB/decade with a flat passband."
+    ],
+    "probes": [
+      {
+        "trigger": "candidate gives fc without connecting it to the -3 dB point or reactance",
+        "question": "What is actually happening at the cutoff frequency — what's the output level there and why that frequency?"
+      },
+      {
+        "trigger": "candidate states the transfer function but not the roll-off",
+        "question": "Sketch the Bode magnitude for me — how many dB per decade does it fall, and what sets that slope?"
+      },
+      {
+        "trigger": "candidate fixes RC but picks extreme R or C",
+        "question": "fc only fixes the product RC. What makes you choose, say, a 1 kΩ resistor versus a 1 MΩ one for the same cutoff?"
+      },
+      {
+        "trigger": "candidate proposes cascading two passive RCs for a sharper cut",
+        "question": "If you just chain two RC sections back to back, do you really get two clean independent poles? What does the second stage do to the first?"
+      },
+      {
+        "trigger": "candidate reaches for an active filter without justifying Q",
+        "question": "In your Sallen-Key stage, what Q do you pick and why — what does it do to the passband and the step response?"
+      },
+      {
+        "trigger": "candidate never commits to numbers",
+        "question": "Give me a target cutoff and the actual R and C you'd stock for it, then check the math."
+      }
+    ],
+    "red_flags": [
+      "Wrong cutoff formula or dropping the 2π (confusing fc in Hz with ωc in rad/s).",
+      "Claiming a single RC rolls off faster than -20 dB/decade, or not knowing roll-off scales with order.",
+      "Not understanding the -3 dB / 1-over-root-2 meaning of cutoff.",
+      "Choosing absurd component values (sub-ohm R, or multi-MΩ R that loads/noises the circuit) for the target fc.",
+      "Assuming two cascaded passive RC stages give two ideal independent poles with no loading interaction.",
+      "Picking a second-order filter with no notion of Q/damping or the Butterworth 0.707 flat choice.",
+      "Ignoring source/load impedance and the need for buffering.",
+      "No numeric example, or arithmetic/units errors when computing R from fc and C."
+    ],
+    "follow_ups": [
+      "You now need 40 dB of attenuation one decade above cutoff. What order do you need, and how do you build it?",
+      "Walk me through a Sallen-Key low-pass: which components set fc and which set Q?",
+      "How would the step/transient response differ between a Butterworth and a Bessel design at the same cutoff?",
+      "Your source has significant output resistance and the next stage has input capacitance — how does that change your filter?",
+      "How would you turn this into a high-pass or band-pass filter?"
+    ],
+    "exemplar_answer": "I'd start with the first-order passive RC, since it anchors everything. The cutoff is fc = 1/(2πRC); that's the -3 dB point, where the output is about 0.707 of the input and the capacitor's reactance equals R. The transfer function is H(s) = 1/(1 + sRC): flat in the passband, a single pole at the cutoff, then a -20 dB/decade roll-off, with the phase passing through -45 degrees at fc. For a concrete target, say fc = 1 kHz, I'd fix the capacitor at a convenient 100 nF and solve R = 1/(2π·fc·C), which is about 1592 ohms, so I'd stock a standard 1.6 kΩ resistor and re-check: 1/(2π·1.6k·100n) is about 995 Hz, well within tolerance. On value choice, fc only pins the product RC, so I set the impedance level deliberately — a few hundred ohms to tens of kilohms keeps me from loading the source with too-small an R or adding noise and bias-current error with too-large an R. A single RC only gives me -20 dB/decade and gets loaded by whatever follows, and importantly I can't just chain two passive sections and expect two clean poles, because the second stage loads the first and shifts the cutoff. So when I need a sharper -40 dB/decade cut, gain, or a buffered output, I go active with a Sallen-Key second-order stage around one op-amp. There I choose the cutoff and the Q: Q = 0.707 gives a Butterworth maximally-flat passband with no peaking, higher Q buys sharpness but adds overshoot and ringing, and if transient fidelity matters I'd consider a Bessel alignment for its linear phase. I'd finish by checking the passband gain, the attenuation a decade out, and the step response, then confirm it in simulation before building it."
+  },
+  "interviewer_notes": "Mid-level signals-and-systems / analog station on low-pass filter design. Reward a candidate who moves cleanly from spec to circuit: the first-order RC cutoff fc = 1/(2πRC) tied to the -3 dB point, the transfer function and the -20 dB/decade-per-pole Bode picture, deliberate component selection at a sensible impedance level, and a clear trigger for going active (sharper roll-off, gain, isolation) with a Sallen-Key second-order stage. Probe their understanding of Q/damping and the Butterworth 0.707 flat choice, and the loading interaction that makes naive cascaded passive RCs misbehave. Insist on a real numeric example and check the arithmetic and units. Do not require exact filter-table coefficients or synthesis-tool precision — reward correct method, correct orders of magnitude, and clear reasoning. Flag dropping the 2π, believing one RC rolls off faster than -20 dB/decade, or reaching for a second-order filter with no notion of Q."
+}

@@ -1,7 +1,10 @@
 // Dependency-free SVG radar chart for the report scorecard. Scores are 0..4.
 type Point = { label: string; value: number };
 
-export function Radar({ data, max = 4, size = 320 }: { data: Point[]; max?: number; size?: number }) {
+// `fill` makes the chart scale to fill its container (used on the dashboard so a
+// small 3-axis radar doesn't leave the panel half-empty); otherwise it renders
+// at a fixed `size` px (used on the report scorecard).
+export function Radar({ data, max = 4, size = 320, fill = false }: { data: Point[]; max?: number; size?: number; fill?: boolean }) {
   const n = data.length;
   if (n < 3) return null;
   const cx = size / 2;
@@ -20,7 +23,13 @@ export function Radar({ data, max = 4, size = 320 }: { data: Point[]; max?: numb
     .join(" ");
 
   return (
-    <svg viewBox={`0 0 ${size} ${size}`} width="100%" style={{ maxWidth: size }}>
+    <svg
+      viewBox={`0 0 ${size} ${size}`}
+      width="100%"
+      preserveAspectRatio="xMidYMid meet"
+      className={fill ? "h-full w-full" : undefined}
+      style={fill ? { maxHeight: "100%" } : { maxWidth: size }}
+    >
       {[0.25, 0.5, 0.75, 1].map((f) => (
         <polygon key={f} points={ring(f)} fill="none" stroke="var(--color-line)" strokeWidth={1} />
       ))}

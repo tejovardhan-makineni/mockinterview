@@ -31,7 +31,11 @@ var validDifficulty = map[string]bool{
 // area; an ml_system_design interview counts for engineering AND data_science).
 // The client derives the Area->Domain catalog navigation from these.
 var validAreas = map[string]bool{
-	"engineering": true, "data_science": true, "medicine": true, "nursing": true,
+	// Engineering is split by discipline so each has its own Area->Domain track:
+	// software (the original corpus), plus mechanical, electrical, and civil.
+	"software_engineering": true, "mechanical_engineering": true,
+	"electrical_engineering": true, "civil_engineering": true,
+	"data_science": true, "medicine": true, "nursing": true,
 	"law": true, "consulting": true, "product_management": true, "finance": true,
 }
 

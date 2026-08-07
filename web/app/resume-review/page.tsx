@@ -262,7 +262,17 @@ export default function ResumePage() {
           <Panel className="overflow-hidden lg:flex-[1.35]">
             <div className="flex items-center justify-between border-b border-[var(--color-line)] px-4 py-2 text-xs text-[var(--color-faint)]">
               <span className="truncate">{resume.filename}</span>
-              <span>{tab === "review" && review ? "amber = fix · green = applied/strong" : tab === "match" && match ? "cyan = matched keyword" : " "}</span>
+              {tab === "review" && review ? (
+                <span className="flex flex-none items-center gap-3" title="Colored highlights in the resume below mark what to change and what's already strong.">
+                  <Swatch color="var(--color-warn)" label="Suggested fix" />
+                  <Swatch color="var(--color-good)" label="Applied / strong" />
+                </span>
+              ) : tab === "match" && match ? (
+                <span className="flex flex-none items-center gap-3" title="Highlights show how your resume overlaps the job description.">
+                  <Swatch color="var(--color-accent)" label="Matched" />
+                  <Swatch color="var(--color-bad)" label="Missing" />
+                </span>
+              ) : <span />}
             </div>
             <ResumeDoc parsed={workingParsed} text={workingText} marks={marks} />
           </Panel>
@@ -419,6 +429,17 @@ function EditRow({
           : <button onClick={() => onToggle(idx, true)} disabled={!canApply} className="rounded-md bg-[var(--color-accent)] px-2.5 py-1 text-xs font-semibold text-[#0b0d12] disabled:opacity-40">Apply</button>}
       </div>
     </div>
+  );
+}
+
+// Swatch is the little colored-dot + label used in the resume highlight legend,
+// so the meaning of the in-document highlights is self-explanatory.
+function Swatch({ color, label }: { color: string; label: string }) {
+  return (
+    <span className="inline-flex items-center gap-1.5">
+      <span className="h-2.5 w-2.5 flex-none rounded-full" style={{ background: `color-mix(in srgb, ${color} 55%, transparent)`, boxShadow: `inset 0 0 0 1px ${color}` }} />
+      <span className="text-[var(--color-muted)]">{label}</span>
+    </span>
   );
 }
 

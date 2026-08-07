@@ -1,0 +1,125 @@
+{
+  "id": "beam-load-analysis",
+  "title": "Analyze a Loaded Cantilever Beam",
+  "track": "engineering",
+  "domain": "mechanics",
+  "areas": [
+    "mechanical_engineering"
+  ],
+  "modality": "conversational",
+  "difficulty": "mid",
+  "tags": [
+    "solid-mechanics",
+    "cantilever-beam",
+    "bending-stress",
+    "deflection",
+    "factor-of-safety",
+    "statics"
+  ],
+  "prompt": "You have a cantilever beam fixed at one end with a point load applied at the free tip. Walk me through your structured approach — the support reactions, the shear and bending-moment diagrams, where and how large the maximum bending moment and stress are, the tip deflection, and how you'd check the factor of safety against yield. Reason it through out loud and put some numbers on it.",
+  "blurb": "Spoken station — analyze a tip-loaded cantilever: reactions, shear and moment diagrams, max bending stress σ = Mc/I, tip deflection PL³/3EI, and factor of safety against yield.",
+  "rubric": [
+    {
+      "key": "problem_framing",
+      "label": "Framing & free body",
+      "description": "Draws a free-body diagram, states the loading and boundary conditions (fixed end reacts a force and a moment, free end is unloaded except the tip force), and identifies beam-theory assumptions (slender beam, small deflection, linear-elastic, Euler–Bernoulli).",
+      "weight": 1.1
+    },
+    {
+      "key": "reactions_equilibrium",
+      "label": "Reactions & equilibrium",
+      "description": "Uses static equilibrium (ΣF = 0, ΣM = 0) to get the wall reaction force R = P and the fixed-end reaction moment M = PL, with correct sense.",
+      "weight": 1.1
+    },
+    {
+      "key": "shear_moment",
+      "label": "Shear & moment diagrams",
+      "description": "Constructs correct shear (constant V = P) and bending-moment (linear, zero at tip to maximum PL at the wall) diagrams and locates the maximum bending moment at the fixed end.",
+      "weight": 1.2
+    },
+    {
+      "key": "bending_stress",
+      "label": "Bending stress",
+      "description": "Applies the flexure formula σ = Mc/I, computes the section second moment of area I and extreme-fiber distance c, and identifies the peak tensile/compressive stress location.",
+      "weight": 1.3
+    },
+    {
+      "key": "deflection",
+      "label": "Deflection",
+      "description": "Gives the tip deflection δ = PL³/3EI (by integration, energy, or a known formula), states its dependence on L³ and EI, and checks it against any stiffness/serviceability limit.",
+      "weight": 1.1
+    },
+    {
+      "key": "factor_of_safety",
+      "label": "Factor of safety",
+      "description": "Computes FoS = σ_yield / σ_max, interprets whether the design is adequate, and mentions other limit states (yielding vs deflection, stress concentration, buckling, fatigue if cyclic).",
+      "weight": 1.1
+    },
+    {
+      "key": "communication",
+      "label": "Communication & structure",
+      "description": "Presents the analysis in a logical order, thinks aloud, carries units, and sanity-checks magnitudes and directions.",
+      "weight": 0.9
+    }
+  ],
+  "reference": {
+    "scenario": "The candidate analyzes a cantilever beam fixed at one end with a concentrated load P at the free tip. The station tests whether they can go cleanly from a free-body diagram to support reactions, to shear and bending-moment diagrams, to the flexure formula for peak stress, to tip deflection, and finally to a factor of safety against yield — carrying units and sanity-checking throughout. The interviewer can vary the section (rectangular vs circular vs I-beam), add a distributed load, or ask about serviceability versus strength limits to probe depth. This is an educational reasoning exercise, not a substitute for real structural design, code-compliant analysis (e.g. AISC/Eurocode), or a licensed engineer's sign-off.",
+    "model_points": [
+      "Draws the free body: a cantilever length L, fixed (built-in) support at one end, downward point load P at the free tip. Notes assumptions — slender linear-elastic Euler–Bernoulli beam, small deflections, load through the shear center so no torsion.",
+      "Equilibrium gives the wall reactions: vertical reaction R = P (upward), and a reaction (fixing) moment M_wall = P·L that resists the load's moment about the support; ΣF_y = 0 and ΣM = 0.",
+      "Shear-force diagram: internal shear is constant along the span, V = P (magnitude), jumping to zero past the tip load — a rectangular SFD.",
+      "Bending-moment diagram: moment varies linearly, zero at the free tip and maximum in magnitude at the fixed end, M_max = P·L; the maximum bending moment and hence maximum stress are at the wall.",
+      "Flexure formula: bending stress σ = M·c / I, where c is the distance from the neutral axis to the extreme fiber and I is the second moment of area; peak stress is at the fixed-end extreme fibers (tension on one face, compression on the other).",
+      "Section properties: for a rectangle b×h, I = b·h³/12 and c = h/2 so section modulus S = I/c = b·h²/6; for a solid circle diameter d, I = π·d⁴/64 and c = d/2.",
+      "Tip deflection: δ_max = P·L³ / (3·E·I) from Euler–Bernoulli beam theory (double integration of M = EI·d²y/dx² or Castigliano); strongly sensitive to length (L³) and to bending stiffness EI.",
+      "Worked example: P = 1000 N, L = 1 m, steel beam E = 200 GPa, rectangular section b = 20 mm, h = 40 mm. Then I = (0.02·0.04³)/12 = 1.07×10⁻⁷ m⁴, c = 0.02 m. M_max = P·L = 1000 N·m. σ_max = M·c/I = 1000·0.02 / 1.07×10⁻⁷ ≈ 1.88×10⁸ Pa ≈ 188 MPa.",
+      "Deflection for the example: δ = P·L³/(3EI) = 1000·1³ / (3·200×10⁹·1.07×10⁻⁷) ≈ 0.0156 m ≈ 15.6 mm at the tip.",
+      "Factor of safety: for structural steel with σ_yield ≈ 250 MPa, FoS = σ_yield/σ_max = 250/188 ≈ 1.3 — adequate against yield but marginal, and the 15.6 mm tip deflection (~L/64) may violate a serviceability limit; also considers stress concentrations at the fixed end, buckling of thin sections, and fatigue if the load is cyclic."
+    ],
+    "probes": [
+      {
+        "trigger": "candidate forgets the reaction moment at the fixed end",
+        "question": "A fixed support reacts more than a vertical force — what else does the wall have to supply to keep the beam in equilibrium?"
+      },
+      {
+        "trigger": "candidate is unsure where the maximum moment occurs",
+        "question": "Along the beam, where is the bending moment largest, and what is its value there?"
+      },
+      {
+        "trigger": "candidate writes σ = Mc/I but can't get I or c",
+        "question": "For your chosen cross-section, how do you compute I and the distance c to the extreme fiber?"
+      },
+      {
+        "trigger": "candidate confuses strength and stiffness",
+        "question": "The stress checks out — but how much does the tip actually deflect, and would that be acceptable?"
+      },
+      {
+        "trigger": "candidate reports stress but no safety margin",
+        "question": "How do you turn that peak stress into a factor of safety, and is this design adequate?"
+      },
+      {
+        "trigger": "candidate treats FoS against yield as the only check",
+        "question": "Besides yielding, what other failure modes would you want to check before signing off?"
+      }
+    ],
+    "red_flags": [
+      "Omitting the fixed-end reaction moment M = PL, or getting the reactions wrong.",
+      "Placing the maximum bending moment at the tip or midspan instead of at the fixed end.",
+      "Misstating the flexure formula (e.g. σ = M/I or σ = MI/c) or mishandling units of I.",
+      "Wrong second moment of area — e.g. using b·h³/3, or confusing I with the section modulus S.",
+      "Using the wrong deflection formula (e.g. PL³/48EI for a simply supported case) for a cantilever.",
+      "Ignoring deflection/serviceability entirely and checking only stress, or vice versa.",
+      "Defining factor of safety upside-down (σ_max/σ_yield) or against ultimate when yield is the relevant limit.",
+      "Never carrying units, producing non-physical magnitudes, or not sanity-checking the result."
+    ],
+    "follow_ups": [
+      "Replace the tip load with a uniformly distributed load w over the whole span — how do M_max and δ_max change?",
+      "Swap the rectangular section for a circular one or an I-beam of the same area — which is stiffer and stronger, and why?",
+      "If the tip deflection limit is L/250, does your design pass, and what would you change if it doesn't?",
+      "The load cycles on and off millions of times — how does that shift your analysis toward fatigue?",
+      "How would a fillet or hole at the fixed end change your peak stress, and how would you account for it?"
+    ],
+    "exemplar_answer": "I'd start with a free body: a cantilever of length L, built in at one end, with a downward point load P at the free tip, and I'll assume a slender linear-elastic Euler–Bernoulli beam with small deflections. Equilibrium fixes the reactions — the wall pushes up with R = P, and because a fixed support resists rotation it also supplies a reaction moment M = P·L to balance the load's moment about the support. For the diagrams: the internal shear is constant at V = P along the span, so the shear diagram is a rectangle, and the bending moment grows linearly from zero at the tip to a maximum of P·L at the wall — so both the peak moment and the peak stress live at the fixed end. Stress comes from the flexure formula σ = Mc/I. Take a concrete case: P = 1000 N, L = 1 m, a steel beam with a 20 by 40 mm rectangular section, E = 200 GPa. Then I = b·h³/12 = 0.02·0.04³/12 ≈ 1.07×10⁻⁷ m⁴, c = h/2 = 20 mm, and M_max = P·L = 1000 N·m, giving σ_max = Mc/I ≈ 188 MPa at the fixed end — tension on the top fiber, compression on the bottom. For stiffness the tip deflection is δ = PL³/3EI, which here is 1000·1³/(3·200×10⁹·1.07×10⁻⁷) ≈ 15.6 mm, and I'd note the strong L³ sensitivity. Finally the safety check: with a yield strength around 250 MPa, FoS = σ_yield/σ_max ≈ 250/188 ≈ 1.3 — it won't yield but the margin is thin, and 15.6 mm of tip droop is about L/64, which would likely fail a serviceability limit. So I'd flag that this beam is governed as much by stiffness as by strength, and before signing off I'd also look at the stress concentration at the fixed end, possible buckling of thin flanges, and fatigue if the load is cyclic."
+  },
+  "interviewer_notes": "Mid-level solid-mechanics station. Let the candidate build the analysis in sequence — free body, reactions, SFD/BMD, stress, deflection, factor of safety — and hold them to the two anchor results M_max = PL at the fixed end and δ = PL³/3EI. The most telling behaviors are remembering the fixed-end reaction moment, locating the maximum moment at the wall (not the tip), stating the flexure formula correctly with a properly computed I, and distinguishing a strength check (yield) from a stiffness/serviceability check (deflection). Reward carried units, sane magnitudes (~188 MPa, ~15.6 mm, FoS ~1.3 for the worked case), and awareness of other limit states. Vary the section or add a distributed load to test depth. Penalize a missing reaction moment, wrong I or deflection formula, an inverted factor of safety, and checking stress while ignoring deflection. This is a reasoning exercise — reward correct method and estimation over memorized code values."
+}

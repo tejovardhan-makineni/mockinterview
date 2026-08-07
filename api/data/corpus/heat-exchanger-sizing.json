@@ -1,0 +1,125 @@
+{
+  "id": "heat-exchanger-sizing",
+  "title": "Size a Heat Exchanger (LMTD)",
+  "track": "engineering",
+  "domain": "mechanical_design",
+  "areas": [
+    "mechanical_engineering"
+  ],
+  "modality": "conversational",
+  "difficulty": "mid",
+  "tags": [
+    "heat-transfer",
+    "heat-exchanger",
+    "lmtd",
+    "thermal-design",
+    "counter-flow",
+    "mechanical-design"
+  ],
+  "prompt": "You need to size a heat exchanger to transfer a given thermal duty between two fluid streams. Walk me through your structured approach — how you get the heat duty, how you use the LMTD method to find the required area, how you estimate the overall heat-transfer coefficient, why counter-flow versus co-flow matters, and the fouling and pressure-drop tradeoffs you'd weigh. Reason it out loud with some representative numbers.",
+  "blurb": "Spoken station — size a counter-flow or shell-and-tube heat exchanger: heat duty Q = ṁ·cp·ΔT, the LMTD method Q = U·A·ΔT_lm, estimating U, computing required area, and fouling and pressure-drop tradeoffs.",
+  "rubric": [
+    {
+      "key": "problem_framing",
+      "label": "Framing & assumptions",
+      "description": "Identifies the two streams, the target duty or outlet temperatures, and the working assumptions (steady state, negligible heat loss to surroundings, constant properties, no phase change unless stated), and sets up an energy balance between the streams.",
+      "weight": 1.0
+    },
+    {
+      "key": "heat_duty",
+      "label": "Heat duty",
+      "description": "Computes the thermal duty from a sensible-heat energy balance Q = ṁ·cp·ΔT on the known stream, and equates the heat lost by the hot stream to that gained by the cold stream.",
+      "weight": 1.1
+    },
+    {
+      "key": "lmtd_method",
+      "label": "LMTD method",
+      "description": "Applies Q = U·A·ΔT_lm, computes the log-mean temperature difference ΔT_lm = (ΔT1 - ΔT2)/ln(ΔT1/ΔT2) with the correct end differences, and (for shell-and-tube) mentions the correction factor F.",
+      "weight": 1.3
+    },
+    {
+      "key": "u_estimation",
+      "label": "Estimating U",
+      "description": "Builds the overall coefficient from the series thermal resistances (1/U = 1/h_i + wall + 1/h_o + fouling), or uses a sensible tabulated U for the fluid pairing, and states typical magnitudes.",
+      "weight": 1.1
+    },
+    {
+      "key": "area_sizing",
+      "label": "Area & geometry",
+      "description": "Solves A = Q/(U·ΔT_lm) for the required surface area and translates it into a tube count/length or exchanger size, with units carried through.",
+      "weight": 1.2
+    },
+    {
+      "key": "tradeoffs",
+      "label": "Configuration & tradeoffs",
+      "description": "Explains why counter-flow gives a larger ΔT_lm (and allows temperature cross) than co-flow, and weighs fouling allowance, pressure drop/pumping power, velocity, materials, and cost against heat-transfer area.",
+      "weight": 1.2
+    },
+    {
+      "key": "communication",
+      "label": "Communication & structure",
+      "description": "Presents the sizing in a logical sequence, thinks aloud, carries units, and sanity-checks the area and coefficients.",
+      "weight": 0.9
+    }
+  ],
+  "reference": {
+    "scenario": "The candidate sizes a heat exchanger — counter-flow or shell-and-tube — to deliver a specified heat duty between a hot and a cold stream. The station tests whether they can move from an energy balance for the duty, to the log-mean temperature difference, to a defensible overall heat-transfer coefficient, to a required surface area and rough geometry, while reasoning about counter- versus co-flow, fouling, and pressure-drop/pumping tradeoffs. The interviewer can flip the flow arrangement, introduce a temperature cross, add a fouling factor, or tighten the pressure-drop budget to probe depth. This is an educational reasoning exercise, not a substitute for real thermal design software, TEMA/ASME code compliance, or a licensed engineer's sign-off.",
+    "model_points": [
+      "Sets up the problem: two streams (hot and cold), known flow rates and specific heats, and either a target duty or specified inlet/outlet temperatures. Assumes steady state, negligible loss to surroundings, roughly constant properties, and sensible-heat (no phase change) unless stated.",
+      "Heat duty from an energy balance: Q = ṁ·cp·ΔT on the fully specified stream, with the hot-side heat released equal to the cold-side heat absorbed, ṁ_h·cp,h·(T_h,in - T_h,out) = ṁ_c·cp,c·(T_c,out - T_c,in).",
+      "Design equation: Q = U·A·ΔT_lm, where ΔT_lm is the log-mean temperature difference between the streams.",
+      "Log-mean temperature difference: ΔT_lm = (ΔT1 - ΔT2)/ln(ΔT1/ΔT2), using the terminal temperature differences at each end — and these end differences depend on whether the arrangement is counter-flow or co-flow.",
+      "Counter-flow vs co-flow: counter-flow yields a larger ΔT_lm for the same terminal temperatures, allows the cold outlet to exceed the hot outlet (a temperature cross), and so needs less area; co-flow cannot cross and gives a smaller mean ΔT. For multi-pass shell-and-tube, apply a correction factor F (Q = U·A·F·ΔT_lm), F typically 0.8–1.0.",
+      "Overall coefficient U from series resistances: 1/(U·A) = 1/(h_i·A_i) + R_wall + R_fouling + 1/(h_o·A_o); typical U values — water-to-water ~800–1500 W/m²·K, water-to-oil ~100–300, gas-to-gas ~10–50 W/m²·K.",
+      "Worked example: cool 2 kg/s of water from 80 °C to 40 °C using cold water entering at 20 °C and leaving at 40 °C. Q = ṁ·cp·ΔT = 2·4180·(80-40) ≈ 334 kW. For counter-flow, end differences ΔT1 = 80-40 = 40 °C and ΔT2 = 40-20 = 20 °C, so ΔT_lm = (40-20)/ln(40/20) = 20/0.693 ≈ 28.9 °C.",
+      "Area from A = Q/(U·ΔT_lm): with a water-to-water U ≈ 1000 W/m²·K, A = 334,000 / (1000·28.9) ≈ 11.6 m². Translates to geometry — e.g. with 19 mm OD tubes, surface per metre ≈ π·0.019 ≈ 0.06 m²/m, so roughly 190 m of tube, or about 60 tubes of ~3 m in several passes.",
+      "Fouling and margin: add a fouling resistance (e.g. 0.0002 m²·K/W per side) which lowers the effective U and increases required area; designers oversize (often 10–25%) for fouling, uncertainty, and future duty, and specify cleaning access.",
+      "Pressure-drop and pumping tradeoff: higher tube-side velocity raises h_i and shrinks area but increases ΔP and pumping power (ΔP roughly scales with velocity squared and tube length); the design balances heat-transfer area and capital cost against pumping energy, erosion, and vibration within a pressure-drop budget, and sanity-checks that the energy balance closes, ΔT_lm sits between the terminal differences, and U and area land in physically plausible ranges."
+    ],
+    "probes": [
+      {
+        "trigger": "candidate jumps to area without establishing the duty",
+        "question": "Before area, what's the heat duty here, and how do you get it from the stream data?"
+      },
+      {
+        "trigger": "candidate uses a plain arithmetic-mean ΔT",
+        "question": "Why do we use a log-mean temperature difference instead of just averaging the two end differences?"
+      },
+      {
+        "trigger": "candidate can't justify a value for U",
+        "question": "Where does your overall heat-transfer coefficient come from, and roughly what value is reasonable for these two fluids?"
+      },
+      {
+        "trigger": "candidate ignores the flow arrangement",
+        "question": "Would counter-flow or co-flow need less area here, and why — what happens to ΔT_lm?"
+      },
+      {
+        "trigger": "candidate sizes clean and stops",
+        "question": "How does fouling over the exchanger's life change your required area, and how would you allow for it?"
+      },
+      {
+        "trigger": "candidate keeps raising velocity for a smaller unit",
+        "question": "Pushing tube velocity up shrinks the area — what's the penalty you're paying for that?"
+      }
+    ],
+    "red_flags": [
+      "Not establishing the heat duty from an energy balance, or not equating hot-side and cold-side heat.",
+      "Using an arithmetic-mean temperature difference instead of the log-mean, or computing ΔT_lm with the wrong end differences.",
+      "Ignoring the flow arrangement — treating co-flow and counter-flow as equivalent, or missing that only counter-flow allows a temperature cross.",
+      "Pulling an overall U out of thin air with no resistance-network reasoning or plausible magnitude.",
+      "Mangling the design equation Q = U·A·ΔT_lm (wrong rearrangement, dropped units) so the area is non-physical.",
+      "Omitting fouling entirely, or providing no oversizing/design margin.",
+      "Ignoring pressure drop and pumping power when trading velocity/area, or forgetting the F-correction for multi-pass units.",
+      "No sanity check that the energy balance closes and that U and area are in reasonable ranges."
+    ],
+    "follow_ups": [
+      "Switch this to co-flow — recompute ΔT_lm and explain how much more area you'd need.",
+      "The cold stream must be heated above the hot outlet temperature (a temperature cross) — which arrangement can do it and why?",
+      "Add a fouling factor of 0.0002 m²·K/W on each side — how does the required area change?",
+      "For a 1-shell-2-tube-pass unit, what's the F-correction and how do you apply it?",
+      "If one stream boils or condenses, how does the temperature profile and your ΔT_lm change?"
+    ],
+    "exemplar_answer": "I'd size this in a clear sequence. First the duty from an energy balance: say I'm cooling 2 kg/s of water from 80 to 40 °C, so Q = ṁ·cp·ΔT = 2·4180·40 ≈ 334 kW, and I'd set that equal to what the cold stream absorbs — cold water entering at 20 and leaving at 40 °C. The design equation is Q = U·A·ΔT_lm. For the driving temperature difference I use the log-mean, not a plain average, because the local ΔT varies along the length; for counter-flow the end differences are 80-40 = 40 °C and 40-20 = 20 °C, so ΔT_lm = (40-20)/ln(40/20) ≈ 28.9 °C. I'd pick counter-flow deliberately — it gives a larger mean ΔT than co-flow and lets the cold outlet approach or cross the hot outlet, which co-flow can't do, so I need less area. For U I'd reason from series resistances, 1/U = 1/h_i + wall + fouling + 1/h_o, but for a water-to-water unit a sensible starting value is around 1000 W/m²·K. Then A = Q/(U·ΔT_lm) = 334,000/(1000·28.9) ≈ 11.6 m². I'd turn that into geometry — with 19 mm tubes that's roughly 190 m of tube, say 60 tubes around 3 m long in a couple of passes, and for a multi-pass shell-and-tube I'd apply an F-correction of maybe 0.9. Then the real-world layer: I'd add a fouling resistance on each side, which drops the effective U and pushes the area up, and I'd oversize perhaps 10-20% for fouling and future duty. Finally the pressure-drop tradeoff — I could shrink the area by driving tube velocity up to raise h_i, but ΔP and pumping power climb roughly with velocity squared, so I'd size within a pressure-drop budget and watch for erosion and vibration. Throughout I'd sanity-check that the energy balance closes, that ΔT_lm sits between the end differences, and that U and the final area are physically reasonable."
+  },
+  "interviewer_notes": "Mid-level thermal/mechanical-design sizing station. Let the candidate work the sequence — energy balance for duty, LMTD, overall U, required area, then geometry — and hold them to the design equation Q = U·A·ΔT_lm. The most telling behaviors are using the log-mean (not arithmetic-mean) ΔT with the correct terminal differences, justifying U from a resistance network or a plausible tabulated value, and explaining why counter-flow needs less area and uniquely permits a temperature cross. Reward carried units, sane numbers (Q ~334 kW, ΔT_lm ~29 °C, U ~1000 W/m²·K, A ~12 m² for the worked case), and awareness of fouling margin, the F-correction, and the velocity/area/pressure-drop tradeoff. Perturb the problem — flip to co-flow, force a temperature cross, or add fouling — to test depth. Penalize a missing duty balance, arithmetic-mean ΔT, an unjustified U, ignoring flow arrangement or fouling, and neglecting pumping power. This is a reasoning exercise; reward correct method and estimation over exact catalog values."
+}

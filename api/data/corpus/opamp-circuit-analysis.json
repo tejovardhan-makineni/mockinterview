@@ -1,0 +1,125 @@
+{
+  "id": "opamp-circuit-analysis",
+  "title": "Analyze an Op-Amp Amplifier",
+  "track": "engineering",
+  "domain": "circuits",
+  "areas": [
+    "electrical_engineering"
+  ],
+  "modality": "conversational",
+  "difficulty": "mid",
+  "tags": [
+    "op-amp",
+    "analog-circuits",
+    "amplifier",
+    "gain-bandwidth",
+    "feedback",
+    "circuit-analysis"
+  ],
+  "prompt": "You're handed a non-inverting op-amp stage: a signal into the + input, a feedback resistor Rf from the output to the - input, and a resistor Rin from that - input to ground. Walk me through how you analyze it — the assumptions you make, how you get the closed-loop gain and input/output impedance, and how bandwidth and slew rate limit what this stage can actually do. Pick some component values and work a real number.",
+  "blurb": "Spoken station — analyze a non-inverting op-amp stage: ideal-op-amp assumptions, closed-loop gain, impedance, gain-bandwidth and slew-rate limits, and real non-idealities.",
+  "rubric": [
+    {
+      "key": "ideal_assumptions",
+      "label": "Ideal-op-amp assumptions",
+      "description": "States and justifies the idealizations used to analyze the stage: the virtual short (V+ = V-) from high open-loop gain plus negative feedback, negligible input bias current (infinite input impedance), and zero output impedance; is clear these are approximations.",
+      "weight": 1.2
+    },
+    {
+      "key": "closed_loop_gain",
+      "label": "Closed-loop gain derivation",
+      "description": "Derives the non-inverting closed-loop gain 1 + Rf/Rin from the virtual short and the feedback divider, rather than reciting it; can contrast with the inverting configuration (-Rf/Rin) and explain the feedback-divider β = Rin/(Rin+Rf).",
+      "weight": 1.3
+    },
+    {
+      "key": "impedance",
+      "label": "Input & output impedance",
+      "description": "Explains that the non-inverting topology presents a very high input impedance (loop-gain-boosted) and low output impedance, why that makes it a good buffer/first stage, and how feedback reduces output impedance by the loop gain.",
+      "weight": 1.0
+    },
+    {
+      "key": "bandwidth",
+      "label": "Gain-bandwidth & bandwidth",
+      "description": "Uses the gain-bandwidth product (GBW ≈ constant for a dominant-pole op-amp) to compute closed-loop bandwidth = GBW / closed-loop gain, and explains the gain-bandwidth tradeoff.",
+      "weight": 1.2
+    },
+    {
+      "key": "slew_and_nonideal",
+      "label": "Slew rate & non-idealities",
+      "description": "Distinguishes small-signal bandwidth from large-signal slew-rate limiting (full-power bandwidth), and raises real non-idealities: input offset voltage, bias/offset currents, finite open-loop gain, output saturation near the rails, and noise.",
+      "weight": 1.2
+    },
+    {
+      "key": "worked_example",
+      "label": "Worked numeric example",
+      "description": "Carries a concrete example end to end: picks resistor values, computes the gain, then computes the resulting bandwidth from a stated GBW (and ideally sanity-checks the slew-rate limit), with correct units.",
+      "weight": 1.1
+    },
+    {
+      "key": "communication",
+      "label": "Communication & structure",
+      "description": "Lays out the analysis in an organized way, thinks aloud, defines symbols, and sanity-checks results rather than just asserting formulas.",
+      "weight": 0.9
+    }
+  ],
+  "reference": {
+    "scenario": "A candidate is asked to analyze a non-inverting op-amp amplifier stage. The station tests whether they can reason from ideal-op-amp assumptions to closed-loop behavior — gain, input/output impedance — and then layer in the real limits that matter in practice: finite gain-bandwidth product, slew rate, offset, and the supply rails. A strong candidate derives results rather than reciting them, works a concrete numeric example, and knows when the ideal model breaks down. This is an educational reasoning exercise, not a substitute for real design verification, SPICE simulation, or datasheet sign-off.",
+    "model_points": [
+      "Ideal-op-amp model: infinite open-loop gain, infinite input impedance (no input current), zero output impedance, infinite bandwidth — used as a first approximation and refined later.",
+      "Virtual short: with negative feedback and huge open-loop gain, the op-amp drives V- to equal V+, so the inverting input tracks the input signal even though no current flows into either input.",
+      "Closed-loop gain of the non-inverting stage: the feedback network Rf/Rin divides the output back to V-; setting V- = Vin gives Vout/Vin = 1 + Rf/Rin (the feedback factor β = Rin/(Rin+Rf), and closed-loop gain ≈ 1/β for large loop gain).",
+      "Input impedance is very high (signal drives the + input directly, boosted by the loop gain), output impedance is low (Zout,closed ≈ Zout,open / loop gain), making the stage a good buffer or front end; a unity-gain follower is the Rf=0 / Rin=∞ limit.",
+      "Gain-bandwidth product (GBW): for a dominant-pole (single-pole compensated) op-amp the product of closed-loop gain and bandwidth is roughly constant, so closed-loop bandwidth f_3dB ≈ GBW / closed-loop gain — the fundamental gain-vs-speed tradeoff.",
+      "Slew rate is a separate large-signal limit (dV/dt max, set by internal current charging the compensation capacitor); full-power bandwidth f_FP = SR / (2·π·Vpeak). Small-signal bandwidth and slew-limited full-power bandwidth are different ceilings — the lower one governs.",
+      "Finite open-loop gain A causes a small gain error: actual gain = ideal / (1 + 1/(Aβ)); as A rolls off with frequency the loop gain shrinks and gain error grows.",
+      "DC non-idealities: input offset voltage (amplified by the noise gain 1 + Rf/Rin and appearing as an output DC error), input bias and offset currents through the resistors (mitigate with a balancing resistor and by keeping resistances moderate), and input-referred noise.",
+      "Output can only swing within the supply rails (or closer with a rail-to-rail part); clipping/saturation occurs when gain×input exceeds the available swing, so gain and signal amplitude must fit the rails.",
+      "Worked example: Rin = 1 kΩ, Rf = 9 kΩ → gain = 1 + 9k/1k = 10 (20 dB). With a GBW of 10 MHz, closed-loop bandwidth ≈ 10 MHz / 10 = 1 MHz. Check slew: for a 1 Vpeak output and SR = 5 V/µs, full-power bandwidth = 5e6 / (2π·1) ≈ 0.8 MHz, so a 1 V, 1 MHz sine would be slightly slew-limited — the slew limit, not the small-signal bandwidth, dominates for large signals."
+    ],
+    "probes": [
+      {
+        "trigger": "candidate recites 1 + Rf/Rin without justifying it",
+        "question": "Where does that formula come from? Walk me through it starting from what the two inputs do."
+      },
+      {
+        "trigger": "candidate treats bandwidth as fixed regardless of gain",
+        "question": "If you doubled the closed-loop gain, what happens to the bandwidth, and why?"
+      },
+      {
+        "trigger": "candidate conflates bandwidth with slew rate",
+        "question": "Your small-signal bandwidth says 1 MHz. Would a 5-volt-peak square-ish signal at that frequency actually come through cleanly? What else limits you?"
+      },
+      {
+        "trigger": "candidate assumes the op-amp is perfectly ideal",
+        "question": "This is a real part with finite gain and some input offset. Where does the ideal model start to lie to you?"
+      },
+      {
+        "trigger": "candidate ignores the supply rails",
+        "question": "You've got gain of 100 and a 50 mV DC offset at the input on a ±5 V supply. Any problem?"
+      },
+      {
+        "trigger": "candidate never picks numbers",
+        "question": "Pick real resistor values and a GBW and tell me the actual gain and bandwidth you'd get."
+      }
+    ],
+    "red_flags": [
+      "Reciting gain = 1 + Rf/Rin (or the inverting -Rf/Rin) with no derivation and mixing up which configuration is which.",
+      "Claiming current flows into the ideal op-amp inputs, or not understanding the virtual short requires negative feedback.",
+      "Treating bandwidth as independent of gain / not knowing the gain-bandwidth product tradeoff.",
+      "Confusing slew-rate (large-signal) limiting with small-signal bandwidth, or ignoring slew entirely.",
+      "Ignoring the supply rails / output saturation and offset amplification (noise gain).",
+      "Assuming infinite open-loop gain gives zero gain error at all frequencies.",
+      "Getting units or orders of magnitude wrong in the worked example (e.g., Hz vs MHz).",
+      "No numeric example at all despite being asked."
+    ],
+    "follow_ups": [
+      "Redo this as an inverting amplifier — how do the gain, input impedance, and the virtual-ground node change?",
+      "Your open-loop gain rolls off at -20 dB/decade above a low pole. How does that shape the closed-loop response and stability?",
+      "How would input offset voltage and bias current show up at the output, and how would you minimize their effect?",
+      "When would you add a capacitor across Rf, and what does it do to the frequency response?",
+      "How do you check this stage is stable — what do phase margin and the feedback factor have to do with it?"
+    ],
+    "exemplar_answer": "I'd start from the ideal-op-amp assumptions and refine from there. Ideally the op-amp has infinite open-loop gain, no input current, and zero output impedance. Because there's negative feedback and huge open-loop gain, the op-amp drives its inverting input to match the non-inverting input — the virtual short — so V- equals Vin, while essentially no current flows into either input. The feedback network is just Rf and Rin forming a divider from the output: V- = Vout·Rin/(Rin+Rf). Setting that equal to Vin gives Vout/Vin = 1 + Rf/Rin. So if I pick Rin = 1 kΩ and Rf = 9 kΩ, the closed-loop gain is 10, or 20 dB. Because the signal drives the + input directly, the input impedance is very high, and negative feedback drives the output impedance down by the loop gain, so this makes a good buffered front end. For speed I use the gain-bandwidth product: for a dominant-pole op-amp, gain times bandwidth is roughly constant, so with a 10 MHz GBW my closed-loop bandwidth is about 10 MHz divided by the gain of 10, which is 1 MHz — that's the gain-versus-speed tradeoff. But small-signal bandwidth isn't the whole story: slew rate is a separate large-signal limit. If the part slews at 5 V/µs, the full-power bandwidth for a 1-volt-peak output is SR over 2π·Vpeak, about 0.8 MHz, so a large signal near 1 MHz would actually start to slew-limit before the small-signal bandwidth bites — the lower ceiling wins. Then the real non-idealities: finite open-loop gain gives a small gain error that grows as the gain rolls off; input offset voltage gets amplified by the noise gain of 1 + Rf/Rin and shows up as a DC output error; bias currents through the resistors add offset, which I'd manage with a balancing resistor and moderate resistor values; and the output can only swing within the rails, so I keep gain times signal inside the supply range to avoid clipping. I'd confirm the final design in simulation and against the datasheet."
+    },
+  "interviewer_notes": "Mid-level analog circuits station on a non-inverting op-amp stage. Reward a candidate who derives the closed-loop gain from the virtual short and the feedback divider rather than reciting 1 + Rf/Rin, and who cleanly separates the three limits that matter: small-signal bandwidth via the gain-bandwidth product, large-signal slew-rate limiting, and the supply rails. Push them to pick real numbers and carry a worked example through gain and bandwidth; a strong answer sanity-checks the slew limit too. Feed non-idealities (offset, finite gain, a saturating output) to see if they know when the ideal model breaks. Do not require exact datasheet parameters or SPICE precision — reward correct method, correct orders of magnitude, and clear reasoning. Common failure modes to flag: confusing inverting vs non-inverting, thinking bandwidth is independent of gain, and conflating slew rate with bandwidth."
+}

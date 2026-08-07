@@ -1,0 +1,125 @@
+{
+  "id": "structural-load-path",
+  "title": "Trace a Building's Gravity Load Path",
+  "track": "engineering",
+  "domain": "structural",
+  "areas": [
+    "civil_engineering"
+  ],
+  "modality": "conversational",
+  "difficulty": "mid",
+  "tags": [
+    "structural",
+    "load-path",
+    "gravity-loads",
+    "beam-design",
+    "load-combinations",
+    "tributary-area"
+  ],
+  "prompt": "Walk me through how gravity load travels from a typical office floor down to the foundation. Take a representative interior bay, assign realistic dead and live loads, and trace the load through the slab, beams, girders, columns, and footing. Size one representative simply-supported beam as you go, and tell me how you'd think about the lateral system too.",
+  "blurb": "Spoken station — trace gravity load from slab to foundation: tributary areas, dead/live loads, load combinations, a worked beam sizing, and lateral-system awareness.",
+  "rubric": [
+    {
+      "key": "load_path_tracing",
+      "label": "Load path & tributary areas",
+      "description": "Traces gravity load in the correct sequence — slab spans to beams, beams to girders, girders to columns, columns to foundation — and defines tributary width/area at each step so that load is neither lost nor double-counted.",
+      "weight": 1.3
+    },
+    {
+      "key": "load_quantification",
+      "label": "Load quantification",
+      "description": "Assigns realistic dead and live loads (e.g., office live ~50 psf, slab/superimposed dead loads), distinguishes dead vs live vs superimposed, and converts area loads to line loads on members using tributary width.",
+      "weight": 1.2
+    },
+    {
+      "key": "load_combinations",
+      "label": "Load combinations",
+      "description": "Applies factored (LRFD/strength) combinations such as 1.2D + 1.6L and mentions service-level combos for deflection; understands why factors differ and which combo typically governs gravity design.",
+      "weight": 1.1
+    },
+    {
+      "key": "member_sizing",
+      "label": "Member sizing & calculation",
+      "description": "Sizes a simply-supported beam correctly — max moment wL^2/8, required section modulus S = M/Fb (or Mu/(phi*Fy)), and a deflection/serviceability sanity check — with a clean worked numeric example.",
+      "weight": 1.2
+    },
+    {
+      "key": "lateral_awareness",
+      "label": "Lateral-system awareness",
+      "description": "Recognizes that gravity is only part of the story; identifies a lateral force-resisting system (moment frames, braced frames, shear walls) and how lateral load and its own load path coexist with gravity.",
+      "weight": 1.0
+    },
+    {
+      "key": "assumptions_checks",
+      "label": "Assumptions & sanity checks",
+      "description": "States assumptions (support conditions, continuity, spans), checks units, and applies rules of thumb (e.g., span/depth ratios) to sanity-check results.",
+      "weight": 1.0
+    },
+    {
+      "key": "communication",
+      "label": "Communication & structure",
+      "description": "Explains the reasoning in an organized, sequential way; thinks aloud; keeps track of load bookkeeping from floor to footing.",
+      "weight": 0.9
+    }
+  ],
+  "reference": {
+    "scenario": "The candidate is asked to trace the gravity load path for a typical multistory office building and to size a representative member along the way. The station tests whether they understand that load accumulates through a hierarchy of members — slab to beam to girder to column to foundation — and can quantify it with realistic loads, apply strength load combinations, and perform a clean beam-sizing calculation with a serviceability check. The interviewer can vary the bay size, span, or occupancy to see whether the candidate's numbers update correctly. This is an educational reasoning exercise, not a substitute for a licensed engineer's design, code-checked calculations, or project-specific sign-off.",
+    "model_points": [
+      "States the gravity load hierarchy explicitly: floor slab spans to floor beams, beams frame into girders, girders deliver load to columns, columns stack load downward and deliver it to spread/mat/pile foundations that spread it to the soil.",
+      "Uses tributary area/width to apportion load: each beam picks up a strip equal to half the distance to the adjacent members on each side; a column's tributary area is roughly the bay area it supports (e.g., a 30 ft x 30 ft interior bay gives ~900 sq ft per floor).",
+      "Assigns realistic loads: office live load ~50 psf (plus ~20 psf partition allowance), superimposed dead ~15-25 psf (MEP, ceiling, flooring), and slab self-weight (e.g., a 6 in normal-weight concrete slab ~75 psf); names ASCE 7 as the load source.",
+      "Applies LRFD strength load combinations, principally 1.2D + 1.6L, and mentions others (e.g., 1.4D, and combinations with wind/seismic); uses unfactored service loads for deflection checks.",
+      "Converts area load to a line load on a beam: w = (factored area load) x (tributary width); e.g., a beam at 10 ft spacing under ~150 psf factored carries ~1.5 kip/ft.",
+      "Computes design forces for a simply-supported beam: maximum moment M = wL^2/8 and maximum shear V = wL/2 at midspan/supports respectively.",
+      "Sizes the beam by strength: required section modulus S >= M/Fb (ASD) or required Zx from Mu = phi*Fy*Zx (LRFD, phi = 0.90), then selects a rolled shape (e.g., a W-shape) meeting or exceeding it.",
+      "Checks serviceability: live-load deflection limit around L/360 (and L/240 total), using delta = 5wL^4/(384EI) for a uniformly loaded simple span, and applies span/depth rules of thumb (steel beam depth ~ L/20 to L/24).",
+      "Accumulates axial load in columns floor by floor (tributary area x load per floor x number of floors, with live-load reduction on large tributary areas) and sizes the footing from that total.",
+      "Distinguishes the gravity system from the lateral force-resisting system (moment frames, braced frames, shear walls, diaphragms) and notes lateral load has its own path (diaphragm to vertical elements to foundation) that must coexist with gravity."
+    ],
+    "probes": [
+      {
+        "trigger": "candidate leaves load in the slab and jumps to columns",
+        "question": "Before it reaches the column, what member does the slab load pass through, and how do you decide how much each beam picks up?"
+      },
+      {
+        "trigger": "candidate uses an area load directly on a beam",
+        "question": "Your load is in psf but the beam is a line member — how do you get from pounds per square foot to a load per foot along the beam?"
+      },
+      {
+        "trigger": "candidate designs to unfactored loads",
+        "question": "Are you designing the strength of this beam to service loads or factored loads? What combination would you apply and why?"
+      },
+      {
+        "trigger": "candidate forgets the maximum-moment formula or misplaces it",
+        "question": "For a uniformly loaded simply-supported beam, where is the maximum moment and what's its magnitude?"
+      },
+      {
+        "trigger": "candidate sizes for strength only and stops",
+        "question": "The beam is strong enough — but would the occupants notice anything? What else governs the section?"
+      },
+      {
+        "trigger": "candidate ignores lateral loads entirely",
+        "question": "You've handled gravity. What resists wind or seismic load on this building, and how does that load reach the foundation?"
+      }
+    ],
+    "red_flags": [
+      "Losing or double-counting load — e.g., not using tributary width, or adding girder load without the beams that feed it.",
+      "Applying an area load (psf) directly to a line member without converting to load per foot.",
+      "Designing member strength to unfactored service loads instead of factored combinations.",
+      "Misstating the simple-span moment (using wL^2/2 or wL/8 instead of wL^2/8).",
+      "Ignoring deflection/serviceability and sizing on strength alone.",
+      "Grossly unrealistic loads (e.g., 5 psf or 500 psf office live load) with no sanity check.",
+      "Confusing the gravity load path with the lateral system, or claiming gravity framing alone resists wind and seismic.",
+      "Unit errors — mixing psf, plf, kips, and inches without tracking them."
+    ],
+    "follow_ups": [
+      "How does live-load reduction change the column and footing loads on a large tributary area over many floors?",
+      "If this beam were continuous over several supports instead of simply supported, how would the moment diagram and your governing moment change?",
+      "How would a composite steel-concrete floor change the beam's effective stiffness and your deflection check?",
+      "Trace the lateral load path for a wind event: from the facade to the diaphragm to the vertical system to the foundation.",
+      "How do you size the spread footing once you know the total service axial load at the base of the column?"
+    ],
+    "exemplar_answer": "I'd start at the top and follow the load down. The floor slab spans between floor beams and delivers a distributed pressure to them; each beam picks up a tributary strip equal to half the spacing to the beams on either side, so a beam at 10 ft spacing collects a 10 ft-wide strip. Those beams frame into girders, the girders land on columns, the columns stack the accumulated load floor by floor, and the bottom column delivers everything to a footing that spreads it into the soil. For loads on a typical office floor I'd take a 6-inch normal-weight slab at about 75 psf, superimposed dead of roughly 20 psf for ceiling, MEP and flooring, and an office live load of 50 psf plus a partition allowance — call dead about 95 psf and live about 65 psf. For strength I design to factored load, 1.2D + 1.6L, which is about 1.2(95) + 1.6(65) is roughly 218 psf; on a beam at 10 ft tributary width that's about 2.2 kip/ft. Say the beam simply spans 30 ft: the maximum moment is wL^2/8 = 2.2 x 30^2 / 8 is about 248 kip-ft, and the shear is wL/2 is about 33 kips. Sizing in steel with Fy = 50 ksi, LRFD needs Zx >= Mu/(phi*Fy) = 248 x 12 / (0.9 x 50) is about 66 in^3, so I'd pick a W-shape with Zx a bit above that, maybe a W18x40-ish section, then confirm the depth is sensible against the L/20-to-L/24 rule and check live-load deflection against L/360 using 5wL^4/384EI on service load. Columns then accumulate tributary bay load times the number of floors, with live-load reduction on the large tributary, and that total sizes the footing. All of that is the gravity path; separately, wind or seismic load goes from the cladding into the floor diaphragms and then into a lateral system — moment frames, braced frames, or shear walls — which carries it down to the foundation, so the building really has two load paths working at once."
+  },
+  "interviewer_notes": "Mid-level structural station. Let the candidate establish the load hierarchy first, then feed specifics — a bay size, a span, an occupancy — to see whether their numbers update correctly and stay dimensionally consistent. The single most important behavior is clean load bookkeeping: load must flow slab to beam to girder to column to footing via tributary areas without being lost or double-counted, and area loads (psf) must be converted to line loads (plf) before member design. Reward a correct wL^2/8 moment, a strength check to factored combinations (1.2D + 1.6L), and a serviceability/deflection check, plus awareness that gravity and lateral systems are distinct. Do not require exact code-book values, rolled-shape properties from memory, or licensed-engineer precision — reward correct method, realistic estimates, and sanity checks. This is a reasoning exercise, not a code compliance calculation."
+}

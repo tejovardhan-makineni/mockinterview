@@ -14,10 +14,23 @@ func TestSystemPromptIncludesPersonaAndProbes(t *testing.T) {
 		Rubric:    []corpus.RubricDim{{Key: "hld", Label: "High-level design", Description: "components", Weight: 1}},
 		Reference: json.RawMessage(`{"deep_dives":[{"topic":"cdc","probe":"how do you capture DB changes, Debezium?"}]}`),
 	}
-	sp := SystemPrompt(q, "annoying", 5, "deepdive", "7y backend eng", "candidate drew a Postgres box", 30)
-	for _, want := range []string{"impatient", "Debezium", "High-level design", "deepdive", "Postgres"} {
+	sp := SystemPrompt(q, "annoying", 5, "deepdive", "7y backend eng", "candidate drew a Postgres box", 30, "charon")
+	for _, want := range []string{"impatient", "Debezium", "High-level design", "deepdive", "Postgres", "Charon"} {
 		if !strings.Contains(sp, want) {
 			t.Errorf("system prompt missing %q", want)
+		}
+	}
+}
+
+func TestInterviewerRoleByField(t *testing.T) {
+	cases := map[string]corpus.Question{
+		"an attending physician who supervises trainees":      {Domain: "clinical_reasoning", Areas: []string{"medicine"}},
+		"a senior mechanical engineer":                        {Domain: "thermodynamics", Areas: []string{"mechanical_engineering"}},
+		"a hiring manager who has run hundreds of interviews": {Domain: "behavioral", Areas: []string{"software_engineering", "medicine"}},
+	}
+	for want, q := range cases {
+		if got := interviewerRole(q); got != want {
+			t.Errorf("interviewerRole(%v) = %q, want %q", q.Areas, got, want)
 		}
 	}
 }

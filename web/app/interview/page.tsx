@@ -32,6 +32,14 @@ function StudioInner() {
   const lastCanvas = useRef<string>("");
   const timerRef = useRef<number | undefined>(undefined);
   const endedRef = useRef(false);
+  const transcriptRef = useRef<HTMLDivElement | null>(null);
+
+  // Keep the transcript pinned to the newest line as it streams — otherwise long
+  // answers grow below the fold and look like the text "stopped printing".
+  useEffect(() => {
+    const el = transcriptRef.current;
+    if (el) el.scrollTop = el.scrollHeight;
+  }, [captions]);
 
   useEffect(() => {
     // cancelled guards the async setup: if we unmount (incl. React StrictMode's
@@ -67,6 +75,9 @@ function StudioInner() {
         // Coalesce: while a turn streams (or when it finalizes), replace the last
         // bubble of the same role rather than adding a new one per chunk.
         if (last && last.role === c.role && last.streaming) return [...prev.slice(0, -1), c];
+        // Dedupe an identical finalized repeat (e.g. a closing line the model
+        // emits twice) so it doesn't show up as two bubbles.
+        if (last && last.role === c.role && !c.streaming && last.text.trim() === c.text.trim()) return prev;
         return [...prev.slice(-60), c];
       }))
         .on("speaking", (on) => { avatar.current.speaking = on; avatar.current.mood = on ? "neutral" : "listening"; setAiState(on ? "speaking" : "listening"); })
@@ -178,7 +189,7 @@ function StudioInner() {
           <div className="mt-3">
             <LiveHUD micRef={micRef} aiState={aiState} conn={conn} mode={mode} />
           </div>
-          <div className="mi-panel mt-3 max-h-[40vh] flex-1 overflow-y-auto rounded-xl border border-[var(--color-line)] bg-[var(--color-panel)] p-3 text-sm lg:max-h-none">
+          <div ref={transcriptRef} className="mi-panel mt-3 max-h-[40vh] flex-1 overflow-y-auto rounded-xl border border-[var(--color-line)] bg-[var(--color-panel)] p-3 text-sm lg:max-h-[52vh]">
             {captions.length === 0 && <p className="text-[var(--color-faint)]">The interviewer will begin shortly…</p>}
             {captions.map((c, i) => (
               <p key={i} className={`mb-2 ${c.role === "interviewer" ? "text-[var(--color-ink)]" : "text-[var(--color-muted)]"}`}>

@@ -4,7 +4,7 @@ import type { QuestionSummary } from "./catalog";
 
 const q: QuestionSummary = {
   id: "url-shortener", title: "Design a URL Shortener (TinyURL)", track: "engineering",
-  domain: "system_design", modality: "system_design", difficulty: "mid",
+  domain: "system_design", areas: ["software_engineering"], modality: "system_design", difficulty: "mid",
   tags: ["hashing", "kv-store", "caching"],
   prompt: "Design a service that turns long URLs into short links.",
   blurb: "Read-heavy KV design — hashing, collisions, cache, analytics.",

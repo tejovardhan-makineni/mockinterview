@@ -1,0 +1,125 @@
+{
+  "id": "thermo-cycle-sizing",
+  "title": "Size a Steam Power Cycle (Rankine)",
+  "track": "engineering",
+  "domain": "thermodynamics",
+  "areas": [
+    "mechanical_engineering"
+  ],
+  "modality": "conversational",
+  "difficulty": "senior",
+  "tags": [
+    "thermodynamics",
+    "rankine-cycle",
+    "power-plant",
+    "energy-balance",
+    "cycle-efficiency",
+    "steam-turbine"
+  ],
+  "prompt": "You're asked to size a steam power cycle to deliver about 10 MW of net electrical power. Walk me through your structured approach — the cycle states you'd fix, the first-law energy balance on each component, how you get the steam mass flow rate and thermal efficiency, and the practical tradeoffs you'd weigh. Talk me through your reasoning and estimates out loud.",
+  "blurb": "Spoken station — size a Rankine steam cycle for a target net power: fix the states, do a per-component energy balance, get mass flow and efficiency, and reason about superheat, reheat, and condenser pressure.",
+  "rubric": [
+    {
+      "key": "problem_framing",
+      "label": "Framing & assumptions",
+      "description": "States the target (net power), picks reasonable boiler/condenser conditions, identifies the four ideal components (boiler, turbine, condenser, pump) and the working assumptions (steady flow, isentropic ideal devices, negligible KE/PE), and names the Rankine cycle explicitly.",
+      "weight": 1.1
+    },
+    {
+      "key": "governing_equations",
+      "label": "Governing equations",
+      "description": "Applies the steady-flow energy equation (first law) per component: turbine work w_t = h1 - h2, pump work w_p = h4 - h3 ≈ v·Δp, boiler heat q_in = h1 - h4, condenser heat q_out = h2 - h3; defines net work and thermal efficiency correctly.",
+      "weight": 1.3
+    },
+    {
+      "key": "state_properties",
+      "label": "State properties & tables",
+      "description": "Uses steam-table / Mollier reasoning to fix enthalpies at each state, handles the two-phase turbine exit via quality x and h = hf + x·hfg, and checks that values are physically sensible.",
+      "weight": 1.1
+    },
+    {
+      "key": "sizing_calculation",
+      "label": "Sizing & mass flow",
+      "description": "Gets steam mass flow from net power (ṁ = Ẇ_net / w_net), computes thermal efficiency η = w_net / q_in, and produces order-of-magnitude-correct numbers with units carried through.",
+      "weight": 1.2
+    },
+    {
+      "key": "tradeoffs",
+      "label": "Practical tradeoffs",
+      "description": "Discusses efficiency and reliability levers — superheat, reheat, regenerative feedwater heating, lower condenser pressure, higher boiler pressure — and their limits (turbine exit moisture, metallurgy, cost, cooling water).",
+      "weight": 1.2
+    },
+    {
+      "key": "real_effects",
+      "label": "Real-world corrections",
+      "description": "Moves from ideal to real: turbine and pump isentropic efficiencies, pressure drops, boiler/mechanical/generator losses, and how these change the mass flow and heat input needed to still hit 10 MW.",
+      "weight": 1.0
+    },
+    {
+      "key": "communication",
+      "label": "Communication & structure",
+      "description": "Lays out the analysis in an organized, sequential way, thinks aloud, sanity-checks numbers, and clearly separates assumptions from results.",
+      "weight": 0.9
+    }
+  ],
+  "reference": {
+    "scenario": "The candidate must size a simple ideal Rankine steam cycle to deliver roughly 10 MW of net power. The station tests whether they can fix cycle states from chosen boiler and condenser conditions, apply the steady-flow first law to each component, extract the steam mass flow rate and thermal efficiency, and reason about the practical levers (superheat, reheat, regeneration, condenser pressure, component efficiencies) that separate a textbook cycle from a real plant. The interviewer can perturb the problem — drop the condenser pressure, add reheat, or apply a turbine isentropic efficiency — to see how the reasoning adapts. This is an educational reasoning exercise, not a substitute for real plant design, thermal-hydraulic analysis, or code-compliant power-plant engineering sign-off.",
+    "model_points": [
+      "Names the cycle: a simple ideal Rankine cycle with four components — boiler (heat addition at constant pressure), turbine (near-isentropic expansion), condenser (heat rejection at constant pressure), and feed pump (near-isentropic compression of saturated liquid). Assumes steady flow and negligible kinetic/potential energy.",
+      "Picks reasonable conditions, e.g. boiler at ~8 MPa with superheat to ~500 °C, condenser at ~10 kPa (saturation ~46 °C, set by available cooling water), and states these drive the state points.",
+      "Fixes the four states: State 1 superheated steam at turbine inlet (~8 MPa, 500 °C, h1 ≈ 3400 kJ/kg, s1 ≈ 6.7 kJ/kg·K); State 2 turbine exit at condenser pressure with s2 = s1, two-phase with quality x2 ≈ 0.80, h2 ≈ 2100 kJ/kg; State 3 saturated liquid leaving condenser (h3 ≈ 192 kJ/kg at 10 kPa); State 4 compressed liquid after the pump.",
+      "Applies the steady-flow energy equation per component: turbine work w_t = h1 - h2 ≈ 1300 kJ/kg; pump work w_p = v·Δp ≈ (0.00101 m³/kg)(8000-10 kPa) ≈ 8 kJ/kg so h4 ≈ 200 kJ/kg; boiler heat q_in = h1 - h4 ≈ 3200 kJ/kg; condenser heat q_out = h2 - h3 ≈ 1900 kJ/kg.",
+      "Net specific work w_net = w_t - w_p ≈ 1300 - 8 ≈ 1290 kJ/kg; verifies energy closure w_net ≈ q_in - q_out ≈ 3200 - 1900 ≈ 1300 kJ/kg.",
+      "Thermal efficiency η = w_net / q_in ≈ 1290 / 3200 ≈ 0.40 (about 40% for these conditions), and notes back-work ratio w_p/w_t is tiny (~0.6%) — characteristic of vapor power cycles versus gas cycles.",
+      "Mass flow from the target: ṁ = Ẇ_net / w_net = 10,000 kW / 1290 kJ/kg ≈ 7.8 kg/s of steam; correspondingly q_in·ṁ ≈ 25 MW of boiler heat and q_out·ṁ ≈ 15 MW rejected to the condenser cooling water.",
+      "Tradeoffs to raise efficiency: superheat (raises mean temperature of heat addition and keeps turbine exit drier), reheat (expand, reheat, expand again — limits exit moisture and adds ~4-5 points), regenerative feedwater heating with extraction (raises average heat-addition temperature), higher boiler pressure, and lower condenser pressure (biggest single lever, limited by cooling-water temperature and air in-leakage).",
+      "Constraints and limits: turbine exit quality should stay above ~0.88-0.90 to limit blade erosion; boiler pressure and temperature are capped by tube metallurgy and creep; lower condenser pressure is limited by ambient/cooling-water temperature; every gain trades against capital cost and complexity.",
+      "Real-cycle corrections: apply turbine isentropic efficiency (~0.85-0.90) so actual w_t = η_t·(h1 - h2s), which raises exit enthalpy and moisture allowance; include pump efficiency, boiler and piping pressure drops, and mechanical/generator losses — all of which raise the required mass flow and fuel heat to still deliver 10 MW net."
+    ],
+    "probes": [
+      {
+        "trigger": "candidate starts computing without fixing the cycle states or conditions",
+        "question": "Before any numbers, what boiler and condenser conditions are you assuming, and what are your four state points?"
+      },
+      {
+        "trigger": "candidate forgets pump work or treats the liquid as compressible",
+        "question": "How do you get the pump work, and roughly how big is it compared with the turbine work?"
+      },
+      {
+        "trigger": "candidate ignores that turbine exit is wet",
+        "question": "At the condenser pressure, what phase is the steam leaving the turbine, and how do you find its enthalpy?"
+      },
+      {
+        "trigger": "candidate gets efficiency but not mass flow (or vice versa)",
+        "question": "You have the specific work — how do you turn a 10 MW target into a steam mass flow rate?"
+      },
+      {
+        "trigger": "candidate stays purely ideal",
+        "question": "Now the turbine is only 87% isentropically efficient — what changes in your mass flow and in the exit steam quality?"
+      },
+      {
+        "trigger": "candidate wants more efficiency but doesn't say how",
+        "question": "If I need a few more points of thermal efficiency, what would you change, and what's the penalty for each option?"
+      }
+    ],
+    "red_flags": [
+      "Not naming or misidentifying the four Rankine components or the heat-addition/heat-rejection processes.",
+      "Neglecting pump work entirely, or computing it as if compressing a gas rather than v·Δp for a liquid.",
+      "Treating turbine exit as superheated vapor and ignoring the two-phase quality, so h2 and efficiency are wrong.",
+      "Defining thermal efficiency incorrectly (e.g. w_net/q_out, or omitting pump work from net work).",
+      "Producing wildly non-physical numbers (e.g. >60% efficiency, or a mass flow off by an order of magnitude) without a sanity check.",
+      "Confusing the direction of energy flow — sign errors that make the condenser add heat or the pump produce work.",
+      "Claiming huge efficiency gains from lowering condenser pressure without noting the cooling-water and air-leakage limits, or ignoring turbine-exit moisture limits.",
+      "Never moving from the ideal cycle to real component efficiencies and losses when asked."
+    ],
+    "follow_ups": [
+      "Add a single reheat stage — where do you place it, and how does it help both efficiency and turbine blade life?",
+      "Sketch how regenerative feedwater heating with a turbine extraction changes the efficiency and why.",
+      "If your cooling water is warmer in summer and the condenser pressure rises to 15 kPa, what happens to power output and efficiency?",
+      "How would you decide between raising boiler pressure versus adding superheat if metallurgy limits your peak temperature?",
+      "Where does the ~15 MW of rejected heat go, and how would that constrain your plant siting and cooling design?"
+    ],
+    "exemplar_answer": "I'd model this as a simple ideal Rankine cycle with four components and pin down the states first. Say the boiler runs at 8 MPa with superheat to 500 °C and the condenser sits at about 10 kPa, set by the cooling water. State 1 at turbine inlet is then superheated steam with h1 around 3400 kJ/kg and entropy about 6.7 kJ/kg·K. Expanding isentropically to 10 kPa, entropy is conserved, so State 2 is wet — I'd solve for quality, roughly 0.80, giving h2 near 2100 kJ/kg, and I'd flag that quality because blade erosion below about 0.88 is a real concern. State 3 is saturated liquid off the condenser at 10 kPa, h3 ≈ 192 kJ/kg, and the pump raises it to 8 MPa with work v·Δp ≈ 8 kJ/kg, so h4 ≈ 200 kJ/kg — tiny compared with the turbine, which is the whole appeal of a vapor cycle. Now the first law per component: turbine work is h1 - h2 ≈ 1300 kJ/kg, boiler heat is h1 - h4 ≈ 3200 kJ/kg, condenser rejects h2 - h3 ≈ 1900 kJ/kg. Net specific work is about 1290 kJ/kg, and I'd check closure: q_in - q_out ≈ 1300, which matches. Thermal efficiency is w_net/q_in ≈ 1290/3200 ≈ 40%. For 10 MW net, mass flow is Ẇ_net/w_net = 10,000/1290 ≈ 7.8 kg/s of steam, which means about 25 MW into the boiler and 15 MW dumped to the condenser. To push efficiency I'd reach for the usual levers — more superheat, a reheat stage to both add a few points and keep the exit drier, regenerative feedwater heating, higher boiler pressure, and above all a lower condenser pressure since that's the strongest single lever, though it's capped by cooling-water temperature. Finally I'd make it real: with a turbine isentropic efficiency around 87% the actual work drops, the exit gets drier and warmer, and I'd need proportionally more steam and fuel — plus pump, pressure-drop, and generator losses — to still land 10 MW net."
+  },
+  "interviewer_notes": "Senior-level thermodynamics sizing station. Let the candidate fix their own cycle conditions, then hold them to a clean per-component first-law analysis and a defensible mass flow and efficiency. The two most telling behaviors are (1) treating the turbine exit as a two-phase state and solving for quality via conserved entropy, and (2) getting mass flow from ṁ = Ẇ_net/w_net with units intact. Reward tiny-pump-work insight, energy-balance closure checks, and physically sane numbers (~40% efficiency, ~8 kg/s, ~25 MW boiler duty for a 10 MW plant). Perturb the problem — drop condenser pressure, add reheat, or impose an 87% turbine efficiency — and watch whether the reasoning updates. Penalize neglected pump work, ignoring exit moisture, wrong efficiency definitions, sign errors, and unbounded claims about lowering condenser pressure. This is a reasoning exercise; do not require exact steam-table digits — order-of-magnitude-correct estimates with correct method are the bar."
+}

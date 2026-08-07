@@ -7,6 +7,8 @@ import type { SessionHistoryItem } from "@/lib/types";
 import { Badge, Button, Panel } from "@/components/ui";
 import { AppShell } from "@/components/AppShell";
 import { Radar } from "@/components/Radar";
+import { Achievements } from "@/components/Achievements";
+import { computeAchievements, type QuestionMeta } from "@/lib/features/achievements";
 
 const MOD_LABEL: Record<string, string> = { system_design: "Whiteboard", coding: "Coding", written: "Written", conversational: "Spoken" };
 const tone = (s: number) => (s >= 3 ? "good" : s >= 2 ? "warn" : "bad");
@@ -15,16 +17,26 @@ const pretty = (s: string) => s.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toU
 export default function DashboardPage() {
   const router = useRouter();
   const [items, setItems] = useState<SessionHistoryItem[]>([]);
+  const [metaByQid, setMetaByQid] = useState<Record<string, QuestionMeta>>({});
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     (async () => {
       const u = await api.me();
       if (!u) { router.replace("/login"); return; }
-      try { setItems(await api.listSessions()); } catch { /* ignore */ }
+      // Sessions drive the stats; the catalog supplies domain/areas per question
+      // so achievements can count behavioral stations and distinct fields.
+      const [sessions, questions] = await Promise.all([
+        api.listSessions().catch(() => [] as SessionHistoryItem[]),
+        api.listQuestions().catch(() => []),
+      ]);
+      setItems(sessions);
+      setMetaByQid(Object.fromEntries(questions.map((q) => [q.id, { domain: q.domain, areas: q.areas ?? [] }])));
       setLoading(false);
     })();
   }, [router]);
+
+  const achievements = useMemo(() => computeAchievements(items, metaByQid), [items, metaByQid]);
 
   const scored = useMemo(() => items.filter((i) => i.status === "complete" && i.scored !== false && typeof i.overall === "number"), [items]);
   const avg = scored.length ? scored.reduce((s, i) => s + (i.overall ?? 0), 0) / scored.length : 0;
@@ -61,6 +73,9 @@ export default function DashboardPage() {
             <Stat label="Best score" value={scored.length ? `${best.toFixed(1)}/4` : "—"} tone={scored.length ? tone(best) : undefined} />
           </div>
 
+          {/* Gamification — streak + achievement badges */}
+          <Achievements streak={achievements.streak} badges={achievements.badges} earnedCount={achievements.earnedCount} />
+
           <div className="mt-4 grid gap-4 lg:grid-cols-[1.3fr_1fr]">
             {/* Recent sessions */}
             <Panel className="p-5">
@@ -86,11 +101,15 @@ export default function DashboardPage() {
             </Panel>
 
             {/* Skill radar */}
-            <Panel className="flex flex-col items-center p-5">
-              <h2 className="mb-2 self-start font-semibold">Skill radar</h2>
+            <Panel className="flex flex-col p-5">
+              <h2 className="mb-2 font-semibold">Skill radar</h2>
               {byMod.length >= 3
-                ? <Radar data={byMod.map((m) => ({ label: MOD_LABEL[m.modality] ?? m.modality, value: m.avg }))} size={260} />
-                : <p className="py-10 text-center text-sm text-[var(--color-faint)]">Complete interviews in 3+ formats to see your skill radar.</p>}
+                ? (
+                  <div className="flex min-h-[240px] flex-1 items-center justify-center">
+                    <Radar data={byMod.map((m) => ({ label: MOD_LABEL[m.modality] ?? m.modality, value: m.avg }))} size={280} fill />
+                  </div>
+                )
+                : <p className="flex flex-1 items-center justify-center py-10 text-center text-sm text-[var(--color-faint)]">Complete interviews in 3+ formats to see your skill radar.</p>}
             </Panel>
           </div>
 

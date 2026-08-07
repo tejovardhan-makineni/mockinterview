@@ -1,0 +1,125 @@
+{
+  "id": "shallow-foundation-bearing",
+  "title": "Size a Shallow Footing (Bearing Capacity)",
+  "track": "engineering",
+  "domain": "geotechnical",
+  "areas": [
+    "civil_engineering"
+  ],
+  "modality": "conversational",
+  "difficulty": "mid",
+  "tags": [
+    "geotechnical",
+    "foundation",
+    "bearing-capacity",
+    "terzaghi",
+    "settlement",
+    "factor-of-safety"
+  ],
+  "prompt": "A column delivers a service axial load to a shallow spread footing on soil. Walk me through how you'd size that footing. Start from the bearing-capacity equation, get to an allowable bearing pressure with a sensible factor of safety, work out the required footing area, and then tell me what else you'd check before you'd trust it — settlement, water table, eccentricity. Put some real numbers on it.",
+  "blurb": "Spoken station — size a spread footing: Terzaghi/general bearing-capacity equation, allowable pressure with a factor of safety, required area, and settlement/water-table/eccentricity checks with a worked example.",
+  "rubric": [
+    {
+      "key": "bearing_capacity_theory",
+      "label": "Bearing-capacity theory",
+      "description": "States the general/Terzaghi bearing-capacity equation qult = cNc + qNq + 0.5*gamma*B*Ngamma, explains the three terms (cohesion, surcharge, self-weight), and knows the Nc/Nq/Ngamma factors depend on the friction angle phi.",
+      "weight": 1.3
+    },
+    {
+      "key": "factor_of_safety",
+      "label": "Allowable pressure & factor of safety",
+      "description": "Converts ultimate capacity to allowable bearing pressure with a factor of safety around 3 (q_allow = qult/FS), and understands why a large FS is used against a bearing failure.",
+      "weight": 1.1
+    },
+    {
+      "key": "footing_sizing",
+      "label": "Footing sizing",
+      "description": "Computes required footing area A = P/q_allow from the service load and allowable pressure, picks practical plan dimensions, and iterates because B appears in the capacity equation and in the self-weight term.",
+      "weight": 1.2
+    },
+    {
+      "key": "settlement_check",
+      "label": "Settlement check",
+      "description": "Recognizes that settlement — not just bearing failure — often governs; distinguishes immediate (elastic) settlement in sands from consolidation settlement in clays, and checks total/differential settlement against tolerable limits.",
+      "weight": 1.2
+    },
+    {
+      "key": "site_effects",
+      "label": "Water table & eccentricity effects",
+      "description": "Accounts for a high water table (buoyant/effective unit weight reduces q and the self-weight term) and for load eccentricity (effective width B' = B - 2e, Meyerhof) or moment causing non-uniform pressure and possible uplift.",
+      "weight": 1.1
+    },
+    {
+      "key": "assumptions_checks",
+      "label": "Assumptions & sanity checks",
+      "description": "States assumptions (soil type, phi, c, unit weight, embedment depth), tracks units, and sanity-checks the pressure and dimensions against typical presumptive bearing values.",
+      "weight": 1.0
+    },
+    {
+      "key": "communication",
+      "label": "Communication & structure",
+      "description": "Presents the sizing logic in a clear, ordered way; thinks aloud; separates capacity from serviceability cleanly.",
+      "weight": 0.9
+    }
+  ],
+  "reference": {
+    "scenario": "The candidate is asked to size a shallow spread footing supporting a single column load. The station tests whether they can move from bearing-capacity theory to a designed footing: writing the general bearing-capacity equation, applying a factor of safety to get an allowable pressure, sizing the area from the service load, and then recognizing that settlement, groundwater, and eccentricity all modify the answer. The interviewer can vary the soil (dense sand vs soft clay), the water-table depth, or add a moment to see whether the candidate adapts. This is an educational reasoning exercise, not a substitute for a geotechnical engineer's site-specific investigation, code-checked design, or professional sign-off.",
+    "model_points": [
+      "Writes the general/Terzaghi bearing-capacity equation qult = c*Nc + q*Nq + 0.5*gamma*B*Ngamma, and names the three contributions: soil cohesion, surcharge from embedment (q = gamma*Df), and the footing self-weight/width term.",
+      "Knows the bearing-capacity factors Nc, Nq, Ngamma are functions of the friction angle phi (e.g., for phi = 30 degrees roughly Nc ~ 30, Nq ~ 18, Ngamma ~ 15-22 depending on the theory), and that for a purely cohesive (undrained) clay phi = 0 gives Nc ~ 5.14 and qult ~ 5.14*cu + q.",
+      "Applies a factor of safety of about 3 to get allowable bearing: q_allow = qult/FS (often net bearing, subtracting the overburden), reflecting uncertainty in soil parameters and the severity of a bearing failure.",
+      "Sizes the footing from the service load: required area A = P/q_allow; for a square footing B = sqrt(A); iterates because B enters the 0.5*gamma*B*Ngamma term and shape/depth factors.",
+      "Adds shape, depth, and inclination correction factors (e.g., Meyerhof/Hansen) for real footings rather than treating the strip equation as exact.",
+      "Checks settlement as a separate, often governing limit state: immediate/elastic settlement in granular soils (from SPT/CPT correlations or elastic theory delta = q*B*(1-nu^2)*I/E) and time-dependent consolidation settlement in saturated clays (Cc, e0, and the log-effective-stress relationship).",
+      "Compares total and differential settlement to tolerable limits (commonly around 1 inch total, with differential/angular distortion limits like 1/500) — recognizing that in soft clay settlement, not bearing failure, usually controls the size.",
+      "Handles the water table: a high or rising water table reduces effective (buoyant) unit weight (gamma' ~ gamma_sat - gamma_w), lowering both the surcharge term and the self-weight term and thus the bearing capacity.",
+      "Handles eccentric/moment loading with Meyerhof's effective-area method: effective width B' = B - 2e, design on the reduced area, keep the resultant within the middle third to avoid uplift, and check the peak edge pressure q = P/A +/- M*c/I.",
+      "Sanity-checks against presumptive/allowable bearing values (e.g., a few ksf for stiff clay or medium-dense sand) and states assumptions on c, phi, gamma, and embedment depth Df."
+    ],
+    "probes": [
+      {
+        "trigger": "candidate recites qult but can't apportion the three terms",
+        "question": "In your bearing-capacity equation, what physical contribution does each of the three terms represent, and which dominates in a clean sand versus a soft clay?"
+      },
+      {
+        "trigger": "candidate designs directly to ultimate capacity",
+        "question": "Would you put the service load on the soil right up to its ultimate capacity? What factor of safety do you apply and why is it as large as it is?"
+      },
+      {
+        "trigger": "candidate stops after satisfying bearing capacity",
+        "question": "The footing won't shear the soil — but will the owner be happy in a year? What other limit state might actually govern the size?"
+      },
+      {
+        "trigger": "candidate ignores groundwater",
+        "question": "The water table rises to near the footing base. What happens to your bearing capacity, and why?"
+      },
+      {
+        "trigger": "candidate treats the load as purely concentric when a moment is present",
+        "question": "Now add a column moment. How does the pressure distribution change, and how do you size the footing to avoid uplift at one edge?"
+      },
+      {
+        "trigger": "candidate forgets B is in the equation being solved",
+        "question": "Notice B appears in both your capacity equation and in the area you're solving for — how do you resolve that?"
+      }
+    ],
+    "red_flags": [
+      "Designing to ultimate bearing capacity with no factor of safety, or an unreasonably small one.",
+      "Omitting or garbling the bearing-capacity equation, or not knowing the factors depend on friction angle phi.",
+      "Checking bearing capacity only and never considering settlement — especially on clay where settlement usually governs.",
+      "Confusing immediate settlement in sand with consolidation settlement in clay, or ignoring time-dependent settlement entirely.",
+      "Ignoring the water table's effect on effective unit weight and therefore on capacity.",
+      "Treating an eccentric/moment load as concentric, or allowing uplift/tension under the footing without noticing.",
+      "Not iterating when B appears both in the capacity term and in the required-area calculation.",
+      "Unit errors or wildly unrealistic allowable pressures with no sanity check against presumptive values."
+    ],
+    "follow_ups": [
+      "How would your approach change on soft normally-consolidated clay, where consolidation settlement dominates?",
+      "How do you estimate immediate settlement of a footing on sand from SPT blow counts or CPT data?",
+      "At what point would you abandon a spread footing and recommend a mat or a deep (pile) foundation instead?",
+      "How does embedment depth Df affect both bearing capacity and settlement, and is deeper always better?",
+      "How would you convert this service-load sizing into the structural design of the footing (thickness, punching shear, flexural reinforcement)?"
+    ],
+    "exemplar_answer": "I'd separate two questions: will the soil fail in bearing, and will the footing settle too much — and size for whichever governs. For capacity I use the general bearing-capacity equation, qult = c*Nc + q*Nq + 0.5*gamma*B*Ngamma, where the first term is cohesion, the second is surcharge from embedment q = gamma*Df, and the third is the footing width and soil self-weight; the N factors all depend on the friction angle phi. Say I have a medium-dense sand, phi about 30 degrees, gamma about 120 pcf, negligible cohesion, and I embed the footing Df = 3 ft, and the column brings a service load P of 300 kips. With phi = 30, roughly Nq ~ 18 and Ngamma ~ 20; the surcharge term is q*Nq = 0.12 ksf x 3 x 18 is about 6.5 ksf, plus the width term, so qult comes out in the rough range of 15-20 ksf; taking FS = 3 gives an allowable of maybe 5-6 ksf. Required area A = P/q_allow = 300/5 = 60 sq ft, so a square footing about 8 ft x 8 ft, and I'd iterate once because B sits in the 0.5*gamma*B*Ngamma term. Then I check settlement, which in sand is largely immediate/elastic — I'd estimate it from SPT correlations or elastic theory and keep total settlement under about an inch with differential distortion within tolerable limits; on a soft clay I'd instead run a consolidation settlement using Cc and the change in effective stress, and settlement would probably govern the size, not bearing. I'd also watch the water table: if it rises to the footing, the effective unit weight drops to buoyant, roughly halving the surcharge and self-weight terms and cutting capacity. Finally, if the column carries a moment I'd use Meyerhof's effective width B' = B - 2e, design on the reduced area, keep the resultant in the middle third so there's no uplift, and check the peak edge pressure against q_allow. I'd state my assumptions on c, phi, gamma, and Df, and sanity-check the allowable pressure against presumptive values for the soil."
+  },
+  "interviewer_notes": "Mid-level geotechnical station. Let the candidate lay out the bearing-capacity equation and the FS-based sizing, then push on the parts that separate a strong answer: that settlement is a distinct limit state that frequently governs (especially on clay), that groundwater reduces capacity through effective unit weight, and that eccentricity demands an effective-width or middle-third check. Feed a soil change (dense sand to soft clay), a rising water table, or an added column moment to test adaptability. Reward correctly naming and apportioning the three bearing terms, a sensible FS near 3, A = P/q_allow with iteration on B, and a clear split between capacity and serviceability. Do not require exact Nc/Nq/Ngamma table values, code-book settlement limits, or licensed-engineer precision — reward correct method, realistic estimates, and unit-consistent sanity checks. This is a reasoning exercise, not a site-specific geotechnical report."
+}

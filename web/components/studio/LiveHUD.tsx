@@ -52,7 +52,7 @@ export function LiveHUD({
   const ai = AI_STATES[aiState];
 
   return (
-    <div className="mi-panel flex items-center gap-3 rounded-xl border border-[var(--color-line)] bg-[var(--color-panel)] px-3 py-2">
+    <div className="mi-panel flex flex-col gap-2 rounded-xl border border-[var(--color-line)] bg-[var(--color-panel)] px-3 py-2.5">
       {/* Mic meter — proof the candidate is being heard */}
       <div className="flex items-center gap-2" title="Your microphone level">
         <span className="text-[var(--color-accent)]" aria-hidden>
@@ -68,13 +68,13 @@ export function LiveHUD({
             />
           ))}
         </div>
-        <span ref={labelRef} className="hidden text-[11px] font-medium text-[var(--color-muted)] sm:inline">Listening</span>
+        <span ref={labelRef} className="text-[11px] font-medium text-[var(--color-muted)]">Listening</span>
       </div>
 
-      <span className="h-5 w-px bg-[var(--color-line)]" />
+      <span className="h-px w-full bg-[var(--color-line)]" />
 
       {/* Interviewer state */}
-      <div className="ml-auto flex min-w-0 items-center gap-1.5" aria-live="polite">
+      <div className="flex min-w-0 items-center gap-1.5" aria-live="polite">
         <span className={ai.color}>{ai.icon}</span>
         <span className={`truncate text-[11px] font-medium ${ai.color}`}>{ai.label}</span>
         {aiState === "thinking" && <ThinkingDots />}

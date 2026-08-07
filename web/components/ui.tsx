@@ -46,7 +46,7 @@ export function Badge({ children, tone = "muted" }: { children: ReactNode; tone?
     warn: "text-[var(--color-warn)] border-[var(--color-warn)]",
     bad: "text-[var(--color-bad)] border-[var(--color-bad)]",
   }[tone];
-  return <span className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-medium ${map}`}>{children}</span>;
+  return <span className={`inline-flex items-center rounded-full border px-2.5 py-1 text-xs font-medium leading-none ${map}`}>{children}</span>;
 }
 
 export function Field({ label, children, hint }: { label: string; children: ReactNode; hint?: string }) {

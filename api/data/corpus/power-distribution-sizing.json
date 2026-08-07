@@ -1,0 +1,125 @@
+{
+  "id": "power-distribution-sizing",
+  "title": "Size a Feeder & Transformer",
+  "track": "engineering",
+  "domain": "power_systems",
+  "areas": [
+    "electrical_engineering"
+  ],
+  "modality": "conversational",
+  "difficulty": "mid",
+  "tags": [
+    "power-systems",
+    "distribution",
+    "transformer-sizing",
+    "power-factor",
+    "voltage-drop",
+    "protection"
+  ],
+  "prompt": "You've got a three-phase load at the end of a feeder, and you need to size the conductor and the transformer that supply it. Walk me through your approach — how you get from the load's power to a current, how you pick a conductor for ampacity and voltage drop, how you size the transformer with headroom, and how you'd think about the breaker and protection. Give me a worked example with real numbers.",
+  "blurb": "Spoken station — size a distribution feeder and transformer: P/Q/S and power factor, three-phase current, conductor ampacity and voltage-drop limit, transformer kVA with headroom, and protection basics.",
+  "rubric": [
+    {
+      "key": "power_triangle",
+      "label": "Power triangle & power factor",
+      "description": "Distinguishes real power P (kW), reactive power Q (kVAR), and apparent power S (kVA) with S = √(P²+Q²), and uses power factor pf = P/S = cos(θ); knows loads are sized/billed on kVA and current, not just kW.",
+      "weight": 1.2
+    },
+    {
+      "key": "three_phase_current",
+      "label": "Three-phase current calculation",
+      "description": "Computes line current for a three-phase load as I = S/(√3·V_LL) (or P/(√3·V_LL·pf)), uses line-to-line voltage correctly, and gets the √3 factor and units right.",
+      "weight": 1.3
+    },
+    {
+      "key": "conductor_ampacity",
+      "label": "Conductor sizing for ampacity",
+      "description": "Selects a conductor rated for the load current with margin (continuous-load derating, e.g. sizing to ~125% of continuous current), and mentions ampacity depends on conductor material/size, insulation temperature rating, and installation/ambient derating.",
+      "weight": 1.1
+    },
+    {
+      "key": "voltage_drop",
+      "label": "Voltage-drop check",
+      "description": "Checks feeder voltage drop against a limit (rule of thumb ~3% feeder, ~5% total), using Vdrop ≈ √3·I·(R·cosθ + X·sinθ)·L for three-phase, and knows long runs are often voltage-drop-limited rather than ampacity-limited, requiring an upsized conductor.",
+      "weight": 1.2
+    },
+    {
+      "key": "transformer_sizing",
+      "label": "Transformer kVA sizing",
+      "description": "Sizes the transformer in kVA (not kW) to cover the apparent-power load plus headroom/growth (e.g. loading to ~80%), rounds up to a standard rating, and considers inrush/motor starting and future load.",
+      "weight": 1.2
+    },
+    {
+      "key": "protection",
+      "label": "Protection & coordination",
+      "description": "Picks an overcurrent device (breaker/fuse) above continuous load but below conductor ampacity so the conductor is protected, and shows awareness of coordination/selectivity, interrupting rating, and that protection guards the wire, not just the load.",
+      "weight": 1.0
+    },
+    {
+      "key": "worked_example",
+      "label": "Worked numeric example",
+      "description": "Carries a full example: a load in kW/kVA at a stated voltage and pf, computes S and line current, picks a conductor and transformer size with headroom, and estimates voltage drop — with correct units throughout.",
+      "weight": 1.1
+    }
+  ],
+  "reference": {
+    "scenario": "A candidate is asked to size a three-phase distribution feeder and its supply transformer for a given load. The station tests whether they can move from a load's real and reactive power to an apparent power and a line current, select a conductor for both ampacity and voltage drop, size the transformer in kVA with sensible headroom, and reason about overcurrent protection and coordination. A strong candidate handles the power triangle and the √3 correctly, knows long feeders are often voltage-drop-limited, and works a concrete numeric example. This is an educational reasoning exercise using rules of thumb, not a substitute for a stamped design to the applicable electrical code (e.g. NEC/IEC) or a real protection study.",
+    "model_points": [
+      "Power triangle: real power P (kW) does work, reactive power Q (kVAR) supports the magnetic/electric fields of inductive loads, and apparent power S (kVA) is the vector sum, S = √(P²+Q²). Power factor pf = P/S = cos(θ); low pf means more current and kVA for the same kW.",
+      "Feeders, conductors, and transformers are sized on apparent power S and current, not on kW alone — a 100 kW load at 0.8 pf is 125 kVA and draws 25% more current than its kW suggests.",
+      "Three-phase line current: I = S / (√3 · V_LL) using line-to-line voltage, equivalently I = P / (√3 · V_LL · pf). The √3 comes from the relationship between line and phase quantities in a balanced three-phase system.",
+      "Conductor ampacity: pick a conductor whose ampacity exceeds the load current with margin — code practice sizes continuous loads to about 125% of the continuous current. Ampacity depends on conductor size/material (Cu vs Al), insulation temperature rating (e.g. 75/90 °C), and derating for ambient temperature and number of bundled conductors/conduit fill.",
+      "Voltage drop: keep feeder drop within roughly 3% (and ~5% total from service to load). For three-phase, Vdrop ≈ √3 · I · (R·cosθ + X·sinθ) · L, where R and X are per-unit-length line constants. Long runs are frequently voltage-drop-limited, forcing a larger conductor than ampacity alone would require.",
+      "Transformer sizing: rate it in kVA to cover the apparent-power load plus headroom for growth and to avoid continuous full loading — typically load a transformer to ~80% of rating — then round up to a standard size (e.g. 15, 30, 45, 75, 112.5, 150, 225, 300, 500 kVA). Consider motor-starting inrush and short-time overloads.",
+      "Protection: the overcurrent device (breaker or fuse) must be set above the continuous/load current (with the continuous-load factor) but at or below the conductor ampacity, so its primary job is to protect the conductor. It must also have an adequate interrupting rating for the available fault current.",
+      "Coordination/selectivity: downstream devices should trip before upstream ones for a fault in their zone, so a fault clears at the nearest device and doesn't black out the whole feeder; this is set by the time-current curves.",
+      "Other real factors: transformer impedance affects fault current and voltage regulation, power-factor correction capacitors reduce reactive draw and free up capacity, and harmonic/nonlinear loads may require derating.",
+      "Worked example: 100 kW three-phase load at 480 V line-to-line, pf = 0.85. S = 100/0.85 ≈ 118 kVA. Line current I = 118,000 / (√3 · 480) ≈ 142 A. Size continuous conductor to 125% → ~177 A, so choose a conductor rated ≥ ~180 A (e.g. around 3/0 copper at 75 °C) and verify voltage drop over the run length; if the run is long, upsize. Transformer: 118 kVA at ~80% loading → need ≥ ~148 kVA, so specify a standard 150 kVA (or 225 kVA if meaningful growth is expected). Breaker: above 142 A continuous (≈ 177 A with the 125% factor) and at/below the conductor ampacity — e.g. a 175 or 200 A breaker matched to the chosen conductor."
+    ],
+    "probes": [
+      {
+        "trigger": "candidate sizes everything off kW and ignores reactive power",
+        "question": "The load is 100 kW but the power factor is 0.85. What current does the feeder actually carry, and what kVA does the transformer see?"
+      },
+      {
+        "trigger": "candidate drops the √3 or uses phase instead of line voltage",
+        "question": "Write the current formula for me for a balanced three-phase load — where does the root-three come from, and which voltage do you use?"
+      },
+      {
+        "trigger": "candidate sizes the conductor on ampacity only",
+        "question": "The run is 150 meters. Is ampacity really your binding constraint, or is something else going to force a bigger conductor?"
+      },
+      {
+        "trigger": "candidate picks a transformer exactly equal to the load",
+        "question": "You sized the transformer right at the load kVA. Any problem loading it continuously at 100%, and what about future growth or motor inrush?"
+      },
+      {
+        "trigger": "candidate treats the breaker as protecting only the load",
+        "question": "What is the breaker's rating actually protecting, and how do you pick it relative to the conductor's ampacity?"
+      },
+      {
+        "trigger": "candidate never commits to numbers",
+        "question": "Give me a real load, voltage, and power factor, and take me all the way to a conductor size, a transformer kVA, and a breaker rating."
+      }
+    ],
+    "red_flags": [
+      "Sizing the feeder/transformer on kW and ignoring power factor / reactive power (undersizing current and kVA).",
+      "Dropping the √3 or using line-to-neutral instead of line-to-line voltage in the three-phase current formula.",
+      "Sizing the transformer in kW instead of kVA, or loading it to 100% with no headroom or growth allowance.",
+      "Checking only ampacity and never voltage drop, especially on a long run.",
+      "No continuous-load margin (sizing conductor and breaker right at the load current with no ~125% factor).",
+      "Setting the overcurrent device above the conductor ampacity, so the wire isn't protected.",
+      "Ignoring protection coordination, interrupting/fault rating, or motor-starting inrush entirely.",
+      "Unit or order-of-magnitude errors (e.g. mixing kW/kVA, amps off by √3), or no numeric example."
+    ],
+    "follow_ups": [
+      "The feeder run is 200 meters and your voltage drop comes out to 6%. What do you do?",
+      "Adding power-factor-correction capacitors — how does that change the current, the conductor, and the transformer sizing?",
+      "How does the transformer's percent impedance affect the available fault current and your breaker's interrupting rating?",
+      "A large motor starts on this feeder. How do inrush and starting current affect your conductor, transformer, and protection choices?",
+      "Walk me through how you'd coordinate this feeder breaker with the downstream branch breakers."
+    ],
+    "exemplar_answer": "I'd start from the load's power triangle and work outward to current, then to hardware. The load has real power P in kW, but inductive loads also draw reactive power Q in kVAR, and the feeder and transformer actually see the apparent power S = √(P²+Q²) in kVA, with power factor pf = P/S. So for a 100 kW three-phase load at 480 volts line-to-line and 0.85 power factor, S is 100 over 0.85, about 118 kVA. The line current is I = S over root-three times V line-to-line, which is 118,000 divided by (1.732 × 480), roughly 142 amps — the root-three comes from the balanced three-phase relationship, and I use line-to-line voltage. For the conductor I size to the continuous-load margin, about 125%, so around 177 amps, and pick a conductor rated at least that — something like 3/0 copper at a 75-degree rating — but ampacity isn't the only test: I check voltage drop, keeping the feeder within about 3%, using Vdrop ≈ √3·I·(R·cosθ + X·sinθ)·L. On a long run the voltage-drop limit often forces a bigger conductor than ampacity alone, so I'd upsize if the run is long. For the transformer I size in kVA, not kW, and leave headroom — loading to about 80% — so for 118 kVA I need at least roughly 148 kVA and I'd specify a standard 150 kVA, or step to 225 kVA if I expect growth or significant motor inrush. Finally protection: the breaker sits above the continuous load current, around 177 amps with the margin, but at or below the conductor's ampacity, because its real job is to protect the wire — so maybe a 175 or 200 amp breaker matched to the conductor, with an adequate interrupting rating for the fault current and coordination so downstream faults clear at the nearest device. I'd confirm all of this against the applicable code and a proper fault study before finalizing."
+  },
+  "interviewer_notes": "Mid-level power-systems station on feeder and transformer sizing. Reward a candidate who reasons from the power triangle (P, Q, S and power factor) to a three-phase line current with the correct √3 and line-to-line voltage, then sizes a conductor for BOTH ampacity (with a continuous-load margin) and voltage drop, sizes the transformer in kVA with headroom, and picks an overcurrent device that protects the conductor and coordinates. Insist on a full worked example and check units and the √3 carefully. Feed complications — a long run to force the voltage-drop constraint, power-factor correction, motor inrush — to test depth. Do not require exact NEC/IEC table values or a stamped protection study — reward correct method, sensible rules of thumb, and correct orders of magnitude. Flag sizing on kW instead of kVA, dropping the √3, checking only ampacity, loading the transformer to 100%, or setting the breaker above the conductor ampacity."
+}

@@ -85,14 +85,17 @@ export default function InterviewsPage() {
   const clear = () => { setArea("all"); setDomain("all"); setQuery(""); };
   const hasFilters = area !== "all" || domain !== "all" || query.trim() !== "";
 
-  const selectCls = "rounded-full border border-[var(--color-line)] bg-[var(--color-studio)] px-3 py-1.5 text-sm text-[var(--color-muted)] outline-none focus:border-[var(--color-accent)]";
+  // appearance-none drops the native arrow (which crams against the pill's
+  // rounded right edge); Select renders a chevron inset from the edge instead.
+  const selectCls =
+    "appearance-none rounded-full border border-[var(--color-line)] bg-[var(--color-studio)] pl-3.5 pr-8 py-1.5 text-sm text-[var(--color-muted)] outline-none focus:border-[var(--color-accent)]";
 
   return (
     <AppShell active="interview">
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
           <h1 className="text-3xl font-extrabold tracking-tight">Interview Catalog</h1>
-          <p className="mt-1 text-[var(--color-muted)]">Pick an area and a domain — system design, LLD/OOD, coding, clinical, legal, case, and more. {questions.length} interviews across {areas.length} areas.</p>
+          <p className="mt-1 text-[var(--color-muted)]">Pick an area and a domain — software, mechanical, electrical & civil engineering, plus clinical, legal, case, and more. {questions.length} interviews across {areas.length} areas.</p>
         </div>
         {recommended && questions.some((q) => q.domain === recommended) && <Badge tone="accent">Recommended: {pretty(recommended)}</Badge>}
       </div>
@@ -107,17 +110,23 @@ export default function InterviewsPage() {
         <div className="flex flex-wrap items-center gap-2">
           <label className="flex items-center gap-2 text-sm text-[var(--color-muted)]">
             <span className="text-[var(--color-faint)]">Area</span>
-            <select value={area} onChange={(e) => onArea(e.target.value)} className={selectCls}>
-              <option value="all">All areas</option>
-              {areas.map((a) => <option key={a} value={a}>{pretty(a)}</option>)}
-            </select>
+            <span className="relative inline-flex items-center">
+              <select value={area} onChange={(e) => onArea(e.target.value)} className={selectCls}>
+                <option value="all">All areas</option>
+                {areas.map((a) => <option key={a} value={a}>{pretty(a)}</option>)}
+              </select>
+              <Chevron />
+            </span>
           </label>
           <label className="flex items-center gap-2 text-sm text-[var(--color-muted)]">
             <span className="text-[var(--color-faint)]">Domain</span>
-            <select value={domain} onChange={(e) => setDomain(e.target.value)} className={selectCls}>
-              <option value="all">All domains</option>
-              {domains.map((d) => <option key={d} value={d}>{pretty(d)}</option>)}
-            </select>
+            <span className="relative inline-flex items-center">
+              <select value={domain} onChange={(e) => setDomain(e.target.value)} className={selectCls}>
+                <option value="all">All domains</option>
+                {domains.map((d) => <option key={d} value={d}>{pretty(d)}</option>)}
+              </select>
+              <Chevron />
+            </span>
           </label>
           {hasFilters && <button onClick={clear} className="text-sm text-[var(--color-accent)] hover:brightness-125">Clear filters</button>}
           <span className="ml-auto text-xs text-[var(--color-faint)]">{filtered.length} shown</span>
@@ -146,5 +155,20 @@ export default function InterviewsPage() {
         </div>
       )}
     </AppShell>
+  );
+}
+
+// Chevron is the custom dropdown arrow for the Area/Domain pills — positioned
+// inset from the rounded right edge (with pointer-events-none so clicks fall
+// through to the underlying <select>).
+function Chevron() {
+  return (
+    <svg
+      aria-hidden viewBox="0 0 12 8"
+      className="pointer-events-none absolute right-3 h-2 w-3 text-[var(--color-faint)]"
+      fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"
+    >
+      <path d="M1 1.5L6 6.5L11 1.5" />
+    </svg>
   );
 }

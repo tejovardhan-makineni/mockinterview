@@ -1,0 +1,125 @@
+{
+  "id": "signalized-intersection",
+  "title": "Time a Signalized Intersection",
+  "track": "engineering",
+  "domain": "transportation",
+  "areas": [
+    "civil_engineering"
+  ],
+  "modality": "conversational",
+  "difficulty": "mid",
+  "tags": [
+    "transportation",
+    "traffic-signal",
+    "webster",
+    "cycle-length",
+    "capacity",
+    "level-of-service"
+  ],
+  "prompt": "You're timing a two-phase signalized intersection. Walk me through how you'd set it up: estimate saturation flow, pick out the critical lane volumes, compute a reasonable cycle length, split the green time, and then check capacity, the volume-to-capacity ratio, and level of service. Don't forget the pedestrians. Put real numbers on it as you go.",
+  "blurb": "Spoken station — time a signalized intersection: saturation flow, critical lane volumes, Webster's optimal cycle, green splits, capacity and v/c, level of service, and pedestrian minimum green, with a worked example.",
+  "rubric": [
+    {
+      "key": "saturation_flow",
+      "label": "Saturation flow & demand",
+      "description": "Estimates saturation flow rate (base ~1900 veh/h/lane, adjusted) and identifies the critical lane volume in each phase; understands flow ratio y = v/s as the fundamental demand measure per movement.",
+      "weight": 1.2
+    },
+    {
+      "key": "cycle_length",
+      "label": "Cycle length (Webster)",
+      "description": "Computes a cycle length using Webster's optimal formula C = (1.5*L + 5)/(1 - sum(y)), correctly summing critical flow ratios and accounting for total lost time L; sanity-checks against practical min/max cycle bounds.",
+      "weight": 1.3
+    },
+    {
+      "key": "green_splits",
+      "label": "Green-time allocation",
+      "description": "Distributes effective green in proportion to the critical flow ratios (gi proportional to yi), accounts for lost time per phase, and converts effective green to displayed green plus yellow/all-red.",
+      "weight": 1.2
+    },
+    {
+      "key": "capacity_vc",
+      "label": "Capacity, v/c & LOS",
+      "description": "Computes movement capacity c = s*(g/C), the volume-to-capacity (degree of saturation) ratio X = v/c, and relates delay/v/c to level of service A-F; recognizes v/c approaching or above 1 signals oversaturation.",
+      "weight": 1.2
+    },
+    {
+      "key": "pedestrian_timing",
+      "label": "Pedestrian & safety timing",
+      "description": "Checks pedestrian minimum green / crossing time (walk + flashing don't-walk from crossing distance and walking speed ~3.5 ft/s) and ensures vehicle green isn't shorter than the pedestrian requirement.",
+      "weight": 1.0
+    },
+    {
+      "key": "assumptions_checks",
+      "label": "Assumptions & sanity checks",
+      "description": "States assumptions (phasing, lost time per phase, lane use), tracks units (veh/h, seconds), and sanity-checks cycle length and splits against practical ranges.",
+      "weight": 1.0
+    },
+    {
+      "key": "communication",
+      "label": "Communication & structure",
+      "description": "Presents the timing logic in a clear, ordered way; thinks aloud; keeps demand, capacity, and timing bookkeeping straight.",
+      "weight": 0.9
+    }
+  ],
+  "reference": {
+    "scenario": "The candidate is asked to design the signal timing for a signalized intersection. The station tests whether they can move from traffic demand to a working timing plan: estimating saturation flow, isolating the critical movement in each phase, applying Webster's optimal cycle-length formula, splitting green in proportion to demand, and then checking capacity, degree of saturation, and level of service — while not forgetting pedestrian crossing minimums. The interviewer can vary volumes, add a protected left-turn phase, or raise demand toward oversaturation to see how the candidate adapts. This is an educational reasoning exercise, not a substitute for an HCM-based analysis, code-checked design, or a professional engineer's sign-off.",
+    "model_points": [
+      "Sets up phasing (e.g., two phases for a simple intersection) and defines total lost time: startup plus clearance lost time per phase, typically ~4 seconds per phase, so total lost time L = number of phases x lost time.",
+      "Estimates saturation flow rate: base ~1900 veh/h/green/lane, adjusted (HCM adjustment factors) for lane width, heavy vehicles, grade, parking, turns; multiplies by number of lanes for a movement group.",
+      "Identifies the critical lane volume/movement in each phase and forms the flow ratio y = v/s for each critical movement; sums the critical flow ratios Y = sum(yi).",
+      "Applies Webster's optimal cycle length C_opt = (1.5*L + 5)/(1 - Y), which minimizes delay, and checks it against practical bounds (commonly ~60-120 s, rarely below 40 or above 150).",
+      "Confirms the intersection is feasible: if Y approaches or exceeds 1.0 the intersection is oversaturated and no finite cycle works — demand exceeds capacity and geometry or phasing must change.",
+      "Allocates effective green in proportion to critical flow ratios: gi = (yi/Y) x (C - L), so busier phases get more green; then adds back lost time to relate effective and displayed green.",
+      "Converts to displayed timing: displayed green + yellow (change interval ~3-5 s) + all-red clearance = phase time; effective green g = displayed green + yellow - lost time.",
+      "Computes capacity of a movement c = s*(g/C) and the degree of saturation / volume-to-capacity ratio X = v/c = (v/s)*(C/g); flags X > ~0.9 as approaching capacity and X >= 1 as oversaturated.",
+      "Estimates control delay (e.g., Webster/HCM delay) and maps delay per vehicle to level of service A-F (roughly LOS A <10 s/veh up to LOS F >80 s/veh) to judge performance.",
+      "Checks pedestrian timing: minimum green must cover walk interval plus flashing-don't-walk clearance computed from crossing distance divided by walking speed (~3.5 ft/s, historically 4 ft/s), and ensures the vehicle phase isn't shorter than the pedestrian requirement."
+    ],
+    "probes": [
+      {
+        "trigger": "candidate uses volume directly without saturation flow",
+        "question": "How do you turn a movement's demand volume into a flow ratio you can put into a cycle-length formula — what do you compare the volume against?"
+      },
+      {
+        "trigger": "candidate picks a cycle length arbitrarily",
+        "question": "Is there a formula that gives you a delay-minimizing cycle length? What goes into Webster's equation and what does the lost time represent?"
+      },
+      {
+        "trigger": "candidate splits green evenly regardless of demand",
+        "question": "Should both phases get equal green if one carries twice the critical flow? How do you decide the split?"
+      },
+      {
+        "trigger": "candidate reports timing without checking capacity",
+        "question": "Once the timing is set, how do you know each movement actually has enough capacity — what's the v/c ratio telling you?"
+      },
+      {
+        "trigger": "candidate ignores pedestrians",
+        "question": "A pedestrian pushes the button to cross the 60-foot approach. Does your green time actually give them enough time to cross safely?"
+      },
+      {
+        "trigger": "candidate's Y approaches or exceeds 1",
+        "question": "Your critical flow ratios sum close to one — what does Webster's formula do, and what does that tell you about this intersection?"
+      }
+    ],
+    "red_flags": [
+      "Putting raw volumes into the cycle formula without forming flow ratios y = v/s against saturation flow.",
+      "Not knowing or misapplying Webster's cycle-length formula, or omitting lost time entirely.",
+      "Splitting green equally regardless of the critical demand in each phase.",
+      "Never computing capacity or the v/c (degree of saturation) ratio, so oversaturation goes undetected.",
+      "Not recognizing that sum of critical flow ratios approaching 1.0 means the intersection can't be timed to serve demand.",
+      "Ignoring pedestrian crossing time / minimum green, or vehicle greens shorter than the pedestrian requirement.",
+      "Confusing effective green with displayed green, or ignoring yellow/all-red clearance intervals.",
+      "Producing an absurd cycle length (e.g., 15 s or 400 s) with no sanity check against practical ranges."
+    ],
+    "follow_ups": [
+      "How does adding a protected left-turn phase change your lost time, critical flow ratios, and cycle length?",
+      "How would you estimate control delay and assign level of service once the timing is set?",
+      "What do you do when demand grows so the critical flow ratios sum above 1.0 and no cycle length works?",
+      "How would coordinating this signal with adjacent intersections (a green-wave / progression) constrain your cycle length?",
+      "How would actuated or adaptive control change your fixed-time assumptions here?"
+    ],
+    "exemplar_answer": "I'd work from demand to timing to a performance check. First, phasing: for a simple intersection I'll assume two phases and about 4 seconds of lost time each, so total lost time L is roughly 8 seconds. For each movement I need a saturation flow rate — I'll start from about 1900 veh/h/lane and adjust for lane width, heavy vehicles, and turns. Then in each phase I find the critical lane and form its flow ratio y = v/s. Say the critical eastbound movement runs 900 veh/h across two lanes at s of about 3600, so y1 is 0.25, and the critical northbound is 630 veh/h at s of about 1800, so y2 is 0.35; the sum Y is 0.60. Webster's optimal cycle is C = (1.5*L + 5)/(1 - Y) = (1.5*8 + 5)/(1 - 0.60) = 17/0.40, about 43 seconds — I'd round up toward a practical 45-to-50-second cycle. I split the available effective green, C minus L is about 37 seconds, in proportion to the flow ratios: phase 1 gets (0.25/0.60) x 37, roughly 15 seconds, phase 2 gets (0.35/0.60) x 37, roughly 22 seconds, then I add yellow and all-red clearance and convert effective to displayed green. Now I check capacity: for the northbound, c = s*(g/C) = 1800 x (22/50), about 790 veh/h against a demand of 630, so v/c is about 0.8 — under capacity, with delay putting it around LOS C or D; if any v/c approached 1.0 I'd know I'm running out of capacity, and if Y itself had approached 1.0 no finite cycle would work and I'd need more lanes or different phasing. Finally pedestrians: if the crossing is 60 feet, at a 3.5 ft/s walking speed the clearance alone is about 17 seconds plus a walk interval, so I'd make sure the serving phase's green isn't shorter than the pedestrian requirement, lengthening it if needed. I'd state my assumptions on saturation flow and lost time and sanity-check that the cycle and splits land in normal ranges."
+  },
+  "interviewer_notes": "Mid-level transportation station. Let the candidate build the plan in order — saturation flow and critical flow ratios, Webster's cycle, proportional green splits, then capacity/v/c/LOS — and feed changes (higher volumes, a protected left phase, a long pedestrian crossing) to test adaptability. The key behaviors: forming flow ratios y = v/s rather than using raw volumes, applying Webster's C = (1.5L+5)/(1-Y) with lost time, splitting green in proportion to critical flow ratios, and closing the loop with a capacity/v/c check that would reveal oversaturation. Also reward the pedestrian minimum-green check from crossing distance and walking speed. Do not require exact HCM adjustment factors, precise delay-equation coefficients, or licensed-engineer precision — reward correct method, realistic estimates, and unit-consistent sanity checks (veh/h and seconds). This is a reasoning exercise, not an HCM software run or a code-compliant design."
+}

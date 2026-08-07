@@ -108,7 +108,7 @@ func (r *Relay) Handle(w http.ResponseWriter, req *http.Request) {
 			durationMin = n
 		}
 	}
-	system := SystemPrompt(q, persona, intensity, "intro", resumeSummary, "", durationMin)
+	system := SystemPrompt(q, persona, intensity, "intro", resumeSummary, "", durationMin, voice)
 
 	_ = r.store.UpdateSessionStatus(req.Context(), sessionID, "active")
 

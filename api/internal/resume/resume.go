@@ -10,8 +10,10 @@ import (
 	"encoding/json"
 	"html"
 	"io"
+	"math"
 	"net/http"
 	"regexp"
+	"sort"
 	"strings"
 
 	"github.com/ledongthuc/pdf"
@@ -379,12 +381,75 @@ func extractPDF(data []byte) string {
 		if p.V.IsNull() {
 			continue
 		}
-		if txt, err := p.GetPlainText(nil); err == nil {
+		// Prefer geometry-based extraction: it reinserts the word spaces that
+		// pdf.GetPlainText drops (it ignores TJ kerning, so "Elastic APM" comes
+		// out "ElasticAPM"). Fall back to GetPlainText if geometry yields nothing.
+		if txt := extractPageSpaced(p); strings.TrimSpace(txt) != "" {
+			sb.WriteString(txt)
+			sb.WriteString("\n")
+		} else if txt, err := p.GetPlainText(nil); err == nil {
 			sb.WriteString(txt)
 			sb.WriteString("\n")
 		}
 	}
 	return sb.String()
+}
+
+var multiSpace = regexp.MustCompile(`[ \t]{2,}`)
+var spacedNewline = regexp.MustCompile(` *\n *`)
+
+// extractPageSpaced rebuilds a page's text from per-glyph geometry. pdf.Content()
+// gives each glyph a real X/width/font-size (computed from the text matrix and
+// font metrics), so we can group glyphs into lines by baseline and insert a space
+// wherever there's a visible horizontal gap between one glyph and the next —
+// recovering word boundaries that the raw operator stream encodes only as spacing.
+func extractPageSpaced(p pdf.Page) string {
+	return spaceGlyphs(p.Content().Text)
+}
+
+// spaceGlyphs turns positioned glyphs into text with word spaces and line breaks
+// reconstructed from geometry. Split out from extractPageSpaced so the spacing
+// heuristic can be unit-tested without a real PDF.
+func spaceGlyphs(chars []pdf.Text) string {
+	if len(chars) == 0 {
+		return ""
+	}
+	// Order glyphs top-to-bottom (Y increases upward), then left-to-right within
+	// a line. A ~2pt Y tolerance keeps sub/superscripts on the same visual line.
+	sort.SliceStable(chars, func(i, j int) bool {
+		if math.Abs(chars[i].Y-chars[j].Y) > 2.0 {
+			return chars[i].Y > chars[j].Y
+		}
+		return chars[i].X < chars[j].X
+	})
+
+	var sb strings.Builder
+	lineY := chars[0].Y
+	prevEnd := chars[0].X
+	for i, t := range chars {
+		switch {
+		case i == 0:
+			// first glyph — nothing to separate from
+		case math.Abs(t.Y-lineY) > 2.0:
+			sb.WriteByte('\n')
+			lineY = t.Y
+		default:
+			// Same line: a gap wider than a fraction of the font size is a space.
+			thresh := t.FontSize * 0.2
+			if thresh <= 0 {
+				thresh = 1.0
+			}
+			if t.X-prevEnd > thresh {
+				sb.WriteByte(' ')
+			}
+		}
+		sb.WriteString(t.S)
+		prevEnd = t.X + t.W
+	}
+
+	out := multiSpace.ReplaceAllString(sb.String(), " ")
+	out = spacedNewline.ReplaceAllString(out, "\n")
+	return out
 }
 
 func clip(s string, n int) string {
