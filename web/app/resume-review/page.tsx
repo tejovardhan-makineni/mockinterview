@@ -274,7 +274,7 @@ export default function ResumePage() {
                 </span>
               ) : <span />}
             </div>
-            <ResumeDoc parsed={workingParsed} text={workingText} marks={marks} />
+            <ResumeDoc parsed={workingParsed} text={workingText} marks={marks} expand={tab === "review" ? !!review : !!match} />
           </Panel>
 
           {/* RIGHT — analysis panel */}
@@ -340,7 +340,7 @@ function ReviewPanel({
           {fixes.map((f, i) => {
             const edit = edits.find((e) => (e?.original ? (f?.detail?.includes(e.original) || f?.title?.includes(e.original)) : false));
             return (
-              <div key={`f${i}`} className="rounded-xl border border-[var(--color-line)] p-3 text-sm">
+              <div key={`f${i}`} className="rounded-xl border border-[var(--color-line)] p-3 text-sm [overflow-wrap:anywhere]">
                 <div className="flex items-baseline justify-between gap-2">
                   <span className="font-semibold">{f?.title}</span>
                   <span className="font-mono text-[10px] uppercase tracking-wide text-[var(--color-faint)]">{f?.location}</span>
@@ -380,8 +380,8 @@ function ReviewPanel({
 
       {/* Strengths / gaps */}
       <div className="grid gap-4 sm:grid-cols-2">
-        <Panel className="p-4"><h3 className="mb-2 text-sm font-semibold"><Badge tone="good">Strengths</Badge></h3><ul className="space-y-1 text-xs text-[var(--color-muted)]">{strengths.map((s, i) => <li key={i}>• {s}</li>)}</ul></Panel>
-        <Panel className="p-4"><h3 className="mb-2 text-sm font-semibold"><Badge tone="warn">Gaps</Badge></h3><ul className="space-y-1 text-xs text-[var(--color-muted)]">{gaps.map((s, i) => <li key={i}>• {s}</li>)}</ul></Panel>
+        <Panel className="p-4"><h3 className="mb-2 text-sm font-semibold"><Badge tone="good">Strengths</Badge></h3>{strengths.length > 0 ? <ul className="space-y-1 text-xs text-[var(--color-muted)]">{strengths.map((s, i) => <li key={i}>• {s}</li>)}</ul> : <p className="text-xs italic text-[var(--color-faint)]">None noted</p>}</Panel>
+        <Panel className="p-4"><h3 className="mb-2 text-sm font-semibold"><Badge tone="warn">Gaps</Badge></h3>{gaps.length > 0 ? <ul className="space-y-1 text-xs text-[var(--color-muted)]">{gaps.map((s, i) => <li key={i}>• {s}</li>)}</ul> : <p className="text-xs italic text-[var(--color-faint)]">None noted — solid across the board</p>}</Panel>
       </div>
 
       {/* ATS compatibility */}
@@ -395,7 +395,7 @@ function ReviewPanel({
               <span className="ml-auto text-[var(--color-muted)]">Keyword match</span>
               <span className="font-semibold">{Math.round(Number(ats.keyword_match) || 0)}%</span>
             </div>
-            <Bar pct={(Number(ats.keyword_match) || 0) / 100} color={matchColor(Number(ats.keyword_match) || 0)} />
+            <div className="mt-2.5"><Bar pct={(Number(ats.keyword_match) || 0) / 100} color={matchColor(Number(ats.keyword_match) || 0)} /></div>
             <p className="mt-2 text-xs text-[var(--color-muted)]">{ats.notes}</p>
           </>
         )}
@@ -420,7 +420,7 @@ function EditRow({
   const isApplied = applied.has(idx);
   const canApply = workingText.includes(edit.original) || isApplied;
   return (
-    <div className="mt-2 rounded-lg bg-[var(--color-panel-2)] p-2.5 text-sm">
+    <div className="mt-2 rounded-lg bg-[var(--color-panel-2)] p-2.5 text-sm [overflow-wrap:anywhere]">
       <div className={`text-[var(--color-faint)] ${isApplied ? "line-through" : ""}`}>{edit.original}</div>
       <div className="mt-1 text-[var(--color-good)]">{edit.improved}</div>
       <div className="mt-2">
@@ -496,7 +496,7 @@ function MatchPanel({ match, busy, onOpen }: { match: ResumeMatch | null; busy: 
           <h3 className="mb-3 text-sm font-semibold">AI tailoring suggestions</h3>
           <div className="space-y-3">
             {suggestions.map((s, i) => (
-              <div key={i} className="rounded-xl border border-[var(--color-line)] p-3 text-sm">
+              <div key={i} className="rounded-xl border border-[var(--color-line)] p-3 text-sm [overflow-wrap:anywhere]">
                 <div className="font-semibold">{s?.issue}</div>
                 <p className="mt-1 text-[var(--color-muted)]">{s?.detail}</p>
                 <p className="mt-1.5 text-[var(--color-accent)]">→ {s?.suggestion}</p>

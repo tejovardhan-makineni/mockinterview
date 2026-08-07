@@ -30,11 +30,16 @@ function skillGroups(skills: ResumeParsed["skills"]): ResumeSkillGroup[] {
   return skills as ResumeSkillGroup[];
 }
 
-export function ResumeDoc({ parsed, text, marks }: { parsed?: ResumeParsed; text?: string; marks: Mark[] }) {
+export function ResumeDoc({ parsed, text, marks, expand = false }: { parsed?: ResumeParsed; text?: string; marks: Mark[]; expand?: boolean }) {
+  // When there's analysis alongside (expand), render the resume at full height and
+  // let the page scroll — never clip the bottom behind an inner scrollbar. With no
+  // analysis the right column is just a short prompt, so we cap the doc height and
+  // let it scroll internally to avoid a lopsided, over-tall left column.
+  const box = expand ? "px-7 py-7" : "mi-doc-scroll max-h-[72vh] overflow-auto px-7 py-7";
   if (!hasStructure(parsed)) {
     // Fallback: highlighted raw text, still readable.
     return (
-      <div className="mi-doc-scroll max-h-[72vh] overflow-auto px-6 py-6">
+      <div className={`${expand ? "px-6 py-6" : "mi-doc-scroll max-h-[72vh] overflow-auto px-6 py-6"} [overflow-wrap:anywhere]`}>
         <pre className="whitespace-pre-wrap font-sans text-[13.5px] leading-relaxed text-[var(--color-ink)]">{hl(text ?? "", marks)}</pre>
       </div>
     );
@@ -45,8 +50,8 @@ export function ResumeDoc({ parsed, text, marks }: { parsed?: ResumeParsed; text
   const contactBits = [contact.location, contact.email, contact.phone, ...(contact.links ?? [])].filter(Boolean) as string[];
 
   return (
-    <div className="mi-doc-scroll max-h-[72vh] overflow-auto px-7 py-7 text-[var(--color-ink)]">
-      <div className="mx-auto max-w-[720px]">
+    <div className={`${box} text-[var(--color-ink)]`}>
+      <div className="mx-auto max-w-[720px] [overflow-wrap:anywhere]">
         {/* Header */}
         <header className="border-b border-[var(--color-line)] pb-4 text-center">
           <h1 className="text-2xl font-extrabold tracking-tight">{p.name || "Your Name"}</h1>
