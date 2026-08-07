@@ -82,8 +82,8 @@ export const LogoM = ({ className }: { className?: string }) => (
   <svg viewBox="0 0 32 32" width="1em" height="1em" className={className} aria-hidden="true">
     <rect x="1" y="1" width="30" height="30" rx="8" fill="var(--color-accent)" />
     <path
-      d="M9 20.5 L9 15 A3.5 3.5 0 0 0 16 15 A3.5 3.5 0 0 0 23 15 L23 20.5 M16 15 L16 20.5"
-      fill="none" stroke="var(--color-studio)" strokeWidth="2.8" strokeLinecap="round" strokeLinejoin="round"
+      d="M10 21.5 L10 13.5 A3 3 0 0 0 16 13.5 A3 3 0 0 0 22 13.5 L22 21.5 M16 13.5 L16 21.5"
+      fill="none" stroke="var(--color-studio)" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round"
     />
   </svg>
 );
