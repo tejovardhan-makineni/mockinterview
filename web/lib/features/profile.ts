@@ -84,8 +84,6 @@ export const MOCK_VOICES: Voice[] = [
 
 export const MOCK_FACES: Face[] = [
   { id: "sophia", label: "Sophia", gltf: "/avatars/rpm-female.glb" },
-  { id: "mia", label: "Mia", gltf: "/avatars/rpm-b.glb" },
-  { id: "kai", label: "Kai", gltf: "/avatars/rpm-c.glb" },
   { id: "pumpkin", label: "Pumpkin Professor", gltf: "" },
   { id: "robot", label: "Interviewer-9000 (Robot)", gltf: "" },
   { id: "wizard", label: "The Wizard", gltf: "" },

@@ -81,8 +81,8 @@ function GltfAvatarImpl({ url, drive, onError }: { url: string; drive: MutableRe
         // all get the same clean crop instead of a too-tight face.
         const box = new THREE.Box3().setFromObject(root);
         const headTop = box.max.y;              // crown of the head
-        const focusY = headTop - 0.22;          // ~nose height
-        const frameHalf = 0.3;                  // half the vertical window (~0.6 units)
+        const focusY = headTop - 0.2;           // ~nose height
+        const frameHalf = 0.22;                 // half the vertical window (flattering head-and-shoulders)
         const fovRad = (camera.fov * Math.PI) / 180;
         const dist = frameHalf / Math.tan(fovRad / 2);
         camera.position.set(0, focusY, dist);
