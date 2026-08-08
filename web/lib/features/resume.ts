@@ -6,6 +6,50 @@
 
 import { req, BASE, authHeader } from "../http";
 
+// ---- whitespace-tolerant matching ----
+// PDF extraction sometimes drops the spaces between words, so an AI edit's
+// `original`/`improved` phrase (copied from the raw extracted text) can differ
+// from the re-spaced structured resume ONLY by where the whitespace falls
+// ("DevelopedanIngestion" vs "Developed an Ingestion"). These helpers match and
+// substitute while ignoring whitespace placement, so highlighting and "Apply"
+// work on the rendered document regardless of that drift.
+export function looseFind(haystack: string, needle: string): { start: number; end: number } | null {
+  if (!needle) return null;
+  const exact = haystack.indexOf(needle);
+  if (exact >= 0) return { start: exact, end: exact + needle.length };
+  // Map each non-whitespace char of the haystack back to its original index.
+  const idxMap: number[] = [];
+  let stripped = "";
+  for (let i = 0; i < haystack.length; i++) {
+    if (!/\s/.test(haystack[i])) { stripped += haystack[i]; idxMap.push(i); }
+  }
+  const nNeedle = needle.replace(/\s+/g, "");
+  if (!nNeedle) return null;
+  const at = stripped.indexOf(nNeedle);
+  if (at < 0) return null;
+  return { start: idxMap[at], end: idxMap[at + nNeedle.length - 1] + 1 };
+}
+
+export function looseIncludes(haystack: string, needle: string): boolean {
+  return looseFind(haystack, needle) !== null;
+}
+
+// looseReplaceAll replaces every whitespace-tolerant occurrence of `needle`,
+// advancing past each replacement so a replacement text is never re-scanned.
+export function looseReplaceAll(haystack: string, needle: string, repl: string): string {
+  if (!needle) return haystack;
+  let out = "";
+  let rest = haystack;
+  let guard = 0;
+  for (;;) {
+    const hit = looseFind(rest, needle);
+    if (!hit || guard++ > 5000) { out += rest; break; }
+    out += rest.slice(0, hit.start) + repl;
+    rest = rest.slice(hit.end);
+  }
+  return out;
+}
+
 // ---- structured resume (renderable document) ----
 export interface ResumeContact {
   location?: string;

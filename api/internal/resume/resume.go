@@ -135,6 +135,10 @@ func (s *Service) Upload(w http.ResponseWriter, r *http.Request) {
 		System: "You extract a resume into structured JSON so it can be re-rendered faithfully. " +
 			"Copy bullet lines, titles, companies, dates, and contact details VERBATIM from the source. " +
 			"Do NOT invent, embellish, or add facts that are not present. Leave a field empty if the resume does not state it. " +
+			"IMPORTANT: the source text is machine-extracted from a PDF and may have LOST the spaces between words " +
+			"(e.g. 'DevelopedanIngestionUtilitywebapplication'). Whenever you see run-together words like that, restore the " +
+			"natural word spacing so the output reads normally — split them back into ordinary words. Only fix spacing/word " +
+			"boundaries; never change, add, remove, or reorder the actual words. " +
 			"Group skills by their category headings when the resume provides them; otherwise emit a single group with an empty category.",
 		Messages:    []llm.Message{{Role: "user", Text: "Resume text:\n\n" + clip(text, 20000)}},
 		JSONSchema:  parseSchema,
@@ -249,7 +253,7 @@ func (s *Service) Review(w http.ResponseWriter, r *http.Request) {
 		Model:   s.reasonModel,
 		System: "You are a senior engineering hiring manager and resume coach. Critique the resume honestly and " +
 			"specifically. Score 0..5 on overall strength. " +
-			"For line_edits, copy each `original` VERBATIM from the resume text so it can be located and highlighted, and make `improved` a concrete, quantified rewrite (add %, latency, $, scale, or time saved — but never fabricate numbers; use placeholders like '<X>%' when the true figure is unknown). " +
+			"For line_edits, copy each `original` VERBATIM from the resume text so it can be located and highlighted, and make `improved` a concrete, stronger rewrite. Quantify (%, latency, $, scale, time saved) ONLY where the resume already states a real figure — NEVER fabricate numbers and NEVER insert placeholder tokens like '<X>%', '<N>', or '<number>' into the rewrite. If no real metric exists, strengthen the line through specific action verbs, scope, and outcome instead of leaving a blank metric. " +
 			"For critical_fixes, give the most damaging problems with a precise `location`. " +
 			"For quantifiable_impacts, surface the resume's strongest already-quantified achievements. " +
 			"For ats_breakdown, judge formatting as pass/warn/fail and estimate keyword_match 0..100.",
@@ -390,11 +394,13 @@ func extractPDF(data []byte) string {
 		}
 		// Prefer geometry-based extraction: it reinserts the word spaces that
 		// pdf.GetPlainText drops (it ignores TJ kerning, so "Elastic APM" comes
-		// out "ElasticAPM"). Fall back to GetPlainText if geometry yields nothing.
-		if txt := extractPageSpaced(p); strings.TrimSpace(txt) != "" {
-			sb.WriteString(txt)
-			sb.WriteString("\n")
-		} else if txt, err := p.GetPlainText(nil); err == nil {
+		// out "ElasticAPM"). But on some fonts the geometry path itself comes out
+		// run-together ("DevelopedanIngestion"); in that case fall back to
+		// GetPlainText if IT happens to carry real space characters. Pick whichever
+		// page text is actually spaced.
+		geo := extractPageSpaced(p)
+		plain, _ := p.GetPlainText(nil)
+		if txt := pickReadable(geo, plain); strings.TrimSpace(txt) != "" {
 			sb.WriteString(txt)
 			sb.WriteString("\n")
 		}
@@ -404,6 +410,44 @@ func extractPDF(data []byte) string {
 
 var multiSpace = regexp.MustCompile(`[ \t]{2,}`)
 var spacedNewline = regexp.MustCompile(` *\n *`)
+
+// pickReadable chooses the better-spaced of the geometry and plain-text
+// extractions for a page. It defaults to the geometry text (which normally
+// recovers word spacing), but if the geometry text looks run-together — very few
+// spaces relative to its length — and the plain text is meaningfully better
+// spaced, it uses the plain text instead. This rescues resumes whose fonts defeat
+// the geometry heuristic (words extracted with no gaps at all).
+func pickReadable(geo, plain string) string {
+	if strings.TrimSpace(geo) == "" {
+		return plain
+	}
+	if strings.TrimSpace(plain) == "" {
+		return geo
+	}
+	// spaceRatio = fraction of whitespace among non-newline characters. Normal
+	// prose sits around 0.13–0.18; run-together text is near 0.
+	spaceRatio := func(s string) float64 {
+		var spaces, chars int
+		for _, r := range s {
+			if r == '\n' {
+				continue
+			}
+			chars++
+			if r == ' ' || r == '\t' {
+				spaces++
+			}
+		}
+		if chars == 0 {
+			return 0
+		}
+		return float64(spaces) / float64(chars)
+	}
+	gr, pr := spaceRatio(geo), spaceRatio(plain)
+	if gr < 0.06 && pr > gr {
+		return plain
+	}
+	return geo
+}
 
 // extractPageSpaced rebuilds a page's text from per-glyph geometry. pdf.Content()
 // gives each glyph a real X/width/font-size (computed from the text matrix and
