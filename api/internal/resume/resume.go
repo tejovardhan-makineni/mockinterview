@@ -253,10 +253,17 @@ func (s *Service) Review(w http.ResponseWriter, r *http.Request) {
 		Model:   s.reasonModel,
 		System: "You are a senior engineering hiring manager and resume coach. Critique the resume honestly and " +
 			"specifically. Score 0..5 on overall strength. " +
-			"For line_edits, copy each `original` VERBATIM from the resume text so it can be located and highlighted, and make `improved` a concrete, stronger rewrite. Quantify (%, latency, $, scale, time saved) ONLY where the resume already states a real figure — NEVER fabricate numbers and NEVER insert placeholder tokens like '<X>%', '<N>', or '<number>' into the rewrite. If no real metric exists, strengthen the line through specific action verbs, scope, and outcome instead of leaving a blank metric. " +
-			"For critical_fixes, give the most damaging problems with a precise `location`. " +
+			"EXTRACTION ARTIFACT: the resume text is machine-extracted from a PDF and often LOSES the spaces between words " +
+			"(e.g. 'GraphsandLLMstotransform', run-together contact/education lines). This is a limitation of the extractor, " +
+			"NOT a flaw in the candidate's actual resume. Read run-together words normally, and DO NOT list missing spaces, " +
+			"run-together text, or poor word separation as a critical_fix, a gap, or an ATS/formatting problem. Whenever you " +
+			"QUOTE resume text back to the user (line_edits `original`, quantifiable_impacts `text`), RESTORE natural word " +
+			"spacing so it reads normally — keep the exact same words in the same order, changing only the spacing (the app " +
+			"still locates the phrase after re-spacing). " +
+			"For line_edits, `original` is the phrase you're improving (re-spaced as above) and `improved` is a concrete, stronger rewrite. Quantify (%, latency, $, scale, time saved) ONLY where the resume already states a real figure — NEVER fabricate numbers and NEVER insert placeholder tokens like '<X>%', '<N>', or '<number>' into the rewrite. If no real metric exists, strengthen the line through specific action verbs, scope, and outcome instead of leaving a blank metric. " +
+			"For critical_fixes, give the most damaging CONTENT problems with a precise `location`. " +
 			"For quantifiable_impacts, surface the resume's strongest already-quantified achievements. " +
-			"For ats_breakdown, judge formatting as pass/warn/fail and estimate keyword_match 0..100.",
+			"For ats_breakdown, judge formatting as pass/warn/fail based on real structure (IGNORING the extraction spacing artifact) and estimate keyword_match 0..100.",
 		Messages:    []llm.Message{{Role: "user", Text: "Resume text:\n\n" + clip(res.ParsedText, 20000)}},
 		JSONSchema:  reviewSchema,
 		Temperature: 0.4,
@@ -305,7 +312,8 @@ func (s *Service) Match(w http.ResponseWriter, r *http.Request) {
 		Purpose: llm.PurposeResumeMatch,
 		Model:   s.reasonModel,
 		System: "You are an ATS and technical recruiter. Compare the candidate's resume to the job description. " +
-			"Do real keyword AND semantic gap analysis: match_score (0..100) reflects overall fit; matched_keywords are JD skills present in the resume (copy them VERBATIM as they appear IN THE RESUME so they can be highlighted); missing_keywords are important JD skills absent from the resume. " +
+			"NOTE: the resume text is machine-extracted from a PDF and may have LOST spaces between words — treat that as an extraction artifact, read through it, and never flag run-together text as a gap. " +
+			"Do real keyword AND semantic gap analysis: match_score (0..100) reflects overall fit; matched_keywords are JD skills present in the resume (write each keyword with normal spacing so it can be highlighted); missing_keywords are important JD skills absent from the resume. " +
 			"Give specific, actionable tailoring_suggestions. Do NOT invent resume content or claim skills the candidate does not have.",
 		Messages: []llm.Message{{Role: "user", Text: "JOB DESCRIPTION:\n\n" + clip(jd, 8000) +
 			"\n\n---\n\nCANDIDATE RESUME:\n\n" + clip(res.ParsedText, 20000)}},
