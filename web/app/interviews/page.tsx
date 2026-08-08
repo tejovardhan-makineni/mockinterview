@@ -89,6 +89,15 @@ export default function InterviewsPage() {
   const clear = () => { setArea("all"); setDomain("all"); setQuery(""); };
   const hasFilters = area !== "all" || domain !== "all" || query.trim() !== "";
 
+  // Pick a random interview from the CURRENT filtered set, so the active
+  // area/domain/search filters are honoured. Math.random in a click handler is
+  // safe for static export (no render-time nondeterminism / hydration mismatch).
+  const pickRandom = () => {
+    if (filtered.length === 0) return;
+    const q = filtered[Math.floor(Math.random() * filtered.length)];
+    router.push(`/setup?q=${q.id}`);
+  };
+
   // appearance-none drops the native arrow (which crams against the pill's
   // rounded right edge); Select renders a chevron inset from the edge instead.
   const selectCls =
@@ -132,6 +141,14 @@ export default function InterviewsPage() {
               <Chevron />
             </span>
           </label>
+          <button
+            onClick={pickRandom}
+            disabled={filtered.length === 0}
+            title={t("Start a random interview from the filtered results")}
+            className="rounded-full border border-[var(--color-line)] bg-[var(--color-studio)] px-3.5 py-1.5 text-sm text-[var(--color-ink)] transition hover:border-[var(--color-accent)] disabled:cursor-not-allowed disabled:opacity-40"
+          >
+            {t("🎲 Surprise me")}
+          </button>
           {hasFilters && <button onClick={clear} className="text-sm text-[var(--color-accent)] hover:brightness-125">{t("Clear filters")}</button>}
           <span className="ml-auto text-xs text-[var(--color-faint)]">{filtered.length} {t("shown")}</span>
         </div>
