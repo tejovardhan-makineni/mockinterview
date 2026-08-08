@@ -165,6 +165,11 @@ function fallbackTTS(req: PreviewReq, drive: MutableRefObject<AvatarDrive>) {
 
 // fallbackLine is a compact client mirror of persona.PreviewDelivery, used only
 // for the browser-TTS fallback (the real path speaks the server-composed line).
+// TODO(ARCH-11): derive these names from the fetched face catalog (api.listFaces)
+// instead of duplicating the ids here. Left static for now because this runs in a
+// synchronous, non-React fallback path where an async catalog fetch isn't wired;
+// an unknown id already degrades to "your interviewer", so the duplication is
+// cosmetic-only (offline TTS greeting) and low-risk.
 const FACE_NAMES: Record<string, string> = { sophia: "Sophia", marcus: "Marcus", richard: "Richard" };
 function fallbackLine(r: PreviewReq): string {
   const name = FACE_NAMES[r.faceId] ?? "your interviewer";

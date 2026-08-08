@@ -87,9 +87,25 @@ function ProceduralAvatar({ faceId, drive }: { faceId: string; drive: MutableRef
     loop();
 
     return () => {
-      cancelAnimationFrame(raf); ro.disconnect(); renderer.dispose();
+      cancelAnimationFrame(raf); ro.disconnect();
+      // Dispose geometry AND materials (+ any textures they reference) — material
+      // .dispose() alone still leaks the GPU textures. Mirrors GltfAvatar.
+      const disposeMat = (m: THREE.Material) => {
+        for (const k of ["map", "normalMap", "roughnessMap", "metalnessMap", "emissiveMap", "aoMap", "alphaMap"] as const) {
+          (m as unknown as Record<string, THREE.Texture | null>)[k]?.dispose?.();
+        }
+        m.dispose();
+      };
+      scene.traverse((o) => {
+        const m = o as THREE.Mesh;
+        m.geometry?.dispose?.();
+        const mat = m.material as THREE.Material | THREE.Material[] | undefined;
+        if (Array.isArray(mat)) mat.forEach(disposeMat);
+        else if (mat) disposeMat(mat);
+      });
+      renderer.forceContextLoss(); // release the WebGL context so it isn't held until GC
+      renderer.dispose();
       if (renderer.domElement.parentNode === el) el.removeChild(renderer.domElement);
-      scene.traverse((o) => { const m = o as THREE.Mesh; m.geometry?.dispose?.(); });
     };
     // Only rebuild the scene on faceId change; `drive` is a stable ref read each frame.
     // eslint-disable-next-line react-hooks/exhaustive-deps

@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { api } from "@/lib/api";
 import type { Resume, ResumeReview, ResumeMatch, ResumeParsed } from "@/lib/types";
+import { looseIncludes, looseReplaceAll } from "@/lib/features/resume";
 import { Badge, Button, Panel } from "@/components/ui";
 import { AppShell } from "@/components/AppShell";
 import { ResumeDoc, type Mark } from "@/components/resume/ResumeDoc";
@@ -422,7 +423,7 @@ function EditRow({
 }) {
   const t = useT();
   const isApplied = applied.has(idx);
-  const canApply = workingText.includes(edit.original) || isApplied;
+  const canApply = looseIncludes(workingText, edit.original) || isApplied;
   return (
     <div className="mt-2 rounded-lg bg-[var(--color-panel-2)] p-2.5 text-sm [overflow-wrap:anywhere]">
       <div className={`text-[var(--color-faint)] ${isApplied ? "line-through" : ""}`}>{edit.original}</div>
@@ -589,7 +590,7 @@ function Bar({ pct, color }: { pct: number; color: string }) {
 // ---------------- edit application helpers ----------------
 function subAll(s: string, edits: { original: string; improved: string }[], applied: Set<number>): string {
   let t = s;
-  applied.forEach((i) => { const e = edits[i]; if (e && e.original) t = t.split(e.original).join(e.improved); });
+  applied.forEach((i) => { const e = edits[i]; if (e && e.original) t = looseReplaceAll(t, e.original, e.improved); });
   return t;
 }
 

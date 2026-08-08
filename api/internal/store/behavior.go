@@ -3,7 +3,19 @@ package store
 import (
 	"context"
 	"encoding/json"
+	"time"
 )
+
+// BehaviorRetention is how long raw behavioral telemetry (samples + discrete
+// events) is kept before it can be purged. This is the most privacy-sensitive
+// data we hold (derived from the candidate's camera + mic), so it is minimized:
+// the aggregated presence/communication numbers already live on the saved
+// report, and the raw per-frame samples have no value once scoring has run.
+// Deleting a user's account already cascades these rows away (ON DELETE CASCADE
+// from sessions); this retention window additionally ages out raw telemetry for
+// accounts that are still active. Nothing schedules the purge yet — this is the
+// mechanism; a cron/worker can call PurgeBehaviorSamplesOlderThan on an interval.
+const BehaviorRetention = 30 * 24 * time.Hour
 
 // Behavioral telemetry is captured client-side (MediaPipe + VAD) and POSTed as
 // samples/events. The client sends normalized numeric fields on each sample:
@@ -33,6 +45,24 @@ func (s *Store) AddEvent(ctx context.Context, sessionID string, tsMs int64, kind
 		`INSERT INTO events (id, session_id, ts_ms, kind, data) VALUES ($1,$2,$3,$4,$5)`,
 		NewID(), sessionID, tsMs, kind, data)
 	return err
+}
+
+// PurgeBehaviorSamplesOlderThan deletes raw behavioral telemetry (samples +
+// discrete events) written more than d ago, by wall-clock created_at. It returns
+// the number of sample rows removed. Account deletion already cascades this data
+// (sessions ON DELETE CASCADE); this is the additional age-out for still-active
+// accounts. Intended to be called periodically with d = BehaviorRetention.
+func (s *Store) PurgeBehaviorSamplesOlderThan(ctx context.Context, d time.Duration) (int64, error) {
+	cutoff := time.Now().Add(-d)
+	tag, err := s.Pool.Exec(ctx, `DELETE FROM behavior_samples WHERE created_at < $1`, cutoff)
+	if err != nil {
+		return 0, err
+	}
+	// Discrete events are the same class of raw telemetry; age them out together.
+	if _, err := s.Pool.Exec(ctx, `DELETE FROM events WHERE created_at < $1`, cutoff); err != nil {
+		return tag.RowsAffected(), err
+	}
+	return tag.RowsAffected(), nil
 }
 
 // BehavioralSummary aggregates raw samples + events into the presence/communication

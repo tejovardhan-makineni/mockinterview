@@ -35,6 +35,43 @@ func TestInterviewerRoleByField(t *testing.T) {
 	}
 }
 
+// TestEveryCorpusDomainHasGuidance guards HR-5: per-domain interviewer guidance
+// used to silently die because the domainGuidance keys had drifted away from the
+// real corpus `domain` strings. Every domain in the shipped corpus must have
+// either non-empty domainGuidance OR non-empty interviewer_notes on every one of
+// its questions (the SystemPrompt fallback), so an interview is never run with
+// generic, domain-blind pacing.
+func TestEveryCorpusDomainHasGuidance(t *testing.T) {
+	cat, err := corpus.Load("../../data/corpus")
+	if err != nil {
+		t.Fatalf("load corpus: %v", err)
+	}
+	// Collect, per domain, whether any question lacks interviewer_notes.
+	domainHasNotesGap := map[string]bool{}
+	domains := map[string]bool{}
+	for _, sum := range cat.List("", "", "") {
+		q, ok := cat.Get(sum.ID)
+		if !ok {
+			continue
+		}
+		domains[q.Domain] = true
+		if strings.TrimSpace(q.InterviewerNotes) == "" {
+			domainHasNotesGap[q.Domain] = true
+		}
+	}
+	if len(domains) == 0 {
+		t.Fatal("no domains loaded from corpus")
+	}
+	for d := range domains {
+		if strings.TrimSpace(domainGuidance[d]) != "" {
+			continue // covered by built-in guidance
+		}
+		if domainHasNotesGap[d] {
+			t.Errorf("domain %q has neither domainGuidance nor interviewer_notes on all its questions — interviewer guidance would silently die", d)
+		}
+	}
+}
+
 func TestNextPhaseSkipsByModality(t *testing.T) {
 	// conversational skips estimation/hld/api → intro then requirements then deepdive.
 	if got := NextPhase("conversational", "requirements"); got != "deepdive" {

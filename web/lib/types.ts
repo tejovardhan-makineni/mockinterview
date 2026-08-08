@@ -5,7 +5,7 @@
 
 export type { Personality, Modality, Phase } from "./domain";
 export type { User, AuthResult } from "./features/auth";
-export type { Profile, InterviewConfig, Voice, Face } from "./features/profile";
+export type { Profile, InterviewConfig, Voice, Face, PersonalityOption } from "./features/profile";
 export type { ResumeParsed, Resume, ResumeReview, ResumeMatch, ResumeExperience, ResumeEducation, ResumeSkillGroup, ResumeContact } from "./features/resume";
 export type { QuestionSummary } from "./features/catalog";
 export type {

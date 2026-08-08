@@ -4,11 +4,14 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"log/slog"
 	"net/http"
+	"net/url"
 	"strconv"
 	"strings"
 	"sync"
 	"time"
+	"unicode/utf8"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/gorilla/websocket"
@@ -19,6 +22,61 @@ import (
 	"github.com/tejo/mockinterview-api/internal/persona"
 	"github.com/tejo/mockinterview-api/internal/store"
 )
+
+// WebSocket keep-alive: ping the client periodically and require a pong (or any
+// frame) within pongWait, so a half-open socket (candidate closed the laptop,
+// network dropped) is reaped instead of pinning a Gemini session open.
+const (
+	pongWait     = 60 * time.Second
+	pingPeriod   = 25 * time.Second
+	writeWait    = 10 * time.Second
+	persistBound = 5 * time.Second
+)
+
+// wsWriter is the slice of *websocket.Conn's write surface that wsConn needs;
+// declaring it as an interface lets tests inject a fake conn to exercise the
+// write serialization under -race (GO-14).
+type wsWriter interface {
+	WriteJSON(v interface{}) error
+	WriteMessage(messageType int, data []byte) error
+	WriteControl(messageType int, data []byte, deadline time.Time) error
+	SetWriteDeadline(t time.Time) error
+	Close() error
+}
+
+// wsConn serializes ALL writes to a single gorilla *websocket.Conn. gorilla
+// forbids concurrent writers, and both the Gemini→browser reader goroutine
+// (audio + transcripts) and the browser→Gemini loop (typed-text echo) write to
+// the same socket — without this lock they race and panic ("concurrent write to
+// websocket connection"). Every write also sets a deadline so a stuck client
+// can't block a writer forever, and the error is returned so a dead socket
+// triggers teardown instead of being silently swallowed.
+type wsConn struct {
+	mu   sync.Mutex
+	conn wsWriter
+}
+
+func (c *wsConn) writeServerMsg(m serverMsg) error {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	_ = c.conn.SetWriteDeadline(time.Now().Add(writeWait))
+	return c.conn.WriteJSON(m)
+}
+
+func (c *wsConn) writeBinary(b []byte) error {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	_ = c.conn.SetWriteDeadline(time.Now().Add(writeWait))
+	return c.conn.WriteMessage(websocket.BinaryMessage, b)
+}
+
+func (c *wsConn) writePing() error {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	return c.conn.WriteControl(websocket.PingMessage, nil, time.Now().Add(writeWait))
+}
+
+func (c *wsConn) close() error { return c.conn.Close() }
 
 // Relay bridges the browser and the interview director. When a Gemini API key is
 // present it proxies real-time audio to the Gemini Live native-audio model
@@ -45,15 +103,46 @@ type Relay struct {
 	authFn      func(*http.Request) (string, error)
 }
 
-func NewRelay(st Store, cat *corpus.Catalog, ai llm.Client, apiKey, liveModel, reasonModel string, authFn func(*http.Request) (string, error)) *Relay {
+func NewRelay(st Store, cat *corpus.Catalog, ai llm.Client, apiKey, liveModel, reasonModel string, allowedOrigins []string, authFn func(*http.Request) (string, error)) *Relay {
 	return &Relay{
 		store: st, corpus: cat, llm: ai, apiKey: apiKey, liveModel: liveModel, reasonModel: reasonModel,
 		authFn: authFn,
 		upgrader: websocket.Upgrader{
 			ReadBufferSize:  1 << 15,
 			WriteBufferSize: 1 << 15,
-			CheckOrigin:     func(_ *http.Request) bool { return true }, // CORS handled at HTTP layer
+			// SEC-6: only allow the configured web origin(s) (or a same-origin /
+			// header-less non-browser client) to open the socket. A wide-open
+			// CheckOrigin lets any website drive an authenticated user's live session
+			// (cross-site WebSocket hijacking); the HTTP CORS layer does NOT protect
+			// the WS handshake.
+			CheckOrigin: originChecker(allowedOrigins),
 		},
+	}
+}
+
+// originChecker builds the upgrader's CheckOrigin: permit requests with no Origin
+// header (native/test clients that can't be a browser CSRF vector), same-origin
+// requests, and any explicitly-allowed web origin.
+func originChecker(allowed []string) func(*http.Request) bool {
+	return func(req *http.Request) bool {
+		origin := req.Header.Get("Origin")
+		if origin == "" {
+			return true // non-browser client (no Origin header)
+		}
+		u, err := url.Parse(origin)
+		if err != nil || u.Host == "" {
+			return false
+		}
+		// Same-origin: the WS request Host matches the page's Origin host.
+		if strings.EqualFold(u.Host, req.Host) {
+			return true
+		}
+		for _, a := range allowed {
+			if strings.EqualFold(origin, strings.TrimRight(a, "/")) {
+				return true
+			}
+		}
+		return false
 	}
 }
 
@@ -180,9 +269,12 @@ func (r *Relay) runGemini(conn *websocket.Conn, sessionID string, q corpus.Quest
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Minute)
 	defer cancel()
 
+	wc := &wsConn{conn: conn}
+
 	client, err := genai.NewClient(ctx, &genai.ClientConfig{APIKey: r.apiKey, Backend: genai.BackendGeminiAPI})
 	if err != nil {
-		writeJSON(conn, serverMsg{Type: "error", Text: "live connect failed"})
+		slog.Error("live client init failed", "session", sessionID, "err", err)
+		_ = wc.writeServerMsg(serverMsg{Type: "error", Text: "live connect failed"})
 		return
 	}
 	cfg := &genai.LiveConnectConfig{
@@ -223,15 +315,96 @@ func (r *Relay) runGemini(conn *websocket.Conn, sessionID string, q corpus.Quest
 	}
 	session, err := client.Live.Connect(ctx, r.liveModel, cfg)
 	if err != nil {
-		writeJSON(conn, serverMsg{Type: "error", Text: "live model unavailable: " + err.Error()})
+		// GO-9/SEC-9: log the raw provider error server-side; return a generic
+		// message so upstream/internal detail never reaches the browser.
+		slog.Error("live model connect failed", "session", sessionID, "model", r.liveModel, "err", err)
+		_ = wc.writeServerMsg(serverMsg{Type: "error", Text: "live model unavailable"})
 		return
 	}
-	defer session.Close()
-	writeJSON(conn, serverMsg{Type: "ready", Mode: "voice"})
+
+	// Keep-alive (GO-3): a pong (or any frame) must arrive within pongWait or the
+	// read errors out, reaping half-open sockets. Pings are sent below.
+	_ = conn.SetReadDeadline(time.Now().Add(pongWait))
+	conn.SetPongHandler(func(string) error { return conn.SetReadDeadline(time.Now().Add(pongWait)) })
+
+	// Teardown (GO-3): idempotent and safe from any goroutine. cancel() alone can
+	// hang because session.Receive()/conn.ReadMessage() may not honor ctx, so we
+	// also force-close both so those blocked reads error out immediately.
+	var stopOnce sync.Once
+	stop := func() {
+		stopOnce.Do(func() {
+			cancel()
+			_ = session.Close()
+			_ = wc.close()
+		})
+	}
+	defer stop()
+
+	_ = wc.writeServerMsg(serverMsg{Type: "ready", Mode: "voice"})
 
 	start := time.Now()
+
+	// GO-2: keep transcript persistence OFF the audio hot path. Finished turns are
+	// pushed onto a buffered channel and written by a dedicated goroutine with a
+	// bounded timeout, so a slow DB write never stalls the interviewer's audio.
+	// The write ctx is independent of the session ctx so an in-flight persist
+	// survives teardown (we don't want to drop the last turn on disconnect).
+	type pendingTurn struct {
+		role, text string
+		tsMs       int64
+	}
+	turns := make(chan pendingTurn, 256)
+	persist := func(role, text string, tsMs int64) {
+		select {
+		case turns <- pendingTurn{role, text, tsMs}:
+		default:
+			// Buffer full (pathological): persist in a throwaway goroutine so the hot
+			// path still never blocks and the turn isn't dropped.
+			go func() {
+				pctx, pcancel := context.WithTimeout(context.Background(), persistBound)
+				defer pcancel()
+				_ = r.store.AddTurn(pctx, sessionID, role, text, tsMs, nil)
+			}()
+		}
+	}
+	var persistWg sync.WaitGroup
+	persistWg.Add(1)
+	go func() {
+		defer persistWg.Done()
+		for t := range turns {
+			pctx, pcancel := context.WithTimeout(context.Background(), persistBound)
+			_ = r.store.AddTurn(pctx, sessionID, t.role, t.text, t.tsMs, nil)
+			pcancel()
+		}
+	}()
+
+	// Ping ticker (GO-3): rides the write lock like every other write.
+	go func() {
+		ticker := time.NewTicker(pingPeriod)
+		defer ticker.Stop()
+		for {
+			select {
+			case <-ctx.Done():
+				return
+			case <-ticker.C:
+				if err := wc.writePing(); err != nil {
+					stop()
+					return
+				}
+			}
+		}
+	}()
+
 	var wg sync.WaitGroup
 	wg.Add(1)
+
+	// endedOnce guards against emitting "ended" twice (GO-11).
+	var endedOnce sync.Once
+	emitEnded := func() {
+		endedOnce.Do(func() {
+			_ = wc.writeServerMsg(serverMsg{Type: "ended", Text: "The interviewer concluded the interview."})
+		})
+	}
 
 	// Gemini → browser: audio + transcripts. Transcriptions arrive in small
 	// chunks; we ACCUMULATE per role and emit the full text-so-far (streaming),
@@ -244,8 +417,8 @@ func (r *Relay) runGemini(conn *websocket.Conn, sessionID string, q corpus.Quest
 			if curText == "" {
 				return
 			}
-			_ = r.store.AddTurn(context.Background(), sessionID, curRole, curText, time.Since(start).Milliseconds(), nil)
-			writeJSON(conn, serverMsg{Type: "transcript", Role: curRole, Text: curText, Streaming: false})
+			persist(curRole, curText, time.Since(start).Milliseconds())
+			_ = wc.writeServerMsg(serverMsg{Type: "transcript", Role: curRole, Text: curText, Streaming: false})
 			curRole, curText = "", ""
 		}
 		accumulate := func(role, chunk string) {
@@ -257,27 +430,41 @@ func (r *Relay) runGemini(conn *websocket.Conn, sessionID string, q corpus.Quest
 			}
 			curRole = role
 			curText += chunk
-			writeJSON(conn, serverMsg{Type: "transcript", Role: role, Text: curText, Streaming: true})
+			// GO-13: a failed write means the client is gone — tear down instead of
+			// swallowing the error and looping.
+			if err := wc.writeServerMsg(serverMsg{Type: "transcript", Role: role, Text: curText, Streaming: true}); err != nil {
+				stop()
+			}
 		}
 		for {
 			msg, err := session.Receive()
 			if err != nil {
 				flush()
-				// The Gemini session dropped (error, or the 30-min cap). Close the
-				// browser socket so the client's auto-reconnect kicks in and opens a
-				// FRESH Gemini session — otherwise the candidate keeps talking into a
-				// dead session and nothing is heard. Transcript is already persisted.
-				_ = conn.Close()
+				// The Gemini session dropped (error, or the 30-min cap). Tear down so
+				// the browser socket closes and the client's auto-reconnect opens a
+				// FRESH Gemini session. Transcript is already persisted.
+				stop()
 				return
 			}
-			// The interviewer decided to end the interview.
+			// The interviewer decided to end the interview (GO-11).
 			if msg.ToolCall != nil {
+				ended := false
 				for _, fc := range msg.ToolCall.FunctionCalls {
 					if fc.Name == "end_interview" {
 						_ = session.SendToolResponse(genai.LiveToolResponseInput{FunctionResponses: []*genai.FunctionResponse{{ID: fc.ID, Name: fc.Name, Response: map[string]any{"ok": true}}}})
 						flush()
-						writeJSON(conn, serverMsg{Type: "ended", Text: "The interviewer concluded the interview."})
+						emitEnded()
+						ended = true
 					}
+				}
+				if ended {
+					// Mark the session complete and tear the whole relay down instead of
+					// continuing the receive loop with a session the interviewer ended.
+					uctx, ucancel := context.WithTimeout(context.Background(), persistBound)
+					_ = r.store.UpdateSessionStatus(uctx, sessionID, "complete")
+					ucancel()
+					stop()
+					return
 				}
 				continue
 			}
@@ -288,7 +475,10 @@ func (r *Relay) runGemini(conn *websocket.Conn, sessionID string, q corpus.Quest
 			if sc.ModelTurn != nil {
 				for _, p := range sc.ModelTurn.Parts {
 					if p.InlineData != nil && len(p.InlineData.Data) > 0 {
-						_ = conn.WriteMessage(websocket.BinaryMessage, p.InlineData.Data)
+						if err := wc.writeBinary(p.InlineData.Data); err != nil {
+							stop()
+							return
+						}
 					}
 				}
 			}
@@ -299,11 +489,11 @@ func (r *Relay) runGemini(conn *websocket.Conn, sessionID string, q corpus.Quest
 				accumulate("candidate", sc.InputTranscription.Text)
 			}
 			if sc.Interrupted {
-				writeJSON(conn, serverMsg{Type: "interrupted"})
+				_ = wc.writeServerMsg(serverMsg{Type: "interrupted"})
 			}
 			if sc.TurnComplete {
 				flush()
-				writeJSON(conn, serverMsg{Type: "turn_complete"})
+				_ = wc.writeServerMsg(serverMsg{Type: "turn_complete"})
 			}
 		}
 	}()
@@ -342,6 +532,7 @@ func (r *Relay) runGemini(conn *websocket.Conn, sessionID string, q corpus.Quest
 	}
 
 	// Browser → Gemini: audio (binary) + control (JSON).
+readLoop:
 	for {
 		mt, data, err := conn.ReadMessage()
 		if err != nil {
@@ -370,9 +561,12 @@ func (r *Relay) runGemini(conn *websocket.Conn, sessionID string, q corpus.Quest
 				// A typed answer IS a completed candidate turn — PERSIST it (Gemini
 				// won't echo typed text back as an input transcription, so without
 				// this the scorer would never see typed answers) and prompt a reply.
+				// Persistence goes through the off-hot-path channel (GO-2), and the
+				// echo through the serialized writer (GO-1) — this write races the
+				// reader goroutine's audio/transcript writes.
 				if strings.TrimSpace(m.Text) != "" {
-					_ = r.store.AddTurn(context.Background(), sessionID, "candidate", m.Text, time.Since(start).Milliseconds(), nil)
-					writeJSON(conn, serverMsg{Type: "transcript", Role: "candidate", Text: m.Text, Streaming: false})
+					persist("candidate", m.Text, time.Since(start).Milliseconds())
+					_ = wc.writeServerMsg(serverMsg{Type: "transcript", Role: "candidate", Text: m.Text, Streaming: false})
 				}
 				_ = session.SendClientContent(genai.LiveClientContentInput{
 					Turns:        []*genai.Content{genai.NewContentFromText(m.Text, genai.RoleUser)},
@@ -390,14 +584,33 @@ func (r *Relay) runGemini(conn *websocket.Conn, sessionID string, q corpus.Quest
 					TurnComplete: genai.Ptr(false),
 				})
 			case "end":
-				cancel()
-				wg.Wait()
-				return
+				break readLoop
 			}
 		}
 	}
-	cancel()
-	wg.Wait()
+
+	// Teardown: cancel + force-close so the reader goroutine's blocked
+	// session.Receive() errors out, then wait for it (bounded), then drain and
+	// wait for the persistence goroutine so no finished turn is lost (GO-3).
+	stop()
+	if waitTimeout(&wg, writeWait) {
+		close(turns)
+		persistWg.Wait()
+	}
+}
+
+// waitTimeout waits for wg for at most d, returning true if it completed. Used so
+// teardown can't hang forever on a reader goroutine that (pathologically) fails
+// to observe the closed session.
+func waitTimeout(wg *sync.WaitGroup, d time.Duration) bool {
+	done := make(chan struct{})
+	go func() { wg.Wait(); close(done) }()
+	select {
+	case <-done:
+		return true
+	case <-time.After(d):
+		return false
+	}
 }
 
 // ---- helpers ----
@@ -471,9 +684,18 @@ func writeJSON(conn *websocket.Conn, m serverMsg) {
 	_ = conn.WriteJSON(m)
 }
 
+// clipText truncates s to at most n bytes WITHOUT splitting a UTF-8 rune — a
+// naive s[:n] can slice through a multi-byte character (e.g. Telugu/Hindi text)
+// and emit invalid UTF-8. Back off to the nearest rune boundary at or before n.
 func clipText(s string, n int) string {
+	if n <= 0 {
+		return ""
+	}
 	if len(s) <= n {
 		return s
+	}
+	for n > 0 && !utf8.RuneStart(s[n]) {
+		n--
 	}
 	return s[:n]
 }

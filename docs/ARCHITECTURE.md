@@ -58,7 +58,8 @@ flowchart TD
 |---|---|---|
 | `config` | env → typed config, `.env` load, provider resolution, admin allowlist, daily limit | add a setting / provider key / tier rule |
 | `store` | pgx pool, **embedded migrations**, all SQL (users, sessions, transcripts, scores, reports, behavior…), the `Datastore` contract, and `store/memstore` (in-memory impl for tests) | change the schema (add `migrations/NNNN_*.sql`) or a query |
-| `persona` | swappable catalogs — `voices.go`, `faces.go`, `personalities.go` (each a one-file registry + validators) | add/change a voice, face, or interviewer personality |
+| `persona` | swappable catalogs — `voices.go`, `faces.go`, `personalities.go`, `languages.go`, `delivery.go` (each a one-file registry + validators) | add/change a voice, face, interviewer personality, language, or delivery style |
+| `i18n` | server-side UI-string translation (`/i18n/translate`, LLM-backed, 1 MB-capped + ≤200 texts/call) | change how chrome strings are translated |
 | `auth` | email/password + JWT, middleware | change auth / add an identity provider |
 | `corpus` | load + validate + serve questions (`data/corpus/*.json`) | add/edit questions, change the question schema/validator |
 | `llm` | provider-agnostic `Client` (Gemini/OpenAI/DeepSeek/xAI/Meta/Anthropic + stub) | add an LLM provider / change model defaults |
@@ -99,8 +100,11 @@ under `lib/features/`** owning its types + HTTP calls + mock + fixtures:
 | `lib/domain.ts` | cross-feature primitives (`Modality`, `Personality`, `Phase`) |
 | `lib/types.ts`, `lib/mockdata.ts` | back-compat barrels re-exporting from features |
 | `lib/live.ts` | live client: WS transport, mic/voice, captions, nudge, **reconnect w/ backoff**, ended |
-| `lib/behavior.ts` | in-browser MediaPipe + luminance behavioral capture |
+| `lib/behavior.ts` | in-browser MediaPipe + luminance behavioral capture — **opt-in only** (gated on `localStorage["mi.cameraConsent"]==="granted"`; no-ops otherwise) |
 | `lib/voicePreview.ts` | real Gemini voice preview (+ browser fallback), play/stop |
+| `lib/features/i18n.ts` | translation + language-list slice (http + mock twin); consumed by `lib/i18n.tsx` via `api` (never a raw `fetch`) |
+| `lib/features/achievements.ts` | pure client-side derivation over already-fetched sessions (no transport — intentional composer exception) |
+| `lib/i18n.tsx` | language context + `t()`; personality & language catalogs are fetched from the backend (`/personalities`, `/languages`), not hardcoded |
 | `components/AppShell.tsx` | left-sidebar app shell (nav, theme, sign-out) wrapping every signed-in page |
 | `components/ThemeToggle.tsx` | Dark / Light / Quantum themes |
 | `components/studio/*` | interview room: `Avatar3D` + `avatars/*` (plug-and-play), `Workspace` (Excalidraw/Monaco/text), `Webcam` |

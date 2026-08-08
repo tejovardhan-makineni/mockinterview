@@ -44,14 +44,20 @@ func (s *Service) hash(pw string) (string, error) {
 	return string(b), err
 }
 
-// wsAudience marks a short-lived ticket that may ride in a WebSocket URL. The
-// long-lived session JWT never carries it, so a JWT leaked from a URL/log is not
-// accepted on the socket, and a ticket is useless after ~90s.
-const wsAudience = "ws"
+// Token audiences isolate the two token kinds so one can't be replayed as the
+// other (SEC-5/GO-10). The full session JWT carries aud=api and is accepted only
+// on bearer-header API requests; the short-lived WebSocket ticket carries aud=ws
+// and is accepted only on the socket handshake. Without distinct audiences a 90s
+// ws ticket (which rides in a URL/log) would also be a valid full API bearer.
+const (
+	apiAudience = "api"
+	wsAudience  = "ws"
+)
 
 func (s *Service) issue(userID string) (string, error) {
 	claims := jwt.RegisteredClaims{
 		Subject:   userID,
+		Audience:  jwt.ClaimStrings{apiAudience},
 		ExpiresAt: jwt.NewNumericDate(time.Now().Add(s.ttl)),
 		IssuedAt:  jwt.NewNumericDate(time.Now()),
 	}
@@ -90,7 +96,7 @@ func (s *Service) parseTicket(tokenStr string) (string, error) {
 }
 
 func (s *Service) parse(tokenStr string) (string, error) {
-	tok, err := jwt.ParseWithClaims(tokenStr, &jwt.RegisteredClaims{}, s.keyFunc)
+	tok, err := jwt.ParseWithClaims(tokenStr, &jwt.RegisteredClaims{}, s.keyFunc, jwt.WithAudience(apiAudience))
 	if err != nil || !tok.Valid {
 		return "", errors.New("invalid token")
 	}

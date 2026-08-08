@@ -361,7 +361,11 @@ export class LiveSession {
   }
 
   private playPcm(bytes: Uint8Array) {
-    if (!this.audioCtx) { this.audioCtx = new AudioContext({ sampleRate: 24000 }); this.playHead = this.audioCtx.currentTime; }
+    if (!this.audioCtx) {
+      this.audioCtx = new AudioContext({ sampleRate: 24000 });
+      this.playHead = this.audioCtx.currentTime;
+      void this.audioCtx.resume(); // browsers create AudioContexts suspended until a gesture
+    }
     const ctx = this.audioCtx;
     const pcm = new Int16Array(bytes.buffer, bytes.byteOffset, Math.floor(bytes.byteLength / 2));
     const f32 = new Float32Array(pcm.length);

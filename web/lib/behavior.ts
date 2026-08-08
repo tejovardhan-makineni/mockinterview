@@ -7,6 +7,25 @@
 
 import { api } from "./api";
 
+// Camera/behavioral analysis is OPT-IN. The candidate's decision is stored in
+// localStorage under this key: "granted" enables face-mesh/gaze/lighting/
+// framing/posture capture; "denied" (or absent) means the interview runs with
+// NO behavioral capture at all. Absent is treated as NOT granted.
+export const CAMERA_CONSENT_KEY = "mi.cameraConsent";
+export type CameraConsent = "granted" | "denied";
+
+export function getCameraConsent(): CameraConsent | null {
+  if (typeof window === "undefined") return null;
+  const v = window.localStorage.getItem(CAMERA_CONSENT_KEY);
+  return v === "granted" || v === "denied" ? v : null;
+}
+export function setCameraConsent(v: CameraConsent) {
+  if (typeof window !== "undefined") window.localStorage.setItem(CAMERA_CONSENT_KEY, v);
+}
+export function cameraConsentGranted(): boolean {
+  return getCameraConsent() === "granted";
+}
+
 type Sample = {
   ts_ms: number;
   gaze: { on_screen: number };
@@ -28,10 +47,16 @@ export class BehaviorTracker {
   private speaking = 0;
   // MediaPipe (optional)
   private landmarker: unknown = null;
+  // Set by stop(); guards a landmarker that finishes loading AFTER we've stopped
+  // (so it gets closed instead of leaking) and blocks any late sampling.
+  private stopped = false;
 
   constructor(private sessionId: string, private video: HTMLVideoElement) {}
 
   async begin() {
+    // Opt-in gate: with no explicit camera consent, capture NOTHING. The
+    // interview still runs; the report simply omits the behavioral section.
+    if (!cameraConsentGranted()) return;
     this.canvas!.width = 160; this.canvas!.height = 120;
     void this.tryLoadMediapipe();
     this.timer = window.setInterval(() => this.sample(), 2000);
@@ -49,12 +74,16 @@ export class BehaviorTracker {
       const fileset = await vision.FilesetResolver.forVisionTasks(
         "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@1.0.1/wasm"
       );
-      this.landmarker = await vision.FaceLandmarker.createFromOptions(fileset, {
+      const lm = await vision.FaceLandmarker.createFromOptions(fileset, {
         baseOptions: { modelAssetPath: "https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/1/face_landmarker.task" },
         runningMode: "VIDEO",
         numFaces: 1,
         outputFacialTransformationMatrixes: true,
       });
+      // We may have been stop()'d while the model + wasm were downloading — if so,
+      // close it immediately rather than holding the native handle open.
+      if (this.stopped) { (lm as { close?: () => void }).close?.(); this.landmarker = null; return; }
+      this.landmarker = lm;
     } catch { this.landmarker = null; /* canvas fallback still runs */ }
   }
 
@@ -138,8 +167,13 @@ export class BehaviorTracker {
   }
 
   async stop() {
+    this.stopped = true;
     if (this.timer) clearInterval(this.timer);
     if (this.flushTimer) clearInterval(this.flushTimer);
+    // Release the MediaPipe FaceLandmarker's native/WASM resources. Without this
+    // each interview leaks a landmarker (GPU/WASM heap) until GC, if ever.
+    (this.landmarker as { close?: () => void } | null)?.close?.();
+    this.landmarker = null;
     await this.flush();
   }
 }

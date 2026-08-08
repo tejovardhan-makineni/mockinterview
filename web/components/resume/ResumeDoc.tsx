@@ -6,6 +6,7 @@
 // parse is empty. Structure modeled after OpenResume / Reactive Resume.
 import type { ReactNode } from "react";
 import type { ResumeParsed, ResumeSkillGroup } from "@/lib/types";
+import { looseFind } from "@/lib/features/resume";
 
 export type Mark = { str: string; cls: string };
 
@@ -153,10 +154,13 @@ function Section({ title, children }: { title: string; children: ReactNode }) {
 
 // hl wraps each occurrence of a mark string in a styled <mark>. Sequential,
 // non-overlapping, first/earliest-match wins. Longer marks are tried first so a
-// specific phrase beats a substring of it.
+// specific phrase beats a substring of it. Matching is whitespace-tolerant
+// (looseFind) so a mark copied from run-together PDF text still highlights the
+// correctly-spaced phrase in the rendered document — and the ACTUAL rendered
+// span (with its real spacing) is what gets wrapped, not the mark string.
 export function hl(text: string, marks: Mark[]): ReactNode[] {
   const targets = marks
-    .filter((m) => m.str && text.includes(m.str))
+    .filter((m) => m.str)
     .sort((a, b) => b.str.length - a.str.length);
   if (targets.length === 0) return [text];
   const out: ReactNode[] = [];
@@ -164,11 +168,13 @@ export function hl(text: string, marks: Mark[]): ReactNode[] {
   let key = 0;
   while (rest.length) {
     let best = -1;
+    let bestEnd = -1;
     let bestMark: Mark | null = null;
     for (const m of targets) {
-      const idx = rest.indexOf(m.str);
-      if (idx >= 0 && (best === -1 || idx < best)) {
-        best = idx;
+      const hit = looseFind(rest, m.str);
+      if (hit && (best === -1 || hit.start < best)) {
+        best = hit.start;
+        bestEnd = hit.end;
         bestMark = m;
       }
     }
@@ -177,8 +183,8 @@ export function hl(text: string, marks: Mark[]): ReactNode[] {
       break;
     }
     if (best > 0) out.push(<span key={key++}>{rest.slice(0, best)}</span>);
-    out.push(<mark key={key++} className={`mi-hl ${bestMark.cls}`}>{bestMark.str}</mark>);
-    rest = rest.slice(best + bestMark.str.length);
+    out.push(<mark key={key++} className={`mi-hl ${bestMark.cls}`}>{rest.slice(best, bestEnd)}</mark>);
+    rest = rest.slice(bestEnd);
   }
   return out;
 }

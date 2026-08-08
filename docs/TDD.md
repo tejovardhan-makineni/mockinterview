@@ -119,6 +119,10 @@ duplicated maps).
 - `director.go` — **the entire interviewer personality**: system-prompt assembly
   from persona + intensity + phase + per-domain pacing (`domainGuidance`) + the
   question's rubric/deep-dive material + a rolling canvas summary. One file.
+  `domainGuidance` is keyed to the **real corpus `domain` strings** (incl. the
+  professional + engineering domains); `TestEveryCorpusDomainHasGuidance` fails CI
+  if any corpus domain lacks both guidance and per-question `interviewer_notes`,
+  so safety-critical clinical/nursing/legal standards can't silently stop firing.
 - `relay.go` — the transport: proxies the Gemini Live WebSocket (so the key never
   reaches the browser), taps both transcripts, handles turn-taking/VAD, the
   `end_interview` tool, and persists candidate turns (critical for scoring).
@@ -128,7 +132,11 @@ duplicated maps).
 Corpus-driven: rubric dimensions come from the question, so one engine scores
 system-design, coding, and professional interviews. Guards against fabricating
 scores: `< 40` candidate words ⇒ *not scored*; per-dimension `assessed` flag ⇒
-unassessed dims don't drag the weighted overall. Deterministic under the stub.
+unassessed dims don't drag the weighted overall. Deterministic under the stub —
+and the stub **fails closed under `APP_ENV=production`** so a real candidate can
+never be shown fabricated feedback from an unconfigured LLM. Scoring runs on a
+detached 90 s context (not the request context), so a candidate navigating to the
+report right after `POST /finish` can't cancel their own scoring.
 
 ### 4.4 LLM providers (`internal/llm`)
 
@@ -179,10 +187,25 @@ on boot.
   proxy log can't open a socket. The full JWT is only ever sent in the
   `Authorization` header.
 - **Abuse controls:** per-IP rate limit on `/auth/*`; per-user rate limit on the
-  paid LLM/TTS endpoints (`/resume/review`, `/voices/preview`); a 1 MB JSON body
-  cap and a bounded behavior-batch; a decompression-bomb guard on DOCX; a
-  `SetReadLimit` on the live socket. In production the server refuses to boot with
-  the default `JWT_SECRET`.
+  paid LLM/TTS endpoints (`/resume/review`, `/voices/preview`, `/i18n/translate`);
+  a 1 MB JSON body cap on **every** JSON endpoint (`/i18n/translate` also bounds
+  the batch to ≤200 texts) and a bounded behavior-batch; a decompression-bomb
+  guard on DOCX; a `SetReadLimit` on the live socket. In production the server
+  refuses to boot with the default `JWT_SECRET`.
+- **Session vs ticket audiences:** the session JWT is minted with `aud=api` and
+  the live-socket ticket with `aud=ws`; each middleware requires its own audience,
+  so a ticket cannot be replayed as an API bearer and vice-versa.
+- **Live socket:** all writes to the browser socket go through a single
+  mutex-guarded writer with a write deadline (no concurrent-write panics);
+  `Origin` is checked against the CORS allow-list; ping/pong + read deadlines reap
+  half-open connections.
+- **Behavioral (camera) data — privacy posture:** in-browser gaze/lighting/
+  framing analysis is **opt-in with explicit informed consent, off by default**.
+  Physical-presence signals are shown as neutral, non-scored, ability-aware notes
+  (never a numeric grade) and never touch the technical rubric. Samples are
+  retained ~30 days (`store.BehaviorRetention`, `PurgeBehaviorSamplesOlderThan`)
+  and cascade-deleted with the account. The report copy states accurately that raw
+  samples are sent to and stored on the server for the candidate's own feedback.
 - Secrets only in gitignored `.env` / `deploy/*.env`. The API key never reaches
   the browser — the server proxies Gemini Live.
 - Tiering: free users get `FREE_DAILY_LIMIT` interviews/day (429 past it); admin

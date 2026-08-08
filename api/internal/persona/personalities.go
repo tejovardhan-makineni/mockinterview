@@ -11,16 +11,19 @@ type Personality struct {
 	Directive string `json:"-"` // instruction fragment injected into the interviewer's system prompt
 }
 
-// Personalities is the catalog of selectable interviewer demeanors.
+// Personalities is the catalog of selectable interviewer demeanors. The FIRST
+// entry is the default a brand-new user gets (see DefaultPersonalityID), so the
+// balanced/professional "neutral" persona leads — a stress/adversarial style is
+// never the default and is offered only as an explicit opt-in (HR-8).
 var Personalities = []Personality{
+	{ID: "neutral", Label: "Balanced", Blurb: "Professional and even — closest to a typical real interview. Recommended default.",
+		Directive: "You are balanced and professional. Neither warm nor cold. You give little away."},
 	{ID: "supportive", Label: "Supportive", Blurb: "Warm and encouraging; nudges you when you're stuck.",
 		Directive: "You are warm and encouraging. Offer a gentle hint if the candidate is stuck for a while. Acknowledge good points."},
-	{ID: "neutral", Label: "Neutral", Blurb: "Professional and even — a typical real interview.",
-		Directive: "You are balanced and professional. Neither warm nor cold. You give little away."},
 	{ID: "interruptive", Label: "Interruptive", Blurb: "Probes hard and barges in on gaps, like a senior bar-raiser.",
 		Directive: "You interrupt frequently with pointed follow-ups the moment the candidate touches something worth probing. You do not let them monologue."},
-	{ID: "annoying", Label: "Stress", Blurb: "Deliberately terse and pressuring to test composure.",
-		Directive: "You are impatient and skeptical. You push back hard, express mild frustration at vagueness, and demand specifics. Never be abusive, just demanding."},
+	{ID: "annoying", Label: "Stress (practice)", Blurb: "Optional stress-practice style: deliberately terse and pressuring to help you rehearse composure. This is a training mode, not how most real interviews go.",
+		Directive: "You are running an OPT-IN stress-practice interview to help the candidate rehearse composure under pressure. You are impatient and skeptical: push back hard, express mild frustration at vagueness, and demand specifics. Never be abusive or personal — this is a demanding practice style, not hostility."},
 }
 
 // Directive returns the interviewer prompt fragment for a personality id, with a

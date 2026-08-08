@@ -56,7 +56,7 @@ func (a *App) Routes(r chi.Router) {
 
 	// Live interview WebSocket relay. Auth is via ?token= (WS can't set headers),
 	// so it sits outside the bearer-header middleware group.
-	relay := live.NewRelay(a.Store, a.Corpus, a.LLM, a.Cfg.GeminiAPIKey, a.Cfg.ModelLive, a.Cfg.LLMModel, authSvc.AuthFromRequest)
+	relay := live.NewRelay(a.Store, a.Corpus, a.LLM, a.Cfg.GeminiAPIKey, a.Cfg.ModelLive, a.Cfg.LLMModel, a.Cfg.CORSAllow, authSvc.AuthFromRequest)
 	r.Get("/sessions/{id}/live", relay.Handle)
 
 	resumeSvc := resume.New(a.Store, a.LLM, a.Cfg.LLMModel)

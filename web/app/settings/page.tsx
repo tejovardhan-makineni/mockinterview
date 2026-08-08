@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { api } from "@/lib/api";
-import type { Face, InterviewConfig, Personality, Profile, Voice } from "@/lib/types";
+import type { Face, InterviewConfig, Personality, PersonalityOption, Profile, Voice } from "@/lib/types";
 import { Badge, Button, Field, Input, Panel } from "@/components/ui";
 import { AppShell } from "@/components/AppShell";
 import { Avatar3D, type AvatarDrive } from "@/components/studio/Avatar3D";
@@ -16,7 +16,6 @@ const DOMAINS = [
   "nursing", "law", "consulting_case", "product_management", "finance", "data_science",
   "ux_design", "sales", "marketing", "human_resources", "education", "mba_admissions",
 ];
-const PERSONAS: Personality[] = ["supportive", "neutral", "interruptive", "annoying"];
 const pretty = (s: string) => s.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
 
 export default function SettingsPage() {
@@ -26,6 +25,7 @@ export default function SettingsPage() {
   const [cfg, setCfg] = useState<InterviewConfig>({ voice_id: "aoede", face_id: "sophia", personality: "neutral", intensity: 3 });
   const [voices, setVoices] = useState<Voice[]>([]);
   const [faces, setFaces] = useState<Face[]>([]);
+  const [personas, setPersonas] = useState<PersonalityOption[]>([]);
   const [saved, setSaved] = useState("");
   const [confirmDelete, setConfirmDelete] = useState(false);
   const pv = useRef<AvatarDrive>({ speaking: false, amplitude: 0, mood: "neutral" });
@@ -41,10 +41,13 @@ export default function SettingsPage() {
     (async () => {
       const u = await api.me();
       if (!u) { router.replace("/login"); return; }
-      const [p, c, v, f] = await Promise.all([api.getProfile(), api.getConfig(), api.listVoices(), api.listFaces()]);
-      setProfile(p || {}); setCfg(c); setVoices(v); setFaces(f);
+      const [p, c, v, f, ps] = await Promise.all([api.getProfile(), api.getConfig(), api.listVoices(), api.listFaces(), api.listPersonalities()]);
+      setProfile(p || {}); setCfg(c); setVoices(v); setFaces(f); setPersonas(ps);
     })();
   }, [router]);
+
+  // Stop any preview audio when leaving the page (FE-3).
+  useEffect(() => () => stopPreview(pv), []);
 
   // Warm the preview clip whenever the combo changes so "Hear this voice & face"
   // plays instantly. Debounced so dragging the intensity slider fires one fetch.
@@ -133,7 +136,7 @@ export default function SettingsPage() {
             <div className="grid grid-cols-2 gap-4">
               <Field label={t("Temperament")}>
                 <select value={cfg.personality} onChange={(e) => setCfg({ ...cfg, personality: e.target.value as Personality })} className="w-full rounded-xl border border-[var(--color-line)] bg-[var(--color-studio)] px-3 py-2.5 text-sm">
-                  {PERSONAS.map((p) => <option key={p} value={p}>{t(pretty(p))}</option>)}
+                  {personas.map((p) => <option key={p.id} value={p.id}>{t(p.label)}</option>)}
                 </select>
               </Field>
               <Field label={`${t("Intensity")} — ${cfg.intensity}/5`}>
