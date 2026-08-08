@@ -74,4 +74,13 @@ func TestWSTicketAudienceSeparation(t *testing.T) {
 	if err != nil || uid != "user-123" {
 		t.Errorf("valid ws ticket should parse to its subject, got uid=%q err=%v", uid, err)
 	}
+
+	// SEC-5/GO-10: the reverse must also hold — a 90s ws ticket (which rides in a
+	// URL/log) must NOT be accepted as a full API bearer token.
+	if _, err := s.parse(ticket); err == nil {
+		t.Error("a ws ticket must be rejected as a full API bearer (wrong audience)")
+	}
+	if uid, err := s.parse(jwtTok); err != nil || uid != "user-123" {
+		t.Errorf("a normal session JWT should parse as an API bearer, got uid=%q err=%v", uid, err)
+	}
 }

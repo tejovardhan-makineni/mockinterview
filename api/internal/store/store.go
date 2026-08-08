@@ -51,10 +51,34 @@ func Open(ctx context.Context, dsn string, maxConns int32) (*Store, error) {
 
 func (s *Store) Close() { s.Pool.Close() }
 
+// migrationLockKey is an arbitrary, fixed advisory-lock key shared by every
+// instance so they serialize on the same lock during migration (GO-5).
+const migrationLockKey int64 = 0x6D6F636B6D6967 // "mockmig"
+
 // migrate applies every migrations/*.sql file (lexical order) that has not yet
 // been recorded in schema_migrations. Each file runs in its own transaction.
+//
+// GO-5: concurrent instances (e.g. several Cloud Run containers booting at once)
+// would otherwise race on check-then-apply DDL. We hold a session-level
+// pg_advisory_lock on a SINGLE pinned connection for the whole migration so only
+// one instance applies migrations at a time; the rest block, then observe the
+// already-recorded versions and no-op.
 func (s *Store) migrate(ctx context.Context) error {
-	if _, err := s.Pool.Exec(ctx, `CREATE TABLE IF NOT EXISTS schema_migrations (
+	conn, err := s.Pool.Acquire(ctx)
+	if err != nil {
+		return fmt.Errorf("acquire migration conn: %w", err)
+	}
+	defer conn.Release()
+
+	if _, err := conn.Exec(ctx, `SELECT pg_advisory_lock($1)`, migrationLockKey); err != nil {
+		return fmt.Errorf("acquire migration advisory lock: %w", err)
+	}
+	defer func() {
+		// Best-effort unlock; releasing the connection also drops session locks.
+		_, _ = conn.Exec(ctx, `SELECT pg_advisory_unlock($1)`, migrationLockKey)
+	}()
+
+	if _, err := conn.Exec(ctx, `CREATE TABLE IF NOT EXISTS schema_migrations (
 		version TEXT PRIMARY KEY,
 		applied_at TIMESTAMPTZ NOT NULL DEFAULT now()
 	)`); err != nil {
@@ -75,7 +99,7 @@ func (s *Store) migrate(ctx context.Context) error {
 
 	for _, name := range names {
 		var exists bool
-		if err := s.Pool.QueryRow(ctx, `SELECT EXISTS(SELECT 1 FROM schema_migrations WHERE version=$1)`, name).Scan(&exists); err != nil {
+		if err := conn.QueryRow(ctx, `SELECT EXISTS(SELECT 1 FROM schema_migrations WHERE version=$1)`, name).Scan(&exists); err != nil {
 			return err
 		}
 		if exists {
@@ -85,7 +109,7 @@ func (s *Store) migrate(ctx context.Context) error {
 		if err != nil {
 			return err
 		}
-		tx, err := s.Pool.Begin(ctx)
+		tx, err := conn.Begin(ctx)
 		if err != nil {
 			return err
 		}

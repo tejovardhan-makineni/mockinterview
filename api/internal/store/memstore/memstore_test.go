@@ -7,10 +7,6 @@ import (
 	"github.com/tejo/mockinterview-api/internal/store"
 )
 
-// The in-memory store must satisfy the full production contract, so tests that
-// wire it into the app exercise the same interface the real store implements.
-var _ store.Datastore = (*Mem)(nil)
-
 func TestUserRoundTripAndCascade(t *testing.T) {
 	ctx := context.Background()
 	m := New()

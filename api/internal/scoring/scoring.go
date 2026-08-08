@@ -10,7 +10,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"math"
+	"os"
 	"strings"
+	"unicode/utf8"
 
 	"github.com/tejo/mockinterview-api/internal/corpus"
 	"github.com/tejo/mockinterview-api/internal/llm"
@@ -126,9 +128,26 @@ there is real evidence. Be specific and honest; never inflate.`,
 	return r, nil
 }
 
+// isProductionEnv reports whether we're running in a real deployment (APP_ENV=
+// production), matching the check config.Load uses to reject insecure secrets.
+func isProductionEnv() bool {
+	return strings.EqualFold(strings.TrimSpace(os.Getenv("APP_ENV")), "production")
+}
+
 // stubResult deterministically derives scores from the rubric so the pipeline
 // works offline and tests are stable.
 func (e *Engine) stubResult(q corpus.Question) Result {
+	// HR-9: the stub fabricates plausible-looking strengths/gaps/scores — perfect
+	// for offline dev + tests, but a candidate on a REAL deployment must never be
+	// shown invented feedback as if it were an authoritative evaluation. If we
+	// reach the stub in production (no scoring provider configured), fail closed:
+	// return a clearly non-authoritative, not-scored result instead of fabricating.
+	if isProductionEnv() {
+		return Result{
+			Scored: false,
+			Note:   "Automated scoring isn't available on this deployment, so we can't give you an authoritative evaluation right now (a stub score here would be a non-authoritative demo only, not real feedback). Your transcript and workspace are saved below.",
+		}
+	}
 	r := Result{Scored: true}
 	for i, d := range q.Rubric {
 		score := 2.0 + 0.5*float64((i%5)-2) // 1.0 .. 3.0, deterministic
@@ -253,9 +272,17 @@ var scoreSchema = map[string]any{
 	"required": []string{"scores"},
 }
 
+// clip truncates s to at most n bytes without splitting a UTF-8 rune, so
+// non-ASCII transcripts/reference material aren't corrupted at the cut point.
 func clip(s string, n int) string {
+	if n <= 0 {
+		return ""
+	}
 	if len(s) <= n {
 		return s
+	}
+	for n > 0 && !utf8.RuneStart(s[n]) {
+		n--
 	}
 	return s[:n]
 }

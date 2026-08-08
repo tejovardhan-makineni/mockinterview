@@ -10,11 +10,13 @@ import (
 	"encoding/json"
 	"html"
 	"io"
+	"log/slog"
 	"math"
 	"net/http"
 	"regexp"
 	"sort"
 	"strings"
+	"unicode/utf8"
 
 	"github.com/ledongthuc/pdf"
 
@@ -139,7 +141,10 @@ func (s *Service) Upload(w http.ResponseWriter, r *http.Request) {
 		Temperature: 0.1,
 	})
 	if err != nil {
-		httpx.WriteProblem(w, http.StatusBadGateway, "resume parsing failed: "+err.Error())
+		// GO-9/SEC-9: log the raw provider error server-side; return a generic
+		// message so upstream detail never reaches the client.
+		slog.Error("resume parse failed", "user", uid, "err", err)
+		httpx.WriteProblem(w, http.StatusBadGateway, "resume parsing failed")
 		return
 	}
 	parsedJSON := json.RawMessage(parsed)
@@ -253,7 +258,8 @@ func (s *Service) Review(w http.ResponseWriter, r *http.Request) {
 		Temperature: 0.4,
 	})
 	if err != nil {
-		httpx.WriteProblem(w, http.StatusBadGateway, "review failed: "+err.Error())
+		slog.Error("resume review failed", "user", uid, "err", err)
+		httpx.WriteProblem(w, http.StatusBadGateway, "review failed")
 		return
 	}
 	result := json.RawMessage(out)
@@ -303,7 +309,8 @@ func (s *Service) Match(w http.ResponseWriter, r *http.Request) {
 		Temperature: 0.3,
 	})
 	if err != nil {
-		httpx.WriteProblem(w, http.StatusBadGateway, "match failed: "+err.Error())
+		slog.Error("resume match failed", "user", uid, "err", err)
+		httpx.WriteProblem(w, http.StatusBadGateway, "match failed")
 		return
 	}
 	result := json.RawMessage(out)
@@ -452,9 +459,17 @@ func spaceGlyphs(chars []pdf.Text) string {
 	return out
 }
 
+// clip truncates s to at most n bytes without splitting a UTF-8 rune, so
+// non-ASCII resume/JD text isn't corrupted at the cut point.
 func clip(s string, n int) string {
+	if n <= 0 {
+		return ""
+	}
 	if len(s) <= n {
 		return s
+	}
+	for n > 0 && !utf8.RuneStart(s[n]) {
+		n--
 	}
 	return s[:n]
 }

@@ -3,19 +3,13 @@
 import { Suspense, useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { api } from "@/lib/api";
-import type { Face, InterviewConfig, Personality, Resume, Voice } from "@/lib/types";
+import type { Face, InterviewConfig, Personality, PersonalityOption, Resume, Voice } from "@/lib/types";
 import { Badge, Button, Field, Panel } from "@/components/ui";
 import { Avatar3D, type AvatarDrive } from "@/components/studio/Avatar3D";
 import { previewVoiceSample, stopPreview, prefetchPreview } from "@/lib/voicePreview";
-import { useLang, useT, LANGUAGES, labelFor } from "@/lib/i18n";
+import { useLang, useT, labelFor } from "@/lib/i18n";
+import { getCameraConsent, setCameraConsent, type CameraConsent } from "@/lib/behavior";
 import { IconPlay, IconStop } from "@/components/icons";
-
-const PERSONAS: { id: Personality; label: string; desc: string }[] = [
-  { id: "supportive", label: "Supportive", desc: "Warm, encouraging, gives hints." },
-  { id: "neutral", label: "Neutral", desc: "Balanced, professional." },
-  { id: "interruptive", label: "Interruptive", desc: "Cuts in with probing follow-ups." },
-  { id: "annoying", label: "Annoying", desc: "Impatient, skeptical, high pressure." },
-];
 
 function SetupInner() {
   const router = useRouter();
@@ -25,6 +19,7 @@ function SetupInner() {
   const [resume, setResume] = useState<Resume | null>(null);
   const [voices, setVoices] = useState<Voice[]>([]);
   const [faces, setFaces] = useState<Face[]>([]);
+  const [personas, setPersonas] = useState<PersonalityOption[]>([]);
   const [cfg, setCfg] = useState<InterviewConfig>({ voice_id: "aoede", face_id: "sophia", personality: "neutral", intensity: 3 });
   const [uploading, setUploading] = useState(false);
   const [starting, setStarting] = useState(false);
@@ -33,9 +28,16 @@ function SetupInner() {
   const fileRef = useRef<HTMLInputElement>(null);
   const pv = useRef<AvatarDrive>({ speaking: false, amplitude: 0, mood: "neutral" });
   const [previewing, setPreviewing] = useState(false);
-  const { lang } = useLang();
+  const { lang, languages } = useLang();
   const t = useT();
   const [interviewLang, setInterviewLang] = useState(lang); // defaults to app language, overridable per interview
+  // Camera/behavioral-analysis consent (opt-in, default OFF). null = undecided.
+  // Read AFTER mount (not a lazy initializer) so the server/first-paint render is
+  // stable and the localStorage read can't cause a hydration mismatch.
+  const [consent, setConsent] = useState<CameraConsent | null>(null);
+  // eslint-disable-next-line react-hooks/set-state-in-effect
+  useEffect(() => { setConsent(getCameraConsent()); }, []);
+  const decideConsent = (v: CameraConsent) => { setCameraConsent(v); setConsent(v); };
   const previewReq = { voiceId: cfg.voice_id, faceId: cfg.face_id, personality: cfg.personality, intensity: cfg.intensity };
   const toggleVoice = () => {
     if (previewing) { stopPreview(pv); setPreviewing(false); return; }
@@ -47,10 +49,14 @@ function SetupInner() {
     (async () => {
       const u = await api.me();
       if (!u) { router.replace("/login"); return; }
-      const [r, v, f, c] = await Promise.all([api.getResume(), api.listVoices(), api.listFaces(), api.getConfig()]);
-      setResume(r); setVoices(v); setFaces(f); setCfg(c);
+      const [r, v, f, p, c] = await Promise.all([api.getResume(), api.listVoices(), api.listFaces(), api.listPersonalities(), api.getConfig()]);
+      setResume(r); setVoices(v); setFaces(f); setPersonas(p); setCfg(c);
     })();
   }, [router]);
+
+  // Stop any preview audio when leaving the page (navigating away mid-preview
+  // otherwise leaves the interviewer's voice playing).
+  useEffect(() => () => stopPreview(pv), []);
 
   // Warm the preview clip when the combo changes so playback is instant.
   useEffect(() => {
@@ -163,11 +169,11 @@ function SetupInner() {
 
         <Field label={t("Temperament")}>
           <div className="grid gap-2 md:grid-cols-4">
-            {PERSONAS.map((p) => (
-              <button key={p.id} onClick={() => setCfg({ ...cfg, personality: p.id })}
+            {personas.map((p) => (
+              <button key={p.id} onClick={() => setCfg({ ...cfg, personality: p.id as Personality })}
                 className={`rounded-xl border p-3 text-left transition ${cfg.personality === p.id ? "border-[var(--color-accent)] bg-[var(--color-panel-2)]" : "border-[var(--color-line)] hover:bg-[var(--color-panel-2)]"}`}>
                 <div className="text-sm font-semibold">{t(p.label)}</div>
-                <div className="mt-1 text-xs text-[var(--color-faint)]">{t(p.desc)}</div>
+                <div className="mt-1 text-xs text-[var(--color-faint)]">{t(p.blurb)}</div>
               </button>
             ))}
           </div>
@@ -188,10 +194,37 @@ function SetupInner() {
             <select value={interviewLang} onChange={(e) => setInterviewLang(e.target.value)}
               aria-label="Interview language"
               className="w-full rounded-xl border border-[var(--color-line)] bg-[var(--color-studio)] px-3 py-2.5 text-sm">
-              {LANGUAGES.map((l) => <option key={l.code} value={l.code}>{labelFor(l)}</option>)}
+              {languages.map((l) => <option key={l.code} value={l.code}>{labelFor(l)}</option>)}
             </select>
             <p className="mt-1 text-xs text-[var(--color-faint)]">{t("The interviewer will speak and write in this language.")}</p>
           </Field>
+        </div>
+      </Panel>
+
+      {/* Camera / behavioral analysis consent — opt-in, default OFF (HR-2) */}
+      <Panel className="mt-4 p-6">
+        <div className="flex items-center gap-2">
+          <h2 className="text-lg font-semibold">{t("Camera analysis")}</h2>
+          {consent === "granted" && <Badge tone="good">{t("On")}</Badge>}
+          {consent === "denied" && <Badge tone="warn">{t("Off")}</Badge>}
+          {consent === null && <Badge tone="warn">{t("Off — choose below")}</Badge>}
+        </div>
+        <p className="mt-2 text-sm text-[var(--color-muted)]">
+          {t("Optionally, your webcam can be analyzed during the interview to give you feedback on how you came across. This is OFF unless you turn it on here.")}
+        </p>
+        <ul className="mt-3 space-y-1.5 text-sm text-[var(--color-muted)]">
+          <li>• {t("What is analyzed: a face mesh for where you're facing (gaze), plus lighting, framing, and posture.")}</li>
+          <li>• {t("How: computed in your browser, then raw samples (about one every 2 seconds) are sent to and stored on our server to generate your feedback.")}</li>
+          <li>• {t("Where it goes & retention: stored with your interview to build your report, and retained about 30 days.")}</li>
+          <li>• {t("These signals never affect your interview score, and you can run the interview WITHOUT camera analysis.")}</li>
+        </ul>
+        <div className="mt-4 flex flex-wrap items-center gap-3">
+          <Button variant={consent === "granted" ? "primary" : "ghost"} onClick={() => decideConsent("granted")}>
+            {t("Enable camera analysis")}
+          </Button>
+          <Button variant={consent === "denied" ? "primary" : "ghost"} onClick={() => decideConsent("denied")}>
+            {t("Run without camera analysis")}
+          </Button>
         </div>
       </Panel>
 

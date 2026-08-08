@@ -7,6 +7,7 @@
 // re-renders React; the coarse states are props.
 import { useEffect, useRef, type MutableRefObject } from "react";
 import type { ConnState } from "@/lib/live";
+import { useT } from "@/lib/i18n";
 import { IconMic, IconMicOff, IconWave, IconThinking, IconSpeaker, IconConnected, IconReconnect, IconDisconnected } from "@/components/icons";
 
 export type AiState = "idle" | "listening" | "thinking" | "speaking";
@@ -23,9 +24,12 @@ export function LiveHUD({
 }) {
   const barRefs = useRef<(HTMLSpanElement | null)[]>([]);
   const labelRef = useRef<HTMLSpanElement>(null);
+  const t = useT();
 
   // Animate the meter bars from the live mic level without re-rendering.
   useEffect(() => {
+    // Resolve the label strings ONCE per effect run — never inside the rAF loop.
+    const hearing = t("Hearing you…"), demoMic = t("Demo mic"), listening = t("Listening");
     let raf = 0;
     const loop = () => {
       const lvl = micRef.current;
@@ -40,14 +44,13 @@ export function LiveHUD({
         el.style.opacity = String(0.35 + Math.min(1, lvl * 2) * 0.65);
       }
       if (labelRef.current) {
-        labelRef.current.textContent =
-          lvl > 0.04 ? "Hearing you…" : mode === "local" ? "Demo mic" : "Listening";
+        labelRef.current.textContent = lvl > 0.04 ? hearing : mode === "local" ? demoMic : listening;
       }
       raf = requestAnimationFrame(loop);
     };
     loop();
     return () => cancelAnimationFrame(raf);
-  }, [micRef, mode]);
+  }, [micRef, mode, t]);
 
   const ai = AI_STATES[aiState];
 
@@ -68,7 +71,7 @@ export function LiveHUD({
             />
           ))}
         </div>
-        <span ref={labelRef} className="text-[11px] font-medium text-[var(--color-muted)]">Listening</span>
+        <span ref={labelRef} className="text-[11px] font-medium text-[var(--color-muted)]">{t("Listening")}</span>
       </div>
 
       <span className="h-px w-full bg-[var(--color-line)]" />
@@ -76,7 +79,7 @@ export function LiveHUD({
       {/* Interviewer state */}
       <div className="flex min-w-0 items-center gap-1.5" aria-live="polite">
         <span className={ai.color}>{ai.icon}</span>
-        <span className={`truncate text-[11px] font-medium ${ai.color}`}>{ai.label}</span>
+        <span className={`truncate text-[11px] font-medium ${ai.color}`}>{t(ai.label)}</span>
         {aiState === "thinking" && <ThinkingDots />}
       </div>
     </div>
@@ -101,17 +104,18 @@ function ThinkingDots() {
 }
 
 export function ConnChip({ conn, onReconnect }: { conn: ConnState; onReconnect: () => void }) {
+  const t = useT();
   if (conn === "connected") {
     return (
       <span className="flex items-center gap-1.5 rounded-full border border-[color-mix(in_srgb,var(--color-good)_40%,transparent)] px-2 py-0.5 text-[11px] font-medium text-[var(--color-good)]" title="Connected to the interviewer">
-        <IconConnected className="h-3.5 w-3.5" /> <span className="hidden sm:inline">Connected</span>
+        <IconConnected className="h-3.5 w-3.5" /> <span className="hidden sm:inline">{t("Connected")}</span>
       </span>
     );
   }
   if (conn === "connecting" || conn === "reconnecting") {
     return (
       <span className="flex items-center gap-1.5 rounded-full border border-[color-mix(in_srgb,var(--color-warn)_40%,transparent)] px-2 py-0.5 text-[11px] font-medium text-[var(--color-warn)]">
-        <IconReconnect className="h-3.5 w-3.5 mi-spin" /> {conn === "reconnecting" ? "Reconnecting…" : "Connecting…"}
+        <IconReconnect className="h-3.5 w-3.5 mi-spin" /> {conn === "reconnecting" ? t("Reconnecting…") : t("Connecting…")}
       </span>
     );
   }
@@ -122,7 +126,7 @@ export function ConnChip({ conn, onReconnect }: { conn: ConnState; onReconnect: 
       className="flex items-center gap-1.5 rounded-full border border-[var(--color-bad)] px-2.5 py-0.5 text-[11px] font-semibold text-[var(--color-bad)] transition hover:bg-[color-mix(in_srgb,var(--color-bad)_12%,transparent)]"
       title="Connection lost — click to reconnect"
     >
-      <IconDisconnected className="h-3.5 w-3.5" /> Reconnect
+      <IconDisconnected className="h-3.5 w-3.5" /> {t("Reconnect")}
     </button>
   );
 }

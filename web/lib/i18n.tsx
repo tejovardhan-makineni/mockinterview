@@ -10,28 +10,19 @@
 // stay English — coverage can grow incrementally with no breakage. English is
 // the source language, so t() is a no-op when the language is English.
 import { createContext, useCallback, useContext, useEffect, useRef, useState } from "react";
-import { BASE, authHeader } from "./http";
+import { api } from "./api";
+import { LANGUAGES, type Language } from "./features/i18n";
 
-// `label` is the endonym (native name); `en` is the English name. The picker
-// shows "endonym (English)" so a user who accidentally switches into a script
-// they can't read can still recognize and get back to English.
-export const LANGUAGES: { code: string; label: string; en: string }[] = [
-  { code: "en", label: "English", en: "English" },
-  { code: "es", label: "Español", en: "Spanish" },
-  { code: "fr", label: "Français", en: "French" },
-  { code: "de", label: "Deutsch", en: "German" },
-  { code: "pt", label: "Português", en: "Portuguese" },
-  { code: "hi", label: "हिन्दी", en: "Hindi" },
-  { code: "te", label: "తెలుగు", en: "Telugu" },
-  { code: "zh", label: "中文", en: "Chinese" },
-  { code: "ja", label: "日本語", en: "Japanese" },
-  { code: "ar", label: "العربية", en: "Arabic" },
-];
+// The offered language set + translator both live in the lib/features/i18n slice
+// (single source, backed by the backend /languages + /i18n/translate through the
+// api composer). We re-export LANGUAGES for callers that import it from here.
+export { LANGUAGES };
+export type { Language };
 
-// labelFor renders the option text: plain "English" for English, else
-// "endonym (English)" so it stays recoverable in any script.
-export const labelFor = (l: { code: string; label: string; en: string }) =>
-  l.code === "en" ? l.label : `${l.label} (${l.en})`;
+// labelFor renders the picker option text: plain "English" for English, else
+// "endonym (English name)" so it stays recoverable in any script.
+export const labelFor = (l: Language) =>
+  l.code === "en" ? l.label : `${l.label} (${l.name})`;
 const CODES = new Set(LANGUAGES.map((l) => l.code));
 export const isRTL = (code: string) => code === "ar";
 
@@ -52,8 +43,8 @@ function persist(lang: string) {
   try { localStorage.setItem(dictKey(lang), JSON.stringify(dicts[lang] || {})); } catch { /* quota */ }
 }
 
-type Ctx = { lang: string; setLang: (l: string) => void; t: (s: string) => string; version: number };
-const I18nContext = createContext<Ctx>({ lang: "en", setLang: () => {}, t: (s) => s, version: 0 });
+type Ctx = { lang: string; setLang: (l: string) => void; t: (s: string) => string; version: number; languages: Language[] };
+const I18nContext = createContext<Ctx>({ lang: "en", setLang: () => {}, t: (s) => s, version: 0, languages: LANGUAGES });
 
 export function LanguageProvider({ children }: { children: React.ReactNode }) {
   // Lazy initializer reads the saved language directly. First paint still renders
@@ -64,6 +55,10 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
     return "en";
   });
   const [version, setVersion] = useState(0);
+  // The picker's option set. Seeded from the static mirror (so the first paint
+  // renders synchronously) and refreshed from the backend /languages catalog via
+  // the api composer — the offered set is owned by the backend, not re-hardcoded.
+  const [languages, setLanguages] = useState<Language[]>(LANGUAGES);
   const langRef = useRef(lang);
   const pending = useRef<Set<string>>(new Set());
   const timer = useRef<number | undefined>(undefined);
@@ -75,6 +70,14 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
     document.documentElement.dir = isRTL(lang) ? "rtl" : "ltr";
   }, [lang]);
 
+  // Load the offered languages from the backend catalog (mock returns the static
+  // list offline). Best-effort: on failure the seeded static list stands.
+  useEffect(() => {
+    let live = true;
+    api.listLanguages().then((ls) => { if (live && ls?.length) setLanguages(ls); }).catch(() => { /* keep static */ });
+    return () => { live = false; };
+  }, []);
+
   const flush = useCallback(async () => {
     const lg = langRef.current;
     if (lg === "en") { pending.current.clear(); return; }
@@ -83,14 +86,11 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
     pending.current.clear();
     if (!need.length) return;
     try {
-      const res = await fetch(`${BASE}/api/v1/i18n/translate`, {
-        method: "POST",
-        headers: { ...authHeader(), "Content-Type": "application/json" },
-        body: JSON.stringify({ lang: lg, texts: need }),
-      });
-      if (!res.ok) return;
-      const data = (await res.json()) as { translations: Dict };
-      Object.assign(d, data.translations || {});
+      // Through the api composer (http hits /i18n/translate; the mock twin echoes
+      // the input) so offline mode never breaks. `translate` returns translations
+      // aligned to `need`'s order.
+      const out = await api.translate(lg, need);
+      need.forEach((s, i) => { d[s] = out[i] ?? s; });
       persist(lg);
       if (langRef.current === lg) setVersion((v) => v + 1); // re-render consumers with fresh dict
     } catch { /* offline — strings stay English */ }
@@ -117,7 +117,7 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
     setVersion((v) => v + 1);
   }, []);
 
-  return <I18nContext.Provider value={{ lang, setLang, t, version }}>{children}</I18nContext.Provider>;
+  return <I18nContext.Provider value={{ lang, setLang, t, version, languages }}>{children}</I18nContext.Provider>;
 }
 
 // useT returns the translate function; consumers re-render when new translations
@@ -127,6 +127,6 @@ export function useT() {
 }
 
 export function useLang() {
-  const { lang, setLang } = useContext(I18nContext);
-  return { lang, setLang };
+  const { lang, setLang, languages } = useContext(I18nContext);
+  return { lang, setLang, languages };
 }

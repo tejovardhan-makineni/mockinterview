@@ -31,6 +31,11 @@ type reportRec struct {
 	scores []store.ScoreRow
 }
 
+// Compile-time proof the in-memory store implements the full production
+// contract, enforced by `go build` (not just when tests run) so it stays in
+// lockstep with *store.Store's identical assertion (ARCH-6).
+var _ store.Datastore = (*Mem)(nil)
+
 // Mem is a thread-safe in-memory Repo. Construct with New().
 type Mem struct {
 	mu       sync.Mutex

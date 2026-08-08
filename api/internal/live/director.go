@@ -42,22 +42,49 @@ var phaseObjective = map[string]string{
 	"wrap":          "Wrap up: ask them to summarize tradeoffs and what they'd do with more time.",
 }
 
+// engineeringGuidance is one shared professional-engineering blurb used for the
+// discipline-specific engineering domains (mechanical/electrical/civil), which
+// all share the same rigor expectations. Keyed to each such domain below.
+const engineeringGuidance = "Professional engineering interview: have the candidate state assumptions and the governing principles/equations FIRST, set the problem up with a clear sketch (free-body / circuit / system diagram) before computing, then work it QUANTITATIVELY with correct units and sanity-checked magnitudes. Probe where each number comes from, the design constraints and safety factors, and the trade-offs behind their choices. Don't accept a plugged-in formula without the assumptions behind it; let them reason out loud."
+
 // domainGuidance gives per-domain expectations + pacing so each interview type
-// is run distinctly, not as a generic interview.
+// is run distinctly, not as a generic interview. Keys are the corpus `domain`
+// strings (see internal/corpus). director_test.go asserts every corpus domain is
+// covered here OR carries its own interviewer_notes, so guidance can't silently
+// die for a domain (it once did: these keys had drifted from the real corpus).
 var domainGuidance = map[string]string{
-	"system_design":      "Let them drive: requirements → back-of-envelope estimates → high-level design → data model/API → deep dives (bottlenecks, scaling, failure, CDC, caching) → tradeoffs. Give them long stretches to draw on the whiteboard. Don't rush; go deep on one or two areas rather than skimming everything.",
-	"ml_system_design":   "As system design, but center it on ML infra: data/feature pipeline, training vs serving, evaluation, drift/monitoring, feedback loops. Probe eval and drift specifically.",
-	"low_level_design":   "Object-oriented design: expect classes, responsibilities, relationships, and design patterns. Probe SOLID and extensibility ('how would you add feature X?'). Let them sketch a class diagram.",
-	"coding":             "Pace: clarify the problem + edge cases → discuss approach and complexity BEFORE coding → have them write it in the editor → then walk time/space complexity and test edge cases. Nudge to a better approach with questions if they're stuck; never give the solution.",
-	"behavioral":         "Conversational STAR. Push relentlessly for the candidate's OWN actions ('I' not 'we') and a MEASURABLE result. Follow up on vague claims. Keep it flowing like a real conversation.",
-	"medicine":           "Clinical reasoning: structured history → differential (life-threatening causes FIRST) → targeted investigations → management → safety-netting. Do not accept jumping to treatment without a differential.",
+	// Software / technical.
+	"system_design":    "Let them drive: requirements → back-of-envelope estimates → high-level design → data model/API → deep dives (bottlenecks, scaling, failure, CDC, caching) → tradeoffs. Give them long stretches to draw on the whiteboard. Don't rush; go deep on one or two areas rather than skimming everything.",
+	"ml_system_design": "As system design, but center it on ML infra: data/feature pipeline, training vs serving, evaluation, drift/monitoring, feedback loops. Probe eval and drift specifically.",
+	"low_level_design": "Object-oriented design: expect classes, responsibilities, relationships, and design patterns. Probe SOLID and extensibility ('how would you add feature X?'). Let them sketch a class diagram.",
+	"coding":           "Pace: clarify the problem + edge cases → discuss approach and complexity BEFORE coding → have them write it in the editor → then walk time/space complexity and test edge cases. Nudge to a better approach with questions if they're stuck; never give the solution.",
+	"behavioral":       "Conversational STAR. Push relentlessly for the candidate's OWN actions ('I' not 'we') and a MEASURABLE result. Follow up on vague claims. Keep it flowing like a real conversation.",
+	// Medicine.
+	"clinical_reasoning": "Clinical reasoning: structured history → differential (life-threatening causes FIRST) → targeted investigations → management → safety-netting. Do not accept jumping to treatment without a differential.",
 	"medical_residency":  "MMI-style: assess ethical reasoning, empathy, communication, and structure. Present the station scenario and probe how they'd act and why; look for balanced perspectives.",
-	"nursing":            "Prioritization + patient safety (ABCs), escalation, and delegation. Probe what they'd do first and why.",
-	"law":                "IRAC discipline: issue-spotting → rule → application → conclusion, and press for counterarguments. For written, expect a structured memo.",
-	"consulting_case":    "Expect an upfront STRUCTURE/framework before diving in, a hypothesis, and QUANTITATIVE reasoning. Provide case data (numbers) when asked. Push back on 'bigger is better' with 'how would you structure this?'.",
-	"product_management": "Product sense: user + problem + prioritization + metrics + tradeoffs. Push for a crisp target user and how they'd measure success.",
-	"finance":            "Expect a clear framework (e.g. DCF steps), explicit assumptions, quantitative rigor, and sensible judgment. Ask for sensitivities.",
-	"data_science":       "Experiment/statistical rigor: problem framing, experiment design, validity threats, interpretation. Probe metrics and confounders.",
+	// Nursing.
+	"prioritization": "Prioritization + patient safety (ABCs), escalation, and delegation. Probe what they'd do first and why.",
+	// Law.
+	"legal_practice": "IRAC discipline: issue-spotting → rule → application → conclusion, and press for counterarguments. For written, expect a structured memo.",
+	"issue_spotting": "IRAC discipline: issue-spotting → rule → application → conclusion, and press for counterarguments. For written, expect a structured memo.",
+	// Consulting.
+	"case": "Expect an upfront STRUCTURE/framework before diving in, a hypothesis, and QUANTITATIVE reasoning. Provide case data (numbers) when asked. Push back on 'bigger is better' with 'how would you structure this?'.",
+	// Product.
+	"product_sense": "Product sense: user + problem + prioritization + metrics + tradeoffs. Push for a crisp target user and how they'd measure success.",
+	// Finance.
+	"valuation": "Expect a clear framework (e.g. DCF steps), explicit assumptions, quantitative rigor, and sensible judgment. Ask for sensitivities.",
+	// Data science.
+	"experimentation": "Experiment/statistical rigor: problem framing, experiment design, validity threats, interpretation. Probe metrics and confounders.",
+	// Professional-engineering disciplines (mechanical/electrical/civil) — shared blurb.
+	"thermodynamics":    engineeringGuidance,
+	"mechanics":         engineeringGuidance,
+	"mechanical_design": engineeringGuidance,
+	"structural":        engineeringGuidance,
+	"geotechnical":      engineeringGuidance,
+	"transportation":    engineeringGuidance,
+	"circuits":          engineeringGuidance,
+	"power_systems":     engineeringGuidance,
+	"signals_systems":   engineeringGuidance,
 }
 
 // personaTone combines the persona's directive (owned by the persona catalog)

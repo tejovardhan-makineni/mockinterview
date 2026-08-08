@@ -40,6 +40,16 @@ export interface Face {
   thumb?: string;
 }
 
+// A selectable interviewer demeanor as served by GET /personalities. Mirrors
+// api/internal/persona.Personality's CLIENT-facing fields (the prompt Directive
+// is server-only, json:"-"). `blurb` is the one-line description shown in the
+// persona picker.
+export interface PersonalityOption {
+  id: string;
+  label: string;
+  blurb: string;
+}
+
 // PreviewReq is the full interviewer combo whose delivery (words + tone + pace)
 // the voice preview reflects. Face = the person, voice = the timbre, personality
 // = temperament, intensity = pressure.
@@ -55,6 +65,7 @@ export interface ProfileSlice {
   saveConfig(cfg: InterviewConfig): Promise<InterviewConfig>;
   listVoices(): Promise<Voice[]>;
   listFaces(): Promise<Face[]>;
+  listPersonalities(): Promise<PersonalityOption[]>;
   voicePreview(req: PreviewReq): Promise<Blob | null>;
   getProfile(): Promise<Profile>;
   saveProfile(p: Profile): Promise<Profile>;
@@ -68,6 +79,7 @@ export const profileHttp: ProfileSlice = {
   saveConfig(cfg) { return req<InterviewConfig>("/api/v1/config", { method: "PUT", body: JSON.stringify(cfg) }); },
   listVoices() { return req<Voice[]>("/api/v1/voices"); },
   listFaces() { return req<Face[]>("/api/v1/faces"); },
+  listPersonalities() { return req<PersonalityOption[]>("/api/v1/personalities"); },
   async voicePreview(req) {
     try {
       const qs = new URLSearchParams({
@@ -102,6 +114,16 @@ export const MOCK_FACES: Face[] = [
   { id: "richard", label: "Richard", gltf: "/avatars/richard.glb" },
 ];
 
+// Mirrors api/internal/persona.Personalities (client-facing fields) so the
+// persona picker works offline. The backend is the single source in the live
+// app; this only backstops NEXT_PUBLIC_MOCK=1.
+export const MOCK_PERSONALITIES: PersonalityOption[] = [
+  { id: "supportive", label: "Supportive", blurb: "Warm and encouraging; nudges you when you're stuck." },
+  { id: "neutral", label: "Neutral", blurb: "Professional and even — a typical real interview." },
+  { id: "interruptive", label: "Interruptive", blurb: "Probes hard and barges in on gaps, like a senior bar-raiser." },
+  { id: "annoying", label: "Stress", blurb: "Deliberately terse and pressuring to test composure." },
+];
+
 export const profileMock: ProfileSlice = {
   async getConfig() {
     if (typeof window === "undefined") return DEFAULT_CONFIG;
@@ -111,6 +133,7 @@ export const profileMock: ProfileSlice = {
   async saveConfig(cfg) { window.localStorage.setItem(CFG_KEY, JSON.stringify(cfg)); return cfg; },
   async listVoices() { return MOCK_VOICES; },
   async listFaces() { return MOCK_FACES; },
+  async listPersonalities() { return MOCK_PERSONALITIES; },
   async voicePreview() { return null; }, // mock has no real TTS; UI falls back to browser speech
   async getProfile() {
     if (typeof window === "undefined") return {};

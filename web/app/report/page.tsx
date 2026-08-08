@@ -8,16 +8,22 @@ import { Badge, Button, Panel } from "@/components/ui";
 import { Radar } from "@/components/Radar";
 import { InfoTip } from "@/components/InfoTip";
 
+// Info tooltips for the DELIVERY tiles (transcript-derived). These are
+// non-authoritative observations, not a graded competency. Physical-presence
+// signals (facing camera / lighting / framing / posture) are shown as neutral
+// notes, not scored tiles — see PresenceNotes.
 const BEHAVIORAL_INFO: Record<string, string> = {
-  "Filler words / min": "How often you said 'um, uh, like, you know' per minute, detected from the transcript. Lower is crisper. To improve: pause silently instead of filling gaps — a beat of quiet reads as thoughtful.",
-  "Long pauses": "Silences over ~8s where you weren't drawing or speaking. Some thinking time is good; frequent long stalls can read as being stuck. Narrate your thinking as you go.",
-  "Help requests": "Times you asked the interviewer for help or a hint. Occasional clarifying is fine; leaning on hints lowers signal. Try stating an assumption and moving on.",
-  "Eye contact": "Share of time you looked toward the camera, from in-browser face tracking. To improve: glance at the camera when speaking, not only at your diagram.",
-  "Posture": "Stability and upright framing of your upper body, from pose tracking (0–4). Sit up, centered, and avoid drifting out of frame.",
-  "Lighting": "Whether your face is well-lit (0–4), from the webcam's brightness. Face a window or light; avoid backlight and darkness.",
-  "Framing": "How well-centered and appropriately-sized your face is in frame (0–4). Center yourself with your head+shoulders visible.",
-  "Speaking ratio": "Share of the interview you were actively talking. Very low can mean under-communicating your thinking; very high can mean not pausing to let the interviewer probe.",
+  "Filler words / min": "How often you said 'um, uh, like, you know' per minute, detected from the transcript. To reduce them: pause silently instead of filling gaps — a beat of quiet reads as thoughtful. This does not affect your score.",
+  "Long pauses": "Silences over ~8s where you weren't drawing or speaking. Some thinking time is completely fine; if you like, narrate your thinking as you go. This does not affect your score.",
+  "Help requests": "Times you asked the interviewer for help or a hint. Asking for clarification is a normal, healthy interview skill. This does not affect your score.",
+  "Speaking ratio": "Share of the interview you were actively talking, from the transcript. Neither high nor low is 'correct' — it just reflects how the conversation went. This does not affect your score.",
 };
+
+// Professional fields where a practice sim must never read as certification /
+// licensure / professional advice (HR-6). Matched loosely against the question
+// title since the report doesn't carry an explicit domain.
+const PRO_DOMAIN_RE = /\b(clinical|medic\w*|patient|chest pain|nurs\w*|diagnos\w*|law|legal|contract|irac|litigation|financ\w*|accounting|audit|tax|pharmac\w*|therap\w*|licens\w*)\b/i;
+const isProfessional = (title: string) => PRO_DOMAIN_RE.test(title || "");
 
 const pretty = (k: string) => k.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
 const tone = (s: number) => (s >= 3 ? "good" : s >= 2 ? "warn" : "bad") as "good" | "warn" | "bad";
@@ -73,6 +79,13 @@ function ReportInner() {
           <Button variant="ghost" onClick={() => window.print()}>⬇ Download PDF</Button>
         </div>
       </div>
+
+      {/* Professional-domain disclaimer — persistent, candidate-facing (HR-6) */}
+      {isProfessional(rep.question_title) && (
+        <div className="mt-4 rounded-xl border border-[var(--color-warn)] bg-[color-mix(in_srgb,var(--color-warn)_10%,transparent)] px-4 py-3 text-sm text-[var(--color-warn)]">
+          Practice simulation — not certification, licensure assessment, or professional (medical/legal/financial) advice.
+        </div>
+      )}
 
       <div className="mt-6 flex flex-col items-center gap-2 text-center">
         <div className="relative flex h-28 w-28 items-center justify-center rounded-full border-4" style={{ borderColor: color(rep.overall) }}>
@@ -167,24 +180,37 @@ function ReportInner() {
         ))}
       </div>
 
-      {/* Behavioral */}
+      {/* Delivery + presence — observations only, never scored (HR-1/HR-3/HR-10) */}
       {hasBehavioral && b && (
         <>
           <div className="mt-10 flex items-center gap-2">
-            <h2 className="text-xl font-bold">Presence &amp; delivery</h2>
-            <InfoTip text="Measured in your browser (nothing leaves your device except the summary): filler words + pauses from the transcript, and eye contact, posture, lighting, and framing from webcam face/pose tracking. These don't affect your technical score — they're how you came across. Hover any tile for how to improve it." />
+            <h2 className="text-xl font-bold">Delivery &amp; presence</h2>
+            <InfoTip text="How this is measured: filler words, pauses and speaking ratio come from your transcript. If you turned ON camera analysis, a face mesh (gaze), lighting, framing and posture were computed in your browser AND raw samples (about one every 2 seconds) were sent to and stored on our server to generate this feedback — retained about 30 days. None of these affect your interview score." />
           </div>
-          <p className="mt-1 text-sm text-[var(--color-faint)]">Observed signals — not right/wrong, but how you came across.</p>
+          <p className="mt-1 text-sm text-[var(--color-faint)]">Observations about how you came across — not right or wrong, and they do not affect your score.</p>
           <div className="mt-4 grid grid-cols-2 gap-3 md:grid-cols-4">
             <Metric label="Filler words / min" value={b.filler_per_min ?? 0} />
             <Metric label="Long pauses" value={b.long_pauses ?? 0} />
             <Metric label="Help requests" value={b.help_requests ?? 0} />
-            <Metric label="Eye contact" value={`${b.eye_contact_pct ?? 0}%`} />
-            <Metric label="Posture" value={`${(b.posture_score ?? 0).toFixed(1)}/4`} />
-            <Metric label="Lighting" value={`${(b.lighting_score ?? 0).toFixed(1)}/4`} />
-            <Metric label="Framing" value={`${(b.framing_score ?? 0).toFixed(1)}/4`} />
             <Metric label="Speaking ratio" value={`${Math.round((b.speaking_ratio ?? 0) * 100)}%`} />
           </div>
+
+          {/* Physical-presence signals: neutral, non-scored NOTES only. */}
+          {(b.samples ?? 0) > 0 && (
+            <div className="mt-4">
+              <Panel className="p-5">
+                <div className="text-sm font-semibold">Presence signals</div>
+                <p className="mt-1 text-xs text-[var(--color-faint)]">
+                  Presence signals vary by culture, ability, and setup — they are not a competency and don&apos;t affect your score.
+                </p>
+                <ul className="mt-3 space-y-1.5 text-sm text-[var(--color-muted)]">
+                  {presenceNotes(b).map((n) => (
+                    <li key={n.label}><span className="text-[var(--color-ink)]">{n.label}:</span> {n.note}</li>
+                  ))}
+                </ul>
+              </Panel>
+            </div>
+          )}
         </>
       )}
 
@@ -201,6 +227,30 @@ function ReportInner() {
       </div>
     </main>
   );
+}
+
+// presenceNotes turns the raw physical-presence signals into NEUTRAL, non-scored
+// notes (HR-1/HR-10). No numeric grade, ability/culture-aware, and looking at
+// on-screen work is never framed as negative.
+function presenceNotes(b: Partial<BehavioralSummary>): { label: string; note: string }[] {
+  const face = b.eye_contact_pct ?? 0;
+  const li = b.lighting_score ?? 0;
+  const fr = b.framing_score ?? 0;
+  const po = b.posture_score ?? 0;
+  return [
+    { label: "Facing camera", note: face >= 60
+      ? "You often faced the camera while speaking."
+      : "You often looked toward your work rather than the camera — that's perfectly fine for technical work." },
+    { label: "Lighting", note: li >= 3
+      ? "Your face was clearly visible to the webcam."
+      : li >= 1.5 ? "Your webcam lighting was a little uneven." : "Your webcam view was fairly dark." },
+    { label: "Framing", note: fr >= 3
+      ? "You stayed roughly centered in the webcam frame."
+      : "You moved around the webcam frame at times." },
+    { label: "Steadiness", note: po >= 3
+      ? "You stayed fairly still on camera."
+      : "You shifted around on camera a fair amount." },
+  ];
 }
 
 function Metric({ label, value }: { label: string; value: string | number }) {

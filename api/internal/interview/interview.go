@@ -5,9 +5,12 @@ package interview
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
+	"net"
 	"net/http"
 	"strings"
+	"time"
 
 	"github.com/go-chi/chi/v5"
 
@@ -188,14 +191,24 @@ func (s *Service) Finish(w http.ResponseWriter, r *http.Request) {
 		httpx.WriteProblem(w, http.StatusInternalServerError, "question not found for session")
 		return
 	}
-	_ = s.store.UpdateSessionStatus(r.Context(), sess.ID, "scoring")
+	// GO-4/GO-12: scoring + persistence must NOT ride the request context. If the
+	// browser navigates to the report page right after POST /finish, r.Context()
+	// cancels mid-score and the evaluator fails (and a retry on the same cancelled
+	// ctx is doomed). Detach onto a bounded background context so a well-formed
+	// finish always produces the best available report.
+	ctx, cancel := context.WithTimeout(context.Background(), 90*time.Second)
+	defer cancel()
 
-	transcript, _ := s.store.Transcript(r.Context(), sess.ID)
-	workspace, _ := s.store.LatestWorkspace(r.Context(), sess.ID)
+	_ = s.store.UpdateSessionStatus(ctx, sess.ID, "scoring")
 
-	result, err := s.scorer.Evaluate(r.Context(), q, transcript, workspace)
-	if err != nil {
-		result, err = s.scorer.Evaluate(r.Context(), q, transcript, workspace) // one retry
+	transcript, _ := s.store.Transcript(ctx, sess.ID)
+	workspace, _ := s.store.LatestWorkspace(ctx, sess.ID)
+
+	result, err := s.scorer.Evaluate(ctx, q, transcript, workspace)
+	if err != nil && isTransient(err) {
+		// GO-12: only retry transient/timeout failures — a deterministic error
+		// (e.g. an unparseable model response) will fail identically on retry.
+		result, err = s.scorer.Evaluate(ctx, q, transcript, workspace)
 	}
 	if err != nil {
 		// The evaluator was unavailable. NEVER strand the candidate without a
@@ -207,12 +220,36 @@ func (s *Service) Finish(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 	// Behavioral summary is attached by the behavior package if present.
-	behavioral, _ := s.store.BehavioralSummary(r.Context(), sess.ID)
+	behavioral, _ := s.store.BehavioralSummary(ctx, sess.ID)
 	// Best-effort persist — a failure here still marks the session complete so the
 	// user isn't stuck; the report endpoint will surface whatever was saved.
-	_ = s.scorer.Persist(r.Context(), s.store, sess.ID, result, behavioral)
-	_ = s.store.UpdateSessionStatus(r.Context(), sess.ID, "complete")
+	_ = s.scorer.Persist(ctx, s.store, sess.ID, result, behavioral)
+	_ = s.store.UpdateSessionStatus(ctx, sess.ID, "complete")
 	httpx.WriteJSON(w, http.StatusOK, map[string]any{"ok": true, "overall": result.Overall, "scored": result.Scored})
+}
+
+// isTransient reports whether a scoring error is worth retrying — a timeout,
+// context deadline, or an upstream "temporarily unavailable"/rate-limit blip.
+// Deterministic failures (e.g. a malformed model response we couldn't parse)
+// are NOT transient: a retry would fail identically, so we skip it.
+func isTransient(err error) bool {
+	if err == nil {
+		return false
+	}
+	if errors.Is(err, context.DeadlineExceeded) || errors.Is(err, context.Canceled) {
+		return true
+	}
+	var ne net.Error
+	if errors.As(err, &ne) && ne.Timeout() {
+		return true
+	}
+	msg := strings.ToLower(err.Error())
+	for _, s := range []string{"timeout", "deadline", "temporarily", "unavailable", "connection reset", "eof", "429", "rate limit", "overloaded", "503", "502"} {
+		if strings.Contains(msg, s) {
+			return true
+		}
+	}
+	return false
 }
 
 // Transcript returns the session's conversation so far so a resumed interview

@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { api } from "@/lib/api";
 import type { Modality, Session } from "@/lib/types";
 import { LiveSession, type Caption, type ConnState } from "@/lib/live";
-import { BehaviorTracker } from "@/lib/behavior";
+import { BehaviorTracker, cameraConsentGranted } from "@/lib/behavior";
 import { Avatar3D, type AvatarDrive } from "@/components/studio/Avatar3D";
 import { Workspace } from "@/components/studio/Workspace";
 import { Webcam } from "@/components/studio/Webcam";
@@ -142,6 +142,10 @@ function StudioInner() {
   }, [router, sid]);
 
   const onWebcam = useCallback((v: HTMLVideoElement) => {
+    // Behavioral capture is opt-in (HR-2). Without explicit camera consent we
+    // never construct or start the tracker — the interview runs normally and the
+    // report simply omits the behavioral section.
+    if (!cameraConsentGranted()) return;
     const t = new BehaviorTracker(sid, v);
     tracker.current = t;
     void t.begin();
@@ -171,7 +175,7 @@ function StudioInner() {
     router.push(`/report?s=${sid}`);
   }
 
-  if (!session) return <div className="flex h-screen items-center justify-center text-[var(--color-muted)]">Entering the room…</div>;
+  if (!session) return <div className="flex h-screen items-center justify-center text-[var(--color-muted)]">{t("Entering the room…")}</div>;
 
   const faceId = readFace(session);
   const modality: Modality = session.modality;
@@ -229,11 +233,11 @@ function StudioInner() {
           >
             <input
               value={typed} onChange={(e) => setTyped(e.target.value)}
-              placeholder="Type an answer…"
+              placeholder={t("Type an answer…")}
               aria-label="Type an answer to the interviewer"
               className="min-w-0 flex-1 rounded-lg border border-[var(--color-line)] bg-[var(--color-studio)] px-3 py-2 text-sm outline-none focus:border-[var(--color-accent)]"
             />
-            <Button type="submit" variant="ghost">Send</Button>
+            <Button type="submit" variant="ghost">{t("Send")}</Button>
             {(conn === "failed" || conn === "reconnecting") && (
               <Button
                 type="button"
@@ -241,7 +245,7 @@ function StudioInner() {
                 onClick={() => { setConn("reconnecting"); live.current?.reconnect(); }}
                 title="Reconnect to the interviewer"
               >
-                {conn === "reconnecting" ? "Retry" : "Reconnect"}
+                {conn === "reconnecting" ? t("Retry") : t("Reconnect")}
               </Button>
             )}
           </form>

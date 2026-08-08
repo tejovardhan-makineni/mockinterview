@@ -38,10 +38,19 @@ type translateReq struct {
 // language. English (the source language) is echoed back unchanged. Anything
 // already cached is served without an LLM call; only the uncached remainder is
 // sent to the model in one batch.
+// maxTranslateTexts caps how many strings one request may ask to translate, so a
+// single authenticated call can't fan out into an unbounded, expensive LLM batch.
+const maxTranslateTexts = 200
+
 func (s *Service) Translate(w http.ResponseWriter, r *http.Request) {
 	var req translateReq
-	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		httpx.WriteProblem(w, http.StatusBadRequest, "invalid request")
+	// SEC-1/ARCH-4: use the shared decoder (caps body size, hides decode detail)
+	// instead of a bare json.NewDecoder on the raw body.
+	if !httpx.DecodeJSON(w, r, &req) {
+		return
+	}
+	if len(req.Texts) > maxTranslateTexts {
+		httpx.WriteProblem(w, http.StatusBadRequest, "too many strings in one request")
 		return
 	}
 	lang := persona.NormalizeLanguage(req.Lang)
