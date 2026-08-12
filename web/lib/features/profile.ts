@@ -16,6 +16,18 @@ export interface Profile {
   domain?: string;                    // preferred interview domain (matches corpus domains)
   years_experience?: number;
   target_role?: string;
+  professions?: string[];             // the professions the user interviews for (= corpus areas); gates the catalog
+}
+
+// A profession the user can interview for, as served by GET /api/v1/professions.
+// `key` is the canonical id (= a corpus `area`), `label` is the display name,
+// `count` is how many corpus questions cover it, `tracks` are the corpus tracks
+// present under it. Derived from the loaded corpus (like /languages).
+export interface Profession {
+  key: string;
+  label: string;
+  count: number;
+  tracks: string[];
 }
 
 export interface InterviewConfig {
@@ -69,6 +81,7 @@ export interface ProfileSlice {
   voicePreview(req: PreviewReq): Promise<Blob | null>;
   getProfile(): Promise<Profile>;
   saveProfile(p: Profile): Promise<Profile>;
+  listProfessions(): Promise<Profession[]>;
   deleteAccount(): Promise<void>;
 }
 
@@ -92,6 +105,7 @@ export const profileHttp: ProfileSlice = {
   },
   getProfile() { return req<Profile>("/api/v1/profile"); },
   saveProfile(p) { return req<Profile>("/api/v1/profile", { method: "PUT", body: JSON.stringify(p) }); },
+  listProfessions() { return req<Profession[]>("/api/v1/professions"); },
   deleteAccount() { return req<void>("/api/v1/account", { method: "DELETE" }); },
 };
 
@@ -124,6 +138,24 @@ export const MOCK_PERSONALITIES: PersonalityOption[] = [
   { id: "annoying", label: "Stress", blurb: "Deliberately terse and pressuring to test composure." },
 ];
 
+// The 11 canonical professions (= corpus `areas`). Mirrors what the backend
+// GET /api/v1/professions derives from the loaded corpus, so the onboarding /
+// settings pickers work offline under NEXT_PUBLIC_MOCK=1. The live app is the
+// single source; counts here are indicative only.
+export const MOCK_PROFESSIONS: Profession[] = [
+  { key: "software_engineering", label: "Software Engineering", count: 24, tracks: ["engineering"] },
+  { key: "data_science", label: "Data Science", count: 12, tracks: ["engineering"] },
+  { key: "medicine", label: "Medicine", count: 10, tracks: ["professional"] },
+  { key: "nursing", label: "Nursing", count: 6, tracks: ["professional"] },
+  { key: "law", label: "Law", count: 6, tracks: ["professional"] },
+  { key: "consulting", label: "Consulting", count: 8, tracks: ["professional"] },
+  { key: "finance", label: "Finance", count: 8, tracks: ["professional"] },
+  { key: "product_management", label: "Product Management", count: 8, tracks: ["professional"] },
+  { key: "mechanical_engineering", label: "Mechanical Engineering", count: 6, tracks: ["engineering"] },
+  { key: "electrical_engineering", label: "Electrical Engineering", count: 6, tracks: ["engineering"] },
+  { key: "civil_engineering", label: "Civil Engineering", count: 6, tracks: ["engineering"] },
+];
+
 export const profileMock: ProfileSlice = {
   async getConfig() {
     if (typeof window === "undefined") return DEFAULT_CONFIG;
@@ -141,6 +173,7 @@ export const profileMock: ProfileSlice = {
     return raw ? (JSON.parse(raw) as Profile) : {};
   },
   async saveProfile(p) { window.localStorage.setItem(PROFILE_KEY, JSON.stringify(p)); return p; },
+  async listProfessions() { return MOCK_PROFESSIONS; },
   async deleteAccount() {
     if (typeof window !== "undefined") {
       window.localStorage.removeItem("mi_token");

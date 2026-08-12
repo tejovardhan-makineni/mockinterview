@@ -9,28 +9,31 @@ import (
 )
 
 type Session struct {
-	ID         string          `json:"id"`
-	UserID     string          `json:"-"`
-	QuestionID string          `json:"question_id"`
-	Modality   string          `json:"modality"`
-	Track      string          `json:"track"`
-	Status     string          `json:"status"`
-	Phase      string          `json:"phase"`
-	Config     json.RawMessage `json:"config"`
+	ID          string          `json:"id"`
+	UserID      string          `json:"-"`
+	QuestionID  string          `json:"question_id"`
+	Modality    string          `json:"modality"`
+	Track       string          `json:"track"`
+	Status      string          `json:"status"`
+	Phase       string          `json:"phase"`
+	Config      json.RawMessage `json:"config"`
+	PackID      string          `json:"pack_id,omitempty"`
+	PackRoundID string          `json:"pack_round_id,omitempty"`
 }
 
-func (s *Store) CreateSession(ctx context.Context, userID, questionID, modality, track string, cfg json.RawMessage) (Session, error) {
+func (s *Store) CreateSession(ctx context.Context, userID, questionID, modality, track, packID, roundID string, cfg json.RawMessage) (Session, error) {
 	if len(cfg) == 0 {
 		cfg = json.RawMessage(`{}`)
 	}
 	sess := Session{
 		ID: NewID(), UserID: userID, QuestionID: questionID, Modality: modality,
 		Track: track, Status: "created", Phase: "lobby", Config: cfg,
+		PackID: packID, PackRoundID: roundID,
 	}
 	_, err := s.Pool.Exec(ctx,
-		`INSERT INTO sessions (id, user_id, question_id, modality, track, config, status, phase, started_at)
-		 VALUES ($1,$2,$3,$4,$5,$6,'created','lobby', now())`,
-		sess.ID, userID, questionID, modality, track, cfg)
+		`INSERT INTO sessions (id, user_id, question_id, modality, track, config, status, phase, started_at, pack_id, pack_round_id)
+		 VALUES ($1,$2,$3,$4,$5,$6,'created','lobby', now(), $7, $8)`,
+		sess.ID, userID, questionID, modality, track, cfg, packID, roundID)
 	return sess, err
 }
 
@@ -43,14 +46,16 @@ func (s *Store) CountSessionsToday(ctx context.Context, userID string) (int, err
 }
 
 type SessionSummary struct {
-	ID         string   `json:"id"`
-	QuestionID string   `json:"question_id"`
-	Modality   string   `json:"modality"`
-	Track      string   `json:"track"`
-	Status     string   `json:"status"`
-	CreatedAt  string   `json:"created_at"`
-	Overall    *float64 `json:"overall,omitempty"`
-	Scored     *bool    `json:"scored,omitempty"`
+	ID          string   `json:"id"`
+	QuestionID  string   `json:"question_id"`
+	Modality    string   `json:"modality"`
+	Track       string   `json:"track"`
+	Status      string   `json:"status"`
+	CreatedAt   string   `json:"created_at"`
+	Overall     *float64 `json:"overall,omitempty"`
+	Scored      *bool    `json:"scored,omitempty"`
+	PackID      string   `json:"pack_id,omitempty"`
+	PackRoundID string   `json:"pack_round_id,omitempty"`
 }
 
 // ListUserSessions returns the user's past sessions (newest first) with the
@@ -61,7 +66,8 @@ func (s *Store) ListUserSessions(ctx context.Context, userID string, limit int) 
 	}
 	rows, err := s.Pool.Query(ctx, `
 		SELECT s.id, s.question_id, s.modality, s.track, s.status,
-		       to_char(s.created_at, 'YYYY-MM-DD"T"HH24:MI:SS'), r.overall, r.scored
+		       to_char(s.created_at, 'YYYY-MM-DD"T"HH24:MI:SS'), r.overall, r.scored,
+		       s.pack_id, s.pack_round_id
 		FROM sessions s LEFT JOIN reports r ON r.session_id = s.id
 		WHERE s.user_id=$1 ORDER BY s.created_at DESC LIMIT $2`, userID, limit)
 	if err != nil {
@@ -71,7 +77,31 @@ func (s *Store) ListUserSessions(ctx context.Context, userID string, limit int) 
 	var out []SessionSummary
 	for rows.Next() {
 		var ss SessionSummary
-		if err := rows.Scan(&ss.ID, &ss.QuestionID, &ss.Modality, &ss.Track, &ss.Status, &ss.CreatedAt, &ss.Overall, &ss.Scored); err != nil {
+		if err := rows.Scan(&ss.ID, &ss.QuestionID, &ss.Modality, &ss.Track, &ss.Status, &ss.CreatedAt, &ss.Overall, &ss.Scored, &ss.PackID, &ss.PackRoundID); err != nil {
+			return nil, err
+		}
+		out = append(out, ss)
+	}
+	return out, rows.Err()
+}
+
+// SessionsForPack returns the user's sessions that belong to a given pack
+// (newest first, with report overall/scored), for per-pack progress.
+func (s *Store) SessionsForPack(ctx context.Context, userID, packID string) ([]SessionSummary, error) {
+	rows, err := s.Pool.Query(ctx, `
+		SELECT s.id, s.question_id, s.modality, s.track, s.status,
+		       to_char(s.created_at, 'YYYY-MM-DD"T"HH24:MI:SS'), r.overall, r.scored,
+		       s.pack_id, s.pack_round_id
+		FROM sessions s LEFT JOIN reports r ON r.session_id = s.id
+		WHERE s.user_id=$1 AND s.pack_id=$2 ORDER BY s.created_at DESC`, userID, packID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var out []SessionSummary
+	for rows.Next() {
+		var ss SessionSummary
+		if err := rows.Scan(&ss.ID, &ss.QuestionID, &ss.Modality, &ss.Track, &ss.Status, &ss.CreatedAt, &ss.Overall, &ss.Scored, &ss.PackID, &ss.PackRoundID); err != nil {
 			return nil, err
 		}
 		out = append(out, ss)
@@ -82,8 +112,8 @@ func (s *Store) ListUserSessions(ctx context.Context, userID string, limit int) 
 func (s *Store) GetSession(ctx context.Context, id string) (Session, error) {
 	var sess Session
 	err := s.Pool.QueryRow(ctx,
-		`SELECT id, user_id, question_id, modality, track, status, phase, config FROM sessions WHERE id=$1`, id).
-		Scan(&sess.ID, &sess.UserID, &sess.QuestionID, &sess.Modality, &sess.Track, &sess.Status, &sess.Phase, &sess.Config)
+		`SELECT id, user_id, question_id, modality, track, status, phase, config, pack_id, pack_round_id FROM sessions WHERE id=$1`, id).
+		Scan(&sess.ID, &sess.UserID, &sess.QuestionID, &sess.Modality, &sess.Track, &sess.Status, &sess.Phase, &sess.Config, &sess.PackID, &sess.PackRoundID)
 	if errors.Is(err, pgx.ErrNoRows) {
 		return sess, ErrNotFound
 	}

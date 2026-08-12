@@ -1,0 +1,40 @@
+{
+  "id": "mbb-consulting",
+  "name": "MBB Consulting Loop",
+  "company": "",
+  "blurb": "A McKinsey/BCG/Bain-style management consulting round: a personal-experience (PEI) behavioral followed by two case interviews.",
+  "areas": ["consulting"],
+  "track": "professional",
+  "rounds": [
+    {
+      "id": "pei",
+      "title": "Personal Experience Interview (PEI)",
+      "kind": "behavioral",
+      "domain": "behavioral",
+      "modality": "conversational",
+      "difficulty": "mid",
+      "minutes": 30,
+      "focus": "MBB PEI: leadership, personal impact, and entrepreneurial drive. Push for specific, structured, individual-contribution stories."
+    },
+    {
+      "id": "case-1",
+      "title": "Case I",
+      "kind": "case",
+      "domain": "case",
+      "modality": "conversational",
+      "difficulty": "mid",
+      "minutes": 30,
+      "focus": "Structure first, then hypothesis-driven analysis; quantitative comfort and a crisp recommendation."
+    },
+    {
+      "id": "case-2",
+      "title": "Case II",
+      "kind": "case",
+      "domain": "case",
+      "modality": "conversational",
+      "difficulty": "senior",
+      "minutes": 30,
+      "focus": "Ambiguous prompt; drive the structure, do the math cleanly, and synthesize a client-ready answer."
+    }
+  ]
+}

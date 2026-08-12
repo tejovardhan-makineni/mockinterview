@@ -41,8 +41,9 @@ type Config struct {
 	ModelLive    string // native-audio Live model (voice)
 	ModelTTS     string // one-shot text-to-speech model (voice previews)
 
-	// Corpus
+	// Corpus + practice packs
 	CorpusDir string
+	PacksDir  string
 
 	// Tiers / cost control. Free users get FreeDailyLimit interviews/day; admin
 	// emails (developers/testers) are unlimited. Tiers are behind-the-scenes.
@@ -69,6 +70,7 @@ func Load() (*Config, error) {
 		LLMModel:       env("LLM_MODEL", ""),
 		LLMBaseURL:     env("LLM_BASE_URL", ""),
 		CorpusDir:      env("CORPUS_DIR", "data/corpus"),
+		PacksDir:       env("PACKS_DIR", "data/packs"),
 		AdminEmails:    splitCSV(strings.ToLower(env("ADMIN_EMAILS", "makinenitejovardhan@gmail.com,founder@mockinterview.live,demo@mockinterview.live"))),
 		FreeDailyLimit: envInt("FREE_DAILY_LIMIT", 2),
 	}

@@ -9,6 +9,7 @@ import { AppShell } from "@/components/AppShell";
 
 const MOD_LABEL: Record<string, string> = { system_design: "🧩 Whiteboard", coding: "⌨️ Coding", written: "📝 Written", conversational: "🎙️ Spoken" };
 const tone = (s?: number) => (s === undefined ? "muted" : s >= 3 ? "good" : s >= 2 ? "warn" : "bad");
+const pretty = (s: string) => s.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
 
 export default function ResultsPage() {
   const router = useRouter();
@@ -48,6 +49,7 @@ export default function ResultsPage() {
                   <div className="flex items-center gap-2">
                     <span className="truncate font-semibold">{it.title}</span>
                     <span className="shrink-0 rounded-md bg-[var(--color-panel-2)] px-2 py-0.5 text-xs text-[var(--color-faint)]">{MOD_LABEL[it.modality] ?? it.modality}</span>
+                    {it.pack_id && <Badge tone="accent">🎯 {pretty(it.pack_id)}</Badge>}
                   </div>
                   <div className="mt-1 text-xs text-[var(--color-faint)]">{new Date(it.created_at).toLocaleString()} · {it.status}</div>
                 </div>

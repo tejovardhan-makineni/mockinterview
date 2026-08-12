@@ -15,6 +15,7 @@ import (
 	"github.com/tejo/mockinterview-api/internal/interview"
 	"github.com/tejo/mockinterview-api/internal/live"
 	"github.com/tejo/mockinterview-api/internal/llm"
+	"github.com/tejo/mockinterview-api/internal/pack"
 	"github.com/tejo/mockinterview-api/internal/profile"
 	"github.com/tejo/mockinterview-api/internal/resume"
 	"github.com/tejo/mockinterview-api/internal/scoring"
@@ -28,6 +29,7 @@ type App struct {
 	Store  store.Datastore
 	LLM    llm.Client
 	Corpus *corpus.Catalog
+	Packs  *pack.Catalog // practice packs; nil disables the packs feature (e.g. in tests)
 }
 
 // Routes mounts all /api/v1 endpoints.
@@ -66,6 +68,13 @@ func (a *App) Routes(r chi.Router) {
 	scorer := scoring.New(a.LLM, a.Cfg.LLMModel)
 	interviewSvc := interview.New(a.Store, a.Corpus, scorer, a.Cfg.AdminEmails, a.Cfg.FreeDailyLimit)
 
+	// Practice packs (company/goal loops). Optional: nil catalog → feature off.
+	var packSvc *pack.Service
+	if a.Packs != nil {
+		packSvc = pack.NewService(a.Corpus, a.Packs, a.Store)
+		interviewSvc.SetPacks(packSvc) // resolve pack rounds → question + focus
+	}
+
 	// Authenticated API. Feature sub-routers are mounted here phase by phase.
 	r.Group(func(r chi.Router) {
 		r.Use(authSvc.Required)
@@ -102,6 +111,16 @@ func (a *App) Routes(r chi.Router) {
 		// Question corpus (client-safe summaries).
 		r.Get("/questions", corpusSvc.List)
 		r.Get("/questions/{id}", corpusSvc.Get)
+
+		// Professions (corpus areas) — drives catalog gating + onboarding picker.
+		r.Get("/professions", corpusSvc.ListProfessions)
+
+		// Practice packs (company/goal interview loops) + per-user progress.
+		if packSvc != nil {
+			r.Get("/packs", packSvc.List)
+			r.Get("/packs/{id}", packSvc.Get)
+			r.Get("/packs/{id}/progress", packSvc.Progress)
+		}
 
 		// Interview sessions + scoring + report.
 		r.Get("/sessions", interviewSvc.List)

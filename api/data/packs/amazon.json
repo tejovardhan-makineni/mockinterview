@@ -1,0 +1,70 @@
+{
+  "id": "amazon",
+  "name": "Amazon SDE Loop",
+  "company": "Amazon",
+  "blurb": "The full Amazon software engineering on-site: a Leadership-Principles-heavy behavioral, two coding rounds, an object-oriented design, a system design, and a bar-raiser.",
+  "areas": ["software_engineering"],
+  "track": "engineering",
+  "rounds": [
+    {
+      "id": "intro-behavioral",
+      "title": "Intro & Behavioral (Leadership Principles)",
+      "kind": "behavioral",
+      "domain": "behavioral",
+      "modality": "conversational",
+      "difficulty": "mid",
+      "minutes": 30,
+      "focus": "Anchor every answer to Amazon Leadership Principles (Ownership, Customer Obsession, Dive Deep). Push for STAR structure and the candidate's individual contribution."
+    },
+    {
+      "id": "coding-1",
+      "title": "Coding I",
+      "kind": "coding",
+      "domain": "coding",
+      "modality": "coding",
+      "difficulty": "mid",
+      "minutes": 40,
+      "focus": "Clean, working code first; then complexity and edge cases. Probe data-structure choice."
+    },
+    {
+      "id": "coding-2",
+      "title": "Coding II",
+      "kind": "coding",
+      "domain": "coding",
+      "modality": "coding",
+      "difficulty": "senior",
+      "minutes": 40,
+      "focus": "Harder algorithmic problem; watch for optimal complexity and how they handle a bug under time pressure."
+    },
+    {
+      "id": "lld",
+      "title": "Object-Oriented / Low-Level Design",
+      "kind": "lld",
+      "domain": "low_level_design",
+      "modality": "system_design",
+      "difficulty": "mid",
+      "minutes": 45,
+      "focus": "Class model, responsibilities, and extensibility. Deep-dive one or two components rather than skimming."
+    },
+    {
+      "id": "system-design",
+      "title": "System Design",
+      "kind": "system_design",
+      "domain": "system_design",
+      "modality": "system_design",
+      "difficulty": "senior",
+      "minutes": 45,
+      "focus": "Scale, data model, and failure modes. When they introduce a component, probe why it, tradeoffs, and alternatives."
+    },
+    {
+      "id": "bar-raiser",
+      "title": "Bar Raiser",
+      "kind": "bar_raiser",
+      "domain": "behavioral",
+      "modality": "conversational",
+      "difficulty": "senior",
+      "minutes": 30,
+      "focus": "Amazon bar-raiser: raise the bar; probe Leadership Principles depth and hire/no-hire signal."
+    }
+  ]
+}

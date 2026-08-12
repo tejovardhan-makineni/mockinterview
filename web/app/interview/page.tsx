@@ -4,7 +4,7 @@ import { Suspense, useCallback, useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { api } from "@/lib/api";
 import type { Modality, Session } from "@/lib/types";
-import { LiveSession, type Caption, type ConnState } from "@/lib/live";
+import { LiveSession, type Caption, type ConnState, type SectionInfo } from "@/lib/live";
 import { BehaviorTracker, cameraConsentGranted } from "@/lib/behavior";
 import { Avatar3D, type AvatarDrive } from "@/components/studio/Avatar3D";
 import { Workspace } from "@/components/studio/Workspace";
@@ -29,6 +29,7 @@ function StudioInner() {
   const [remainingMs, setRemainingMs] = useState<number | null>(null);
   const [mode, setMode] = useState<"voice" | "text" | "local">("text");
   const [aiState, setAiState] = useState<AiState>("idle");
+  const [section, setSection] = useState<SectionInfo | null>(null);
   const micRef = useRef(0); // live mic level, read by the HUD via rAF (no re-render)
 
   const live = useRef<LiveSession | null>(null);
@@ -102,6 +103,7 @@ function StudioInner() {
             });
           }
         })
+        .on("section", (s) => setSection(s))
         .on("filler", () => { tracker.current?.addEvent("filler"); avatar.current.mood = "curious"; })
         .on("pause", () => { tracker.current?.addEvent("long_pause"); })
         .on("help", () => { tracker.current?.addEvent("help_request"); })
@@ -209,7 +211,7 @@ function StudioInner() {
             <Avatar3D faceId={faceId} drive={avatar} />
           </div>
           <div className="mt-3">
-            <LiveHUD micRef={micRef} aiState={aiState} conn={conn} mode={mode} />
+            <LiveHUD micRef={micRef} aiState={aiState} conn={conn} mode={mode} section={section} />
           </div>
           <div ref={transcriptRef} className="mi-panel mt-3 max-h-[40vh] flex-1 overflow-y-auto rounded-xl border border-[var(--color-line)] bg-[var(--color-panel)] p-3 text-sm lg:max-h-[52vh]">
             {captions.length === 0 && <p className="text-[var(--color-faint)]">The interviewer will begin shortly…</p>}

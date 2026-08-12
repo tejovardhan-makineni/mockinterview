@@ -12,6 +12,12 @@ import { api, IS_MOCK } from "./api";
 
 export type Caption = { role: "interviewer" | "candidate" | "system"; text: string; streaming?: boolean };
 
+// Where the candidate is in the interview. The relay emits one of these each time
+// the interviewer moves to a new section (index 0 right after the greeting), so
+// the studio can show a progress indicator. Titles are server-authored + already
+// human-readable — display them as-is.
+export type SectionInfo = { index: number; total: number; title: string; kind: string };
+
 // Connection lifecycle the studio surfaces to the candidate. "reconnecting"
 // means we dropped and are auto-retrying; "failed" means auto-retry gave up and
 // the user should hit Reconnect.
@@ -30,6 +36,7 @@ type Events = {
   help: () => void;
   status: (s: string) => void;
   connection: (s: ConnState) => void;
+  section: (s: SectionInfo) => void; // interview moved to a new section (drives the progress HUD)
   ended: () => void;
 };
 
@@ -60,6 +67,7 @@ export class LiveSession {
   private reconnectTimer?: number;
   private connState: ConnState = "connecting";
   private candidateIdle?: number; // voice-mode: fires when the candidate pauses
+  private currentSection?: SectionInfo; // last section the relay announced
 
   constructor(private sessionId: string, questionTags: string[] = [], private voiceId: string = "aoede") {
     this.questionTags = questionTags;
@@ -107,6 +115,9 @@ export class LiveSession {
 
   private setConn(s: ConnState) { this.connState = s; this.emit("connection", s); }
   connectionState() { return this.connState; }
+  // Last announced section (or undefined before the first "section" message) —
+  // lets a late subscriber read current progress without waiting for the next event.
+  currentSectionInfo() { return this.currentSection; }
 
   async start(minutes = 30) {
     this.minutes = minutes;
@@ -168,7 +179,7 @@ export class LiveSession {
 
   private onWsMessage(e: MessageEvent) {
     if (typeof e.data !== "string") { this.playPcm(new Uint8Array(e.data as ArrayBuffer)); return; }
-    let m: { type: string; role?: string; text?: string; mode?: string; streaming?: boolean };
+    let m: { type: string; role?: string; text?: string; mode?: string; streaming?: boolean; index?: number; total?: number; title?: string; kind?: string };
     try { m = JSON.parse(e.data); } catch { return; }
     switch (m.type) {
       case "ready":
@@ -196,6 +207,18 @@ export class LiveSession {
           if (this.candidateIdle) clearTimeout(this.candidateIdle);
           this.candidateIdle = window.setTimeout(() => this.emit("userSpeaking", false), 1500);
         }
+        break;
+      }
+      case "section": {
+        // Interview progressed to a new section — surface it for the progress HUD.
+        const info: SectionInfo = {
+          index: typeof m.index === "number" ? m.index : 0,
+          total: typeof m.total === "number" ? m.total : 0,
+          title: m.title ?? "",
+          kind: m.kind ?? "",
+        };
+        this.currentSection = info;
+        this.emit("section", info);
         break;
       }
       case "interrupted": this.cancelSpeech(); break;

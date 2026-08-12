@@ -22,6 +22,7 @@ export default function InterviewsPage() {
   const t = useT();
   const router = useRouter();
   const [questions, setQuestions] = useState<QuestionSummary[]>([]);
+  const [professions, setProfessions] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [area, setArea] = useState("all");
   const [domain, setDomain] = useState("all");
@@ -34,11 +35,14 @@ export default function InterviewsPage() {
       if (!u) { router.replace("/login"); return; }
       const [qs, p] = await Promise.all([api.listQuestions(), api.getProfile()]);
       setQuestions(qs);
+      const profs = (p as Profile)?.professions ?? [];
+      setProfessions(profs);
       // Restore saved filters; else default to the profile's domain if it exists in the corpus.
+      // An area is only honoured if it's one of the user's professions (the gate).
       const saved = typeof window !== "undefined" ? window.localStorage.getItem(FILTER_KEY) : null;
       if (saved) {
         const f = JSON.parse(saved) as { area?: string; domain?: string; query?: string };
-        setArea(f.area ?? "all"); setDomain(f.domain ?? "all"); setQuery(f.query ?? "");
+        setArea(f.area && profs.includes(f.area) ? f.area : "all"); setDomain(f.domain ?? "all"); setQuery(f.query ?? "");
       } else if ((p as Profile)?.domain && qs.some((q) => q.domain === (p as Profile).domain)) {
         setDomain((p as Profile).domain!);
       }
@@ -53,18 +57,29 @@ export default function InterviewsPage() {
     window.localStorage.setItem(FILTER_KEY, JSON.stringify({ area, domain, query }));
   }, [area, domain, query, loading]);
 
-  // Areas (professions) present in the corpus — derived, not hardcoded.
-  const areas = useMemo(
-    () => Array.from(new Set(questions.flatMap((q) => q.areas ?? []))).sort(),
-    [questions]
+  // GATING: the catalog only ever shows questions whose `areas` intersect the
+  // user's professions — even with no filters, a software user never sees law.
+  // If the user has no professions set, the gated set is empty (the AppShell
+  // onboarding gate redirects them; this is the defensive fallback).
+  const profSet = useMemo(() => new Set(professions), [professions]);
+  const gated = useMemo(
+    () => (profSet.size === 0 ? [] : questions.filter((q) => (q.areas ?? []).some((a) => profSet.has(a)))),
+    [questions, profSet]
   );
 
-  // Domains (sub-topics) available under the selected area — filtered to that area.
+  // Area options = the user's professions, intersected with areas actually
+  // present in the corpus (so we never offer an empty area).
+  const areas = useMemo(
+    () => professions.filter((a) => questions.some((q) => (q.areas ?? []).includes(a))).sort(),
+    [professions, questions]
+  );
+
+  // Domains (sub-topics) available under the selected area — within the gated set.
   const domains = useMemo(
     () => Array.from(new Set(
-      questions.filter((q) => area === "all" || (q.areas ?? []).includes(area)).map((q) => q.domain)
+      gated.filter((q) => area === "all" || (q.areas ?? []).includes(area)).map((q) => q.domain)
     )).sort(),
-    [questions, area]
+    [gated, area]
   );
 
   // Selecting an area narrows the domain options; if the current domain isn't in
@@ -72,19 +87,19 @@ export default function InterviewsPage() {
   const onArea = (a: string) => {
     setArea(a);
     if (a !== "all" && domain !== "all") {
-      const inArea = questions.some((q) => q.domain === domain && (q.areas ?? []).includes(a));
+      const inArea = gated.some((q) => q.domain === domain && (q.areas ?? []).includes(a));
       if (!inArea) setDomain("all");
     }
   };
 
   const filtered = useMemo(() => {
-    return questions
+    return gated
       .filter((q) => (area === "all" || (q.areas ?? []).includes(area)) && (domain === "all" || q.domain === domain))
       .map((q) => ({ q, score: matchScore(q, query) }))
       .filter((x) => x.score > 0.34)
       .sort((a, b) => b.score - a.score)
       .map((x) => x.q);
-  }, [questions, area, domain, query]);
+  }, [gated, area, domain, query]);
 
   const clear = () => { setArea("all"); setDomain("all"); setQuery(""); };
   const hasFilters = area !== "all" || domain !== "all" || query.trim() !== "";
@@ -108,9 +123,9 @@ export default function InterviewsPage() {
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
           <h1 className="text-3xl font-extrabold tracking-tight">{t("Interview Catalog")}</h1>
-          <p className="mt-1 text-[var(--color-muted)]">{t("Pick an area and a domain — software, mechanical, electrical & civil engineering, plus clinical, legal, case, and more.")} {questions.length} {t("interviews across")} {areas.length} {t("areas.")}</p>
+          <p className="mt-1 text-[var(--color-muted)]">{t("Pick an area and a domain — tailored to the professions you interview for.")} {gated.length} {t("interviews across")} {areas.length} {t("areas.")}</p>
         </div>
-        {recommended && questions.some((q) => q.domain === recommended) && <Badge tone="accent">{t("Recommended:")} {pretty(recommended)}</Badge>}
+        {recommended && gated.some((q) => q.domain === recommended) && <Badge tone="accent">{t("Recommended:")} {pretty(recommended)}</Badge>}
       </div>
 
       {/* Search + Area/Domain selects */}
@@ -174,7 +189,9 @@ export default function InterviewsPage() {
               <Button href={`/setup?q=${q.id}`} className="mt-4 self-start">{t("Start →")}</Button>
             </Panel>
           ))}
-          {filtered.length === 0 && <Panel className="col-span-full p-10 text-center text-[var(--color-muted)]">{t("No interviews match.")} <button onClick={clear} className="text-[var(--color-accent)]">{t("Clear filters")}</button></Panel>}
+          {filtered.length === 0 && (professions.length === 0
+            ? <Panel className="col-span-full p-10 text-center text-[var(--color-muted)]">{t("Choose the professions you interview for to see your catalog.")} <Button href="/onboarding" className="mt-4">{t("Choose professions")}</Button></Panel>
+            : <Panel className="col-span-full p-10 text-center text-[var(--color-muted)]">{t("No interviews match.")} <button onClick={clear} className="text-[var(--color-accent)]">{t("Clear filters")}</button></Panel>)}
         </div>
       )}
     </AppShell>

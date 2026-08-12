@@ -31,9 +31,10 @@ type Datastore interface {
 	LatestResume(ctx context.Context, userID string) (Resume, error)
 	SaveResumeReview(ctx context.Context, userID, resumeID, provider, model string, result json.RawMessage) (string, error)
 	// sessions
-	CreateSession(ctx context.Context, userID, questionID, modality, track string, cfg json.RawMessage) (Session, error)
+	CreateSession(ctx context.Context, userID, questionID, modality, track, packID, roundID string, cfg json.RawMessage) (Session, error)
 	CountSessionsToday(ctx context.Context, userID string) (int, error)
 	ListUserSessions(ctx context.Context, userID string, limit int) ([]SessionSummary, error)
+	SessionsForPack(ctx context.Context, userID, packID string) ([]SessionSummary, error)
 	GetSession(ctx context.Context, id string) (Session, error)
 	UpdateSessionStatus(ctx context.Context, id, status string) error
 	AddTurn(ctx context.Context, sessionID, role, text string, tsMs int64, meta json.RawMessage) error

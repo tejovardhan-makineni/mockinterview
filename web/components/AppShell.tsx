@@ -12,16 +12,17 @@ import { ThemeToggle } from "./ThemeToggle";
 import { LanguageSelect } from "./LanguageSelect";
 import { useT } from "@/lib/i18n";
 import {
-  IconDashboard, IconInterview, IconResume, IconResults, IconSettings, IconSignOut, LogoM,
+  IconDashboard, IconInterview, IconPacks, IconResume, IconResults, IconSettings, IconSignOut, LogoM,
 } from "@/components/icons";
 
-export type NavKey = "dashboard" | "interview" | "resume" | "results" | "settings";
+export type NavKey = "dashboard" | "interview" | "packs" | "resume" | "results" | "settings";
 
 type IconType = ComponentType<{ className?: string }>;
 
 const NAV: { key: NavKey; href: string; label: string; Icon: IconType }[] = [
   { key: "dashboard", href: "/dashboard", label: "Dashboard", Icon: IconDashboard },
   { key: "interview", href: "/interviews", label: "Interview", Icon: IconInterview },
+  { key: "packs", href: "/packs", label: "Practice Packs", Icon: IconPacks },
   { key: "resume", href: "/resume-review", label: "Resume", Icon: IconResume },
   { key: "results", href: "/results", label: "Results", Icon: IconResults },
   { key: "settings", href: "/settings", label: "Settings", Icon: IconSettings },
@@ -34,7 +35,21 @@ export function AppShell({ active, children }: { active: NavKey; children: React
   const [open, setOpen] = useState(false); // mobile drawer
   const drawerRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => { api.me().then((u) => setEmail(u?.email ?? "")); }, []);
+  useEffect(() => {
+    let alive = true;
+    (async () => {
+      const u = await api.me();
+      if (!alive) return;
+      setEmail(u?.email ?? "");
+      if (!u) return;
+      // Mandatory onboarding gate: a signed-in user with no professions chosen is
+      // routed to the picker before using the app (so the catalog is always gated).
+      const p = await api.getProfile();
+      if (!alive) return;
+      if (!p?.professions || p.professions.length === 0) router.replace("/onboarding");
+    })();
+    return () => { alive = false; };
+  }, [router]);
 
   // Drawer a11y: close on Escape and move focus into the panel when it opens.
   useEffect(() => {

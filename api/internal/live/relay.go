@@ -155,11 +155,16 @@ type clientMsg struct {
 
 // serverMsg is a JSON frame to the browser. Binary frames carry PCM16 audio (24kHz).
 type serverMsg struct {
-	Type      string `json:"type"` // say | transcript | phase | interrupted | turn_complete | error | ready
+	Type      string `json:"type"` // say | transcript | phase | section | interrupted | turn_complete | error | ready
 	Role      string `json:"role,omitempty"`
 	Text      string `json:"text,omitempty"`
 	Mode      string `json:"mode,omitempty"`      // "voice" (gemini audio) | "text" (client TTS)
 	Streaming bool   `json:"streaming,omitempty"` // true while a turn is still being transcribed; false = finalized
+	// section-event fields (Type == "section"): which section is now active.
+	Index int    `json:"index,omitempty"`
+	Total int    `json:"total,omitempty"`
+	Title string `json:"title,omitempty"`
+	Kind  string `json:"kind,omitempty"`
 }
 
 func (r *Relay) Handle(w http.ResponseWriter, req *http.Request) {
@@ -189,7 +194,7 @@ func (r *Relay) Handle(w http.ResponseWriter, req *http.Request) {
 	// can't stream an unbounded message up. 1 MB is far above any real frame.
 	conn.SetReadLimit(1 << 20)
 
-	personaID, intensity, voice, language := parseConfig(sess.Config)
+	personaID, intensity, voice, language, roundFocus := parseConfig(sess.Config)
 	resumeSummary := r.resumeSummary(req.Context(), uid)
 	durationMin := 30
 	if v := req.URL.Query().Get("minutes"); v != "" {
@@ -197,7 +202,8 @@ func (r *Relay) Handle(w http.ResponseWriter, req *http.Request) {
 			durationMin = n
 		}
 	}
-	system := SystemPrompt(q, personaID, intensity, "intro", resumeSummary, "", durationMin, voice, language)
+	sections := SectionPlan(q, resumeSummary != "", roundFocus)
+	system := SystemPrompt(q, personaID, intensity, "intro", resumeSummary, "", durationMin, voice, language, sections, roundFocus)
 
 	_ = r.store.UpdateSessionStatus(req.Context(), sessionID, "active")
 
@@ -205,7 +211,7 @@ func (r *Relay) Handle(w http.ResponseWriter, req *http.Request) {
 		r.runText(conn, sessionID, q, system)
 		return
 	}
-	r.runGemini(conn, sessionID, q, system, voice)
+	r.runGemini(conn, sessionID, q, system, voice, sections, durationMin)
 }
 
 // ---- text director (stub / no key): browser speaks via Web Speech API ----
@@ -265,7 +271,7 @@ func (r *Relay) runText(conn *websocket.Conn, sessionID string, q corpus.Questio
 
 // ---- Gemini Live (real audio) ----
 
-func (r *Relay) runGemini(conn *websocket.Conn, sessionID string, q corpus.Question, system, voice string) {
+func (r *Relay) runGemini(conn *websocket.Conn, sessionID string, q corpus.Question, system, voice string, sections []Section, durationMin int) {
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Minute)
 	defer cancel()
 
@@ -531,6 +537,35 @@ func (r *Relay) runGemini(conn *websocket.Conn, sessionID string, q corpus.Quest
 		})
 	}
 
+	// SECTION PROGRESSION. Announce the first section (intro) right after the
+	// greeting kick-off, then drive transitions on TIME: intro gets the first few
+	// minutes, wrap the last couple, and the middle sections split the remainder
+	// evenly. Each transition (a) injects a context-only "[SECTION CHANGE → ...]"
+	// directive to Gemini (TurnComplete=false, so it steers WITHOUT forcing a
+	// barge-in) and (b) emits a `section` event to the browser. All browser writes
+	// go through the single wsConn writer; the goroutine exits on ctx cancel.
+	if len(sections) > 0 {
+		_ = wc.writeServerMsg(serverMsg{Type: "section", Index: 0, Total: len(sections), Title: sections[0].Title, Kind: sections[0].Kind})
+	}
+	go func() {
+		sched := sectionSchedule(time.Duration(durationMin)*time.Minute, len(sections))
+		for i, at := range sched {
+			select {
+			case <-ctx.Done():
+				return
+			case <-time.After(at - time.Since(start)):
+			}
+			sec := sections[i+1] // sched[i] is the transition INTO section i+1
+			_ = session.SendClientContent(genai.LiveClientContentInput{
+				Turns:        []*genai.Content{genai.NewContentFromText("[SECTION CHANGE → "+sec.Title+": "+sec.Guidance+"]", genai.RoleUser)},
+				TurnComplete: genai.Ptr(false),
+			})
+			if err := wc.writeServerMsg(serverMsg{Type: "section", Index: i + 1, Total: len(sections), Title: sec.Title, Kind: sec.Kind}); err != nil {
+				return
+			}
+		}
+	}()
+
 	// Browser → Gemini: audio (binary) + control (JSON).
 readLoop:
 	for {
@@ -615,6 +650,45 @@ func waitTimeout(wg *sync.WaitGroup, d time.Duration) bool {
 
 // ---- helpers ----
 
+// sectionSchedule returns, for an n-section plan running for total, the elapsed
+// time at which to transition INTO each section 1..n-1 (so the returned slice
+// has length n-1; index i is the transition into section i+1). Section 0 (intro)
+// starts at t=0. The intro gets the first ~3.5 min, wrap the last ~2.5 min, and
+// the middle sections split the remainder evenly. Boundaries are clamped so a
+// short interview still yields a sane, monotonic schedule.
+func sectionSchedule(total time.Duration, n int) []time.Duration {
+	if n <= 1 {
+		return nil
+	}
+	introDur := 3*time.Minute + 30*time.Second
+	wrapDur := 2*time.Minute + 30*time.Second
+	// Clamp for short interviews so intro+wrap never swallow the whole thing.
+	if introDur+wrapDur > total {
+		introDur = total / 4
+		wrapDur = total / 4
+	}
+	out := make([]time.Duration, n-1)
+	// Wrap (last section) starts at total-wrapDur.
+	out[n-2] = total - wrapDur
+	middle := n - 2 // sections between intro and wrap
+	if middle >= 1 {
+		per := (total - introDur - wrapDur) / time.Duration(middle)
+		if per < 0 {
+			per = 0
+		}
+		for k := 1; k <= middle; k++ {
+			out[k-1] = introDur + time.Duration(k-1)*per
+		}
+	}
+	// Guarantee monotonic non-decreasing transitions.
+	for i := 1; i < len(out); i++ {
+		if out[i] < out[i-1] {
+			out[i] = out[i-1]
+		}
+	}
+	return out
+}
+
 func (r *Relay) resumeSummary(ctx context.Context, uid string) string {
 	res, err := r.store.LatestResume(ctx, uid)
 	if err != nil {
@@ -653,7 +727,7 @@ func (r *Relay) resumeSummary(ctx context.Context, uid string) string {
 	return out
 }
 
-func parseConfig(cfg json.RawMessage) (personaID string, intensity int, voice, language string) {
+func parseConfig(cfg json.RawMessage) (personaID string, intensity int, voice, language, roundFocus string) {
 	def := store.DefaultConfig() // single source of truth for defaults (from persona catalogs)
 	personaID, intensity, voice = def.Personality, def.Intensity, def.VoiceID
 	language = persona.DefaultLanguageCode()
@@ -662,6 +736,7 @@ func parseConfig(cfg json.RawMessage) (personaID string, intensity int, voice, l
 		Intensity   int    `json:"intensity"`
 		VoiceID     string `json:"voice_id"`
 		Language    string `json:"language"`
+		RoundFocus  string `json:"round_focus"`
 	}
 	if json.Unmarshal(cfg, &c) == nil {
 		if c.Personality != "" {
@@ -676,6 +751,7 @@ func parseConfig(cfg json.RawMessage) (personaID string, intensity int, voice, l
 		if c.Language != "" {
 			language = persona.NormalizeLanguage(c.Language)
 		}
+		roundFocus = strings.TrimSpace(c.RoundFocus)
 	}
 	return
 }
