@@ -176,7 +176,7 @@ func (m *Mem) SaveResumeReview(_ context.Context, _, _, _, _ string, _ json.RawM
 
 // ---- sessions ----
 
-func (m *Mem) CreateSession(_ context.Context, userID, questionID, modality, track string, cfg json.RawMessage) (store.Session, error) {
+func (m *Mem) CreateSession(_ context.Context, userID, questionID, modality, track, packID, roundID string, cfg json.RawMessage) (store.Session, error) {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 	if len(cfg) == 0 {
@@ -186,9 +186,41 @@ func (m *Mem) CreateSession(_ context.Context, userID, questionID, modality, tra
 	sess := store.Session{
 		ID: store.NewID(), UserID: userID, QuestionID: questionID, Modality: modality,
 		Track: track, Status: "created", Phase: "lobby", Config: cfg,
+		PackID: packID, PackRoundID: roundID,
 	}
 	m.sessions[sess.ID] = &sessionRec{sess: sess, seq: m.seq, created: time.Now()}
 	return sess, nil
+}
+
+// SessionsForPack returns the user's sessions belonging to a pack (newest first).
+func (m *Mem) SessionsForPack(_ context.Context, userID, packID string) ([]store.SessionSummary, error) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	recs := make([]*sessionRec, 0)
+	for _, rec := range m.sessions {
+		if rec.sess.UserID == userID && rec.sess.PackID == packID {
+			recs = append(recs, rec)
+		}
+	}
+	sort.Slice(recs, func(i, j int) bool { return recs[i].seq > recs[j].seq })
+	out := make([]store.SessionSummary, 0, len(recs))
+	for _, rec := range recs {
+		ss := store.SessionSummary{
+			ID: rec.sess.ID, QuestionID: rec.sess.QuestionID, Modality: rec.sess.Modality,
+			Track: rec.sess.Track, Status: rec.sess.Status,
+			CreatedAt:   rec.created.UTC().Format("2006-01-02T15:04:05"),
+			PackID:      rec.sess.PackID,
+			PackRoundID: rec.sess.PackRoundID,
+		}
+		if rep, ok := m.reports[rec.sess.ID]; ok {
+			overall := rep.report.Overall
+			scored := rep.report.Scored
+			ss.Overall = &overall
+			ss.Scored = &scored
+		}
+		out = append(out, ss)
+	}
+	return out, nil
 }
 
 // CountSessionsToday mirrors the SQL store: only sessions created since local
@@ -228,7 +260,9 @@ func (m *Mem) ListUserSessions(_ context.Context, userID string, limit int) ([]s
 		ss := store.SessionSummary{
 			ID: rec.sess.ID, QuestionID: rec.sess.QuestionID, Modality: rec.sess.Modality,
 			Track: rec.sess.Track, Status: rec.sess.Status,
-			CreatedAt: rec.created.UTC().Format("2006-01-02T15:04:05"),
+			CreatedAt:   rec.created.UTC().Format("2006-01-02T15:04:05"),
+			PackID:      rec.sess.PackID,
+			PackRoundID: rec.sess.PackRoundID,
 		}
 		if rep, ok := m.reports[rec.sess.ID]; ok {
 			overall := rep.report.Overall

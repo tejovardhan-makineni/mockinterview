@@ -17,7 +17,7 @@ func TestUserRoundTripAndCascade(t *testing.T) {
 	}
 
 	// A session + report tied to the user.
-	sess, _ := m.CreateSession(ctx, u.ID, "q1", "system_design", "engineering", nil)
+	sess, _ := m.CreateSession(ctx, u.ID, "q1", "system_design", "engineering", "", "", nil)
 	_ = m.SaveReport(ctx, sess.ID, 3.0, nil, nil, nil, "", true, "")
 
 	list, _ := m.ListUserSessions(ctx, u.ID, 50)

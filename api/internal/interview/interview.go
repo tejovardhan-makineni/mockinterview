@@ -28,7 +28,7 @@ type Repo interface {
 	UserByID(ctx context.Context, id string) (store.User, error)
 	ListUserSessions(ctx context.Context, userID string, limit int) ([]store.SessionSummary, error)
 	CountSessionsToday(ctx context.Context, userID string) (int, error)
-	CreateSession(ctx context.Context, userID, questionID, modality, track string, cfg json.RawMessage) (store.Session, error)
+	CreateSession(ctx context.Context, userID, questionID, modality, track, packID, roundID string, cfg json.RawMessage) (store.Session, error)
 	GetSession(ctx context.Context, id string) (store.Session, error)
 	UpdateSessionStatus(ctx context.Context, id, status string) error
 	AddTurn(ctx context.Context, sessionID, role, text string, tsMs int64, meta json.RawMessage) error
@@ -50,6 +50,7 @@ type Service struct {
 	scorer      *scoring.Engine
 	adminEmails map[string]bool
 	dailyLimit  int
+	packs       PackResolver // may be nil
 }
 
 func New(st Repo, cat *corpus.Catalog, sc *scoring.Engine, adminEmails []string, dailyLimit int) *Service {
@@ -95,7 +96,20 @@ func (s *Service) List(w http.ResponseWriter, r *http.Request) {
 type createReq struct {
 	QuestionID string          `json:"question_id"`
 	Config     json.RawMessage `json:"config"`
+	PackID     string          `json:"pack_id,omitempty"`
+	RoundID    string          `json:"round_id,omitempty"`
 }
+
+// PackResolver resolves a pack round to a concrete corpus question + an
+// interviewer focus line. internal/pack's Service satisfies it; it's a
+// consumer-defined seam so interview doesn't import pack (avoids a cycle) and is
+// wired at the composition root via SetPacks. May be nil (packs disabled).
+type PackResolver interface {
+	ResolveRound(packID, roundID string) (questionID, focus string, ok bool)
+}
+
+// SetPacks wires the pack resolver after construction (composition root).
+func (s *Service) SetPacks(p PackResolver) { s.packs = p }
 
 func (s *Service) Create(w http.ResponseWriter, r *http.Request) {
 	uid := auth.UserID(r.Context())
@@ -103,10 +117,29 @@ func (s *Service) Create(w http.ResponseWriter, r *http.Request) {
 	if !httpx.DecodeJSON(w, r, &req) {
 		return
 	}
+	// Pack round: resolve to a concrete question + interviewer focus, and stamp
+	// the focus into the session config so the live director can specialize.
+	var roundFocus string
+	if req.PackID != "" && req.RoundID != "" && s.packs != nil {
+		qid, focus, ok := s.packs.ResolveRound(req.PackID, req.RoundID)
+		if !ok {
+			httpx.WriteProblem(w, http.StatusBadRequest, "unknown pack round")
+			return
+		}
+		req.QuestionID = qid
+		roundFocus = focus
+	} else {
+		// A pack id without a valid round (or vice-versa) is a client bug.
+		req.PackID, req.RoundID = "", ""
+	}
+
 	q, ok := s.corpus.Get(req.QuestionID)
 	if !ok {
 		httpx.WriteProblem(w, http.StatusBadRequest, "unknown question_id")
 		return
+	}
+	if roundFocus != "" {
+		req.Config = withRoundFocus(req.Config, roundFocus)
 	}
 	// Free-tier daily limit (cost control). Admins are unlimited.
 	if s.dailyLimit > 0 && !s.isAdmin(r.Context(), uid) {
@@ -115,12 +148,28 @@ func (s *Service) Create(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
-	sess, err := s.store.CreateSession(r.Context(), uid, q.ID, q.Modality, q.Track, req.Config)
+	sess, err := s.store.CreateSession(r.Context(), uid, q.ID, q.Modality, q.Track, req.PackID, req.RoundID, req.Config)
 	if err != nil {
 		httpx.WriteProblem(w, http.StatusInternalServerError, "create failed")
 		return
 	}
 	httpx.WriteJSON(w, http.StatusOK, sess)
+}
+
+// withRoundFocus merges a `round_focus` string into the session config JSON so
+// the live director can specialize the interview for a pack round.
+func withRoundFocus(cfg json.RawMessage, focus string) json.RawMessage {
+	m := map[string]json.RawMessage{}
+	if len(cfg) > 0 {
+		_ = json.Unmarshal(cfg, &m)
+	}
+	b, _ := json.Marshal(focus)
+	m["round_focus"] = b
+	out, err := json.Marshal(m)
+	if err != nil {
+		return cfg
+	}
+	return out
 }
 
 func (s *Service) Get(w http.ResponseWriter, r *http.Request) {

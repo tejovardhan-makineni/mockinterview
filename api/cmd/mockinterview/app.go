@@ -103,6 +103,9 @@ func (a *App) Routes(r chi.Router) {
 		r.Get("/questions", corpusSvc.List)
 		r.Get("/questions/{id}", corpusSvc.Get)
 
+		// Professions (corpus areas) — drives catalog gating + onboarding picker.
+		r.Get("/professions", corpusSvc.ListProfessions)
+
 		// Interview sessions + scoring + report.
 		r.Get("/sessions", interviewSvc.List)
 		r.Post("/sessions", interviewSvc.Create)
