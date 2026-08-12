@@ -6,7 +6,7 @@
 // Reconnect. The fast-changing mic level is read from a ref via rAF so it never
 // re-renders React; the coarse states are props.
 import { useEffect, useRef, type MutableRefObject } from "react";
-import type { ConnState } from "@/lib/live";
+import type { ConnState, SectionInfo } from "@/lib/live";
 import { useT } from "@/lib/i18n";
 import { IconMic, IconMicOff, IconWave, IconThinking, IconSpeaker, IconConnected, IconReconnect, IconDisconnected } from "@/components/icons";
 
@@ -15,12 +15,13 @@ export type AiState = "idle" | "listening" | "thinking" | "speaking";
 const BARS = 7;
 
 export function LiveHUD({
-  micRef, aiState, conn, mode,
+  micRef, aiState, conn, mode, section,
 }: {
   micRef: MutableRefObject<number>;
   aiState: AiState;
   conn: ConnState;
   mode: "voice" | "text" | "local";
+  section?: SectionInfo | null;
 }) {
   const barRefs = useRef<(HTMLSpanElement | null)[]>([]);
   const labelRef = useRef<HTMLSpanElement>(null);
@@ -82,6 +83,41 @@ export function LiveHUD({
         <span className={`truncate text-[11px] font-medium ${ai.color}`}>{t(ai.label)}</span>
         {aiState === "thinking" && <ThinkingDots />}
       </div>
+
+      {/* Section progress — where the candidate is in the interview */}
+      {section && section.total > 0 && (
+        <>
+          <span className="h-px w-full bg-[var(--color-line)]" />
+          <div className="flex flex-col gap-1.5">
+            <div
+              className="flex min-w-0 items-baseline gap-1.5 text-[11px] font-medium"
+              aria-live="polite"
+            >
+              <span className="whitespace-nowrap text-[var(--color-muted)]">
+                {t("Section")} {section.index + 1} {t("of")} {section.total}
+              </span>
+              {section.title && (
+                <span className="truncate text-[var(--color-ink)]" title={section.title}>
+                  · {section.title}
+                </span>
+              )}
+            </div>
+            {/* Segmented bar: filled up to and including the current section */}
+            <div
+              className="flex items-center gap-1"
+              role="img"
+              aria-label={`${t("Section")} ${section.index + 1} ${t("of")} ${section.total}`}
+            >
+              {Array.from({ length: section.total }).map((_, i) => (
+                <span
+                  key={i}
+                  className={`h-1 flex-1 rounded-full ${i <= section.index ? "bg-[var(--color-accent)]" : "bg-[var(--color-line)]"}`}
+                />
+              ))}
+            </div>
+          </div>
+        </>
+      )}
     </div>
   );
 }

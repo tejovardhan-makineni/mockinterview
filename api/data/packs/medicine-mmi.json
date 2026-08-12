@@ -1,0 +1,54 @@
+{
+  "id": "medicine-mmi",
+  "name": "Medicine MMI + Clinical Reasoning",
+  "company": "",
+  "blurb": "A residency-style Multiple Mini Interview: short, focused stations on communication, ethics, and teamwork, plus a clinical-reasoning case.",
+  "areas": ["medicine"],
+  "track": "professional",
+  "rounds": [
+    {
+      "id": "station-communication",
+      "title": "MMI Station: Breaking Bad News",
+      "kind": "mmi",
+      "domain": "medical_residency",
+      "modality": "conversational",
+      "difficulty": "mid",
+      "minutes": 10,
+      "question_id": "mmi-communication-bad-news",
+      "focus": "Communication station: empathy, clarity, and checking understanding. Assess how they deliver difficult information and respond to emotion."
+    },
+    {
+      "id": "station-ethics",
+      "title": "MMI Station: Ethical Dilemma",
+      "kind": "mmi",
+      "domain": "medical_residency",
+      "modality": "conversational",
+      "difficulty": "entry",
+      "minutes": 8,
+      "question_id": "mmi-ethical-dilemma",
+      "focus": "Ethics station: identify the competing principles, reason through options, and commit to a defensible course of action."
+    },
+    {
+      "id": "station-teamwork",
+      "title": "MMI Station: Teamwork",
+      "kind": "mmi",
+      "domain": "medical_residency",
+      "modality": "conversational",
+      "difficulty": "entry",
+      "minutes": 8,
+      "question_id": "mmi-teamwork",
+      "focus": "Teamwork station: collaboration, handling conflict with colleagues, and prioritizing patient care."
+    },
+    {
+      "id": "clinical-reasoning",
+      "title": "Clinical Reasoning: Chest Pain",
+      "kind": "clinical",
+      "domain": "clinical_reasoning",
+      "modality": "conversational",
+      "difficulty": "mid",
+      "minutes": 12,
+      "question_id": "clinical-reasoning-chest-pain",
+      "focus": "Structured differential, targeted history and workup, and a safe disposition. Probe red-flag reasoning."
+    }
+  ]
+}

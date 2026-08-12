@@ -24,6 +24,7 @@ import (
 	"github.com/tejo/mockinterview-api/internal/corpus"
 	"github.com/tejo/mockinterview-api/internal/httpx"
 	"github.com/tejo/mockinterview-api/internal/llm"
+	"github.com/tejo/mockinterview-api/internal/pack"
 	"github.com/tejo/mockinterview-api/internal/store"
 )
 
@@ -82,9 +83,14 @@ func main() {
 		slog.Error("corpus", "err", err)
 		os.Exit(1)
 	}
-	slog.Info("startup", "mode", cfg.Mode, "llm_provider", info.Provider, "llm_model", info.Model, "llm_stub", ai.Stubbed(), "model_live", cfg.ModelLive, "questions", cat.Count())
+	packs, err := pack.Load(cfg.PacksDir, cat)
+	if err != nil {
+		slog.Error("packs", "err", err)
+		os.Exit(1)
+	}
+	slog.Info("startup", "mode", cfg.Mode, "llm_provider", info.Provider, "llm_model", info.Model, "llm_stub", ai.Stubbed(), "model_live", cfg.ModelLive, "questions", cat.Count(), "packs", packs.Count())
 
-	app := &App{Cfg: cfg, Store: st, LLM: ai, Corpus: cat}
+	app := &App{Cfg: cfg, Store: st, LLM: ai, Corpus: cat, Packs: packs}
 
 	r := chi.NewRouter()
 	r.Use(middleware.RequestID)

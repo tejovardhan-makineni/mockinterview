@@ -19,6 +19,8 @@ export interface Session {
   status: "created" | "active" | "scoring" | "complete" | "abandoned";
   phase: Phase;
   config: InterviewConfig;
+  pack_id?: string;        // set when this session is a pack round
+  pack_round_id?: string;
 }
 
 export interface SessionHistoryItem {
@@ -31,6 +33,8 @@ export interface SessionHistoryItem {
   created_at: string;
   overall?: number;
   scored?: boolean;
+  pack_id?: string;        // set when this interview belongs to a company pack
+  pack_round_id?: string;
 }
 
 export interface TranscriptTurn {
@@ -78,7 +82,9 @@ export interface Report {
 }
 
 export interface InterviewSlice {
-  createSession(questionId: string, cfg: InterviewConfig): Promise<Session>;
+  // `pack` carries company-pack context (set by packs.startRound). When present
+  // the server resolves the round's question, so questionId is sent empty.
+  createSession(questionId: string, cfg: InterviewConfig, pack?: { packId: string; roundId: string }): Promise<Session>;
   getSession(id: string): Promise<Session>;
   saveWorkspace(sessionId: string, kind: string, content: string): Promise<void>;
   sendTurn(sessionId: string, role: string, text: string, tsMs: number): Promise<void>;
@@ -95,8 +101,8 @@ export interface InterviewSlice {
 }
 
 export const interviewHttp: InterviewSlice = {
-  createSession(questionId, cfg) {
-    return req<Session>("/api/v1/sessions", { method: "POST", body: JSON.stringify({ question_id: questionId, config: cfg }) });
+  createSession(questionId, cfg, pack) {
+    return req<Session>("/api/v1/sessions", { method: "POST", body: JSON.stringify({ question_id: questionId, config: cfg, pack_id: pack?.packId, round_id: pack?.roundId }) });
   },
   getSession(id) { return req<Session>(`/api/v1/sessions/${id}`); },
   saveWorkspace(sessionId, kind, content) {
@@ -157,11 +163,11 @@ export const MOCK_REPORT: Report = {
 };
 
 export const interviewMock: InterviewSlice = {
-  async createSession(questionId, cfg) {
+  async createSession(questionId, cfg, pack) {
     // Mirror the real backend defaults (status "created", phase "lobby") so UI
     // that branches on status/phase behaves the same in mock and live modes.
     const q = MOCK_QUESTIONS.find((x) => x.id === questionId);
-    return { id: "mock-session", question_id: questionId, modality: q?.modality ?? "system_design", track: q?.track ?? "engineering", status: "created", phase: "lobby", config: cfg };
+    return { id: "mock-session", question_id: questionId, modality: q?.modality ?? "system_design", track: q?.track ?? "engineering", status: "created", phase: "lobby", config: cfg, pack_id: pack?.packId, pack_round_id: pack?.roundId };
   },
   async getSession(id) {
     const cfg = await profileMock.getConfig();

@@ -87,6 +87,93 @@ var domainGuidance = map[string]string{
 	"signals_systems":   engineeringGuidance,
 }
 
+// Section is one phase of the sectioned interview. The interview runs as ONE
+// continuous voice session, but the interviewer's "brain" specializes per
+// section: the relay drives progression on time and the SystemPrompt lays out
+// the whole plan so the model knows the arc and how to behave in each part.
+type Section struct {
+	ID       string
+	Title    string
+	Kind     string
+	Guidance string
+}
+
+// sectionTitle is the human-facing title shown per section kind (surfaced to the
+// browser as the `section` event title).
+var sectionTitle = map[string]string{
+	"intro":      "Intro & warm-up",
+	"resume":     "Resume deep-dive",
+	"coding":     "Coding",
+	"lld":        "Low-level design",
+	"design":     "System design",
+	"behavioral": "Behavioral",
+	"clinical":   "Clinical reasoning",
+	"case":       "Case",
+	"core":       "Main question",
+	"wrap":       "Wrap-up",
+}
+
+// sectionGuidance is the specialized interviewer brain per section KIND. Each
+// entry tells the interviewer how to behave while that section is active. The
+// relay injects the active section's guidance as a live directive on transition,
+// and SystemPrompt lists them all so the model knows the arc up front.
+var sectionGuidance = map[string]string{
+	"intro":      "Open warmly: greet the candidate, say your name, ONE bit of genuine small talk, and let them give a short self-introduction. Keep it light and human — no interview question yet. React naturally to what they say.",
+	"resume":     "Deep-dive ONE project they're genuinely proud of. Probe their INDIVIDUAL contribution ('what was YOUR part, specifically?'), the key decisions they made and why, and the tradeoffs they weighed. Ask 1-2 varied, specific follow-ups drawn from THEIR answer. VARY your questions every run — do not fall back on the same stock resume questions; make each one fit what they actually said. If their answer is thin, evasive, or a joke, ask ONE genuine follow-up to draw out the real story before moving on.",
+	"coding":     "Watch them code. Do NOT jump on every mistake — sometimes wait and see if they catch it themselves (strong signal), sometimes point out a small syntax slip, sometimes just let a minor thing ride. As code appears, ask about time/space complexity and edge cases (empty input, nulls, boundaries, overflow). Follow up on the data structures and approach they chose ('why a heap there?'). When you spot a real bug, probe it with ONE leading question that points at the problem area WITHOUT revealing the fix ('walk me through what this returns for an empty list').",
+	"lld":        "Whenever the candidate introduces a COMPONENT (a class, an interface, a design pattern, a relationship), ask 1-2 targeted follow-ups on THAT component: why that choice, the tradeoffs, how it fails or gets abused, and what the alternatives were. Deep-dive one or two areas properly (SOLID, extensibility — 'how would you add feature X?') rather than skimming everything.",
+	"design":     "Let them drive requirements → estimates → high-level design → data model/API → deep dives. Whenever they introduce a COMPONENT (a queue, cache, database, load balancer, index, replica), ask 1-2 targeted follow-ups on THAT component: why it, the tradeoffs, its failure modes, and the alternatives. Go DEEP on one or two areas (bottlenecks, scaling, consistency, failure) rather than skimming the whole diagram.",
+	"behavioral": "Conversational STAR. Push relentlessly for the candidate's OWN actions ('I', not 'we') and a MEASURABLE result. Decompose multi-part prompts into one question at a time; follow up on vague claims. Keep it flowing like a real conversation.",
+	"clinical":   "Structured clinical reasoning: history → differential (life-threatening causes FIRST) → targeted investigations → management → safety-netting, or MMI-style ethical/communication probing for a station scenario. Do not accept jumping to treatment without a differential; probe the 'why' behind each step.",
+	"case":       "Expect an upfront STRUCTURE/framework before diving in, a clear hypothesis, and QUANTITATIVE reasoning. Provide case data (numbers) when they ask. Push back on hand-waving with 'how would you structure this?' and make them show the math.",
+	"core":       "Run the main question in a domain-appropriate, structured way. Let the candidate drive; probe their reasoning, choices, and tradeoffs one question at a time, and go deep on the highest-signal areas rather than skimming.",
+	"wrap":       "Wind down: ask 'Before we wrap up, do you have any questions for me?' and STOP. WAIT for their reply and answer each question briefly and naturally (silently note the quality of what they ask). Only once they clearly have no more questions, thank them warmly and wish them well, THEN call the end_interview function.",
+}
+
+// coreKind maps a corpus question's domain to the CORE section kind.
+func coreKind(domain string) string {
+	switch domain {
+	case "coding":
+		return "coding"
+	case "low_level_design":
+		return "lld"
+	case "system_design", "ml_system_design":
+		return "design"
+	case "behavioral":
+		return "behavioral"
+	case "clinical_reasoning", "medical_residency":
+		return "clinical"
+	case "prioritization":
+		return "clinical"
+	case "case":
+		return "case"
+	default:
+		return "core"
+	}
+}
+
+// SectionPlan builds the ordered interview plan: intro → (resume if hasResume) →
+// CORE (derived from the question's domain) → wrap. Each section carries the
+// specialized guidance for its kind. A non-empty roundFocus (e.g. from a company
+// pack round) is appended as extra emphasis to the CORE section only.
+func SectionPlan(q corpus.Question, hasResume bool, roundFocus string) []Section {
+	mk := func(id, kind string) Section {
+		return Section{ID: id, Title: sectionTitle[kind], Kind: kind, Guidance: sectionGuidance[kind]}
+	}
+	plan := []Section{mk("intro", "intro")}
+	if hasResume {
+		plan = append(plan, mk("resume", "resume"))
+	}
+	ck := coreKind(q.Domain)
+	core := mk("core", ck)
+	if rf := strings.TrimSpace(roundFocus); rf != "" {
+		core.Guidance = strings.TrimSpace(core.Guidance) + " EXTRA EMPHASIS FOR THIS ROUND: " + rf
+	}
+	plan = append(plan, core)
+	plan = append(plan, mk("wrap", "wrap"))
+	return plan
+}
+
 // personaTone combines the persona's directive (owned by the persona catalog)
 // with the selected intensity. Adding a personality is a one-line edit in
 // internal/persona/personalities.go — its Directive flows through here.
@@ -147,7 +234,7 @@ func interviewerRole(q corpus.Question) string {
 // SystemPrompt builds the full interviewer system instruction for a session.
 // resumeSummary and canvasContext may be empty. voice is the selected voice id;
 // the interviewer takes that voice's name as their own (e.g. "Charon").
-func SystemPrompt(q corpus.Question, persona string, intensity int, phase, resumeSummary, canvasContext string, durationMin int, voice, language string) string {
+func SystemPrompt(q corpus.Question, persona string, intensity int, phase, resumeSummary, canvasContext string, durationMin int, voice, language string, sections []Section, roundFocus string) string {
 	name := "your interviewer"
 	if v, ok := personapkg.VoiceByID(voice); ok && v.Label != "" {
 		name = v.Label
@@ -214,6 +301,22 @@ func SystemPrompt(q corpus.Question, persona string, intensity int, phase, resum
 		fmt.Fprintf(&b, "DOMAIN EXPECTATIONS & PACE (specific to this interview type): %s\n", guidance)
 	}
 	fmt.Fprintf(&b, "QUESTION: %s\nPROMPT: %s\n\n", q.Title, q.Prompt)
+
+	// SECTION PLAN — the interview runs as ONE continuous conversation, but you
+	// specialize your behavior per section. Run the sections IN ORDER, transition
+	// naturally (no meta-narration — never announce "moving to the coding
+	// section"), and behave according to the ACTIVE section's guidance. You'll get
+	// a brief live "[SECTION CHANGE → ...]" note as each new section begins.
+	if len(sections) > 0 {
+		b.WriteString("SECTION PLAN — run these IN ORDER as one seamless conversation. You are specialized per section: while a section is active, follow ITS guidance. Transition naturally between them; NEVER announce or narrate the switch. You will receive a brief live '[SECTION CHANGE → ...]' cue as each section begins.\n")
+		for i, s := range sections {
+			fmt.Fprintf(&b, "  %d. %s — %s\n", i+1, s.Title, s.Guidance)
+		}
+		if rf := strings.TrimSpace(roundFocus); rf != "" {
+			fmt.Fprintf(&b, "ROUND FOCUS (extra emphasis throughout the main question): %s\n", rf)
+		}
+		b.WriteString("\n")
+	}
 
 	if resumeSummary != "" {
 		fmt.Fprintf(&b, "CANDIDATE'S RESUME / BACKGROUND:\n%s\n", resumeSummary)

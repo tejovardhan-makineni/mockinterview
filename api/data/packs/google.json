@@ -1,0 +1,60 @@
+{
+  "id": "google",
+  "name": "Google L4/L5 Loop",
+  "company": "Google",
+  "blurb": "Google's software engineering on-site: two algorithm-heavy coding rounds, a system design, a low-level design, and a Googleyness & leadership behavioral.",
+  "areas": ["software_engineering"],
+  "track": "engineering",
+  "rounds": [
+    {
+      "id": "coding-1",
+      "title": "Coding I",
+      "kind": "coding",
+      "domain": "coding",
+      "modality": "coding",
+      "difficulty": "mid",
+      "minutes": 40,
+      "focus": "Data structures and algorithms; clear reasoning out loud and tight complexity analysis."
+    },
+    {
+      "id": "coding-2",
+      "title": "Coding II",
+      "kind": "coding",
+      "domain": "coding",
+      "modality": "coding",
+      "difficulty": "senior",
+      "minutes": 40,
+      "focus": "Harder algorithmic problem; probe optimality and edge cases, and how they test their own code."
+    },
+    {
+      "id": "system-design",
+      "title": "System Design",
+      "kind": "system_design",
+      "domain": "system_design",
+      "modality": "system_design",
+      "difficulty": "senior",
+      "minutes": 45,
+      "focus": "Scalability and data model. When a component appears, ask why it, tradeoffs, and failure modes."
+    },
+    {
+      "id": "lld",
+      "title": "Low-Level Design",
+      "kind": "lld",
+      "domain": "low_level_design",
+      "modality": "system_design",
+      "difficulty": "mid",
+      "minutes": 45,
+      "focus": "Clean class model and API design; extensibility and separation of concerns."
+    },
+    {
+      "id": "behavioral",
+      "title": "Googleyness & Leadership",
+      "kind": "behavioral",
+      "domain": "behavioral",
+      "modality": "conversational",
+      "difficulty": "mid",
+      "minutes": 30,
+      "focus": "Googleyness & leadership: collaboration, dealing with ambiguity, and comfort without clear authority."
+    }
+  ]
+}

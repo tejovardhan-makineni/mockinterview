@@ -3,6 +3,7 @@ import { authMock } from "./auth";
 import { resumeMock } from "./resume";
 import { profileMock, DEFAULT_CONFIG } from "./profile";
 import { interviewMock } from "./interview";
+import { packsMock } from "./packs";
 
 // These exercise the mock feature slices in isolation — each owns its own
 // localStorage keys, so improving one slice can't silently break another.
@@ -81,5 +82,39 @@ describe("interview slice (mock)", () => {
   });
   it("has no live URL in mock mode", () => {
     expect(interviewMock.liveUrl("s1", "t", 30)).toBe("");
+  });
+  it("carries pack context onto the created session", async () => {
+    const sess = await interviewMock.createSession("", DEFAULT_CONFIG, { packId: "amazon", roundId: "coding-1" });
+    expect(sess.pack_id).toBe("amazon");
+    expect(sess.pack_round_id).toBe("coding-1");
+  });
+});
+
+describe("packs slice (mock)", () => {
+  it("lists packs and filters by profession", async () => {
+    const all = await packsMock.listPacks();
+    expect(all.length).toBeGreaterThan(0);
+    expect(all.some((p) => p.id === "amazon")).toBe(true);
+    const eng = await packsMock.listPacks("software_engineering");
+    expect(eng.every((p) => p.areas.includes("software_engineering"))).toBe(true);
+    const consulting = await packsMock.listPacks("consulting");
+    expect(consulting.some((p) => p.id === "amazon")).toBe(false);
+  });
+  it("returns a pack detail with resolvable rounds", async () => {
+    const d = await packsMock.getPack("amazon");
+    expect(d.id).toBe("amazon");
+    expect(d.rounds.length).toBeGreaterThan(0);
+    expect(d.rounds[0].focus.length).toBeGreaterThan(0);
+  });
+  it("reports progress with the first round done and readiness in range", async () => {
+    const pr = await packsMock.packProgress("amazon");
+    expect(pr.rounds[0].status).toBe("done");
+    expect(pr.overall_readiness).toBeGreaterThanOrEqual(0);
+    expect(pr.overall_readiness).toBeLessThanOrEqual(1);
+  });
+  it("starts a round as a session carrying pack context", async () => {
+    const s = await packsMock.startRound("amazon", "coding-1", DEFAULT_CONFIG);
+    expect(s.pack_id).toBe("amazon");
+    expect(s.pack_round_id).toBe("coding-1");
   });
 });

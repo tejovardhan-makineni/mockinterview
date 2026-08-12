@@ -1,0 +1,60 @@
+{
+  "id": "meta",
+  "name": "Meta E5 Loop",
+  "company": "Meta",
+  "blurb": "Meta's software engineering loop: a behavioral round, two coding rounds, a large-scale system design, and a product-flavored design round.",
+  "areas": ["software_engineering"],
+  "track": "engineering",
+  "rounds": [
+    {
+      "id": "behavioral",
+      "title": "Behavioral",
+      "kind": "behavioral",
+      "domain": "behavioral",
+      "modality": "conversational",
+      "difficulty": "mid",
+      "minutes": 30,
+      "focus": "Impact, collaboration, and driving projects to completion. Push for the candidate's individual role and the measurable outcome."
+    },
+    {
+      "id": "coding-1",
+      "title": "Coding I",
+      "kind": "coding",
+      "domain": "coding",
+      "modality": "coding",
+      "difficulty": "mid",
+      "minutes": 40,
+      "focus": "Two-problems-in-45 pace: correct, communicated, and complexity-aware. Probe edge cases."
+    },
+    {
+      "id": "coding-2",
+      "title": "Coding II",
+      "kind": "coding",
+      "domain": "coding",
+      "modality": "coding",
+      "difficulty": "senior",
+      "minutes": 40,
+      "focus": "Optimal solution and a clean second-problem follow-up; watch how they recover from a wrong first approach."
+    },
+    {
+      "id": "system-design",
+      "title": "System Design",
+      "kind": "system_design",
+      "domain": "system_design",
+      "modality": "system_design",
+      "difficulty": "senior",
+      "minutes": 45,
+      "focus": "Product-scale system: data model, hot paths, and tradeoffs. Deep-dive one component's failure modes."
+    },
+    {
+      "id": "ml-design",
+      "title": "ML System Design",
+      "kind": "system_design",
+      "domain": "ml_system_design",
+      "modality": "system_design",
+      "difficulty": "senior",
+      "minutes": 45,
+      "focus": "Ranking/recommendation-style ML system: features, training/serving split, and evaluation. Probe metric choice and feedback loops."
+    }
+  ]
+}

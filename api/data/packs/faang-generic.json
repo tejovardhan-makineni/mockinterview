@@ -1,0 +1,50 @@
+{
+  "id": "faang-generic",
+  "name": "FAANG Generic Loop",
+  "company": "",
+  "blurb": "A company-agnostic big-tech software loop: behavioral, coding, system design, and low-level design. A good default when prepping broadly.",
+  "areas": ["software_engineering"],
+  "track": "engineering",
+  "rounds": [
+    {
+      "id": "behavioral",
+      "title": "Behavioral",
+      "kind": "behavioral",
+      "domain": "behavioral",
+      "modality": "conversational",
+      "difficulty": "mid",
+      "minutes": 30,
+      "focus": "STAR-structured stories; individual contribution, tradeoffs, and outcomes."
+    },
+    {
+      "id": "coding",
+      "title": "Coding",
+      "kind": "coding",
+      "domain": "coding",
+      "modality": "coding",
+      "difficulty": "mid",
+      "minutes": 40,
+      "focus": "Correct, communicated, complexity-aware code; probe edge cases and data-structure choice."
+    },
+    {
+      "id": "system-design",
+      "title": "System Design",
+      "kind": "system_design",
+      "domain": "system_design",
+      "modality": "system_design",
+      "difficulty": "senior",
+      "minutes": 45,
+      "focus": "Requirements, data model, scale, and tradeoffs. Deep-dive one component."
+    },
+    {
+      "id": "lld",
+      "title": "Low-Level Design",
+      "kind": "lld",
+      "domain": "low_level_design",
+      "modality": "system_design",
+      "difficulty": "mid",
+      "minutes": 45,
+      "focus": "Class model, responsibilities, and extensibility; clean API boundaries."
+    }
+  ]
+}

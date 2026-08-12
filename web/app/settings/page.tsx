@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { api } from "@/lib/api";
 import type { Face, InterviewConfig, Personality, PersonalityOption, Profile, Voice } from "@/lib/types";
+import type { Profession } from "@/lib/features/profile";
 import { Badge, Button, Field, Input, Panel } from "@/components/ui";
 import { AppShell } from "@/components/AppShell";
 import { Avatar3D, type AvatarDrive } from "@/components/studio/Avatar3D";
@@ -26,6 +27,7 @@ export default function SettingsPage() {
   const [voices, setVoices] = useState<Voice[]>([]);
   const [faces, setFaces] = useState<Face[]>([]);
   const [personas, setPersonas] = useState<PersonalityOption[]>([]);
+  const [professions, setProfessions] = useState<Profession[]>([]);
   const [saved, setSaved] = useState("");
   const [confirmDelete, setConfirmDelete] = useState(false);
   const pv = useRef<AvatarDrive>({ speaking: false, amplitude: 0, mood: "neutral" });
@@ -41,8 +43,8 @@ export default function SettingsPage() {
     (async () => {
       const u = await api.me();
       if (!u) { router.replace("/login"); return; }
-      const [p, c, v, f, ps] = await Promise.all([api.getProfile(), api.getConfig(), api.listVoices(), api.listFaces(), api.listPersonalities()]);
-      setProfile(p || {}); setCfg(c); setVoices(v); setFaces(f); setPersonas(ps);
+      const [p, c, v, f, ps, prof] = await Promise.all([api.getProfile(), api.getConfig(), api.listVoices(), api.listFaces(), api.listPersonalities(), api.listProfessions()]);
+      setProfile(p || {}); setCfg(c); setVoices(v); setFaces(f); setPersonas(ps); setProfessions(prof);
     })();
   }, [router]);
 
@@ -59,6 +61,12 @@ export default function SettingsPage() {
   }, [cfg.voice_id, cfg.face_id, cfg.personality, cfg.intensity, voices.length]);
 
   async function saveProfile() { await api.saveProfile(profile); flash(t("Profile saved")); }
+  const toggleProfession = (key: string) =>
+    setProfile((cur) => {
+      const set = cur.professions ?? [];
+      const next = set.includes(key) ? set.filter((k) => k !== key) : [...set, key];
+      return { ...cur, professions: next };
+    });
   async function saveCfg() { await api.saveConfig(cfg); flash(t("Interviewer saved")); }
   function flash(m: string) { setSaved(m); setTimeout(() => setSaved(""), 1800); }
 
@@ -99,6 +107,30 @@ export default function SettingsPage() {
           <Field label={t("Years of experience")}><Input type="number" min={0} value={profile.years_experience ?? ""} onChange={(e) => setProfile({ ...profile, years_experience: Number(e.target.value) })} /></Field>
         </div>
         <Button className="mt-5" onClick={saveProfile}>{t("Save profile")}</Button>
+      </Panel>
+
+      {/* Professions — gates the interview catalog */}
+      <Panel className="mt-4 p-6">
+        <h2 className="text-lg font-semibold">{t("Professions")}</h2>
+        <p className="mt-1 text-sm text-[var(--color-muted)]">{t("What you interview for. Your catalog only ever shows interviews for these — pick at least one.")}</p>
+        <div className="mt-5 flex flex-wrap gap-2">
+          {professions.map((p) => {
+            const on = (profile.professions ?? []).includes(p.key);
+            return (
+              <button
+                key={p.key}
+                type="button"
+                aria-pressed={on}
+                onClick={() => toggleProfession(p.key)}
+                className={`inline-flex items-center gap-1.5 rounded-full border px-3.5 py-1.5 text-sm transition ${on ? "border-[var(--color-accent)] bg-[var(--color-panel-2)] text-[var(--color-ink)]" : "border-[var(--color-line)] text-[var(--color-muted)] hover:bg-[var(--color-panel-2)]"}`}
+              >
+                <span aria-hidden className={on ? "text-[var(--color-accent)]" : "text-transparent"}>✓</span>
+                {p.label}
+              </button>
+            );
+          })}
+        </div>
+        <Button className="mt-5" onClick={saveProfile} disabled={(profile.professions ?? []).length === 0}>{t("Save professions")}</Button>
       </Panel>
 
       {/* Interviewer */}

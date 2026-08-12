@@ -111,6 +111,42 @@ func TestWriteErrorPropagates(t *testing.T) {
 	}
 }
 
+// TestSectionSchedule checks the time-driven section progression: one transition
+// per section after the first, monotonic non-decreasing, intro gets the front of
+// the interview and wrap the tail, and short interviews still yield a sane plan.
+func TestSectionSchedule(t *testing.T) {
+	// intro, resume, core, wrap over 30 min → 3 transitions.
+	got := sectionSchedule(30*time.Minute, 4)
+	if len(got) != 3 {
+		t.Fatalf("len = %d, want 3", len(got))
+	}
+	for i := 1; i < len(got); i++ {
+		if got[i] < got[i-1] {
+			t.Errorf("not monotonic at %d: %v", i, got)
+		}
+	}
+	if got[0] != 3*time.Minute+30*time.Second {
+		t.Errorf("intro end = %v, want 3m30s", got[0])
+	}
+	if last, want := got[len(got)-1], 30*time.Minute-(2*time.Minute+30*time.Second); last != want {
+		t.Errorf("wrap start = %v, want %v", last, want)
+	}
+	// Degenerate: fewer than 2 sections → no transitions.
+	if s := sectionSchedule(30*time.Minute, 1); s != nil {
+		t.Errorf("n=1 schedule = %v, want nil", s)
+	}
+	// Very short interview stays monotonic and non-negative.
+	short := sectionSchedule(2*time.Minute, 4)
+	for i, at := range short {
+		if at < 0 {
+			t.Errorf("short[%d] negative: %v", i, at)
+		}
+		if i > 0 && at < short[i-1] {
+			t.Errorf("short not monotonic at %d: %v", i, short)
+		}
+	}
+}
+
 // TestOriginChecker guards SEC-6: only the configured web origin(s), same-origin,
 // or header-less (non-browser) requests may open the socket.
 func TestOriginChecker(t *testing.T) {
