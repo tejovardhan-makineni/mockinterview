@@ -10,6 +10,7 @@ import (
 	"github.com/tejo/mockinterview-api/internal/auth"
 	"github.com/tejo/mockinterview-api/internal/config"
 	"github.com/tejo/mockinterview-api/internal/corpus"
+	"github.com/tejo/mockinterview-api/internal/feedback"
 	"github.com/tejo/mockinterview-api/internal/httpx"
 	"github.com/tejo/mockinterview-api/internal/i18n"
 	"github.com/tejo/mockinterview-api/internal/interview"
@@ -64,6 +65,7 @@ func (a *App) Routes(r chi.Router) {
 	resumeSvc := resume.New(a.Store, a.LLM, a.Cfg.LLMModel)
 	profileSvc := profile.New(a.Store, a.Cfg.GeminiAPIKey, a.Cfg.ModelTTS)
 	corpusSvc := corpus.NewService(a.Corpus)
+	feedbackSvc := feedback.New(a.Store, a.Cfg.AdminEmails)
 	i18nSvc := i18n.New(a.LLM, a.Cfg.LLMModel)
 	scorer := scoring.New(a.LLM, a.Cfg.LLMModel)
 	interviewSvc := interview.New(a.Store, a.Corpus, scorer, a.Cfg.AdminEmails, a.Cfg.FreeDailyLimit)
@@ -114,6 +116,11 @@ func (a *App) Routes(r chi.Router) {
 
 		// Professions (corpus areas) — drives catalog gating + onboarding picker.
 		r.Get("/professions", corpusSvc.ListProfessions)
+
+		// User feedback (general or in-interview with debug context). Submit is
+		// rate-limited to curb spam; List is admin-gated inside the handler.
+		r.With(perUser).Post("/feedback", feedbackSvc.Submit)
+		r.Get("/feedback", feedbackSvc.List)
 
 		// Practice packs (company/goal interview loops) + per-user progress.
 		if packSvc != nil {

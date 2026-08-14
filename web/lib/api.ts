@@ -19,16 +19,17 @@ import { catalogHttp, catalogMock, type CatalogSlice } from "./features/catalog"
 import { interviewHttp, interviewMock, type InterviewSlice } from "./features/interview";
 import { packsHttp, packsMock, type PacksSlice } from "./features/packs";
 import { i18nHttp, i18nMock, type I18nSlice } from "./features/i18n";
+import { feedbackHttp, feedbackMock, type FeedbackSlice } from "./features/feedback";
 
 export { getToken } from "./http";
 
 // The full client is the intersection of every feature slice.
-export type Api = AuthSlice & ProfileSlice & ResumeSlice & CatalogSlice & InterviewSlice & PacksSlice & I18nSlice;
+export type Api = AuthSlice & ProfileSlice & ResumeSlice & CatalogSlice & InterviewSlice & PacksSlice & I18nSlice & FeedbackSlice;
 
 const useMock = process.env.NEXT_PUBLIC_MOCK === "1";
 
 export const api: Api = useMock
-  ? { ...authMock, ...profileMock, ...resumeMock, ...catalogMock, ...interviewMock, ...packsMock, ...i18nMock }
-  : { ...authHttp, ...profileHttp, ...resumeHttp, ...catalogHttp, ...interviewHttp, ...packsHttp, ...i18nHttp };
+  ? { ...authMock, ...profileMock, ...resumeMock, ...catalogMock, ...interviewMock, ...packsMock, ...i18nMock, ...feedbackMock }
+  : { ...authHttp, ...profileHttp, ...resumeHttp, ...catalogHttp, ...interviewHttp, ...packsHttp, ...i18nHttp, ...feedbackHttp };
 
 export const IS_MOCK = useMock;
