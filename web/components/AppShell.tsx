@@ -10,6 +10,7 @@ import { useRouter } from "next/navigation";
 import { api } from "@/lib/api";
 import { ThemeToggle } from "./ThemeToggle";
 import { LanguageSelect } from "./LanguageSelect";
+import { FeedbackWidget } from "./FeedbackWidget";
 import { useT } from "@/lib/i18n";
 import {
   IconDashboard, IconInterview, IconPacks, IconResume, IconResults, IconSettings, IconSignOut, LogoM,
@@ -98,6 +99,8 @@ export function AppShell({ active, children }: { active: NavKey; children: React
           <span className="text-xs font-medium text-[var(--color-muted)]">{t("Theme")}</span>
           <ThemeToggle />
         </div>
+        {/* Feedback — general feedback / bug report (captures the current page). */}
+        <FeedbackWidget variant="nav" />
         {/* Account email */}
         <div className="min-w-0 px-1">
           <div className="truncate text-xs text-[var(--color-muted)]" title={email || "Account"}>{email || "Account"}</div>

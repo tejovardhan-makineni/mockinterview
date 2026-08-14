@@ -27,6 +27,10 @@ type Datastore interface {
 	GetConfig(ctx context.Context, userID string) (InterviewConfig, error)
 	SaveConfig(ctx context.Context, userID string, c InterviewConfig) error
 	// resumes
+	// feedback
+	SaveFeedback(ctx context.Context, userID, kind, message string, rating int, contextJSON json.RawMessage) (string, error)
+	ListFeedback(ctx context.Context, limit int) ([]Feedback, error)
+	// resume
 	SaveResume(ctx context.Context, userID, filename, parsedText string, parsedJSON json.RawMessage) (Resume, error)
 	LatestResume(ctx context.Context, userID string) (Resume, error)
 	SaveResumeReview(ctx context.Context, userID, resumeID, provider, model string, result json.RawMessage) (string, error)

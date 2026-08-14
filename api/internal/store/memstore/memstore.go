@@ -47,6 +47,7 @@ type Mem struct {
 	resumes  map[string][]store.Resume // userID -> resumes (append order)
 	sessions map[string]*sessionRec    // sessionID -> record
 	reports  map[string]*reportRec     // sessionID -> report
+	feedback []store.Feedback          // append order (newest last)
 }
 
 // New returns an empty in-memory store.
@@ -60,6 +61,39 @@ func New() *Mem {
 		sessions: map[string]*sessionRec{},
 		reports:  map[string]*reportRec{},
 	}
+}
+
+// ---- feedback ----
+
+func (m *Mem) SaveFeedback(_ context.Context, userID, kind, message string, rating int, contextJSON json.RawMessage) (string, error) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	if len(contextJSON) == 0 {
+		contextJSON = json.RawMessage(`{}`)
+	}
+	id := store.NewID()
+	email := ""
+	if u, ok := m.users[userID]; ok {
+		email = u.Email
+	}
+	m.feedback = append(m.feedback, store.Feedback{
+		ID: id, UserID: userID, Email: email, Kind: kind, Message: message,
+		Rating: rating, Context: contextJSON, CreatedAt: time.Now().UTC().Format("2006-01-02T15:04:05"),
+	})
+	return id, nil
+}
+
+func (m *Mem) ListFeedback(_ context.Context, limit int) ([]store.Feedback, error) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	if limit <= 0 || limit > 500 {
+		limit = 200
+	}
+	out := make([]store.Feedback, 0, len(m.feedback))
+	for i := len(m.feedback) - 1; i >= 0 && len(out) < limit; i-- { // newest first
+		out = append(out, m.feedback[i])
+	}
+	return out, nil
 }
 
 // ---- users ----

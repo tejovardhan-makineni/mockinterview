@@ -12,6 +12,7 @@ import { Webcam } from "@/components/studio/Webcam";
 import { LiveHUD, ConnChip, type AiState } from "@/components/studio/LiveHUD";
 import { Button } from "@/components/ui";
 import { LanguageSelect } from "@/components/LanguageSelect";
+import { FeedbackWidget } from "@/components/FeedbackWidget";
 import { useT } from "@/lib/i18n";
 
 function StudioInner() {
@@ -194,6 +195,24 @@ function StudioInner() {
         </div>
         <div className="flex items-center gap-3">
           <LanguageSelect variant="header" />
+          <FeedbackWidget
+            variant="studio"
+            getContext={() => ({
+              session_id: session?.id,
+              question_id: session?.question_id,
+              modality: session?.modality,
+              pack_id: session?.pack_id,
+              pack_round_id: session?.pack_round_id,
+              config: session?.config,
+              section: section ?? live.current?.currentSectionInfo() ?? null,
+              connection: conn,
+              mode,
+              ai_state: aiState,
+              remaining_ms: remainingMs,
+              status,
+              transcript_tail: captions.slice(-12).map((c) => ({ role: c.role, text: c.text })),
+            })}
+          />
           <ConnChip conn={conn} onReconnect={() => { setConn("reconnecting"); live.current?.reconnect(); }} />
           {remainingMs !== null && (
             <span className={`rounded-full border px-3 py-1 font-mono text-sm ${remainingMs < 120000 ? "border-[var(--color-bad)] text-[var(--color-bad)]" : "border-[var(--color-line)] text-[var(--color-muted)]"}`}>
