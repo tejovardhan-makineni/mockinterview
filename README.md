@@ -7,8 +7,9 @@ feedback, and contribute new interview formats. The hosted application is at
 **The redesigned public beta is live.** The API and website were promoted on
 September 10, 2026. Production signup, verification, a real AI text interview,
 saved evidence/report, history, feedback and quota checks passed. See
-[release validation](docs/RELEASE-VALIDATION-2026-09-09.md) for exact deployed
-versions, completed checks and remaining limits.
+[initial interview acceptance](docs/RELEASE-VALIDATION-2026-09-09.md) and the
+[policy/privacy release record](docs/RELEASE-VALIDATION-2026-09-10.md) for exact
+deployed versions, completed checks and remaining limits.
 
 Choose a profession, format, target level and duration. Optional controls adjust
 challenge, interview style and simulation versus coaching. A device check leads
@@ -99,8 +100,8 @@ fails, the report offers a retry for that saved attempt. An invalid assessment
 is rejected rather than replaced with invented scores, and a retry is not a
 guarantee of success.
 
-The **policy-control update in this source is awaiting deployment verification**.
-It adds an 18+ assertion, acceptance of the current terms and acknowledgment of
+The **policy and privacy controls are deployed**, as recorded in the
+[September 10 validation](docs/RELEASE-VALIDATION-2026-09-10.md). They require an 18+ assertion, acceptance of the current terms and acknowledgment of
 the privacy notice before hosted AI use. Existing users keep login, recovery,
 history, export and deletion access while reviewing the update. No birth date or
 identity document is collected by this acknowledgment flow.
