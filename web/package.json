@@ -16,8 +16,8 @@
     "@monaco-editor/react": "^4.7.0",
     "monaco-editor": "0.56.0",
     "next": "16.3.4",
-    "react": "19.2.4",
-    "react-dom": "19.2.4"
+    "react": "19.2.8",
+    "react-dom": "19.2.8"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
