@@ -1,0 +1,10 @@
+.git
+.env
+*.env
+deploy
+web/node_modules
+web/.next
+web/out
+api/bin
+scratch
+.firebase

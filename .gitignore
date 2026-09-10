@@ -24,3 +24,7 @@ npm-debug.log*
 # misc
 *.log
 scratch/
+
+# Local Python/build tooling
+__pycache__/
+*.pyc

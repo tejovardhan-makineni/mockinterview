@@ -1,0 +1,40 @@
+name: Interview format or scenario
+description: Propose a realistic task, reusable format or rubric improvement.
+title: "[Content] "
+body:
+  - type: textarea
+    id: task
+    attributes:
+      label: Candidate task and interviewer role
+      description: Describe the profession, target level, time budget and what the candidate actually does.
+    validations:
+      required: true
+  - type: dropdown
+    id: kind
+    attributes:
+      label: Contribution type
+      options:
+        - Scenario in an existing format
+        - Reusable interaction format
+        - Self-guided drill
+        - Rubric or realism review
+        - New workspace capability
+  - type: textarea
+    id: interaction
+    attributes:
+      label: Realistic interaction and evidence
+      description: What facts are revealed when? Which follow-ups and observable skills matter? Which tools are permitted?
+  - type: textarea
+    id: provenance
+    attributes:
+      label: Provenance and review
+      description: Identify original/licensed material, AI assistance and relevant reviewer experience. Do not paste proprietary questions or private candidate data.
+    validations:
+      required: true
+  - type: checkboxes
+    id: preview
+    attributes:
+      label: Preview scope
+      options:
+        - label: I understand that a passing schema check does not establish realism or score calibration.
+          required: true

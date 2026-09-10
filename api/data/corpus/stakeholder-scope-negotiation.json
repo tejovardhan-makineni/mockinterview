@@ -1,0 +1,159 @@
+{
+  "schema_version": 1,
+  "revision": 1,
+  "format_id": "stakeholder-simulation",
+  "review_status": "preview",
+  "provenance": {
+    "authorship": "Original project scenario, AI-assisted draft. Practitioner review and calibration pending.",
+    "license": "AGPL-3.0-only"
+  },
+  "minutes": 20,
+  "id": "stakeholder-scope-negotiation",
+  "title": "Negotiate a Release Scope",
+  "track": "professional",
+  "domain": "stakeholder_roleplay",
+  "areas": [
+    "product_management",
+    "consulting",
+    "sales"
+  ],
+  "modality": "conversational",
+  "difficulty": "mid",
+  "tags": [
+    "stakeholder-simulation",
+    "practical",
+    "community-preview"
+  ],
+  "prompt": "A client expects three promised features this month, but your team can safely deliver only two. I am the client lead. Open the conversation, understand my priorities, and work toward an honest delivery agreement without promising capacity you do not have.",
+  "blurb": "Negotiate a Release Scope \u2014 original practice scenario, awaiting practitioner review.",
+  "rubric": [
+    {
+      "key": "discovery",
+      "label": "Understand priorities",
+      "description": "Asks which business outcomes matter and what deadlines are genuinely fixed.",
+      "weight": 1,
+      "anchors": {
+        "0": "No demonstrated evidence of this skill.",
+        "2": "Addresses the core point with relevant evidence and a reasonable explanation.",
+        "4": "Gives a precise, well-supported explanation, tests alternatives and states limitations."
+      }
+    },
+    {
+      "key": "honesty",
+      "label": "Accurate commitments",
+      "description": "Makes the capacity constraint explicit without blaming colleagues or inventing promises.",
+      "weight": 1,
+      "anchors": {
+        "0": "No demonstrated evidence of this skill.",
+        "2": "Addresses the core point with relevant evidence and a reasonable explanation.",
+        "4": "Gives a precise, well-supported explanation, tests alternatives and states limitations."
+      }
+    },
+    {
+      "key": "options",
+      "label": "Options and tradeoffs",
+      "description": "Offers concrete sequencing or scope choices tied to customer value.",
+      "weight": 1,
+      "anchors": {
+        "0": "No demonstrated evidence of this skill.",
+        "2": "Addresses the core point with relevant evidence and a reasonable explanation.",
+        "4": "Gives a precise, well-supported explanation, tests alternatives and states limitations."
+      }
+    },
+    {
+      "key": "listening",
+      "label": "Responsive listening",
+      "description": "Responds to the client\u2019s actual concern rather than reciting a negotiation framework.",
+      "weight": 1,
+      "anchors": {
+        "0": "No demonstrated evidence of this skill.",
+        "2": "Addresses the core point with relevant evidence and a reasonable explanation.",
+        "4": "Gives a precise, well-supported explanation, tests alternatives and states limitations."
+      }
+    },
+    {
+      "key": "agreement",
+      "label": "Close the loop",
+      "description": "Confirms deliverables, unresolved questions, owners and next communication.",
+      "weight": 1,
+      "anchors": {
+        "0": "No demonstrated evidence of this skill.",
+        "2": "Addresses the core point with relevant evidence and a reasonable explanation.",
+        "4": "Gives a precise, well-supported explanation, tests alternatives and states limitations."
+      }
+    },
+    {
+      "key": "empathy",
+      "label": "Professional relationship",
+      "description": "Acknowledges the impact without becoming defensive or coercive.",
+      "weight": 1,
+      "anchors": {
+        "0": "No demonstrated evidence of this skill.",
+        "2": "Addresses the core point with relevant evidence and a reasonable explanation.",
+        "4": "Gives a precise, well-supported explanation, tests alternatives and states limitations."
+      }
+    }
+  ],
+  "reference": {
+    "scenario": "A client expects three promised features this month, but your team can safely deliver only two. I am the client lead. Open the conversation, understand my priorities, and work toward an honest delivery agreement without promising capacity you do not have.",
+    "facts": [
+      {
+        "id": "priority",
+        "value": "Feature A is required for a board demonstration. B saves manual work. C is desirable but not time-sensitive.",
+        "reveal_when": "candidate asks about business priorities"
+      },
+      {
+        "id": "deadline",
+        "value": "The board demonstration is in 18 days.",
+        "reveal_when": "candidate asks which deadline is fixed"
+      },
+      {
+        "id": "flexibility",
+        "value": "A limited pilot of B is acceptable if the manual fallback is documented.",
+        "reveal_when": "candidate explores narrower scope for B"
+      }
+    ],
+    "model_points": [
+      "Asks which business outcomes matter and what deadlines are genuinely fixed.",
+      "Makes the capacity constraint explicit without blaming colleagues or inventing promises.",
+      "Offers concrete sequencing or scope choices tied to customer value.",
+      "Responds to the client\u2019s actual concern rather than reciting a negotiation framework.",
+      "Confirms deliverables, unresolved questions, owners and next communication.",
+      "Acknowledges the impact without becoming defensive or coercive."
+    ],
+    "probes": [
+      {
+        "trigger": "candidate promises all three",
+        "question": "What has changed about your team\u2019s capacity?"
+      },
+      {
+        "trigger": "candidate picks features without asking",
+        "question": "How did you decide which outcome matters most to us?"
+      }
+    ],
+    "red_flags": [
+      "Inventing unavailable facts",
+      "Ignoring explicit constraints",
+      "Claiming unperformed verification"
+    ],
+    "follow_ups": [
+      "What additional evidence would change your decision?"
+    ],
+    "exemplar_answer": "Multiple approaches are valid. A strong response establishes the goal, uses the provided facts, tests alternatives, explains tradeoffs, and states uncertainty."
+  },
+  "interviewer_notes": "Play the client lead, not a generic hiring manager. Begin concerned but professional. Share priorities when the candidate investigates them. Do not use hostile pressure. Assess a credible agreement, not a magical resolution.",
+  "learning_drills": [
+    {
+      "id": "repair-one-decision",
+      "title": "Repair one decision",
+      "minutes": 5,
+      "prompt": "Choose one decision in your answer. Rewrite the explanation using one fact, one alternative, and one limitation. This is self-guided practice; no model assessment is performed.",
+      "checklist": [
+        "Identify the decision",
+        "Cite a supplied fact",
+        "Compare an alternative",
+        "State what would change your mind"
+      ]
+    }
+  ]
+}

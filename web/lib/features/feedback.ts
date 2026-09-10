@@ -7,8 +7,13 @@ import { req } from "../http";
 export type FeedbackContext = Record<string, unknown>;
 
 export interface FeedbackPayload {
-  kind: "general" | "interview";
-  message: string;
+  kind:
+    "general" | "interview" | "interviewer" | "product" | "question" | "report";
+  session_id?: string;
+  tags?: string[];
+  include_diagnostics?: boolean;
+  share_transcript?: boolean;
+  message?: string;
   rating?: number; // 0 = unset, else 1..5
   context?: FeedbackContext;
 }
@@ -19,7 +24,10 @@ export interface FeedbackSlice {
 
 export const feedbackHttp: FeedbackSlice = {
   sendFeedback(p) {
-    return req<{ id: string }>("/api/v1/feedback", { method: "POST", body: JSON.stringify(p) });
+    return req<{ id: string }>("/api/v1/feedback", {
+      method: "POST",
+      body: JSON.stringify(p),
+    });
   },
 };
 

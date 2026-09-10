@@ -3,13 +3,14 @@ package live
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"log/slog"
 	"net/http"
 	"net/url"
-	"strconv"
 	"strings"
 	"sync"
+	"sync/atomic"
 	"time"
 	"unicode/utf8"
 
@@ -85,6 +86,8 @@ func (c *wsConn) close() error { return c.conn.Close() }
 // offline. Either way, transcripts are tapped and persisted for scoring.
 // Store is the persistence the relay needs during a live session.
 type Store interface {
+	store.SessionRuntime
+	UserByID(context.Context, string) (store.User, error)
 	GetSession(ctx context.Context, id string) (store.Session, error)
 	UpdateSessionStatus(ctx context.Context, id, status string) error
 	AddTurn(ctx context.Context, sessionID, role, text string, tsMs int64, meta json.RawMessage) error
@@ -93,14 +96,20 @@ type Store interface {
 }
 
 type Relay struct {
-	store       Store
-	corpus      *corpus.Catalog
-	llm         llm.Client
-	apiKey      string
-	liveModel   string
-	reasonModel string
-	upgrader    websocket.Upgrader
-	authFn      func(*http.Request) (string, error)
+	background    context.Context
+	hosted        bool
+	encryptionKey []byte
+	attempt       store.Session
+	owner         string
+	tokenVersion  int
+	store         Store
+	corpus        *corpus.Catalog
+	llm           llm.Client
+	apiKey        string
+	liveModel     string
+	reasonModel   string
+	upgrader      websocket.Upgrader
+	authFn        func(*http.Request) (string, error)
 }
 
 func NewRelay(st Store, cat *corpus.Catalog, ai llm.Client, apiKey, liveModel, reasonModel string, allowedOrigins []string, authFn func(*http.Request) (string, error)) *Relay {
@@ -149,17 +158,22 @@ func originChecker(allowed []string) func(*http.Request) bool {
 // clientMsg is a JSON control frame from the browser. Binary frames are raw
 // PCM16 mic audio (16kHz) and are handled separately.
 type clientMsg struct {
-	Type string `json:"type"` // start | user_text | canvas | phase | end
-	Text string `json:"text"`
+	EventID string `json:"event_id"`
+	Type    string `json:"type"` // start | user_text | canvas | phase | end
+	Text    string `json:"text"`
 }
 
 // serverMsg is a JSON frame to the browser. Binary frames carry PCM16 audio (24kHz).
 type serverMsg struct {
-	Type      string `json:"type"` // say | transcript | phase | section | interrupted | turn_complete | error | ready
-	Role      string `json:"role,omitempty"`
-	Text      string `json:"text,omitempty"`
-	Mode      string `json:"mode,omitempty"`      // "voice" (gemini audio) | "text" (client TTS)
-	Streaming bool   `json:"streaming,omitempty"` // true while a turn is still being transcribed; false = finalized
+	Code       string     `json:"code,omitempty"`
+	Retryable  bool       `json:"retryable"`
+	EventID    string     `json:"event_id,omitempty"`
+	DeadlineAt *time.Time `json:"deadline_at,omitempty"`
+	Type       string     `json:"type"` // say | transcript | phase | section | interrupted | turn_complete | error | ready
+	Role       string     `json:"role,omitempty"`
+	Text       string     `json:"text,omitempty"`
+	Mode       string     `json:"mode,omitempty"`      // "voice" (gemini audio) | "text" (client TTS)
+	Streaming  bool       `json:"streaming,omitempty"` // true while a turn is still being transcribed; false = finalized
 	// section-event fields (Type == "section"): which section is now active.
 	Index int    `json:"index,omitempty"`
 	Total int    `json:"total,omitempty"`
@@ -167,79 +181,166 @@ type serverMsg struct {
 	Kind  string `json:"kind,omitempty"`
 }
 
+func (r *Relay) SetContext(ctx context.Context)     { r.background = ctx }
+func (r *Relay) SetOptions(hosted bool, key []byte) { r.hosted = hosted; r.encryptionKey = key }
 func (r *Relay) Handle(w http.ResponseWriter, req *http.Request) {
 	uid, err := r.authFn(req)
 	if err != nil {
-		http.Error(w, "unauthorized", http.StatusUnauthorized)
+		http.Error(w, "unauthorized", 401)
 		return
 	}
-	sessionID := chi.URLParam(req, "id")
-	sess, err := r.store.GetSession(req.Context(), sessionID)
+	id := chi.URLParam(req, "id")
+	sess, err := r.store.GetSession(req.Context(), id)
 	if err != nil || sess.UserID != uid {
-		http.Error(w, "session not found", http.StatusNotFound)
+		http.Error(w, "session not found", 404)
 		return
 	}
-	q, ok := r.corpus.Get(sess.QuestionID)
-	if !ok {
-		http.Error(w, "question not found", http.StatusNotFound)
+	user, err := r.store.UserByID(req.Context(), uid)
+	if err != nil || r.hosted && !user.EmailVerified {
+		http.Error(w, "verified account required", 403)
 		return
 	}
-
+	owner := store.NewID()
+	sess, err = r.store.AcquireLive(req.Context(), id, owner)
+	if err != nil {
+		http.Error(w, "interview is closed or connected elsewhere", 409)
+		return
+	}
+	defer func() {
+		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		defer cancel()
+		_ = r.store.ReleaseLive(ctx, id, owner)
+	}()
 	conn, err := r.upgrader.Upgrade(w, req, nil)
 	if err != nil {
 		return
 	}
 	defer conn.Close()
-	// Bound a single inbound frame (mic PCM chunk or JSON control) so a client
-	// can't stream an unbounded message up. 1 MB is far above any real frame.
 	conn.SetReadLimit(1 << 20)
-
-	personaID, intensity, voice, language, roundFocus := parseConfig(sess.Config)
-	resumeSummary := r.resumeSummary(req.Context(), uid)
-	durationMin := 30
-	if v := req.URL.Query().Get("minutes"); v != "" {
-		if n, err := strconv.Atoi(v); err == nil && n > 0 && n < 180 {
-			durationMin = n
+	_ = conn.SetReadDeadline(time.Now().Add(pongWait))
+	conn.SetPongHandler(func(string) error { return conn.SetReadDeadline(time.Now().Add(pongWait)) })
+	wc := &wsConn{conn: conn}
+	local := *r
+	if sess.LiveModel != "" {
+		local.liveModel = sess.LiveModel
+	}
+	local.attempt = sess
+	local.owner = owner
+	local.tokenVersion = user.TokenVersion
+	if sess.Funding == "byok" {
+		sealed, e := r.store.SessionCredential(req.Context(), id)
+		if e != nil {
+			_ = wc.writeServerMsg(serverMsg{Type: "error", Code: "credential_expired", Text: "Your personal key expired. Re-enter it to resume.", Retryable: false})
+			return
+		}
+		key, e := llm.OpenKey(r.encryptionKey, uid, id, sealed)
+		if e != nil {
+			_ = wc.writeServerMsg(serverMsg{Type: "error", Code: "credential_unavailable", Text: "Could not unlock your personal key.", Retryable: false})
+			return
+		}
+		local.llm, e = llm.New(req.Context(), llm.Settings{Provider: llm.Provider(sess.Provider), APIKey: key, Model: sess.Model})
+		if e != nil {
+			_ = wc.writeServerMsg(serverMsg{Type: "error", Code: "provider_invalid", Text: "Provider settings unavailable.", Retryable: false})
+			return
+		}
+		local.reasonModel = sess.Model
+		local.apiKey = ""
+		if sess.Provider == "gemini" {
+			local.apiKey = key
 		}
 	}
-	sections := SectionPlan(q, resumeSummary != "", roundFocus)
-	system := SystemPrompt(q, personaID, intensity, "intro", resumeSummary, "", durationMin, voice, language, sections, roundFocus)
-
-	_ = r.store.UpdateSessionStatus(req.Context(), sessionID, "active")
-
-	if r.llm.Stubbed() || r.apiKey == "" {
-		r.runText(conn, sessionID, q, system)
+	q, ok := r.corpus.Get(sess.QuestionID)
+	if len(sess.QuestionSnapshot) > 2 {
+		if json.Unmarshal(sess.QuestionSnapshot, &q) == nil {
+			ok = true
+		}
+	}
+	if !ok {
+		_ = wc.writeServerMsg(serverMsg{Type: "error", Code: "question_unavailable", Text: "Interview content unavailable.", Retryable: false})
 		return
 	}
-	r.runGemini(conn, sessionID, q, system, voice, sections, durationMin)
+	cfg := map[string]any{}
+	_ = json.Unmarshal(sess.Config, &cfg)
+	cfg["minutes"] = sess.DurationMinutes
+	raw, _ := json.Marshal(cfg)
+	q = corpus.ApplySessionConfig(q, raw)
+	pid, intensity, voice, language, focus := parseConfig(sess.Config)
+	resume := ""
+	if enabled, exists := cfg["include_resume"]; !exists || enabled == true {
+		resume = local.resumeSummary(req.Context(), uid)
+	}
+	sections := SectionPlan(q, resume != "", focus)
+	artifact, e := r.store.GetArtifact(req.Context(), id)
+	if e != nil {
+		_ = wc.writeServerMsg(serverMsg{Type: "error", Code: "storage_unavailable", Text: "Saved work could not be loaded. Retry shortly.", Retryable: true})
+		return
+	}
+	system := SystemPrompt(q, pid, intensity, "intro", resume, artifact.Content, sess.DurationMinutes, voice, language, sections, focus)
+	if sess.Mode == "text" || local.llm.Stubbed() || local.apiKey == "" {
+		local.runText(conn, id, q, system)
+		return
+	}
+	local.runGemini(conn, id, q, system, voice, sections, sess.DurationMinutes)
 }
 
 // ---- text director (stub / no key): browser speaks via Web Speech API ----
 
 func (r *Relay) runText(conn *websocket.Conn, sessionID string, q corpus.Question, system string) {
-	ctx := context.Background()
-	start := time.Now()
-	writeJSON(conn, serverMsg{Type: "ready", Mode: "text"})
-
+	ctx, cancel := context.WithDeadline(r.parentContext(), r.deadline())
+	defer cancel()
+	wc := &wsConn{conn: conn}
+	var once sync.Once
+	stop := func() { once.Do(func() { cancel(); _ = conn.Close() }) }
+	defer stop()
+	prior, e := r.store.Transcript(ctx, sessionID)
+	if e != nil {
+		return
+	}
 	history := []llm.Message{}
-	say := func(text string) {
+	for _, t := range prior {
+		role := "user"
+		if t.Role == "interviewer" {
+			role = "model"
+		}
+		history = append(history, llm.Message{Role: role, Text: t.Text})
+	}
+	// A restored unanswered question must remain unanswered. Reconnects never
+	// create another interviewer turn unless a saved candidate answer needs one.
+	first := ""
+	if len(prior) == 0 || prior[len(prior)-1].Role == "candidate" {
+		call, done := context.WithTimeout(ctx, 20*time.Second)
+		first, e = NextTurn(call, r.llm, r.reasonModel, system, history)
+		done()
+		if e != nil {
+			_ = wc.writeServerMsg(serverMsg{Type: "error", Code: "provider_unavailable", Text: "The interviewer could not start. No new allowance was used.", Retryable: false})
+			return
+		}
+	}
+	r.attempt, e = r.store.ActivateLive(ctx, sessionID, r.owner)
+	if e != nil {
+		return
+	}
+	go r.watch(ctx, conn, wc, stop)
+	if wc.writeServerMsg(serverMsg{Type: "ready", Mode: "text", DeadlineAt: r.attempt.DeadlineAt}) != nil {
+		return
+	}
+	say := func(text string) error {
+		if e := r.record(ctx, "interviewer", text, ""); e != nil {
+			return e
+		}
 		history = append(history, llm.Message{Role: "model", Text: text})
-		_ = r.store.AddTurn(ctx, sessionID, "interviewer", text, time.Since(start).Milliseconds(), nil)
-		writeJSON(conn, serverMsg{Type: "say", Role: "interviewer", Text: text})
+		return wc.writeServerMsg(serverMsg{Type: "say", Role: "interviewer", Text: text})
 	}
-
-	// Opening line.
-	if first, err := NextTurn(ctx, r.llm, r.reasonModel, system, nil); err == nil {
-		say(first)
+	if first != "" && say(first) != nil {
+		return
 	}
-
 	for {
-		mt, data, err := conn.ReadMessage()
-		if err != nil {
+		mt, data, e := conn.ReadMessage()
+		if e != nil {
 			return
 		}
 		if mt != websocket.TextMessage {
-			continue // no audio path in text mode; mic is transcribed client-side
+			continue
 		}
 		var m clientMsg
 		if json.Unmarshal(data, &m) != nil {
@@ -247,23 +348,34 @@ func (r *Relay) runText(conn *websocket.Conn, sessionID string, q corpus.Questio
 		}
 		switch m.Type {
 		case "user_text":
-			if m.Text == "" {
+			if strings.TrimSpace(m.Text) == "" || len(m.Text) > 24000 || len(m.EventID) > 128 {
 				continue
+			}
+			if e = r.record(ctx, "candidate", m.Text, m.EventID); errors.Is(e, store.ErrDuplicateEvent) {
+				_ = wc.writeServerMsg(serverMsg{Type: "ack", EventID: m.EventID})
+				continue
+			} else if e != nil {
+				_ = wc.writeServerMsg(serverMsg{Type: "error", Code: "save_failed", Text: "Your answer could not be saved. Reconnect and retry.", Retryable: true})
+				return
+			}
+			if m.EventID != "" {
+				_ = wc.writeServerMsg(serverMsg{Type: "ack", EventID: m.EventID})
 			}
 			history = append(history, llm.Message{Role: "user", Text: m.Text})
-			_ = r.store.AddTurn(ctx, sessionID, "candidate", m.Text, time.Since(start).Milliseconds(), nil)
-			reply, err := NextTurn(ctx, r.llm, r.reasonModel, system, history)
-			if err != nil {
-				writeJSON(conn, serverMsg{Type: "error", Text: "director error"})
-				continue
+			call, done := context.WithTimeout(ctx, 30*time.Second)
+			reply, e := NextTurn(call, r.llm, r.reasonModel, system+r.stageContext(q, wc), history)
+			done()
+			if e != nil {
+				_ = wc.writeServerMsg(serverMsg{Type: "error", Code: "provider_unavailable", Text: "Your answer is saved. Reconnect to continue with the interviewer.", Retryable: true})
+				return
 			}
-			say(reply)
+			if say(reply) != nil {
+				return
+			}
 		case "canvas":
-			// Record the drawing as context for the next director turn.
-			history = append(history, llm.Message{Role: "user", Text: "[my current diagram: " + clipText(m.Text, 1500) + "]"})
-		case "nudge":
-			say("Take your time — whenever you're ready, walk me through your thinking.")
+			history = append(history, llm.Message{Role: "user", Text: "[Workspace context only: " + clipText(m.Text, 12000) + "]"})
 		case "end":
+			_ = wc.writeServerMsg(serverMsg{Type: "saved"})
 			return
 		}
 	}
@@ -272,15 +384,14 @@ func (r *Relay) runText(conn *websocket.Conn, sessionID string, q corpus.Questio
 // ---- Gemini Live (real audio) ----
 
 func (r *Relay) runGemini(conn *websocket.Conn, sessionID string, q corpus.Question, system, voice string, sections []Section, durationMin int) {
-	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Minute)
+	ctx, cancel := context.WithDeadline(r.parentContext(), r.deadline())
 	defer cancel()
 
 	wc := &wsConn{conn: conn}
 
-	client, err := genai.NewClient(ctx, &genai.ClientConfig{APIKey: r.apiKey, Backend: genai.BackendGeminiAPI})
-	if err != nil {
-		slog.Error("live client init failed", "session", sessionID, "err", err)
-		_ = wc.writeServerMsg(serverMsg{Type: "error", Text: "live connect failed"})
+	prior, loadErr := r.store.Transcript(ctx, sessionID)
+	if loadErr != nil {
+		_ = wc.writeServerMsg(serverMsg{Type: "error", Code: "save_unavailable", Text: "Saved conversation temporarily unavailable.", Retryable: true})
 		return
 	}
 	cfg := &genai.LiveConnectConfig{
@@ -319,12 +430,19 @@ func (r *Relay) runGemini(conn *websocket.Conn, sessionID string, q corpus.Quest
 			}},
 		}},
 	}
-	session, err := client.Live.Connect(ctx, r.liveModel, cfg)
+	session, err := connectGemini(ctx, r.apiKey, r.liveModel, cfg)
 	if err != nil {
-		// GO-9/SEC-9: log the raw provider error server-side; return a generic
-		// message so upstream/internal detail never reaches the browser.
-		slog.Error("live model connect failed", "session", sessionID, "model", r.liveModel, "err", err)
-		_ = wc.writeServerMsg(serverMsg{Type: "error", Text: "live model unavailable"})
+		// Provider errors can contain request URLs or credentials; log no raw error.
+		slog.Error("live model connect failed", "session", sessionID, "model", r.liveModel)
+		_ = wc.writeServerMsg(serverMsg{Type: "error", Text: "live model unavailable", Code: "provider_unavailable", Retryable: false})
+		return
+	}
+
+	up := &upstream{session: session}
+	r.attempt, err = r.store.ActivateLive(ctx, sessionID, r.owner)
+	if err != nil {
+		_ = session.Close()
+		_ = wc.writeServerMsg(serverMsg{Type: "error", Code: "start_failed", Text: "Could not confirm interview start.", Retryable: true})
 		return
 	}
 
@@ -337,40 +455,52 @@ func (r *Relay) runGemini(conn *websocket.Conn, sessionID string, q corpus.Quest
 	// hang because session.Receive()/conn.ReadMessage() may not honor ctx, so we
 	// also force-close both so those blocked reads error out immediately.
 	var stopOnce sync.Once
+	var gracefulEnd atomic.Bool
 	stop := func() {
 		stopOnce.Do(func() {
 			cancel()
 			_ = session.Close()
-			_ = wc.close()
+			if !gracefulEnd.Load() {
+				_ = wc.close()
+			}
 		})
 	}
 	defer stop()
+	go r.watch(ctx, conn, wc, stop)
 
-	_ = wc.writeServerMsg(serverMsg{Type: "ready", Mode: "voice"})
+	_ = wc.writeServerMsg(serverMsg{Type: "ready", Mode: "voice", DeadlineAt: r.attempt.DeadlineAt})
 
 	start := time.Now()
+	if r.attempt.StartedAt != nil {
+		start = *r.attempt.StartedAt
+	}
 
-	// GO-2: keep transcript persistence OFF the audio hot path. Finished turns are
-	// pushed onto a buffered channel and written by a dedicated goroutine with a
-	// bounded timeout, so a slow DB write never stalls the interviewer's audio.
-	// The write ctx is independent of the session ctx so an in-flight persist
-	// survives teardown (we don't want to drop the last turn on disconnect).
+	// A bounded ordered writer survives socket teardown. Typed acknowledgements
+	// happen only after the same queue has committed preceding transcript turns.
 	type pendingTurn struct {
-		role, text string
-		tsMs       int64
+		role, text, event string
+		done              chan error
 	}
 	turns := make(chan pendingTurn, 256)
-	persist := func(role, text string, tsMs int64) {
+	var queueMu sync.RWMutex
+	accepting := true
+	enqueue := func(t pendingTurn) error {
+		queueMu.RLock()
+		defer queueMu.RUnlock()
+		if !accepting {
+			return errors.New("transcript writer stopped")
+		}
 		select {
-		case turns <- pendingTurn{role, text, tsMs}:
-		default:
-			// Buffer full (pathological): persist in a throwaway goroutine so the hot
-			// path still never blocks and the turn isn't dropped.
-			go func() {
-				pctx, pcancel := context.WithTimeout(context.Background(), persistBound)
-				defer pcancel()
-				_ = r.store.AddTurn(pctx, sessionID, role, text, tsMs, nil)
-			}()
+		case turns <- t:
+			return nil
+		case <-time.After(5 * time.Second):
+			return errors.New("transcript queue unavailable")
+		}
+	}
+	persist := func(role, text string, _ int64) {
+		if enqueue(pendingTurn{role: role, text: text}) != nil {
+			_ = wc.writeServerMsg(serverMsg{Type: "error", Code: "save_failed", Text: "Transcript could not be saved. Please reconnect.", Retryable: true})
+			stop()
 		}
 	}
 	var persistWg sync.WaitGroup
@@ -378,28 +508,20 @@ func (r *Relay) runGemini(conn *websocket.Conn, sessionID string, q corpus.Quest
 	go func() {
 		defer persistWg.Done()
 		for t := range turns {
-			pctx, pcancel := context.WithTimeout(context.Background(), persistBound)
-			_ = r.store.AddTurn(pctx, sessionID, t.role, t.text, t.tsMs, nil)
-			pcancel()
-		}
-	}()
-
-	// Ping ticker (GO-3): rides the write lock like every other write.
-	go func() {
-		ticker := time.NewTicker(pingPeriod)
-		defer ticker.Stop()
-		for {
-			select {
-			case <-ctx.Done():
-				return
-			case <-ticker.C:
-				if err := wc.writePing(); err != nil {
-					stop()
-					return
-				}
+			e := r.record(context.Background(), t.role, t.text, t.event)
+			if t.done != nil {
+				t.done <- e
+			}
+			if e != nil && !errors.Is(e, store.ErrDuplicateEvent) {
+				_ = wc.writeServerMsg(serverMsg{Type: "error", Code: "save_failed", Text: "Transcript could not be saved. Please reconnect.", Retryable: true})
+				stop()
 			}
 		}
 	}()
+	up.onError = func() {
+		_ = wc.writeServerMsg(serverMsg{Type: "error", Code: "provider_unavailable", Text: "The provider connection ended. Your saved work can be resumed.", Retryable: true})
+		stop()
+	}
 
 	var wg sync.WaitGroup
 	wg.Add(1)
@@ -416,32 +538,37 @@ func (r *Relay) runGemini(conn *websocket.Conn, sessionID string, q corpus.Quest
 	// chunks; we ACCUMULATE per role and emit the full text-so-far (streaming),
 	// then persist ONE transcript turn when the role switches or the turn ends —
 	// so the UI shows one growing message, not one entry per token.
+	var transcriptMu sync.Mutex
+	var interviewerSpeaking, discardInterruptedOutput atomic.Bool
+	var curRole, curText string
+	flushLocked := func() {
+		if curText == "" {
+			return
+		}
+		persist(curRole, curText, time.Since(start).Milliseconds())
+		_ = wc.writeServerMsg(serverMsg{Type: "transcript", Role: curRole, Text: curText, Streaming: false})
+		curRole, curText = "", ""
+	}
+	flush := func() { transcriptMu.Lock(); defer transcriptMu.Unlock(); flushLocked() }
+	accumulate := func(role, chunk string) {
+		transcriptMu.Lock()
+		defer transcriptMu.Unlock()
+		if chunk == "" {
+			return
+		}
+		if curRole != "" && curRole != role {
+			flushLocked()
+		}
+		curRole = role
+		curText += chunk
+		// GO-13: a failed write means the client is gone — tear down instead of
+		// swallowing the error and looping.
+		if err := wc.writeServerMsg(serverMsg{Type: "transcript", Role: role, Text: curText, Streaming: true}); err != nil {
+			stop()
+		}
+	}
 	go func() {
 		defer wg.Done()
-		var curRole, curText string
-		flush := func() {
-			if curText == "" {
-				return
-			}
-			persist(curRole, curText, time.Since(start).Milliseconds())
-			_ = wc.writeServerMsg(serverMsg{Type: "transcript", Role: curRole, Text: curText, Streaming: false})
-			curRole, curText = "", ""
-		}
-		accumulate := func(role, chunk string) {
-			if chunk == "" {
-				return
-			}
-			if curRole != "" && curRole != role {
-				flush()
-			}
-			curRole = role
-			curText += chunk
-			// GO-13: a failed write means the client is gone — tear down instead of
-			// swallowing the error and looping.
-			if err := wc.writeServerMsg(serverMsg{Type: "transcript", Role: role, Text: curText, Streaming: true}); err != nil {
-				stop()
-			}
-		}
 		for {
 			msg, err := session.Receive()
 			if err != nil {
@@ -457,7 +584,7 @@ func (r *Relay) runGemini(conn *websocket.Conn, sessionID string, q corpus.Quest
 				ended := false
 				for _, fc := range msg.ToolCall.FunctionCalls {
 					if fc.Name == "end_interview" {
-						_ = session.SendToolResponse(genai.LiveToolResponseInput{FunctionResponses: []*genai.FunctionResponse{{ID: fc.ID, Name: fc.Name, Response: map[string]any{"ok": true}}}})
+						_ = up.tool(genai.LiveToolResponseInput{FunctionResponses: []*genai.FunctionResponse{{ID: fc.ID, Name: fc.Name, Response: map[string]any{"ok": true}}}})
 						flush()
 						emitEnded()
 						ended = true
@@ -467,7 +594,7 @@ func (r *Relay) runGemini(conn *websocket.Conn, sessionID string, q corpus.Quest
 					// Mark the session complete and tear the whole relay down instead of
 					// continuing the receive loop with a session the interviewer ended.
 					uctx, ucancel := context.WithTimeout(context.Background(), persistBound)
-					_ = r.store.UpdateSessionStatus(uctx, sessionID, "complete")
+					_ = r.store.BeginTimedFinish(uctx, sessionID)
 					ucancel()
 					stop()
 					return
@@ -478,7 +605,14 @@ func (r *Relay) runGemini(conn *websocket.Conn, sessionID string, q corpus.Quest
 			if sc == nil {
 				continue
 			}
-			if sc.ModelTurn != nil {
+			if sc.Interrupted {
+				flush()
+				interviewerSpeaking.Store(false)
+				discardInterruptedOutput.Store(false)
+				_ = wc.writeServerMsg(serverMsg{Type: "interrupted"})
+			}
+			if sc.ModelTurn != nil && !discardInterruptedOutput.Load() {
+				interviewerSpeaking.Store(true)
 				for _, p := range sc.ModelTurn.Parts {
 					if p.InlineData != nil && len(p.InlineData.Data) > 0 {
 						if err := wc.writeBinary(p.InlineData.Data); err != nil {
@@ -488,16 +622,16 @@ func (r *Relay) runGemini(conn *websocket.Conn, sessionID string, q corpus.Quest
 					}
 				}
 			}
-			if sc.OutputTranscription != nil {
+			if sc.OutputTranscription != nil && !discardInterruptedOutput.Load() {
+				interviewerSpeaking.Store(true)
 				accumulate("interviewer", sc.OutputTranscription.Text)
 			}
 			if sc.InputTranscription != nil {
 				accumulate("candidate", sc.InputTranscription.Text)
 			}
-			if sc.Interrupted {
-				_ = wc.writeServerMsg(serverMsg{Type: "interrupted"})
-			}
 			if sc.TurnComplete {
+				interviewerSpeaking.Store(false)
+				discardInterruptedOutput.Store(false)
 				flush()
 				_ = wc.writeServerMsg(serverMsg{Type: "turn_complete"})
 			}
@@ -508,10 +642,9 @@ func (r *Relay) runGemini(conn *websocket.Conn, sessionID string, q corpus.Quest
 	// RESUME (reconnect after a drop, or the candidate returning) — feed the
 	// conversation so far and tell the interviewer to CONTINUE, never restart or
 	// re-greet. Otherwise it's a fresh start.
-	prior, _ := r.store.Transcript(ctx, sessionID)
 	if len(prior) == 0 {
-		_ = session.SendClientContent(genai.LiveClientContentInput{
-			Turns:        []*genai.Content{genai.NewContentFromText("Please begin the interview now: greet the candidate warmly and make a little genuine small talk before any question.", genai.RoleUser)},
+		_ = up.content(genai.LiveClientContentInput{
+			Turns:        []*genai.Content{genai.NewContentFromText("Begin with the authored opening for the active stage. Follow the format timing: a brief introduction only; do not add small talk or resume questions when the format excludes them. Ask one question and wait for the candidate.", genai.RoleUser)},
 			TurnComplete: genai.Ptr(true),
 		})
 	} else {
@@ -525,16 +658,14 @@ func (r *Relay) runGemini(conn *websocket.Conn, sessionID string, q corpus.Quest
 			fmt.Fprintf(&b, "%s: %s\n", role, t.Text)
 		}
 		// Context only (no reply).
-		_ = session.SendClientContent(genai.LiveClientContentInput{
+		_ = up.content(genai.LiveClientContentInput{
 			Turns:        []*genai.Content{genai.NewContentFromText(b.String(), genai.RoleUser)},
 			TurnComplete: genai.Ptr(false),
 		})
-		// Now prompt one continuing turn — acknowledge the network blip and ask
-		// the candidate to repeat, since their last words may have been lost.
-		_ = session.SendClientContent(genai.LiveClientContentInput{
-			Turns:        []*genai.Content{genai.NewContentFromText("(You just reconnected after a brief NETWORK ISSUE — the candidate's last words may have been cut off and not captured.) In ONE short, natural line, acknowledge the hiccup and ask them to repeat their last point — e.g. \"Sorry, I think we had a brief connection issue there — could you repeat that last part?\" Then continue from where you left off. Do NOT greet, do NOT restart, do NOT re-introduce yourself.", genai.RoleUser)},
-			TurnComplete: genai.Ptr(true),
-		})
+		if prior[len(prior)-1].Role == "candidate" {
+			_ = up.content(genai.LiveClientContentInput{Turns: []*genai.Content{genai.NewContentFromText("Continue naturally from the last saved candidate answer. Do not greet, restart, or repeat a question already answered.", genai.RoleUser)}, TurnComplete: genai.Ptr(true)})
+		}
+
 	}
 
 	// SECTION PROGRESSION. Announce the first section (intro) right after the
@@ -544,23 +675,36 @@ func (r *Relay) runGemini(conn *websocket.Conn, sessionID string, q corpus.Quest
 	// directive to Gemini (TurnComplete=false, so it steers WITHOUT forcing a
 	// barge-in) and (b) emits a `section` event to the browser. All browser writes
 	// go through the single wsConn writer; the goroutine exits on ctx cancel.
-	if len(sections) > 0 {
-		_ = wc.writeServerMsg(serverMsg{Type: "section", Index: 0, Total: len(sections), Title: sections[0].Title, Kind: sections[0].Kind})
-	}
 	go func() {
-		sched := sectionSchedule(time.Duration(durationMin)*time.Minute, len(sections))
+		sched := SectionSchedule(time.Duration(durationMin)*time.Minute, sections)
+		stage := 0
 		for i, at := range sched {
+			if time.Since(start) >= at {
+				stage = i + 1
+			}
+		}
+		emit := func(i int) bool {
+			sec := sections[i]
+			if up.content(genai.LiveClientContentInput{Turns: []*genai.Content{genai.NewContentFromText("[ACTIVE STAGE: "+sec.Title+". "+sec.Guidance+"]", genai.RoleUser)}, TurnComplete: genai.Ptr(false)}) != nil {
+				return false
+			}
+			return wc.writeServerMsg(serverMsg{Type: "section", Index: i, Total: len(sections), Title: sec.Title, Kind: sec.Kind}) == nil
+		}
+		if len(sections) > 0 && !emit(stage) {
+			return
+		}
+		for i, at := range sched {
+			if i+1 <= stage {
+				continue
+			}
+			timer := time.NewTimer(max(at-time.Since(start), 0))
 			select {
 			case <-ctx.Done():
+				timer.Stop()
 				return
-			case <-time.After(at - time.Since(start)):
+			case <-timer.C:
 			}
-			sec := sections[i+1] // sched[i] is the transition INTO section i+1
-			_ = session.SendClientContent(genai.LiveClientContentInput{
-				Turns:        []*genai.Content{genai.NewContentFromText("[SECTION CHANGE → "+sec.Title+": "+sec.Guidance+"]", genai.RoleUser)},
-				TurnComplete: genai.Ptr(false),
-			})
-			if err := wc.writeServerMsg(serverMsg{Type: "section", Index: i + 1, Total: len(sections), Title: sec.Title, Kind: sec.Kind}); err != nil {
+			if !emit(i + 1) {
 				return
 			}
 		}
@@ -575,7 +719,7 @@ readLoop:
 		}
 		switch mt {
 		case websocket.BinaryMessage:
-			_ = session.SendRealtimeInput(genai.LiveRealtimeInput{
+			_ = up.audio(genai.LiveRealtimeInput{
 				Audio: &genai.Blob{Data: data, MIMEType: "audio/pcm;rate=16000"},
 			})
 		case websocket.TextMessage:
@@ -588,8 +732,8 @@ readLoop:
 				// Feed the drawing in as CONTEXT ONLY (turnComplete=false) so the
 				// model can reference it later WITHOUT being prompted to respond —
 				// otherwise it talks over the candidate while they draw.
-				_ = session.SendClientContent(genai.LiveClientContentInput{
-					Turns:        []*genai.Content{genai.NewContentFromText("[The candidate's diagram now shows: "+clipText(m.Text, 2000)+"]", genai.RoleUser)},
+				_ = up.content(genai.LiveClientContentInput{
+					Turns:        []*genai.Content{genai.NewContentFromText("[The candidate's diagram now shows: "+clipText(m.Text, 12000)+"]", genai.RoleUser)},
 					TurnComplete: genai.Ptr(false),
 				})
 			case "user_text":
@@ -599,26 +743,47 @@ readLoop:
 				// Persistence goes through the off-hot-path channel (GO-2), and the
 				// echo through the serialized writer (GO-1) — this write races the
 				// reader goroutine's audio/transcript writes.
-				if strings.TrimSpace(m.Text) != "" {
-					persist("candidate", m.Text, time.Since(start).Milliseconds())
+				if strings.TrimSpace(m.Text) != "" && len(m.Text) <= 24000 && len(m.EventID) <= 128 {
+					if interviewerSpeaking.Load() {
+						discardInterruptedOutput.Store(true)
+					}
+					flush()
+					_ = wc.writeServerMsg(serverMsg{Type: "interrupted"})
+					ack := make(chan error, 1)
+					if enqueue(pendingTurn{role: "candidate", text: m.Text, event: m.EventID, done: ack}) != nil {
+						break readLoop
+					}
+					saveErr := <-ack
+					if errors.Is(saveErr, store.ErrDuplicateEvent) {
+						_ = wc.writeServerMsg(serverMsg{Type: "ack", EventID: m.EventID})
+						continue
+					}
+					if saveErr != nil {
+						_ = wc.writeServerMsg(serverMsg{Type: "error", Code: "save_failed", Text: "Your answer could not be saved. Retry after reconnecting.", Retryable: true})
+						break readLoop
+					}
+					if m.EventID != "" {
+						_ = wc.writeServerMsg(serverMsg{Type: "ack", EventID: m.EventID})
+					}
 					_ = wc.writeServerMsg(serverMsg{Type: "transcript", Role: "candidate", Text: m.Text, Streaming: false})
 				}
-				_ = session.SendClientContent(genai.LiveClientContentInput{
-					Turns:        []*genai.Content{genai.NewContentFromText(m.Text, genai.RoleUser)},
-					TurnComplete: genai.Ptr(true),
-				})
+				if strings.TrimSpace(m.Text) == "" || len(m.Text) > 24000 || len(m.EventID) > 128 {
+					continue
+				}
+				_ = up.audio(genai.LiveRealtimeInput{Text: m.Text})
 			case "nudge":
-				_ = session.SendClientContent(genai.LiveClientContentInput{
+				_ = up.content(genai.LiveClientContentInput{
 					Turns:        []*genai.Content{genai.NewContentFromText("[The candidate has been quiet for a while. Give ONE short, friendly nudge like 'Take your time — whenever you're ready, walk me through it.' Do NOT repeat the question or answer it, then wait silently.]", genai.RoleUser)},
 					TurnComplete: genai.Ptr(true),
 				})
 			case "time":
 				// Periodic time-remaining update as CONTEXT only (no forced reply).
-				_ = session.SendClientContent(genai.LiveClientContentInput{
-					Turns:        []*genai.Content{genai.NewContentFromText("[Time check: "+clipText(m.Text, 60)+". Pace accordingly; when time is nearly up, give a brief closing and call end_interview.]", genai.RoleUser)},
+				_ = up.content(genai.LiveClientContentInput{
+					Turns:        []*genai.Content{genai.NewContentFromText(fmt.Sprintf("[Time check: %d seconds remain on the server clock. Pace accordingly; when time is nearly up, give a brief closing and call end_interview.]", max(0, int(time.Until(*r.attempt.DeadlineAt).Seconds()))), genai.RoleUser)},
 					TurnComplete: genai.Ptr(false),
 				})
 			case "end":
+				gracefulEnd.Store(true)
 				break readLoop
 			}
 		}
@@ -628,9 +793,21 @@ readLoop:
 	// session.Receive() errors out, then wait for it (bounded), then drain and
 	// wait for the persistence goroutine so no finished turn is lost (GO-3).
 	stop()
-	if waitTimeout(&wg, writeWait) {
-		close(turns)
-		persistWg.Wait()
+	readerDrained := waitTimeout(&wg, writeWait)
+	queueMu.Lock()
+	accepting = false
+	close(turns)
+	queueMu.Unlock()
+	// All acknowledged typed turns are already committed. Closing the queue also
+	// prevents a delayed SDK reader from enqueuing after the lease is released.
+	persistDrained := waitTimeout(&persistWg, writeWait)
+	if gracefulEnd.Load() {
+		if readerDrained && persistDrained {
+			_ = wc.writeServerMsg(serverMsg{Type: "saved"})
+		} else {
+			_ = wc.writeServerMsg(serverMsg{Type: "error", Code: "save_unavailable", Text: "Some final speech could not be confirmed saved. Review your transcript.", Retryable: false})
+		}
+		_ = wc.close()
 	}
 }
 

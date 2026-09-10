@@ -6,8 +6,10 @@
 package config
 
 import (
+	"encoding/base64"
 	"fmt"
 	"log/slog"
+	"net/url"
 	"os"
 	"strconv"
 	"strings"
@@ -19,6 +21,18 @@ type Config struct {
 	Port      string
 	Mode      string // "api" (reserved for future "worker" mode)
 	CORSAllow []string
+
+	Environment           string
+	Hosted                bool
+	HostedDailyStartLimit int
+	SessionEncryptionKey  string
+	PublicURL             string
+	ResendAPIKey          string
+	MailFrom              string
+	SMTPAddress           string
+	SMTPUsername          string
+	SMTPPassword          string
+	ReleaseSHA            string
 
 	// Database
 	DatabaseURL string
@@ -54,25 +68,41 @@ type Config struct {
 func Load() (*Config, error) {
 	loadDotEnv() // best-effort: populate env from .env (repo root) if present
 
+	environment := strings.ToLower(env("APP_ENV", "development"))
+	if environment != "development" && environment != "production" {
+		return nil, fmt.Errorf("APP_ENV must be development or production")
+	}
+	production := environment == "production"
 	c := &Config{
-		Port:           env("PORT", "8080"),
-		Mode:           env("MODE", "api"),
-		CORSAllow:      splitCSV(env("CORS_ALLOW", "http://localhost:3000")),
-		DatabaseURL:    env("DATABASE_URL", "postgres://mockinterview:mockinterview@localhost:5432/mockinterview?sslmode=disable"),
-		DBMaxConns:     int32(envInt("DB_MAX_CONNS", 10)),
-		JWTSecret:      env("JWT_SECRET", "dev-insecure-change-me"),
-		JWTTTL:         time.Duration(envInt("JWT_TTL_HOURS", 168)) * time.Hour,
-		GeminiAPIKey:   env("GEMINI_API_KEY", ""),
-		ModelReason:    env("GEMINI_MODEL_REASON", "gemini-2.5-flash"),
-		ModelLive:      env("GEMINI_MODEL_LIVE", "gemini-2.5-flash-native-audio-preview-12-2025"),
-		ModelTTS:       env("GEMINI_MODEL_TTS", "gemini-2.5-flash-preview-tts"),
-		LLMProvider:    strings.ToLower(env("LLM_PROVIDER", "gemini")),
-		LLMModel:       env("LLM_MODEL", ""),
-		LLMBaseURL:     env("LLM_BASE_URL", ""),
-		CorpusDir:      env("CORPUS_DIR", "data/corpus"),
-		PacksDir:       env("PACKS_DIR", "data/packs"),
-		AdminEmails:    splitCSV(strings.ToLower(env("ADMIN_EMAILS", "makinenitejovardhan@gmail.com,founder@mockinterview.live,demo@mockinterview.live"))),
-		FreeDailyLimit: envInt("FREE_DAILY_LIMIT", 2),
+		Environment:           environment,
+		Hosted:                !envBool("LOCAL_UNLIMITED", !production),
+		HostedDailyStartLimit: envInt("HOSTED_DAILY_START_LIMIT", 50),
+		SessionEncryptionKey:  env("SESSION_ENCRYPTION_KEY", ""),
+		PublicURL:             env("PUBLIC_URL", "http://localhost:3000"),
+		ResendAPIKey:          env("RESEND_API_KEY", ""),
+		MailFrom:              env("MAIL_FROM", ""),
+		SMTPAddress:           env("SMTP_ADDRESS", ""),
+		SMTPUsername:          env("SMTP_USERNAME", ""),
+		SMTPPassword:          env("SMTP_PASSWORD", ""),
+		ReleaseSHA:            env("RELEASE_SHA", "development"),
+		Port:                  env("PORT", "8080"),
+		Mode:                  env("MODE", "api"),
+		CORSAllow:             splitCSV(env("CORS_ALLOW", "http://localhost:3000")),
+		DatabaseURL:           env("DATABASE_URL", "postgres://mockinterview:mockinterview@localhost:5432/mockinterview?sslmode=disable"),
+		DBMaxConns:            int32(envInt("DB_MAX_CONNS", 10)),
+		JWTSecret:             env("JWT_SECRET", "dev-insecure-change-me"),
+		JWTTTL:                time.Duration(envInt("JWT_TTL_HOURS", 168)) * time.Hour,
+		GeminiAPIKey:          env("GEMINI_API_KEY", ""),
+		ModelReason:           env("GEMINI_MODEL_REASON", "gemini-2.5-flash"),
+		ModelLive:             env("GEMINI_MODEL_LIVE", "gemini-2.5-flash-native-audio-preview-12-2025"),
+		ModelTTS:              env("GEMINI_MODEL_TTS", "gemini-2.5-flash-preview-tts"),
+		LLMProvider:           strings.ToLower(env("LLM_PROVIDER", "gemini")),
+		LLMModel:              env("LLM_MODEL", ""),
+		LLMBaseURL:            env("LLM_BASE_URL", ""),
+		CorpusDir:             env("CORPUS_DIR", "data/corpus"),
+		PacksDir:              env("PACKS_DIR", "data/packs"),
+		AdminEmails:           nil,
+		FreeDailyLimit:        envInt("FREE_DAILY_LIMIT", 2),
 	}
 
 	// Resolve the API key + default model for the selected reasoning provider.
@@ -87,12 +117,14 @@ func Load() (*Config, error) {
 		c.LLMAPIKey = env("META_API_KEY", "")
 	case "anthropic":
 		c.LLMAPIKey = env("ANTHROPIC_API_KEY", "")
-	default: // gemini
+	case "gemini":
 		c.LLMProvider = "gemini"
 		c.LLMAPIKey = c.GeminiAPIKey
 		if c.LLMModel == "" {
 			c.LLMModel = c.ModelReason
 		}
+	default:
+		return nil, fmt.Errorf("unsupported LLM_PROVIDER %q", c.LLMProvider)
 	}
 
 	// Force the stub when the selected provider has no key OR when explicitly
@@ -106,7 +138,36 @@ func Load() (*Config, error) {
 	// Never let a production deploy run with the public default JWT secret — any
 	// reader of the repo could forge tokens. In production also require length.
 	insecure := c.JWTSecret == "" || c.JWTSecret == "dev-insecure-change-me"
-	if strings.EqualFold(env("APP_ENV", ""), "production") {
+	if production {
+		if !c.Hosted {
+			return nil, fmt.Errorf("LOCAL_UNLIMITED is forbidden in production")
+		}
+		if c.UseStubLLM {
+			return nil, fmt.Errorf("production requires a configured real LLM provider; stub mode is forbidden")
+		}
+		if c.GeminiAPIKey == "" {
+			return nil, fmt.Errorf("GEMINI_API_KEY is required for hosted native voice")
+		}
+		key, err := base64.StdEncoding.DecodeString(c.SessionEncryptionKey)
+		if err != nil || len(key) != 32 {
+			return nil, fmt.Errorf("SESSION_ENCRYPTION_KEY must encode 32 random bytes as base64")
+		}
+		public, err := url.Parse(c.PublicURL)
+		if err != nil || public.Scheme != "https" || public.Host == "" {
+			return nil, fmt.Errorf("PUBLIC_URL must be an HTTPS origin in production")
+		}
+		if c.MailFrom == "" || (c.ResendAPIKey == "" && c.SMTPAddress == "") {
+			return nil, fmt.Errorf("production requires MAIL_FROM and RESEND_API_KEY or SMTP_ADDRESS for verification/recovery")
+		}
+		if c.DBMaxConns < 1 || c.DBMaxConns > 20 {
+			return nil, fmt.Errorf("DB_MAX_CONNS must be between 1 and 20 in production")
+		}
+		for _, origin := range c.CORSAllow {
+			u, e := url.Parse(origin)
+			if e != nil || u.Scheme != "https" || u.Host == "" || strings.Contains(origin, "*") {
+				return nil, fmt.Errorf("CORS_ALLOW must contain explicit HTTPS origins in production")
+			}
+		}
 		if insecure || len(c.JWTSecret) < 32 {
 			return nil, fmt.Errorf("JWT_SECRET must be set to a strong value (>=32 chars) in production")
 		}

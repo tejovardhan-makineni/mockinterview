@@ -2,19 +2,9 @@
   "id": "teacher-classroom",
   "title": "Teaching Scenario: Classroom Management & Differentiated Instruction",
   "track": "professional",
-  "domain": "behavioral",
+  "domain": "classroom_management",
   "areas": [
-    "software_engineering",
-    "data_science",
-    "medicine",
-    "nursing",
-    "law",
-    "consulting",
-    "product_management",
-    "finance",
-    "mechanical_engineering",
-    "electrical_engineering",
-    "civil_engineering"
+    "education"
   ],
   "modality": "conversational",
   "difficulty": "entry",
@@ -27,7 +17,7 @@
     "scenario"
   ],
   "prompt": "You're teaching a mixed-ability class of 28 students. During a lesson, one student keeps calling out and distracting others, a small group in the back has clearly finished the work and is getting bored, and two students look completely lost and disengaged. It's the middle of the lesson and you have to keep it moving. Walk me through how you'd handle the moment and how you'd design the lesson so this goes better next time.",
-  "blurb": "An entry-level teaching scenario — assessed for in-the-moment classroom management, differentiated instruction, and a proactive, relationship-based approach.",
+  "blurb": "An entry-level teaching scenario \u2014 assessed for in-the-moment classroom management, differentiated instruction, and a proactive, relationship-based approach.",
   "rubric": [
     {
       "key": "classroom_management",
@@ -62,28 +52,28 @@
     {
       "key": "communication",
       "label": "Communication & reflection",
-      "description": "Explains reasoning clearly, is organized, and reflects on what they'd adjust — including follow-up with individual students or families where appropriate.",
+      "description": "Explains reasoning clearly, is organized, and reflects on what they'd adjust \u2014 including follow-up with individual students or families where appropriate.",
       "weight": 1.0
     }
   ],
   "reference": {
-    "scenario": "Entry-level teaching scenario assessing classroom management and differentiated instruction. The candidate must handle three simultaneous needs — a disruptive caller-outer, a bored high-readiness group, and two lost/disengaged students — in the middle of a live lesson, then reflect on preventive design. A strong answer separates the in-the-moment response from the systemic fix. In the moment: manage the disruption with the least intervention that works (proximity, a non-verbal cue, a quiet private redirect, re-stating the expectation) rather than a public showdown that derails the class — and diagnose the behavior (attention-seeking, boredom, or masking that the student is lost). Re-engage the finished group with a meaningful extension or challenge task (not busywork) and give the two lost students a quick scaffold — a check for understanding, a simpler entry point, pairing, or a brief small-group pull-aside while others work. The strongest candidates treat behavior and engagement as linked: the bored and the lost students are both at risk of acting out, and differentiation is classroom management. For prevention, they describe designing the lesson for a mixed-ability class up front: tiered/leveled tasks, built-in extension and anchor activities, frequent low-stakes checks for understanding, clear routines and expectations established early, thoughtful seating/grouping, and knowing their students' data. They handle behavior with dignity — no public shaming — build relationships, and follow up individually or with families as appropriate, keeping equity in mind so no group is consistently left behind. Weak answers reach straight for punishment, stop the whole lesson to deal with one student, ignore the bored or the lost group (only managing the disruption), give the finished group busywork, treat behavior purely as defiance rather than diagnosing cause, or offer no preventive design.",
+    "scenario": "Entry-level teaching scenario assessing classroom management and differentiated instruction. The candidate must handle three simultaneous needs \u2014 a disruptive caller-outer, a bored high-readiness group, and two lost/disengaged students \u2014 in the middle of a live lesson, then reflect on preventive design. A strong answer separates the in-the-moment response from the systemic fix. In the moment: manage the disruption with the least intervention that works (proximity, a non-verbal cue, a quiet private redirect, re-stating the expectation) rather than a public showdown that derails the class \u2014 and diagnose the behavior (attention-seeking, boredom, or masking that the student is lost). Re-engage the finished group with a meaningful extension or challenge task (not busywork) and give the two lost students a quick scaffold \u2014 a check for understanding, a simpler entry point, pairing, or a brief small-group pull-aside while others work. The strongest candidates treat behavior and engagement as linked: the bored and the lost students are both at risk of acting out, and differentiation is classroom management. For prevention, they describe designing the lesson for a mixed-ability class up front: tiered/leveled tasks, built-in extension and anchor activities, frequent low-stakes checks for understanding, clear routines and expectations established early, thoughtful seating/grouping, and knowing their students' data. They handle behavior with dignity \u2014 no public shaming \u2014 build relationships, and follow up individually or with families as appropriate, keeping equity in mind so no group is consistently left behind. Weak answers reach straight for punishment, stop the whole lesson to deal with one student, ignore the bored or the lost group (only managing the disruption), give the finished group busywork, treat behavior purely as defiance rather than diagnosing cause, or offer no preventive design.",
     "model_points": [
-      "Separate the immediate response from the systemic fix, and say so — handle the moment, then redesign.",
-      "Manage the disruption with the least intervention that works: proximity, a non-verbal cue, a brief quiet private redirect, and a calm restatement of the expectation — avoid a public confrontation that stops the whole class.",
-      "Diagnose the behavior rather than just suppressing it: calling out can be attention-seeking, boredom, or a sign the student is actually lost — the response differs by cause.",
-      "Re-engage the finished group with meaningful extension/challenge (deeper questions, an application task, a peer-teaching role) — not busywork or 'wait quietly.'",
+      "Separate the immediate response from the systemic fix, and say so \u2014 handle the moment, then redesign.",
+      "Manage the disruption with the least intervention that works: proximity, a non-verbal cue, a brief quiet private redirect, and a calm restatement of the expectation \u2014 avoid a public confrontation that stops the whole class.",
+      "Diagnose the behavior rather than just suppressing it: calling out can be attention-seeking, boredom, or a sign the student is actually lost \u2014 the response differs by cause.",
+      "Re-engage the finished group with meaningful extension/challenge (deeper questions, an application task, a peer-teaching role) \u2014 not busywork or 'wait quietly.'",
       "Support the two lost students: a quick check for understanding to find the gap, a scaffold or simpler entry point, pairing with a peer, or a short small-group pull-aside while others work independently.",
       "Treat differentiation as classroom management: bored and lost students are the ones most likely to disengage or act out, so meeting their needs prevents behavior problems.",
       "Keep the lesson moving: don't let one student or one group stall the other 27; use routines so the class can work while you attend to individuals.",
       "Proactive design for a mixed-ability class: tiered/leveled tasks, built-in extension and anchor activities, frequent low-stakes checks for understanding, clear routines and expectations set early, deliberate seating/grouping, and use of student data.",
-      "Handle behavior with dignity and build relationships: private over public correction, positive framing, no shaming, and a fresh start — plus individual follow-up or family contact when a pattern emerges.",
+      "Handle behavior with dignity and build relationships: private over public correction, positive framing, no shaming, and a fresh start \u2014 plus individual follow-up or family contact when a pattern emerges.",
       "Keep equity central: ensure the same students aren't always the ones left behind or always the ones extended, and that support is distributed fairly."
     ],
     "probes": [
       {
         "trigger": "candidate reaches straight for punishment",
-        "question": "Before consequences — why do you think that student is calling out? Could the behavior be telling you something about the lesson?"
+        "question": "Before consequences \u2014 why do you think that student is calling out? Could the behavior be telling you something about the lesson?"
       },
       {
         "trigger": "candidate stops the whole lesson to deal with the disruptive student",
@@ -91,7 +81,7 @@
       },
       {
         "trigger": "candidate only manages the disruption",
-        "question": "What about the group that's bored and the two who are lost — what are you doing for them in this same moment?"
+        "question": "What about the group that's bored and the two who are lost \u2014 what are you doing for them in this same moment?"
       },
       {
         "trigger": "candidate gives the finished group busywork",
@@ -127,7 +117,7 @@
       "When does a behavior pattern warrant a conversation with the student one-on-one or a call home?",
       "How do you make sure the same 'fast' kids aren't always extended and the same 'slow' kids always remediated?"
     ],
-    "exemplar_answer": "A strong entry answer splits the moment from the design. In the moment: 'I'd handle the disruption with the smallest intervention that works — move toward the student, a quick non-verbal cue or a quiet private word restating the expectation — without stopping the whole class for a showdown. But I'd also ask myself why they're calling out; it's often boredom, attention-seeking, or actually being lost, and each needs a different response.' Meeting all three needs at once: 'For the group that's finished, I'd have a real extension ready — a harder application problem or a peer-teaching role — not busywork. For the two who look lost, I'd do a quick check for understanding to find the gap, then scaffold — a simpler entry point, a peer partner, or a brief small-group pull-aside while the rest work independently. I try to keep the other 27 moving with a clear task so I can attend to individuals.' The key insight: 'Differentiation IS classroom management — the bored and the lost students are exactly the ones who act out, so meeting their needs prevents behavior problems.' Prevention: 'Next time I'd design the lesson for a mixed-ability class from the start: tiered tasks with built-in extension and anchor activities, frequent low-stakes checks for understanding, clear routines and expectations set early, and deliberate grouping using what I know about each student.' Dignity and follow-up: 'I'd correct behavior privately, keep it positive, avoid shaming, and if a pattern emerges follow up one-on-one or with family — and I'd watch that the same kids aren't always the ones left behind.' It manages the moment calmly, differentiates for every group, diagnoses behavior, and shifts to proactive design."
+    "exemplar_answer": "A strong entry answer splits the moment from the design. In the moment: 'I'd handle the disruption with the smallest intervention that works \u2014 move toward the student, a quick non-verbal cue or a quiet private word restating the expectation \u2014 without stopping the whole class for a showdown. But I'd also ask myself why they're calling out; it's often boredom, attention-seeking, or actually being lost, and each needs a different response.' Meeting all three needs at once: 'For the group that's finished, I'd have a real extension ready \u2014 a harder application problem or a peer-teaching role \u2014 not busywork. For the two who look lost, I'd do a quick check for understanding to find the gap, then scaffold \u2014 a simpler entry point, a peer partner, or a brief small-group pull-aside while the rest work independently. I try to keep the other 27 moving with a clear task so I can attend to individuals.' The key insight: 'Differentiation IS classroom management \u2014 the bored and the lost students are exactly the ones who act out, so meeting their needs prevents behavior problems.' Prevention: 'Next time I'd design the lesson for a mixed-ability class from the start: tiered tasks with built-in extension and anchor activities, frequent low-stakes checks for understanding, clear routines and expectations set early, and deliberate grouping using what I know about each student.' Dignity and follow-up: 'I'd correct behavior privately, keep it positive, avoid shaming, and if a pattern emerges follow up one-on-one or with family \u2014 and I'd watch that the same kids aren't always the ones left behind.' It manages the moment calmly, differentiates for every group, diagnoses behavior, and shifts to proactive design."
   },
-  "interviewer_notes": "Entry-level educational scenario — reward sound instincts and a student-centered mindset over jargon. The strongest signal is that the candidate meets all three needs at once (disruption, boredom, being lost) and connects behavior to engagement: differentiation is classroom management. If they only manage the disruptive student, probe for the bored group and the lost students. If they reach for punishment, push them to diagnose the behavior's cause. If they give the finished group busywork, challenge it. Then drive them from reaction to prevention — a good candidate can describe tiered tasks, checks for understanding, routines, and grouping. Use the follow-up that the disruptive student is actually one of the lost ones to test whether they revise their read. Look for dignity in handling behavior (private over public), relationship-building, and equity awareness. Penalize punishment-first reactions, stopping the whole lesson for one student, ignoring the bored or lost groups, busywork extensions, and no preventive design."
+  "interviewer_notes": "Entry-level educational scenario \u2014 reward sound instincts and a student-centered mindset over jargon. The strongest signal is that the candidate meets all three needs at once (disruption, boredom, being lost) and connects behavior to engagement: differentiation is classroom management. If they only manage the disruptive student, probe for the bored group and the lost students. If they reach for punishment, push them to diagnose the behavior's cause. If they give the finished group busywork, challenge it. Then drive them from reaction to prevention \u2014 a good candidate can describe tiered tasks, checks for understanding, routines, and grouping. Use the follow-up that the disruptive student is actually one of the lost ones to test whether they revise their read. Look for dignity in handling behavior (private over public), relationship-building, and equity awareness. Penalize punishment-first reactions, stopping the whole lesson for one student, ignoring the bored or lost groups, busywork extensions, and no preventive design."
 }

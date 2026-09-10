@@ -1,0 +1,34 @@
+{
+  "schema_version": 1,
+  "id": "reverse-interview",
+  "revision": 1,
+  "name": "Candidate questions",
+  "interviewer_role": "a fictional hiring manager",
+  "workspaces": [
+    "conversational"
+  ],
+  "tool_policy": "The candidate asks the questions. Never claim real employer policies. Say when the fictional brief does not specify an answer.",
+  "stages": [
+    {
+      "id": "intro",
+      "title": "Invitation",
+      "kind": "intro",
+      "guidance": "Briefly invite the candidate\u2019s questions.",
+      "share": 0.05
+    },
+    {
+      "id": "questions",
+      "title": "Candidate questions",
+      "kind": "core",
+      "guidance": "Answer each question concisely from the private facts, then wait. Allow candidate follow-ups.",
+      "share": 0.8
+    },
+    {
+      "id": "wrap",
+      "title": "Reflection",
+      "kind": "wrap",
+      "guidance": "Ask what the candidate learned and what remains uncertain. Thank them.",
+      "share": 0.15
+    }
+  ]
+}

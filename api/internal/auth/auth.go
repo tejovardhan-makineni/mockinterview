@@ -7,6 +7,7 @@ import (
 	"context"
 	"errors"
 	"net/http"
+	"net/mail"
 	"strings"
 	"time"
 
@@ -20,6 +21,7 @@ import (
 type ctxKey string
 
 const userIDKey ctxKey = "uid"
+const tokenVersionKey ctxKey = "token_version"
 
 // Repo is the persistence auth needs. *store.Store satisfies it; tests supply a
 // fake. Declaring it consumer-side keeps auth independent of the concrete store.
@@ -30,9 +32,10 @@ type Repo interface {
 }
 
 type Service struct {
-	store  Repo
-	secret []byte
-	ttl    time.Duration
+	store   Repo
+	secret  []byte
+	ttl     time.Duration
+	options Options
 }
 
 func New(st Repo, secret string, ttl time.Duration) *Service {
@@ -54,57 +57,80 @@ const (
 	wsAudience  = "ws"
 )
 
+type sessionClaims struct {
+	jwt.RegisteredClaims
+	Version int `json:"ver"`
+}
+
+var ErrUnavailable = errors.New("authentication storage unavailable")
+
+func (s *Service) issueAudience(userID, audience string, ttl time.Duration) (string, error) {
+	version := 0
+	if s.store != nil {
+		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		defer cancel()
+		u, err := s.store.UserByID(ctx, userID)
+		if err != nil {
+			return "", ErrUnavailable
+		}
+		version = u.TokenVersion
+	}
+	return s.signAudience(userID, version, audience, ttl)
+}
+
+// Sign the identity version observed when the credential was authenticated.
+// Rereading a newer version here would revive a concurrently revoked session.
+func (s *Service) signAudience(userID string, version int, audience string, ttl time.Duration) (string, error) {
+	claims := sessionClaims{RegisteredClaims: jwt.RegisteredClaims{Subject: userID, Audience: jwt.ClaimStrings{audience}, ExpiresAt: jwt.NewNumericDate(time.Now().Add(ttl)), IssuedAt: jwt.NewNumericDate(time.Now())}, Version: version}
+	return jwt.NewWithClaims(jwt.SigningMethodHS256, claims).SignedString(s.secret)
+}
 func (s *Service) issue(userID string) (string, error) {
-	claims := jwt.RegisteredClaims{
-		Subject:   userID,
-		Audience:  jwt.ClaimStrings{apiAudience},
-		ExpiresAt: jwt.NewNumericDate(time.Now().Add(s.ttl)),
-		IssuedAt:  jwt.NewNumericDate(time.Now()),
-	}
-	return jwt.NewWithClaims(jwt.SigningMethodHS256, claims).SignedString(s.secret)
+	return s.issueAudience(userID, apiAudience, s.ttl)
 }
-
-// issueTicket mints a short-TTL, ws-audience token for the WebSocket handshake.
 func (s *Service) issueTicket(userID string) (string, error) {
-	claims := jwt.RegisteredClaims{
-		Subject:   userID,
-		Audience:  jwt.ClaimStrings{wsAudience},
-		ExpiresAt: jwt.NewNumericDate(time.Now().Add(90 * time.Second)),
-		IssuedAt:  jwt.NewNumericDate(time.Now()),
-	}
-	return jwt.NewWithClaims(jwt.SigningMethodHS256, claims).SignedString(s.secret)
+	return s.issueAudience(userID, wsAudience, 90*time.Second)
 }
-
 func (s *Service) keyFunc(t *jwt.Token) (any, error) {
-	if _, ok := t.Method.(*jwt.SigningMethodHMAC); !ok {
+	if t.Method != jwt.SigningMethodHS256 {
 		return nil, errors.New("unexpected signing method")
 	}
 	return s.secret, nil
 }
-
-// parseTicket validates a WebSocket ticket (must carry the ws audience).
-func (s *Service) parseTicket(tokenStr string) (string, error) {
-	tok, err := jwt.ParseWithClaims(tokenStr, &jwt.RegisteredClaims{}, s.keyFunc, jwt.WithAudience(wsAudience))
-	if err != nil || !tok.Valid {
-		return "", errors.New("invalid ticket")
-	}
-	claims, ok := tok.Claims.(*jwt.RegisteredClaims)
-	if !ok || claims.Subject == "" {
-		return "", errors.New("invalid ticket claims")
+func (s *Service) parseAudience(tokenStr, audience string) (string, error) {
+	claims, err := s.parseAudienceClaims(tokenStr, audience)
+	if err != nil {
+		return "", err
 	}
 	return claims.Subject, nil
 }
 
+func (s *Service) parseAudienceClaims(tokenStr, audience string) (*sessionClaims, error) {
+	claims := &sessionClaims{}
+	tok, err := jwt.ParseWithClaims(tokenStr, claims, s.keyFunc, jwt.WithAudience(audience), jwt.WithExpirationRequired(), jwt.WithValidMethods([]string{"HS256"}), jwt.WithIssuedAt())
+	if err != nil || !tok.Valid || claims.Subject == "" {
+		return nil, errors.New("invalid token")
+	}
+	if s.store != nil {
+		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		defer cancel()
+		u, err := s.store.UserByID(ctx, claims.Subject)
+		if errors.Is(err, store.ErrNotFound) {
+			return nil, errors.New("account unavailable")
+		}
+		if err != nil {
+			return nil, ErrUnavailable
+		}
+		if u.TokenVersion != claims.Version {
+			return nil, errors.New("session revoked")
+		}
+	}
+	return claims, nil
+}
+func (s *Service) parseTicket(tokenStr string) (string, error) {
+	return s.parseAudience(tokenStr, wsAudience)
+}
 func (s *Service) parse(tokenStr string) (string, error) {
-	tok, err := jwt.ParseWithClaims(tokenStr, &jwt.RegisteredClaims{}, s.keyFunc, jwt.WithAudience(apiAudience))
-	if err != nil || !tok.Valid {
-		return "", errors.New("invalid token")
-	}
-	claims, ok := tok.Claims.(*jwt.RegisteredClaims)
-	if !ok || claims.Subject == "" {
-		return "", errors.New("invalid claims")
-	}
-	return claims.Subject, nil
+	return s.parseAudience(tokenStr, apiAudience)
 }
 
 // ---- HTTP handlers ----
@@ -120,8 +146,10 @@ type authResponse struct {
 }
 
 type userPayload struct {
-	ID    string `json:"id"`
-	Email string `json:"email"`
+	ID            string `json:"id"`
+	Email         string `json:"email"`
+	EmailVerified bool   `json:"email_verified"`
+	Role          string `json:"role"`
 }
 
 func (s *Service) Register(w http.ResponseWriter, r *http.Request) {
@@ -130,12 +158,20 @@ func (s *Service) Register(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	c.Email = strings.ToLower(strings.TrimSpace(c.Email))
-	if !strings.Contains(c.Email, "@") || len(c.Password) < 6 {
-		httpx.WriteProblem(w, http.StatusBadRequest, "valid email and password (min 6 chars) required")
+	address, emailErr := mail.ParseAddress(c.Email)
+	if emailErr != nil || address.Address != c.Email || len(c.Email) > 254 || !validPassword(c.Password) {
+		httpx.WriteProblem(w, http.StatusBadRequest, "valid email and password (12–72 bytes) required")
+		return
+	}
+	if s.options.RequireVerification && s.options.Mailer == nil {
+		httpx.WriteProblem(w, http.StatusServiceUnavailable, "account email delivery is not configured")
 		return
 	}
 	if _, err := s.store.UserByEmail(r.Context(), c.Email); err == nil {
-		httpx.WriteProblem(w, http.StatusConflict, "email already registered")
+		httpx.WriteProblem(w, http.StatusConflict, "email already registered; sign in or reset your password")
+		return
+	} else if !errors.Is(err, store.ErrNotFound) {
+		httpx.WriteProblem(w, http.StatusServiceUnavailable, "account service unavailable")
 		return
 	}
 	hash, err := s.hash(c.Password)
@@ -146,6 +182,16 @@ func (s *Service) Register(w http.ResponseWriter, r *http.Request) {
 	u, err := s.store.CreateUser(r.Context(), c.Email, hash)
 	if err != nil {
 		httpx.WriteProblem(w, http.StatusInternalServerError, "create failed")
+		return
+	}
+	if s.options.RequireVerification || s.options.Development {
+		extra := map[string]any{"verification_required": s.options.RequireVerification}
+		link, err := s.sendAction(r.Context(), u, "verify")
+		extra["delivery_available"] = err == nil
+		if s.options.Development && link != "" {
+			extra["development_action_url"] = link
+		}
+		s.respondAuthExtra(w, u, extra)
 		return
 	}
 	s.respondAuth(w, u)
@@ -176,16 +222,25 @@ func (s *Service) Me(w http.ResponseWriter, r *http.Request) {
 		httpx.WriteProblem(w, http.StatusNotFound, "user not found")
 		return
 	}
-	httpx.WriteJSON(w, http.StatusOK, userPayload{ID: u.ID, Email: u.Email})
+	httpx.WriteJSON(w, http.StatusOK, payload(u))
 }
 
-func (s *Service) respondAuth(w http.ResponseWriter, u store.User) {
-	token, err := s.issue(u.ID)
+func payload(u store.User) userPayload {
+	return userPayload{ID: u.ID, Email: u.Email, EmailVerified: u.EmailVerified, Role: u.Role}
+}
+func (s *Service) respondAuth(w http.ResponseWriter, u store.User) { s.respondAuthExtra(w, u, nil) }
+func (s *Service) respondAuthExtra(w http.ResponseWriter, u store.User, extra map[string]any) {
+	token, err := s.signAudience(u.ID, u.TokenVersion, apiAudience, s.ttl)
 	if err != nil {
 		httpx.WriteProblem(w, http.StatusInternalServerError, "token failed")
 		return
 	}
-	httpx.WriteJSON(w, http.StatusOK, authResponse{Token: token, User: userPayload{ID: u.ID, Email: u.Email}})
+	if extra == nil {
+		extra = map[string]any{}
+	}
+	extra["token"] = token
+	extra["user"] = payload(u)
+	httpx.WriteJSON(w, http.StatusOK, extra)
 }
 
 // ---- Middleware ----
@@ -193,12 +248,17 @@ func (s *Service) respondAuth(w http.ResponseWriter, u store.User) {
 // Required rejects requests without a valid bearer token.
 func (s *Service) Required(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		uid, err := s.authFromRequest(r)
+		claims, err := s.requestClaims(r)
 		if err != nil {
+			if errors.Is(err, ErrUnavailable) {
+				httpx.WriteProblem(w, http.StatusServiceUnavailable, "account service unavailable")
+				return
+			}
 			httpx.WriteProblem(w, http.StatusUnauthorized, "authentication required")
 			return
 		}
-		ctx := context.WithValue(r.Context(), userIDKey, uid)
+		ctx := context.WithValue(r.Context(), userIDKey, claims.Subject)
+		ctx = context.WithValue(ctx, tokenVersionKey, claims.Version)
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
 }
@@ -206,11 +266,19 @@ func (s *Service) Required(next http.Handler) http.Handler {
 // authFromRequest authenticates a normal HTTP request via the Authorization
 // bearer header (the full session JWT).
 func (s *Service) authFromRequest(r *http.Request) (string, error) {
+	claims, err := s.requestClaims(r)
+	if err != nil {
+		return "", err
+	}
+	return claims.Subject, nil
+}
+
+func (s *Service) requestClaims(r *http.Request) (*sessionClaims, error) {
 	h := r.Header.Get("Authorization")
 	if !strings.HasPrefix(h, "Bearer ") {
-		return "", errors.New("no token")
+		return nil, errors.New("no token")
 	}
-	return s.parse(strings.TrimPrefix(h, "Bearer "))
+	return s.parseAudienceClaims(strings.TrimPrefix(h, "Bearer "), apiAudience)
 }
 
 // AuthFromRequest authenticates a WebSocket upgrade. Browsers can't set headers
@@ -226,7 +294,12 @@ func (s *Service) AuthFromRequest(r *http.Request) (string, error) {
 
 // WSTicket issues a short-lived ticket for opening the interview WebSocket.
 func (s *Service) WSTicket(w http.ResponseWriter, r *http.Request) {
-	t, err := s.issueTicket(UserID(r.Context()))
+	version, ok := r.Context().Value(tokenVersionKey).(int)
+	if !ok || UserID(r.Context()) == "" {
+		httpx.WriteProblem(w, http.StatusUnauthorized, "authentication required")
+		return
+	}
+	t, err := s.signAudience(UserID(r.Context()), version, wsAudience, 90*time.Second)
 	if err != nil {
 		httpx.WriteProblem(w, http.StatusInternalServerError, "could not issue ticket")
 		return

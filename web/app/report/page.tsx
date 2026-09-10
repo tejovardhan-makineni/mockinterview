@@ -1,295 +1,370 @@
 "use client";
-
 import { Suspense, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { api } from "@/lib/api";
-import type { BehavioralSummary, Report } from "@/lib/types";
-import { Badge, Button, Panel } from "@/components/ui";
-import { Radar } from "@/components/Radar";
-import { InfoTip } from "@/components/InfoTip";
-
-// Info tooltips for the DELIVERY tiles (transcript-derived). These are
-// non-authoritative observations, not a graded competency. Physical-presence
-// signals (facing camera / lighting / framing / posture) are shown as neutral
-// notes, not scored tiles — see PresenceNotes.
-const BEHAVIORAL_INFO: Record<string, string> = {
-  "Filler words / min": "How often you said 'um, uh, like, you know' per minute, detected from the transcript. To reduce them: pause silently instead of filling gaps — a beat of quiet reads as thoughtful. This does not affect your score.",
-  "Long pauses": "Silences over ~8s where you weren't drawing or speaking. Some thinking time is completely fine; if you like, narrate your thinking as you go. This does not affect your score.",
-  "Help requests": "Times you asked the interviewer for help or a hint. Asking for clarification is a normal, healthy interview skill. This does not affect your score.",
-  "Speaking ratio": "Share of the interview you were actively talking, from the transcript. Neither high nor low is 'correct' — it just reflects how the conversation went. This does not affect your score.",
-};
-
-// Professional fields where a practice sim must never read as certification /
-// licensure / professional advice (HR-6). Matched loosely against the question
-// title since the report doesn't carry an explicit domain.
-const PRO_DOMAIN_RE = /\b(clinical|medic\w*|patient|chest pain|nurs\w*|diagnos\w*|law|legal|contract|irac|litigation|financ\w*|accounting|audit|tax|pharmac\w*|therap\w*|licens\w*)\b/i;
-const isProfessional = (title: string) => PRO_DOMAIN_RE.test(title || "");
-
-const pretty = (k: string) => k.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
-const tone = (s: number) => (s >= 3 ? "good" : s >= 2 ? "warn" : "bad") as "good" | "warn" | "bad";
-const color = (s: number) => (s >= 3 ? "var(--color-good)" : s >= 2 ? "var(--color-warn)" : "var(--color-bad)");
-
-function ReportInner() {
+import type {
+  Report,
+  ProcessingReport,
+  Session,
+  TranscriptTurn,
+} from "@/lib/features/interview";
+import { errorMessage } from "@/lib/http";
+import { AppShell } from "@/components/AppShell";
+import { Badge, Button, Panel, ErrorNotice } from "@/components/ui";
+import { PersonalKeyRecovery } from "@/components/PersonalKeyRecovery";
+import { FeedbackWidget } from "@/components/FeedbackWidget";
+const pretty = (value: string) =>
+  value.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
+function ReportView() {
   const router = useRouter();
   const params = useSearchParams();
-  const sid = params.get("s") || "";
-  const [rep, setRep] = useState<Report | null>(null);
-  const [err, setErr] = useState("");
-
+  const sid = params.get("s") ?? "";
+  const [report, setReport] = useState<Report | null>(null);
+  const [processing, setProcessing] = useState<ProcessingReport | null>(null);
+  const [session, setSession] = useState<Session | null>(null);
+  const [turns, setTurns] = useState<TranscriptTurn[]>([]);
+  const [error, setError] = useState("");
+  const [retry, setRetry] = useState(0);
+  const [busy, setBusy] = useState(false);
   useEffect(() => {
+    let cancelled = false;
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    const poll = async () => {
+      try {
+        const result = await api.getReport(sid);
+        if (cancelled) return;
+        if ("status" in result) {
+          setProcessing(result);
+          if (result.status === "scoring")
+            timer = setTimeout(() => void poll(), 2000);
+        } else {
+          setReport(result);
+          setProcessing(null);
+        }
+      } catch (e) {
+        if (!cancelled) setError(errorMessage(e));
+      }
+    };
     (async () => {
-      const u = await api.me();
-      if (!u) { router.replace("/login"); return; }
-      try { setRep(await api.getReport(sid)); }
-      catch (e) { setErr(e instanceof Error ? e.message : "No report"); }
+      try {
+        const user = await api.me();
+        if (cancelled) return;
+        if (!user) {
+          router.replace(
+            "/login?next=" + encodeURIComponent("/report?s=" + sid),
+          );
+          return;
+        }
+        const [s, t] = await Promise.all([
+          api.getSession(sid),
+          api.getTranscript(sid),
+        ]);
+        if (cancelled) return;
+        setSession(s);
+        setTurns(t);
+        await poll();
+      } catch (e) {
+        if (!cancelled) setError(errorMessage(e));
+      }
     })();
-  }, [router, sid]);
-
-  if (err) return <Centered>{err} · <Button href="/dashboard" variant="ghost">Dashboard</Button></Centered>;
-  if (!rep) return <Centered>Loading report…</Centered>;
-
-  // Not enough was said to score fairly — show why instead of fake numbers.
-  if (rep.scored === false) {
-    return (
-      <main className="mx-auto max-w-2xl px-6 py-16 text-center">
-        <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full border-2 border-[var(--color-warn)] text-2xl">–</div>
-        <h1 className="mt-5 text-2xl font-bold">Not scored</h1>
-        <p className="mx-auto mt-3 max-w-lg text-[var(--color-muted)]">{rep.note || "There wasn't enough in this interview to score fairly."}</p>
-        <div className="mt-8 flex justify-center gap-3">
-          <Button href="/dashboard">Try another interview →</Button>
-        </div>
-      </main>
-    );
+    return () => {
+      cancelled = true;
+      if (timer) clearTimeout(timer);
+    };
+  }, [sid, router, retry]);
+  async function retryScoring() {
+    setBusy(true);
+    setError("");
+    try {
+      await api.finishSession(sid);
+      setProcessing({ status: "scoring" });
+      setRetry((n) => n + 1);
+    } catch (e) {
+      setError(errorMessage(e));
+    } finally {
+      setBusy(false);
+    }
   }
-
-  const assessed = rep.scores.filter((s) => s.assessed !== false);
-  const notAssessed = rep.scores.filter((s) => s.assessed === false);
-  const b = rep.behavioral as Partial<BehavioralSummary> | undefined;
-  const hasBehavioral = !!b && ((b.samples ?? 0) > 0 || !!b.filler_per_min || !!b.help_requests || !!b.long_pauses);
-
+  function exportReport() {
+    const blob = new Blob(
+      [JSON.stringify({ report, session, transcript: turns }, null, 2)],
+      { type: "application/json" },
+    );
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "interview-" + sid + ".json";
+    a.click();
+    URL.revokeObjectURL(url);
+  }
   return (
-    <main className="mx-auto max-w-5xl px-6 py-8">
-      <div className="no-print flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <Button href="/dashboard" variant="ghost">← Dashboard</Button>
-          <Button href="/results" variant="ghost">All results</Button>
-        </div>
-        <div className="flex items-center gap-2">
-          <Badge tone="accent">{rep.question_title}</Badge>
-          <Button variant="ghost" onClick={() => window.print()}>⬇ Download PDF</Button>
-        </div>
-      </div>
-
-      {/* Professional-domain disclaimer — persistent, candidate-facing (HR-6) */}
-      {isProfessional(rep.question_title) && (
-        <div className="mt-4 rounded-xl border border-[var(--color-warn)] bg-[color-mix(in_srgb,var(--color-warn)_10%,transparent)] px-4 py-3 text-sm text-[var(--color-warn)]">
-          Practice simulation — not certification, licensure assessment, or professional (medical/legal/financial) advice.
+    <AppShell active="results">
+      <a href="/results" className="text-sm text-[var(--color-muted)]">
+        ← Your history
+      </a>
+      {error && (
+        <div className="my-5">
+          <ErrorNotice
+            message={error}
+            onRetry={() => {
+              setError("");
+              setRetry((n) => n + 1);
+            }}
+          />
         </div>
       )}
-
-      <div className="mt-6 flex flex-col items-center gap-2 text-center">
-        <div className="relative flex h-28 w-28 items-center justify-center rounded-full border-4" style={{ borderColor: color(rep.overall) }}>
-          <div>
-            <div className="text-3xl font-extrabold">{rep.overall.toFixed(1)}</div>
-            <div className="text-xs text-[var(--color-faint)]">/ 4.0</div>
-          </div>
-        </div>
-        <h1 className="text-2xl font-bold">Interview scorecard</h1>
-      </div>
-
-      <div className="mt-8 grid gap-4 lg:grid-cols-2">
-        <Panel className="flex flex-col items-center justify-center p-6">
-          {(() => {
-            // Prefer assessed dims; if too few, fall back to ALL rubric dims
-            // (uncovered ones plotted at 0) so the radar is never blank/confusing.
-            const source = assessed.length >= 3 ? assessed : rep.scores;
-            const data = source.map((s) => ({ label: pretty(s.dimension), value: s.assessed === false ? 0 : s.score }));
-            if (data.length >= 3) {
-              return (
-                <>
-                  <Radar data={data} />
-                  {assessed.length < 3 && (
-                    <p className="mt-2 text-center text-xs text-[var(--color-faint)]">Limited data — dimensions you didn&apos;t cover are shown at 0.</p>
-                  )}
-                </>
-              );
-            }
-            return (
-              <div className="py-8 text-center">
-                <div className="mx-auto mb-3 grid h-16 w-16 place-items-center rounded-full border-2 border-dashed border-[var(--color-line)] text-2xl text-[var(--color-faint)]">📊</div>
-                <p className="text-sm text-[var(--color-muted)]">Not enough of the interview was completed to plot a skill radar.</p>
-                <p className="mt-1 text-xs text-[var(--color-faint)]">Finish a fuller attempt to see your dimension breakdown.</p>
-              </div>
-            );
-          })()}
-        </Panel>
-        <div className="grid gap-4">
-          <Panel className="p-5">
-            <h3 className="mb-3 font-semibold"><Badge tone="good">Strengths</Badge></h3>
-            <ul className="space-y-1.5 text-sm text-[var(--color-muted)]">{rep.strengths?.map((s, i) => <li key={i}>• {s}</li>)}</ul>
-          </Panel>
-          <Panel className="p-5">
-            <h3 className="mb-3 font-semibold"><Badge tone="warn">To improve</Badge></h3>
-            <ul className="space-y-1.5 text-sm text-[var(--color-muted)]">{rep.gaps?.map((s, i) => <li key={i}>• {s}</li>)}</ul>
-          </Panel>
-        </div>
-      </div>
-
-      {/* Your work — code / notes / diagram summary captured during the interview */}
-      {rep.workspace && rep.workspace.trim() && (
-        <>
-          <h2 className="mt-10 text-xl font-bold">Your work</h2>
-          <Panel className="mt-3 overflow-hidden">
-            <div className="border-b border-[var(--color-line)] px-4 py-2 text-xs text-[var(--color-faint)]">
-              {rep.modality === "coding" ? "Your code" : rep.modality === "written" ? "Your written answer" : "Your notes / diagram"}
-            </div>
-            <pre className="max-h-[50vh] overflow-auto whitespace-pre-wrap p-5 font-mono text-[13px] leading-relaxed text-[var(--color-ink)]">{rep.workspace}</pre>
-          </Panel>
-        </>
-      )}
-
-      {/* Per-dimension breakdown */}
-      <div className="mt-10 flex items-center gap-2">
-        <h2 className="text-xl font-bold">Dimension breakdown</h2>
-        <InfoTip text="These dimensions are specific to THIS interview type (each question has its own rubric). Each is scored 0–4 from evidence in your transcript and work, weighted, and averaged into the overall. Dimensions you didn't address are marked 'not assessed' rather than guessed." />
-      </div>
-      {notAssessed.length > 0 && (
-        <p className="mt-1 text-sm text-[var(--color-faint)]">Not assessed (too little said): {notAssessed.map((s) => pretty(s.dimension)).join(", ")}.</p>
-      )}
-      <div className="mt-4 space-y-3">
-        {assessed.map((s) => (
-          <Panel key={s.dimension} className="p-5">
-            <div className="flex items-center justify-between gap-4">
-              <div className="font-semibold">{pretty(s.dimension)}</div>
-              <div className="flex items-center gap-3">
-                <span className="text-xs text-[var(--color-faint)]">coverage {s.coverage_pct}%</span>
-                <Badge tone={tone(s.score)}>{s.score.toFixed(1)} / 4</Badge>
-              </div>
-            </div>
-            <div className="mt-2 h-2 w-full overflow-hidden rounded-full bg-[var(--color-panel-2)]">
-              <div className="h-full rounded-full" style={{ width: `${(s.score / 4) * 100}%`, background: color(s.score) }} />
-            </div>
-            {(s.expected || s.actual) && (
-              <div className="mt-3 grid gap-3 text-sm md:grid-cols-2">
-                {s.expected && <div><div className="text-xs font-medium text-[var(--color-faint)]">EXPECTED</div><div className="text-[var(--color-muted)]">{s.expected}</div></div>}
-                {s.actual && <div><div className="text-xs font-medium text-[var(--color-faint)]">ACTUAL</div><div className="text-[var(--color-muted)]">{s.actual}</div></div>}
+      {!report ? (
+        <Panel className="mx-auto mt-10 max-w-2xl p-8">
+          <p className="eyebrow">
+            {session ? "Your interview is saved" : "Loading your interview"}
+          </p>
+          <h1 className="mt-3 text-2xl font-medium">
+            {processing?.status === "feedback_failed"
+              ? "Feedback needs another try."
+              : "Preparing your next steps."}
+          </h1>
+          <p className="mt-4 text-sm text-[var(--color-muted)]" role="status">
+            {processing?.status === "feedback_failed"
+              ? processing.error ||
+                "The report could not be completed. Retry uses the same saved interview and does not consume another attempt."
+              : session
+                ? "Your saved answers and work are being reviewed. You can leave this page and return from History."
+                : "Loading the saved record. If the service is unavailable, retry or return to History."}
+          </p>
+          {processing?.status === "feedback_failed" &&
+            session?.funding === "byok" && (
+              <div className="mt-4">
+                <PersonalKeyRecovery sessionId={sid} onSaved={retryScoring} />
               </div>
             )}
-            {s.evidence && <div className="mt-2 text-sm italic text-[var(--color-faint)]">“{s.evidence}”</div>}
-          </Panel>
-        ))}
-      </div>
-
-      {/* Delivery + presence — observations only, never scored (HR-1/HR-3/HR-10) */}
-      {hasBehavioral && b && (
+          {processing?.status === "feedback_failed" && (
+            <Button
+              className="mt-5"
+              disabled={busy}
+              onClick={() => void retryScoring()}
+            >
+              {busy ? "Retrying…" : "Retry feedback"}
+            </Button>
+          )}
+          <Button href="/results" variant="ghost" className="ml-3 mt-5">
+            Back to history
+          </Button>
+        </Panel>
+      ) : (
         <>
-          <div className="mt-10 flex items-center gap-2">
-            <h2 className="text-xl font-bold">Delivery &amp; presence</h2>
-            <InfoTip text="How this is measured: filler words, pauses and speaking ratio come from your transcript. If you turned ON camera analysis, a face mesh (gaze), lighting, framing and posture were computed in your browser AND raw samples (about one every 2 seconds) were sent to and stored on our server to generate this feedback — retained about 30 days. None of these affect your interview score." />
+          <div className="mt-7 flex flex-wrap items-start justify-between gap-4">
+            <div>
+              <p className="eyebrow">A clearer next step</p>
+              <h1 className="page-title mt-3">
+                {report.scored === false
+                  ? "Keep going. There’s more to learn."
+                  : "Know what to practice next."}
+              </h1>
+              <p className="mt-3 text-[var(--color-muted)]">
+                {report.question_title}
+              </p>
+            </div>
+            <div className="no-print flex gap-2">
+              <Button variant="ghost" onClick={() => window.print()}>
+                Print / save PDF
+              </Button>
+              <Button variant="ghost" onClick={exportReport}>
+                Export record
+              </Button>
+            </div>
           </div>
-          <p className="mt-1 text-sm text-[var(--color-faint)]">Observations about how you came across — not right or wrong, and they do not affect your score.</p>
-          <div className="mt-4 grid grid-cols-2 gap-3 md:grid-cols-4">
-            <Metric label="Filler words / min" value={b.filler_per_min ?? 0} />
-            <Metric label="Long pauses" value={b.long_pauses ?? 0} />
-            <Metric label="Help requests" value={b.help_requests ?? 0} />
-            <Metric label="Speaking ratio" value={`${Math.round((b.speaking_ratio ?? 0) * 100)}%`} />
-          </div>
-
-          {/* Physical-presence signals: neutral, non-scored NOTES only. */}
-          {(b.samples ?? 0) > 0 && (
-            <div className="mt-4">
-              <Panel className="p-5">
-                <div className="text-sm font-semibold">Presence signals</div>
-                <p className="mt-1 text-xs text-[var(--color-faint)]">
-                  Presence signals vary by culture, ability, and setup — they are not a competency and don&apos;t affect your score.
-                </p>
-                <ul className="mt-3 space-y-1.5 text-sm text-[var(--color-muted)]">
-                  {presenceNotes(b).map((n) => (
-                    <li key={n.label}><span className="text-[var(--color-ink)]">{n.label}:</span> {n.note}</li>
+          {report.scored === false ? (
+            <p className="notice mt-6">
+              {report.note ??
+                "There was not enough evidence to score this attempt fairly. Your transcript and work are still saved below."}
+            </p>
+          ) : (
+            <div className="mt-7 grid gap-5 md:grid-cols-2">
+              <Panel className="p-6">
+                <p className="eyebrow">Keep doing</p>
+                <h2 className="mt-3 text-xl font-medium">What worked</h2>
+                <ul className="mt-4 space-y-3">
+                  {report.strengths?.map((x, i) => (
+                    <li
+                      key={i}
+                      className="text-sm leading-relaxed text-[var(--color-muted)]"
+                    >
+                      {x}
+                    </li>
                   ))}
                 </ul>
               </Panel>
+              <Panel className="p-6">
+                <p className="eyebrow">A little more attention</p>
+                <h2 className="mt-3 text-xl font-medium">
+                  Your next improvements
+                </h2>
+                <ol className="mt-4 space-y-3">
+                  {report.gaps?.slice(0, 3).map((x, i) => (
+                    <li
+                      key={i}
+                      className="text-sm leading-relaxed text-[var(--color-muted)]"
+                    >
+                      {i + 1}. {x}
+                    </li>
+                  ))}
+                </ol>
+              </Panel>
             </div>
           )}
+          <div className="mt-6 grid gap-6 lg:grid-cols-[1.7fr_1fr]">
+            <div className="space-y-4">
+              <Panel className="p-6">
+                <details open>
+                  <summary className="font-semibold">
+                    Evidence behind the feedback
+                  </summary>
+                  <div className="mt-5 space-y-5">
+                    {report.scores?.map((score) => (
+                      <div
+                        key={score.dimension}
+                        className="border-t border-[var(--color-line)] pt-4"
+                      >
+                        <div className="flex items-center justify-between gap-4">
+                          <h3 className="text-sm font-semibold">
+                            {pretty(score.dimension)}
+                          </h3>
+                          <Badge>
+                            {score.assessed === false
+                              ? "Not assessed"
+                              : score.score.toFixed(1) + " / 4"}
+                          </Badge>
+                        </div>
+                        {score.assessed !== false && (
+                          <>
+                            <p className="mt-2 text-sm text-[var(--color-muted)]">
+                              {score.actual}
+                            </p>
+                            {score.evidence && (
+                              <blockquote className="mt-3 border-l-2 border-[var(--color-accent)] pl-3 text-sm text-[var(--color-muted)]">
+                                {score.evidence}
+                              </blockquote>
+                            )}
+                            {score.expected && (
+                              <p className="mt-3 text-xs text-[var(--color-muted)]">
+                                Next time: {score.expected}
+                              </p>
+                            )}
+                          </>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </details>
+              </Panel>
+              <Panel className="p-6">
+                <details>
+                  <summary className="font-semibold">
+                    Full transcript · {turns.length} turns
+                  </summary>
+                  <div className="mt-5 max-h-[60vh] space-y-5 overflow-auto">
+                    {turns.map((turn, i) => (
+                      <div key={i}>
+                        <p className="text-xs font-semibold">
+                          {turn.role === "candidate"
+                            ? "You"
+                            : turn.role === "interviewer"
+                              ? "Interviewer"
+                              : "System"}
+                        </p>
+                        <p className="mt-1 whitespace-pre-wrap text-sm text-[var(--color-muted)]">
+                          {turn.text}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                </details>
+              </Panel>
+              <Panel className="p-6">
+                <details>
+                  <summary className="font-semibold">
+                    Saved work & interview settings
+                  </summary>
+                  <pre className="mt-4 max-h-80 overflow-auto whitespace-pre-wrap text-sm">
+                    {session?.workspace?.content ||
+                      report.workspace ||
+                      "No workspace content was added."}
+                  </pre>
+                  <p className="mt-4 text-xs text-[var(--color-muted)]">
+                    {pretty(session?.config.target_level ?? "mid")} ·{" "}
+                    {pretty(session?.config.challenge ?? "standard")} ·{" "}
+                    {session?.duration_minutes} minutes ·{" "}
+                    {session?.provider || "Configured provider"}{" "}
+                    {session?.model} · Scoring version{" "}
+                    {report.scoring_version ?? "original"}
+                  </p>
+                </details>
+              </Panel>
+            </div>
+            <aside className="space-y-5">
+              {(report.learning_drills ?? []).slice(0, 2).map((drill) => (
+                <Panel key={drill.id} className="p-6">
+                  <p className="eyebrow">
+                    {drill.minutes} minutes · no model needed
+                  </p>
+                  <h2 className="mt-3 text-lg font-semibold">{drill.title}</h2>
+                  <p className="mt-3 text-sm text-[var(--color-muted)]">
+                    {drill.prompt}
+                  </p>
+                  <ul className="mt-4 space-y-2 text-xs text-[var(--color-muted)]">
+                    {drill.checklist.map((x) => (
+                      <li key={x}>• {x}</li>
+                    ))}
+                  </ul>
+                  <label className="mt-4 block text-xs">
+                    Try it now
+                    <textarea
+                      rows={4}
+                      className="field-select mt-2"
+                      placeholder="Notes for this exercise — not saved"
+                    />
+                  </label>
+                </Panel>
+              ))}
+              <Panel className="p-6">
+                <h2 className="font-semibold">
+                  Help improve the next interview.
+                </h2>
+                <p className="my-3 text-sm text-[var(--color-muted)]">
+                  Two optional questions. A rating is enough.
+                </p>
+                <div className="flex flex-col gap-3">
+                  <FeedbackWidget
+                    target="interviewer"
+                    sessionId={sid}
+                    label="Did the interviewer feel realistic?"
+                  />
+                  <FeedbackWidget
+                    target="product"
+                    sessionId={sid}
+                    label="How was the product experience?"
+                  />
+                </div>
+              </Panel>
+              <Button href="/interviews" variant="ghost" className="w-full">
+                Explore your next practice →
+              </Button>
+            </aside>
+          </div>
+          <p className="mt-7 text-xs text-[var(--color-muted)]">
+            AI practice feedback can be incomplete or mistaken. Unassessed
+            dimensions are not zeroes. Camera presence and appearance do not
+            contribute to these scores.
+          </p>
         </>
       )}
-
-      {/* Coaching */}
-      {rep.coaching_md && (
-        <Panel className="mt-10 p-6">
-          <h2 className="text-xl font-bold">Coaching</h2>
-          <Markdown md={rep.coaching_md} />
-        </Panel>
-      )}
-
-      <div className="mt-8 flex justify-center">
-        <Button href="/dashboard">Practice another →</Button>
-      </div>
-    </main>
+    </AppShell>
   );
 }
-
-// presenceNotes turns the raw physical-presence signals into NEUTRAL, non-scored
-// notes (HR-1/HR-10). No numeric grade, ability/culture-aware, and looking at
-// on-screen work is never framed as negative.
-function presenceNotes(b: Partial<BehavioralSummary>): { label: string; note: string }[] {
-  const face = b.eye_contact_pct ?? 0;
-  const li = b.lighting_score ?? 0;
-  const fr = b.framing_score ?? 0;
-  const po = b.posture_score ?? 0;
-  return [
-    { label: "Facing camera", note: face >= 60
-      ? "You often faced the camera while speaking."
-      : "You often looked toward your work rather than the camera — that's perfectly fine for technical work." },
-    { label: "Lighting", note: li >= 3
-      ? "Your face was clearly visible to the webcam."
-      : li >= 1.5 ? "Your webcam lighting was a little uneven." : "Your webcam view was fairly dark." },
-    { label: "Framing", note: fr >= 3
-      ? "You stayed roughly centered in the webcam frame."
-      : "You moved around the webcam frame at times." },
-    { label: "Steadiness", note: po >= 3
-      ? "You stayed fairly still on camera."
-      : "You shifted around on camera a fair amount." },
-  ];
-}
-
-function Metric({ label, value }: { label: string; value: string | number }) {
-  return (
-    <Panel className="p-4">
-      <div className="text-2xl font-bold">{value}</div>
-      <div className="mt-1 flex items-center gap-1.5 text-xs text-[var(--color-faint)]">
-        {label}
-        {BEHAVIORAL_INFO[label] && <InfoTip text={BEHAVIORAL_INFO[label]} />}
-      </div>
-    </Panel>
-  );
-}
-
-// Minimal markdown: ## headings, - bullets, **bold**, blank-line paragraphs.
-function Markdown({ md }: { md: string }) {
-  const lines = md.split("\n");
-  const out: React.ReactNode[] = [];
-  let list: string[] = [];
-  const flush = () => {
-    if (list.length) { out.push(<ul key={out.length} className="my-2 space-y-1 pl-1">{list.map((l, i) => <li key={i} className="text-[var(--color-muted)]">• {bold(l)}</li>)}</ul>); list = []; }
-  };
-  for (const raw of lines) {
-    const line = raw.trim();
-    if (line.startsWith("## ")) { flush(); out.push(<h3 key={out.length} className="mt-4 font-semibold">{line.slice(3)}</h3>); }
-    else if (/^[-*]\s|^\d+\.\s/.test(line)) { list.push(line.replace(/^[-*]\s|^\d+\.\s/, "")); }
-    else if (line) { flush(); out.push(<p key={out.length} className="my-2 text-[var(--color-muted)]">{bold(line)}</p>); }
-  }
-  flush();
-  return <div className="mt-2 text-sm">{out}</div>;
-}
-function bold(s: string): React.ReactNode {
-  return s.split(/(\*\*[^*]+\*\*)/g).map((p, i) => (p.startsWith("**") ? <strong key={i} className="text-[var(--color-ink)]">{p.slice(2, -2)}</strong> : p));
-}
-
-function Centered({ children }: { children: React.ReactNode }) {
-  return <main className="flex min-h-screen items-center justify-center gap-2 text-[var(--color-muted)]">{children}</main>;
-}
-
 export default function ReportPage() {
-  return <Suspense fallback={<Centered>Loading…</Centered>}><ReportInner /></Suspense>;
+  return (
+    <Suspense fallback={<p className="p-10">Loading feedback…</p>}>
+      <ReportView />
+    </Suspense>
+  );
 }

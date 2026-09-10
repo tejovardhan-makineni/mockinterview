@@ -1,69 +1,157 @@
-// Small design-system primitives used across the app. Keep these dependency-free
-// and consistent with globals.css (studio dark theme).
+"use client";
 import Link from "next/link";
-import type { ReactNode } from "react";
-
-export function Panel({ children, className = "" }: { children: ReactNode; className?: string }) {
+import {
+  cloneElement,
+  isValidElement,
+  useId,
+  type ReactElement,
+  type ReactNode,
+  type ButtonHTMLAttributes,
+} from "react";
+export function Panel({
+  children,
+  className = "",
+}: {
+  children: ReactNode;
+  className?: string;
+}) {
   return (
     <div
-      className={`mi-panel rounded-2xl border border-[var(--color-line)] bg-[var(--color-panel)] transition-colors ${className}`}
-      style={{ borderRadius: "var(--radius-panel)" }}
+      className={
+        "mi-panel border border-[var(--color-line)] bg-[var(--color-panel)] " +
+        className
+      }
     >
       {children}
     </div>
   );
 }
-
-type BtnProps = {
+type BtnProps = ButtonHTMLAttributes<HTMLButtonElement> & {
   children: ReactNode;
-  onClick?: () => void;
   href?: string;
-  type?: "button" | "submit";
   variant?: "primary" | "ghost" | "danger";
-  disabled?: boolean;
-  className?: string;
-  title?: string;
 };
-
-export function Button({ children, onClick, href, type = "button", variant = "primary", disabled, className = "", title }: BtnProps) {
-  const base = "inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold transition disabled:opacity-40 disabled:cursor-not-allowed";
-  const styles = {
-    // Deep-blue gradient with white text — high contrast in every theme.
-    primary: "text-white bg-gradient-to-b from-[#4d8eff] to-[#005ac2] hover:shadow-[0_0_16px_rgba(76,215,246,0.35)] border border-white/10",
-    ghost: "border border-[var(--color-line)] text-[var(--color-ink)] hover:bg-[var(--color-panel-2)]",
-    danger: "bg-[var(--color-bad)] text-[#0b0d12] hover:brightness-110",
-  }[variant];
-  const cls = `${base} ${styles} ${className}`;
-  if (href) return <Link href={href} className={cls} title={title}>{children}</Link>;
-  return <button type={type} onClick={onClick} disabled={disabled} className={cls} title={title}>{children}</button>;
-}
-
-export function Badge({ children, tone = "muted" }: { children: ReactNode; tone?: "muted" | "accent" | "good" | "warn" | "bad" }) {
-  const map = {
-    muted: "text-[var(--color-muted)] border-[var(--color-line)]",
-    accent: "text-[var(--color-accent)] border-[var(--color-accent)]",
-    good: "text-[var(--color-good)] border-[var(--color-good)]",
-    warn: "text-[var(--color-warn)] border-[var(--color-warn)]",
-    bad: "text-[var(--color-bad)] border-[var(--color-bad)]",
-  }[tone];
-  return <span className={`inline-flex items-center rounded-full border px-2.5 py-1 text-xs font-medium leading-none ${map}`}>{children}</span>;
-}
-
-export function Field({ label, children, hint }: { label: string; children: ReactNode; hint?: string }) {
+export function Button({
+  children,
+  href,
+  type = "button",
+  variant = "primary",
+  disabled,
+  className = "",
+  ...rest
+}: BtnProps) {
+  const colors =
+    variant === "primary"
+      ? "bg-[var(--color-accent)] text-[var(--color-panel)] border-[var(--color-accent)]"
+      : variant === "danger"
+        ? "text-[var(--color-bad)] border-[var(--color-bad)] bg-transparent"
+        : "border-[var(--color-line)] bg-[var(--color-panel)] text-[var(--color-ink)]";
+  const cls =
+    "inline-flex min-h-11 items-center justify-center gap-2 rounded-lg border px-4 py-2.5 text-sm font-semibold transition hover:brightness-95 disabled:opacity-50 " +
+    colors +
+    " " +
+    className;
+  if (href)
+    return (
+      <Link
+        href={href}
+        className={cls}
+        title={rest.title}
+        aria-disabled={disabled || undefined}
+        onClick={(e) => {
+          if (disabled) e.preventDefault();
+        }}
+      >
+        {children}
+      </Link>
+    );
   return (
-    <label className="block">
-      <span className="mb-1.5 block text-sm font-medium text-[var(--color-muted)]">{label}</span>
+    <button {...rest} type={type} disabled={disabled} className={cls}>
       {children}
-      {hint && <span className="mt-1 block text-xs text-[var(--color-faint)]">{hint}</span>}
-    </label>
+    </button>
   );
 }
-
+export function Badge({
+  children,
+  tone = "muted",
+}: {
+  children: ReactNode;
+  tone?: "muted" | "accent" | "good" | "warn" | "bad";
+}) {
+  const color =
+    tone === "muted" ? "var(--color-muted)" : "var(--color-" + tone + ")";
+  return (
+    <span
+      className="inline-flex items-center rounded-md bg-[var(--color-panel-2)] px-2 py-1 text-xs font-medium"
+      style={{ color }}
+    >
+      {children}
+    </span>
+  );
+}
+export function Field({
+  label,
+  children,
+  hint,
+}: {
+  label: string;
+  children: ReactNode;
+  hint?: string;
+}) {
+  const generated = useId();
+  const control = isValidElement(children)
+    ? (children as ReactElement<{ id?: string; "aria-describedby"?: string }>)
+    : null;
+  const id = control?.props.id ?? generated;
+  const hintId = generated + "-hint";
+  return (
+    <div className="block text-sm">
+      <label htmlFor={id} className="mb-2 block font-medium">
+        {label}
+      </label>
+      {control
+        ? cloneElement(control, {
+            id,
+            "aria-describedby":
+              [control.props["aria-describedby"], hint ? hintId : undefined]
+                .filter(Boolean)
+                .join(" ") || undefined,
+          })
+        : children}
+      {hint && (
+        <span
+          id={hintId}
+          className="mt-2 block text-xs text-[var(--color-muted)]"
+        >
+          {hint}
+        </span>
+      )}
+    </div>
+  );
+}
 export function Input(props: React.InputHTMLAttributes<HTMLInputElement>) {
   return (
-    <input
-      {...props}
-      className={`w-full rounded-xl border border-[var(--color-line)] bg-[var(--color-studio)] px-3.5 py-2.5 text-sm text-[var(--color-ink)] outline-none placeholder:text-[var(--color-faint)] focus:border-[var(--color-accent)] ${props.className ?? ""}`}
-    />
+    <input {...props} className={"field-select " + (props.className ?? "")} />
+  );
+}
+export function ErrorNotice({
+  message,
+  onRetry,
+}: {
+  message: string;
+  onRetry?: () => void;
+}) {
+  return (
+    <div
+      role="alert"
+      className="notice border-[var(--color-bad)] text-[var(--color-bad)]"
+    >
+      <p>{message}</p>
+      {onRetry && (
+        <Button variant="ghost" onClick={onRetry} className="mt-3">
+          Try again
+        </Button>
+      )}
+    </div>
   );
 }

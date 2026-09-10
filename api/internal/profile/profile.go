@@ -126,13 +126,21 @@ func (s *Service) ListPersonalities(w http.ResponseWriter, _ *http.Request) {
 }
 
 func (s *Service) Get(w http.ResponseWriter, r *http.Request) {
-	c, _ := s.store.GetConfig(r.Context(), auth.UserID(r.Context()))
+	c, err := s.store.GetConfig(r.Context(), auth.UserID(r.Context()))
+	if err != nil {
+		httpx.WriteProblem(w, 503, "Could not load interview settings.")
+		return
+	}
 	httpx.WriteJSON(w, http.StatusOK, c)
 }
 
 // GetProfile returns the user's profile (DOB, gender, occupation, domain, status…).
 func (s *Service) GetProfile(w http.ResponseWriter, r *http.Request) {
-	raw, _ := s.store.GetSettings(r.Context(), auth.UserID(r.Context()))
+	raw, err := s.store.GetSettings(r.Context(), auth.UserID(r.Context()))
+	if err != nil {
+		httpx.WriteProblem(w, 503, "Could not load profile.")
+		return
+	}
 	w.Header().Set("Content-Type", "application/json")
 	_, _ = w.Write(raw)
 }

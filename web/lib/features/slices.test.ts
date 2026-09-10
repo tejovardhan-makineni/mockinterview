@@ -45,7 +45,9 @@ describe("resume slice (mock)", () => {
     expect((up.parsed.skills as unknown[]).length).toBeGreaterThan(0);
   });
   it("returns a job match with a score in range and keyword arrays", async () => {
-    const m = await resumeMock.matchResume("Senior Go engineer, Kafka, AWS, Terraform.");
+    const m = await resumeMock.matchResume(
+      "Senior Go engineer, Kafka, AWS, Terraform.",
+    );
     expect(m.match_score).toBeGreaterThanOrEqual(0);
     expect(m.match_score).toBeLessThanOrEqual(100);
     expect(Array.isArray(m.matched_keywords)).toBe(true);
@@ -70,21 +72,29 @@ describe("profile slice (mock)", () => {
 
 describe("interview slice (mock)", () => {
   it("creates a session and lists a completed one", async () => {
-    const sess = await interviewMock.createSession("url-shortener", DEFAULT_CONFIG);
+    const sess = await interviewMock.createSession(
+      "url-shortener",
+      DEFAULT_CONFIG,
+    );
     expect(sess.question_id).toBe("url-shortener");
     const list = await interviewMock.listSessions();
     expect(list.length).toBeGreaterThan(0);
   });
-  it("returns a report with scored dimensions", async () => {
+  it("returns an explicitly unscored simulated report", async () => {
     const rep = await interviewMock.getReport("s1");
+    if ("status" in rep) throw new Error("Expected ready mock report");
     expect(rep.session_id).toBe("s1");
-    expect(rep.scores.length).toBeGreaterThan(0);
+    expect(rep.scored).toBe(false);
+    expect(rep.scores).toEqual([]);
   });
   it("has no live URL in mock mode", () => {
     expect(interviewMock.liveUrl("s1", "t", 30)).toBe("");
   });
   it("carries pack context onto the created session", async () => {
-    const sess = await interviewMock.createSession("", DEFAULT_CONFIG, { packId: "amazon", roundId: "coding-1" });
+    const sess = await interviewMock.createSession("", DEFAULT_CONFIG, {
+      packId: "amazon",
+      roundId: "coding-1",
+    });
     expect(sess.pack_id).toBe("amazon");
     expect(sess.pack_round_id).toBe("coding-1");
   });
@@ -96,7 +106,9 @@ describe("packs slice (mock)", () => {
     expect(all.length).toBeGreaterThan(0);
     expect(all.some((p) => p.id === "amazon")).toBe(true);
     const eng = await packsMock.listPacks("software_engineering");
-    expect(eng.every((p) => p.areas.includes("software_engineering"))).toBe(true);
+    expect(eng.every((p) => p.areas.includes("software_engineering"))).toBe(
+      true,
+    );
     const consulting = await packsMock.listPacks("consulting");
     expect(consulting.some((p) => p.id === "amazon")).toBe(false);
   });

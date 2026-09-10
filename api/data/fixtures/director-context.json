@@ -1,0 +1,98 @@
+[
+  {
+    "scenario_id": "ai-output-critique-forecast",
+    "expected_format": "ai-output-critique",
+    "context_contains": [
+      "The cohorts were not randomly assigned.",
+      "candidate asks whether this was an experiment",
+      "candidate accepts causality"
+    ],
+    "candidate_examples": {
+      "clarification": "candidate asks whether this was an experiment",
+      "partial": "I have a tentative approach, but I need to check an assumption.",
+      "correction": "I would revise that after checking the evidence.",
+      "silence": "",
+      "wrap": "I am ready to finish."
+    }
+  },
+  {
+    "scenario_id": "sql-review-retention",
+    "expected_format": "work-sample-defense",
+    "context_contains": [
+      "Use a specified signup_date cohort that is old enough to have completed day 7.",
+      "candidate asks cohort dates or completeness",
+      "candidate uses COUNT after a join"
+    ],
+    "candidate_examples": {
+      "clarification": "candidate asks cohort dates or completeness",
+      "partial": "I have a tentative approach, but I need to check an assumption.",
+      "correction": "I would revise that after checking the evidence.",
+      "silence": "",
+      "wrap": "I am ready to finish."
+    }
+  },
+  {
+    "scenario_id": "incident-triage-checkout",
+    "expected_format": "incident-simulation",
+    "context_contains": [
+      "Version 42 deployed 12 minutes ago; errors began 2 minutes later.",
+      "candidate asks about recent changes or timing",
+      "candidate wants to change several things at once"
+    ],
+    "candidate_examples": {
+      "clarification": "candidate asks about recent changes or timing",
+      "partial": "I have a tentative approach, but I need to check an assumption.",
+      "correction": "I would revise that after checking the evidence.",
+      "silence": "",
+      "wrap": "I am ready to finish."
+    }
+  },
+  {
+    "scenario_id": "stakeholder-scope-negotiation",
+    "expected_format": "stakeholder-simulation",
+    "context_contains": [
+      "Feature A is required for a board demonstration. B saves manual work. C is desirable but not time-sensitive.",
+      "candidate asks about business priorities",
+      "candidate promises all three"
+    ],
+    "candidate_examples": {
+      "clarification": "candidate asks about business priorities",
+      "partial": "I have a tentative approach, but I need to check an assumption.",
+      "correction": "I would revise that after checking the evidence.",
+      "silence": "",
+      "wrap": "I am ready to finish."
+    }
+  },
+  {
+    "scenario_id": "candidate-questions-role-fit",
+    "expected_format": "reverse-interview",
+    "context_contains": [
+      "The first three months focus on shipping a small customer-facing improvement with a mentor.",
+      "candidate asks about success or initial expectations",
+      "candidate accepts a vague answer"
+    ],
+    "candidate_examples": {
+      "clarification": "candidate asks about success or initial expectations",
+      "partial": "I have a tentative approach, but I need to check an assumption.",
+      "correction": "I would revise that after checking the evidence.",
+      "silence": "",
+      "wrap": "I am ready to finish."
+    }
+  },
+  {
+    "scenario_id": "work-sample-reservation-review",
+    "expected_format": "work-sample-defense",
+    "context_contains": [
+      "Invalid inputs should be rejected, with original stock unchanged. An exception is acceptable only if the candidate explicitly proposes and explains a contract change.",
+      "candidate asks how invalid inputs should behave",
+      "candidate misses invalid requests"
+    ],
+    "candidate_examples": {
+      "clarification": "candidate asks how invalid inputs should behave",
+      "partial": "I have a tentative approach, but I need to check an assumption.",
+      "correction": "I would revise that after checking the evidence.",
+      "silence": "",
+      "wrap": "I am ready to finish."
+    }
+  }
+]

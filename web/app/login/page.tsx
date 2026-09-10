@@ -1,68 +1,164 @@
 "use client";
-
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { Suspense, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { api, IS_MOCK } from "@/lib/api";
-import { Button, Field, Input, Panel } from "@/components/ui";
-
-export default function LoginPage() {
+import { account } from "@/lib/features/auth";
+import { errorMessage } from "@/lib/http";
+import { AppShell } from "@/components/AppShell";
+import { Button, Field, Input, Panel, ErrorNotice } from "@/components/ui";
+function Login() {
   const router = useRouter();
-  const [mode, setMode] = useState<"login" | "register">("login");
+  const params = useSearchParams();
+  const [mode, setMode] = useState<"login" | "register" | "forgot">("login");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [err, setErr] = useState("");
+  const [error, setError] = useState("");
+  const [notice, setNotice] = useState("");
+  const [link, setLink] = useState("");
   const [busy, setBusy] = useState(false);
-
+  const next = params.get("next") ?? "/interviews";
+  const destination =
+    next.startsWith("/") && !next.startsWith("//") ? next : "/interviews";
   async function submit(e: React.FormEvent) {
     e.preventDefault();
-    setErr("");
     setBusy(true);
+    setError("");
+    setNotice("");
     try {
-      if (mode === "register") await api.register(email, password);
-      else await api.login(email, password);
-      router.push("/dashboard");
+      if (mode === "forgot") {
+        const r = await account.forgot(email);
+        setNotice(
+          r.message ??
+            "If this address has an account, a recovery link will be sent.",
+        );
+        setLink(r.development_action_url ?? "");
+      } else if (mode === "register") {
+        const r = await api.register(email, password);
+        if (r.verification_required) {
+          setNotice(
+            "Your account is ready. Verify your email before starting a hosted interview. Check your inbox for a verification link.",
+          );
+          setLink(r.development_action_url ?? "");
+        } else router.push(destination);
+      } else {
+        await api.login(email, password);
+        router.push(destination);
+      }
     } catch (e) {
-      setErr(e instanceof Error ? e.message : "Something went wrong");
+      setError(errorMessage(e));
     } finally {
       setBusy(false);
     }
   }
-
   return (
-    <main className="mx-auto flex min-h-screen max-w-md flex-col justify-center px-6">
-      <div className="mb-8 flex items-center gap-2.5 text-lg font-bold">
-        <span className="live-dot inline-block h-2.5 w-2.5 rounded-full bg-[var(--color-live)]" />
-        mockinterview<span className="text-[var(--color-accent)]">.live</span>
-      </div>
-      <Panel className="p-7">
-        <h1 className="text-2xl font-bold">{mode === "register" ? "Create your account" : "Welcome back"}</h1>
-        <p className="mt-1.5 text-sm text-[var(--color-muted)]">
-          {mode === "register" ? "Start your first mock interview in under a minute." : "Sign in to continue."}
+    <AppShell active="public">
+      <Panel className="mx-auto my-8 max-w-md p-8">
+        <p className="eyebrow">Your next step</p>
+        <h1 className="mt-3 text-3xl font-medium tracking-tight">
+          {mode === "register"
+            ? "Make room to practice."
+            : mode === "forgot"
+              ? "Recover your account."
+              : "Welcome back."}
+        </h1>
+        <p className="mt-3 text-sm text-[var(--color-muted)]">
+          {mode === "register"
+            ? "Save your interviews and turn feedback into progress."
+            : mode === "forgot"
+              ? "We’ll send a secure link if this email has an account."
+              : "Your practice and feedback are waiting."}
         </p>
-        {IS_MOCK && (
-          <p className="mt-3 rounded-lg border border-[var(--color-line)] bg-[var(--color-panel-2)] px-3 py-2 text-xs text-[var(--color-faint)]">
-            Demo mode — any email/password works, no backend needed.
-          </p>
-        )}
-        <form onSubmit={submit} className="mt-6 space-y-4">
+        <form className="mt-7 space-y-5" onSubmit={submit}>
           <Field label="Email">
-            <Input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@example.com" />
+            <Input
+              type="email"
+              autoComplete="email"
+              required
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            />
           </Field>
-          <Field label="Password">
-            <Input type="password" required minLength={6} value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" />
-          </Field>
-          {err && <p className="text-sm text-[var(--color-bad)]">{err}</p>}
+          {mode !== "forgot" && (
+            <Field
+              label="Password"
+              hint={
+                mode === "register"
+                  ? "Use at least 12 characters. Password managers and pasted passwords are welcome."
+                  : undefined
+              }
+            >
+              <Input
+                type="password"
+                autoComplete={
+                  mode === "register" ? "new-password" : "current-password"
+                }
+                required
+                minLength={mode === "register" && !IS_MOCK ? 12 : undefined}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+              />
+            </Field>
+          )}
+          {error && <ErrorNotice message={error} />}
           <Button type="submit" disabled={busy} className="w-full">
-            {busy ? "…" : mode === "register" ? "Create account" : "Sign in"}
+            {busy
+              ? "Please wait…"
+              : mode === "forgot"
+                ? "Send recovery link"
+                : mode === "register"
+                  ? "Create account"
+                  : "Sign in"}
           </Button>
         </form>
-        <button
-          className="mt-5 w-full text-center text-sm text-[var(--color-muted)] hover:text-[var(--color-ink)]"
-          onClick={() => setMode(mode === "register" ? "login" : "register")}
-        >
-          {mode === "register" ? "Already have an account? Sign in" : "Need an account? Register"}
-        </button>
+        {notice && (
+          <div className="notice mt-5" role="status">
+            {notice}
+            {link && (
+              <a href={link} className="mt-3 block underline">
+                Open local development action link
+              </a>
+            )}
+            <Button href={destination} variant="ghost" className="mt-4">
+              Continue to practice
+            </Button>
+          </div>
+        )}
+        <div className="mt-5 flex flex-wrap justify-between gap-2 text-sm">
+          <button
+            className="underline"
+            onClick={() => {
+              setMode(mode === "login" ? "register" : "login");
+              setError("");
+              setNotice("");
+            }}
+          >
+            {mode === "login" ? "Create an account" : "Back to sign in"}
+          </button>
+          {mode === "login" && (
+            <button className="underline" onClick={() => setMode("forgot")}>
+              Forgot password?
+            </button>
+          )}
+        </div>
+        <p className="mt-6 text-xs text-[var(--color-muted)]">
+          By using this service, review{" "}
+          <a href="/terms" className="underline">
+            Using mockinterview
+          </a>{" "}
+          and{" "}
+          <a href="/privacy" className="underline">
+            Privacy & your data
+          </a>
+          .
+        </p>
       </Panel>
-    </main>
+    </AppShell>
+  );
+}
+export default function LoginPage() {
+  return (
+    <Suspense fallback={<p className="p-10">Loading sign in…</p>}>
+      <Login />
+    </Suspense>
   );
 }

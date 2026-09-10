@@ -31,9 +31,9 @@ func (d Delivery) TTSPrompt() string {
 type facePersona struct{ name, role string }
 
 var facePersonas = map[string]facePersona{
-	"sophia":  {"Sophia", "one of the engineers on the panel"},
-	"marcus":  {"Marcus", "a senior engineer here"},
-	"richard": {"Richard", "a staff engineer, and I'll be your interviewer today"},
+	"alex":   {"Alex", "your AI practice interviewer"},
+	"jordan": {"Jordan", "your AI practice interviewer"},
+	"sam":    {"Sam", "your AI practice interviewer"},
 }
 
 func personaFor(faceID string) facePersona {

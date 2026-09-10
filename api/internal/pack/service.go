@@ -2,6 +2,8 @@ package pack
 
 import (
 	"context"
+	"crypto/rand"
+	"encoding/hex"
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
@@ -41,13 +43,43 @@ func (s *Service) ResolveRound(packID, roundID string) (questionID, focus string
 		if rd.ID != roundID {
 			continue
 		}
-		qid, ok := PickQuestion(s.corpus, p, rd)
+		var seed [16]byte
+		if _, err := rand.Read(seed[:]); err != nil {
+			return "", "", false
+		}
+		qid, ok := PickQuestionWithSeed(s.corpus, p, rd, hex.EncodeToString(seed[:]), nil)
 		if !ok {
 			return "", "", false
 		}
 		return qid, rd.Focus, true
 	}
 	return "", "", false
+}
+
+func (s *Service) ResolveRoundForUser(ctx context.Context, userID, packID, roundID string) (questionID, focus string, minutes int, ok bool) {
+	p, ok := s.packs.Get(packID)
+	if !ok {
+		return "", "", 0, false
+	}
+	previous, err := s.repo.SessionsForPack(ctx, userID, packID)
+	if err != nil {
+		return "", "", 0, false
+	}
+	seen := []string{}
+	for _, session := range previous {
+		seen = append(seen, session.QuestionID)
+	}
+	for _, rd := range p.Rounds {
+		if rd.ID == roundID {
+			var seed [16]byte
+			if _, err := rand.Read(seed[:]); err != nil {
+				return "", "", 0, false
+			}
+			id, found := PickQuestionWithSeed(s.corpus, p, rd, hex.EncodeToString(seed[:]), seen)
+			return id, rd.Focus, rd.Minutes, found
+		}
+	}
+	return "", "", 0, false
 }
 
 // ---- client-safe views ----
@@ -62,13 +94,15 @@ type roundSummary struct {
 
 // packSummary is the client-safe pack projection for the list endpoint.
 type packSummary struct {
-	ID      string         `json:"id"`
-	Name    string         `json:"name"`
-	Company string         `json:"company,omitempty"`
-	Blurb   string         `json:"blurb,omitempty"`
-	Areas   []string       `json:"areas"`
-	Track   string         `json:"track,omitempty"`
-	Rounds  []roundSummary `json:"rounds"`
+	ReviewStatus string         `json:"review_status"`
+	SourceNote   string         `json:"source_note"`
+	ID           string         `json:"id"`
+	Name         string         `json:"name"`
+	Company      string         `json:"company,omitempty"`
+	Blurb        string         `json:"blurb,omitempty"`
+	Areas        []string       `json:"areas"`
+	Track        string         `json:"track,omitempty"`
+	Rounds       []roundSummary `json:"rounds"`
 }
 
 func summarize(p Pack) packSummary {
@@ -77,6 +111,7 @@ func summarize(p Pack) packSummary {
 		rounds = append(rounds, roundSummary{ID: rd.ID, Title: rd.Title, Kind: rd.Kind, Minutes: rd.Minutes})
 	}
 	return packSummary{
+		ReviewStatus: p.ReviewStatus, SourceNote: p.SourceNote,
 		ID: p.ID, Name: p.Name, Company: p.Company, Blurb: p.Blurb,
 		Areas: p.Areas, Track: p.Track, Rounds: rounds,
 	}
@@ -126,7 +161,7 @@ type progressResponse struct {
 }
 
 // Progress serves the authed user's per-round progress for a pack, plus an
-// overall readiness (mean scored round overall / 5, normalised 0..1; 0 if none).
+// normalized practice score (mean scored round overall / 4; 0 if none).
 func (s *Service) Progress(w http.ResponseWriter, r *http.Request) {
 	uid := auth.UserID(r.Context())
 	if uid == "" {
@@ -183,11 +218,17 @@ func (s *Service) Progress(w http.ResponseWriter, r *http.Request) {
 		}
 		rounds = append(rounds, pr)
 	}
-	// Readiness is normalised 0..1 (mean of scored round overalls / 5) so the UI
-	// can render it directly as a percentage ring.
+	// Historical API field name is retained; this is a normalized practice
+	// score, not a calibrated probability of interview or hiring success.
 	readiness := 0.0
 	if n > 0 {
-		readiness = (sum / float64(n)) / 5.0
+		readiness = (sum / float64(n)) / 4.0
+		if readiness > 1 {
+			readiness = 1
+		}
+		if readiness < 0 {
+			readiness = 0
+		}
 	}
 	httpx.WriteJSON(w, http.StatusOK, progressResponse{
 		Pack: summarize(p), Rounds: rounds, OverallReadiness: readiness,

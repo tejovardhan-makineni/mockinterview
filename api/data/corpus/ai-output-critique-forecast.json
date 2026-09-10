@@ -1,0 +1,158 @@
+{
+  "schema_version": 1,
+  "revision": 1,
+  "format_id": "ai-output-critique",
+  "review_status": "preview",
+  "provenance": {
+    "authorship": "Original project scenario, AI-assisted draft. Practitioner review and calibration pending.",
+    "license": "AGPL-3.0-only"
+  },
+  "minutes": 20,
+  "id": "ai-output-critique-forecast",
+  "title": "Audit an AI-Generated Forecast",
+  "track": "professional",
+  "domain": "ai_critique",
+  "areas": [
+    "data_science",
+    "product_management"
+  ],
+  "modality": "written",
+  "difficulty": "mid",
+  "tags": [
+    "ai-output-critique",
+    "practical",
+    "community-preview"
+  ],
+  "prompt": "An AI assistant wrote: \"Trial conversion rose from 10% to 12%, so our new onboarding caused a 20% revenue increase. Roll out to everyone.\" Its only input was two monthly cohorts: May had 100 conversions from 1,000 trials; June had 120 from 1,000. June also introduced a new advertising channel. Review the claim, identify missing evidence, and write a decision note. No external analysis tools are required.",
+  "blurb": "Audit an AI-Generated Forecast \u2014 original practice scenario, awaiting practitioner review.",
+  "rubric": [
+    {
+      "key": "claims",
+      "label": "Claim verification",
+      "description": "Separates observed conversion, relative versus absolute change, revenue and causal claims.",
+      "weight": 1,
+      "anchors": {
+        "0": "No demonstrated evidence of this skill.",
+        "2": "Addresses the core point with relevant evidence and a reasonable explanation.",
+        "4": "Gives a precise, well-supported explanation, tests alternatives and states limitations."
+      }
+    },
+    {
+      "key": "confounding",
+      "label": "Alternative explanations",
+      "description": "Identifies acquisition mix and other cohort differences as possible confounders.",
+      "weight": 1,
+      "anchors": {
+        "0": "No demonstrated evidence of this skill.",
+        "2": "Addresses the core point with relevant evidence and a reasonable explanation.",
+        "4": "Gives a precise, well-supported explanation, tests alternatives and states limitations."
+      }
+    },
+    {
+      "key": "uncertainty",
+      "label": "Uncertainty",
+      "description": "Does not invent significance or an effect estimate from unsupported assumptions.",
+      "weight": 1,
+      "anchors": {
+        "0": "No demonstrated evidence of this skill.",
+        "2": "Addresses the core point with relevant evidence and a reasonable explanation.",
+        "4": "Gives a precise, well-supported explanation, tests alternatives and states limitations."
+      }
+    },
+    {
+      "key": "evidence",
+      "label": "Verification plan",
+      "description": "Requests allocation, segment, revenue and uncertainty information relevant to the decision.",
+      "weight": 1,
+      "anchors": {
+        "0": "No demonstrated evidence of this skill.",
+        "2": "Addresses the core point with relevant evidence and a reasonable explanation.",
+        "4": "Gives a precise, well-supported explanation, tests alternatives and states limitations."
+      }
+    },
+    {
+      "key": "decision",
+      "label": "Decision quality",
+      "description": "Makes a bounded recommendation with a measurable follow-up.",
+      "weight": 1,
+      "anchors": {
+        "0": "No demonstrated evidence of this skill.",
+        "2": "Addresses the core point with relevant evidence and a reasonable explanation.",
+        "4": "Gives a precise, well-supported explanation, tests alternatives and states limitations."
+      }
+    },
+    {
+      "key": "ownership",
+      "label": "AI oversight",
+      "description": "Owns verification rather than trusting confident language or discarding all useful observations.",
+      "weight": 1,
+      "anchors": {
+        "0": "No demonstrated evidence of this skill.",
+        "2": "Addresses the core point with relevant evidence and a reasonable explanation.",
+        "4": "Gives a precise, well-supported explanation, tests alternatives and states limitations."
+      }
+    }
+  ],
+  "reference": {
+    "scenario": "An AI assistant wrote: \"Trial conversion rose from 10% to 12%, so our new onboarding caused a 20% revenue increase. Roll out to everyone.\" Its only input was two monthly cohorts: May had 100 conversions from 1,000 trials; June had 120 from 1,000. June also introduced a new advertising channel. Review the claim, identify missing evidence, and write a decision note. No external analysis tools are required.",
+    "facts": [
+      {
+        "id": "allocation",
+        "value": "The cohorts were not randomly assigned.",
+        "reveal_when": "candidate asks whether this was an experiment"
+      },
+      {
+        "id": "revenue",
+        "value": "No revenue data was supplied.",
+        "reveal_when": "candidate asks for revenue"
+      },
+      {
+        "id": "channels",
+        "value": "The new channel supplied 40% of June trials; segment conversion rates are unavailable.",
+        "reveal_when": "candidate asks about channel mix"
+      }
+    ],
+    "model_points": [
+      "Separates observed conversion, relative versus absolute change, revenue and causal claims.",
+      "Identifies acquisition mix and other cohort differences as possible confounders.",
+      "Does not invent significance or an effect estimate from unsupported assumptions.",
+      "Requests allocation, segment, revenue and uncertainty information relevant to the decision.",
+      "Makes a bounded recommendation with a measurable follow-up.",
+      "Owns verification rather than trusting confident language or discarding all useful observations."
+    ],
+    "probes": [
+      {
+        "trigger": "candidate accepts causality",
+        "question": "What else changed between the two cohorts?"
+      },
+      {
+        "trigger": "candidate dismisses every statement",
+        "question": "Which part of the assistant\u2019s claim can you support with the supplied counts?"
+      }
+    ],
+    "red_flags": [
+      "Inventing unavailable facts",
+      "Ignoring explicit constraints",
+      "Claiming unperformed verification"
+    ],
+    "follow_ups": [
+      "What additional evidence would change your decision?"
+    ],
+    "exemplar_answer": "Multiple approaches are valid. A strong response establishes the goal, uses the provided facts, tests alternatives, explains tradeoffs, and states uncertainty."
+  },
+  "interviewer_notes": "Assess careful verification and uncertainty, not anti-AI sentiment. The observed difference is two percentage points and a 20% relative conversion increase; neither establishes revenue growth or causality. Reveal only authored facts.",
+  "learning_drills": [
+    {
+      "id": "repair-one-decision",
+      "title": "Repair one decision",
+      "minutes": 5,
+      "prompt": "Choose one decision in your answer. Rewrite the explanation using one fact, one alternative, and one limitation. This is self-guided practice; no model assessment is performed.",
+      "checklist": [
+        "Identify the decision",
+        "Cite a supplied fact",
+        "Compare an alternative",
+        "State what would change your mind"
+      ]
+    }
+  ]
+}

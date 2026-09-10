@@ -1,0 +1,167 @@
+{
+  "schema_version": 1,
+  "revision": 1,
+  "format_id": "incident-simulation",
+  "review_status": "preview",
+  "provenance": {
+    "authorship": "Original project scenario, AI-assisted draft. Practitioner review and calibration pending.",
+    "license": "AGPL-3.0-only"
+  },
+  "minutes": 25,
+  "id": "incident-triage-checkout",
+  "title": "Triage a Checkout Incident",
+  "track": "professional",
+  "domain": "incident_response",
+  "areas": [
+    "software_engineering"
+  ],
+  "modality": "conversational",
+  "difficulty": "mid",
+  "tags": [
+    "incident-simulation",
+    "practical",
+    "community-preview"
+  ],
+  "prompt": "You are the on-call engineer. Checkout errors rose after a deployment, and support is reporting failed purchases. Talk through your first actions, what evidence you need, and how you will communicate. I will provide incident observations when asked.",
+  "blurb": "Triage a Checkout Incident \u2014 original practice scenario, awaiting practitioner review.",
+  "rubric": [
+    {
+      "key": "triage",
+      "label": "Impact and priority",
+      "description": "Establishes user impact and severity before chasing an interesting technical theory.",
+      "weight": 1,
+      "anchors": {
+        "0": "No demonstrated evidence of this skill.",
+        "2": "Addresses the core point with relevant evidence and a reasonable explanation.",
+        "4": "Gives a precise, well-supported explanation, tests alternatives and states limitations."
+      }
+    },
+    {
+      "key": "hypotheses",
+      "label": "Evidence-led diagnosis",
+      "description": "Separates observations from hypotheses and requests discriminating evidence.",
+      "weight": 1,
+      "anchors": {
+        "0": "No demonstrated evidence of this skill.",
+        "2": "Addresses the core point with relevant evidence and a reasonable explanation.",
+        "4": "Gives a precise, well-supported explanation, tests alternatives and states limitations."
+      }
+    },
+    {
+      "key": "mitigation",
+      "label": "Safe mitigation",
+      "description": "Considers rollback or feature disabling with an explicit verification plan.",
+      "weight": 1,
+      "anchors": {
+        "0": "No demonstrated evidence of this skill.",
+        "2": "Addresses the core point with relevant evidence and a reasonable explanation.",
+        "4": "Gives a precise, well-supported explanation, tests alternatives and states limitations."
+      }
+    },
+    {
+      "key": "communication",
+      "label": "Incident communication",
+      "description": "Names an owner, audience, update cadence and uncertainty.",
+      "weight": 1,
+      "anchors": {
+        "0": "No demonstrated evidence of this skill.",
+        "2": "Addresses the core point with relevant evidence and a reasonable explanation.",
+        "4": "Gives a precise, well-supported explanation, tests alternatives and states limitations."
+      }
+    },
+    {
+      "key": "validation",
+      "label": "Recovery verification",
+      "description": "Checks user-facing success and metrics rather than assuming a deployment fixed it.",
+      "weight": 1,
+      "anchors": {
+        "0": "No demonstrated evidence of this skill.",
+        "2": "Addresses the core point with relevant evidence and a reasonable explanation.",
+        "4": "Gives a precise, well-supported explanation, tests alternatives and states limitations."
+      }
+    },
+    {
+      "key": "learning",
+      "label": "Follow-up",
+      "description": "Separates immediate mitigation from root-cause work and records prevention tasks.",
+      "weight": 1,
+      "anchors": {
+        "0": "No demonstrated evidence of this skill.",
+        "2": "Addresses the core point with relevant evidence and a reasonable explanation.",
+        "4": "Gives a precise, well-supported explanation, tests alternatives and states limitations."
+      }
+    }
+  ],
+  "reference": {
+    "scenario": "You are the on-call engineer. Checkout errors rose after a deployment, and support is reporting failed purchases. Talk through your first actions, what evidence you need, and how you will communicate. I will provide incident observations when asked.",
+    "facts": [
+      {
+        "id": "timing",
+        "value": "Version 42 deployed 12 minutes ago; errors began 2 minutes later.",
+        "reveal_when": "candidate asks about recent changes or timing"
+      },
+      {
+        "id": "impact",
+        "value": "Checkout error rate rose from 1% to 18%; browse and cart endpoints remain normal.",
+        "reveal_when": "candidate asks about scope or impact"
+      },
+      {
+        "id": "errors",
+        "value": "Most failures are payment request timeouts. Payment-provider status reports no incident.",
+        "reveal_when": "candidate asks about errors or dependencies"
+      },
+      {
+        "id": "rollback",
+        "value": "Version 41 is available for rollback. No database migration was part of version 42.",
+        "reveal_when": "candidate asks about rollback safety"
+      },
+      {
+        "id": "change",
+        "value": "Version 42 changed the payment client timeout from 5 seconds to 500 milliseconds.",
+        "reveal_when": "candidate asks to inspect the deployment diff"
+      }
+    ],
+    "model_points": [
+      "Establishes user impact and severity before chasing an interesting technical theory.",
+      "Separates observations from hypotheses and requests discriminating evidence.",
+      "Considers rollback or feature disabling with an explicit verification plan.",
+      "Names an owner, audience, update cadence and uncertainty.",
+      "Checks user-facing success and metrics rather than assuming a deployment fixed it.",
+      "Separates immediate mitigation from root-cause work and records prevention tasks."
+    ],
+    "probes": [
+      {
+        "trigger": "candidate wants to change several things at once",
+        "question": "How will you know which change restored checkout?"
+      },
+      {
+        "trigger": "candidate declares recovery",
+        "question": "What would you verify from a customer\u2019s perspective?"
+      }
+    ],
+    "red_flags": [
+      "Inventing unavailable facts",
+      "Ignoring explicit constraints",
+      "Claiming unperformed verification"
+    ],
+    "follow_ups": [
+      "What additional evidence would change your decision?"
+    ],
+    "exemplar_answer": "Multiple approaches are valid. A strong response establishes the goal, uses the provided facts, tests alternatives, explains tradeoffs, and states uncertainty."
+  },
+  "interviewer_notes": "Simulate an incident partner. Reveal requested facts consistently. Do not turn this into a trivia quiz about a cloud vendor. Accept rollback, disabling the change, or another safe evidence-based mitigation. New metrics after a hypothetical action are unknown unless explicitly supplied.",
+  "learning_drills": [
+    {
+      "id": "repair-one-decision",
+      "title": "Repair one decision",
+      "minutes": 5,
+      "prompt": "Choose one decision in your answer. Rewrite the explanation using one fact, one alternative, and one limitation. This is self-guided practice; no model assessment is performed.",
+      "checklist": [
+        "Identify the decision",
+        "Cite a supplied fact",
+        "Compare an alternative",
+        "State what would change your mind"
+      ]
+    }
+  ]
+}

@@ -21,8 +21,8 @@ func TestGeminiVoiceNameFallback(t *testing.T) {
 }
 
 func TestValidFace(t *testing.T) {
-	if !ValidFace("sophia") {
-		t.Error("sophia should be a valid face")
+	if !ValidFace("alex") {
+		t.Error("alex should be a valid face")
 	}
 	if ValidFace("ghost") {
 		t.Error("unknown face should be invalid")
@@ -43,7 +43,7 @@ func TestValidPersonality(t *testing.T) {
 // Every face must carry a kind the client understands.
 func TestFacesHaveKnownKind(t *testing.T) {
 	for _, f := range Faces {
-		if f.Kind != "human" && f.Kind != "fun" && f.Kind != "realistic" {
+		if f.Kind != "human" && f.Kind != "fun" && f.Kind != "realistic" && f.Kind != "illustrated" {
 			t.Errorf("face %q has unexpected kind %q", f.ID, f.Kind)
 		}
 	}

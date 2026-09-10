@@ -1,0 +1,152 @@
+{
+  "schema_version": 1,
+  "revision": 1,
+  "format_id": "work-sample-defense",
+  "review_status": "preview",
+  "provenance": {
+    "authorship": "Original project scenario, AI-assisted draft. Practitioner review and calibration pending.",
+    "license": "AGPL-3.0-only"
+  },
+  "minutes": 25,
+  "id": "work-sample-reservation-review",
+  "title": "Review a Reservation Change",
+  "track": "professional",
+  "domain": "code_review",
+  "areas": [
+    "software_engineering"
+  ],
+  "modality": "written",
+  "difficulty": "mid",
+  "tags": [
+    "work-sample-defense",
+    "practical",
+    "community-preview"
+  ],
+  "prompt": "Review this proposed inventory function. It should accept positive integer requests and nonnegative integer stock, reject invalid inputs without changing stock, and return (remaining_stock, accepted). Explain your review, propose tests, and defend a minimal fix. This is a code walkthrough; code is not executed here.\n\ndef reserve(stock, requested):\n    if stock < requested:\n        return stock, False\n    return stock - requested, True",
+  "blurb": "Review a Reservation Change \u2014 original practice scenario, awaiting practitioner review.",
+  "rubric": [
+    {
+      "key": "correctness",
+      "label": "Correctness",
+      "description": "Finds that a negative request increases stock and zero is accepted contrary to the contract.",
+      "weight": 1,
+      "anchors": {
+        "0": "No demonstrated evidence of this skill.",
+        "2": "Addresses the core point with relevant evidence and a reasonable explanation.",
+        "4": "Gives a precise, well-supported explanation, tests alternatives and states limitations."
+      }
+    },
+    {
+      "key": "validation",
+      "label": "Input contracts",
+      "description": "Distinguishes integer validation from business acceptance; considers booleans in Python and documents policy.",
+      "weight": 1,
+      "anchors": {
+        "0": "No demonstrated evidence of this skill.",
+        "2": "Addresses the core point with relevant evidence and a reasonable explanation.",
+        "4": "Gives a precise, well-supported explanation, tests alternatives and states limitations."
+      }
+    },
+    {
+      "key": "tests",
+      "label": "Test design",
+      "description": "Covers exact stock, insufficient stock, zero, negative, noninteger and unchanged stock on rejection.",
+      "weight": 1,
+      "anchors": {
+        "0": "No demonstrated evidence of this skill.",
+        "2": "Addresses the core point with relevant evidence and a reasonable explanation.",
+        "4": "Gives a precise, well-supported explanation, tests alternatives and states limitations."
+      }
+    },
+    {
+      "key": "minimality",
+      "label": "Focused change",
+      "description": "Proposes a small guard before mutation rather than unrelated architecture changes.",
+      "weight": 1,
+      "anchors": {
+        "0": "No demonstrated evidence of this skill.",
+        "2": "Addresses the core point with relevant evidence and a reasonable explanation.",
+        "4": "Gives a precise, well-supported explanation, tests alternatives and states limitations."
+      }
+    },
+    {
+      "key": "collaboration",
+      "label": "Review communication",
+      "description": "Explains impact respectfully and separates blockers from suggestions.",
+      "weight": 1,
+      "anchors": {
+        "0": "No demonstrated evidence of this skill.",
+        "2": "Addresses the core point with relevant evidence and a reasonable explanation.",
+        "4": "Gives a precise, well-supported explanation, tests alternatives and states limitations."
+      }
+    },
+    {
+      "key": "tradeoffs",
+      "label": "Defending a choice",
+      "description": "Explains reject-versus-error behavior and the limitations of an in-memory helper.",
+      "weight": 1,
+      "anchors": {
+        "0": "No demonstrated evidence of this skill.",
+        "2": "Addresses the core point with relevant evidence and a reasonable explanation.",
+        "4": "Gives a precise, well-supported explanation, tests alternatives and states limitations."
+      }
+    }
+  ],
+  "reference": {
+    "scenario": "Review this proposed inventory function. It should accept positive integer requests and nonnegative integer stock, reject invalid inputs without changing stock, and return (remaining_stock, accepted). Explain your review, propose tests, and defend a minimal fix. This is a code walkthrough; code is not executed here.\n\ndef reserve(stock, requested):\n    if stock < requested:\n        return stock, False\n    return stock - requested, True",
+    "facts": [
+      {
+        "id": "policy",
+        "value": "Invalid inputs should be rejected, with original stock unchanged. An exception is acceptable only if the candidate explicitly proposes and explains a contract change.",
+        "reveal_when": "candidate asks how invalid inputs should behave"
+      },
+      {
+        "id": "scope",
+        "value": "This helper runs in one process with one caller; database concurrency is outside this exercise.",
+        "reveal_when": "candidate asks about concurrent callers"
+      }
+    ],
+    "model_points": [
+      "Finds that a negative request increases stock and zero is accepted contrary to the contract.",
+      "Distinguishes integer validation from business acceptance; considers booleans in Python and documents policy.",
+      "Covers exact stock, insufficient stock, zero, negative, noninteger and unchanged stock on rejection.",
+      "Proposes a small guard before mutation rather than unrelated architecture changes.",
+      "Explains impact respectfully and separates blockers from suggestions.",
+      "Explains reject-versus-error behavior and the limitations of an in-memory helper."
+    ],
+    "probes": [
+      {
+        "trigger": "candidate misses invalid requests",
+        "question": "What happens when requested is negative?"
+      },
+      {
+        "trigger": "candidate proposes a fix",
+        "question": "Which test would fail before your change and pass after it?"
+      }
+    ],
+    "red_flags": [
+      "Inventing unavailable facts",
+      "Ignoring explicit constraints",
+      "Claiming unperformed verification"
+    ],
+    "follow_ups": [
+      "What additional evidence would change your decision?"
+    ],
+    "exemplar_answer": "Multiple approaches are valid. A strong response establishes the goal, uses the provided facts, tests alternatives, explains tradeoffs, and states uncertainty."
+  },
+  "interviewer_notes": "Ask for a first-pass review, then one risk-based test, then a minimal fix and justification. Give time to inspect the code. Do not claim to execute tests. Respect correct alternatives.",
+  "learning_drills": [
+    {
+      "id": "repair-one-decision",
+      "title": "Repair one decision",
+      "minutes": 5,
+      "prompt": "Choose one decision in your answer. Rewrite the explanation using one fact, one alternative, and one limitation. This is self-guided practice; no model assessment is performed.",
+      "checklist": [
+        "Identify the decision",
+        "Cite a supplied fact",
+        "Compare an alternative",
+        "State what would change your mind"
+      ]
+    }
+  ]
+}

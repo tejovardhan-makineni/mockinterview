@@ -16,7 +16,7 @@ func TestSystemPromptIncludesPersonaAndProbes(t *testing.T) {
 	}
 	sections := SectionPlan(q, true, "")
 	sp := SystemPrompt(q, "annoying", 5, "deepdive", "7y backend eng", "candidate drew a Postgres box", 30, "charon", "en", sections, "")
-	for _, want := range []string{"impatient", "Debezium", "High-level design", "deepdive", "Postgres", "Charon", "SECTION PLAN"} {
+	for _, want := range []string{"impatient", "Debezium", "High-level design", "deepdive", "Postgres", "Alex", "STAGES"} {
 		if !strings.Contains(sp, want) {
 			t.Errorf("system prompt missing %q", want)
 		}

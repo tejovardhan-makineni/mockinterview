@@ -32,6 +32,7 @@ func main() {
 	// Standalone corpus validation (used by authoring agents + CI). Loads a
 	// directory, validates every question, exits non-zero on any error. No DB.
 	validateDir := flag.String("validate-corpus", "", "validate all questions in this directory and exit")
+	migrateOnly := flag.Bool("migrate-only", false, "apply pending migrations and exit")
 	checkLLM := flag.Bool("check-llm", false, "run a tiny live call against every provider whose key is set, then exit")
 	flag.Parse()
 	if *validateDir != "" {
@@ -57,13 +58,18 @@ func main() {
 		os.Exit(1)
 	}
 
-	ctx := context.Background()
+	ctx, stopWorkers := context.WithCancel(context.Background())
+	defer stopWorkers()
 	st, err := store.Open(ctx, cfg.DatabaseURL, cfg.DBMaxConns)
 	if err != nil {
 		slog.Error("store", "err", err)
 		os.Exit(1)
 	}
 	defer st.Close()
+	if *migrateOnly {
+		slog.Info("migrations complete")
+		return
+	}
 
 	ai, err := llm.New(ctx, llm.Settings{
 		Provider:  llm.Provider(cfg.LLMProvider),
@@ -90,18 +96,21 @@ func main() {
 	}
 	slog.Info("startup", "mode", cfg.Mode, "llm_provider", info.Provider, "llm_model", info.Model, "llm_stub", ai.Stubbed(), "model_live", cfg.ModelLive, "questions", cat.Count(), "packs", packs.Count())
 
-	app := &App{Cfg: cfg, Store: st, LLM: ai, Corpus: cat, Packs: packs}
+	go st.Maintenance(ctx)
+	app := &App{Background: ctx, Cfg: cfg, Store: st, LLM: ai, Corpus: cat, Packs: packs}
 
 	r := chi.NewRouter()
 	r.Use(middleware.RequestID)
-	r.Use(middleware.RealIP)
+	// Do not trust arbitrary X-Real-IP/True-Client-IP headers for auth limits.
 	r.Use(middleware.Recoverer)
-	r.Use(middleware.Timeout(60 * time.Second))
+	r.Use(httpx.Observe(cfg.ReleaseSHA))
+	r.Use(httpx.RESTTimeout(60 * time.Second))
 	r.Use(cors.Handler(cors.Options{
 		AllowedOrigins:   cfg.CORSAllow,
 		AllowedMethods:   []string{"GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"},
 		AllowedHeaders:   []string{"Authorization", "Content-Type"},
 		AllowCredentials: false,
+		ExposedHeaders:   []string{"X-Request-ID", "X-Release"},
 		MaxAge:           300,
 	}))
 
@@ -109,6 +118,19 @@ func main() {
 		httpx.WriteJSON(w, http.StatusOK, map[string]any{"ok": true, "llm_stub": ai.Stubbed()})
 	})
 
+	r.Get("/readyz", func(w http.ResponseWriter, r *http.Request) {
+		check, cancel := context.WithTimeout(r.Context(), 3*time.Second)
+		defer cancel()
+		if err := st.Pool.Ping(check); err != nil {
+			httpx.WriteJSON(w, 503, map[string]any{"ready": false, "dependency": "database"})
+			return
+		}
+		if cfg.Environment == "production" && ai.Stubbed() {
+			httpx.WriteJSON(w, 503, map[string]any{"ready": false, "dependency": "model_configuration"})
+			return
+		}
+		httpx.WriteJSON(w, 200, map[string]any{"ready": true, "release": cfg.ReleaseSHA, "llm_stub": ai.Stubbed(), "provider": info.Provider})
+	})
 	r.Route("/api/v1", app.Routes)
 
 	srv := &http.Server{
@@ -129,6 +151,7 @@ func main() {
 	signal.Notify(stop, os.Interrupt, syscall.SIGTERM)
 	<-stop
 	slog.Info("shutting down")
+	stopWorkers()
 	shutCtx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 	_ = srv.Shutdown(shutCtx)

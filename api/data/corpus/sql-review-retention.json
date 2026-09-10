@@ -1,0 +1,158 @@
+{
+  "schema_version": 1,
+  "revision": 1,
+  "format_id": "work-sample-defense",
+  "review_status": "preview",
+  "provenance": {
+    "authorship": "Original project scenario, AI-assisted draft. Practitioner review and calibration pending.",
+    "license": "AGPL-3.0-only"
+  },
+  "minutes": 25,
+  "id": "sql-review-retention",
+  "title": "Review a Retention Query",
+  "track": "professional",
+  "domain": "sql_review",
+  "areas": [
+    "data_science",
+    "software_engineering"
+  ],
+  "modality": "written",
+  "difficulty": "mid",
+  "tags": [
+    "work-sample-defense",
+    "practical",
+    "community-preview"
+  ],
+  "prompt": "A dashboard defines day-7 retention as the fraction of a signup cohort with at least one event on calendar day 7 after signup, in UTC. users(id, signup_date) has one row per user; events(user_id, event_date) can have many rows per day. Review this query, explain the defects, and propose corrected SQL or pseudocode. This is query reasoning, not an executing SQL environment.\nSELECT COUNT(e.user_id) * 1.0 / COUNT(u.id)\nFROM users u JOIN events e ON u.id=e.user_id\nWHERE e.event_date = u.signup_date + INTERVAL '7 days';",
+  "blurb": "Review a Retention Query \u2014 original practice scenario, awaiting practitioner review.",
+  "rubric": [
+    {
+      "key": "denominator",
+      "label": "Cohort denominator",
+      "description": "Preserves every eligible cohort user including users without events.",
+      "weight": 1,
+      "anchors": {
+        "0": "No demonstrated evidence of this skill.",
+        "2": "Addresses the core point with relevant evidence and a reasonable explanation.",
+        "4": "Gives a precise, well-supported explanation, tests alternatives and states limitations."
+      }
+    },
+    {
+      "key": "duplicates",
+      "label": "Duplicate events",
+      "description": "Counts a retained user once regardless of event count.",
+      "weight": 1,
+      "anchors": {
+        "0": "No demonstrated evidence of this skill.",
+        "2": "Addresses the core point with relevant evidence and a reasonable explanation.",
+        "4": "Gives a precise, well-supported explanation, tests alternatives and states limitations."
+      }
+    },
+    {
+      "key": "time",
+      "label": "Time semantics",
+      "description": "Uses UTC calendar dates and avoids incomplete cohorts.",
+      "weight": 1,
+      "anchors": {
+        "0": "No demonstrated evidence of this skill.",
+        "2": "Addresses the core point with relevant evidence and a reasonable explanation.",
+        "4": "Gives a precise, well-supported explanation, tests alternatives and states limitations."
+      }
+    },
+    {
+      "key": "query",
+      "label": "Query reasoning",
+      "description": "Uses EXISTS or a deduplicated left join with correct aggregation.",
+      "weight": 1,
+      "anchors": {
+        "0": "No demonstrated evidence of this skill.",
+        "2": "Addresses the core point with relevant evidence and a reasonable explanation.",
+        "4": "Gives a precise, well-supported explanation, tests alternatives and states limitations."
+      }
+    },
+    {
+      "key": "tests",
+      "label": "Example-based validation",
+      "description": "Proposes a hand-checkable cohort including zero events and repeated events.",
+      "weight": 1,
+      "anchors": {
+        "0": "No demonstrated evidence of this skill.",
+        "2": "Addresses the core point with relevant evidence and a reasonable explanation.",
+        "4": "Gives a precise, well-supported explanation, tests alternatives and states limitations."
+      }
+    },
+    {
+      "key": "communication",
+      "label": "Explain the metric",
+      "description": "Explains how the original join distorts numerator and denominator.",
+      "weight": 1,
+      "anchors": {
+        "0": "No demonstrated evidence of this skill.",
+        "2": "Addresses the core point with relevant evidence and a reasonable explanation.",
+        "4": "Gives a precise, well-supported explanation, tests alternatives and states limitations."
+      }
+    }
+  ],
+  "reference": {
+    "scenario": "A dashboard defines day-7 retention as the fraction of a signup cohort with at least one event on calendar day 7 after signup, in UTC. users(id, signup_date) has one row per user; events(user_id, event_date) can have many rows per day. Review this query, explain the defects, and propose corrected SQL or pseudocode. This is query reasoning, not an executing SQL environment.\nSELECT COUNT(e.user_id) * 1.0 / COUNT(u.id)\nFROM users u JOIN events e ON u.id=e.user_id\nWHERE e.event_date = u.signup_date + INTERVAL '7 days';",
+    "facts": [
+      {
+        "id": "cohort",
+        "value": "Use a specified signup_date cohort that is old enough to have completed day 7.",
+        "reveal_when": "candidate asks cohort dates or completeness"
+      },
+      {
+        "id": "dates",
+        "value": "Both date columns are UTC DATE values, not timestamps.",
+        "reveal_when": "candidate asks about time zones or date types"
+      },
+      {
+        "id": "nulls",
+        "value": "User IDs and signup dates are non-null. A cohort can contain zero users.",
+        "reveal_when": "candidate asks nulls or empty inputs"
+      }
+    ],
+    "model_points": [
+      "Preserves every eligible cohort user including users without events.",
+      "Counts a retained user once regardless of event count.",
+      "Uses UTC calendar dates and avoids incomplete cohorts.",
+      "Uses EXISTS or a deduplicated left join with correct aggregation.",
+      "Proposes a hand-checkable cohort including zero events and repeated events.",
+      "Explains how the original join distorts numerator and denominator."
+    ],
+    "probes": [
+      {
+        "trigger": "candidate uses COUNT after a join",
+        "question": "What does a user with three events contribute to each count?"
+      },
+      {
+        "trigger": "candidate excludes nonreturners",
+        "question": "Where is a user who never created an event represented?"
+      }
+    ],
+    "red_flags": [
+      "Inventing unavailable facts",
+      "Ignoring explicit constraints",
+      "Claiming unperformed verification"
+    ],
+    "follow_ups": [
+      "What additional evidence would change your decision?"
+    ],
+    "exemplar_answer": "Multiple approaches are valid. A strong response establishes the goal, uses the provided facts, tests alternatives, explains tradeoffs, and states uncertainty."
+  },
+  "interviewer_notes": "Do not demand a particular SQL dialect. Accept semantically correct EXISTS or deduplication approaches. Ask the candidate to test a tiny example aloud. Never claim the query was run.",
+  "learning_drills": [
+    {
+      "id": "repair-one-decision",
+      "title": "Repair one decision",
+      "minutes": 5,
+      "prompt": "Choose one decision in your answer. Rewrite the explanation using one fact, one alternative, and one limitation. This is self-guided practice; no model assessment is performed.",
+      "checklist": [
+        "Identify the decision",
+        "Cite a supplied fact",
+        "Compare an alternative",
+        "State what would change your mind"
+      ]
+    }
+  ]
+}

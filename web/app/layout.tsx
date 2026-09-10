@@ -3,17 +3,30 @@ import "./globals.css";
 import { LanguageProvider } from "@/lib/i18n";
 
 export const metadata: Metadata = {
-  title: "mockinterview.live — AI System Design Interviews",
+  title: "mockinterview.live — A clearer next interview",
   description:
-    "Realistic AI-led mock system design interviews: a human-like interviewer that talks, watches you draw, interrupts with deep-dive questions, and scores you across every dimension of a real interview.",
+    "Practice interviews for your role, review evidence-based feedback, and contribute new formats to an open-source platform.",
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   return (
-    <html lang="en">
+    <html
+      lang="en"
+      data-theme="light"
+      data-scroll-behavior="smooth"
+      suppressHydrationWarning
+    >
       <head>
         {/* Apply saved theme before paint to avoid a flash. */}
-        <script dangerouslySetInnerHTML={{ __html: `try{document.documentElement.setAttribute('data-theme',localStorage.getItem('mi_theme')||'dark')}catch(e){}` }} />
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `try{document.documentElement.setAttribute('data-theme',localStorage.getItem('mi_theme')||'light')}catch(e){}`,
+          }}
+        />
       </head>
       <body>
         <LanguageProvider>

@@ -1,22 +1,23 @@
-.PHONY: help up down dev api web build test seed lint fmt tidy
+.PHONY: help install up down dev api web build test lint fmt tidy validate-content preview-format new-scenario new-format local-stack check-llm
+ID ?= work-sample-reservation-review
 
 help:
-	@echo "mockinterview — targets:"
-	@echo "  make up      start Postgres (docker compose)"
-	@echo "  make down    stop Postgres"
-	@echo "  make dev     run API + web together (needs 'make up' first)"
-	@echo "  make api     run the Go API only"
-	@echo "  make web     run the Next.js web only"
-	@echo "  make seed    seed a demo user (corpus is embedded/loaded automatically)"
-	@echo "  make build   build API binary + web static export"
-	@echo "  make test    go test ./... + web build check"
+	@echo "make install: install Go and web dependencies"
+	@echo "make up / down: start or stop local services (preserves database)"
+	@echo "make dev: run API and web; make local-stack: run both in Docker"
+	@echo "make test / lint / build / validate-content: local checks"
+	@echo "make new-scenario ID=my-scenario / new-format ID=my-format: draft content"
+	@echo "make preview-format ID=work-sample-reservation-review: private author preview"
+
+install:
+	cd api && go mod download
+	cd web && npm ci --no-audit --no-fund
 
 up:
-	docker compose up -d
-	@echo "waiting for postgres..." && sleep 2
+	docker compose up -d --wait postgres
 
 down:
-	docker compose down
+	docker compose --profile app down
 
 api:
 	cd api && go run ./cmd/mockinterview
@@ -24,34 +25,46 @@ api:
 web:
 	cd web && npm run dev
 
-# Run API and web concurrently; Ctrl-C stops both.
 dev:
-	@bash -c '\
-	  ( cd api && go run ./cmd/mockinterview ) & API_PID=$$!; \
-	  ( cd web && npm run dev ) & WEB_PID=$$!; \
-	  trap "kill $$API_PID $$WEB_PID 2>/dev/null" INT TERM; \
-	  wait'
+	@bash scripts/dev.sh
 
-seed:
-	cd api && go run ./cmd/mockinterview -seed
-
-# Verify every LLM provider whose key is in .env with a tiny real call.
-check-llm:
-	cd api && go run ./cmd/mockinterview -check-llm
+local-stack:
+	docker compose --profile app up -d --build --wait
 
 build:
 	cd api && go build -o bin/mockinterview ./cmd/mockinterview
 	cd web && npm run build
 
 test:
-	cd api && go build ./... && go test ./...
+	cd api && go test ./...
+	cd web && npm test
+	python3 scripts/test_content.py
+	python3 scripts/test_deploy.py
 
 lint:
 	cd api && go vet ./...
 	cd web && npm run lint
 
+validate-content:
+	cd api && go run ./cmd/mockinterview -validate-corpus data/corpus
+	cd api && go test ./internal/corpus ./internal/pack ./internal/live ./internal/scoring
+	python3 scripts/test_content.py
+
+preview-format:
+	cd api && go run ./cmd/previewformat -id "$(ID)"
+
+new-scenario:
+	python3 scripts/content.py new-scenario --id "$(ID)"
+
+new-format:
+	python3 scripts/content.py new-format --id "$(ID)"
+
+# Explicitly makes billable calls to providers configured in .env; never run in CI.
+check-llm:
+	cd api && go run ./cmd/mockinterview -check-llm
+
 fmt:
-	cd api && gofmt -w .
+	cd api && gofmt -w internal cmd
 
 tidy:
 	cd api && go mod tidy

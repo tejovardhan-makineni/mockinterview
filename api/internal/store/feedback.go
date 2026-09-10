@@ -8,6 +8,7 @@ import (
 // Feedback is a single piece of user feedback (general or in-interview). Context
 // carries page/session/interview debug details for reproduction.
 type Feedback struct {
+	Status    string          `json:"status"`
 	ID        string          `json:"id"`
 	UserID    string          `json:"user_id,omitempty"`
 	Email     string          `json:"email,omitempty"`
@@ -37,7 +38,7 @@ func (s *Store) ListFeedback(ctx context.Context, limit int) ([]Feedback, error)
 		limit = 200
 	}
 	rows, err := s.Pool.Query(ctx, `
-		SELECT f.id, f.user_id, COALESCE(u.email, ''), f.kind, f.message, f.rating, f.context,
+		SELECT f.status,f.id, f.user_id, COALESCE(u.email, ''), f.kind, f.message, f.rating, f.context,
 		       to_char(f.created_at, 'YYYY-MM-DD"T"HH24:MI:SS')
 		FROM feedback f LEFT JOIN users u ON u.id = f.user_id
 		ORDER BY f.created_at DESC LIMIT $1`, limit)
@@ -48,10 +49,22 @@ func (s *Store) ListFeedback(ctx context.Context, limit int) ([]Feedback, error)
 	var out []Feedback
 	for rows.Next() {
 		var f Feedback
-		if err := rows.Scan(&f.ID, &f.UserID, &f.Email, &f.Kind, &f.Message, &f.Rating, &f.Context, &f.CreatedAt); err != nil {
+		if err := rows.Scan(&f.Status, &f.ID, &f.UserID, &f.Email, &f.Kind, &f.Message, &f.Rating, &f.Context, &f.CreatedAt); err != nil {
 			return nil, err
 		}
 		out = append(out, f)
 	}
 	return out, rows.Err()
+}
+
+// UpdateFeedbackStatus is called only by the role-gated triage handler.
+func (s *Store) UpdateFeedbackStatus(ctx context.Context, id, status string) error {
+	tag, err := s.Pool.Exec(ctx, `UPDATE feedback SET status=$2 WHERE id=$1`, id, status)
+	if err != nil {
+		return err
+	}
+	if tag.RowsAffected() != 1 {
+		return ErrNotFound
+	}
+	return nil
 }

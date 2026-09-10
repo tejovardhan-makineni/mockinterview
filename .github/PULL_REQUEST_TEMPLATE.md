@@ -23,3 +23,14 @@
 ## Notes
 
 <!-- Screenshots, tradeoffs, follow-ups, anything reviewers should know. -->
+
+## Interview content (if changed)
+
+- [ ] Original/licensed material; authorship, sources and AI assistance disclosed.
+- [ ] Revision updated; new formats/scenarios start as preview.
+- [ ] Conditional facts and probe triggers are consistent and included in fixtures.
+- [ ] Alternatives, partial answers, late corrections, silence and wrap-up considered.
+- [ ] Rubric dimensions are observable, fair and distinguish not-assessed evidence.
+- [ ] Reviewer and calibration claims reflect work actually completed.
+- [ ] `make validate-content` passes; private answers stay out of candidate summaries.
+- [ ] No real candidate records, confidential questions or credentials included.

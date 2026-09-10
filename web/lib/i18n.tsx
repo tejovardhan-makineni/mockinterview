@@ -47,13 +47,10 @@ type Ctx = { lang: string; setLang: (l: string) => void; t: (s: string) => strin
 const I18nContext = createContext<Ctx>({ lang: "en", setLang: () => {}, t: (s) => s, version: 0, languages: LANGUAGES });
 
 export function LanguageProvider({ children }: { children: React.ReactNode }) {
-  // Lazy initializer reads the saved language directly. First paint still renders
-  // English (the translation dict is empty until fetched), so this cannot cause a
-  // hydration mismatch — the DOM text matches the server either way.
-  const [lang, setLangState] = useState<string>(() => {
-    try { const s = localStorage.getItem(LS_LANG); if (s && CODES.has(s)) return s; } catch { /* ignore */ }
-    return "en";
-  });
+  // This release's redesigned navigation is English. Interview response language
+  // is configured separately; an old UI-language preference must not relabel
+  // English screens for assistive technology or introduce hydration mismatches.
+  const [lang, setLangState] = useState<string>("en");
   const [version, setVersion] = useState(0);
   // The picker's option set. Seeded from the static mirror (so the first paint
   // renders synchronously) and refreshed from the backend /languages catalog via

@@ -180,9 +180,21 @@ func stubDirectorTurn(req GenerateRequest) string {
 			break
 		}
 	}
+	if last == "" || strings.HasPrefix(last, "begin the interview using its authored opening") {
+		if _, brief, ok := strings.Cut(req.System, "CANDIDATE BRIEF: "); ok {
+			brief, _, _ = strings.Cut(brief, "\nPRIVATE SCENARIO MATERIAL")
+			if brief = strings.TrimSpace(brief); brief != "" {
+				return "Demo interview. " + brief
+			}
+		}
+		return "Demo interview. Tell me how you would approach the scenario you selected."
+	}
+	// Demo follow-ups cannot infer professional facts. Keep them useful across
+	// domains and reserve technical examples for an actual technical workspace.
+	if !strings.Contains(req.System, "Workspace: system_design.") && !strings.Contains(req.System, "Workspace: coding.") {
+		return "What evidence supports that choice, and what uncertainty would you clarify next?"
+	}
 	switch {
-	case last == "":
-		return "Let's begin. Walk me through how you'd approach this system. Start with the functional requirements."
 	case strings.Contains(last, "database") || strings.Contains(last, "postgres") || strings.Contains(last, "sql"):
 		return "You mentioned a database. How would you capture changes out of it — say for a search index or cache? Would you use change data capture, something like Debezium?"
 	case strings.Contains(last, "cache"):

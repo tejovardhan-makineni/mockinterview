@@ -10,6 +10,8 @@
 package pack
 
 import (
+	"crypto/sha256"
+	"encoding/binary"
 	"fmt"
 	"sort"
 	"strings"
@@ -32,13 +34,16 @@ type Round struct {
 
 // Pack is an ordered interview loop for a company or goal.
 type Pack struct {
-	ID      string   `json:"id"`
-	Name    string   `json:"name"`
-	Company string   `json:"company,omitempty"`
-	Blurb   string   `json:"blurb,omitempty"`
-	Areas   []string `json:"areas"` // professions this pack targets (corpus areas)
-	Track   string   `json:"track,omitempty"`
-	Rounds  []Round  `json:"rounds"`
+	Revision     int      `json:"revision"`
+	ReviewStatus string   `json:"review_status"`
+	SourceNote   string   `json:"source_note"`
+	ID           string   `json:"id"`
+	Name         string   `json:"name"`
+	Company      string   `json:"company,omitempty"`
+	Blurb        string   `json:"blurb,omitempty"`
+	Areas        []string `json:"areas"` // professions this pack targets (corpus areas)
+	Track        string   `json:"track,omitempty"`
+	Rounds       []Round  `json:"rounds"`
 }
 
 // Validate checks a pack against the corpus: every area is a valid profession,
@@ -64,6 +69,12 @@ func Validate(p Pack, cat *corpus.Catalog) error {
 	}
 	seen := map[string]bool{}
 	for i, rd := range p.Rounds {
+		if rd.Minutes < 3 || rd.Minutes > 90 {
+			return fmt.Errorf("%s: round %q minutes must be 3..90", p.ID, rd.ID)
+		}
+		if rd.Difficulty != "" && rd.Difficulty != "entry" && rd.Difficulty != "junior" && rd.Difficulty != "mid" && rd.Difficulty != "senior" && rd.Difficulty != "staff" {
+			return fmt.Errorf("%s: invalid round difficulty", p.ID)
+		}
 		if strings.TrimSpace(rd.ID) == "" {
 			return fmt.Errorf("%s: round %d: id required", p.ID, i)
 		}
@@ -88,6 +99,13 @@ func Validate(p Pack, cat *corpus.Catalog) error {
 			if q.Domain != rd.Domain || q.Modality != rd.Modality {
 				return fmt.Errorf("%s: round %q: question %q is (%s,%s), round is (%s,%s)",
 					p.ID, rd.ID, rd.QuestionID, q.Domain, q.Modality, rd.Domain, rd.Modality)
+			}
+			areaSet := map[string]bool{}
+			for _, a := range p.Areas {
+				areaSet[a] = true
+			}
+			if !intersects(q.Areas, areaSet) {
+				return fmt.Errorf("%s: pinned question does not match profession", p.ID)
 			}
 			continue
 		}
@@ -157,4 +175,43 @@ func PickQuestion(cat *corpus.Catalog, p Pack, round Round) (questionID string, 
 		}
 	}
 	return cands[0], true
+}
+
+// PickQuestionWithSeed rotates a pooled round without repeating previous
+// questions while an unseen compatible scenario remains. Persist the chosen
+// question on the session; never re-resolve it during reconnect or scoring.
+func PickQuestionWithSeed(cat *corpus.Catalog, p Pack, round Round, seed string, seen []string) (string, bool) {
+	if round.QuestionID != "" {
+		_, ok := cat.Get(round.QuestionID)
+		return round.QuestionID, ok
+	}
+	pool := candidates(cat, p, round)
+	if len(pool) == 0 {
+		return "", false
+	}
+	excluded := map[string]bool{}
+	for _, id := range seen {
+		excluded[id] = true
+	}
+	fresh := []string{}
+	for _, id := range pool {
+		if !excluded[id] {
+			fresh = append(fresh, id)
+		}
+	}
+	if len(fresh) > 0 {
+		pool = fresh
+	}
+	preferred := []string{}
+	for _, id := range pool {
+		q, _ := cat.Get(id)
+		if q.Difficulty == round.Difficulty {
+			preferred = append(preferred, id)
+		}
+	}
+	if len(preferred) > 0 {
+		pool = preferred
+	}
+	hash := sha256.Sum256([]byte(seed + ":" + p.ID + ":" + round.ID))
+	return pool[binary.BigEndian.Uint64(hash[:8])%uint64(len(pool))], true
 }

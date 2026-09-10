@@ -1,140 +1,152 @@
 "use client";
 
-// Renders + animates any registered 3D avatar. Characters are plug-and-play
-// builders (see ./avatars/*) registered against ./avatars/kit — swap or add one
-// and it shows up everywhere. Falls back to the 2D <Avatar> if WebGL is absent.
-import { memo, useEffect, useRef, useState, type MutableRefObject } from "react";
-import * as THREE from "three";
-import { Avatar as Avatar2D, type Mood } from "./Avatar";
-import { getBuilder, getPalette, getGltf, type AvatarParts, type Mood as KitMood } from "./avatars/kit";
-import { GltfAvatar } from "./GltfAvatar";
-
-// The avatar is driven by a REF the parent mutates — so rapid audio updates
-// never re-render React (which was causing flicker). `level`/`bright` feed the
-// realistic glTF avatar's viseme lip-sync (openness + vowel color); the
-// procedural avatar uses `amplitude`.
-export type AvatarDrive = { speaking: boolean; amplitude: number; mood: Mood; level?: number; bright?: number };
-// Side-effect imports register the realistic glTF faces, plus the procedural
-// human builders which remain only as a graceful fallback if a glTF fails to
-// load or a legacy/unknown face id is requested.
-import "./avatars/humans";
-import "./avatars/realistic";
-
-function webglOK() {
-  try {
-    const c = document.createElement("canvas");
-    return !!(window.WebGLRenderingContext && (c.getContext("webgl") || c.getContext("experimental-webgl")));
-  } catch { return false; }
+// Original vector character artwork created for this project. No third-party
+// avatar assets, likenesses, textures or fonts are used. AGPL-3.0, same as project.
+import { memo, useEffect, useRef, type MutableRefObject } from "react";
+export type AvatarDrive = {
+  speaking: boolean;
+  amplitude: number;
+  mood: string;
+  level?: number;
+  bright?: number;
+};
+export const INTERVIEWERS = [
+  { id: "alex", name: "Alex" },
+  { id: "jordan", name: "Jordan" },
+  { id: "sam", name: "Sam" },
+];
+export function interviewerName(id?: string) {
+  return INTERVIEWERS.find((p) => p.id === id)?.name ?? "Alex";
 }
-
-function ProceduralAvatar({ faceId, drive }: { faceId: string; drive: MutableRefObject<AvatarDrive> }) {
-  const mount = useRef<HTMLDivElement>(null);
-  const st = useRef({ amp: 0, blink: 0, nextBlink: 60, t: 0 });
-
+function Portrait({
+  faceId,
+  drive,
+}: {
+  faceId: string;
+  drive: MutableRefObject<AvatarDrive>;
+}) {
+  const mouth = useRef<SVGEllipseElement>(null);
+  const head = useRef<SVGGElement>(null);
+  const eyes = useRef<SVGGElement>(null);
+  const skin =
+    faceId === "jordan" ? "#a76d50" : faceId === "sam" ? "#d69b76" : "#e2b18d";
+  const hair = faceId === "sam" ? "#73736d" : "#343d35";
   useEffect(() => {
-    if (!mount.current || !webglOK()) return;
-    const el = mount.current;
-
-    const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(30, 1, 0.1, 100);
-    camera.position.set(0, 0.05, 4.2);
-    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-    renderer.setPixelRatio(Math.min(2, window.devicePixelRatio));
-    el.appendChild(renderer.domElement);
-
-    scene.add(new THREE.AmbientLight(0xffffff, 0.6));
-    const key = new THREE.DirectionalLight(0xfff2e6, 1.1); key.position.set(2, 3, 4); scene.add(key);
-    const rim = new THREE.DirectionalLight(0x7c8bff, 0.7); rim.position.set(-3, 1, -2); scene.add(rim);
-
-    const builder = getBuilder(faceId) ?? getBuilder("ava");
-    let parts: AvatarParts | null = null;
-    if (builder) {
-      parts = builder(THREE, getPalette(faceId));
-      scene.add(parts.root);
-    } else {
-      const fallback = new THREE.Mesh(new THREE.SphereGeometry(1, 32, 32), new THREE.MeshStandardMaterial({ color: 0xf1c9a5 }));
-      scene.add(fallback);
-    }
-    const lidRest = parts?.lidRestY ?? 0.16;
-    let lastMood: KitMood | "" = "";
-
-    const resize = () => { const w = el.clientWidth, h = el.clientHeight; renderer.setSize(w, h, false); camera.aspect = w / h; camera.updateProjectionMatrix(); };
-    resize();
-    const ro = new ResizeObserver(resize); ro.observe(el);
-
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)");
     let raf = 0;
-    const loop = () => {
-      const s = st.current; s.t += 1;
+    const loop = (time: number) => {
       const d = drive.current;
-      // lip-sync
-      const target = d.speaking ? 0.12 + d.amplitude * 0.5 : 0.12;
-      s.amp = s.amp + (target - s.amp) * 0.4;
-      if (parts?.mouth) parts.mouth.scale.y = d.speaking ? 0.12 + s.amp * 1.3 : 0.12;
-      // blink
-      if (s.t > s.nextBlink) { s.blink = 1; s.nextBlink = s.t + 120 + Math.floor(Math.abs(Math.sin(s.t) * 160)); }
-      if (s.blink > 0) s.blink = Math.max(0, s.blink - 0.18);
-      const open = 1 - (s.blink > 0.5 ? (s.blink - 0.5) * 2 : 0);
-      parts?.lids?.forEach((lid) => { lid.position.y = lidRest - (1 - open) * 0.18; });
-      // mood → expression (only when it changes)
-      const effMood: KitMood = d.speaking ? "speaking" : d.mood;
-      if (effMood !== lastMood) { parts?.setMood?.(effMood); lastMood = effMood; }
-      // gentle sway/nod
-      const speak = d.speaking ? 1 : 0.4;
-      if (parts?.root) { parts.root.rotation.y = Math.sin(s.t / 70) * 0.08 * speak; parts.root.rotation.x = Math.sin(s.t / 45) * 0.04 * speak; }
-      parts?.tick?.(s.t, d.speaking, s.amp);
-      raf = requestAnimationFrame(loop); renderer.render(scene, camera);
+      const speaking = d.speaking && !reduce.matches;
+      mouth.current?.setAttribute(
+        "ry",
+        String(speaking ? 2 + Math.min(1, d.level ?? d.amplitude) * 5 : 1.4),
+      );
+      head.current?.setAttribute(
+        "transform",
+        reduce.matches
+          ? ""
+          : "rotate(" + Math.sin(time / 3800) * 0.6 + " 160 142)",
+      );
+      const blink = !reduce.matches && time % 4800 < 120;
+      eyes.current?.setAttribute(
+        "transform",
+        blink ? "translate(0 141) scale(1 .15) translate(0 -141)" : "",
+      );
+      raf = requestAnimationFrame(loop);
     };
-    loop();
-
-    return () => {
-      cancelAnimationFrame(raf); ro.disconnect();
-      // Dispose geometry AND materials (+ any textures they reference) — material
-      // .dispose() alone still leaks the GPU textures. Mirrors GltfAvatar.
-      const disposeMat = (m: THREE.Material) => {
-        for (const k of ["map", "normalMap", "roughnessMap", "metalnessMap", "emissiveMap", "aoMap", "alphaMap"] as const) {
-          (m as unknown as Record<string, THREE.Texture | null>)[k]?.dispose?.();
-        }
-        m.dispose();
-      };
-      scene.traverse((o) => {
-        const m = o as THREE.Mesh;
-        m.geometry?.dispose?.();
-        const mat = m.material as THREE.Material | THREE.Material[] | undefined;
-        if (Array.isArray(mat)) mat.forEach(disposeMat);
-        else if (mat) disposeMat(mat);
-      });
-      renderer.forceContextLoss(); // release the WebGL context so it isn't held until GC
-      renderer.dispose();
-      if (renderer.domElement.parentNode === el) el.removeChild(renderer.domElement);
-    };
-    // Only rebuild the scene on faceId change; `drive` is a stable ref read each frame.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [faceId]);
-
-  if (typeof window !== "undefined" && !webglOK()) {
-    const d = drive.current;
-    return <Avatar2D faceId={faceId} speaking={d.speaking} amplitude={d.amplitude} mood={d.mood} />;
-  }
-  return <div ref={mount} className="h-full w-full" style={{ borderRadius: 12, overflow: "hidden" }} />;
+    raf = requestAnimationFrame(loop);
+    return () => cancelAnimationFrame(raf);
+  }, [drive]);
+  return (
+    <div className="interviewer-portrait">
+      <svg
+        viewBox="0 0 320 320"
+        role="img"
+        aria-label={interviewerName(faceId) + ", illustrated AI interviewer"}
+      >
+        <rect width="320" height="320" fill="#e6eee5" />
+        <path d="M0 234 Q155 175 320 220 V320 H0Z" fill="#d7e2d7" />
+        <rect x="229" y="33" width="65" height="109" rx="7" fill="#f6f8f1" />
+        <path
+          d="M249 127V57M245 98Q224 75 245 76M253 113Q283 88 265 88M251 78Q269 61 268 51"
+          stroke="#a8b69c"
+          strokeWidth="5"
+          fill="none"
+          strokeLinecap="round"
+        />
+        <path d="M49 320Q53 228 127 220H193Q266 228 272 320" fill="#365747" />
+        <path d="M126 222L158 272L193 222" fill="#f4f1e7" />
+        <path d="M137 191V233Q161 256 183 233V191" fill={skin} />
+        <g ref={head}>
+          <ellipse cx="110" cy="155" rx="12" ry="20" fill={skin} />
+          <ellipse cx="211" cy="155" rx="12" ry="20" fill={skin} />
+          <path
+            d="M107 117Q107 57 160 57Q216 57 215 122L206 185Q190 219 161 223Q130 218 115 185Z"
+            fill={skin}
+          />
+          <path
+            d="M106 143Q89 111 108 79Q129 40 172 46Q223 50 224 106L212 143L204 109Q181 118 163 83Q145 112 116 113L113 144Z"
+            fill={hair}
+          />
+          {faceId === "jordan" && (
+            <path
+              d="M106 105Q86 69 116 60Q106 39 139 35Q167 21 184 40Q222 27 231 63Q252 80 221 109L204 93Q174 109 160 70Q138 109 106 105Z"
+              fill={hair}
+            />
+          )}
+          <path
+            d="M128 129Q138 124 148 129M174 129Q184 124 194 129"
+            stroke={hair}
+            strokeWidth="4"
+            strokeLinecap="round"
+            fill="none"
+          />
+          <g ref={eyes}>
+            <ellipse cx="139" cy="142" rx="9" ry="5" fill="#fbf5e9" />
+            <ellipse cx="185" cy="142" rx="9" ry="5" fill="#fbf5e9" />
+            <circle cx="140" cy="142" r="3.7" fill="#354335" />
+            <circle cx="184" cy="142" r="3.7" fill="#354335" />
+            <circle cx="141" cy="141" r="1" fill="white" />
+            <circle cx="185" cy="141" r="1" fill="white" />
+          </g>
+          <path
+            d="M160 145L155 165Q160 169 166 165"
+            stroke="#a86f51"
+            strokeWidth="2"
+            strokeLinecap="round"
+            fill="none"
+          />
+          <path
+            d="M143 185Q161 196 178 184"
+            stroke="#a0614e"
+            strokeWidth="3"
+            strokeLinecap="round"
+            fill="none"
+          />
+          <ellipse
+            ref={mouth}
+            cx="161"
+            cy="184"
+            rx="12"
+            ry="1.4"
+            fill="#754b3d"
+          />
+          {faceId === "sam" && (
+            <g fill="none" stroke="#485349" strokeWidth="3">
+              <rect x="122" y="133" width="31" height="20" rx="7" />
+              <rect x="170" y="133" width="31" height="20" rx="7" />
+              <path d="M153 139H170" />
+            </g>
+          )}
+        </g>
+        <path
+          d="M92 276L85 320M230 276L238 320"
+          stroke="#284735"
+          strokeWidth="3"
+          strokeLinecap="round"
+        />
+      </svg>
+    </div>
+  );
 }
-
-// Avatar3D routes a face to the realistic glTF renderer when one is registered
-// for that id, otherwise to the procedural builder. A glTF load failure falls
-// back to procedural so the room always has a face. Memoized on faceId + drive
-// so audio updates (via the ref) never re-render.
-function Avatar3DImpl({ faceId, drive }: { faceId: string; drive: MutableRefObject<AvatarDrive> }) {
-  // Every offered face is a realistic glTF; an unknown/legacy id (e.g. a removed
-  // "fun" character from an old saved config) falls back to the default realistic
-  // face rather than a procedural head.
-  const gltf = getGltf(faceId) ?? getGltf("sophia");
-  // Track which face failed to load (derived, so switching faces auto-resets the
-  // fallback without a setState-in-effect).
-  const [failedFace, setFailedFace] = useState<string | null>(null);
-
-  if (gltf && failedFace !== faceId && (typeof window === "undefined" || webglOK())) {
-    return <GltfAvatar key={faceId} url={gltf.url} drive={drive} onError={() => setFailedFace(faceId)} />;
-  }
-  return <ProceduralAvatar key={faceId} faceId={faceId} drive={drive} />;
-}
-
-export const Avatar3D = memo(Avatar3DImpl, (a, b) => a.faceId === b.faceId && a.drive === b.drive);
+export const Avatar3D = memo(Portrait);

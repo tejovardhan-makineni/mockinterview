@@ -2,19 +2,9 @@
   "id": "hr-people-scenario",
   "title": "HR Scenario: An Employee-Relations Difficult Conversation",
   "track": "professional",
-  "domain": "behavioral",
+  "domain": "employee_relations",
   "areas": [
-    "software_engineering",
-    "data_science",
-    "medicine",
-    "nursing",
-    "law",
-    "consulting",
-    "product_management",
-    "finance",
-    "mechanical_engineering",
-    "electrical_engineering",
-    "civil_engineering"
+    "human_resources"
   ],
   "modality": "conversational",
   "difficulty": "mid",
@@ -26,8 +16,8 @@
     "conflict",
     "fairness"
   ],
-  "prompt": "You're an HR business partner. A manager comes to you frustrated: one of their high-performing engineers, Alex, has become 'impossible to work with' — snapping at teammates in meetings, and two people have quietly complained. The manager wants you to 'just have a talk with Alex and sort it out,' and hints they'd like Alex managed out if it doesn't improve. Walk me through how you'd handle this — with the manager, with Alex, and the process — this is educational, framework-based, not legal advice.",
-  "blurb": "A mid-level employee-relations scenario — assessed for fact-finding, fairness and process, a well-run difficult conversation, and balancing the employee, manager, and organization.",
+  "prompt": "You're an HR business partner. A manager comes to you frustrated: one of their high-performing engineers, Alex, has become 'impossible to work with' \u2014 snapping at teammates in meetings, and two people have quietly complained. The manager wants you to 'just have a talk with Alex and sort it out,' and hints they'd like Alex managed out if it doesn't improve. Walk me through how you'd handle this \u2014 with the manager, with Alex, and the process \u2014 this is educational, framework-based, not legal advice.",
+  "blurb": "A mid-level employee-relations scenario \u2014 assessed for fact-finding, fairness and process, a well-run difficult conversation, and balancing the employee, manager, and organization.",
   "rubric": [
     {
       "key": "fact_finding",
@@ -44,7 +34,7 @@
     {
       "key": "difficult_conversation",
       "label": "The difficult conversation",
-      "description": "Plans/handles the conversation with Alex well: private, specific behavioral feedback (not labels), curiosity about causes, active listening, clear expectations, and support — firm and empathetic.",
+      "description": "Plans/handles the conversation with Alex well: private, specific behavioral feedback (not labels), curiosity about causes, active listening, clear expectations, and support \u2014 firm and empathetic.",
       "weight": 1.2
     },
     {
@@ -67,23 +57,23 @@
     }
   ],
   "reference": {
-    "scenario": "Mid-level employee-relations scenario. A manager wants HR to 'fix' a high-performing but newly difficult engineer and hints at managing them out. This is educational and framework-based, not legal advice. The core skill is resisting the manager's framing and running a fair, fact-based process while balancing everyone's interests. A strong HR business partner does NOT simply summon Alex for a talk on the manager's say-so. First they gather facts and context from the manager: specifics (what exactly was said/done, when, how often, is it a pattern or recent change), what the manager has already done (has Alex received clear, direct feedback yet?), and possible causes — a sudden behavior change in a strong performer often signals workload/burnout, a personal issue, unclear expectations, or a team-dynamics problem. They protect and understand the complaints (what the teammates actually reported, is anyone at risk, is this a conduct/harassment matter that changes the process). They coach the manager: the day-to-day behavior conversation is often the manager's job to own with HR's support, not something to outsource wholesale; and they push back firmly on the premature 'manage out' — no predetermined outcome, and any performance process must be fair, documented, and consistent. When (or if) they meet with Alex, they plan it well: private, specific behavioral feedback (describe the behavior and its impact, not labels like 'impossible'), genuine curiosity about what's going on, active listening, then clear expectations and offers of support (EAP, workload adjustment). They distinguish a performance/behavior issue (coaching, expectations, improvement plan) from a policy/conduct violation (which may require formal investigation), document appropriately, maintain confidentiality, and know when to loop in legal/leadership. They keep the high performer's value in view without letting it excuse harmful behavior, and they keep the affected teammates safe. Weak answers execute the manager's request uncritically, jump to discipline or 'managing out' without facts, deliver labels instead of behavioral feedback, ignore possible causes, fail to coach the manager, mishandle confidentiality or the complainants, or ignore fairness/process and legal risk.",
+    "scenario": "Mid-level employee-relations scenario. A manager wants HR to 'fix' a high-performing but newly difficult engineer and hints at managing them out. This is educational and framework-based, not legal advice. The core skill is resisting the manager's framing and running a fair, fact-based process while balancing everyone's interests. A strong HR business partner does NOT simply summon Alex for a talk on the manager's say-so. First they gather facts and context from the manager: specifics (what exactly was said/done, when, how often, is it a pattern or recent change), what the manager has already done (has Alex received clear, direct feedback yet?), and possible causes \u2014 a sudden behavior change in a strong performer often signals workload/burnout, a personal issue, unclear expectations, or a team-dynamics problem. They protect and understand the complaints (what the teammates actually reported, is anyone at risk, is this a conduct/harassment matter that changes the process). They coach the manager: the day-to-day behavior conversation is often the manager's job to own with HR's support, not something to outsource wholesale; and they push back firmly on the premature 'manage out' \u2014 no predetermined outcome, and any performance process must be fair, documented, and consistent. When (or if) they meet with Alex, they plan it well: private, specific behavioral feedback (describe the behavior and its impact, not labels like 'impossible'), genuine curiosity about what's going on, active listening, then clear expectations and offers of support (EAP, workload adjustment). They distinguish a performance/behavior issue (coaching, expectations, improvement plan) from a policy/conduct violation (which may require formal investigation), document appropriately, maintain confidentiality, and know when to loop in legal/leadership. They keep the high performer's value in view without letting it excuse harmful behavior, and they keep the affected teammates safe. Weak answers execute the manager's request uncritically, jump to discipline or 'managing out' without facts, deliver labels instead of behavioral feedback, ignore possible causes, fail to coach the manager, mishandle confidentiality or the complainants, or ignore fairness/process and legal risk.",
     "model_points": [
       "Don't act on the manager's framing alone: separate what's observed from what's interpreted, and gather facts before any conversation with Alex.",
-      "Interview the manager for specifics: what exactly happened, when, how often, is this a recent change or a pattern, and — critically — what direct feedback has Alex already been given? A sudden change in a strong performer usually has a cause.",
-      "Consider causes, not just symptoms: workload/burnout, a personal or health issue, unclear expectations, a team-dynamics or interpersonal conflict — the response differs by cause.",
+      "Interview the manager for specifics: what exactly happened, when, how often, is this a recent change or a pattern, and \u2014 critically \u2014 what direct feedback has Alex already been given? A sudden change in a strong performer usually has a cause.",
+      "Consider causes, not just symptoms: workload/burnout, a personal or health issue, unclear expectations, a team-dynamics or interpersonal conflict \u2014 the response differs by cause.",
       "Understand and protect the complaints: what did the two teammates actually report, is anyone unsafe, and is this ordinary friction (coaching) or potential conduct/harassment (which triggers a more formal, careful process)?",
       "Coach the manager rather than executing: the routine behavior-and-expectations conversation is often the manager's to own with HR support; help them give direct feedback and set expectations instead of outsourcing it.",
       "Push back on the predetermined 'manage out': no outcome should be decided before the facts; any performance process must be fair, consistent, documented, and give the employee a genuine chance to improve.",
       "Plan the conversation with Alex well: private setting, specific behavioral feedback (the behavior and its impact, not labels like 'impossible to work with'), lead with curiosity, listen actively, then set clear expectations and offer support (EAP, workload/schedule adjustments).",
-      "Distinguish performance/behavior (coaching, clear expectations, possibly a documented improvement plan) from a policy/conduct violation (which may need a formal investigation) — the process forks here.",
+      "Distinguish performance/behavior (coaching, clear expectations, possibly a documented improvement plan) from a policy/conduct violation (which may need a formal investigation) \u2014 the process forks here.",
       "Document appropriately, maintain confidentiality for all parties, and know when to escalate or loop in legal/leadership.",
       "Balance stakeholders: keep the high performer's value in view without excusing harm, keep the complaining teammates safe, protect the manager relationship while holding them accountable, and manage organizational/fairness/legal risk."
     ],
     "probes": [
       {
         "trigger": "candidate agrees to just go talk to Alex on the manager's say-so",
-        "question": "Before you talk to anyone, what do you actually know here — and what's the risk of acting on the manager's version alone?"
+        "question": "Before you talk to anyone, what do you actually know here \u2014 and what's the risk of acting on the manager's version alone?"
       },
       {
         "trigger": "candidate jumps to discipline or 'managing out'",
@@ -103,7 +93,7 @@
       },
       {
         "trigger": "candidate ignores the complainants",
-        "question": "What about the two people who complained — what do you owe them, and how do you handle confidentiality and their safety?"
+        "question": "What about the two people who complained \u2014 what do you owe them, and how do you handle confidentiality and their safety?"
       },
       {
         "trigger": "candidate treats it identically regardless of severity",
@@ -127,7 +117,7 @@
       "Behavior improves for a month then relapses. What's your next step and how does documentation factor in?",
       "How do you keep this fair and consistent with how you've handled similar situations with other employees?"
     ],
-    "exemplar_answer": "A strong HR partner slows the manager down first: 'Before I talk to Alex, I want to understand what actually happened — I don't want to act on a label. So I'd ask the manager for specifics: what exactly was said or done, when, how often, is this a recent change or a long pattern, and importantly, has Alex been given clear, direct feedback yet?' They probe for cause: 'A strong performer who suddenly turns short-tempered usually has a reason — burnout, a personal or health issue, unclear expectations, or a team conflict — and the right response depends on which.' They protect the complaints: 'I'd understand what the two teammates actually reported and whether anyone's at risk; ordinary friction is a coaching matter, but if it crossed into harassment or a slur, that forks into a more formal, careful process.' They coach rather than execute: 'I'd push back gently on ''just sort it out'' — the day-to-day behavior-and-expectations conversation is really the manager's to own, with me supporting and coaching them on how to give specific feedback; and I'd push back firmly on ''manage out.'' We don't decide the outcome before the facts, and any performance process has to be fair, documented, consistent, and give Alex a real chance to improve.' On the conversation itself: 'Private, specific, and behavioral — ''in the last two sprint reviews you cut people off and raised your voice, and here's the impact'' rather than ''you're impossible.'' I'd lead with curiosity, listen, then set clear expectations and offer support like workload adjustment or EAP.' And they manage risk: 'I'd document, keep confidentiality for everyone, distinguish coaching from a conduct investigation, and loop in legal or leadership if it escalates — while keeping Alex's value in view without excusing harm to the team.' It's fact-first, fair, empathetic but firm, and balances every stakeholder."
+    "exemplar_answer": "A strong HR partner slows the manager down first: 'Before I talk to Alex, I want to understand what actually happened \u2014 I don't want to act on a label. So I'd ask the manager for specifics: what exactly was said or done, when, how often, is this a recent change or a long pattern, and importantly, has Alex been given clear, direct feedback yet?' They probe for cause: 'A strong performer who suddenly turns short-tempered usually has a reason \u2014 burnout, a personal or health issue, unclear expectations, or a team conflict \u2014 and the right response depends on which.' They protect the complaints: 'I'd understand what the two teammates actually reported and whether anyone's at risk; ordinary friction is a coaching matter, but if it crossed into harassment or a slur, that forks into a more formal, careful process.' They coach rather than execute: 'I'd push back gently on ''just sort it out'' \u2014 the day-to-day behavior-and-expectations conversation is really the manager's to own, with me supporting and coaching them on how to give specific feedback; and I'd push back firmly on ''manage out.'' We don't decide the outcome before the facts, and any performance process has to be fair, documented, consistent, and give Alex a real chance to improve.' On the conversation itself: 'Private, specific, and behavioral \u2014 ''in the last two sprint reviews you cut people off and raised your voice, and here's the impact'' rather than ''you're impossible.'' I'd lead with curiosity, listen, then set clear expectations and offer support like workload adjustment or EAP.' And they manage risk: 'I'd document, keep confidentiality for everyone, distinguish coaching from a conduct investigation, and loop in legal or leadership if it escalates \u2014 while keeping Alex's value in view without excusing harm to the team.' It's fact-first, fair, empathetic but firm, and balances every stakeholder."
   },
-  "interviewer_notes": "Educational, framework-based scenario — never give real legal advice; assess judgment and process. The defining signal at mid level is that the candidate refuses to act on the manager's framing and runs a fair, fact-based process instead of executing 'go talk to Alex' or jumping to 'manage out.' Probe hard if they do either. Look for: fact-finding and cause-diagnosis (a sudden change in a strong performer has a reason), coaching the manager rather than doing their job for them, a well-planned conversation using specific behavioral feedback instead of labels, handling the complainants' confidentiality and safety, and distinguishing a coaching matter from a conduct/harassment investigation. Use the follow-ups to test adaptability — the personal-issue reveal (empathy + support) and the slur reveal (process forks to formal investigation) are key. Reward balancing the employee, complainants, manager, and organization, plus attention to fairness, documentation, and consistency. Penalize uncritical execution, predetermined outcomes, character labels, ignoring causes or complainants, and disregard for process and risk."
+  "interviewer_notes": "Educational, framework-based scenario \u2014 never give real legal advice; assess judgment and process. The defining signal at mid level is that the candidate refuses to act on the manager's framing and runs a fair, fact-based process instead of executing 'go talk to Alex' or jumping to 'manage out.' Probe hard if they do either. Look for: fact-finding and cause-diagnosis (a sudden change in a strong performer has a reason), coaching the manager rather than doing their job for them, a well-planned conversation using specific behavioral feedback instead of labels, handling the complainants' confidentiality and safety, and distinguishing a coaching matter from a conduct/harassment investigation. Use the follow-ups to test adaptability \u2014 the personal-issue reveal (empathy + support) and the slur reveal (process forks to formal investigation) are key. Reward balancing the employee, complainants, manager, and organization, plus attention to fairness, documentation, and consistency. Penalize uncritical execution, predetermined outcomes, character labels, ignoring causes or complainants, and disregard for process and risk."
 }

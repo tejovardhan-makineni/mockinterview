@@ -1,75 +1,112 @@
-# Corpus authoring standard — how to add interview questions
+# Interview content contract
 
-The corpus lives in `api/data/corpus/*.json` — **one JSON file per question**. It is
-loaded + validated at startup (`internal/corpus`) and served client-safe (reference
-answers never leave the server). This doc is the permanent standard; follow it to add
-questions (by hand or by pointing an agent at it).
+A **profession** selects relevant work. A **format** defines the interaction and
+stages. A **workspace** is a tool: `coding`, `system_design`, `written` or
+`conversational`. A **scenario** supplies original task facts and its rubric. A
+**drill** is a short self-guided exercise after the interview. Avoid treating these
+as interchangeable catalog categories.
 
-## Add a question in 3 steps
+## Version 1
 
-1. Create `api/data/corpus/<id>.json` following the schema below (`<id>` kebab-case,
-   matches the `id` field and the filename).
-2. Validate: `cd api && go build -o bin/mockinterview ./cmd/mockinterview && \
-   ./bin/mockinterview -validate-corpus data/corpus` → must print `OK: N questions valid`.
-3. It's live locally on restart; on prod it ships in the next `deploy-api.sh`.
-   (`go test ./internal/corpus/` also validates the whole dir in CI.)
+The machine-readable schemas live in `api/data/schemas`. Runtime validation in
+`api/internal/corpus` additionally checks references, supported professions,
+format compatibility and unique rubric keys. Legacy scenarios are adapted at load
+time to revision 1 and preview status without inventing provenance.
 
-## Schema (every question)
+Each `api/data/corpus/<id>.json` uses its filename as its kebab-case `id` and has:
 
-```json
-{
-  "id": "kebab-case-unique",
-  "title": "Human title",
-  "track": "engineering | professional",
-  "domain": "system_design | ml_system_design | coding | medicine | medical_residency | law | consulting_case | product_management | finance | behavioral | <new-domain>",
-  "modality": "system_design | coding | written | conversational",
-  "difficulty": "entry | junior | mid | senior | staff",
-  "tags": ["...", "..."],
-  "prompt": "The opening question/scenario the interviewer states.",
-  "blurb": "One-sentence teaser shown to the candidate.",
-  "rubric": [
-    { "key": "snake_case", "label": "Human label", "description": "What a strong answer covers.", "weight": 1.0 }
-  ],
-  "reference": { /* modality-specific ideal-answer material — server only */ },
-  "interviewer_notes": "How the AI should run this — when to interrupt, what to probe."
-}
+- `schema_version: 1`, positive `revision`, a matching `format_id`,
+  `review_status: "preview"`, and `minutes` between 3 and 90.
+- `title`, `track` (`engineering` or `professional`), `domain`, `areas`,
+  `modality`, `difficulty` (entry/junior/mid/senior/staff), `tags`, a candidate
+  `prompt` and a concise `blurb`.
+- `rubric` with unique snake-case keys, labels, observable descriptions,
+  positive weights up to 5 and optional score anchors keyed `"0"` through `"4"`.
+  Prefer a small set of independent dimensions over redundant scoring categories.
+- `reference`, `interviewer_notes` and `provenance` with `authorship` and
+  `license`; optional `sources` must identify material actually used. A
+  `reviewed` entry also requires an actual `reviewer` and `reviewed_at` date.
+- Optional `learning_drills`: unique `id`, `title`, `prompt`, 1–20 `minutes`
+  and a nonempty `checklist`. These are self-guided, without a model request.
+
+Start from `work-sample-reservation-review.json`, `ai-output-critique-forecast.json`
+or `incident-triage-checkout.json`. They are original AI-assisted **drafts**, not
+calibrated reference assessments. Describe expected behavior at each score anchor
+and replace generic anchors with concrete evidence as review improves the content.
+
+## Private interviewer material
+
+The director receives the full authored notes, reference and conditional probes.
+The candidate receives only a safe summary. Runtime snapshots include the resolved
+format definition; source files must reference formats by ID.
+
+Required reference fields depend on the workspace:
+
+| Workspace | Required reference fields |
+|---|---|
+| coding | `constraints`, `examples`, `test_cases`, `approaches` |
+| system_design | `functional_requirements`, `deep_dives`, `followup_bank` |
+| written / conversational | `scenario`, `model_points`, `probes` |
+
+Use `facts: [{id, value, reveal_when}]` for conditional information. Never rely on
+the model to invent a patient's vitals, a company policy or an incident metric.
+`probes` and `followup_bank` contain `{trigger, question}` objects. Coding
+`follow_ups` may contain strings. Make triggers specific enough to decide when to
+ask, including sensible alternative approaches and corrections. Put the answer
+key and reference solutions here, not in the initial candidate prompt.
+
+Simulation allows clarification and neutral probes; it does not hand over a
+solution before assessment. Coaching explicitly allows graduated assistance.
+Target level and challenge are separate session settings. An approachable style
+must not silently turn a simulation into coaching. Timing scales with the session
+length, leaving most of a short station for the actual task.
+
+## Reusable formats
+
+`api/data/formats/<id>.json` contains `schema_version: 1`, positive `revision`,
+`id`, `name`, `interviewer_role`, supported `workspaces`, `tool_policy` and
+2–8 `stages`. Stages have a unique `id`, `title`, `kind`, `guidance` and a
+positive `share`; all shares sum to 1. The first stage is `intro`, the last `wrap`.
+Time shares are applied to the chosen duration. Keep introductions brief.
+
+Current examples include work-sample defense, AI-output critique, incident
+simulation, stakeholder simulation and reverse interviewing. Tool policy must
+state whether execution or external AI is available. The current code and SQL
+workspaces do not run code, and interviewers must not claim that they did.
+
+## Validate and review
+
+```bash
+make new-scenario ID=my-original-scenario
+# Edit scratch/content/corpus and its sibling formats directory.
+cd api
+go run ./cmd/mockinterview -validate-corpus ../scratch/content/corpus
+cd ..
+make validate-content
+make preview-format ID=work-sample-reservation-review
 ```
 
-- **rubric**: 6–12 dimensions, each with a positive `weight` (0.6–1.4). These ARE the
-  scoring dimensions for this question — the scorer reads them per-question, so tailor
-  them to the domain. No hardcoded dimension list.
-- **reference**: any valid JSON object; the scorer + director read it. Shape by modality:
-  - `system_design`: `functional_requirements, nonfunctional_requirements,
-    clarifying_questions, qualifying_questions, estimations{...}, core_components[],
-    data_model[], api_design[], high_level_design, deep_dives[{topic,probe}],
-    followup_bank[{trigger,question}], scaling[], bottlenecks[], tradeoffs[],
-    alternative_solutions[], observability[], security[], reference_answer`.
-    Include a `followup_bank` trigger on a datastore (CDC/Debezium) and one on a cache
-    (eviction/stampede) — these drive the interviewer's interruptions.
-  - `coding`: `constraints[], examples[{input,output,explanation}], test_cases[{input,expected}],
-    optimal_time, optimal_space, approaches[{name,idea,time,space}], follow_ups[], reference_solution`.
-    (Doc-style — no compiler; the LLM reads the code as text.)
-  - `written` / `conversational` (professional): `scenario, model_points[],
-    probes[{trigger,question}], red_flags[], follow_ups[], exemplar_answer`.
+The preview prints private director context for authors. Tests in
+`internal/live/fixtures_test.go` consume `data/fixtures/director-context.json` and
+check that conditional facts and probe triggers reach the director. These are
+context-contract checks, not conversations with a real model. Add independent
+candidate turn examples and provider evaluations when assessing behavior.
 
-Read `api/data/corpus/url-shortener.json` as the depth/quality exemplar before authoring.
+Scoring accepts only known rubric dimensions and exact quotes from candidate
+turns or saved workspace evidence. Server rubric weights determine the aggregate.
+Unobserved dimensions are not assessed; they are not scored as failure. Evidence
+IDs must point to actual sources. The complete transcript is retained up to an
+explicit 512 KiB scoring-evidence limit; larger inputs produce a recoverable error
+instead of silently discarding late corrections. Quotes alone do not prove a
+rating is correct: rubric reliability requires human review and calibration.
 
-## Conventions
+Content edits increment `revision`; behavioral format edits increment its
+revision too. Session snapshots preserve the actual question, resolved format
+and configuration. Avoid changing IDs to make a reused question appear new.
+Fresh variants are preferred in packs; repeat practice remains useful but must
+not be represented as an independent readiness measurement.
 
-- `track`: `engineering` for design/coding, `professional` for everything else.
-- Rubric keys are snake_case and domain-appropriate (e.g. behavioral:
-  `situation_clarity, action_ownership, result_impact, reflection, communication`;
-  clinical: `data_gathering, differential_diagnosis, clinical_reasoning, management_plan,
-  safety, communication`).
-- Content must be real, specific, senior-level. No placeholders. Don't invent facts about
-  real companies or, for medical/legal, give prescriptive real-world advice — keep it
-  educational/framework-based.
-- Adding a **new domain** is free — just use a new `domain` string; the dashboard groups
-  and filters by `track`/`domain`/`modality` automatically.
-
-## Bulk authoring with agents
-
-Point an agent at this doc + the exemplar, give it a batch of `(id, domain, modality,
-difficulty, topic)` rows and a private output dir, and have it self-validate with
-`./bin/mockinterview -validate-corpus <dir>` before reporting. Merge validated files
-into `api/data/corpus/` and re-run the validator over the whole dir.
+Before moving a draft into the catalog, verify original/licensed provenance,
+fact consistency, fair difficulty, timing, plausible alternatives, accessibility
+and evidence-based anchors. Do not copy proprietary questions or imply employer
+endorsement. Consult [CONTRIBUTING.md](../CONTRIBUTING.md) for the review workflow.

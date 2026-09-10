@@ -6,6 +6,7 @@ package httpx
 import (
 	"encoding/json"
 	"errors"
+	"io"
 	"log/slog"
 	"net/http"
 )
@@ -63,6 +64,10 @@ func DecodeJSON(w http.ResponseWriter, r *http.Request, dst any) bool {
 			return false
 		}
 		WriteProblem(w, http.StatusBadRequest, "invalid or malformed JSON body")
+		return false
+	}
+	if err := dec.Decode(new(any)); err != io.EOF {
+		WriteProblem(w, http.StatusBadRequest, "request must contain exactly one JSON value")
 		return false
 	}
 	return true

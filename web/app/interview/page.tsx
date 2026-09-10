@@ -1,305 +1,621 @@
 "use client";
-
 import { Suspense, useCallback, useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { api } from "@/lib/api";
-import type { Modality, Session } from "@/lib/types";
-import { LiveSession, type Caption, type ConnState, type SectionInfo } from "@/lib/live";
-import { BehaviorTracker, cameraConsentGranted } from "@/lib/behavior";
-import { Avatar3D, type AvatarDrive } from "@/components/studio/Avatar3D";
+import { errorMessage } from "@/lib/http";
+import type { Session, WorkspaceSnapshot } from "@/lib/features/interview";
+import type { QuestionSummary } from "@/lib/features/catalog";
+import {
+  LiveSession,
+  type Caption,
+  type ConnState,
+  type SectionInfo,
+} from "@/lib/live";
+import { WorkspaceSaver, readWorkspaceDraft } from "@/lib/workspaceSave";
+import {
+  Avatar3D,
+  interviewerName,
+  type AvatarDrive,
+} from "@/components/studio/Avatar3D";
+import { PersonalKeyRecovery } from "@/components/PersonalKeyRecovery";
 import { Workspace } from "@/components/studio/Workspace";
 import { Webcam } from "@/components/studio/Webcam";
-import { LiveHUD, ConnChip, type AiState } from "@/components/studio/LiveHUD";
-import { Button } from "@/components/ui";
-import { LanguageSelect } from "@/components/LanguageSelect";
 import { FeedbackWidget } from "@/components/FeedbackWidget";
-import { useT } from "@/lib/i18n";
-
-function StudioInner() {
+import { Button, Panel, ErrorNotice } from "@/components/ui";
+function Room() {
   const router = useRouter();
-  const t = useT();
   const params = useSearchParams();
-  const sid = params.get("s") || "";
+  const sid = params.get("s") ?? "";
   const [session, setSession] = useState<Session | null>(null);
+  const [question, setQuestion] = useState<QuestionSummary | null>(null);
+  const [initial, setInitial] = useState<WorkspaceSnapshot | null>(null);
   const [captions, setCaptions] = useState<Caption[]>([]);
-  const avatar = useRef<AvatarDrive>({ speaking: false, amplitude: 0, mood: "neutral" });
-  const [status, setStatus] = useState("connecting…");
   const [conn, setConn] = useState<ConnState>("connecting");
+  const [status, setStatus] = useState("Preparing your interviewer…");
+  const [section, setSection] = useState<SectionInfo | null>(null);
+  const [error, setError] = useState("");
+  const [saving, setSaving] = useState("saved");
   const [ending, setEnding] = useState(false);
   const [typed, setTyped] = useState("");
-  const [remainingMs, setRemainingMs] = useState<number | null>(null);
-  const [mode, setMode] = useState<"voice" | "text" | "local">("text");
-  const [aiState, setAiState] = useState<AiState>("idle");
-  const [section, setSection] = useState<SectionInfo | null>(null);
-  const micRef = useRef(0); // live mic level, read by the HUD via rAF (no re-render)
-
+  const [camera, setCamera] = useState(false);
+  const [muted, setMuted] = useState(false);
+  const [effectiveMode, setEffectiveMode] = useState<"voice" | "text">("text");
+  const [modeNotice, setModeNotice] = useState("");
+  const [tab, setTab] = useState("workspace");
+  const [remaining, setRemaining] = useState<number | null>(null);
+  const [aiState, setAiState] = useState("Ready");
+  const [draftNotice, setDraftNotice] = useState("");
+  const [micLevel, setMicLevel] = useState(0);
   const live = useRef<LiveSession | null>(null);
-  const tracker = useRef<BehaviorTracker | null>(null);
-  const lastCanvas = useRef<string>("");
-  const timerRef = useRef<number | undefined>(undefined);
-  const endedRef = useRef(false);
-  const transcriptRef = useRef<HTMLDivElement | null>(null);
-
-  // Keep the transcript pinned to the newest line as it streams — otherwise long
-  // answers grow below the fold and look like the text "stopped printing".
+  const saver = useRef<WorkspaceSaver | null>(null);
+  const drive = useRef<AvatarDrive>({
+    speaking: false,
+    amplitude: 0,
+    mood: "listening",
+  });
+  const transcript = useRef<HTMLDivElement>(null);
+  const stick = useRef(true);
+  const finishRef = useRef<() => Promise<void>>(async () => {});
+  const lastSnapshot = useRef("");
   useEffect(() => {
-    const el = transcriptRef.current;
-    if (el) el.scrollTop = el.scrollHeight;
+    if (stick.current && transcript.current)
+      transcript.current.scrollTop = transcript.current.scrollHeight;
   }, [captions]);
-
   useEffect(() => {
-    // cancelled guards the async setup: if we unmount (incl. React StrictMode's
-    // double-invoke) before start() runs, we must NOT open a socket/mic/timer
-    // that the cleanup already ran past. We also tear down the LOCAL handles we
-    // created, not just the refs, so nothing is orphaned.
     let cancelled = false;
-    let localTimer: number | undefined;
-    let localLive: LiveSession | undefined;
-
+    let ls: LiveSession | undefined;
+    let writer: WorkspaceSaver | undefined;
     (async () => {
-      const u = await api.me();
-      if (cancelled) return;
-      if (!u) { router.replace("/login"); return; }
-      const s = await api.getSession(sid);
-      if (cancelled) return;
-      setSession(s);
-
-      // Resuming a session: reload the conversation so far so the candidate sees
-      // where they left off (the interviewer also resumes without restarting).
       try {
-        const prior = await api.getTranscript(sid);
-        if (!cancelled && prior.length) {
-          setCaptions(prior.slice(-60).map((t) => ({ role: t.role === "candidate" ? "candidate" : "interviewer", text: t.text })));
+        const user = await api.me();
+        if (cancelled) return;
+        if (!user) {
+          router.replace(
+            "/login?next=" + encodeURIComponent("/interview?s=" + sid),
+          );
+          return;
         }
-      } catch { /* fresh session — no transcript yet */ }
-
-      const ls = new LiveSession(sid, [], s.config?.voice_id ?? "aoede");
-      localLive = ls;
-      live.current = ls;
-      ls.on("caption", (c) => setCaptions((prev) => {
-        const last = prev[prev.length - 1];
-        // Coalesce: while a turn streams (or when it finalizes), replace the last
-        // bubble of the same role rather than adding a new one per chunk.
-        if (last && last.role === c.role && last.streaming) return [...prev.slice(0, -1), c];
-        // Dedupe an identical finalized repeat (e.g. a closing line the model
-        // emits twice) so it doesn't show up as two bubbles.
-        if (last && last.role === c.role && !c.streaming && last.text.trim() === c.text.trim()) return prev;
-        return [...prev.slice(-60), c];
-      }))
-        .on("speaking", (on) => { avatar.current.speaking = on; avatar.current.mood = on ? "neutral" : "listening"; setAiState(on ? "speaking" : "listening"); })
-        .on("userSpeaking", (on) => { tracker.current?.setSpeaking(on); setAiState((prev) => (prev === "speaking" ? prev : on ? "listening" : "thinking")); })
-        .on("micLevel", (v) => { micRef.current = v; })
-        .on("amplitude", (v) => { avatar.current.amplitude = v; })
-        .on("viseme", (v) => { avatar.current.level = v.level; avatar.current.bright = v.bright; })
-        .on("mode", (m) => { setMode(m); setStatus(m === "voice" ? "live voice" : m === "text" ? "voice (browser)" : "demo mode"); })
-        .on("status", setStatus)
-        .on("connection", (s) => {
-          setConn(s);
-          // On a real drop, warn the candidate (in red) that their last words may
-          // not have been captured — don't leave them guessing why it went quiet.
-          if (s === "reconnecting" || s === "failed") {
-            setCaptions((prev) => {
-              if (prev[prev.length - 1]?.role === "system") return prev; // no spam
-              return [...prev.slice(-60), { role: "system", text: "⚠ Connection issue — reconnecting. Anything you just said may not have been captured; please repeat it when the interviewer is back." }];
-            });
-          }
+        const s = await api.getSession(sid);
+        if (cancelled) return;
+        if (["scoring", "feedback_failed", "complete"].includes(s.status)) {
+          router.replace("/report?s=" + sid);
+          return;
+        }
+        if (["abandoned", "expired"].includes(s.status))
+          throw new Error(
+            "This attempt can no longer be resumed. Your saved record is available in History.",
+          );
+        const [q, prior] = await Promise.all([
+          api.getQuestion(s.question_id),
+          api.getTranscript(sid),
+        ]);
+        if (cancelled) return;
+        const snapshot = s.workspace ?? {
+          kind:
+            s.modality === "coding"
+              ? "code"
+              : s.modality === "system_design"
+                ? "canvas"
+                : s.modality === "written"
+                  ? "written"
+                  : "note",
+          content: "",
+          revision: 0,
+        };
+        const draft = readWorkspaceDraft("mi_workspace_" + sid);
+        const restored = draft
+          ? { ...draft, revision: snapshot.revision }
+          : snapshot;
+        setInitial(restored);
+        lastSnapshot.current = JSON.stringify(restored);
+        setSession(s);
+        setQuestion(q);
+        setMuted(s.mode === "text");
+        if (s.mode === "text") setTab("conversation");
+        setCaptions(
+          prior.map((turn) => ({
+            role: turn.role,
+            text: turn.text,
+            id: turn.event_id ?? turn.id,
+            delivery: "sent" as const,
+          })),
+        );
+        writer = new WorkspaceSaver(
+          snapshot,
+          async (next) => {
+            const result = await api.saveSnapshot(sid, next);
+            ls?.sendCanvas(next.content);
+            return result;
+          },
+          (value, e) => {
+            if (!cancelled) {
+              setSaving(value);
+              if (e) setError(errorMessage(e));
+            }
+          },
+          "mi_workspace_" + sid,
+        );
+        saver.current = writer;
+        if (draft) {
+          setDraftNotice(
+            "Recovered unsaved work from this browser. It will be saved before you finish.",
+          );
+          writer.update(restored);
+        }
+        ls = new LiveSession(sid, [], s.config.voice_id, {
+          mode: s.mode ?? "voice",
+          language: s.config.language ?? "en",
+          inputDeviceId: sessionStorage.getItem("mi_device_" + sid) ?? "",
+          prompt: q.prompt,
+        });
+        live.current = ls;
+        ls.on("caption", (caption) => {
+          setCaptions((prev) => {
+            const last = prev[prev.length - 1];
+            if (last && last.role === caption.role && last.streaming)
+              return [...prev.slice(0, -1), caption];
+            if (caption.id && prev.some((c) => c.id === caption.id))
+              return prev;
+            return [...prev, caption];
+          });
         })
-        .on("section", (s) => setSection(s))
-        .on("filler", () => { tracker.current?.addEvent("filler"); avatar.current.mood = "curious"; })
-        .on("pause", () => { tracker.current?.addEvent("long_pause"); })
-        .on("help", () => { tracker.current?.addEvent("help_request"); })
-        .on("ended", () => { void end(); });
-
-      // Timed interview: the interviewer knows the clock and wraps up on its own.
-      // Duration: the user's chosen minutes (from the setup slider) if valid,
-      // else a modality default.
-      const chosen = parseInt(params.get("minutes") ?? "", 10);
-      const minutes = chosen >= 5 && chosen <= 60 ? chosen : pickMinutes(s.modality);
-      const endAt = Date.now() + minutes * 60000;
-      setRemainingMs(minutes * 60000);
-      let lastTimeSent = 0;
-      localTimer = window.setInterval(() => {
-        const left = endAt - Date.now();
-        setRemainingMs(left);
-        if (Date.now() - lastTimeSent > 60000) {
-          lastTimeSent = Date.now();
-          const mins = Math.round(left / 60000);
-          live.current?.sendTime(mins <= 0 ? "time is up" : `about ${mins} minute${mins === 1 ? "" : "s"} remain`);
+          .on("delivery", (value) =>
+            setCaptions((prev) =>
+              prev.map((c) =>
+                c.id === value.id ? { ...c, delivery: value.status } : c,
+              ),
+            ),
+          )
+          .on("connection", (state) => {
+            setConn(state);
+            if (state === "connected") {
+              void api
+                .getSession(sid)
+                .then((updated) => {
+                  if (!cancelled) setSession(updated);
+                })
+                .catch(() => {});
+            }
+          })
+          .on("mode", (mode) => {
+            const effective = mode === "voice" ? "voice" : "text";
+            setEffectiveMode(effective);
+            setMuted(effective === "text" || (ls?.isMuted() ?? false));
+            if (effective === "text") {
+              setTab("conversation");
+              if (s.mode === "voice")
+                setModeNotice(
+                  "This installation is providing a text interview. Your microphone is off; type your answers in Conversation.",
+                );
+            } else setModeNotice("");
+          })
+          .on("status", setStatus)
+          .on("error", setError)
+          .on("section", setSection)
+          .on("speaking", (on) => {
+            drive.current.speaking = on;
+            drive.current.mood = on ? "speaking" : "listening";
+            setAiState(on ? "Speaking" : "Listening");
+          })
+          .on("userSpeaking", (on) => {
+            if (!drive.current.speaking)
+              setAiState(on ? "Listening" : "Thinking");
+          })
+          .on("micLevel", setMicLevel)
+          .on("amplitude", (v) => {
+            drive.current.amplitude = v;
+          })
+          .on("viseme", (v) => {
+            drive.current.level = v.level;
+            drive.current.bright = v.bright;
+          })
+          .on("ended", () => {
+            void finishRef.current();
+          });
+        if (cancelled) {
+          ls.end();
+          writer.dispose();
+          return;
         }
-        // Hard safety stop ~90s past zero if the interviewer hasn't wrapped up.
-        if (left < -90000) void end();
-      }, 1000);
-      timerRef.current = localTimer;
-
-      if (cancelled) { ls.end(); if (localTimer) clearInterval(localTimer); return; }
-      await ls.start(minutes);
+        await ls.start(s.duration_minutes ?? 30);
+      } catch (e) {
+        if (!cancelled) setError(errorMessage(e));
+      }
     })();
-
     return () => {
       cancelled = true;
-      localLive?.end();
-      void tracker.current?.stop();
-      if (localTimer) clearInterval(localTimer);
+      ls?.end();
+      writer?.dispose();
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [router, sid]);
-
-  const onWebcam = useCallback((v: HTMLVideoElement) => {
-    // Behavioral capture is opt-in (HR-2). Without explicit camera consent we
-    // never construct or start the tracker — the interview runs normally and the
-    // report simply omits the behavioral section.
-    if (!cameraConsentGranted()) return;
-    const t = new BehaviorTracker(sid, v);
-    tracker.current = t;
-    void t.begin();
-  }, [sid]);
-
-  // Debounced content changes already handled in Workspace; here we persist +
-  // feed the interviewer.
-  const onContent = useCallback((text: string) => {
-    void api.saveWorkspace(sid, session?.modality === "coding" ? "code" : session?.modality === "written" ? "written" : "note", text);
-    // Only feed the interviewer a MEANINGFUL, CHANGED drawing — otherwise every
-    // debounced Excalidraw tick (even "empty canvas") is a new turn and the AI
-    // replies each time, which reads as repeating the question.
-    const t = text.trim();
-    if (!t || t === "empty canvas" || t === lastCanvas.current) return;
-    lastCanvas.current = t;
-    live.current?.sendCanvas(t);
-  }, [sid, session?.modality]);
-
-  async function end() {
-    if (endedRef.current) return; // idempotent — the AI, the timer, and the button all call this
-    endedRef.current = true;
+  }, [sid, router]);
+  useEffect(() => {
+    if (!session?.deadline_at) return;
+    const deadline = new Date(session.deadline_at).getTime();
+    const tick = () => setRemaining(Math.max(0, deadline - Date.now()));
+    tick();
+    const timer = setInterval(tick, 1000);
+    return () => clearInterval(timer);
+  }, [session?.deadline_at]);
+  const change = useCallback((snapshot: WorkspaceSnapshot) => {
+    const serialized = JSON.stringify(snapshot);
+    if (serialized === lastSnapshot.current) return;
+    lastSnapshot.current = serialized;
+    saver.current?.update(snapshot);
+  }, []);
+  async function finish() {
+    if (ending) return;
     setEnding(true);
-    if (timerRef.current) clearInterval(timerRef.current);
-    live.current?.end();
-    await tracker.current?.stop();
-    try { await api.finishSession(sid); } catch { /* ignore — still show the report */ }
-    router.push(`/report?s=${sid}`);
+    setError("");
+    try {
+      if (typed.trim()) {
+        live.current?.submitText(typed);
+        setTyped("");
+      }
+      await saver.current?.flush();
+      await live.current?.drain();
+      live.current?.end();
+      setCamera(false);
+      await api.finishSession(sid);
+      router.push("/report?s=" + sid);
+    } catch (e) {
+      setError(errorMessage(e));
+      setEnding(false);
+    }
   }
-
-  if (!session) return <div className="flex h-screen items-center justify-center text-[var(--color-muted)]">{t("Entering the room…")}</div>;
-
-  const faceId = readFace(session);
-  const modality: Modality = session.modality;
-
-  return (
-    <main className="flex h-screen flex-col bg-[var(--color-studio)]">
-      {/* top bar */}
-      <header className="flex flex-wrap items-center justify-between gap-2 border-b border-[var(--color-line)] px-4 py-2.5 sm:px-5">
-        <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm">
-          <span className="live-dot inline-block h-2 w-2 rounded-full bg-[var(--color-live)]" />
-          <span className="font-semibold">{t("Interview in progress")}</span>
-          <span className="hidden rounded-full border border-[var(--color-line)] px-2 py-0.5 text-xs text-[var(--color-muted)] sm:inline">{status}</span>
-          <span className="hidden text-xs text-[var(--color-faint)] sm:inline">{modality.replace("_", " ")}</span>
-        </div>
-        <div className="flex items-center gap-3">
-          <LanguageSelect variant="header" />
-          <FeedbackWidget
-            variant="studio"
-            getContext={() => ({
-              session_id: session?.id,
-              question_id: session?.question_id,
-              modality: session?.modality,
-              pack_id: session?.pack_id,
-              pack_round_id: session?.pack_round_id,
-              config: session?.config,
-              section: section ?? live.current?.currentSectionInfo() ?? null,
-              connection: conn,
-              mode,
-              ai_state: aiState,
-              remaining_ms: remainingMs,
-              status,
-              transcript_tail: captions.slice(-12).map((c) => ({ role: c.role, text: c.text })),
-            })}
+  useEffect(() => {
+    finishRef.current = finish;
+  });
+  if (!session || !initial)
+    return (
+      <main className="page-width">
+        {error ? (
+          <ErrorNotice
+            message={error}
+            onRetry={() => window.location.reload()}
           />
-          <ConnChip conn={conn} onReconnect={() => { setConn("reconnecting"); live.current?.reconnect(); }} />
-          {remainingMs !== null && (
-            <span className={`rounded-full border px-3 py-1 font-mono text-sm ${remainingMs < 120000 ? "border-[var(--color-bad)] text-[var(--color-bad)]" : "border-[var(--color-line)] text-[var(--color-muted)]"}`}>
-              ⏱ {fmtTime(remainingMs)}
+        ) : (
+          <p role="status">Preparing your interview…</p>
+        )}
+        <Button href="/results" variant="ghost" className="mt-6">
+          Go to history
+        </Button>
+      </main>
+    );
+  const connected = conn === "connected";
+  const time =
+    remaining !== null
+      ? Math.floor(remaining / 60000) +
+        ":" +
+        String(Math.floor(remaining / 1000) % 60).padStart(2, "0")
+      : session.duration_minutes + " min";
+  return (
+    <>
+      <a href="#room-work" className="skip-link">
+        Skip to workspace
+      </a>
+      <header className="border-b border-[var(--color-line)] bg-[var(--color-panel)]">
+        <div className="mx-auto flex max-w-[1400px] flex-wrap items-center justify-between gap-3 px-6 py-4">
+          <div>
+            <p className="eyebrow">Your practice room</p>
+            <h1 className="mt-1 text-lg font-semibold">{question?.title}</h1>
+          </div>
+          <div className="flex items-center gap-4 text-xs">
+            <span
+              role="status"
+              className={
+                connected
+                  ? "text-[var(--color-good)]"
+                  : "text-[var(--color-warn)]"
+              }
+            >
+              {connected
+                ? "Interviewer ready"
+                : conn === "failed"
+                  ? "Connection needs attention"
+                  : "Connecting…"}
             </span>
-          )}
-          <Button variant="danger" onClick={end} disabled={ending}>{ending ? t("Scoring…") : t("End & get report")}</Button>
+            <span className="font-mono" aria-label="Remaining time">
+              {time}
+            </span>
+            <FeedbackWidget
+              variant="studio"
+              getContext={() => ({
+                session_id: sid,
+                question_id: session.question_id,
+                connection: conn,
+                section: section?.title,
+                mode: effectiveMode,
+              })}
+            />
+          </div>
         </div>
       </header>
-
-      <div className="flex min-h-0 flex-1 flex-col lg:flex-row">
-        {/* interviewer panel */}
-        <aside className="flex w-full flex-col border-b border-[var(--color-line)] p-4 lg:w-[340px] lg:border-b-0 lg:border-r">
-          <div className="mx-auto aspect-square w-full max-w-[260px] overflow-hidden rounded-xl bg-[var(--color-panel)] lg:max-w-none">
-            <Avatar3D faceId={faceId} drive={avatar} />
+      <main className="mx-auto max-w-[1400px] px-4 py-5 sm:px-6">
+        {error && (
+          <div className="mb-4">
+            <ErrorNotice message={error} />
           </div>
-          <div className="mt-3">
-            <LiveHUD micRef={micRef} aiState={aiState} conn={conn} mode={mode} section={section} />
-          </div>
-          <div ref={transcriptRef} className="mi-panel mt-3 max-h-[40vh] flex-1 overflow-y-auto rounded-xl border border-[var(--color-line)] bg-[var(--color-panel)] p-3 text-sm lg:max-h-[52vh]">
-            {captions.length === 0 && <p className="text-[var(--color-faint)]">The interviewer will begin shortly…</p>}
-            {captions.map((c, i) => (
-              c.role === "system" ? (
-                <p key={i} className="mb-2 rounded-md border border-[var(--color-bad)] bg-[color-mix(in_srgb,var(--color-bad)_12%,transparent)] px-2 py-1 text-xs font-medium text-[var(--color-bad)]">
-                  {c.text}
-                </p>
-              ) : (
-                <p key={i} className={`mb-2 ${c.role === "interviewer" ? "text-[var(--color-ink)]" : "text-[var(--color-muted)]"}`}>
-                  <span className="text-xs font-semibold text-[var(--color-faint)]">{c.role === "interviewer" ? t("Interviewer") : t("You")}: </span>
-                  {c.text}
-                </p>
-              )
-            ))}
-          </div>
-          {/* typed answer fallback (if mic unavailable) */}
-          <form
-            className="mt-3 flex gap-2"
-            onSubmit={(e) => { e.preventDefault(); if (typed.trim()) { live.current?.submitText(typed); setTyped(""); } }}
-          >
-            <input
-              value={typed} onChange={(e) => setTyped(e.target.value)}
-              placeholder={t("Type an answer…")}
-              aria-label="Type an answer to the interviewer"
-              className="min-w-0 flex-1 rounded-lg border border-[var(--color-line)] bg-[var(--color-studio)] px-3 py-2 text-sm outline-none focus:border-[var(--color-accent)]"
+        )}
+        {session.funding === "byok" && conn === "failed" && (
+          <div className="mb-4">
+            <PersonalKeyRecovery
+              sessionId={sid}
+              onSaved={() => {
+                setError("");
+                live.current?.reconnect();
+              }}
             />
-            <Button type="submit" variant="ghost">{t("Send")}</Button>
-            {(conn === "failed" || conn === "reconnecting") && (
-              <Button
-                type="button"
-                variant={conn === "failed" ? "danger" : "ghost"}
-                onClick={() => { setConn("reconnecting"); live.current?.reconnect(); }}
-                title="Reconnect to the interviewer"
+          </div>
+        )}
+        {modeNotice && (
+          <p className="notice mb-4" role="status">
+            {modeNotice}
+          </p>
+        )}
+        {draftNotice && (
+          <p className="notice mb-4" role="status">
+            {draftNotice}
+          </p>
+        )}
+        <div className="mb-4 flex gap-2 lg:hidden" aria-label="Room panels">
+          {["workspace", "conversation"].map((value) => (
+            <Button
+              key={value}
+              variant={tab === value ? "primary" : "ghost"}
+              aria-pressed={tab === value}
+              onClick={() => setTab(value)}
+            >
+              {value === "workspace" ? "Brief & workspace" : "Conversation"}
+            </Button>
+          ))}
+        </div>
+        <div className="room-grid">
+          <section
+            id="room-work"
+            className={tab !== "workspace" ? "hidden lg:block" : ""}
+          >
+            <Panel className="overflow-hidden">
+              <details
+                open
+                className="border-b border-[var(--color-line)] bg-[var(--color-panel-2)] px-5 py-4"
               >
-                {conn === "reconnecting" ? t("Retry") : t("Reconnect")}
+                <summary className="text-sm font-semibold">
+                  Interview brief
+                </summary>
+                <p className="mt-3 max-h-40 overflow-auto whitespace-pre-wrap text-sm">
+                  {question?.prompt}
+                </p>
+              </details>
+              <div className="flex items-center justify-between border-b border-[var(--color-line)] px-5 py-2 text-xs">
+                <span>{section ? section.title : "Your workspace"}</span>
+                <span role="status">
+                  {saving === "saved"
+                    ? "All changes saved"
+                    : saving === "saving"
+                      ? "Saving…"
+                      : "Changes waiting to save"}
+                </span>
+                {saving === "unsaved" && (
+                  <button
+                    className="underline"
+                    onClick={() => {
+                      void saver.current
+                        ?.flush()
+                        .catch((e) => setError(errorMessage(e)));
+                    }}
+                  >
+                    Retry save
+                  </button>
+                )}
+              </div>
+              <div className="room-workspace">
+                {session.modality === "conversational" ? (
+                  <div className="flex h-full flex-col items-center justify-center gap-6 p-6">
+                    <div className="h-64 w-64 max-w-full sm:h-80 sm:w-80">
+                      <Avatar3D faceId={session.config.face_id} drive={drive} />
+                    </div>
+                    <div className="text-center">
+                      <h2 className="text-xl font-medium">
+                        {interviewerName(session.config.face_id)}
+                      </h2>
+                      <p className="mt-1 text-sm text-[var(--color-muted)]">
+                        {connected ? aiState : status} · AI interviewer
+                      </p>
+                    </div>
+                    <details className="w-full rounded-lg border border-[var(--color-line)]">
+                      <summary className="px-4 py-3 text-sm">
+                        Optional interview notes
+                      </summary>
+                      <div className="h-44">
+                        <Workspace
+                          modality={session.modality}
+                          initial={initial}
+                          onChange={change}
+                        />
+                      </div>
+                    </details>
+                  </div>
+                ) : (
+                  <Workspace
+                    modality={session.modality}
+                    initial={initial}
+                    onChange={change}
+                  />
+                )}
+              </div>
+            </Panel>
+          </section>
+          <aside
+            className={
+              "space-y-4 " + (tab !== "conversation" ? "hidden lg:block" : "")
+            }
+          >
+            <Panel className="p-4">
+              <div
+                className={
+                  "mx-auto h-40 w-40 " +
+                  (session.modality === "conversational" ? "lg:hidden" : "")
+                }
+              >
+                <Avatar3D faceId={session.config.face_id} drive={drive} />
+              </div>
+              <div className="mt-3 flex items-center justify-between">
+                <h2 className="font-semibold">
+                  {interviewerName(session.config.face_id)}
+                </h2>
+                <span className="text-xs text-[var(--color-muted)]">
+                  AI interviewer
+                </span>
+              </div>
+              <p className="mt-1 text-xs" aria-live="polite">
+                {connected ? aiState : status}
+              </p>
+            </Panel>
+            <Panel className="overflow-hidden">
+              <h2 className="border-b border-[var(--color-line)] px-4 py-3 text-sm font-semibold">
+                Conversation
+              </h2>
+              <div
+                ref={transcript}
+                role="log"
+                aria-label="Interview transcript"
+                aria-live="polite"
+                aria-relevant="additions text"
+                onScroll={(e) => {
+                  const el = e.currentTarget;
+                  stick.current =
+                    el.scrollHeight - el.scrollTop - el.clientHeight < 60;
+                }}
+                className="max-h-[35dvh] min-h-40 space-y-4 overflow-auto px-4 py-4"
+              >
+                {!captions.length && (
+                  <p className="text-sm text-[var(--color-muted)]">
+                    Your interviewer will begin when the connection is ready.
+                  </p>
+                )}
+                {captions.map((caption, i) => (
+                  <div key={caption.id ?? i}>
+                    <p className="text-[10px] font-semibold uppercase tracking-wide text-[var(--color-muted)]">
+                      {caption.role === "candidate"
+                        ? "You"
+                        : caption.role === "system"
+                          ? "Connection"
+                          : interviewerName(session.config.face_id)}
+                      {caption.delivery === "pending"
+                        ? " · waiting to send"
+                        : ""}
+                    </p>
+                    <p className="mt-1 whitespace-pre-wrap text-sm">
+                      {caption.text}
+                    </p>
+                  </div>
+                ))}
+              </div>
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  if (typed.trim()) {
+                    live.current?.submitText(typed);
+                    setTyped("");
+                    stick.current = true;
+                  }
+                }}
+                className="space-y-2 border-t border-[var(--color-line)] p-3"
+              >
+                <label
+                  htmlFor="typed-answer"
+                  className="text-xs text-[var(--color-muted)]"
+                >
+                  Type an answer or correction
+                </label>
+                <textarea
+                  id="typed-answer"
+                  rows={3}
+                  className="field-select resize-y text-sm"
+                  value={typed}
+                  onChange={(e) => setTyped(e.target.value)}
+                />
+                <Button
+                  type="submit"
+                  className="w-full"
+                  variant="ghost"
+                  disabled={!typed.trim() || ending}
+                >
+                  {connected ? "Send answer" : "Queue answer"}
+                </Button>
+              </form>
+            </Panel>
+            {camera && <Webcam />}
+          </aside>
+        </div>
+      </main>
+      <footer className="room-controls">
+        <div className="mx-auto flex max-w-[1350px] flex-wrap items-center justify-between gap-3">
+          <div className="flex flex-wrap items-center gap-2">
+            {effectiveMode === "voice" && (
+              <>
+                <Button
+                  variant="ghost"
+                  aria-pressed={!muted}
+                  onClick={() => {
+                    live.current?.setMuted(!muted);
+                    setMuted(!muted);
+                  }}
+                >
+                  {muted ? "Unmute microphone" : "Mute microphone"}
+                </Button>
+                <meter
+                  value={micLevel}
+                  min={0}
+                  max={1}
+                  aria-label="Local microphone input level"
+                  className="w-16"
+                />
+                <Button
+                  variant="ghost"
+                  onClick={() => {
+                    void live.current
+                      ?.enableAudio()
+                      .catch((e) => setError(errorMessage(e)));
+                  }}
+                >
+                  Enable audio
+                </Button>
+              </>
+            )}
+            <Button
+              variant="ghost"
+              aria-pressed={camera}
+              onClick={() => setCamera(!camera)}
+            >
+              {camera ? "Camera off" : "Camera self-view"}
+            </Button>
+            {!connected && (
+              <Button
+                variant="ghost"
+                onClick={() => {
+                  setError("");
+                  live.current?.reconnect();
+                }}
+              >
+                Retry connection
               </Button>
             )}
-          </form>
-        </aside>
-
-        {/* workspace */}
-        <section className="min-w-0 flex-1 p-4">
-          <Workspace modality={modality} onContent={onContent} />
-        </section>
-      </div>
-
-      <Webcam onReady={onWebcam} />
-    </main>
+          </div>
+          <Button onClick={() => void finish()} disabled={ending}>
+            {ending
+              ? "Saving & preparing feedback…"
+              : "Finish & see feedback →"}
+          </Button>
+        </div>
+      </footer>
+    </>
   );
 }
-
-// Interview length by modality + a small random buffer, so the AI paces + wraps up.
-function pickMinutes(modality: string): number {
-  const base = modality === "conversational" ? 18 : modality === "written" ? 22 : 30;
-  return base + Math.floor(Math.random() * 6); // +0..5
-}
-function fmtTime(ms: number): string {
-  const s = Math.max(0, Math.floor(ms / 1000));
-  return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}`;
-}
-
-function readFace(s: Session): string {
-  try {
-    const cfg = (s as unknown as { config?: { face_id?: string } }).config;
-    return cfg?.face_id ?? "ava";
-  } catch { return "ava"; }
-}
-
 export default function InterviewPage() {
-  return <Suspense fallback={<div className="flex h-screen items-center justify-center text-[var(--color-muted)]">Loading…</div>}><StudioInner /></Suspense>;
+  return (
+    <Suspense fallback={<p className="p-10">Opening room…</p>}>
+      <Room />
+    </Suspense>
+  );
 }

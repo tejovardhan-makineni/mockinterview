@@ -1,148 +1,155 @@
 "use client";
-
-// The app shell: a fixed left sidebar (Dashboard / Interview / Resume / Results
-// / Settings, with sign-out bottom-left) + an ambient-glass main area. Every
-// signed-in page renders its content inside <AppShell>. Matches the Quantum
-// design; adapts to Light/Dark themes via CSS vars.
-import { useEffect, useRef, useState, type ReactNode, type ComponentType } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { api } from "@/lib/api";
-import { ThemeToggle } from "./ThemeToggle";
-import { LanguageSelect } from "./LanguageSelect";
+import { api, IS_MOCK } from "@/lib/api";
+import { Button } from "./ui";
 import { FeedbackWidget } from "./FeedbackWidget";
-import { useT } from "@/lib/i18n";
-import {
-  IconDashboard, IconInterview, IconPacks, IconResume, IconResults, IconSettings, IconSignOut, LogoM,
-} from "@/components/icons";
-
-export type NavKey = "dashboard" | "interview" | "packs" | "resume" | "results" | "settings";
-
-type IconType = ComponentType<{ className?: string }>;
-
-const NAV: { key: NavKey; href: string; label: string; Icon: IconType }[] = [
-  { key: "dashboard", href: "/dashboard", label: "Dashboard", Icon: IconDashboard },
-  { key: "interview", href: "/interviews", label: "Interview", Icon: IconInterview },
-  { key: "packs", href: "/packs", label: "Practice Packs", Icon: IconPacks },
-  { key: "resume", href: "/resume-review", label: "Resume", Icon: IconResume },
-  { key: "results", href: "/results", label: "Results", Icon: IconResults },
-  { key: "settings", href: "/settings", label: "Settings", Icon: IconSettings },
-];
-
-export function AppShell({ active, children }: { active: NavKey; children: ReactNode }) {
+export type NavKey =
+  | "dashboard"
+  | "interview"
+  | "packs"
+  | "resume"
+  | "results"
+  | "settings"
+  | "contribute"
+  | "public";
+export const SOURCE_URL =
+  "https://github.com/tejovardhan-makineni/mockinterview";
+export function Footer({ feedback = false }: { feedback?: boolean }) {
+  return (
+    <footer className="no-print mx-auto flex max-w-[1160px] flex-wrap items-center justify-between gap-4 border-t border-[var(--color-line)] px-6 py-6 text-xs text-[var(--color-muted)]">
+      <span>Open source. Room to improve, together.</span>
+      {feedback && <FeedbackWidget target="product" />}
+      <nav aria-label="Information" className="flex flex-wrap gap-5">
+        <Link href="/privacy">Privacy</Link>
+        <Link href="/terms">Terms</Link>
+        <Link href="/help">Help</Link>
+        <a href={SOURCE_URL}>Source</a>
+      </nav>
+    </footer>
+  );
+}
+export function AppShell({
+  active,
+  children,
+}: {
+  active: NavKey;
+  children: ReactNode;
+}) {
+  const [signedIn, setSignedIn] = useState(false);
   const router = useRouter();
-  const t = useT();
-  const [email, setEmail] = useState<string>("");
-  const [open, setOpen] = useState(false); // mobile drawer
-  const drawerRef = useRef<HTMLDivElement>(null);
-
   useEffect(() => {
     let alive = true;
-    (async () => {
-      const u = await api.me();
-      if (!alive) return;
-      setEmail(u?.email ?? "");
-      if (!u) return;
-      // Mandatory onboarding gate: a signed-in user with no professions chosen is
-      // routed to the picker before using the app (so the catalog is always gated).
-      const p = await api.getProfile();
-      if (!alive) return;
-      if (!p?.professions || p.professions.length === 0) router.replace("/onboarding");
-    })();
-    return () => { alive = false; };
-  }, [router]);
-
-  // Drawer a11y: close on Escape and move focus into the panel when it opens.
-  useEffect(() => {
-    if (!open) return;
-    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") setOpen(false); };
-    window.addEventListener("keydown", onKey);
-    drawerRef.current?.focus();
-    return () => window.removeEventListener("keydown", onKey);
-  }, [open]);
-
-  const NavLinks = (
-    <nav className="flex flex-1 flex-col gap-1">
-      {NAV.map((n) => {
-        const { Icon } = n;
-        return (
-          <Link key={n.key} href={n.href} onClick={() => setOpen(false)}
-            className={`flex items-center gap-3 rounded-lg px-4 py-3 text-sm transition ${
-              active === n.key
-                ? "border-l-2 border-[var(--color-accent)] bg-[color-mix(in_srgb,var(--color-accent)_10%,transparent)] font-semibold text-[var(--color-accent)]"
-                : "text-[var(--color-muted)] hover:bg-[var(--color-panel-2)] hover:text-[var(--color-ink)]"
-            }`}>
-            <Icon className="h-5 w-5" />
-            <span>{t(n.label)}</span>
-          </Link>
-        );
-      })}
-    </nav>
-  );
-
-  const Sidebar = (
-    <div className="flex h-full flex-col gap-2 px-4 py-6">
-      <Link href="/dashboard" className="mb-6 flex items-center gap-2.5 px-2 text-lg font-bold tracking-tight">
-        <LogoM className="h-8 w-8" />
-        mockinterview<span className="text-[var(--color-accent)]">.live</span>
-      </Link>
-      {NavLinks}
-      <div className="mt-2 space-y-2 border-t border-[var(--color-line)] pt-4">
-        {/* Language selector — stacked (full-width select under the label) so long
-            "endonym (English)" values never overflow the sidebar. */}
-        <div className="px-1">
-          <span className="text-xs font-medium text-[var(--color-muted)]">{t("Language")}</span>
-          <div className="mt-1"><LanguageSelect variant="sidebar" /></div>
-        </div>
-        {/* Theme switcher — its own labeled row above the account info. */}
-        <div className="flex items-center justify-between gap-2 px-1">
-          <span className="text-xs font-medium text-[var(--color-muted)]">{t("Theme")}</span>
-          <ThemeToggle />
-        </div>
-        {/* Feedback — general feedback / bug report (captures the current page). */}
-        <FeedbackWidget variant="nav" />
-        {/* Account email */}
-        <div className="min-w-0 px-1">
-          <div className="truncate text-xs text-[var(--color-muted)]" title={email || "Account"}>{email || "Account"}</div>
-        </div>
-        {/* Sign out — full-width bordered button, clearly separated. */}
-        <button onClick={() => { api.logout(); router.replace("/login"); }}
-          className="flex w-full items-center justify-center gap-2 rounded-lg border border-[var(--color-line)] px-4 py-2.5 text-sm font-medium text-[var(--color-bad)] transition hover:border-[var(--color-bad)] hover:bg-[color-mix(in_srgb,var(--color-bad)_10%,transparent)]">
-          <IconSignOut className="h-4 w-4" />
-          {t("Sign out")}
-        </button>
-      </div>
-    </div>
-  );
-
+    api
+      .me()
+      .then((u) => {
+        if (alive) setSignedIn(!!u);
+      })
+      .catch(() => {});
+    return () => {
+      alive = false;
+    };
+  }, []);
+  const current =
+    active === "results"
+      ? "History"
+      : active === "contribute"
+        ? "Contribute"
+        : ["public", "settings"].includes(active)
+          ? ""
+          : "Practice";
   return (
-    <div className="min-h-screen">
-      {/* Desktop sidebar */}
-      <aside className="fixed left-0 top-0 z-40 hidden h-full w-[264px] border-r border-[var(--color-line)] bg-[color-mix(in_srgb,var(--color-studio)_82%,transparent)] backdrop-blur-xl md:block">
-        {Sidebar}
-      </aside>
-
-      {/* Mobile top bar + drawer */}
-      <div className="sticky top-0 z-40 flex items-center justify-between border-b border-[var(--color-line)] bg-[color-mix(in_srgb,var(--color-studio)_88%,transparent)] px-4 py-3 backdrop-blur md:hidden">
-        <Link href="/dashboard" className="flex items-center gap-2 font-bold">
-          <LogoM className="h-7 w-7" />
-          mockinterview<span className="text-[var(--color-accent)]">.live</span>
-        </Link>
-        <button onClick={() => setOpen(!open)} aria-label={open ? "Close menu" : "Open menu"} aria-expanded={open} aria-controls="mobile-nav-drawer" className="rounded-lg border border-[var(--color-line)] px-3 py-1.5 text-sm">☰</button>
-      </div>
-      {open && (
-        <div className="fixed inset-0 z-50 md:hidden" onClick={() => setOpen(false)}>
-          <div className="absolute inset-0 bg-black/50" />
-          <div ref={drawerRef} id="mobile-nav-drawer" role="dialog" aria-modal="true" aria-label="Navigation menu" tabIndex={-1} className="absolute left-0 top-0 h-full w-[264px] border-r border-[var(--color-line)] bg-[var(--color-studio)] outline-none" onClick={(e) => e.stopPropagation()}>
-            {Sidebar}
-          </div>
+    <>
+      <a className="skip-link" href="#main-content">
+        Skip to content
+      </a>
+      <header className="no-print border-b border-[var(--color-line)] bg-[var(--color-panel)]">
+        <div className="mx-auto flex max-w-[1160px] flex-wrap items-center gap-x-8 gap-y-3 px-6 py-4">
+          <Link
+            href="/"
+            className="mr-auto flex items-center gap-2.5 text-lg font-semibold tracking-tight no-underline"
+          >
+            <span
+              className="grid h-8 w-8 place-items-center rounded-lg bg-[var(--color-accent)] text-[var(--color-panel)]"
+              aria-hidden="true"
+            >
+              m
+            </span>
+            mockinterview
+            <span className="hidden text-xs font-normal text-[var(--color-muted)] sm:inline">
+              .live
+            </span>
+          </Link>
+          <nav aria-label="Main" className="flex gap-1">
+            {[
+              { label: "Practice", href: "/interviews" },
+              { label: "History", href: "/results" },
+              { label: "Contribute", href: "/contribute" },
+            ].map((n) => (
+              <Link
+                key={n.href}
+                href={n.href}
+                aria-current={current === n.label ? "page" : undefined}
+                className={
+                  "rounded-lg px-3 py-2.5 text-sm no-underline " +
+                  (current === n.label
+                    ? "bg-[var(--color-panel-2)] font-semibold"
+                    : "text-[var(--color-muted)]")
+                }
+              >
+                {n.label}
+              </Link>
+            ))}
+          </nav>
+          {signedIn ? (
+            <details className="relative">
+              <summary className="px-2 py-2 text-sm">Account</summary>
+              <div className="absolute right-0 z-50 mt-2 w-44 rounded-xl border border-[var(--color-line)] bg-[var(--color-panel)] p-2 shadow-lg">
+                <Link href="/settings" className="block rounded-lg p-3 text-sm">
+                  Settings
+                </Link>
+                <Link
+                  href="/resume-review"
+                  className="block rounded-lg p-3 text-sm"
+                >
+                  Resume review
+                </Link>
+                <button
+                  className="w-full rounded-lg p-3 text-left text-sm"
+                  onClick={() => {
+                    void Promise.resolve(api.logout())
+                      .catch(() => {})
+                      .finally(() => {
+                        setSignedIn(false);
+                        router.replace("/");
+                      });
+                  }}
+                >
+                  Sign out
+                </button>
+              </div>
+            </details>
+          ) : (
+            <Button href="/login" variant="ghost">
+              Sign in
+            </Button>
+          )}
+        </div>
+      </header>
+      {IS_MOCK && (
+        <div
+          className="notice mx-auto max-w-[1160px] rounded-none text-center"
+          role="status"
+        >
+          Demo environment · simulated interviews and reports; feedback is not
+          sent.
         </div>
       )}
-
-      {/* Main content */}
-      <main className="md:ml-[264px]">
-        <div className="w-full px-6 py-8 lg:px-10">{children}</div>
+      <main id="main-content" className="page-width" tabIndex={-1}>
+        {children}
       </main>
-    </div>
+      <Footer feedback={signedIn} />
+    </>
   );
 }

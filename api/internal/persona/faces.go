@@ -1,23 +1,18 @@
 package persona
 
-// Face is a client-rendered 3D avatar. Kind is "realistic" for the rigged glTF
-// interviewers rendered by GltfAvatar with viseme lip-sync. Gltf points at the
-// bundled model under web/public/avatars; the web registry keys off the same ID.
+// Face is an original code-drawn animated portrait served by the web client.
+// No third-party avatar binary is required or redistributed.
 type Face struct {
 	ID    string `json:"id"`
 	Label string `json:"label"`
-	Gltf  string `json:"gltf"`
-	Kind  string `json:"kind"` // realistic
+	Gltf  string `json:"gltf,omitempty"`
+	Kind  string `json:"kind"`
 }
 
-// Faces is the catalog served to clients. To add a face, bundle a rigged .glb
-// under web/public/avatars, append one line here, and registerGltf() it under
-// the same ID in web/components/studio/avatars/realistic.ts.
 var Faces = []Face{
-	// Realistic glTF interviewers (rendered by GltfAvatar with viseme lip-sync).
-	{ID: "sophia", Label: "Sophia", Kind: "realistic", Gltf: "/avatars/rpm-female.glb"},
-	{ID: "marcus", Label: "Marcus", Kind: "realistic", Gltf: "/avatars/marcus.glb"},
-	{ID: "richard", Label: "Richard", Kind: "realistic", Gltf: "/avatars/richard.glb"},
+	{ID: "alex", Label: "Alex", Kind: "illustrated"},
+	{ID: "jordan", Label: "Jordan", Kind: "illustrated"},
+	{ID: "sam", Label: "Sam", Kind: "illustrated"},
 }
 
 // FaceByID returns the catalog entry and whether it was found.

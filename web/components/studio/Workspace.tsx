@@ -1,130 +1,209 @@
 "use client";
-
-// The candidate's work surface, chosen by interview modality:
-//   system_design → Excalidraw canvas   coding → Monaco editor
-//   written → rich text pad             conversational → notes scratchpad
-// It reports a debounced text representation of the content up to the studio,
-// which persists it and feeds it to the interviewer (so the AI can reference
-// "the Postgres box you drew").
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useState } from "react";
 import dynamic from "next/dynamic";
 import type { Modality } from "@/lib/types";
-import "@excalidraw/excalidraw/index.css"; // REQUIRED — without this the canvas/toolbar render blank
-
-const Excalidraw = dynamic(async () => (await import("@excalidraw/excalidraw")).Excalidraw, { ssr: false });
-const MonacoEditor = dynamic(() => import("@monaco-editor/react"), { ssr: false });
-
-type Props = { modality: Modality; onContent: (text: string) => void };
-
-export function Workspace({ modality, onContent }: Props) {
-  switch (modality) {
-    case "system_design": return <CanvasWs onContent={onContent} />;
-    case "coding": return <CodeWs onContent={onContent} />;
-    default: return <TextWs modality={modality} onContent={onContent} />;
-  }
-}
-
-function useDebouncedEmit(onContent: (t: string) => void, delay = 1200) {
-  const timer = useRef<number | undefined>(undefined);
-  return (text: string) => {
-    if (timer.current) clearTimeout(timer.current);
-    timer.current = window.setTimeout(() => onContent(text), delay);
+import type { WorkspaceSnapshot } from "@/lib/features/interview";
+import "@excalidraw/excalidraw/index.css";
+const Excalidraw = dynamic(
+  async () => {
+    (
+      window as Window & { EXCALIDRAW_ASSET_PATH?: string }
+    ).EXCALIDRAW_ASSET_PATH = "/vendor/excalidraw/";
+    return (await import("@excalidraw/excalidraw")).Excalidraw;
+  },
+  {
+    ssr: false,
+    loading: () => (
+      <p className="p-6" role="status">
+        Opening whiteboard…
+      </p>
+    ),
+  },
+);
+const MonacoEditor = dynamic(
+  async () => {
+    const editor = await import("@monaco-editor/react");
+    editor.loader.config({ paths: { vs: "/vendor/monaco/vs" } });
+    return editor.default;
+  },
+  {
+    ssr: false,
+    loading: () => (
+      <p className="p-6" role="status">
+        Opening code editor…
+      </p>
+    ),
+  },
+);
+type Props = {
+  modality: Modality;
+  initial?: WorkspaceSnapshot;
+  onChange?: (snapshot: WorkspaceSnapshot) => void;
+  onContent?: (text: string) => void;
+};
+export function Workspace({ modality, initial, onChange, onContent }: Props) {
+  const [text, setText] = useState(initial?.content ?? "");
+  const [language, setLanguage] = useState(
+    String(initial?.data?.language ?? "python"),
+  );
+  const [plain, setPlain] = useState(false);
+  const update = (content: string, data?: Record<string, unknown>) => {
+    setText(content);
+    onContent?.(content);
+    onChange?.({
+      kind:
+        modality === "coding"
+          ? "code"
+          : modality === "system_design"
+            ? "canvas"
+            : modality === "written"
+              ? "written"
+              : "note",
+      content,
+      revision: initial?.revision ?? 0,
+      data,
+    });
   };
-}
-
-// Track the active theme so the embedded editors (Excalidraw/Monaco) match the
-// rest of the app. Light theme uses light editors; dark and quantum are
-// dark-based. Re-reads when ThemeToggle stamps data-theme on <html>.
-function useIsLightTheme() {
-  const [light, setLight] = useState(false);
-  useEffect(() => {
-    const read = () => setLight(document.documentElement.dataset.theme === "light");
-    read();
-    const obs = new MutationObserver(read);
-    obs.observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
-    return () => obs.disconnect();
-  }, []);
-  return light;
-}
-
-// ---- Excalidraw canvas (system design) ----
-function CanvasWs({ onContent }: { onContent: (t: string) => void }) {
-  const emit = useDebouncedEmit(onContent);
-  const light = useIsLightTheme();
-  return (
-    <div className="h-full w-full overflow-hidden rounded-xl border border-[var(--color-line)]">
-      <Excalidraw
-        theme={light ? "light" : "dark"}
-        onChange={(elements: readonly unknown[]) => emit(summarizeDiagram(elements))}
-        UIOptions={{ canvasActions: { toggleTheme: false, loadScene: false, saveToActiveFile: false } }}
-      />
-    </div>
-  );
-}
-
-// Turn Excalidraw elements into a text description the interviewer can reason about.
-function summarizeDiagram(elements: readonly unknown[]): string {
-  const els = elements as { type?: string; text?: string; isDeleted?: boolean; id?: string }[];
-  const live = els.filter((e) => e && !e.isDeleted);
-  const labels = live.filter((e) => e.type === "text" && e.text).map((e) => e.text!.trim()).filter(Boolean);
-  const shapeCounts: Record<string, number> = {};
-  for (const e of live) {
-    if (e.type && e.type !== "text") shapeCounts[e.type] = (shapeCounts[e.type] ?? 0) + 1;
-  }
-  const shapes = Object.entries(shapeCounts).map(([t, n]) => `${n} ${t}${n > 1 ? "s" : ""}`).join(", ");
-  const parts: string[] = [];
-  if (labels.length) parts.push(`labeled components: ${labels.join(", ")}`);
-  if (shapes) parts.push(`shapes: ${shapes}`);
-  const arrows = shapeCounts["arrow"] ?? 0;
-  if (arrows) parts.push(`${arrows} connection${arrows > 1 ? "s" : ""}`);
-  return parts.length ? parts.join("; ") : "empty canvas";
-}
-
-// ---- Monaco editor (coding) ----
-function CodeWs({ onContent }: { onContent: (t: string) => void }) {
-  const emit = useDebouncedEmit(onContent);
-  const [lang, setLang] = useState("python");
-  const light = useIsLightTheme();
-  return (
-    <div className="flex h-full w-full flex-col overflow-hidden rounded-xl border border-[var(--color-line)] bg-[var(--color-panel)]">
-      <div className="flex items-center gap-2 border-b border-[var(--color-line)] px-3 py-1.5 text-xs text-[var(--color-muted)]">
-        <label htmlFor="ws-lang">Language</label>
-        <select id="ws-lang" value={lang} onChange={(e) => setLang(e.target.value)} className="rounded bg-[var(--color-panel-2)] px-2 py-1 text-[var(--color-ink)]">
-          {["python", "javascript", "typescript", "go", "java", "cpp"].map((l) => <option key={l} value={l}>{l}</option>)}
-        </select>
+  if (modality === "system_design" && !plain)
+    return (
+      <div className="flex h-full flex-col">
+        <div className="flex items-center justify-between border-b border-[var(--color-line)] px-4 py-1 text-xs">
+          <span>Whiteboard · diagram and connections are saved</span>
+          <button onClick={() => setPlain(true)} className="underline">
+            Use text description
+          </button>
+        </div>
+        <div className="min-h-0 flex-1">
+          <Excalidraw
+            initialData={initial?.data as never}
+            onChange={(elements, appState, files) => {
+              const scene = {
+                elements,
+                appState: { viewBackgroundColor: appState.viewBackgroundColor },
+                files,
+              };
+              update(
+                summarizeDiagram(elements),
+                scene as unknown as Record<string, unknown>,
+              );
+            }}
+            UIOptions={{
+              canvasActions: {
+                loadScene: false,
+                saveToActiveFile: false,
+                toggleTheme: false,
+              },
+            }}
+          />
+        </div>
       </div>
-      <div className="min-h-0 flex-1">
-        <MonacoEditor
-          height="100%"
-          language={lang}
-          theme={light ? "light" : "vs-dark"}
-          defaultValue={`# Write your solution here\n`}
-          onChange={(v) => emit(`# language: ${lang}\n${v ?? ""}`)}
-          options={{ fontSize: 14, minimap: { enabled: false }, scrollBeyondLastLine: false }}
-        />
+    );
+  if (modality === "coding" && !plain)
+    return (
+      <div className="flex h-full flex-col">
+        <div className="flex items-center justify-between gap-4 border-b border-[var(--color-line)] px-4 py-2">
+          <label className="flex items-center gap-3 text-xs">
+            Language
+            <select
+              value={language}
+              onChange={(e) => {
+                setLanguage(e.target.value);
+                update(text, { language: e.target.value });
+              }}
+              className="rounded border border-[var(--color-line)] bg-[var(--color-panel)] px-2"
+            >
+              {[
+                "python",
+                "javascript",
+                "typescript",
+                "go",
+                "java",
+                "cpp",
+                "sql",
+              ].map((l) => (
+                <option key={l}>{l}</option>
+              ))}
+            </select>
+          </label>
+          <button onClick={() => setPlain(true)} className="text-xs underline">
+            Plain text editor
+          </button>
+        </div>
+        <p className="px-4 py-2 text-xs text-[var(--color-muted)]">
+          Code review interview. Execution is unavailable; explain your tests
+          and expected results.
+        </p>
+        <div className="min-h-0 flex-1">
+          <MonacoEditor
+            value={text}
+            onChange={(v) => update(v ?? "", { language })}
+            language={language}
+            theme="vs"
+            options={{
+              fontSize: 15,
+              minimap: { enabled: false },
+              scrollBeyondLastLine: false,
+              accessibilitySupport: "on",
+              ariaLabel: "Your interview solution",
+            }}
+          />
+        </div>
       </div>
-    </div>
-  );
-}
-
-// ---- Text pad (written / conversational notes) ----
-function TextWs({ modality, onContent }: { modality: Modality; onContent: (t: string) => void }) {
-  const emit = useDebouncedEmit(onContent);
-  const [val, setVal] = useState("");
-  const placeholder = useMemo(
-    () => (modality === "written" ? "Write your response here — the interviewer reads it and probes." : "Optional scratchpad for your notes during the conversation."),
-    [modality]
-  );
-  useEffect(() => { emit(val); }, [val]); // eslint-disable-line react-hooks/exhaustive-deps
+    );
   return (
-    <div className="h-full w-full overflow-hidden rounded-xl border border-[var(--color-line)]">
+    <label className="flex h-full flex-col">
+      <span className="border-b border-[var(--color-line)] px-4 py-3 text-xs text-[var(--color-muted)]">
+        {modality === "system_design"
+          ? "Architecture description — describe components and connections"
+          : modality === "written"
+            ? "Your written response"
+            : modality === "coding"
+              ? "Your solution"
+              : "Optional notes — the interviewer can read these"}
+      </span>
       <textarea
-        value={val}
-        onChange={(e) => setVal(e.target.value)}
-        placeholder={placeholder}
-        aria-label={modality === "written" ? "Your written response" : "Scratchpad notes"}
-        className="h-full w-full resize-none bg-[var(--color-panel)] p-5 text-[15px] leading-relaxed text-[var(--color-ink)] outline-none placeholder:text-[var(--color-faint)]"
+        value={text}
+        onChange={(e) =>
+          update(
+            e.target.value,
+            modality === "coding" ? { language } : undefined,
+          )
+        }
+        className="min-h-0 flex-1 resize-none bg-[var(--color-panel)] p-5 leading-relaxed text-[var(--color-ink)]"
+        placeholder="Start here. Your work saves automatically."
       />
-    </div>
+    </label>
+  );
+}
+export function summarizeDiagram(elements: readonly unknown[]): string {
+  const live = (
+    elements as {
+      id: string;
+      type: string;
+      text?: string;
+      isDeleted?: boolean;
+      startBinding?: { elementId: string } | null;
+      endBinding?: { elementId: string } | null;
+      containerId?: string | null;
+    }[]
+  ).filter((e) => !e.isDeleted);
+  const names = new Map<string, string>();
+  for (const e of live)
+    if (e.text) {
+      names.set(e.id, e.text);
+      if (e.containerId) names.set(e.containerId, e.text);
+    }
+  const labels = [...new Set(names.values())];
+  const links = live
+    .filter((e) => e.type === "arrow")
+    .map(
+      (e) =>
+        (names.get(e.startBinding?.elementId ?? "") ?? "unlabeled component") +
+        " → " +
+        (names.get(e.endBinding?.elementId ?? "") ?? "unlabeled component"),
+    );
+  return (
+    (labels.length ? "Components: " + labels.join(", ") : "") +
+    (links.length ? "\nConnections: " + links.join("; ") : "")
   );
 }

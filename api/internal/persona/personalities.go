@@ -49,7 +49,7 @@ func DefaultFaceID() string {
 	if len(Faces) > 0 {
 		return Faces[0].ID
 	}
-	return "sophia"
+	return "alex"
 }
 
 func DefaultPersonalityID() string {

@@ -1,0 +1,41 @@
+{
+  "schema_version": 1,
+  "id": "stakeholder-simulation",
+  "revision": 1,
+  "name": "Stakeholder simulation",
+  "interviewer_role": "the fictional counterpart specified in the scenario",
+  "workspaces": [
+    "conversational"
+  ],
+  "tool_policy": "Roleplay the specified stakeholder. Never pressure the candidate to make false commitments.",
+  "stages": [
+    {
+      "id": "intro",
+      "title": "Opening",
+      "kind": "intro",
+      "guidance": "Give the candidate a brief opening to lead the conversation.",
+      "share": 0.05
+    },
+    {
+      "id": "discover",
+      "title": "Understand priorities",
+      "kind": "core",
+      "guidance": "Respond as the stakeholder using known facts. Wait for discovery questions.",
+      "share": 0.4
+    },
+    {
+      "id": "negotiate",
+      "title": "Agree on a path",
+      "kind": "core",
+      "guidance": "Explore concrete tradeoffs without inventing capacity or facts.",
+      "share": 0.45
+    },
+    {
+      "id": "wrap",
+      "title": "Close",
+      "kind": "wrap",
+      "guidance": "Confirm what was agreed and what remains open.",
+      "share": 0.1
+    }
+  ]
+}

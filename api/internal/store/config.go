@@ -2,6 +2,8 @@ package store
 
 import (
 	"context"
+	"errors"
+	"github.com/jackc/pgx/v5"
 
 	"github.com/tejo/mockinterview-api/internal/persona"
 )
@@ -35,10 +37,16 @@ func (s *Store) GetConfig(ctx context.Context, userID string) (InterviewConfig, 
 	err := s.Pool.QueryRow(ctx,
 		`SELECT voice_id, face_id, personality, intensity FROM interview_configs WHERE user_id=$1`, userID).
 		Scan(&c.VoiceID, &c.FaceID, &c.Personality, &c.Intensity)
-	if err != nil {
+	if errors.Is(err, pgx.ErrNoRows) {
 		// No row yet → return defaults (not an error).
 		return DefaultConfig(), nil
 	}
+	if err != nil {
+		return InterviewConfig{}, err
+	}
+	c.VoiceID = persona.NormalizeVoiceID(c.VoiceID)
+	c.FaceID = persona.NormalizeFaceID(c.FaceID)
+	c.Personality = persona.NormalizePersonalityID(c.Personality)
 	return c, nil
 }
 

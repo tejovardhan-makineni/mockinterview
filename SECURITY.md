@@ -1,28 +1,24 @@
-# Security Policy
+# Security policy
 
-## Reporting a vulnerability
+Report vulnerabilities privately through this repository's
+[GitHub private vulnerability reporting](https://github.com/tejovardhan-makineni/mockinterview/security/advisories/new)
+(Security → Report a vulnerability). Include affected version, reproduction
+steps, impact and a minimal redacted example. Do not open a public issue with
+credentials, account data or an exploitable vulnerability. If reporting is
+unavailable, ask the maintainer to enable a private reporting channel without
+posting vulnerability details.
 
-Please **do not** open a public issue for security vulnerabilities.
+Only the latest `main` receives security fixes during the preview period. A
+maintainer will assess reports and coordinate a fix and disclosure; there is no
+guaranteed response time. Avoid tests that access other people's accounts or
+cause disruption. Use your own local instance for invasive testing.
 
-Instead, report privately using GitHub's
-[private vulnerability reporting](https://docs.github.com/en/code-security/security-advisories/guidance-on-reporting-and-writing-information-about-vulnerabilities/privately-reporting-a-security-vulnerability)
-on this repository (Security → Report a vulnerability), or email the maintainer.
+Keep provider keys and database credentials in local `.env` files or the deployed
+secret manager. Never commit them, include them in transcripts, or attach them
+to issues. Rotate any exposed credential immediately. Development defaults and
+`LOCAL_UNLIMITED=true` are for local use and must not be exposed publicly.
 
-We aim to acknowledge reports within 72 hours and to ship a fix or mitigation as
-quickly as the severity warrants. Please give us a reasonable window to address
-the issue before any public disclosure.
-
-## Scope & handling of secrets
-
-- API keys and database credentials live only in `.env` / `deploy/*.env`, which
-  are gitignored. Never commit secrets. If a secret is committed, rotate it
-  immediately and open a private report.
-- Auth is email/password with bcrypt hashing and short-lived JWTs. The live
-  interview WebSocket authenticates via a query-string token because browsers
-  can't set headers on `WebSocket`; treat that token as a bearer credential.
-- User data (transcripts, resumes, behavioral samples, scores) is deleted via
-  `ON DELETE CASCADE` when an account is deleted.
-
-## Supported versions
-
-This project is pre-1.0; only the latest `main` receives security fixes.
+Security review should cover account verification and recovery, authorization,
+quota concurrency, session ownership, credential redaction and expiry, export
+and deletion, provider failures and private reference leakage. A passing unit
+suite does not replace deployment configuration or live security verification.

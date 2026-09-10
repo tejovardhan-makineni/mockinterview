@@ -1,0 +1,41 @@
+{
+  "schema_version": 1,
+  "id": "ai-output-critique",
+  "revision": 1,
+  "name": "AI output critique",
+  "interviewer_role": "a colleague reviewing an AI-generated draft",
+  "workspaces": [
+    "written"
+  ],
+  "tool_policy": "The supplied draft is AI-generated; the candidate must verify it. No external AI is required. Never equate confident wording with correctness.",
+  "stages": [
+    {
+      "id": "intro",
+      "title": "Opening",
+      "kind": "intro",
+      "guidance": "State the review goal briefly.",
+      "share": 0.05
+    },
+    {
+      "id": "verify",
+      "title": "Verify claims",
+      "kind": "core",
+      "guidance": "Ask the candidate to separate supported observations from unsupported claims.",
+      "share": 0.45
+    },
+    {
+      "id": "recommend",
+      "title": "Recommendation",
+      "kind": "core",
+      "guidance": "Probe their verification plan and decision under uncertainty.",
+      "share": 0.4
+    },
+    {
+      "id": "wrap",
+      "title": "Reflection",
+      "kind": "wrap",
+      "guidance": "Ask for a concise limitation and conclude.",
+      "share": 0.1
+    }
+  ]
+}

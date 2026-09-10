@@ -1,0 +1,168 @@
+{
+  "schema_version": 1,
+  "revision": 1,
+  "format_id": "reverse-interview",
+  "review_status": "preview",
+  "provenance": {
+    "authorship": "Original project scenario, AI-assisted draft. Practitioner review and calibration pending.",
+    "license": "AGPL-3.0-only"
+  },
+  "minutes": 10,
+  "id": "candidate-questions-role-fit",
+  "title": "Use the Final Five Minutes",
+  "track": "professional",
+  "domain": "candidate_questions",
+  "areas": [
+    "software_engineering",
+    "product_management",
+    "data_science",
+    "consulting",
+    "finance",
+    "sales",
+    "ux_design"
+  ],
+  "modality": "conversational",
+  "difficulty": "mid",
+  "tags": [
+    "reverse-interview",
+    "practical",
+    "community-preview"
+  ],
+  "prompt": "We are at the final part of a fictional interview. Ask questions that help you understand whether this role fits your goals. I will answer as the hiring manager of a small product team. Ask one question at a time and follow up on useful details.",
+  "blurb": "Use the Final Five Minutes \u2014 original practice scenario, awaiting practitioner review.",
+  "rubric": [
+    {
+      "key": "relevance",
+      "label": "Relevant inquiry",
+      "description": "Connects questions to the role, personal priorities and information still missing.",
+      "weight": 1,
+      "anchors": {
+        "0": "No demonstrated evidence of this skill.",
+        "2": "Addresses the core point with relevant evidence and a reasonable explanation.",
+        "4": "Gives a precise, well-supported explanation, tests alternatives and states limitations."
+      }
+    },
+    {
+      "key": "followup",
+      "label": "Active follow-up",
+      "description": "Uses the interviewer\u2019s answer to deepen the next question.",
+      "weight": 1,
+      "anchors": {
+        "0": "No demonstrated evidence of this skill.",
+        "2": "Addresses the core point with relevant evidence and a reasonable explanation.",
+        "4": "Gives a precise, well-supported explanation, tests alternatives and states limitations."
+      }
+    },
+    {
+      "key": "specificity",
+      "label": "Concrete evidence",
+      "description": "Asks for examples instead of accepting broad culture claims.",
+      "weight": 1,
+      "anchors": {
+        "0": "No demonstrated evidence of this skill.",
+        "2": "Addresses the core point with relevant evidence and a reasonable explanation.",
+        "4": "Gives a precise, well-supported explanation, tests alternatives and states limitations."
+      }
+    },
+    {
+      "key": "judgment",
+      "label": "Decision usefulness",
+      "description": "Investigates expectations, support and tradeoffs relevant to a fit decision.",
+      "weight": 1,
+      "anchors": {
+        "0": "No demonstrated evidence of this skill.",
+        "2": "Addresses the core point with relevant evidence and a reasonable explanation.",
+        "4": "Gives a precise, well-supported explanation, tests alternatives and states limitations."
+      }
+    },
+    {
+      "key": "time",
+      "label": "Prioritization",
+      "description": "Uses limited time for important questions rather than exhausting a memorized list.",
+      "weight": 1,
+      "anchors": {
+        "0": "No demonstrated evidence of this skill.",
+        "2": "Addresses the core point with relevant evidence and a reasonable explanation.",
+        "4": "Gives a precise, well-supported explanation, tests alternatives and states limitations."
+      }
+    },
+    {
+      "key": "reflection",
+      "label": "Fit reflection",
+      "description": "Summarizes what was learned and what remains uncertain without overclaiming.",
+      "weight": 1,
+      "anchors": {
+        "0": "No demonstrated evidence of this skill.",
+        "2": "Addresses the core point with relevant evidence and a reasonable explanation.",
+        "4": "Gives a precise, well-supported explanation, tests alternatives and states limitations."
+      }
+    }
+  ],
+  "reference": {
+    "scenario": "We are at the final part of a fictional interview. Ask questions that help you understand whether this role fits your goals. I will answer as the hiring manager of a small product team. Ask one question at a time and follow up on useful details.",
+    "facts": [
+      {
+        "id": "success",
+        "value": "The first three months focus on shipping a small customer-facing improvement with a mentor.",
+        "reveal_when": "candidate asks about success or initial expectations"
+      },
+      {
+        "id": "working",
+        "value": "The team documents major decisions asynchronously and has two shared meeting blocks per week.",
+        "reveal_when": "candidate asks about collaboration"
+      },
+      {
+        "id": "challenge",
+        "value": "A recent launch slipped because ownership between product and engineering was unclear. The team is trialing a single-owner decision log.",
+        "reveal_when": "candidate asks for a challenge or concrete example"
+      },
+      {
+        "id": "support",
+        "value": "A mentor meets weekly; urgent questions go to a rotating support partner.",
+        "reveal_when": "candidate asks about support or onboarding"
+      }
+    ],
+    "model_points": [
+      "Connects questions to the role, personal priorities and information still missing.",
+      "Uses the interviewer\u2019s answer to deepen the next question.",
+      "Asks for examples instead of accepting broad culture claims.",
+      "Investigates expectations, support and tradeoffs relevant to a fit decision.",
+      "Uses limited time for important questions rather than exhausting a memorized list.",
+      "Summarizes what was learned and what remains uncertain without overclaiming."
+    ],
+    "probes": [
+      {
+        "trigger": "candidate accepts a vague answer",
+        "question": "Is there a specific example you would like me to explain?"
+      },
+      {
+        "trigger": "candidate has no more questions",
+        "question": "What did you learn that would matter to your decision?"
+      }
+    ],
+    "red_flags": [
+      "Inventing unavailable facts",
+      "Ignoring explicit constraints",
+      "Claiming unperformed verification"
+    ],
+    "follow_ups": [
+      "What additional evidence would change your decision?"
+    ],
+    "exemplar_answer": "Multiple approaches are valid. A strong response establishes the goal, uses the provided facts, tests alternatives, explains tradeoffs, and states uncertainty."
+  },
+  "interviewer_notes": "Roleplay only this fictional team. Do not invent compensation, legal policies, company names or personal history. Say when a fact is unspecified. Do not score candidates down for reasonable questions about working conditions or support.",
+  "learning_drills": [
+    {
+      "id": "repair-one-decision",
+      "title": "Repair one decision",
+      "minutes": 5,
+      "prompt": "Choose one decision in your answer. Rewrite the explanation using one fact, one alternative, and one limitation. This is self-guided practice; no model assessment is performed.",
+      "checklist": [
+        "Identify the decision",
+        "Cite a supplied fact",
+        "Compare an alternative",
+        "State what would change your mind"
+      ]
+    }
+  ]
+}

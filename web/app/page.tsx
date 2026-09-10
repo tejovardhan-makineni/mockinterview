@@ -1,67 +1,96 @@
-import { Badge, Button, Panel } from "@/components/ui";
-
-const FEATURES = [
-  { t: "A human-like interviewer", d: "A configurable face and voice that speaks, reacts, and interrupts in real time — powered by a native-audio live AI model." },
-  { t: "It watches you draw", d: "Sketch your architecture on a live canvas. The interviewer sees it and probes: \"you drew Postgres — how do you capture changes, CDC/Debezium?\"" },
-  { t: "Scored like the real thing", d: "Requirements, estimations, HLD, API, deep-dives, scaling, reliability, observability, security — each rated with evidence and coverage." },
-  { t: "Reads the room", d: "Eye contact, posture, lighting, filler words, long pauses, and how often you asked for help — tracked in-browser, reported honestly." },
-  { t: "Your resume, your projects", d: "Upload a resume; the intro conversation digs into your real projects before the design problem begins." },
-  { t: "Tune the interviewer", d: "Supportive, neutral, interruptive, or downright annoying — and dial the intensity — to train for any room." },
-];
-
+import Link from "next/link";
+import { AppShell } from "@/components/AppShell";
+import { Button, Panel } from "@/components/ui";
 export default function Home() {
   return (
-    <main className="mx-auto max-w-6xl px-6 py-10">
-      <nav className="flex items-center justify-between">
-        <div className="flex items-center gap-2.5 text-lg font-bold tracking-tight">
-          <span className="live-dot inline-block h-2.5 w-2.5 rounded-full bg-[var(--color-live)]" />
-          mockinterview<span className="text-[var(--color-accent)]">.live</span>
-        </div>
-        <div className="flex items-center gap-3">
-          <Button href="/login" variant="ghost">Sign in</Button>
-          <Button href="/login">Start an interview</Button>
-        </div>
-      </nav>
-
-      <section className="mx-auto mt-24 max-w-3xl text-center">
-        <Badge tone="accent">Powered by AI · Live voice &amp; face</Badge>
-        <h1 className="mt-6 text-5xl font-extrabold leading-[1.05] tracking-tight md:text-6xl">
-          Practice system design with an AI that feels like a{" "}
-          <span className="text-[var(--color-accent)]">real interviewer</span>.
-        </h1>
-        <p className="mx-auto mt-6 max-w-2xl text-lg text-[var(--color-muted)]">
-          Not a chatbot. A face and a voice that asks, listens, watches your diagram, interrupts with
-          low-level follow-ups, and gives you a brutally useful scorecard afterward.
-        </p>
-        <div className="mt-9 flex items-center justify-center gap-3">
-          <Button href="/login" className="px-6 py-3 text-base">Start free interview</Button>
-          <Button href="#how" variant="ghost" className="px-6 py-3 text-base">See how it works</Button>
-        </div>
-      </section>
-
-      <section id="how" className="mt-28 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        {FEATURES.map((f) => (
-          <Panel key={f.t} className="p-6">
-            <h3 className="text-base font-semibold">{f.t}</h3>
-            <p className="mt-2 text-sm leading-relaxed text-[var(--color-muted)]">{f.d}</p>
-          </Panel>
-        ))}
-      </section>
-
-      <section className="mt-28 mb-10">
-        <Panel className="flex flex-col items-center gap-4 p-10 text-center">
-          <h2 className="text-2xl font-bold">Sit down. The interviewer is ready.</h2>
-          <p className="max-w-xl text-[var(--color-muted)]">
-            Pick a question, set the interviewer&apos;s temperament, and go. You&apos;ll get a full
-            report — expected vs. actual, coverage, and coaching — the moment you finish.
+    <AppShell active="public">
+      <section className="grid items-center gap-12 py-12 md:grid-cols-[1.3fr_1fr]">
+        <div>
+          <p className="eyebrow">Practice with purpose</p>
+          <h1 className="mt-5 text-5xl font-medium leading-[1.08] tracking-[-.055em] sm:text-6xl">
+            A little practice.
+            <br />A clearer next step.
+          </h1>
+          <p className="mt-6 max-w-xl text-lg text-[var(--color-muted)]">
+            An AI interviewer that asks, listens, and follows your thinking.
+            Practice for your role, then turn specific feedback into your next
+            improvement.
           </p>
-          <Button href="/login" className="mt-2 px-6 py-3 text-base">Begin</Button>
+          <div className="mt-8 flex flex-wrap gap-3">
+            <Button href="/interviews">Find your interview →</Button>
+            <Button href="/contribute" variant="ghost">
+              Explore the open source project
+            </Button>
+          </div>
+          <p className="mt-4 text-xs text-[var(--color-muted)]">
+            One funded interview every 7 days. Camera and resume are optional.
+          </p>
+        </div>
+        <Panel className="p-7 sm:p-9">
+          <p className="eyebrow">A thoughtful conversation</p>
+          <div className="mt-6 rounded-xl bg-[var(--color-panel-2)] p-5">
+            <p className="text-xs font-semibold">
+              ALEX · AI INTERVIEWER · EXAMPLE
+            </p>
+            <p className="mt-3 text-xl leading-relaxed">
+              “What did you consider, and why did you choose that approach?”
+            </p>
+          </div>
+          <div className="mt-6 border-l-2 border-[var(--color-accent)] pl-5">
+            <h2 className="font-semibold">Leave with something useful.</h2>
+            <p className="mt-2 text-sm text-[var(--color-muted)]">
+              Evidence from your answers, a few specific next steps, and a saved
+              record to come back to.
+            </p>
+          </div>
         </Panel>
       </section>
-
-      <footer className="border-t border-[var(--color-line)] py-8 text-center text-sm text-[var(--color-faint)]">
-        mockinterview.live · built for engineers who want the real thing
-      </footer>
-    </main>
+      <section className="grid gap-5 border-t border-[var(--color-line)] py-10 md:grid-cols-3">
+        {[
+          {
+            n: "01",
+            title: "Choose your interview",
+            text: "Explore engineering, product, business and professional scenarios. Set your level and the time you have.",
+          },
+          {
+            n: "02",
+            title: "Make room for your thinking",
+            text: "Speak or type. Use a whiteboard, code editor or notes. Your interviewer follows up on what you actually say.",
+          },
+          {
+            n: "03",
+            title: "Know what to practice next",
+            text: "Review what worked, what needs attention, and the evidence behind the feedback. Keep improving between interviews.",
+          },
+        ].map((x) => (
+          <div key={x.n}>
+            <span className="eyebrow">{x.n}</span>
+            <h2 className="mt-3 text-lg font-semibold">{x.title}</h2>
+            <p className="mt-2 text-sm text-[var(--color-muted)]">{x.text}</p>
+          </div>
+        ))}
+      </section>
+      <Panel className="flex flex-wrap items-center justify-between gap-6 p-7">
+        <div>
+          <h2 className="text-xl font-medium">
+            Built in the open. Better with your experience.
+          </h2>
+          <p className="mt-2 text-sm text-[var(--color-muted)]">
+            Add an interview scenario, improve a format, or run your own copy.
+          </p>
+        </div>
+        <Link
+          href="/contribute"
+          className="font-semibold text-[var(--color-accent)]"
+        >
+          Help someone practice →
+        </Link>
+      </Panel>
+      <p className="mt-6 text-xs text-[var(--color-muted)]">
+        AI practice feedback is a learning aid, not a hiring decision or
+        professional certification. Community scenarios are labeled with their
+        review status.
+      </p>
+    </AppShell>
   );
 }

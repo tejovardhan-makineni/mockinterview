@@ -10,6 +10,7 @@ import (
 // ProfessionLabels maps each valid area (profession) to a human-facing label.
 // Kept next to validAreas so adding a profession is a two-line edit here.
 var ProfessionLabels = map[string]string{
+	"ux_design": "UX & Product Design", "sales": "Sales", "marketing": "Marketing", "human_resources": "Human Resources", "education": "Education",
 	"software_engineering":   "Software Engineering",
 	"data_science":           "Data Science",
 	"product_management":     "Product Management",

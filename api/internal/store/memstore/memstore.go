@@ -17,13 +17,23 @@ import (
 )
 
 type sessionRec struct {
-	sess      store.Session
-	seq       int64     // insertion order, for "created_at DESC"
-	created   time.Time // for CreatedAt + the "sessions today" filter
-	turns     []store.Turn
-	workspace string
-	canvas    json.RawMessage
-	events    []string // event kinds, for BehavioralSummary counts
+	artifact          store.Workspace
+	owner             string
+	lease             time.Time
+	credential        []byte
+	credentialExpires time.Time
+	job               *store.ScoringJob
+	jobState          string
+	jobLease          time.Time
+	jobNotBefore      time.Time
+	eventIDs          map[string]bool
+	sess              store.Session
+	seq               int64     // insertion order, for "created_at DESC"
+	created           time.Time // for CreatedAt + the "sessions today" filter
+	turns             []store.Turn
+	workspace         string
+	canvas            json.RawMessage
+	events            []string // event kinds, for BehavioralSummary counts
 }
 
 type reportRec struct {
@@ -38,16 +48,18 @@ var _ store.Datastore = (*Mem)(nil)
 
 // Mem is a thread-safe in-memory Repo. Construct with New().
 type Mem struct {
-	mu       sync.Mutex
-	seq      int64
-	users    map[string]store.User      // id -> user
-	byEmail  map[string]string          // email -> id
-	settings map[string]json.RawMessage // userID -> settings
-	configs  map[string]store.InterviewConfig
-	resumes  map[string][]store.Resume // userID -> resumes (append order)
-	sessions map[string]*sessionRec    // sessionID -> record
-	reports  map[string]*reportRec     // sessionID -> report
-	feedback []store.Feedback          // append order (newest last)
+	runtimeUsage []usageRec
+	authActions  map[string]authAction
+	mu           sync.Mutex
+	seq          int64
+	users        map[string]store.User      // id -> user
+	byEmail      map[string]string          // email -> id
+	settings     map[string]json.RawMessage // userID -> settings
+	configs      map[string]store.InterviewConfig
+	resumes      map[string][]store.Resume // userID -> resumes (append order)
+	sessions     map[string]*sessionRec    // sessionID -> record
+	reports      map[string]*reportRec     // sessionID -> report
+	feedback     []store.Feedback          // append order (newest last)
 }
 
 // New returns an empty in-memory store.
@@ -77,7 +89,7 @@ func (m *Mem) SaveFeedback(_ context.Context, userID, kind, message string, rati
 		email = u.Email
 	}
 	m.feedback = append(m.feedback, store.Feedback{
-		ID: id, UserID: userID, Email: email, Kind: kind, Message: message,
+		ID: id, UserID: userID, Email: email, Kind: kind, Message: message, Status: "new",
 		Rating: rating, Context: contextJSON, CreatedAt: time.Now().UTC().Format("2006-01-02T15:04:05"),
 	})
 	return id, nil
@@ -153,6 +165,13 @@ func (m *Mem) DeleteUser(_ context.Context, userID string) error {
 	if u, ok := m.users[userID]; ok {
 		delete(m.byEmail, u.Email)
 	}
+	retained := m.feedback[:0]
+	for _, item := range m.feedback {
+		if item.UserID != userID {
+			retained = append(retained, item)
+		}
+	}
+	m.feedback = retained
 	delete(m.users, userID)
 	delete(m.settings, userID)
 	delete(m.configs, userID)
@@ -337,11 +356,35 @@ func (m *Mem) UpdateSessionStatus(_ context.Context, id, status string) error {
 	return nil
 }
 
-func (m *Mem) AddTurn(_ context.Context, sessionID, role, text string, tsMs int64, _ json.RawMessage) error {
+func (m *Mem) AddTurn(_ context.Context, sessionID, role, text string, tsMs int64, meta json.RawMessage) error {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 	if rec, ok := m.sessions[sessionID]; ok {
-		rec.turns = append(rec.turns, store.Turn{Role: role, Text: text, TsMs: tsMs})
+		if rec.sess.Status != "active" && rec.sess.Status != "interrupted" && rec.sess.Status != "reserved" && rec.sess.Status != "created" && rec.sess.Status != "ending" {
+			return store.ErrSessionConflict
+		}
+		var ev struct {
+			EventID    string `json:"event_id"`
+			LeaseOwner string `json:"lease_owner"`
+		}
+		_ = json.Unmarshal(meta, &ev)
+		if ev.LeaseOwner != "" && (rec.owner != ev.LeaseOwner || !rec.lease.After(time.Now())) {
+			return store.ErrSessionConflict
+		}
+		if rec.eventIDs == nil {
+			rec.eventIDs = map[string]bool{}
+		}
+		if ev.EventID != "" && rec.eventIDs[ev.EventID] {
+			return store.ErrDuplicateEvent
+		}
+		if ev.EventID != "" {
+			rec.eventIDs[ev.EventID] = true
+		}
+		origin := rec.created
+		if rec.sess.StartedAt != nil {
+			origin = *rec.sess.StartedAt
+		}
+		rec.turns = append(rec.turns, store.Turn{ID: store.NewID(), EventID: ev.EventID, Sequence: int64(len(rec.turns) + 1), Role: role, Text: text, TsMs: time.Since(origin).Milliseconds()})
 	}
 	return nil
 }

@@ -44,6 +44,15 @@ func Load(dir string, cat *corpus.Catalog) (*Catalog, error) {
 			errs = append(errs, fmt.Sprintf("%s: %v", e.Name(), err))
 			continue
 		}
+		if p.Revision == 0 {
+			p.Revision = 1
+		}
+		if p.ReviewStatus == "" {
+			p.ReviewStatus = "preview"
+		}
+		if p.SourceNote == "" {
+			p.SourceNote = "Community practice approximation; not an official or guaranteed current employer interview process."
+		}
 		if _, dup := c.byID[p.ID]; dup {
 			errs = append(errs, fmt.Sprintf("%s: duplicate id %s", e.Name(), p.ID))
 			continue

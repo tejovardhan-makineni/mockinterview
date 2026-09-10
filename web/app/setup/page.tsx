@@ -1,244 +1,794 @@
 "use client";
-
-import { Suspense, useEffect, useRef, useState } from "react";
+import { Suspense, useCallback, useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { api } from "@/lib/api";
-import type { Face, InterviewConfig, Personality, PersonalityOption, Resume, Voice } from "@/lib/types";
-import { Badge, Button, Field, Panel } from "@/components/ui";
-import { Avatar3D, type AvatarDrive } from "@/components/studio/Avatar3D";
-import { previewVoiceSample, stopPreview, prefetchPreview } from "@/lib/voicePreview";
-import { useLang, useT, labelFor } from "@/lib/i18n";
-import { getCameraConsent, setCameraConsent, type CameraConsent } from "@/lib/behavior";
-import { IconPlay, IconStop } from "@/components/icons";
-
-function SetupInner() {
+import { api, IS_MOCK } from "@/lib/api";
+import { readSetupDraft, writeSetupDraft } from "@/lib/setupDraft";
+import type { QuestionSummary } from "@/lib/features/catalog";
+import { DEFAULT_CONFIG, type InterviewConfig } from "@/lib/features/profile";
+import type { SessionOptions, Usage } from "@/lib/features/interview";
+import { account, type User } from "@/lib/features/auth";
+import { errorMessage } from "@/lib/http";
+import { AppShell } from "@/components/AppShell";
+import {
+  Badge,
+  Button,
+  Field,
+  Input,
+  Panel,
+  ErrorNotice,
+} from "@/components/ui";
+import {
+  Avatar3D,
+  INTERVIEWERS,
+  interviewerName,
+  type AvatarDrive,
+} from "@/components/studio/Avatar3D";
+import { DeviceCheck } from "@/components/studio/DeviceCheck";
+const pretty = (value: string) =>
+  value.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
+const date = (value?: string) =>
+  value
+    ? new Date(value).toLocaleString(undefined, {
+        dateStyle: "medium",
+        timeStyle: "short",
+      })
+    : "";
+function Setup() {
   const router = useRouter();
   const params = useSearchParams();
-  const questionId = params.get("q") || "";
-
-  const [resume, setResume] = useState<Resume | null>(null);
-  const [voices, setVoices] = useState<Voice[]>([]);
-  const [faces, setFaces] = useState<Face[]>([]);
-  const [personas, setPersonas] = useState<PersonalityOption[]>([]);
-  const [cfg, setCfg] = useState<InterviewConfig>({ voice_id: "aoede", face_id: "sophia", personality: "neutral", intensity: 3 });
-  const [uploading, setUploading] = useState(false);
-  const [starting, setStarting] = useState(false);
-  const [startErr, setStartErr] = useState("");
-  const [minutes, setMinutes] = useState(30); // interview length, user-chosen
-  const fileRef = useRef<HTMLInputElement>(null);
-  const pv = useRef<AvatarDrive>({ speaking: false, amplitude: 0, mood: "neutral" });
-  const [previewing, setPreviewing] = useState(false);
-  const { lang, languages } = useLang();
-  const t = useT();
-  const [interviewLang, setInterviewLang] = useState(lang); // defaults to app language, overridable per interview
-  // Camera/behavioral-analysis consent (opt-in, default OFF). null = undecided.
-  // Read AFTER mount (not a lazy initializer) so the server/first-paint render is
-  // stable and the localStorage read can't cause a hydration mismatch.
-  const [consent, setConsent] = useState<CameraConsent | null>(null);
-  // eslint-disable-next-line react-hooks/set-state-in-effect
-  useEffect(() => { setConsent(getCameraConsent()); }, []);
-  const decideConsent = (v: CameraConsent) => { setCameraConsent(v); setConsent(v); };
-  const previewReq = { voiceId: cfg.voice_id, faceId: cfg.face_id, personality: cfg.personality, intensity: cfg.intensity };
-  const toggleVoice = () => {
-    if (previewing) { stopPreview(pv); setPreviewing(false); return; }
-    setPreviewing(true);
-    void previewVoiceSample(previewReq, pv, () => setPreviewing(false));
-  };
-
+  const qid = params.get("q") ?? "";
+  const packId = params.get("pack") ?? "";
+  const roundId = params.get("round") ?? "";
+  const draftKey = "mi_setup_draft_" + (packId ? packId + "/" + roundId : qid);
+  const [question, setQuestion] = useState<QuestionSummary | null>(null);
+  const [cfg, setCfg] = useState<InterviewConfig>(DEFAULT_CONFIG);
+  const [minutes, setMinutes] = useState(30);
+  const [now, setNow] = useState(() => Date.now());
+  const [stage, setStage] = useState<"setup" | "check">("setup");
+  const [user, setUser] = useState<User | null>(null);
+  const [usage, setUsage] = useState<Usage | null>(null);
+  const [error, setError] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [deviceReady, setDeviceReady] = useState(false);
+  const [device, setDevice] = useState("");
+  const [mode, setMode] = useState<"voice" | "text">(
+    IS_MOCK ? "text" : "voice",
+  );
+  const [funding, setFunding] = useState<"platform" | "byok">("platform");
+  const [provider, setProvider] = useState("gemini");
+  const [model, setModel] = useState("");
+  const [key, setKey] = useState("");
+  const [keyValid, setKeyValid] = useState(false);
+  const [notice, setNotice] = useState("");
+  const [resumeName, setResumeName] = useState("");
+  const drive = useRef<AvatarDrive>({
+    speaking: false,
+    amplitude: 0,
+    mood: "listening",
+  });
+  const file = useRef<HTMLInputElement>(null);
+  const ready = useCallback((value: boolean) => setDeviceReady(value), []);
   useEffect(() => {
+    let alive = true;
     (async () => {
-      const u = await api.me();
-      if (!u) { router.replace("/login"); return; }
-      const [r, v, f, p, c] = await Promise.all([api.getResume(), api.listVoices(), api.listFaces(), api.listPersonalities(), api.getConfig()]);
-      setResume(r); setVoices(v); setFaces(f); setPersonas(p); setCfg(c);
+      try {
+        const draft = readSetupDraft(draftKey);
+        const q: QuestionSummary = await (async () => {
+          if (!packId) return api.getQuestion(qid);
+          const pack = await api.getPack(packId);
+          const round = pack.rounds.find((r) => r.id === roundId);
+          if (!round) throw new Error("This round was not found.");
+          return {
+            id: "",
+            title: round.title,
+            track: pack.track,
+            domain: round.domain,
+            areas: pack.areas,
+            modality: round.modality,
+            difficulty: round.difficulty as QuestionSummary["difficulty"],
+            tags: [],
+            prompt: round.focus,
+            blurb: pack.blurb,
+            minutes: round.minutes,
+            review_status: "preview",
+          };
+        })();
+        if (!alive) return;
+        setQuestion(q);
+        setMinutes(
+          draft?.minutes ??
+            q.minutes ??
+            (q.modality === "conversational" ? 20 : 30),
+        );
+        if (draft) {
+          setMode(draft.mode);
+          setFunding(draft.funding);
+          setProvider(draft.provider);
+          setModel(draft.model);
+          if (draft.funding === "byok")
+            setNotice(
+              "Your interview options were kept. Enter your personal key again after signing in.",
+            );
+        }
+        setCfg((c) => ({
+          ...c,
+          target_level: q.difficulty,
+          ...draft?.config,
+          include_resume: false,
+        }));
+        const u = await api.me();
+        if (!alive) return;
+        setUser(u);
+        if (u) {
+          const [saved, available, resume] = await Promise.all([
+            api.getConfig(),
+            api.getUsage(),
+            api.getResume(),
+          ]);
+          if (!alive) return;
+          setCfg({
+            ...DEFAULT_CONFIG,
+            ...saved,
+            face_id: ["alex", "jordan", "sam"].includes(saved.face_id)
+              ? saved.face_id
+              : "alex",
+            target_level: q.difficulty,
+            ...draft?.config,
+            include_resume: false,
+          });
+          if (resume) setResumeName(resume.filename);
+          setUsage(available);
+          setNow(Date.now());
+        }
+        if (alive) {
+          try {
+            sessionStorage.removeItem(draftKey);
+          } catch {}
+        }
+      } catch (e) {
+        if (alive) setError(errorMessage(e));
+      }
     })();
-  }, [router]);
-
-  // Stop any preview audio when leaving the page (navigating away mid-preview
-  // otherwise leaves the interviewer's voice playing).
-  useEffect(() => () => stopPreview(pv), []);
-
-  // Warm the preview clip when the combo changes so playback is instant.
+    return () => {
+      alive = false;
+    };
+  }, [qid, packId, roundId, draftKey]);
   useEffect(() => {
-    if (!voices.length) return;
-    const t = setTimeout(() => { void prefetchPreview(previewReq); }, 150);
-    return () => clearTimeout(t);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [cfg.voice_id, cfg.face_id, cfg.personality, cfg.intensity, voices.length]);
-
-  async function onFile(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    setUploading(true);
-    try { setResume(await api.uploadResume(file)); } finally { setUploading(false); }
-  }
-
-  async function save() { await api.saveConfig(cfg); }
-
-  async function start() {
-    setStarting(true); setStartErr("");
+    if (!usage?.next_start_at && !usage?.next_funded_at) return;
+    let cancelled = false;
+    let refreshed = false;
+    const timer = window.setInterval(() => {
+      const time = Date.now();
+      setNow(time);
+      const dates = [usage.next_start_at, usage.next_funded_at].filter(
+        Boolean,
+      ) as string[];
+      if (
+        !refreshed &&
+        dates.some((value) => new Date(value).getTime() <= time)
+      ) {
+        refreshed = true;
+        void api
+          .getUsage()
+          .then((value) => {
+            if (!cancelled) setUsage(value);
+          })
+          .catch(() => {
+            refreshed = false;
+          });
+      }
+    }, 30000);
+    return () => {
+      cancelled = true;
+      window.clearInterval(timer);
+    };
+  }, [usage?.next_start_at, usage?.next_funded_at]);
+  const dailyBlocked =
+    !!usage?.next_start_at && new Date(usage.next_start_at).getTime() > now;
+  const blocked =
+    !usage?.local_unlimited &&
+    (dailyBlocked ||
+      (funding === "platform" && usage?.funded_available === false));
+  const availableAt = Math.max(
+    new Date(usage?.next_start_at ?? 0).getTime() || 0,
+    funding === "platform"
+      ? new Date(usage?.next_funded_at ?? 0).getTime() || 0
+      : 0,
+  );
+  async function check() {
+    if (!user) {
+      writeSetupDraft(draftKey, {
+        config: cfg,
+        minutes,
+        mode,
+        funding,
+        provider,
+        model,
+      });
+      router.push(
+        "/login?next=" +
+          encodeURIComponent(
+            packId
+              ? "/setup?pack=" + packId + "&round=" + roundId
+              : "/setup?q=" + qid,
+          ),
+      );
+      return;
+    }
+    setBusy(true);
+    setError("");
     try {
-      // The interviewer speaks the language chosen for THIS interview (defaults to
-      // the app language, but can be overridden above); carry it into the session
-      // config (it rides the per-session JSON, read by the live relay).
-      const withLang = { ...cfg, language: interviewLang };
-      await api.saveConfig(cfg);
-      const s = await api.createSession(questionId, withLang);
-      router.push(`/interview?s=${s.id}&minutes=${minutes}`);
+      setUsage(await api.getUsage());
+      setNow(Date.now());
+      setStage("check");
     } catch (e) {
-      setStartErr(e instanceof Error ? e.message : "Could not start the interview.");
-      setStarting(false);
+      setError(errorMessage(e));
+    } finally {
+      setBusy(false);
     }
   }
-
-  return (
-    <main className="mx-auto max-w-4xl px-6 py-8">
-      <div className="flex items-center justify-between">
-        <Button href="/dashboard" variant="ghost">← {t("Dashboard")}</Button>
-        {questionId && <Badge tone="accent">{t("Question")}: {questionId}</Badge>}
-      </div>
-      <h1 className="mt-6 text-3xl font-bold">{t("Set up your interview")}</h1>
-      <p className="mt-2 text-[var(--color-muted)]">{t("Upload your resume and shape your interviewer. You can change these anytime.")}</p>
-
-      {/* Resume */}
-      <Panel className="mt-8 p-6">
-        <div className="flex items-center justify-between">
-          <h2 className="text-lg font-semibold">{t("Resume")}</h2>
-          {resume && <Button href="/resume-review" variant="ghost">{t("Review my resume →")}</Button>}
-        </div>
-        <div className="mt-4 flex items-center gap-4">
-          <Button onClick={() => fileRef.current?.click()} disabled={uploading}>
-            {uploading ? t("Uploading…") : resume ? t("Replace file") : t("Upload PDF / DOCX / .txt")}
-          </Button>
-          <input ref={fileRef} type="file" accept=".pdf,.docx,.txt,.md" hidden onChange={onFile} />
-          <span className="text-sm text-[var(--color-muted)]">{resume ? resume.filename : t("No resume yet")}</span>
-        </div>
-        {resume?.parsed?.name && (
-          <div className="mt-4 rounded-xl border border-[var(--color-line)] bg-[var(--color-panel-2)] p-4 text-sm">
-            <div className="font-semibold">{resume.parsed.name} · <span className="text-[var(--color-muted)]">{resume.parsed.headline}</span></div>
-            {(() => {
-              const flat = (resume.parsed.skills as unknown[] | undefined ?? []).flatMap((s) => typeof s === "string" ? [s] : ((s as { items?: string[] }).items ?? []));
-              return flat.length > 0 ? <div className="mt-2 flex flex-wrap gap-1.5">{flat.slice(0, 8).map((s) => (
-                <span key={s} className="rounded-md bg-[var(--color-studio)] px-2 py-0.5 text-xs text-[var(--color-faint)]">{s}</span>
-              ))}</div> : null;
-            })()}
-          </div>
+  async function validate() {
+    setBusy(true);
+    setError("");
+    try {
+      const r = await api.validateProvider({
+        provider,
+        model: model || undefined,
+        api_key: key,
+        mode,
+      });
+      setKeyValid(r.valid);
+      setNotice(
+        r.valid
+          ? mode === "voice"
+            ? "Key and reasoning model verified. Voice connection is checked when the interview starts."
+            : "Key and reasoning model verified for a text interview."
+          : "The connection could not be verified.",
+      );
+    } catch (e) {
+      setKeyValid(false);
+      setError(errorMessage(e));
+    } finally {
+      setBusy(false);
+    }
+  }
+  async function start() {
+    if (!question) return;
+    setBusy(true);
+    setError("");
+    try {
+      const options: SessionOptions = {
+        minutes,
+        mode,
+        funding,
+        ...(funding === "byok"
+          ? { provider, model: model || undefined, api_key: key }
+          : {}),
+      };
+      const session = await api.createSession(
+        question.id,
+        cfg,
+        packId ? { packId, roundId } : undefined,
+        options,
+      );
+      setKey("");
+      sessionStorage.setItem("mi_device_" + session.id, device);
+      router.push("/interview?s=" + encodeURIComponent(session.id));
+    } catch (e) {
+      setError(errorMessage(e));
+      setBusy(false);
+    }
+  }
+  if (!question)
+    return (
+      <AppShell active="interview">
+        {error ? (
+          <ErrorNotice
+            message={error}
+            onRetry={() => window.location.reload()}
+          />
+        ) : (
+          <p role="status">Preparing the interview brief…</p>
         )}
-      </Panel>
-
-      {/* Interviewer */}
-      <Panel className="mt-4 p-6">
-        <h2 className="text-lg font-semibold">{t("Your interviewer")}</h2>
-        {/* live preview of who's interviewing */}
-        <div className="mt-4 flex items-center gap-4 rounded-xl border border-[var(--color-line)] bg-[var(--color-panel-2)] p-4">
-          <div className="h-24 w-24 shrink-0 overflow-hidden rounded-xl bg-[var(--color-panel)]">
-            <Avatar3D faceId={cfg.face_id} drive={pv} />
-          </div>
-          <div className="text-sm">
-            <div className="font-semibold">{faces.find((f) => f.id === cfg.face_id)?.label ?? cfg.face_id}</div>
-            <div className="text-[var(--color-muted)]">{t("Voice")}: {voices.find((v) => v.id === cfg.voice_id)?.label ?? cfg.voice_id} · {t(cfg.personality)}, {t("intensity")} {cfg.intensity}/5</div>
-            <button onClick={() => toggleVoice()} className="mt-1 inline-flex items-center gap-1.5 rounded-md border border-[var(--color-line)] px-2 py-1 text-xs font-medium text-[var(--color-accent)] transition hover:bg-[var(--color-panel)]">
-              {previewing ? <IconStop className="h-3.5 w-3.5" /> : <IconPlay className="h-3.5 w-3.5" />}
-              {previewing ? t("Stop") : t("Hear this interviewer")}
-            </button>
-          </div>
+        <Button href="/interviews" variant="ghost" className="mt-5">
+          Back to interviews
+        </Button>
+      </AppShell>
+    );
+  return (
+    <AppShell active="interview">
+      <a href="/interviews" className="text-sm text-[var(--color-muted)]">
+        ← All interviews
+      </a>
+      <div className="mt-7 flex flex-wrap items-start justify-between gap-4">
+        <div>
+          <p className="eyebrow">
+            {stage === "setup" ? "01 · Make it yours" : "02 · A quick check"}
+          </p>
+          <h1 className="page-title mt-3">
+            {stage === "setup"
+              ? "A little preparation goes a long way."
+              : "Ready when you are."}
+          </h1>
+          <p className="mt-3 text-[var(--color-muted)]">
+            {stage === "setup"
+              ? "Choose your level and pace. Everything else is optional."
+              : "Check your connection and devices before the interview begins."}
+          </p>
         </div>
-        <div className="mt-5 grid gap-6 md:grid-cols-2">
-          <Field label={t("Voice")}>
-            <div className="grid grid-cols-3 gap-2">
-              {voices.map((v) => (
-                <button key={v.id} onClick={() => { if (previewing) { stopPreview(pv); setPreviewing(false); } setCfg({ ...cfg, voice_id: v.id }); }}
-                  className={`rounded-xl border px-3 py-2 text-sm transition ${cfg.voice_id === v.id ? "border-[var(--color-accent)] bg-[var(--color-panel-2)]" : "border-[var(--color-line)] hover:bg-[var(--color-panel-2)]"}`}>
-                  {v.label}<span className="block text-xs text-[var(--color-faint)]">{t(v.gender)}</span>
-                </button>
-              ))}
-            </div>
-          </Field>
-          <Field label={t("Face")}>
-            <div className="grid grid-cols-4 gap-2">
-              {faces.map((f) => (
-                <button key={f.id} onClick={() => setCfg({ ...cfg, face_id: f.id })}
-                  className={`flex flex-col items-center gap-1.5 rounded-xl border px-2 py-3 text-sm transition ${cfg.face_id === f.id ? "border-[var(--color-accent)] bg-[var(--color-panel-2)]" : "border-[var(--color-line)] hover:bg-[var(--color-panel-2)]"}`}>
-                  <span className="flex h-9 w-9 items-center justify-center rounded-full bg-[var(--color-accent)] text-sm font-bold text-[#0b0d12]">{f.label[0]}</span>
-                  {f.label}
-                </button>
-              ))}
-            </div>
-          </Field>
-        </div>
-
-        <Field label={t("Temperament")}>
-          <div className="grid gap-2 md:grid-cols-4">
-            {personas.map((p) => (
-              <button key={p.id} onClick={() => setCfg({ ...cfg, personality: p.id as Personality })}
-                className={`rounded-xl border p-3 text-left transition ${cfg.personality === p.id ? "border-[var(--color-accent)] bg-[var(--color-panel-2)]" : "border-[var(--color-line)] hover:bg-[var(--color-panel-2)]"}`}>
-                <div className="text-sm font-semibold">{t(p.label)}</div>
-                <div className="mt-1 text-xs text-[var(--color-faint)]">{t(p.blurb)}</div>
-              </button>
-            ))}
-          </div>
-        </Field>
-
-        <div className="mt-5 grid gap-5 sm:grid-cols-2">
-          <Field label={`${t("Intensity")} — ${cfg.intensity}/5`}>
-            <input type="range" min={1} max={5} value={cfg.intensity}
-              onChange={(e) => setCfg({ ...cfg, intensity: Number(e.target.value) })}
-              className="w-full accent-[var(--color-accent)]" />
-          </Field>
-          <Field label={`${t("Interview length")} — ${minutes} ${t("minutes")}`}>
-            <input type="range" min={10} max={60} step={5} value={minutes}
-              onChange={(e) => setMinutes(Number(e.target.value))}
-              className="w-full accent-[var(--color-accent)]" aria-label="Interview length in minutes" />
-          </Field>
-          <Field label={t("Interview language")}>
-            <select value={interviewLang} onChange={(e) => setInterviewLang(e.target.value)}
-              aria-label="Interview language"
-              className="w-full rounded-xl border border-[var(--color-line)] bg-[var(--color-studio)] px-3 py-2.5 text-sm">
-              {languages.map((l) => <option key={l.code} value={l.code}>{labelFor(l)}</option>)}
-            </select>
-            <p className="mt-1 text-xs text-[var(--color-faint)]">{t("The interviewer will speak and write in this language.")}</p>
-          </Field>
-        </div>
-      </Panel>
-
-      {/* Camera / behavioral analysis consent — opt-in, default OFF (HR-2) */}
-      <Panel className="mt-4 p-6">
-        <div className="flex items-center gap-2">
-          <h2 className="text-lg font-semibold">{t("Camera analysis")}</h2>
-          {consent === "granted" && <Badge tone="good">{t("On")}</Badge>}
-          {consent === "denied" && <Badge tone="warn">{t("Off")}</Badge>}
-          {consent === null && <Badge tone="warn">{t("Off — choose below")}</Badge>}
-        </div>
-        <p className="mt-2 text-sm text-[var(--color-muted)]">
-          {t("Optionally, your webcam can be analyzed during the interview to give you feedback on how you came across. This is OFF unless you turn it on here.")}
-        </p>
-        <ul className="mt-3 space-y-1.5 text-sm text-[var(--color-muted)]">
-          <li>• {t("What is analyzed: a face mesh for where you're facing (gaze), plus lighting, framing, and posture.")}</li>
-          <li>• {t("How: computed in your browser, then raw samples (about one every 2 seconds) are sent to and stored on our server to generate your feedback.")}</li>
-          <li>• {t("Where it goes & retention: stored with your interview to build your report, and retained about 30 days.")}</li>
-          <li>• {t("These signals never affect your interview score, and you can run the interview WITHOUT camera analysis.")}</li>
-        </ul>
-        <div className="mt-4 flex flex-wrap items-center gap-3">
-          <Button variant={consent === "granted" ? "primary" : "ghost"} onClick={() => decideConsent("granted")}>
-            {t("Enable camera analysis")}
-          </Button>
-          <Button variant={consent === "denied" ? "primary" : "ghost"} onClick={() => decideConsent("denied")}>
-            {t("Run without camera analysis")}
-          </Button>
-        </div>
-      </Panel>
-
-      <div className="mt-6 flex items-center justify-between">
-        <Button variant="ghost" onClick={save}>{t("Save settings")}</Button>
-        {questionId
-          ? <Button onClick={start} disabled={starting} className="px-6">{starting ? t("Starting…") : t("Start interview →")}</Button>
-          : <Button href="/dashboard">{t("Pick a question →")}</Button>}
+        <Badge>
+          {question.review_status === "reviewed"
+            ? "Reviewed scenario"
+            : "Community preview"}
+        </Badge>
       </div>
-      {startErr && <p className="mt-3 text-right text-sm text-[var(--color-bad)]">{startErr}</p>}
-    </main>
+      <div className="mt-8 grid gap-6 lg:grid-cols-[1.7fr_1fr]">
+        <div className="space-y-5">
+          <Panel className="p-6 sm:p-7">
+            <p className="eyebrow">
+              {pretty(question.areas?.[0] ?? question.track)} ·{" "}
+              {pretty(question.domain)}
+            </p>
+            <h2 className="mt-3 text-xl font-semibold">{question.title}</h2>
+            <p className="mt-3 whitespace-pre-wrap text-sm text-[var(--color-muted)]">
+              {question.prompt}
+            </p>
+            {stage === "setup" ? (
+              <>
+                <div className="mt-7 grid gap-5 sm:grid-cols-2">
+                  <Field label="Target level">
+                    <select
+                      className="field-select"
+                      value={cfg.target_level}
+                      onChange={(e) =>
+                        setCfg({
+                          ...cfg,
+                          target_level: e.target
+                            .value as InterviewConfig["target_level"],
+                        })
+                      }
+                    >
+                      {["entry", "junior", "mid", "senior", "staff"].map(
+                        (l) => (
+                          <option key={l} value={l}>
+                            {pretty(l)}
+                          </option>
+                        ),
+                      )}
+                    </select>
+                  </Field>
+                  <Field label="Time available">
+                    <select
+                      className="field-select"
+                      value={minutes}
+                      onChange={(e) => setMinutes(Number(e.target.value))}
+                    >
+                      {[...new Set([8, 15, 20, 30, 45, 60, minutes])]
+                        .sort((a, b) => a - b)
+                        .map((m) => (
+                          <option key={m} value={m}>
+                            {m} minutes
+                          </option>
+                        ))}
+                    </select>
+                  </Field>
+                </div>
+                <details className="mt-7 border-t border-[var(--color-line)] pt-5">
+                  <summary className="text-sm font-semibold">
+                    Your interviewer & other options
+                  </summary>
+                  <div className="mt-5 grid gap-5 sm:grid-cols-2">
+                    <Field label="Challenge">
+                      <select
+                        className="field-select"
+                        value={cfg.challenge}
+                        onChange={(e) =>
+                          setCfg({
+                            ...cfg,
+                            challenge: e.target
+                              .value as InterviewConfig["challenge"],
+                          })
+                        }
+                      >
+                        {["foundation", "standard", "stretch"].map((x) => (
+                          <option key={x} value={x}>
+                            {pretty(x)}
+                          </option>
+                        ))}
+                      </select>
+                    </Field>
+                    <Field label="Interviewer style">
+                      <select
+                        className="field-select"
+                        value={cfg.personality}
+                        onChange={(e) =>
+                          setCfg({
+                            ...cfg,
+                            personality: e.target
+                              .value as InterviewConfig["personality"],
+                          })
+                        }
+                      >
+                        <option value="neutral">Balanced</option>
+                        <option value="supportive">Warm</option>
+                        <option value="interruptive">Direct probing</option>
+                      </select>
+                    </Field>
+                    <Field label="Practice mode">
+                      <select
+                        className="field-select"
+                        value={cfg.practice_mode}
+                        onChange={(e) =>
+                          setCfg({
+                            ...cfg,
+                            practice_mode: e.target
+                              .value as InterviewConfig["practice_mode"],
+                          })
+                        }
+                      >
+                        <option value="simulation">Interview simulation</option>
+                        <option value="coaching">
+                          Coaching · hints allowed
+                        </option>
+                      </select>
+                    </Field>
+                    <Field label="Interviewer">
+                      <select
+                        className="field-select"
+                        value={cfg.face_id}
+                        onChange={(e) =>
+                          setCfg({ ...cfg, face_id: e.target.value })
+                        }
+                      >
+                        {INTERVIEWERS.map((x) => (
+                          <option key={x.id} value={x.id}>
+                            {x.name}
+                          </option>
+                        ))}
+                      </select>
+                    </Field>
+                    <Field label="Language">
+                      <select
+                        className="field-select"
+                        value={cfg.language ?? "en"}
+                        onChange={(e) =>
+                          setCfg({ ...cfg, language: e.target.value })
+                        }
+                      >
+                        {[
+                          { id: "en", label: "English" },
+                          { id: "es", label: "Spanish" },
+                          { id: "fr", label: "French" },
+                          { id: "de", label: "German" },
+                          { id: "hi", label: "Hindi" },
+                          { id: "ja", label: "Japanese" },
+                          { id: "zh", label: "Chinese" },
+                        ].map((x) => (
+                          <option key={x.id} value={x.id}>
+                            {x.label}
+                          </option>
+                        ))}
+                      </select>
+                    </Field>
+                    <Field label="Voice">
+                      <select
+                        className="field-select"
+                        value={cfg.voice_id}
+                        onChange={(e) =>
+                          setCfg({ ...cfg, voice_id: e.target.value })
+                        }
+                      >
+                        {[
+                          "aoede",
+                          "kore",
+                          "leda",
+                          "charon",
+                          "fenrir",
+                          "orus",
+                        ].map((x) => (
+                          <option key={x} value={x}>
+                            {pretty(x)}
+                          </option>
+                        ))}
+                      </select>
+                    </Field>
+                  </div>
+                  <div className="mt-5">
+                    <Button
+                      variant="ghost"
+                      onClick={() => file.current?.click()}
+                      disabled={!user || busy}
+                    >
+                      {resumeName
+                        ? "Replace optional resume"
+                        : "Add a resume · optional"}
+                    </Button>
+                    <input
+                      ref={file}
+                      type="file"
+                      hidden
+                      accept=".pdf,.docx,.txt,.md"
+                      onChange={async (e) => {
+                        const f = e.target.files?.[0];
+                        if (!f) return;
+                        setBusy(true);
+                        try {
+                          const r = await api.uploadResume(f);
+                          setResumeName(r.filename);
+                          setCfg((c) => ({ ...c, include_resume: true }));
+                        } catch (e) {
+                          setError(errorMessage(e));
+                        } finally {
+                          setBusy(false);
+                        }
+                      }}
+                    />
+                    {resumeName && (
+                      <label className="mt-4 flex items-center gap-3 text-sm">
+                        <input
+                          type="checkbox"
+                          checked={cfg.include_resume === true}
+                          onChange={(e) =>
+                            setCfg({ ...cfg, include_resume: e.target.checked })
+                          }
+                        />
+                        Use {resumeName} for this interview
+                      </label>
+                    )}
+                    <p className="mt-2 text-xs text-[var(--color-muted)]">
+                      {!user
+                        ? "Sign in to attach a resume. You can practice without one."
+                        : "Use a resume you are permitted to share with the model provider."}
+                    </p>
+                  </div>
+                </details>
+              </>
+            ) : (
+              <>
+                <div className="my-6">
+                  <Field label="How would you like to answer?">
+                    <select
+                      value={mode}
+                      onChange={(e) => {
+                        setMode(e.target.value as "voice" | "text");
+                        setKeyValid(false);
+                      }}
+                      className="field-select"
+                    >
+                      <option
+                        value="voice"
+                        disabled={
+                          IS_MOCK ||
+                          (funding === "byok" && provider !== "gemini")
+                        }
+                      >
+                        Voice conversation
+                      </option>
+                      <option value="text">
+                        Text conversation · no microphone
+                      </option>
+                    </select>
+                  </Field>
+                </div>
+                <DeviceCheck
+                  key={mode}
+                  mode={mode}
+                  onReady={ready}
+                  onDevice={setDevice}
+                />
+                <Button
+                  className="mt-6"
+                  variant="ghost"
+                  onClick={() => setStage("setup")}
+                >
+                  Back to options
+                </Button>
+              </>
+            )}
+          </Panel>
+          {error && <ErrorNotice message={error} />}
+          <p className="text-xs text-[var(--color-muted)]">
+            This is AI practice, not a hiring decision or professional
+            certification.{" "}
+            <a href="/privacy" className="underline">
+              How your data is used
+            </a>
+          </p>
+        </div>
+        <aside className="space-y-5">
+          <Panel className="p-6">
+            <div className="flex items-center gap-4">
+              <div className="h-20 w-20 shrink-0">
+                <Avatar3D faceId={cfg.face_id} drive={drive} />
+              </div>
+              <div>
+                <h2 className="font-semibold">
+                  {interviewerName(cfg.face_id)}
+                </h2>
+                <p className="mt-1 text-xs text-[var(--color-muted)]">
+                  Your AI interviewer
+                  <br />
+                  {pretty(cfg.target_level ?? "mid")} · {minutes} minutes
+                </p>
+              </div>
+            </div>
+            <div className="mt-6 space-y-4 border-t border-[var(--color-line)] pt-5">
+              <Field label="Practice access">
+                <select
+                  value={funding}
+                  onChange={(e) => {
+                    setFunding(e.target.value as "platform" | "byok");
+                    setKeyValid(false);
+                  }}
+                  className="field-select"
+                >
+                  <option value="platform">Platform-funded interview</option>
+                  <option value="byok">Use my model & API key</option>
+                </select>
+              </Field>
+              {funding === "byok" && (
+                <div className="space-y-4">
+                  <Field label="Provider">
+                    <select
+                      value={provider}
+                      onChange={(e) => {
+                        setProvider(e.target.value);
+                        setKeyValid(false);
+                        if (e.target.value !== "gemini") setMode("text");
+                      }}
+                      className="field-select"
+                    >
+                      {[
+                        "gemini",
+                        "openai",
+                        "anthropic",
+                        "deepseek",
+                        "xai",
+                        "meta",
+                      ].map((p) => (
+                        <option key={p} value={p}>
+                          {pretty(p)}
+                        </option>
+                      ))}
+                    </select>
+                  </Field>
+                  <Field label="API key">
+                    <Input
+                      type="password"
+                      autoComplete="off"
+                      value={key}
+                      onChange={(e) => {
+                        setKey(e.target.value);
+                        setKeyValid(false);
+                      }}
+                      placeholder="Used only for this attempt"
+                    />
+                  </Field>
+                  <Field label="Text / feedback model · optional">
+                    <Input
+                      value={model}
+                      onChange={(e) => {
+                        setModel(e.target.value);
+                        setKeyValid(false);
+                      }}
+                      placeholder="Provider default"
+                    />
+                  </Field>
+                  <p className="text-xs text-[var(--color-muted)]">
+                    {provider !== "gemini"
+                      ? "This provider supports text interviews in this release. "
+                      : ""}
+                    Gemini voice uses the service’s configured Live model. Your
+                    provider may charge for use. One hosted attempt per 24
+                    hours.
+                  </p>
+                  <Button
+                    variant="ghost"
+                    onClick={() => void validate()}
+                    disabled={!key || busy || !user}
+                  >
+                    {keyValid
+                      ? "Connection verified"
+                      : "Check model connection"}
+                  </Button>
+                  {notice && (
+                    <p role="status" className="text-xs">
+                      {notice}
+                    </p>
+                  )}
+                </div>
+              )}
+              <div className="notice">
+                {!user
+                  ? "Sign in to see your practice allowance."
+                  : !usage
+                    ? "Checking your practice allowance…"
+                    : usage?.local_unlimited
+                      ? "Local installation · no product practice limit."
+                      : blocked
+                        ? "Next available: " +
+                          date(
+                            availableAt
+                              ? new Date(availableAt).toISOString()
+                              : undefined,
+                          )
+                        : funding === "platform"
+                          ? "Your weekly interview is available."
+                          : "Your daily personal-key interview is available."}
+              </div>
+              {user?.email_verified === false && !usage?.local_unlimited && (
+                <div className="notice">
+                  <p>Verify your email before starting.</p>
+                  <Button
+                    variant="ghost"
+                    className="mt-3"
+                    onClick={() => {
+                      void account
+                        .resend()
+                        .then(() =>
+                          setNotice(
+                            "Verification requested. Check your inbox.",
+                          ),
+                        )
+                        .catch((e) => setError(errorMessage(e)));
+                    }}
+                  >
+                    Resend verification
+                  </Button>
+                </div>
+              )}
+              {stage === "setup" ? (
+                <Button
+                  className="w-full"
+                  onClick={() => void check()}
+                  disabled={busy}
+                >
+                  {user ? "Check devices →" : "Sign in to continue →"}
+                </Button>
+              ) : (
+                <Button
+                  className="w-full"
+                  onClick={() => void start()}
+                  disabled={
+                    busy ||
+                    !usage ||
+                    blocked ||
+                    !deviceReady ||
+                    (funding === "byok" && !keyValid) ||
+                    (user?.email_verified === false && !usage?.local_unlimited)
+                  }
+                >
+                  {busy ? "Preparing interview…" : "Start interview →"}
+                </Button>
+              )}
+              <p className="text-center text-xs text-[var(--color-muted)]">
+                Checks do not consume your allowance.
+              </p>
+              {blocked && (
+                <Button href="/contribute" variant="ghost" className="w-full">
+                  Run locally for more practice
+                </Button>
+              )}
+              {usage?.active_session_id && (
+                <Button
+                  href={"/interview?s=" + usage.active_session_id}
+                  variant="ghost"
+                  className="w-full"
+                >
+                  Resume your active interview
+                </Button>
+              )}
+            </div>
+          </Panel>
+        </aside>
+      </div>
+    </AppShell>
   );
 }
-
 export default function SetupPage() {
-  return <Suspense fallback={<div className="p-10 text-[var(--color-muted)]">Loading…</div>}><SetupInner /></Suspense>;
+  return (
+    <Suspense fallback={<p className="p-10">Loading setup…</p>}>
+      <Setup />
+    </Suspense>
+  );
 }

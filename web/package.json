@@ -7,28 +7,35 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "test": "vitest run"
+    "test": "vitest run",
+    "prebuild": "node scripts/vendor-assets.mjs",
+    "predev": "node scripts/vendor-assets.mjs"
   },
   "dependencies": {
     "@excalidraw/excalidraw": "^0.18.1",
-    "@mediapipe/tasks-vision": "^1.0.1",
     "@monaco-editor/react": "^4.7.0",
-    "next": "16.2.10",
+    "monaco-editor": "0.56.0",
+    "next": "16.3.4",
     "react": "19.2.4",
-    "react-dom": "19.2.4",
-    "three": "^0.185.1"
+    "react-dom": "19.2.4"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
-    "@types/three": "^0.185.4",
     "eslint": "^9",
-    "eslint-config-next": "16.2.10",
+    "eslint-config-next": "16.3.4",
     "jsdom": "^25.0.1",
+    "prettier": "^3.8.3",
     "tailwindcss": "^4",
     "typescript": "^5",
-    "vitest": "^3.2.7"
+    "vitest": "^4.1.11"
+  },
+  "overrides": {
+    "lodash-es": "^4.18.1",
+    "dompurify": "^3.4.15",
+    "nanoid@>=3 <4": "^3.3.18",
+    "nanoid@>=4": "^5.1.16"
   }
 }

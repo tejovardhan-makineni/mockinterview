@@ -7,7 +7,7 @@ import { fileURLToPath } from "node:url";
 export default defineConfig({
   test: {
     environment: "jsdom",
-    include: ["lib/**/*.test.ts"],
+    include: ["lib/**/*.test.{ts,tsx}"],
     setupFiles: ["./vitest.setup.ts"],
     globals: true,
   },

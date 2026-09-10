@@ -1,0 +1,41 @@
+{
+  "schema_version": 1,
+  "id": "incident-simulation",
+  "revision": 1,
+  "name": "Incident simulation",
+  "interviewer_role": "a fictional incident partner",
+  "workspaces": [
+    "conversational"
+  ],
+  "tool_policy": "This is a tabletop exercise. No infrastructure actions run. Reveal only supplied observations.",
+  "stages": [
+    {
+      "id": "intro",
+      "title": "Alert",
+      "kind": "intro",
+      "guidance": "State the incident and let the candidate take the lead.",
+      "share": 0.05
+    },
+    {
+      "id": "triage",
+      "title": "Triage",
+      "kind": "core",
+      "guidance": "Reveal requested observations and probe safe prioritization.",
+      "share": 0.4
+    },
+    {
+      "id": "mitigate",
+      "title": "Mitigation and verification",
+      "kind": "core",
+      "guidance": "Ask how they will mitigate, verify recovery and communicate.",
+      "share": 0.45
+    },
+    {
+      "id": "wrap",
+      "title": "Handoff",
+      "kind": "wrap",
+      "guidance": "Request a short handoff and conclude.",
+      "share": 0.1
+    }
+  ]
+}

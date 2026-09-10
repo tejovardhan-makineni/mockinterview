@@ -1,82 +1,79 @@
 # Contributing to mockinterview.live
 
-Thanks for your interest! This project is built to be **modular** — almost every
-improvement should touch **one file (or one small module) per layer**. This guide
-shows you where things live so you can make a focused change with confidence.
+Help make interviews realistic, understandable and useful to learn from. We
+welcome developers, interviewers, candidates, educators and accessibility testers.
+Follow the [Code of Conduct](CODE_OF_CONDUCT.md). Report vulnerabilities privately
+using [SECURITY.md](SECURITY.md).
 
-## Ground rules
+## Start locally
 
-- Be kind. See [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md).
-- Keep changes scoped to one feature/module. If a change forces edits across
-  many unrelated files, that's usually a smell — open an issue to discuss first.
-- Every PR must pass CI: `go build/vet/test` for the API and `lint`/`test`/`build`
-  for the web app (see [`.github/workflows/ci.yml`](.github/workflows/ci.yml)).
-- No secrets in the repo. Copy `.env.example` → `.env` (gitignored) for local keys.
+Follow the [README setup](README.md#run-locally), including `make install` before
+`make dev`. The development demo needs no API key or mail account. Real-provider
+checks are optional and billable; never put keys or real candidate records in a PR.
 
-## Run it locally
+Choose a focused change and open a branch or fork. A small fix does not need an
+issue first. For a new workspace or broad format, use the format proposal issue
+to explain the candidate task, interviewer role and feedback you intend to support.
 
-You only need a Gemini key for a *real* interview; without one the app runs on a
-deterministic offline stub.
+## Add interview content
+
+Read [docs/CORPUS.md](docs/CORPUS.md) for the versioned contract and examples.
+`make new-scenario ID=my-original-scenario` and `make new-format ID=my-format`
+create editable drafts under `scratch/content`, without changing the catalog.
+
+1. Write an original scenario. Disclose AI assistance, authorship, licensing and
+   sources. Do not copy confidential, paid or leaked interview questions.
+2. Give the candidate enough starting information. Keep hidden facts explicit
+   with reveal conditions. Include realistic probes for a partial answer, an
+   alternative solution and a correction; do not force one memorized exemplar.
+3. Define observable rubric dimensions, positive weights and level-appropriate
+   anchors. Include what cannot be assessed and how coaching affects interpretation.
+4. Add deterministic context fixtures and example turns for clarification,
+   partial reasoning, a late correction, silence and wrap-up. Cover scoring
+   evidence rejection when changing scoring behavior.
+5. Validate drafts with `cd api && go run ./cmd/mockinterview -validate-corpus
+   ../scratch/content/corpus`. Copy accepted drafts and referenced formats into
+   `api/data/`, run `make validate-content`, and include the author preview in
+   your own review. Do not put private answers in candidate-facing UI.
+6. Submit a PR with the content checklist. New entries stay `preview`. A
+   practitioner review records a real reviewer/date and the review's scope;
+   it does not establish model calibration or hiring validity.
+
+The reviewer checks task realism, timing, factual consistency, alternatives,
+accessibility, provenance and rubric evidence against varied sample responses.
+Before claiming a format is reliable, separately evaluate real-provider sessions,
+compare independent reviewers' ratings, record disagreements and failure cases,
+and test regression behavior on a held-out set. Do not invent a pass rate or
+calibration result. Domain-sensitive scenarios need an appropriately qualified
+reviewer and must remain educational practice.
+
+## Code map
+
+| Change | Main locations |
+|---|---|
+| Scenario, format, profession | `api/data/corpus`, `api/data/formats`, `api/internal/corpus` |
+| Interview behavior, timing | `api/internal/live/director.go`, `policy.go` |
+| Rubric scores, evidence, exercises | `api/internal/scoring` |
+| Multi-round practice packs | `api/data/packs`, `api/internal/pack` |
+| Session lifecycle, quota, history | `api/internal/interview`, `api/internal/store` |
+| Workspace and room | `web/components/studio`, `web/app/interview` |
+| Auth, profile, reports | Matching `api/internal` and `web/lib/features` modules |
+| Original interviewer artwork | `web/components/studio/Avatar3D.tsx`, `ARTWORK.md` |
+
+Keep backend handlers dependent on their small repository interfaces; update
+both PostgreSQL and the memory store when a contract changes. Frontend data
+access belongs in the owning feature API seam, with compatible mock behavior.
+Prefer targeted tests of behavior and failure recovery over implementation copies.
 
 ```bash
-cp .env.example .env         # optionally add GEMINI_API_KEY
-make up                      # Postgres via docker-compose
-make dev                     # API (:8080) + web (:3000)
-# or click through with zero backend:
-cd web && NEXT_PUBLIC_MOCK=1 npm run dev
+make test
+make lint
+make build
+make validate-content
 ```
 
-Tests:
-
-```bash
-make test          # go test ./...  +  web unit tests
-cd api && go test ./...
-cd web && npm test && npm run lint
-```
-
-## The architecture in one paragraph
-
-A Go modular monolith (`api/`) behind a Next.js static export (`web/`). Each
-**feature** is an isolated slice on both sides. On the backend a feature is a
-package under `api/internal/` that depends on a small **consumer-defined
-interface**, not the concrete database. On the frontend a feature is one file
-under `web/lib/features/` that owns its types + HTTP calls + mock. See
-[`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) and [`docs/TDD.md`](docs/TDD.md)
-for the full picture and diagrams.
-
-## "I want to change X" — where to go
-
-| Change | Backend | Frontend | Data |
-|---|---|---|---|
-| **Resume review** logic | `internal/resume/resume.go` | `lib/features/resume.ts`, `app/resume-review/page.tsx` | `store/resumes.go` |
-| **Interview results / scoring / report** | `internal/interview/`, `internal/scoring/` | `lib/features/interview.ts`, `app/results`, `app/report` | `store/sessions.go`, `store/reports.go` |
-| **Add / change a voice** | `internal/persona/voices.go` (one line) | — | — |
-| **Add / change a face (avatar)** | `internal/persona/faces.go` (one line) | register a builder in `web/components/studio/avatars/` under the same id | — |
-| **Add an interviewer personality** | `internal/persona/personalities.go` + prompt in `internal/live/director.go` | — | — |
-| **Interviewer behavior / pacing** | `internal/live/director.go` | — | — |
-| **Add an LLM provider** | `internal/llm/` (implement the `Client` interface) | — | — |
-| **Add an interview question** | drop a JSON file in `api/data/corpus/` (validated on load) | — | — |
-| **Add an interview modality/domain** | corpus `modality`/`domain` + director/scoring read it from the rubric | labels in the relevant `lib/features/*` | — |
-| **A new API endpoint** | feature package handler + route in `cmd/mockinterview/app.go` | a method on the owning `lib/features/*` slice | — |
-
-## Golden rules that keep it modular
-
-1. **Handlers depend on interfaces, not `*store.Store`.** Each feature package
-   declares the `Repo` interface it needs. `*store.Store` (Postgres) and
-   `memstore.Mem` (tests) both satisfy it. If you add a store method, add it to
-   the feature's `Repo`, to `store.Datastore`, and to `memstore`.
-2. **The frontend never calls `fetch()` directly.** Everything goes through the
-   `api` seam. Add new calls to the owning `lib/features/*` slice and implement
-   both the `http` and `mock` versions so mock mode never lies.
-3. **Catalogs are registries, not scattered constants.** Voices, faces,
-   personalities, and questions are data — add a row, don't thread a new literal
-   through the codebase.
-4. **Add a test.** Backend handlers get a test in `cmd/mockinterview/api_test.go`
-   (uses `memstore` + the LLM stub — no DB/keys). Frontend logic gets a Vitest
-   test next to it in `lib/`.
-
-## Commit / PR
-
-- Branch off `main`, keep PRs focused, write a clear description of *what* and *why*.
-- Reference any related issue. Fill in the PR template.
-- Green CI is required before review.
+CI must pass. Describe the concrete before/after behavior, validation, limitations
+and screenshots when useful. Explain migrations and recovery for durable-state
+changes. Never use real resumes, transcripts, provider keys or customer data in
+fixtures. Contributor submissions use the project's AGPL v3 license unless an
+explicit compatible exception is documented and approved.

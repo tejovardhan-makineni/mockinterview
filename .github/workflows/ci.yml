@@ -5,18 +5,34 @@ on:
     branches: [main]
   pull_request:
 
+permissions:
+  contents: read
+
 jobs:
   api:
     name: API (Go)
     runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16.14-alpine
+        env:
+          POSTGRES_USER: mockinterview
+          POSTGRES_PASSWORD: local-ci-only
+          POSTGRES_DB: mockinterview_ci
+        ports: [5432:5432]
+        options: >-
+          --health-cmd "pg_isready -U mockinterview -d mockinterview_ci"
+          --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      TEST_DATABASE_URL: postgres://mockinterview:local-ci-only@localhost:5432/mockinterview_ci?sslmode=disable
     defaults:
       run:
         working-directory: api
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-go@v5
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/setup-go@40f1582b2485089dde7abd97c1529aa768e1baff # v5
         with:
-          go-version: "1.26"
+          go-version-file: api/go.mod
           cache-dependency-path: api/go.sum
       - name: Verify formatting
         run: test -z "$(gofmt -l internal cmd)"
@@ -25,9 +41,13 @@ jobs:
       - name: Build
         run: go build ./...
       - name: Test
-        run: go test ./...
-      # The corpus validator and every handler test run against the in-memory
-      # store and the LLM stub, so no Postgres or API key is needed in CI.
+        run: go test -race ./...
+      - name: Validate corpus and scaffold fixtures
+        run: |
+          go run ./cmd/mockinterview -validate-corpus data/corpus
+          python3 ../scripts/test_content.py
+          python3 ../scripts/test_deploy.py
+      # Real database tests use isolated schemas; providers remain stubbed.
 
   web:
     name: Web (Next.js)
@@ -36,20 +56,20 @@ jobs:
       run:
         working-directory: web
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
-          node-version: "20"
+          node-version: "22"
           cache: npm
           cache-dependency-path: web/package-lock.json
-      # `npm install` (not `npm ci`) tolerates minor lock drift from transitive
-      # optional deps (sass/@parcel-watcher) that vary by platform/npm version.
-      - run: npm install --no-audit --no-fund
+      - run: npm ci --no-audit --no-fund
       - name: Lint
         run: npm run lint
       - name: Unit tests
         run: npm test
-      - name: Build (mock mode — no backend needed)
+      - name: Build production export (no running backend needed)
         run: npm run build
         env:
-          NEXT_PUBLIC_MOCK: "1"
+          APP_ENV: production
+          NEXT_PUBLIC_MOCK: "0"
+          NEXT_PUBLIC_API_BASE: https://mockinterview-api-661893776515.us-west1.run.app

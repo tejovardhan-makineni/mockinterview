@@ -42,6 +42,10 @@ func (s *Service) Ingest(w http.ResponseWriter, r *http.Request) {
 	if !ok {
 		return
 	}
+	if sess.Status != "active" && sess.Status != "interrupted" {
+		httpx.WriteProblem(w, 409, "Interview is not accepting delivery samples")
+		return
+	}
 	var batch behaviorBatch
 	if !httpx.DecodeJSON(w, r, &batch) {
 		return
@@ -54,12 +58,18 @@ func (s *Service) Ingest(w http.ResponseWriter, r *http.Request) {
 	}
 	ctx := r.Context()
 	for _, smp := range batch.Samples {
-		_ = s.store.AddBehaviorSample(ctx, sess.ID, smp.TsMs, smp.Gaze, smp.HeadPose, smp.Expression, smp.Posture, smp.Lighting, smp.Vad, smp.Framing)
+		if err := s.store.AddBehaviorSample(ctx, sess.ID, smp.TsMs, smp.Gaze, smp.HeadPose, smp.Expression, smp.Posture, smp.Lighting, smp.Vad, smp.Framing); err != nil {
+			httpx.WriteProblem(w, 503, "Delivery samples could not be saved")
+			return
+		}
 	}
 	for _, ev := range batch.Events {
 		switch ev.Kind {
 		case "filler", "long_pause", "help_request", "interruption":
-			_ = s.store.AddEvent(ctx, sess.ID, ev.TsMs, ev.Kind, ev.Data)
+			if err := s.store.AddEvent(ctx, sess.ID, ev.TsMs, ev.Kind, ev.Data); err != nil {
+				httpx.WriteProblem(w, 503, "Delivery event could not be saved")
+				return
+			}
 		}
 	}
 	httpx.WriteJSON(w, http.StatusOK, map[string]int{"samples": len(batch.Samples), "events": len(batch.Events)})

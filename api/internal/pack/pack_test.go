@@ -1,10 +1,33 @@
 package pack
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/tejo/mockinterview-api/internal/corpus"
 )
+
+func TestSeededSelectionAvoidsPreviouslySeenQuestions(t *testing.T) {
+	cc, pc := loadAll(t)
+	p, _ := pc.Get("amazon")
+	rd := p.Rounds[1]
+	first, ok := PickQuestionWithSeed(cc, p, rd, "one", nil)
+	if !ok {
+		t.Fatal("no candidate")
+	}
+	next, ok := PickQuestionWithSeed(cc, p, rd, "one", []string{first})
+	if !ok || next == first {
+		t.Fatal("repeated while fresh questions remain")
+	}
+	options := map[string]bool{}
+	for i := 0; i < 30; i++ {
+		id, _ := PickQuestionWithSeed(cc, p, rd, fmt.Sprint(i), nil)
+		options[id] = true
+	}
+	if len(options) < 2 {
+		t.Fatal("seed does not vary selection")
+	}
+}
 
 func loadAll(t *testing.T) (*corpus.Catalog, *Catalog) {
 	t.Helper()

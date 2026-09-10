@@ -1,82 +1,132 @@
 # mockinterview.live
 
-A realistic **AI mock-interview platform**. An interviewer with a human face and
-voice asks questions, watches you work (a system-design canvas, a code editor, or
-a written pad), interrupts with probing follow-ups, and scores you across every
-dimension of a real interview — plus how you came across (eye contact, posture,
-lighting, filler words, pauses). Everything is stored; you get a detailed report.
+Practice interviews with a clearly identified AI interviewer, keep your work and
+feedback, and contribute new interview formats. The hosted application is at
+[mockinterview.live](https://mockinterview.live).
 
-Supports multiple **modalities** (system design · coding · written · conversational)
-and **domains** (software engineering, ML system design, medical residency/clinical,
-law, consulting cases, product management, finance, behavioral).
+Choose a profession, format, target level and duration. Optional controls adjust
+challenge, interview style and simulation versus coaching. A device check leads
+into a room with voice, an optional camera, notes and an appropriate workspace.
+Reports use the scenario's rubric and cited candidate evidence; missing evidence
+is marked **not assessed**. Appearance is not part of the interview score.
 
-## Stack
-
-- **Web** — Next.js (App Router) + TypeScript + Tailwind v4, static export.
-- **API** — Go (chi + pgx), single binary, embedded auto-migrations.
-- **DB** — Postgres.
-- **LLM** — swappable: **Gemini** (default, and the live native-audio voice),
-  OpenAI, DeepSeek, Anthropic. A deterministic **stub** runs the whole product
-  with **no API key** for offline/dev.
-- **Avatar** — client-side 3D (no per-minute cost), swappable driver.
-- **Behavioral** — MediaPipe in-browser (gaze/pose/lighting) + VAD (pauses/fillers).
+The catalog contains **143 scenarios**, including original work-sample defense,
+AI-output critique, incident triage, SQL review, stakeholder negotiation and
+candidate-question practice. Content and AI feedback are **community previews**:
+practitioner review and scoring calibration remain pending. Employer-named packs
+are practice approximations, with no employer affiliation or claim of exact
+questions. Code and SQL are reviewed as text; there is no execution sandbox.
 
 ## Run locally
 
-You need Go 1.26+, Node 20+, and Postgres (Docker or local).
+Install **Go 1.26.8+**, **Node.js 22**, **Python 3** (content tools), and **Docker
+with Compose v2** (Postgres 16). No paid service is needed for the demo.
 
 ```bash
-cp .env.example .env          # optional: add GEMINI_API_KEY for real interviews
-make up                       # start Postgres (docker compose)
-make dev                      # runs API (:8080) + web (:3000)
+git clone https://github.com/tejovardhan-makineni/mockinterview.git
+cd mockinterview
+cp .env.example .env
+make install
+make up
+make dev
 ```
 
-Open http://localhost:3000. With **no API key**, the app runs on the deterministic
-stub — you can click through auth, resume parse/review, question selection, a
-scored interview, and the report with zero cost. Add `GEMINI_API_KEY` (or another
-provider's key + `LLM_PROVIDER`) to `.env` for real LLM evaluation and live voice.
+Open `http://localhost:3000`; the API is at `http://localhost:8080`. Register a
+local account. Development auth responses provide a verification/recovery link
+so a mail service is unnecessary locally. The default development setup uses a
+deterministic demo model when no key is configured. Demo feedback is labelled and
+does not measure interview performance. Choose **Text conversation** at the
+device check for this no-key demo. `USE_STUB_LLM=true` explicitly forces it.
+If voice is unavailable, the room identifies the text fallback and keeps the
+microphone off.
 
-**Fully offline UI:** the web app also has a mock mode needing no backend at all:
-`cd web && NEXT_PUBLIC_MOCK=1 npm run dev`.
+`APP_ENV=development` and `LOCAL_UNLIMITED=true` enable unlimited local practice.
+Keep this development configuration on your computer. Production refuses stub
+models and unlimited mode. Local real-provider usage still incurs your provider's
+charges. `make down` stops containers and preserves your database volume.
 
-## Configuration
+For a real voice interview, add `GEMINI_API_KEY` to `.env`. Gemini supplies native
+voice; reasoning and scoring can use the configured `LLM_PROVIDER` and its key.
+See [.env.example](.env.example). `make check-llm` is an optional, billable provider
+connectivity check. Never commit `.env` or paste a key in an issue or transcript.
 
-See `.env.example`. The only value needed for a real interview is `GEMINI_API_KEY`.
-To use a different reasoning provider set `LLM_PROVIDER=openai|deepseek|anthropic`
-and that provider's key; live voice always uses Gemini.
-
-## Layout
-
-```
-api/    Go API (cmd/mockinterview, internal/*, embedded migrations, data/corpus)
-web/    Next.js app (app/, components/, lib/ with the mock/HTTP client seam)
-deploy/ GCP deploy scripts (Cloud Run + Cloud SQL + Firebase Hosting)
-docs/   architecture + operations
-```
-
-## Tests
+You can also paste a personal provider key in interview setup. Development
+generates a temporary encryption key automatically. For interrupted personal-key
+attempts to remain recoverable after restarting the API, generate a stable key:
 
 ```bash
-cd api && go build ./... && go vet ./... && go test ./...   # handlers run on an
-                                            # in-memory store + LLM stub — no DB/keys
-cd web && npm run lint && npm test && npm run build
+python3 -c 'import base64,secrets; print(base64.b64encode(secrets.token_bytes(32)).decode())'
 ```
 
-The whole HTTP API is covered by `cmd/mockinterview/api_test.go` against the
-in-memory store; the corpus is validated in CI via `go test ./internal/corpus/`
-and the `./bin/mockinterview -validate-corpus <dir>` CLI. CI runs both suites on
-every PR (`.github/workflows/ci.yml`).
+Save the output as `SESSION_ENCRYPTION_KEY` in your local `.env`; do not commit
+it. Without a stable key, re-enter your provider key after restarting. Provider
+credentials expire after three hours, so later feedback retries can also request
+re-entry. Unlimited local practice does not remove provider charges.
 
-## Contributing
+Two alternatives after copying `.env.example`:
 
-This project is built to be modular — most improvements touch **one module per
-layer**. See [`CONTRIBUTING.md`](CONTRIBUTING.md) for the "I want to change X"
-map, plus [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) and
-[`docs/TDD.md`](docs/TDD.md). Please also read the
-[Code of Conduct](CODE_OF_CONDUCT.md) and [Security Policy](SECURITY.md).
+- **Containers:** `make local-stack` builds the API and static web application and
+  starts Postgres. Only loopback ports 3000, 8080 and 5432 are published. This is a
+  development setup, without production TLS or mail configuration.
+- **UI preview:** after `make install`, run
+  `cd web && NEXT_PUBLIC_MOCK=1 npm run dev`. This uses example data without an API.
 
-## License
+## Hosted usage and continued practice
 
-Licensed under the **GNU Affero General Public License v3.0** — see
-[`LICENSE`](LICENSE). In short: you may use, modify, and self-host it, but if you
-run a modified version as a network service you must offer users its source.
+The free allowance is one interview start per rolling seven days. All hosted
+starts, including your own provider key, share a one-start-per-rolling-24-hours
+limit. Resume and report retries do not consume another start. Your own-key
+option still uses the hosted service; self-hosting is the route to unrestricted
+local practice.
+
+Between interviews, revisit saved evidence, rewrite an answer and complete the
+report's short self-guided exercises. These exercises make no model request.
+Rehearsing the same scenario builds fluency; a new scenario tests whether the
+skill transfers. Repeated scores are not independent evidence of readiness.
+
+## Contribute
+
+You can contribute a scenario, a reusable format, a rubric review, an accessibility
+fix or a product improvement. Start with [CONTRIBUTING.md](CONTRIBUTING.md) and the
+[content contract](docs/CORPUS.md). New content needs original or appropriately
+licensed material, conditional facts, fair follow-ups and review fixtures.
+
+```bash
+make new-scenario ID=my-original-scenario
+make new-format ID=my-format
+make validate-content
+make preview-format ID=work-sample-reservation-review
+```
+
+Scaffolds go to `scratch/content/` and are not published automatically. The author
+preview includes private answers and probes; do not expose its output to a live
+candidate. Schema validation and context tests are a first gate, followed by
+human content review and real-provider evaluation before any quality claim.
+
+## Development checks
+
+```bash
+make test
+make lint
+make build
+make validate-content
+```
+
+CI installs from the lockfile and runs Go checks, corpus fixtures and web tests
+and a production web export. Deterministic tests need no real provider key.
+
+The application is a Go API with PostgreSQL and embedded migrations, plus a
+Next.js static export. Corpus, director and scorer versions travel with attempts
+so future edits do not silently redefine earlier interviews. The scorer keeps
+full evidence up to an explicit size limit and rejects invalid citations instead
+of silently shortening the transcript. See [architecture](docs/ARCHITECTURE.md),
+[deployment update instructions](docs/DEPLOYMENT-UPDATE-PLAN.md) and
+[launch readiness](docs/LAUNCH-READINESS.md).
+
+## Community and license
+
+See [support](SUPPORT.md), [security reporting](SECURITY.md), the
+[Code of Conduct](CODE_OF_CONDUCT.md) and [third-party notices](NOTICE.md).
+Source and original contributed scenarios are licensed under
+[GNU AGPL v3](LICENSE). If you offer a modified version over a network, provide
+users access to the corresponding source as required by that license.

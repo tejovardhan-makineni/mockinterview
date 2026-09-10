@@ -1,0 +1,42 @@
+{
+  "schema_version": 1,
+  "id": "work-sample-defense",
+  "revision": 1,
+  "name": "Work-sample review and defense",
+  "interviewer_role": "a colleague reviewing a small fictional work sample",
+  "workspaces": [
+    "written",
+    "coding"
+  ],
+  "tool_policy": "Review the supplied artifact. Do not claim code or SQL was executed. The candidate may use notes and explain pseudocode.",
+  "stages": [
+    {
+      "id": "intro",
+      "title": "Opening",
+      "kind": "intro",
+      "guidance": "Briefly explain the artifact and ask whether the candidate has a clarification.",
+      "share": 0.05
+    },
+    {
+      "id": "review",
+      "title": "Review",
+      "kind": "core",
+      "guidance": "Let the candidate inspect and critique the artifact. Probe one concrete risk at a time.",
+      "share": 0.4
+    },
+    {
+      "id": "defense",
+      "title": "Defend and revise",
+      "kind": "core",
+      "guidance": "Ask for an alternative, a verification plan and a focused improvement. Revisit a correction fairly.",
+      "share": 0.45
+    },
+    {
+      "id": "wrap",
+      "title": "Reflection",
+      "kind": "wrap",
+      "guidance": "Ask what remains uncertain, then thank the candidate and end.",
+      "share": 0.1
+    }
+  ]
+}

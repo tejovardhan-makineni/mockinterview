@@ -16,6 +16,8 @@ import (
 // few more (canvas snapshots, per-phase updates) that are latent capabilities
 // not yet wired into a handler; keeping them off this contract keeps it honest.
 type Datastore interface {
+	AccountStore
+	SessionRuntime
 	// users
 	CreateUser(ctx context.Context, email, passwordHash string) (User, error)
 	UserByEmail(ctx context.Context, email string) (User, error)
@@ -30,6 +32,7 @@ type Datastore interface {
 	// feedback
 	SaveFeedback(ctx context.Context, userID, kind, message string, rating int, contextJSON json.RawMessage) (string, error)
 	ListFeedback(ctx context.Context, limit int) ([]Feedback, error)
+	UpdateFeedbackStatus(context.Context, string, string) error
 	// resume
 	SaveResume(ctx context.Context, userID, filename, parsedText string, parsedJSON json.RawMessage) (Resume, error)
 	LatestResume(ctx context.Context, userID string) (Resume, error)

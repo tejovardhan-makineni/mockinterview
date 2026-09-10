@@ -2,10 +2,13 @@ package main
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
+	"github.com/gorilla/websocket"
 	"mime/multipart"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
 	"time"
 
@@ -32,9 +35,12 @@ func testServer(t *testing.T, adminEmails []string, dailyLimit int) *httptest.Se
 		AdminEmails:    adminEmails,
 		FreeDailyLimit: dailyLimit,
 		ModelLive:      "stub",
-		ModelTTS:       "stub",
+		LLMProvider:    "gemini", LLMModel: "stub",
+		ModelTTS: "stub",
 	}
-	app := &App{Cfg: cfg, Store: memstore.New(), LLM: llm.NewStub(), Corpus: cat}
+	ctx, cancel := context.WithCancel(context.Background())
+	t.Cleanup(cancel)
+	app := &App{Background: ctx, Cfg: cfg, Store: memstore.New(), LLM: llm.NewStub(), Corpus: cat}
 	r := chi.NewRouter()
 	r.Route("/api/v1", app.Routes)
 	srv := httptest.NewServer(r)
@@ -106,7 +112,7 @@ func firstQuestionID(t *testing.T) string {
 func TestInterviewHappyPath(t *testing.T) {
 	srv := testServer(t, nil, 100)
 	c := &client{t: t, base: srv.URL}
-	c.register("alice@test.com", "password123")
+	c.register("alice@test.com", "password12345")
 
 	if res, _ := c.do("GET", "/api/v1/auth/me", nil); res.StatusCode != 200 {
 		t.Fatalf("me: %d", res.StatusCode)
@@ -117,13 +123,13 @@ func TestInterviewHappyPath(t *testing.T) {
 	if res, _ := c.do("PUT", "/api/v1/config", bad); res.StatusCode != http.StatusBadRequest {
 		t.Fatalf("invalid config should be 400, got %d", res.StatusCode)
 	}
-	good := map[string]any{"voice_id": "aoede", "face_id": "sophia", "personality": "neutral", "intensity": 3}
+	good := map[string]any{"voice_id": "aoede", "face_id": "alex", "personality": "neutral", "intensity": 3}
 	if res, _ := c.do("PUT", "/api/v1/config", good); res.StatusCode != 200 {
 		t.Fatalf("valid config should be 200, got %d", res.StatusCode)
 	}
 
 	// Create a session.
-	res, body := c.do("POST", "/api/v1/sessions", map[string]any{"question_id": firstQuestionID(t), "config": good})
+	res, body := c.do("POST", "/api/v1/sessions", map[string]any{"question_id": firstQuestionID(t), "config": good, "mode": "text"})
 	if res.StatusCode != 200 {
 		t.Fatalf("create session: %d %s", res.StatusCode, body)
 	}
@@ -135,9 +141,53 @@ func TestInterviewHappyPath(t *testing.T) {
 		t.Fatal("no session id")
 	}
 
-	// Add a substantive candidate turn so scoring has something to assess.
+	// Open the actual text relay: provider readiness commits the start debit.
+	ws, _, err := websocket.DefaultDialer.Dial("ws"+strings.TrimPrefix(srv.URL, "http")+"/api/v1/sessions/"+sess.ID+"/live", http.Header{"Authorization": []string{"Bearer " + c.token}})
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer ws.Close()
+	readEvent := func(want string) map[string]any {
+		t.Helper()
+		_ = ws.SetReadDeadline(time.Now().Add(5 * time.Second))
+		for {
+			var event map[string]any
+			if e := ws.ReadJSON(&event); e != nil {
+				t.Fatalf("waiting for %s: %v", want, e)
+			}
+			if event["type"] == "error" {
+				t.Fatalf("relay error: %v", event)
+			}
+			if event["type"] == want {
+				return event
+			}
+		}
+	}
+	if event := readEvent("ready"); event["deadline_at"] == nil {
+		t.Fatal("ready without canonical deadline")
+	}
+	readEvent("say")
 	longAnswer := "I would start by clarifying functional and non-functional requirements, then estimate traffic and storage, sketch a high level design with a load balancer, stateless app tier, a sharded key value store, and a cache, and finally discuss replication, failover, and observability in depth."
-	c.do("POST", "/api/v1/sessions/"+sess.ID+"/turns", map[string]any{"role": "candidate", "text": longAnswer, "ts_ms": 1000})
+	if err = ws.WriteJSON(map[string]string{"type": "user_text", "text": longAnswer, "event_id": "answer-1"}); err != nil {
+		t.Fatal(err)
+	}
+	if event := readEvent("ack"); event["event_id"] != "answer-1" {
+		t.Fatalf("bad ack: %v", event)
+	}
+	readEvent("say")
+	if err = ws.WriteJSON(map[string]string{"type": "user_text", "text": longAnswer, "event_id": "answer-1"}); err != nil {
+		t.Fatal(err)
+	}
+	readEvent("ack")
+	res, body = c.do("GET", "/api/v1/sessions/"+sess.ID+"/transcript", nil)
+	if res.StatusCode != 200 || bytes.Count(body, []byte(longAnswer)) != 1 {
+		t.Fatalf("answer dedup failed: %d %s", res.StatusCode, body)
+	}
+	if err = ws.WriteJSON(map[string]string{"type": "end"}); err != nil {
+		t.Fatal(err)
+	}
+	readEvent("saved")
+	_ = ws.Close()
 
 	// It shows up in history.
 	if res, body := c.do("GET", "/api/v1/sessions", nil); res.StatusCode != 200 {
@@ -146,14 +196,25 @@ func TestInterviewHappyPath(t *testing.T) {
 
 	// Finish → scoring runs via the stub.
 	res, body = c.do("POST", "/api/v1/sessions/"+sess.ID+"/finish", nil)
-	if res.StatusCode != 200 {
+	if res.StatusCode != 202 {
 		t.Fatalf("finish: %d %s", res.StatusCode, body)
 	}
 
-	// Report is available and carries scores.
-	res, body = c.do("GET", "/api/v1/sessions/"+sess.ID+"/report", nil)
-	if res.StatusCode != 200 {
-		t.Fatalf("report: %d %s", res.StatusCode, body)
+	// Repeated finishes reuse the durable job; report polling handles 202.
+	res, body = c.do("POST", "/api/v1/sessions/"+sess.ID+"/finish", nil)
+	if res.StatusCode != 202 && res.StatusCode != 200 {
+		t.Fatalf("repeat finish: %d %s", res.StatusCode, body)
+	}
+	deadline := time.Now().Add(5 * time.Second)
+	for {
+		res, body = c.do("GET", "/api/v1/sessions/"+sess.ID+"/report", nil)
+		if res.StatusCode == 200 {
+			break
+		}
+		if res.StatusCode != 202 || time.Now().After(deadline) {
+			t.Fatalf("report: %d %s", res.StatusCode, body)
+		}
+		time.Sleep(25 * time.Millisecond)
 	}
 	var rep struct {
 		Scores []map[string]any `json:"scores"`
@@ -169,7 +230,7 @@ func TestInterviewHappyPath(t *testing.T) {
 func TestResumeReviewAndMatch(t *testing.T) {
 	srv := testServer(t, nil, 100)
 	c := &client{t: t, base: srv.URL}
-	c.register("resume@test.com", "password123")
+	c.register("resume@test.com", "password12345")
 
 	// Match before uploading a resume must 400.
 	if res, _ := c.do("POST", "/api/v1/resume/match", map[string]string{"job_description": "Senior Go engineer, Kafka, AWS."}); res.StatusCode != http.StatusBadRequest {
@@ -245,27 +306,20 @@ func TestAuthRequired(t *testing.T) {
 	}
 }
 
-// Free users are capped at the daily limit; admins bypass it.
-func TestDailyLimitAndAdminBypass(t *testing.T) {
+// Configured email strings never grant admin privileges. Even local unlimited
+// mode retains the single active interview guard.
+func TestNoEmailAdminBypassAndSingleActiveAttempt(t *testing.T) {
 	srv := testServer(t, []string{"admin@test.com"}, 1)
-	qid := firstQuestionID(t)
-
-	// Free user: first session ok, second is 429.
-	free := &client{t: t, base: srv.URL}
-	free.register("free@test.com", "password123")
-	if res, _ := free.do("POST", "/api/v1/sessions", map[string]any{"question_id": qid}); res.StatusCode != 200 {
-		t.Fatalf("first session should be 200, got %d", res.StatusCode)
+	c := &client{t: t, base: srv.URL}
+	c.register("admin@test.com", "password12345")
+	if res, _ := c.do("GET", "/api/v1/feedback", nil); res.StatusCode != 403 {
+		t.Fatalf("untrusted email admin: %d", res.StatusCode)
 	}
-	if res, _ := free.do("POST", "/api/v1/sessions", map[string]any{"question_id": qid}); res.StatusCode != http.StatusTooManyRequests {
-		t.Fatalf("second session should be 429, got %d", res.StatusCode)
+	body := map[string]any{"question_id": firstQuestionID(t), "mode": "text"}
+	if res, b := c.do("POST", "/api/v1/sessions", body); res.StatusCode != 200 {
+		t.Fatalf("reserve: %d %s", res.StatusCode, b)
 	}
-
-	// Admin: no cap.
-	admin := &client{t: t, base: srv.URL}
-	admin.register("admin@test.com", "password123")
-	for i := 0; i < 3; i++ {
-		if res, _ := admin.do("POST", "/api/v1/sessions", map[string]any{"question_id": qid}); res.StatusCode != 200 {
-			t.Fatalf("admin session %d should be 200, got %d", i, res.StatusCode)
-		}
+	if res, b := c.do("POST", "/api/v1/sessions", body); res.StatusCode != 409 {
+		t.Fatalf("duplicate active: %d %s", res.StatusCode, b)
 	}
 }

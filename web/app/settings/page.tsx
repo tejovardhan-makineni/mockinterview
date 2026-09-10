@@ -1,197 +1,260 @@
 "use client";
-
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { api } from "@/lib/api";
-import type { Face, InterviewConfig, Personality, PersonalityOption, Profile, Voice } from "@/lib/types";
-import type { Profession } from "@/lib/features/profile";
-import { Badge, Button, Field, Input, Panel } from "@/components/ui";
+import { account, type User } from "@/lib/features/auth";
+import {
+  BASE,
+  authHeader,
+  clearPrivateBrowserData,
+  errorMessage,
+} from "@/lib/http";
 import { AppShell } from "@/components/AppShell";
-import { Avatar3D, type AvatarDrive } from "@/components/studio/Avatar3D";
-import { previewVoiceSample, stopPreview, prefetchPreview } from "@/lib/voicePreview";
-import { IconPlay, IconStop } from "@/components/icons";
-import { useT } from "@/lib/i18n";
-
-const DOMAINS = [
-  "system_design", "ml_system_design", "coding", "behavioral", "medicine", "medical_residency",
-  "nursing", "law", "consulting_case", "product_management", "finance", "data_science",
-  "ux_design", "sales", "marketing", "human_resources", "education", "mba_admissions",
-];
-const pretty = (s: string) => s.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
-
-export default function SettingsPage() {
+import { Button, Field, Input, Panel, ErrorNotice } from "@/components/ui";
+export default function Settings() {
   const router = useRouter();
-  const t = useT();
-  const [profile, setProfile] = useState<Profile>({});
-  const [cfg, setCfg] = useState<InterviewConfig>({ voice_id: "aoede", face_id: "sophia", personality: "neutral", intensity: 3 });
-  const [voices, setVoices] = useState<Voice[]>([]);
-  const [faces, setFaces] = useState<Face[]>([]);
-  const [personas, setPersonas] = useState<PersonalityOption[]>([]);
-  const [professions, setProfessions] = useState<Profession[]>([]);
-  const [saved, setSaved] = useState("");
-  const [confirmDelete, setConfirmDelete] = useState(false);
-  const pv = useRef<AvatarDrive>({ speaking: false, amplitude: 0, mood: "neutral" });
-  const [previewing, setPreviewing] = useState(false);
-  const previewReq = { voiceId: cfg.voice_id, faceId: cfg.face_id, personality: cfg.personality, intensity: cfg.intensity };
-  const previewVoice = () => {
-    if (previewing) { stopPreview(pv); setPreviewing(false); return; }
-    setPreviewing(true);
-    void previewVoiceSample(previewReq, pv, () => setPreviewing(false));
-  };
-
+  const [user, setUser] = useState<User | null>(null);
+  const [error, setError] = useState("");
+  const [notice, setNotice] = useState("");
+  const [oldPassword, setOldPassword] = useState("");
+  const [password, setPassword] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [confirm, setConfirm] = useState(false);
+  const [name, setName] = useState("");
+  const [target, setTarget] = useState("");
   useEffect(() => {
     (async () => {
-      const u = await api.me();
-      if (!u) { router.replace("/login"); return; }
-      const [p, c, v, f, ps, prof] = await Promise.all([api.getProfile(), api.getConfig(), api.listVoices(), api.listFaces(), api.listPersonalities(), api.listProfessions()]);
-      setProfile(p || {}); setCfg(c); setVoices(v); setFaces(f); setPersonas(ps); setProfessions(prof);
+      try {
+        const u = await api.me();
+        if (!u) {
+          router.replace("/login?next=/settings");
+          return;
+        }
+        setUser(u);
+        const p = await api.getProfile();
+        setName(p?.name ?? "");
+        setTarget(p?.target_role ?? "");
+      } catch (e) {
+        setError(errorMessage(e));
+      }
     })();
   }, [router]);
-
-  // Stop any preview audio when leaving the page (FE-3).
-  useEffect(() => () => stopPreview(pv), []);
-
-  // Warm the preview clip whenever the combo changes so "Hear this voice & face"
-  // plays instantly. Debounced so dragging the intensity slider fires one fetch.
-  useEffect(() => {
-    if (!voices.length) return; // wait until config is loaded
-    const t = setTimeout(() => { void prefetchPreview(previewReq); }, 150);
-    return () => clearTimeout(t);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [cfg.voice_id, cfg.face_id, cfg.personality, cfg.intensity, voices.length]);
-
-  async function saveProfile() { await api.saveProfile(profile); flash(t("Profile saved")); }
-  const toggleProfession = (key: string) =>
-    setProfile((cur) => {
-      const set = cur.professions ?? [];
-      const next = set.includes(key) ? set.filter((k) => k !== key) : [...set, key];
-      return { ...cur, professions: next };
-    });
-  async function saveCfg() { await api.saveConfig(cfg); flash(t("Interviewer saved")); }
-  function flash(m: string) { setSaved(m); setTimeout(() => setSaved(""), 1800); }
-
-  async function del() {
-    await api.deleteAccount();
-    router.replace("/");
+  async function action(fn: () => Promise<void>) {
+    setBusy(true);
+    setError("");
+    setNotice("");
+    try {
+      await fn();
+    } catch (e) {
+      setError(errorMessage(e));
+    } finally {
+      setBusy(false);
+    }
   }
-
+  async function exportAccount() {
+    const response = await fetch(BASE + "/api/v1/account/export", {
+      headers: authHeader(),
+    });
+    if (!response.ok)
+      throw new Error("Your export could not be prepared. Please retry.");
+    const blob = await response.blob();
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = "mockinterview-account.json";
+    link.click();
+    URL.revokeObjectURL(url);
+    setNotice("Your account export is ready.");
+  }
   return (
     <AppShell active="settings">
-      {saved && <div className="mb-3"><Badge tone="good">{saved}</Badge></div>}
-      <h1 className="text-3xl font-extrabold tracking-tight">{t("Settings")}</h1>
-
-      {/* Profile */}
-      <Panel className="mt-6 p-6">
-        <h2 className="text-lg font-semibold">{t("Your profile")}</h2>
-        <p className="mt-1 text-sm text-[var(--color-muted)]">{t("We use this to suggest relevant interviews.")}</p>
-        <div className="mt-5 grid gap-4 md:grid-cols-2">
-          <Field label={t("Name")}><Input value={profile.name ?? ""} onChange={(e) => setProfile({ ...profile, name: e.target.value })} placeholder={t("Your name")} /></Field>
-          <Field label={t("Date of birth")}><Input type="date" value={profile.dob ?? ""} onChange={(e) => setProfile({ ...profile, dob: e.target.value })} /></Field>
-          <Field label={t("Gender")}>
-            <select value={profile.gender ?? ""} onChange={(e) => setProfile({ ...profile, gender: e.target.value })} className="w-full rounded-xl border border-[var(--color-line)] bg-[var(--color-studio)] px-3 py-2.5 text-sm">
-              <option value="">{t("Prefer not to say")}</option><option value="female">{t("Female")}</option><option value="male">{t("Male")}</option><option value="nonbinary">{t("Non-binary")}</option>
-            </select>
-          </Field>
-          <Field label={t("I am a…")}>
-            <select value={profile.status ?? ""} onChange={(e) => setProfile({ ...profile, status: e.target.value as Profile["status"] })} className="w-full rounded-xl border border-[var(--color-line)] bg-[var(--color-studio)] px-3 py-2.5 text-sm">
-              <option value="">—</option><option value="student">{t("Student")}</option><option value="working">{t("Working professional")}</option><option value="other">{t("Other")}</option>
-            </select>
-          </Field>
-          <Field label={t("Occupation")}><Input value={profile.occupation ?? ""} onChange={(e) => setProfile({ ...profile, occupation: e.target.value })} placeholder={t("e.g. Software Engineer, Medical Resident")} /></Field>
-          <Field label={t("Target role")}><Input value={profile.target_role ?? ""} onChange={(e) => setProfile({ ...profile, target_role: e.target.value })} placeholder={t("e.g. Senior SWE at a FAANG")} /></Field>
-          <Field label={t("Preferred interview domain")}>
-            <select value={profile.domain ?? ""} onChange={(e) => setProfile({ ...profile, domain: e.target.value })} className="w-full rounded-xl border border-[var(--color-line)] bg-[var(--color-studio)] px-3 py-2.5 text-sm">
-              <option value="">{t("Any")}</option>{DOMAINS.map((d) => <option key={d} value={d}>{t(pretty(d))}</option>)}
-            </select>
-          </Field>
-          <Field label={t("Years of experience")}><Input type="number" min={0} value={profile.years_experience ?? ""} onChange={(e) => setProfile({ ...profile, years_experience: Number(e.target.value) })} /></Field>
+      <p className="eyebrow">Make yourself at home</p>
+      <h1 className="page-title mt-3">Account & preferences</h1>
+      {error && (
+        <div className="mt-6">
+          <ErrorNotice message={error} />
         </div>
-        <Button className="mt-5" onClick={saveProfile}>{t("Save profile")}</Button>
-      </Panel>
-
-      {/* Professions — gates the interview catalog */}
-      <Panel className="mt-4 p-6">
-        <h2 className="text-lg font-semibold">{t("Professions")}</h2>
-        <p className="mt-1 text-sm text-[var(--color-muted)]">{t("What you interview for. Your catalog only ever shows interviews for these — pick at least one.")}</p>
-        <div className="mt-5 flex flex-wrap gap-2">
-          {professions.map((p) => {
-            const on = (profile.professions ?? []).includes(p.key);
-            return (
-              <button
-                key={p.key}
-                type="button"
-                aria-pressed={on}
-                onClick={() => toggleProfession(p.key)}
-                className={`inline-flex items-center gap-1.5 rounded-full border px-3.5 py-1.5 text-sm transition ${on ? "border-[var(--color-accent)] bg-[var(--color-panel-2)] text-[var(--color-ink)]" : "border-[var(--color-line)] text-[var(--color-muted)] hover:bg-[var(--color-panel-2)]"}`}
+      )}
+      {notice && (
+        <p className="notice mt-6" role="status">
+          {notice}
+        </p>
+      )}
+      <div className="mt-7 grid gap-5 lg:grid-cols-2">
+        <Panel className="p-6">
+          <h2 className="text-lg font-semibold">Your account</h2>
+          <p className="mt-3 text-sm">{user?.email ?? "Loading account…"}</p>
+          <p className="mt-2 text-xs text-[var(--color-muted)]">
+            {user?.email_verified === false
+              ? "Email verification needed for hosted practice."
+              : user
+                ? "Account ready."
+                : ""}
+          </p>
+          {user?.email_verified === false && (
+            <Button
+              className="mt-4"
+              variant="ghost"
+              disabled={busy}
+              onClick={() =>
+                void action(async () => {
+                  const r = await account.resend();
+                  setNotice(
+                    r.message ?? "Check your inbox for a verification link.",
+                  );
+                })
+              }
+            >
+              Resend verification
+            </Button>
+          )}
+          <form
+            className="mt-6 space-y-4"
+            onSubmit={(e) => {
+              e.preventDefault();
+              void action(async () => {
+                const profile = await api.getProfile();
+                await api.saveProfile({
+                  ...profile,
+                  name,
+                  target_role: target,
+                });
+                setNotice("Preferences saved.");
+              });
+            }}
+          >
+            <Field label="Name · optional">
+              <Input
+                autoComplete="name"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+              />
+            </Field>
+            <Field label="Target role · optional">
+              <Input
+                value={target}
+                onChange={(e) => setTarget(e.target.value)}
+                placeholder="The role you are preparing for"
+              />
+            </Field>
+            <Button type="submit" variant="ghost" disabled={busy}>
+              Save preferences
+            </Button>
+          </form>
+        </Panel>
+        <Panel className="p-6">
+          <h2 className="text-lg font-semibold">Change your password</h2>
+          <p className="mt-2 text-sm text-[var(--color-muted)]">
+            Other signed-in sessions will be invalidated.
+          </p>
+          <form
+            className="mt-5 space-y-4"
+            onSubmit={(e) => {
+              e.preventDefault();
+              void action(async () => {
+                await account.change(oldPassword, password);
+                setOldPassword("");
+                setPassword("");
+                setNotice("Your password was changed.");
+              });
+            }}
+          >
+            <Field label="Current password">
+              <Input
+                type="password"
+                autoComplete="current-password"
+                value={oldPassword}
+                onChange={(e) => setOldPassword(e.target.value)}
+                required
+              />
+            </Field>
+            <Field label="New password · at least 12 characters">
+              <Input
+                type="password"
+                autoComplete="new-password"
+                minLength={12}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+              />
+            </Field>
+            <Button type="submit" variant="ghost" disabled={busy}>
+              Change password
+            </Button>
+          </form>
+        </Panel>
+        <Panel className="p-6">
+          <h2 className="text-lg font-semibold">Your data</h2>
+          <p className="mt-3 text-sm text-[var(--color-muted)]">
+            Export your records, or delete individual interviews from History.
+            Camera analysis is disabled in this release. Camera self-view stays
+            local and optional.
+          </p>
+          <Button
+            className="mt-5"
+            variant="ghost"
+            disabled={busy}
+            onClick={() => void action(exportAccount)}
+          >
+            Export account data
+          </Button>
+          <h3 className="mt-7 text-sm font-semibold">Appearance</h3>
+          <div className="mt-3 flex gap-3">
+            {["light", "dark"].map((theme) => (
+              <Button
+                key={theme}
+                variant="ghost"
+                onClick={() => {
+                  document.documentElement.dataset.theme = theme;
+                  localStorage.setItem("mi_theme", theme);
+                }}
               >
-                <span aria-hidden className={on ? "text-[var(--color-accent)]" : "text-transparent"}>✓</span>
-                {p.label}
-              </button>
-            );
-          })}
-        </div>
-        <Button className="mt-5" onClick={saveProfile} disabled={(profile.professions ?? []).length === 0}>{t("Save professions")}</Button>
-      </Panel>
-
-      {/* Interviewer */}
-      <Panel className="mt-4 p-6">
-        <h2 className="text-lg font-semibold">{t("Your interviewer")}</h2>
-        <div className="mt-5 grid gap-6 md:grid-cols-[220px_1fr]">
-          <div>
-            <div className="aspect-square w-full overflow-hidden rounded-xl bg-[var(--color-panel-2)]">
-              <Avatar3D faceId={cfg.face_id} drive={pv} />
-            </div>
-            <button onClick={() => previewVoice()} className="mt-2 inline-flex w-full items-center justify-center gap-1.5 rounded-md border border-[var(--color-line)] px-2 py-1.5 text-xs font-medium text-[var(--color-accent)] transition hover:bg-[var(--color-panel-2)]">
-              {previewing ? <IconStop className="h-3.5 w-3.5" /> : <IconPlay className="h-3.5 w-3.5" />}
-              {previewing ? t("Stop") : t("Hear this voice & face")}
-            </button>
+                {theme === "light" ? "Light" : "Dark"}
+              </Button>
+            ))}
           </div>
-          <div className="space-y-4">
-            <Field label={t("Interviewer face")}>
-              <div className="grid grid-cols-4 gap-2">
-                {faces.map((f) => (
-                  <button key={f.id} onClick={() => setCfg({ ...cfg, face_id: f.id })}
-                    className={`rounded-xl border px-2 py-2 text-xs transition ${cfg.face_id === f.id ? "border-[var(--color-accent)] bg-[var(--color-panel-2)]" : "border-[var(--color-line)] hover:bg-[var(--color-panel-2)]"}`}>
-                    {f.label}
-                  </button>
-                ))}
-              </div>
-            </Field>
-            <Field label={t("Voice")}>
-              <div className="grid grid-cols-3 gap-2">
-                {voices.map((v) => (
-                  <button key={v.id} onClick={() => { if (previewing) { stopPreview(pv); setPreviewing(false); } setCfg({ ...cfg, voice_id: v.id }); }}
-                    className={`rounded-xl border px-3 py-2 text-sm transition ${cfg.voice_id === v.id ? "border-[var(--color-accent)] bg-[var(--color-panel-2)]" : "border-[var(--color-line)] hover:bg-[var(--color-panel-2)]"}`}>{v.label}</button>
-                ))}
-              </div>
-            </Field>
-            <div className="grid grid-cols-2 gap-4">
-              <Field label={t("Temperament")}>
-                <select value={cfg.personality} onChange={(e) => setCfg({ ...cfg, personality: e.target.value as Personality })} className="w-full rounded-xl border border-[var(--color-line)] bg-[var(--color-studio)] px-3 py-2.5 text-sm">
-                  {personas.map((p) => <option key={p.id} value={p.id}>{t(p.label)}</option>)}
-                </select>
-              </Field>
-              <Field label={`${t("Intensity")} — ${cfg.intensity}/5`}>
-                <input type="range" min={1} max={5} value={cfg.intensity} onChange={(e) => setCfg({ ...cfg, intensity: Number(e.target.value) })} className="mt-3 w-full accent-[var(--color-accent)]" />
-              </Field>
+        </Panel>
+        <Panel className="p-6">
+          <h2 className="text-lg font-semibold">Delete your account</h2>
+          <p className="mt-3 text-sm text-[var(--color-muted)]">
+            Permanently delete your account, resumes, interview content and
+            feedback. This cannot be undone. Export anything you want to keep
+            first. A minimal record of interview starts is retained for the
+            seven-day allowance window; deleting an account does not reset it.
+          </p>
+          {confirm ? (
+            <div className="mt-5 space-y-3">
+              <p role="alert" className="text-sm font-semibold">
+                Delete your account and interview content?
+              </p>
+              <Button
+                variant="danger"
+                disabled={busy}
+                onClick={() =>
+                  void action(async () => {
+                    await api.deleteAccount();
+                    clearPrivateBrowserData();
+                    router.replace("/");
+                  })
+                }
+              >
+                Yes, delete my account
+              </Button>
+              <Button variant="ghost" onClick={() => setConfirm(false)}>
+                Keep my account
+              </Button>
             </div>
-            <Button onClick={saveCfg}>{t("Save interviewer")}</Button>
-          </div>
-        </div>
-      </Panel>
-
-      {/* Danger zone */}
-      <Panel className="mt-4 border-[var(--color-bad)] p-6" >
-        <h2 className="text-lg font-semibold text-[var(--color-bad)]">{t("Delete account")}</h2>
-        <p className="mt-1 text-sm text-[var(--color-muted)]">{t("Permanently deletes your account and all data — resumes, interviews, transcripts, and reports. This cannot be undone.")}</p>
-        {!confirmDelete
-          ? <Button variant="danger" className="mt-4" onClick={() => setConfirmDelete(true)}>{t("Delete my account")}</Button>
-          : <div className="mt-4 flex items-center gap-3">
-              <span className="text-sm text-[var(--color-bad)]">{t("Are you sure? This erases everything.")}</span>
-              <Button variant="danger" onClick={del}>{t("Yes, delete everything")}</Button>
-              <Button variant="ghost" onClick={() => setConfirmDelete(false)}>{t("Cancel")}</Button>
-            </div>}
-      </Panel>
+          ) : (
+            <Button
+              variant="danger"
+              className="mt-5"
+              onClick={() => setConfirm(true)}
+            >
+              Delete account…
+            </Button>
+          )}
+        </Panel>
+      </div>
     </AppShell>
   );
 }

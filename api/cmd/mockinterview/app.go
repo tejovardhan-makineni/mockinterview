@@ -1,6 +1,9 @@
 package main
 
 import (
+	"context"
+	"crypto/rand"
+	"encoding/base64"
 	"net/http"
 	"time"
 
@@ -26,16 +29,24 @@ import (
 // App wires shared dependencies into the HTTP handlers. Feature handlers are
 // mounted in Routes; each phase of the build adds its sub-router here.
 type App struct {
-	Cfg    *config.Config
-	Store  store.Datastore
-	LLM    llm.Client
-	Corpus *corpus.Catalog
-	Packs  *pack.Catalog // practice packs; nil disables the packs feature (e.g. in tests)
+	Background context.Context
+	Cfg        *config.Config
+	Store      store.Datastore
+	LLM        llm.Client
+	Corpus     *corpus.Catalog
+	Packs      *pack.Catalog // practice packs; nil disables the packs feature (e.g. in tests)
 }
 
 // Routes mounts all /api/v1 endpoints.
 func (a *App) Routes(r chi.Router) {
 	authSvc := auth.New(a.Store, a.Cfg.JWTSecret, a.Cfg.JWTTTL)
+	var mailer auth.Mailer
+	if a.Cfg.ResendAPIKey != "" {
+		mailer = auth.ResendMailer{APIKey: a.Cfg.ResendAPIKey, From: a.Cfg.MailFrom}
+	} else if a.Cfg.SMTPAddress != "" {
+		mailer = auth.SMTPMailer{Address: a.Cfg.SMTPAddress, Username: a.Cfg.SMTPUsername, Password: a.Cfg.SMTPPassword, From: a.Cfg.MailFrom, AllowLocalPlaintext: a.Cfg.Environment != "production"}
+	}
+	authSvc.Configure(auth.Options{PublicURL: a.Cfg.PublicURL, Mailer: mailer, RequireVerification: a.Cfg.Hosted, Development: !a.Cfg.Hosted})
 
 	r.Get("/ping", func(w http.ResponseWriter, _ *http.Request) {
 		httpx.WriteJSON(w, 200, map[string]string{"pong": "ok"})
@@ -50,11 +61,17 @@ func (a *App) Routes(r chi.Router) {
 	// Public auth endpoints. register/login are throttled per-IP to blunt brute
 	// force / spam; /me is NOT throttled — it's called on every page load, so a
 	// limit there would spuriously "log the user out" during normal navigation.
-	authLimit := httprate.LimitByIP(30, time.Minute)
+	authLimit := authRateLimit(a.Cfg.JWTSecret)
 	r.Route("/auth", func(r chi.Router) {
 		r.With(authLimit).Post("/register", authSvc.Register)
 		r.With(authLimit).Post("/login", authSvc.Login)
 		r.With(authSvc.Required).Get("/me", authSvc.Me)
+		r.With(authLimit).Post("/verify", authSvc.Verify)
+		r.With(authLimit).Post("/password/forgot", authSvc.ForgotPassword)
+		r.With(authLimit).Post("/password/reset", authSvc.ResetPassword)
+		r.With(authSvc.Required, authLimit).Post("/verification/resend", authSvc.ResendVerification)
+		r.With(authSvc.Required, authLimit).Post("/password/change", authSvc.ChangePassword)
+		r.With(authSvc.Required).Post("/logout", authSvc.Logout)
 	})
 
 	// Live interview WebSocket relay. Auth is via ?token= (WS can't set headers),
@@ -69,12 +86,35 @@ func (a *App) Routes(r chi.Router) {
 	i18nSvc := i18n.New(a.LLM, a.Cfg.LLMModel)
 	scorer := scoring.New(a.LLM, a.Cfg.LLMModel)
 	interviewSvc := interview.New(a.Store, a.Corpus, scorer, a.Cfg.AdminEmails, a.Cfg.FreeDailyLimit)
+	encryptionKey, _ := base64.StdEncoding.DecodeString(a.Cfg.SessionEncryptionKey)
+	if len(encryptionKey) != 32 {
+		encryptionKey = make([]byte, 32)
+		if _, err := rand.Read(encryptionKey); err != nil {
+			panic("session encryption initialization failed")
+		}
+	}
+	interviewSvc.SetOptions(interview.Options{Hosted: a.Cfg.Hosted, EncryptionKey: encryptionKey, PlatformProvider: a.Cfg.LLMProvider, PlatformModel: a.Cfg.LLMModel, GlobalDailyLimit: a.Cfg.HostedDailyStartLimit, LiveModel: a.Cfg.ModelLive})
+	relay.SetOptions(a.Cfg.Hosted, encryptionKey)
+	if a.Background != nil {
+		relay.SetContext(a.Background)
+		go interviewSvc.RunWorker(a.Background)
+	}
 
 	// Practice packs (company/goal loops). Optional: nil catalog → feature off.
 	var packSvc *pack.Service
 	if a.Packs != nil {
 		packSvc = pack.NewService(a.Corpus, a.Packs, a.Store)
 		interviewSvc.SetPacks(packSvc) // resolve pack rounds → question + focus
+	}
+
+	// Public catalogs contain candidate-facing summaries only; answer keys stay server-side.
+	r.Get("/questions", corpusSvc.List)
+	r.Get("/questions/{id}", corpusSvc.Get)
+	r.Get("/professions", corpusSvc.ListProfessions)
+	r.Get("/languages", i18nSvc.ListLanguages)
+	if packSvc != nil {
+		r.Get("/packs", packSvc.List)
+		r.Get("/packs/{id}", packSvc.Get)
 	}
 
 	// Authenticated API. Feature sub-routers are mounted here phase by phase.
@@ -89,47 +129,48 @@ func (a *App) Routes(r chi.Router) {
 		// rate-limited.
 		r.Post("/resume", resumeSvc.Upload)
 		r.Get("/resume", resumeSvc.Get)
-		r.With(perUser).Post("/resume/review", resumeSvc.Review)
-		r.With(perUser).Post("/resume/match", resumeSvc.Match)
+		r.With(authSvc.Verified, perUser).Post("/resume/review", resumeSvc.Review)
+		r.With(authSvc.Verified, perUser).Post("/resume/match", resumeSvc.Match)
 
 		// Interviewer configuration + catalogs.
 		r.Get("/config", profileSvc.Get)
 		r.Put("/config", profileSvc.Save)
 		r.Get("/voices", profileSvc.ListVoices)
-		r.With(perUser).Get("/voices/preview", profileSvc.PreviewVoice) // TTS costs money
+		r.With(authSvc.Verified, perUser).Get("/voices/preview", profileSvc.PreviewVoice) // TTS costs money
 		r.Get("/faces", profileSvc.ListFaces)
 		r.Get("/personalities", profileSvc.ListPersonalities)
 
 		// UI localization: list languages + translate app-owned strings (LLM,
 		// per-user rate-limited; the client caches heavily so this is rare).
-		r.Get("/languages", i18nSvc.ListLanguages)
-		r.With(perUser).Post("/i18n/translate", i18nSvc.Translate)
+		r.With(authSvc.Verified, perUser).Post("/i18n/translate", i18nSvc.Translate)
 
 		// User profile + account deletion.
 		r.Get("/profile", profileSvc.GetProfile)
 		r.Put("/profile", profileSvc.SaveProfile)
 		r.Delete("/account", profileSvc.DeleteAccount)
+		r.Get("/account/export", profileSvc.ExportAccount)
 
 		// Question corpus (client-safe summaries).
-		r.Get("/questions", corpusSvc.List)
-		r.Get("/questions/{id}", corpusSvc.Get)
 
 		// Professions (corpus areas) — drives catalog gating + onboarding picker.
-		r.Get("/professions", corpusSvc.ListProfessions)
 
 		// User feedback (general or in-interview with debug context). Submit is
 		// rate-limited to curb spam; List is admin-gated inside the handler.
 		r.With(perUser).Post("/feedback", feedbackSvc.Submit)
 		r.Get("/feedback", feedbackSvc.List)
+		r.Patch("/feedback/{id}", feedbackSvc.Triage)
 
 		// Practice packs (company/goal interview loops) + per-user progress.
 		if packSvc != nil {
-			r.Get("/packs", packSvc.List)
-			r.Get("/packs/{id}", packSvc.Get)
 			r.Get("/packs/{id}/progress", packSvc.Progress)
 		}
 
 		// Interview sessions + scoring + report.
+		r.Get("/usage", interviewSvc.Usage)
+		r.Get("/providers", interviewSvc.Providers)
+		r.With(authSvc.Verified, perUser).Post("/providers/validate", interviewSvc.ValidateProvider)
+		r.With(perUser).Put("/sessions/{id}/credentials", interviewSvc.Credentials)
+		r.Delete("/sessions/{id}", interviewSvc.Delete)
 		r.Get("/sessions", interviewSvc.List)
 		r.Post("/sessions", interviewSvc.Create)
 		r.Get("/sessions/{id}", interviewSvc.Get)
