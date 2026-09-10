@@ -4,6 +4,10 @@ Practice interviews with a clearly identified AI interviewer, keep your work and
 feedback, and contribute new interview formats. The hosted application is at
 [mockinterview.live](https://mockinterview.live).
 
+**Release status:** this redesigned version is available to run locally. The
+hosted site still runs the previous release while verification/recovery email
+is configured. See [release validation](docs/RELEASE-VALIDATION-2026-09-09.md).
+
 Choose a profession, format, target level and duration. Optional controls adjust
 challenge, interview style and simulation versus coaching. A device check leads
 into a room with voice, an optional camera, notes and an appropriate workspace.

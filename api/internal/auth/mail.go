@@ -23,7 +23,11 @@ type ResendMailer struct {
 }
 
 func (m ResendMailer) Send(ctx context.Context, to, subject, body string) error {
-	data, _ := json.Marshal(map[string]any{"from": m.From, "to": []string{to}, "subject": subject, "text": body})
+	sender, recipient, err := mailAddresses(m.From, to, subject)
+	if err != nil {
+		return err
+	}
+	data, _ := json.Marshal(map[string]any{"from": sender.String(), "to": []string{recipient.Address}, "subject": subject, "text": body})
 	req, err := http.NewRequestWithContext(ctx, http.MethodPost, "https://api.resend.com/emails", bytes.NewReader(data))
 	if err != nil {
 		return err
@@ -54,12 +58,9 @@ type SMTPMailer struct {
 }
 
 func (m SMTPMailer) Send(ctx context.Context, to, subject, body string) error {
-	from, err := mail.ParseAddress(m.From)
+	from, recipient, err := mailAddresses(m.From, to, subject)
 	if err != nil {
-		return errors.New("invalid mail sender")
-	}
-	if strings.ContainsAny(subject+to, "\r\n") {
-		return errors.New("invalid mail headers")
+		return err
 	}
 	host, _, err := net.SplitHostPort(m.Address)
 	if err != nil {
@@ -99,14 +100,14 @@ func (m SMTPMailer) Send(ctx context.Context, to, subject, body string) error {
 	if err = c.Mail(from.Address); err != nil {
 		return errors.New("mail sender rejected")
 	}
-	if err = c.Rcpt(to); err != nil {
+	if err = c.Rcpt(recipient.Address); err != nil {
 		return errors.New("mail recipient rejected")
 	}
 	w, err := c.Data()
 	if err != nil {
 		return errors.New("mail data rejected")
 	}
-	_, err = fmt.Fprintf(w, "From: %s\r\nTo: %s\r\nSubject: %s\r\nMIME-Version: 1.0\r\nContent-Type: text/plain; charset=UTF-8\r\n\r\n%s", m.From, to, subject, strings.ReplaceAll(body, "\n", "\r\n"))
+	_, err = fmt.Fprintf(w, "From: %s\r\nTo: %s\r\nSubject: %s\r\nMIME-Version: 1.0\r\nContent-Type: text/plain; charset=UTF-8\r\n\r\n%s", from.String(), recipient.String(), subject, strings.ReplaceAll(body, "\n", "\r\n"))
 	if err != nil {
 		return err
 	}
@@ -114,4 +115,23 @@ func (m SMTPMailer) Send(ctx context.Context, to, subject, body string) error {
 		return errors.New("mail send failed")
 	}
 	return c.Quit()
+}
+
+// Parse once and use only the canonical mailbox values at email boundaries.
+// Reject line and NUL controls before parsing; ParseAddress must accept exactly
+// one mailbox, so raw caller strings can never become extra SMTP commands or
+// message headers. Sender names are MIME-escaped by Address.String.
+func mailAddresses(from, to, subject string) (*mail.Address, *mail.Address, error) {
+	if strings.ContainsAny(from, "\r\n\x00") || strings.ContainsAny(to, "\r\n\x00") || strings.ContainsAny(subject, "\r\n\x00") {
+		return nil, nil, errors.New("invalid mail headers")
+	}
+	sender, err := mail.ParseAddress(from)
+	if err != nil || sender.Address == "" || len(sender.Address) > 254 || strings.ContainsAny(sender.Name+sender.Address, "\r\n\x00") {
+		return nil, nil, errors.New("invalid mail sender")
+	}
+	recipient, err := mail.ParseAddress(to)
+	if err != nil || recipient.Address == "" || len(recipient.Address) > 254 || strings.ContainsAny(recipient.Name+recipient.Address, "\r\n\x00") {
+		return nil, nil, errors.New("invalid mail recipient")
+	}
+	return sender, recipient, nil
 }

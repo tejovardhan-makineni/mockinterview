@@ -37,5 +37,10 @@
     "dompurify": "^3.4.15",
     "nanoid@>=3 <4": "^3.3.18",
     "nanoid@>=4": "^5.1.16"
-  }
+  },
+  "engines": {
+    "node": "22.x",
+    "npm": "10.x"
+  },
+  "packageManager": "npm@10.9.8"
 }

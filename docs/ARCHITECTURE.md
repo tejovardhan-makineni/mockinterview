@@ -160,8 +160,11 @@ flowchart LR
   web[web/ static export] -->|firebase deploy| fh[Firebase Hosting<br/>mockinterview-web]
 ```
 
-Scripts in `deploy/`: `setup-db.sh` (create DB+user on the shared instance) →
-`deploy-api.sh` → `deploy-web.sh`. See `docs/OPERATIONS.md`.
+New installations use `deploy/setup-db.sh` after an operator prepares the app's
+custom database role; see [database role hardening](DATABASE-ROLE-HARDENING.md).
+Routine releases use the staged API and web flows in
+[the release runbook](RELEASE-RUNBOOK.md), without reprovisioning the shared SQL
+instance or changing other applications' grants.
 
 ## Upgrade cheat-sheet
 

@@ -1,6 +1,7 @@
 import { AppShell, SOURCE_URL } from "@/components/AppShell";
 import { Button, Panel } from "@/components/ui";
-const support = process.env.NEXT_PUBLIC_SUPPORT_EMAIL;
+const configuredSupport = process.env.NEXT_PUBLIC_SUPPORT_EMAIL;
+const support = configuredSupport || "makinenitejovardhan@gmail.com";
 export default function Help() {
   return (
     <AppShell active="public">
@@ -44,21 +45,23 @@ export default function Help() {
         </p>
         <Panel className="mt-7 p-5">
           <h2 className="!mt-0">Contact the operator</h2>
-          {support ? (
-            <>
-              <p className="my-3">
-                For account access or private data requests, contact the
-                configured service operator.
-              </p>
-              <Button href={"mailto:" + support} variant="ghost">
-                {support}
-              </Button>
-            </>
-          ) : (
+          <p className="my-3">
+            For {configuredSupport ? "this installation" : "mockinterview.live"}{" "}
+            account access, private data requests or Code of Conduct reports,
+            email{" "}
+            {configuredSupport
+              ? "the service operator"
+              : "the project maintainer"}
+            . You do not need to sign in. There is no guaranteed response time.
+          </p>
+          <Button href={"mailto:" + support} variant="ghost">
+            {support}
+          </Button>
+          {!configuredSupport && (
             <p className="mt-3">
-              A private support address is not configured for this installation.
-              The installation owner must provide it for account and data
-              requests.
+              If you use another installation, contact its owner for account or
+              data requests. The project maintainer cannot access that
+              installation.
             </p>
           )}
           <p className="my-4">

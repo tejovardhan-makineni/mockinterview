@@ -1,78 +1,80 @@
-# Operations runbook — mockinterview.live
+# Operations — mockinterview.live
 
-## Local
+## Release status
 
-```bash
-cp .env.example .env          # add GEMINI_API_KEY (and others) — see .env
-make up                       # Postgres via docker (or use local Postgres)
-make dev                      # API :8080 + web :3000
-make check-llm                # verify every provider key in .env with a real call
-```
-No key at all → the app runs on the deterministic stub (auth, resume, a scored
-interview, report — all work offline). `NEXT_PUBLIC_MOCK=1` renders the web UI
-with no backend.
+The redesigned application has **143 preview scenarios** and is available in the
+public source repository. The hosted API and website still serve the previous
+release while production verification/recovery mail is configured. Local checks
+and real Gemini tests do not establish that the new version is deployed. See the
+[dated validation record](RELEASE-VALIDATION-2026-09-09.md) for completed checks and
+remaining release gates. Content review and scoring calibration remain pending.
 
-## LLM providers (swappable)
+Use the [release and recovery runbook](RELEASE-RUNBOOK.md) as the authoritative
+procedure for staging, promotion, rollback and operational verification. Earlier
+audits describe the pre-implementation application.
 
-`LLM_PROVIDER` = `gemini` (default) | `openai` | `deepseek` | `xai` | `meta` | `anthropic`.
-The **live voice always uses Gemini** (native-audio Live API), regardless of
-`LLM_PROVIDER`. `LLM_MODEL` overrides the model; else provider default. Verify
-with `make check-llm`. Gemini "thinking" is disabled for structured calls so
-2.5-flash returns complete JSON.
+## Current hosting targets
 
-Status (last `make check-llm`): gemini ✓, openai ✓, deepseek ✓, xai ✓,
-anthropic ✓, meta ✓ (muse-spark-1.2, api.meta.ai).
+| Resource | Target |
+|---|---|
+| Public website | [mockinterview.live](https://mockinterview.live) |
+| Firebase Hosting site | `mockinterview-web` in project `storybytes-495010` |
+| Firebase default domain | [mockinterview-web.web.app](https://mockinterview-web.web.app) |
+| Cloud Run service | `mockinterview-api`, region `us-west1`, project `storybytes-495010` |
+| Stable API origin | [mockinterview-api-661893776515.us-west1.run.app](https://mockinterview-api-661893776515.us-west1.run.app) |
+| PostgreSQL | App database/login `mockinterview` on the shared Cloud SQL instance |
 
-## GCP deploy (reuses the StoryBytes project + shared Cloud SQL)
+Do not deploy to another Firebase site or assume ownership of mockinterview.io.
+Never recreate or restore the shared SQL instance to update this application.
 
-Project `storybytes-495010`, region `us-west1`, shared Cloud SQL Postgres.
+## Local operation
 
-### One-time prerequisites (you run these)
-1. `gcloud auth login` and `gcloud config set project storybytes-495010`.
-2. Find the shared instance connection name:
-   `gcloud sql instances list --project=storybytes-495010`
-3. `cp deploy/mockinterview.env.template deploy/mockinterview.env` and fill in
-   `CLOUDSQL_INSTANCE`, a strong `DB_PASSWORD`, `JWT_SECRET`, `GEMINI_API_KEY`.
-4. Create this app's DB + user on the shared instance:
-   `bash deploy/setup-db.sh` (then run the printed GRANT once as the admin user).
+Follow [the README](../README.md#run-locally) for dependencies and initial setup.
+`make up` starts PostgreSQL; `make dev` starts the API on port 8080 and web on
+port 3000. `make down` stops containers and preserves the database volume.
 
-### Deploy
-```bash
-bash deploy/deploy-api.sh      # Cloud Build image → Cloud Run, wired to Cloud SQL
-# copy the printed API URL into deploy/mockinterview.env as WEB_API_BASE
-firebase login                 # one-time, interactive (web deploy only)
-bash deploy/deploy-web.sh      # Next static export → isolated Firebase site
-```
-Migrations auto-apply on API start. **Smoke: `curl <API_URL>/api/v1/ping`**
-(Google Frontend swallows the literal path `/healthz` on run.app before it
-reaches the container — use `/api/v1/ping` for health checks; everything else
-routes to the app normally.)
+Development without the selected provider's key uses the labelled deterministic
+text demo. Development auth supplies verification/recovery links without mail.
+`LOCAL_UNLIMITED=true` permits unlimited local practice; production rejects this
+setting and demo models. Real-provider usage still incurs provider charges.
 
-### Current deploy (live)
-- API: `https://mockinterview-api-661893776515.us-west1.run.app` (Cloud Run,
-  us-west1, shared Cloud SQL `storybytes-beta-db`, DB `mockinterview`). Verified:
-  register/login, 52 questions, real-Gemini scoring end-to-end.
-- Web: static export built against the API in `web/out`; deploy to the isolated
-  Firebase site `mockinterview-live` (needs `firebase login` first — it can't be
-  automated headlessly). A dedicated site avoids overwriting summon/storybytes.
+Gemini supplies native voice. Reasoning/scoring use the configured provider and
+model; personal-key sessions retain their selected provider. Configuration is
+listed in [.env.example](../.env.example). The optional `make check-llm` makes
+billable requests to configured providers; earlier results do not prove current
+credentials or models work.
 
-### Notes
-- The API talks to Cloud SQL over the unix socket `/cloudsql/<INSTANCE>` (the
-  `--add-cloudsql-instances` flag mounts it); `DATABASE_URL` uses `host=/cloudsql/...`.
-- `DB_MAX_CONNS=5` and `--max-instances 5` keep connection use bounded on the
-  shared instance (cost + connection-limit friendly).
-- Live WebSocket voice works through Cloud Run (HTTP/1.1 WS upgrade is supported;
-  `--timeout 3600` allows long interviews).
-- To move keys into Secret Manager instead of env, push them and swap the
-  `--set-env-vars` secret entries for `--set-secrets` (see push-secrets.sh).
-- Custom domain: map `mockinterview.live` → Firebase Hosting, and
-  `api.mockinterview.live` → the Cloud Run service; update `CORS_ALLOW` +
-  `WEB_API_BASE` accordingly.
+Run `make test`, `make lint`, `make build` and `make validate-content` for changes.
+Use an isolated `TEST_DATABASE_URL` for PostgreSQL integration tests, never the
+production database. [Contribution guidance](../CONTRIBUTING.md) covers scenario
+fixtures, original content and format review.
 
-## Where things live
-- API: `api/` (Go, chi+pgx, embedded migrations in `internal/store/migrations`,
-  corpus in `api/data/corpus`).
-- Web: `web/` (Next static export; API client seam in `web/lib/api.ts`).
-- Corpus: `api/data/corpus/*.json` — add a file, run
-  `./api/bin/mockinterview -validate-corpus api/data/corpus`, redeploy.
-- Model IDs (incl. the moving Gemini Live preview id): env vars, see `.env.example`.
+## Release controls
+
+Keep filled deployment configuration outside Git and credentials in app-scoped
+Secret Manager secrets. The [deployment template](../deploy/mockinterview.env.template)
+describes the settings; [database role hardening](DATABASE-ROLE-HARDENING.md)
+covers existing-login demotion and custom roles for new installations. Routine
+releases do not rerun database provisioning or rotate passwords.
+
+The API script builds committed source in Cloud Build and stages an immutable
+candidate before explicit traffic promotion. The web script exports committed
+source into an isolated directory, publishes a preview on `mockinterview-web`,
+then promotes that tested version without rebuilding. Staging must use a separate
+database, login, secret prefix and runtime service account. Follow the release
+runbook for exact commands, mail verification, preview CORS, backups and rollback.
+
+## Health and recovery
+
+`/healthz` reports process liveness. `/readyz` checks database access and model
+configuration; it does not make a paid provider request. Monitor the API readiness
+endpoint and website, and verify alert delivery through a configured notification
+channel. A created uptime check alone does not prove notifications work.
+
+Keep CPU allocated and a minimum production instance for the durable scoring and
+retention workers. Watch failed starts, provider errors, persistence failures and
+scoring backlog. Preserve existing interviews during rollouts; verify reconnect
+and report recovery before promotion. Logs must not contain keys, query strings,
+request bodies or candidate transcripts. History remains until user deletion;
+expired keys, action tokens and eligibility records follow the retention rules
+in the release runbook. Database backups follow their separate retention policy.

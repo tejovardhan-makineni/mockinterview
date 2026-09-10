@@ -56,13 +56,19 @@ def finish(operation):
 prefix = '/instances/'+q(instance, safe='')
 users = call('GET', prefix+'/users').get('items', [])
 existing = next((entry for entry in users if entry.get('name') == user), None)
+owner_role = os.environ.get('DB_OWNER_ROLE', '')
+if existing is None and owner_role != database+'_owner':
+    raise SystemExit('New users require DB_OWNER_ROLE=<DB_NAME>_owner, precreated and reviewed in PostgreSQL. Refusing Cloud SQL default elevated privileges.')
 if existing is None or args.rotate_password:
     if len(password) < 20:
         raise SystemExit('Set a strong DB_PASSWORD of at least 20 characters before creating or rotating the app user.')
     body = {'name': user, 'password': password}
     if existing is None:
+        # Cloud SQL grants cloudsqlsuperuser when custom databaseRoles is absent.
+        # A missing role must fail at the provider; never retry without it.
+        body['databaseRoles'] = [owner_role]
         finish(call('POST', prefix+'/users', body))
-        print('Created app database user.')
+        print('Created app database user with the explicit custom owner role. Verify role attributes and grants before deploying.')
     else:
         if existing.get('type', 'BUILT_IN') != 'BUILT_IN':
             raise SystemExit('Refusing password rotation for an IAM database user.')

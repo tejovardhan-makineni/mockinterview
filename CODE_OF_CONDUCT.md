@@ -44,8 +44,12 @@ an individual is officially representing the community in public spaces.
 
 ## Enforcement
 
-Report abusive, harassing or otherwise unacceptable behavior privately. While
-signed in to [mockinterview.live](https://mockinterview.live), select **Share
+Report abusive, harassing or otherwise unacceptable behavior privately to the
+project maintainer at
+[makinenitejovardhan@gmail.com](mailto:makinenitejovardhan@gmail.com), with the
+subject **Code of Conduct report**. You do not need a mockinterview account.
+
+Alternatively, while signed in to [mockinterview.live](https://mockinterview.live), select **Share
 feedback** in the page footer, choose **Product experience**, and begin your
 message with **Code of Conduct report**. Leave optional diagnostics and transcript
 sharing off unless they are needed and you consent to share them. Include the
@@ -58,10 +62,9 @@ reporter's privacy. There is no guaranteed response time. A report concerning a
 maintainer should be identified as such so a separate reviewer can be sought;
 an independent reporting contact is not currently configured.
 
-If you cannot sign in, [Help & support](https://mockinterview.live/help) lists an
-operator contact when one has been configured. Until that contact is available,
-there is no anonymous or unauthenticated private reporting channel. Do not post
-incident details or identifying information in a public issue. GitHub private
+For another installation, [Help & support](https://mockinterview.live/help)
+explains how to reach its operator. Do not post incident details or identifying
+information in a public issue. GitHub private
 vulnerability reporting is for security vulnerabilities, not conduct reports.
 
 ## Attribution

@@ -10,6 +10,7 @@ import shlex
 import subprocess
 import unittest
 from unittest.mock import patch
+from urllib.error import HTTPError
 from urllib.parse import urlparse, parse_qs
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -26,7 +27,8 @@ class DeployTest(unittest.TestCase):
         script = ROOT / 'deploy' / name
         with patch.dict(os.environ, environment, clear=True), patch('sys.argv', [str(script), *arguments]), \
              patch('subprocess.check_output', side_effect=output), patch('urllib.request.urlopen', side_effect=fake_open), \
-             patch('ssl.create_default_context', return_value=None), contextlib.redirect_stdout(io.StringIO()):
+             patch('ssl.create_default_context', return_value=None), patch('time.sleep'), \
+             contextlib.redirect_stdout(io.StringIO()):
             runpy.run_path(str(script), run_name='__main__')
         return calls
 
@@ -41,6 +43,7 @@ class DeployTest(unittest.TestCase):
             if method == 'PUT':
                 self.assertNotIn(env['DB_PASSWORD'], url)
                 self.assertEqual(body['password'], env['DB_PASSWORD'])
+                self.assertNotIn('databaseRoles', body, 'password rotation must preserve existing memberships')
                 return {'status': 'DONE'}
             self.fail('Unexpected operation: '+method+' '+url)
         calls = self.run_helper('setup-db.py', env, response)
@@ -75,13 +78,54 @@ class DeployTest(unittest.TestCase):
             if 'notificationChannels' in row:
                 self.assertEqual(row['notificationChannels'], [env['MONITORING_NOTIFICATION_CHANNEL']])
 
+    def test_new_database_user_requires_explicit_app_role(self):
+        env = {'PROJECT_ID': 'test-project', 'CLOUDSQL_INSTANCE': 'test-project:us-west1:shared',
+               'DB_NAME': 'mockinterview', 'DB_USER': 'mockinterview', 'DB_PASSWORD': 'a-strong-test-only-password'}
+        writes = []
+        def response(method, url, body):
+            if method == 'GET' and url.endswith('/users'):
+                return {'items': []}
+            if method == 'GET' and url.endswith('/databases'):
+                return {'items': [{'name': 'mockinterview'}]}
+            if method == 'POST' and url.endswith('/users'):
+                writes.append(body)
+                return {'status': 'DONE'}
+            self.fail('Unexpected operation: '+method+' '+url)
+        for role in ['', 'cloudsqlsuperuser', 'another_app_owner']:
+            env['DB_OWNER_ROLE'] = role
+            with self.assertRaises(SystemExit):
+                self.run_helper('setup-db.py', env, response)
+            self.assertEqual(writes, [], 'unsafe role caused a write')
+        env['DB_OWNER_ROLE'] = 'mockinterview_owner'
+        self.run_helper('setup-db.py', env, response)
+        self.assertEqual(writes[0]['databaseRoles'], ['mockinterview_owner'])
+        self.assertEqual(writes[0]['name'], 'mockinterview')
+
+    def test_database_role_rejection_never_retries_with_default_privileges(self):
+        env = {'PROJECT_ID': 'test-project', 'CLOUDSQL_INSTANCE': 'test-project:us-west1:shared',
+               'DB_NAME': 'mockinterview_staging', 'DB_USER': 'mockinterview_staging',
+               'DB_PASSWORD': 'a-strong-test-only-password', 'DB_OWNER_ROLE': 'mockinterview_staging_owner',
+               'TARGET_SERVICE': 'mockinterview-api-staging'}
+        writes = []
+        def response(method, url, body):
+            if method == 'GET' and url.endswith('/users'):
+                return {'items': []}
+            if method == 'POST' and url.endswith('/users'):
+                writes.append(body)
+                raise HTTPError(url, 400, 'Custom role unavailable', {}, None)
+            self.fail('Unexpected operation: '+method+' '+url)
+        with self.assertRaisesRegex(SystemExit, r'Cloud SQL request failed \(400\)'):
+            self.run_helper('setup-db.py', env, response)
+        self.assertEqual(len(writes), 1)
+        self.assertEqual(writes[0]['databaseRoles'], ['mockinterview_staging_owner'])
+
     def test_staging_cannot_use_production_database(self):
         env = {'PATH': os.environ['PATH'], 'PROJECT_ID': 'test-project', 'SERVICE': 'mockinterview-api',
                'TARGET_SERVICE': 'mockinterview-api-staging', 'DB_NAME': 'mockinterview', 'DB_USER': 'mockinterview'}
         command = ['bash', '-c', 'source '+shlex.quote(str(ROOT / 'deploy/common.sh'))+'; configure_target']
-        self.assertNotEqual(subprocess.run(command, env=env, capture_output=True).returncode, 0)
+        self.assertNotEqual(subprocess.run(command, env=env, capture_output=True, timeout=10).returncode, 0)
         env.update(DB_NAME='mockinterview_staging', DB_USER='mockinterview_staging')
-        self.assertEqual(subprocess.run(command, env=env, capture_output=True).returncode, 0)
+        self.assertEqual(subprocess.run(command, env=env, capture_output=True, timeout=10).returncode, 0)
 
 if __name__ == '__main__':
     unittest.main()

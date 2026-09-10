@@ -73,6 +73,13 @@ func Load() (*Config, error) {
 		return nil, fmt.Errorf("APP_ENV must be development or production")
 	}
 	production := environment == "production"
+	// Parse with the destination width before conversion. Atoi followed by int32
+	// can wrap oversized values into an apparently valid production pool size.
+	dbMaxConns, err := strconv.ParseInt(env("DB_MAX_CONNS", "10"), 10, 32)
+	if err != nil {
+		return nil, fmt.Errorf("DB_MAX_CONNS must be a valid 32-bit integer")
+	}
+
 	c := &Config{
 		Environment:           environment,
 		Hosted:                !envBool("LOCAL_UNLIMITED", !production),
@@ -89,7 +96,7 @@ func Load() (*Config, error) {
 		Mode:                  env("MODE", "api"),
 		CORSAllow:             splitCSV(env("CORS_ALLOW", "http://localhost:3000")),
 		DatabaseURL:           env("DATABASE_URL", "postgres://mockinterview:mockinterview@localhost:5432/mockinterview?sslmode=disable"),
-		DBMaxConns:            int32(envInt("DB_MAX_CONNS", 10)),
+		DBMaxConns:            int32(dbMaxConns),
 		JWTSecret:             env("JWT_SECRET", "dev-insecure-change-me"),
 		JWTTTL:                time.Duration(envInt("JWT_TTL_HOURS", 168)) * time.Hour,
 		GeminiAPIKey:          env("GEMINI_API_KEY", ""),

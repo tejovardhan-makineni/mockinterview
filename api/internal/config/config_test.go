@@ -41,3 +41,28 @@ func TestProductionValidConfiguration(t *testing.T) {
 		t.Fatal("unexpected production capabilities")
 	}
 }
+
+func TestDBMaxConnsCannotWrapOrDefaultInvalidValues(t *testing.T) {
+	for _, value := range []string{"4294967297", "8589934602", "-4294967286", "2147483648", "-2147483649", "9223372036854775808", "1.5", "not-a-number", "21"} {
+		t.Run(value, func(t *testing.T) {
+			productionEnv(t)
+			t.Setenv("DB_MAX_CONNS", value)
+			if _, err := Load(); err == nil {
+				t.Fatalf("accepted unsafe DB_MAX_CONNS=%q", value)
+			}
+		})
+	}
+	for _, value := range []string{"1", "20"} {
+		t.Run("valid-"+value, func(t *testing.T) {
+			productionEnv(t)
+			t.Setenv("DB_MAX_CONNS", value)
+			c, err := Load()
+			if err != nil {
+				t.Fatal(err)
+			}
+			if c.DBMaxConns < 1 || c.DBMaxConns > 20 {
+				t.Fatalf("invalid parsed pool size: %d", c.DBMaxConns)
+			}
+		})
+	}
+}
