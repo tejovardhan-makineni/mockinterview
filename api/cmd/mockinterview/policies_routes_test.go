@@ -91,8 +91,8 @@ func TestHostedPoliciesGateAICallsButKeepLegacyAccountControls(t *testing.T) {
 	request("DELETE", "/resume", "", 204)
 	request("POST", "/feedback", `{"kind":"product","message":"Synthetic private access request","include_diagnostics":false,"share_transcript":false}`, 200)
 	request("DELETE", "/sessions/"+legacy.ID, "", 204)
-	request("POST", "/auth/policies", `{"adult_confirmed":true,"terms_version":"old","privacy_version":"2026-09-10"}`, 403)
-	out := request("POST", "/auth/policies", `{"adult_confirmed":true,"terms_version":"2026-09-10","privacy_version":"2026-09-10"}`, 200)
+	request("POST", "/auth/policies", `{"adult_confirmed":true,"terms_version":"old","privacy_version":"2026-09-10.1"}`, 403)
+	out := request("POST", "/auth/policies", `{"adult_confirmed":true,"terms_version":"2026-09-10.1","privacy_version":"2026-09-10.1"}`, 200)
 	if strings.Contains(out.Body.String(), `"policies_required":true`) {
 		t.Fatal("valid acknowledgment still blocked")
 	}

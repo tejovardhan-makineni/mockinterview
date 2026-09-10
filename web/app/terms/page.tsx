@@ -9,7 +9,7 @@ export default function Terms() {
         <p className="eyebrow">Before you practice</p>
         <h1 className="page-title mt-3">Using mockinterview</h1>
         <p className="mt-5">
-          Effective September 10, 2026 · terms version 2026-09-10
+          Effective September 10, 2026 · terms version 2026-09-10.1
         </p>
         <p>
           These terms cover the hosted mockinterview.live service provided by
@@ -81,6 +81,23 @@ export default function Terms() {
           successful connection does not verify this. Do not bypass quotas,
           probe other users’ records, submit malware or use the service
           unlawfully.
+        </p>
+        <h2>A short check-in after practice</h2>
+        <p>
+          New interview attempts include a required product-feedback check-in
+          after an interview has started and ended, including unsuccessful
+          attempts. Complete it before starting another interview. Choose the
+          answer that reflects your experience; an unable-to-judge response is
+          valid. Older attempts and reservations that never started do not
+          create a feedback requirement. Your saved reports, history, export,
+          deletion and report-retry controls remain available.
+        </p>
+        <p>
+          Comments and permission to inspect a transcript are optional. Your
+          answers are associated with your account and used to improve the
+          product, as explained in the privacy notice. This check-in does not
+          enroll you in a university study, permit publication of your private
+          records or affect your interview score.
         </p>
         <h2>Community formats and contributions</h2>
         <p>

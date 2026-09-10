@@ -48,18 +48,19 @@ var _ store.Datastore = (*Mem)(nil)
 
 // Mem is a thread-safe in-memory Repo. Construct with New().
 type Mem struct {
-	runtimeUsage []usageRec
-	authActions  map[string]authAction
-	mu           sync.Mutex
-	seq          int64
-	users        map[string]store.User      // id -> user
-	byEmail      map[string]string          // email -> id
-	settings     map[string]json.RawMessage // userID -> settings
-	configs      map[string]store.InterviewConfig
-	resumes      map[string][]store.Resume // userID -> resumes (append order)
-	sessions     map[string]*sessionRec    // sessionID -> record
-	reports      map[string]*reportRec     // sessionID -> report
-	feedback     []store.Feedback          // append order (newest last)
+	interviewFeedback map[string]store.InterviewFeedback
+	runtimeUsage      []usageRec
+	authActions       map[string]authAction
+	mu                sync.Mutex
+	seq               int64
+	users             map[string]store.User      // id -> user
+	byEmail           map[string]string          // email -> id
+	settings          map[string]json.RawMessage // userID -> settings
+	configs           map[string]store.InterviewConfig
+	resumes           map[string][]store.Resume // userID -> resumes (append order)
+	sessions          map[string]*sessionRec    // sessionID -> record
+	reports           map[string]*reportRec     // sessionID -> report
+	feedback          []store.Feedback          // append order (newest last)
 }
 
 // New returns an empty in-memory store.
@@ -179,6 +180,7 @@ func (m *Mem) DeleteUser(_ context.Context, userID string) error {
 	for id, rec := range m.sessions { // cascade sessions + their reports
 		if rec.sess.UserID == userID {
 			delete(m.sessions, id)
+			delete(m.interviewFeedback, id)
 			delete(m.reports, id)
 		}
 	}
@@ -261,7 +263,7 @@ func (m *Mem) SessionsForPack(_ context.Context, userID, packID string) ([]store
 		ss := store.SessionSummary{
 			ID: rec.sess.ID, QuestionID: rec.sess.QuestionID, Modality: rec.sess.Modality,
 			Track: rec.sess.Track, Status: rec.sess.Status,
-			CreatedAt:   rec.created.UTC().Format("2006-01-02T15:04:05"),
+			CreatedAt:   rec.created.UTC().Format(time.RFC3339Nano),
 			PackID:      rec.sess.PackID,
 			PackRoundID: rec.sess.PackRoundID,
 		}
@@ -313,7 +315,7 @@ func (m *Mem) ListUserSessions(_ context.Context, userID string, limit int) ([]s
 		ss := store.SessionSummary{
 			ID: rec.sess.ID, QuestionID: rec.sess.QuestionID, Modality: rec.sess.Modality,
 			Track: rec.sess.Track, Status: rec.sess.Status,
-			CreatedAt:   rec.created.UTC().Format("2006-01-02T15:04:05"),
+			CreatedAt:   rec.created.UTC().Format(time.RFC3339Nano),
 			PackID:      rec.sess.PackID,
 			PackRoundID: rec.sess.PackRoundID,
 		}

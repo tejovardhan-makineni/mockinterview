@@ -7,7 +7,11 @@ import type { QuestionSummary } from "@/lib/features/catalog";
 import { DEFAULT_CONFIG, type InterviewConfig } from "@/lib/features/profile";
 import type { SessionOptions, Usage } from "@/lib/features/interview";
 import { account, type User } from "@/lib/features/auth";
-import { errorMessage } from "@/lib/http";
+import {
+  RequiredFeedbackNotice,
+  useRequiredFeedback,
+} from "@/components/RequiredFeedbackNotice";
+import { ApiError, errorMessage } from "@/lib/http";
 import { AppShell } from "@/components/AppShell";
 import {
   Badge,
@@ -48,6 +52,11 @@ function Setup() {
   const [now, setNow] = useState(() => Date.now());
   const [stage, setStage] = useState<"setup" | "check">("setup");
   const [user, setUser] = useState<User | null>(null);
+  const {
+    pending,
+    error: pendingError,
+    refresh: refreshPending,
+  } = useRequiredFeedback(!!user);
   const [usage, setUsage] = useState<Usage | null>(null);
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
@@ -199,6 +208,22 @@ function Setup() {
       ? new Date(usage?.next_funded_at ?? 0).getTime() || 0
       : 0,
   );
+  const returnTo = packId
+    ? "/setup?pack=" +
+      encodeURIComponent(packId) +
+      "&round=" +
+      encodeURIComponent(roundId)
+    : "/setup?q=" + encodeURIComponent(qid);
+  function preserveOptions() {
+    writeSetupDraft(draftKey, {
+      config: cfg,
+      minutes,
+      mode,
+      funding,
+      provider,
+      model,
+    });
+  }
   async function check() {
     if (!user || user.policies_required) {
       writeSetupDraft(draftKey, {
@@ -227,6 +252,8 @@ function Setup() {
     setBusy(true);
     setError("");
     try {
+      const feedback = await refreshPending();
+      if (feedback?.total) return;
       setUsage(await api.getUsage());
       setNow(Date.now());
       setStage("check");
@@ -291,7 +318,12 @@ function Setup() {
       sessionStorage.setItem("mi_device_" + session.id, device);
       router.push("/interview?s=" + encodeURIComponent(session.id));
     } catch (e) {
-      setError(errorMessage(e));
+      if (e instanceof ApiError && e.code === "interview_feedback_required") {
+        await refreshPending().catch(() => {});
+        setError(
+          "Complete the required check-in for your previous interview before starting another. Your choices here are kept when you use the check-in link.",
+        );
+      } else setError(errorMessage(e));
       setBusy(false);
     }
   }
@@ -316,6 +348,19 @@ function Setup() {
       <a href="/interviews" className="text-sm text-[var(--color-muted)]">
         ← All interviews
       </a>
+      {pending && (
+        <RequiredFeedbackNotice
+          pending={pending}
+          next={returnTo}
+          onNavigate={preserveOptions}
+        />
+      )}
+      {pendingError && (
+        <ErrorNotice
+          message={"Check-in status could not load. " + pendingError}
+          onRetry={() => void refreshPending().catch(() => {})}
+        />
+      )}
       <div className="mt-7 flex flex-wrap items-start justify-between gap-4">
         <div>
           <p className="eyebrow">
@@ -814,7 +859,7 @@ function Setup() {
                 <Button
                   className="w-full"
                   onClick={() => void check()}
-                  disabled={busy}
+                  disabled={busy || !!pending?.total}
                 >
                   {user?.policies_required
                     ? "Review terms to continue →"
@@ -829,6 +874,7 @@ function Setup() {
                   disabled={
                     busy ||
                     !usage ||
+                    !!pending?.total ||
                     blocked ||
                     !deviceReady ||
                     user?.policies_required ||

@@ -24,6 +24,7 @@ func (s *Store) ExportAccount(ctx context.Context, uid string) (json.RawMessage,
  'events',COALESCE((SELECT jsonb_agg(to_jsonb(e)) FROM events e JOIN sessions s ON s.id=e.session_id WHERE s.user_id=$1),'[]'::jsonb),
  'reports',COALESCE((SELECT jsonb_agg(to_jsonb(r)) FROM reports r JOIN sessions s ON s.id=r.session_id WHERE s.user_id=$1),'[]'::jsonb),
  'scores',COALESCE((SELECT jsonb_agg(to_jsonb(r)) FROM scores r JOIN sessions s ON s.id=r.session_id WHERE s.user_id=$1),'[]'::jsonb),
+ 'interview_feedback',COALESCE((SELECT jsonb_agg(to_jsonb(f)-'user_id') FROM interview_feedback f WHERE user_id=$1),'[]'::jsonb),
  'feedback',COALESCE((SELECT jsonb_agg(to_jsonb(f)) FROM feedback f WHERE user_id=$1),'[]'::jsonb)
  )`, uid).Scan(&data)
 	return data, err

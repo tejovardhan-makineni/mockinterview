@@ -21,18 +21,18 @@ evidence that the process is unhealthy.
 ## Build and stage
 
 - Run `make test`, the browser checks, dependency scans and corpus validation. Run the PostgreSQL integration tests with an isolated `TEST_DATABASE_URL`. Check saved work, rejected personal keys, quota exhaustion, interrupted speech, provider failure, refresh/reconnect, final-answer persistence and repeat finish.
-- Commit the exact release source. `deploy/deploy-api.sh candidate` uses `git archive HEAD api` and Cloud Build, retrieves an immutable digest, then creates a revision tagged `candidate` with no production traffic. The first staging service is the only exception to `--no-traffic`.
+- Commit the exact release source. `deploy/deploy-api.sh candidate` uses `git archive HEAD api` and Cloud Build, retrieves an immutable digest, then creates a revision tagged `candidate` with no production traffic. The first staging service is the only exception to `--no-traffic`. Archive extraction normalizes the public source's umask to `022` so the non-root container can read the corpus even when the operator uses `077`; private outer directories and credentials remain restrictive.
 - Run this against isolated staging first using `MOCKINTERVIEW_DEPLOY_ENV=/private/path/staging.env`. Test migrations there; production startup applies additive migrations automatically, before traffic promotion. Review backward compatibility with the still-serving revision.
-- Set `WEB_API_BASE` to the candidate API URL. Add the exact Firebase preview origin to the candidate's CORS configuration. `deploy/deploy-web.sh preview launch-candidate` builds with `npm ci`, real API mode and the source SHA, then publishes only the dedicated site. It does not modify shared Firebase Auth domains.
+- Set the staging `WEB_API_BASE` to the tested staging service, or a candidate URL whose lifetime you preserve. Add the exact Firebase preview origin to that API's CORS configuration. With the staging configuration, `deploy/deploy-web.sh preview launch-candidate` builds with `npm ci`, real API mode and the source SHA, then publishes only the dedicated site. It does not modify shared Firebase Auth domains. This preview talks to the staging database and must not be cloned to production.
 - Verify real-provider readiness separately with a short, controlled interview. A green readiness endpoint does not prove a vendor's key or model works.
 
-### Policy-control update (deployment verification pending)
+### Policy controls and required product feedback
 
 Build the API and web from the same reviewed source, or record and verify exact
 matching API/web trees when their build SHAs differ. Match the published policy
 documents and forms to the API versions; do not release one side independently.
 `GET /api/v1/legal-policy` currently returns `terms_version` and `privacy_version`
-of `2026-09-10`, `minimum_age: 18`, and `required` for the hosted configuration.
+of `2026-09-10.1` in this source, `minimum_age: 18`, and `required` for the hosted configuration.
 Hosted registration requires `adult_confirmed: true` plus both current version
 strings. Existing authenticated users submit those fields to
 `POST /api/v1/auth/policies`, which returns the user directly with
@@ -68,12 +68,28 @@ live. Review [legal readiness](LEGAL-READINESS-2026-09-10.md) and
 [privacy operations](PRIVACY-OPERATIONS.md); operator identity, audience and
 contract/retention decisions remain separate from passing tests.
 
+For the required product-feedback release, also verify that a new, started,
+finished attempt requires a versioned questionnaire before another new interview
+can reserve capacity or call a provider. An unused reservation and an older
+attempt must not block practice. Verify failed and unscored attempts, all
+unable-to-judge answers, concurrent/repeated submissions, ownership, and recovery
+from an unsuccessful save. Reopening a saved response must not count it twice.
+Reports, retry, history, export and deletion remain accessible. Session/account
+deletion removes structured responses; general problem reports have their own
+documented lifecycle. Check full-window metric denominators and stored-admin
+authorization. See [metric definitions](FEEDBACK-METRICS.md).
+
+The terms/privacy version change explains required product feedback; it is not
+consent to optional transcript sharing or research. Coordinate API and web
+promotion. A rollback to an earlier binary removes the new survey enforcement
+and endpoints even if the additive migration is compatible.
+
 ## Promote
 
-1. Record the currently serving API revision and Firebase live version/channel in a private release record.
-2. Promote the tested API revision: `deploy/deploy-api.sh promote EXACT_REVISION`.
-3. Ensure the web build uses the stable production API origin (or a permanent tested revision URL with an explicit lifetime). Preview and test that exact build.
-4. Promote that same Firebase version: `deploy/deploy-web.sh promote launch-candidate`. This clones a tested version; it does not rebuild.
+1. Record the currently serving API revision and Firebase live version/channel in a private release record. Preserve a private application backup and verify the migration on an isolated restore before creating the production candidate.
+2. Create a production candidate using the exact immutable image tested in staging. For an existing service with unchanged configuration, `gcloud run deploy mockinterview-api --project storybytes-495010 --region us-west1 --image "$TESTED_IMAGE" --update-env-vars "RELEASE_SHA=$TESTED_SHA" --no-traffic --tag candidate` preserves its production settings and secret references. Set both variables from the verified staging record; do not use an image tag or copy staging database credentials. Compare the resulting configuration and readiness with the recorded baseline. If a new build or configuration is necessary, test that new artifact before promotion.
+3. With the production deployment configuration selected, build `deploy/deploy-web.sh preview launch-production`. Its `WEB_API_BASE` must be the stable production API origin (or a permanent tested revision URL with an explicit lifetime). Verify source identity, CORS, routes, notices and the exact Firebase version. Keep this separate from `launch-candidate`.
+4. Promote the exact production API revision with `deploy/deploy-api.sh promote EXACT_REVISION`, then clone the matching production preview with `deploy/deploy-web.sh promote launch-production`, both using the production configuration. The web promotion does not rebuild. Verify live equals the tested preview version.
 5. Check the public domain, actual signup/recovery delivery, one representative voice and text interview, history/report retrieval, source links and feedback submission. Inspect structured errors and job backlog.
 6. Tag the tested commit and publish release notes with supported modes and known limitations. Make the repository public only after full-history secret and asset-rights review. Confirm an unauthenticated clone works. Enable private vulnerability reporting, dependency/security scanning and branch protection.
 

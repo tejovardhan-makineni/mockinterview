@@ -29,10 +29,32 @@ Production checks confirmed `/health`, `/ready` and `/api/v1/legal-policy` retur
 | Resumes | Upload immediately extracts/parses content through the configured reasoning provider; optional later interview inclusion is a different choice. Extracted text, profiles and reviews are retained. No original-file persistence was found in this upload path. |
 | Interviews | Answers, transcript, workspace and reports are stored; reasoning providers receive relevant evidence. Voice streams through the API to Gemini Live. No application raw-audio recording store was found; this does not establish provider retention. |
 | Camera/behavior | Self-view sends no frames. The audited baseline still accepted legacy gaze/expression-shaped samples. The deployed update retires that endpoint with `410` without reading or storing the body. Historical records have separate retention controls. |
-| Feedback | Comments are linked to an account; diagnostics-off does not mean anonymous. Session deletion does not automatically erase separately stored feedback. Optional context/transcript permissions are not public publication or unrestricted research consent. |
+| Feedback | The required product check-in in this update stores six structured answers with the interview; its optional comment and transcript permission stay optional. Session/account deletion cascades this structured response, and account export includes it. Separately submitted general/support feedback has a different lifecycle. Neither diagnostics-off nor the internal aggregate view makes account-linked feedback anonymous. Optional context/transcript permissions are not public publication or unrestricted research consent. |
 | Deletion limits | History/resumes have no automatic general expiry at baseline. Short-lived tokens/keys/usage records have cleanup jobs. Browser copies, downloaded exports, provider records and backups need separate handling. |
 
 Detailed handling and retention evidence are in [PRIVACY-OPERATIONS.md](PRIVACY-OPERATIONS.md). Minimize sensitive and third-party submissions; fictional medical/law scenarios do not authorize uploading real patient/client records.
+
+### Required product check-in and voluntary research
+
+The feedback update adds a product-quality purpose: after each newly started and
+finished attempt, six answers are required before another interview can start.
+Every item permits an unrated answer. The check-in does not require a favorable
+opinion, a comment, transcript permission or research participation, and does not
+block existing reports or account rights. Old attempts and unused reservations
+are exempt. Terms/privacy version `2026-09-10.1` explains this change; an
+acknowledgment is not consent to research.
+
+Where GDPR/UK GDPR applies, document the purpose, necessity and balancing
+assessment for this account-linked product analysis and the handling of
+objections. Adding a requirement to terms does not by itself make processing
+necessary for a contract or establish freely given consent. Minimize the data
+and evaluate a less intrusive alternative when resolving an objection. The
+open owner decisions above remain open. See [EDPB lawful-basis guidance](https://www.edpb.europa.eu/sme/be-compliant/process-personal-data-lawfully_en)
+and [feedback metrics](FEEDBACK-METRICS.md). University studies, identifiable
+transcript review for research, recruitment and public quotations require their
+own appropriate process; mandatory product feedback does not enroll users in a
+study. Deployment and verification of this update are recorded separately from
+the earlier policy release.
 
 ## Applicability matrix
 

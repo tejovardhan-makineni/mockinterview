@@ -25,7 +25,13 @@ case "$ACTION" in
   git -C "$TASK_ROOT" diff --quiet HEAD -- api || { echo 'Commit API changes before building a release.' >&2; exit 1; }
   BUILD_DIR=$(mktemp -d)
   trap 'rm -rf "$BUILD_DIR"' EXIT
-  git -C "$TASK_ROOT" archive "$RELEASE_SHA" api | tar -x -C "$BUILD_DIR"
+  # The image runs as a non-root user. An operator's private umask (e.g. 077)
+  # must not make archived public corpus directories unreadable in that image.
+  # Keep the outer temporary directory and other private files restrictive.
+  (
+   umask 022
+   git -C "$TASK_ROOT" archive "$RELEASE_SHA" api | tar -x -C "$BUILD_DIR"
+  )
   BUILD_ID=$(gcloud builds submit "$BUILD_DIR/api" --project "$PROJECT_ID" --tag "gcr.io/$PROJECT_ID/mockinterview-api:$RELEASE_SHA" --async --format='value(id)')
   echo "Cloud Build: $BUILD_ID"
   while true; do

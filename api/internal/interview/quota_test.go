@@ -12,6 +12,7 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/tejo/mockinterview-api/internal/auth"
 	"github.com/tejo/mockinterview-api/internal/corpus"
+	"github.com/tejo/mockinterview-api/internal/feedback"
 	"github.com/tejo/mockinterview-api/internal/llm"
 	"github.com/tejo/mockinterview-api/internal/scoring"
 	"github.com/tejo/mockinterview-api/internal/store"
@@ -62,6 +63,7 @@ func TestHostedAllowanceAppliesToAdminsAndLocalRemainsUnlimited(t *testing.T) {
 				router.Post("/sessions", service.Create)
 				router.Post("/sessions/{id}/finish", service.Finish)
 				router.Get("/usage", service.Usage)
+				router.Get("/metrics", feedback.New(repo, nil).InterviewMetrics)
 				request := func(method, path, body string, want int) *httptest.ResponseRecorder {
 					t.Helper()
 					req := httptest.NewRequest(method, path, strings.NewReader(body))
@@ -74,7 +76,7 @@ func TestHostedAllowanceAppliesToAdminsAndLocalRemainsUnlimited(t *testing.T) {
 					}
 					return response
 				}
-				const body = `{"question_id":"incident-triage-checkout","minutes":5,"mode":"text","funding":"platform"}`
+				const body = `{"question_id":"incident-triage-checkout","minutes":5,"mode":"text","funding":"platform","config":{"target_level":"senior"}}`
 				var first store.Session
 				if err := json.Unmarshal(request("POST", "/sessions", body, 200).Body.Bytes(), &first); err != nil {
 					t.Fatal(err)
@@ -92,6 +94,29 @@ func TestHostedAllowanceAppliesToAdminsAndLocalRemainsUnlimited(t *testing.T) {
 				request("POST", "/sessions/"+first.ID+"/finish", "", 202)
 				service.ProcessPending(ctx)
 				request("POST", "/sessions/"+first.ID+"/finish", "", 200)
+				blocked := request("POST", "/sessions", body, 409)
+				if !strings.Contains(blocked.Body.String(), "interview_feedback_required") {
+					t.Fatal("missing mandatory feedback gate")
+				}
+				// This deliberately unsupported provider would fail validation with 400;
+				// pending feedback must return 409 before any key/provider work instead.
+				for _, mode := range []string{"voice", "text"} {
+					request("POST", "/sessions", `{"question_id":"incident-triage-checkout","minutes":5,"mode":"`+mode+`","funding":"byok","provider":"must-not-be-validated","api_key":"synthetic","paid_billing_confirmed":true,"voice_processing_acknowledged":true}`, 409)
+				}
+				request("POST", "/sessions", `{"question_id":"incident-triage-checkout","mode":"text","config":{"feedback_version":""}}`, 400)
+				answers := map[string]string{}
+				for _, id := range store.InterviewFeedbackQuestionIDs {
+					answers[id] = "unable_to_judge"
+				}
+				if _, err := repo.PutInterviewFeedback(ctx, store.InterviewFeedback{SessionID: first.ID, UserID: u.ID, Version: store.InterviewFeedbackVersion, Answers: answers}); err != nil {
+					t.Fatal(err)
+				}
+				if role == "admin" {
+					metrics := request("GET", "/metrics?group_by=level", "", 200)
+					if !strings.Contains(metrics.Body.String(), `"key":"senior"`) {
+						t.Fatal("real Create lost selected level in metrics", metrics.Body)
+					}
+				}
 				var usage store.Usage
 				if err := json.Unmarshal(request("GET", "/usage", "", 200).Body.Bytes(), &usage); err != nil {
 					t.Fatal(err)

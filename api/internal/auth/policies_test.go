@@ -17,9 +17,9 @@ import (
 func TestRegistrationRequiresCurrentAdultAssertionBeforeCreatingUser(t *testing.T) {
 	for _, fields := range []string{
 		``,
-		`,"adult_confirmed":false,"terms_version":"2026-09-10","privacy_version":"2026-09-10"`,
-		`,"adult_confirmed":true,"terms_version":"older","privacy_version":"2026-09-10"`,
-		`,"adult_confirmed":true,"terms_version":"2026-09-10","privacy_version":"older"`,
+		`,"adult_confirmed":false,"terms_version":"2026-09-10.1","privacy_version":"2026-09-10.1"`,
+		`,"adult_confirmed":true,"terms_version":"older","privacy_version":"2026-09-10.1"`,
+		`,"adult_confirmed":true,"terms_version":"2026-09-10.1","privacy_version":"older"`,
 	} {
 		st := memstore.New()
 		s := New(st, "synthetic-policy-test", time.Hour)
@@ -38,7 +38,7 @@ func TestRegistrationRequiresCurrentAdultAssertionBeforeCreatingUser(t *testing.
 	s.Configure(Options{RequirePolicies: true})
 	start := time.Now().Add(-time.Second)
 	response := httptest.NewRecorder()
-	s.Register(response, httptest.NewRequest("POST", "/register", strings.NewReader(`{"email":"policy@example.test","password":"long test password","adult_confirmed":true,"terms_version":"2026-09-10","privacy_version":"2026-09-10"}`)))
+	s.Register(response, httptest.NewRequest("POST", "/register", strings.NewReader(`{"email":"policy@example.test","password":"long test password","adult_confirmed":true,"terms_version":"2026-09-10.1","privacy_version":"2026-09-10.1"}`)))
 	var auth authResponse
 	if response.Code != 200 || json.Unmarshal(response.Body.Bytes(), &auth) != nil || auth.User.PoliciesRequired || !auth.User.AdultConfirmed {
 		t.Fatalf("valid assertion registration failed: %d %s", response.Code, response.Body)
@@ -78,7 +78,7 @@ func TestLegacyPolicyAcknowledgmentPreservesLoginAndRejectsStaleInput(t *testing
 		s.Required(http.HandlerFunc(s.AcceptPolicies)).ServeHTTP(out, request)
 		return out
 	}
-	for _, body := range []string{`{}`, `{"adult_confirmed":false,"terms_version":"2026-09-10","privacy_version":"2026-09-10"}`, `{"adult_confirmed":true,"terms_version":"old","privacy_version":"2026-09-10"}`} {
+	for _, body := range []string{`{}`, `{"adult_confirmed":false,"terms_version":"2026-09-10.1","privacy_version":"2026-09-10.1"}`, `{"adult_confirmed":true,"terms_version":"old","privacy_version":"2026-09-10.1"}`} {
 		if out := call(body); out.Code != 403 {
 			t.Fatalf("invalid acknowledgment: %d %s", out.Code, out.Body)
 		}
@@ -87,7 +87,7 @@ func TestLegacyPolicyAcknowledgmentPreservesLoginAndRejectsStaleInput(t *testing
 			t.Fatal("invalid acknowledgment mutated user")
 		}
 	}
-	const valid = `{"adult_confirmed":true,"terms_version":"2026-09-10","privacy_version":"2026-09-10"}`
+	const valid = `{"adult_confirmed":true,"terms_version":"2026-09-10.1","privacy_version":"2026-09-10.1"}`
 	if out := call(valid); out.Code != 200 || strings.Contains(out.Body.String(), `"policies_required":true`) {
 		t.Fatalf("accept: %d %s", out.Code, out.Body)
 	}

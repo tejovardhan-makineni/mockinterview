@@ -12,13 +12,12 @@ import { errorMessage } from "@/lib/http";
 import { AppShell } from "@/components/AppShell";
 import { Badge, Button, Panel, ErrorNotice } from "@/components/ui";
 import { PersonalKeyRecovery } from "@/components/PersonalKeyRecovery";
-import { FeedbackWidget } from "@/components/FeedbackWidget";
+import { InterviewCheckIn } from "@/components/InterviewCheckIn";
 const pretty = (value: string) =>
   value.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
-function ReportView() {
+function ReportView({ sid }: { sid: string }) {
   const router = useRouter();
-  const params = useSearchParams();
-  const sid = params.get("s") ?? "";
+  const [checkInEligible, setCheckInEligible] = useState(false);
   const [report, setReport] = useState<Report | null>(null);
   const [processing, setProcessing] = useState<ProcessingReport | null>(null);
   const [session, setSession] = useState<Session | null>(null);
@@ -134,7 +133,11 @@ function ReportView() {
           {processing?.status === "feedback_failed" &&
             session?.funding === "byok" && (
               <div className="mt-4">
-                <PersonalKeyRecovery sessionId={sid} provider={session.provider} onSaved={retryScoring} />
+                <PersonalKeyRecovery
+                  sessionId={sid}
+                  provider={session.provider}
+                  onSaved={retryScoring}
+                />
               </div>
             )}
           {processing?.status === "feedback_failed" && (
@@ -152,7 +155,10 @@ function ReportView() {
         </Panel>
       ) : (
         <>
-          <div className="mt-7 flex flex-wrap items-start justify-between gap-4">
+          <div
+            id="report-summary"
+            className="mt-7 flex flex-wrap items-start justify-between gap-4"
+          >
             <div>
               <p className="eyebrow">A clearer next step</p>
               <h1 className="page-title mt-3">
@@ -326,26 +332,14 @@ function ReportView() {
                   </label>
                 </Panel>
               ))}
-              <Panel className="p-6">
-                <h2 className="font-semibold">
-                  Help improve the next interview.
-                </h2>
-                <p className="my-3 text-sm text-[var(--color-muted)]">
-                  Two optional questions. A rating is enough.
-                </p>
-                <div className="flex flex-col gap-3">
-                  <FeedbackWidget
-                    target="interviewer"
-                    sessionId={sid}
-                    label="Did the interviewer feel realistic?"
-                  />
-                  <FeedbackWidget
-                    target="product"
-                    sessionId={sid}
-                    label="How was the product experience?"
-                  />
-                </div>
-              </Panel>
+              {checkInEligible && (
+                <a
+                  href="#interview-check-in"
+                  className="block rounded-xl border border-[var(--color-line)] p-5 text-sm underline"
+                >
+                  Review your interview check-in ↓
+                </a>
+              )}
               <Button href="/interviews" variant="ghost" className="w-full">
                 Explore your next practice →
               </Button>
@@ -358,13 +352,25 @@ function ReportView() {
           </p>
         </>
       )}
+      {session && (
+        <InterviewCheckIn
+          key={sid}
+          sessionId={sid}
+          reportAvailable={!!report}
+          onEligibilityChange={setCheckInEligible}
+        />
+      )}
     </AppShell>
   );
+}
+function ReportRoute() {
+  const sid = useSearchParams().get("s") ?? "";
+  return <ReportView key={sid} sid={sid} />;
 }
 export default function ReportPage() {
   return (
     <Suspense fallback={<p className="p-10">Loading feedback…</p>}>
-      <ReportView />
+      <ReportRoute />
     </Suspense>
   );
 }

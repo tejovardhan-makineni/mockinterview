@@ -161,6 +161,11 @@ func (a *App) Routes(r chi.Router) {
 		// rate-limited to curb spam; List is admin-gated inside the handler.
 		r.With(perUser).Post("/feedback", feedbackSvc.Submit)
 		r.Get("/feedback", feedbackSvc.List)
+		r.Get("/feedback/required", feedbackSvc.RequiredInterviews)
+		r.Get("/sessions/{id}/feedback", feedbackSvc.GetInterview)
+		r.Put("/sessions/{id}/feedback", feedbackSvc.PutInterview)
+		r.Get("/admin/interview-feedback/metrics", feedbackSvc.InterviewMetrics)
+		r.Get("/admin/interview-feedback/comments", feedbackSvc.InterviewComments)
 		r.Patch("/feedback/{id}", feedbackSvc.Triage)
 
 		// Practice packs (company/goal interview loops) + per-user progress.

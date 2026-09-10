@@ -9,7 +9,7 @@ export default function Privacy() {
         <p className="eyebrow">Your practice is personal</p>
         <h1 className="page-title mt-3">Privacy & your data</h1>
         <p className="mt-5">
-          Effective September 10, 2026 · notice version 2026-09-10
+          Effective September 10, 2026 · notice version 2026-09-10.1
         </p>
         <p>
           This notice describes the hosted mockinterview.live service,
@@ -159,13 +159,32 @@ export default function Privacy() {
         </p>
         <h2>Feedback and service operation</h2>
         <p>
-          Feedback is optional and associated with your account email,
-          rating/comment and relevant interview. It is not anonymous. Technical
-          context and permission to inspect the related transcript have
-          separate, initially unchecked controls. They are not prerequisites for
-          practice. Contact us to withdraw optional sharing or delete feedback.
-          Deleting only an interview does not delete separately submitted
-          feedback; account deletion does.
+          New interview attempts include a required product-feedback check-in
+          after a started interview ends. Complete it before starting another
+          interview; saved reports, history, export, deletion and report retries
+          remain accessible. Each question allows an unable-to-judge answer.
+          Comments and permission to inspect your transcript are optional and
+          do not affect whether you can complete the check-in.
+        </p>
+        <p>
+          These answers are associated with your account and interview; they
+          are not anonymous. We retain the questionnaire version, answers,
+          optional comment and sharing choice, submission/update times, and
+          relevant interview metadata such as subject, format, selected level,
+          mode and provider. The operator uses aggregate counts and rating
+          distributions to understand usability, interviewer behavior, content
+          and service reliability. The questionnaire does not send your answers
+          to an AI model or change your interview score. It does not enroll you
+          in research or authorize publication of private records.
+        </p>
+        <p>
+          The separate “Share feedback” and “Report a problem” controls remain
+          optional. Their technical diagnostics and transcript-sharing choices
+          start unchecked. Contact us to withdraw optional sharing or request
+          deletion. Deleting an interview removes its structured check-in;
+          separately submitted problem reports or general feedback remain until
+          removed separately or through account deletion. Account export
+          includes your structured check-ins.
         </p>
         <p>
           Security and troubleshooting use limited request/usage metadata, such
@@ -180,8 +199,13 @@ export default function Privacy() {
         <p>
           Where European or UK data-protection law applies, core account and
           requested AI processing supports our agreement with you; proportionate
-          security, abuse prevention and service administration support
-          legitimate interests. Optional diagnostic and transcript sharing for a support report is based on your consent. You can withdraw that permission by contacting us; withdrawal does not affect earlier lawful processing. Reading this notice
+          security, abuse prevention, service administration and product-quality
+          analysis support legitimate interests, subject to applicable rights
+          and balancing requirements. A required product check-in is not a
+          request for consent to research. Optional diagnostic and transcript
+          sharing for support is based on your consent. You can withdraw that
+          permission by contacting us; withdrawal does not affect earlier
+          lawful processing. Reading this notice
           is not blanket consent for every use of personal information. We do
           not request special-category data or use interview content for
           advertising or our own model training.

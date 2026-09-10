@@ -28,6 +28,7 @@ import (
 // itself to the scorer's Persist. *store.Store satisfies it; tests supply a fake.
 type Repo interface {
 	store.SessionRuntime
+	PendingInterviewFeedback(context.Context, string) ([]store.Session, error)
 	UserByID(ctx context.Context, id string) (store.User, error)
 	ListUserSessions(ctx context.Context, userID string, limit int) ([]store.SessionSummary, error)
 	CountSessionsToday(ctx context.Context, userID string) (int, error)
@@ -171,6 +172,13 @@ func (s *Service) Create(w http.ResponseWriter, r *http.Request) {
 		auth.PolicyRequired(w)
 		return
 	}
+	if pending, err := s.store.PendingInterviewFeedback(r.Context(), uid); err != nil {
+		httpx.WriteProblem(w, 503, "Could not check required interview feedback. No allowance was used.")
+		return
+	} else if len(pending) > 0 {
+		feedbackRequired(w)
+		return
+	}
 	if req.Minutes == 0 {
 		req.Minutes = 30
 	}
@@ -249,9 +257,11 @@ func (s *Service) Create(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 	snapshot, _ := json.Marshal(q)
-	sess, err := s.store.ReserveSession(r.Context(), store.Reservation{GlobalDailyLimit: s.options.GlobalDailyLimit, Session: store.Session{ID: id, UserID: uid, QuestionID: q.ID, Modality: q.Modality, Track: q.Track, PackID: req.PackID, PackRoundID: req.RoundID, Config: req.Config, DurationMinutes: req.Minutes, Funding: req.Funding, Mode: req.Mode, Provider: req.Provider, Model: req.Model, LiveModel: s.options.LiveModel, QuestionSnapshot: snapshot}, Identity: llm.UsageIdentity(s.options.EncryptionKey, u.Email), Unlimited: !s.options.Hosted, Credential: encrypted, CredentialExpires: time.Now().Add(3 * time.Hour)})
+	sess, err := s.store.ReserveSession(r.Context(), store.Reservation{GlobalDailyLimit: s.options.GlobalDailyLimit, Session: store.Session{FeedbackVersion: store.InterviewFeedbackVersion, ID: id, UserID: uid, QuestionID: q.ID, Modality: q.Modality, Track: q.Track, PackID: req.PackID, PackRoundID: req.RoundID, Config: req.Config, DurationMinutes: req.Minutes, Funding: req.Funding, Mode: req.Mode, Provider: req.Provider, Model: req.Model, LiveModel: s.options.LiveModel, QuestionSnapshot: snapshot}, Identity: llm.UsageIdentity(s.options.EncryptionKey, u.Email), Unlimited: !s.options.Hosted, Credential: encrypted, CredentialExpires: time.Now().Add(3 * time.Hour)})
 	if err != nil {
 		switch {
+		case errors.Is(err, store.ErrInterviewFeedbackRequired):
+			feedbackRequired(w)
 		case errors.Is(err, store.ErrQuota):
 			httpx.WriteProblem(w, 429, "Your interview allowance is used. Check the next available time, use your own key when eligible, or run locally.")
 		case errors.Is(err, store.ErrSessionConflict):
@@ -504,4 +514,8 @@ func (s *Service) owned(w http.ResponseWriter, r *http.Request) (store.Session, 
 		return store.Session{}, false
 	}
 	return sess, true
+}
+
+func feedbackRequired(w http.ResponseWriter) {
+	httpx.WriteJSON(w, 409, map[string]string{"code": "interview_feedback_required", "detail": "Complete the short feedback form for your previous interview before starting another. Reports, history and account controls remain available."})
 }

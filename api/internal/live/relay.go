@@ -94,6 +94,7 @@ func (c *wsConn) close() error { return c.conn.Close() }
 // Store is the persistence the relay needs during a live session.
 type Store interface {
 	store.SessionRuntime
+	PendingInterviewFeedback(context.Context, string) ([]store.Session, error)
 	UserByID(context.Context, string) (store.User, error)
 	GetSession(ctx context.Context, id string) (store.Session, error)
 	UpdateSessionStatus(ctx context.Context, id, status string) error
@@ -210,6 +211,21 @@ func (r *Relay) Handle(w http.ResponseWriter, req *http.Request) {
 	if r.hosted && !auth.PoliciesAccepted(user) {
 		auth.PolicyRequired(w)
 		return
+	}
+	// Feedback blocks a previously reserved, unstarted attempt too; reconnecting
+	// an already started interview remains available.
+	if sess.StartedAt == nil {
+		pending, e := r.store.PendingInterviewFeedback(req.Context(), uid)
+		if e != nil {
+			http.Error(w, "could not check interview feedback", 503)
+			return
+		}
+		if len(pending) > 0 {
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(409)
+			_ = json.NewEncoder(w).Encode(map[string]string{"code": "interview_feedback_required", "detail": "Complete required feedback before starting another interview."})
+			return
+		}
 	}
 	owner := store.NewID()
 	sess, err = r.store.AcquireLive(req.Context(), id, owner)

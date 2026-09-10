@@ -65,7 +65,7 @@ Paths below are relative to `api/internal/` unless stated otherwise.
 | `scoring` | Canonical rubric weights, evidence validation, not-assessed dimensions and learning exercises |
 | `profile` | Interviewer settings, profile, account export/deletion and voice preview |
 | `resume` | Resume extraction, review and matching |
-| `feedback` | Product/interviewer feedback, optional consented context and administrator triage |
+| `feedback` | Versioned six-item interview check-in, next-attempt admission gate, private aggregate metrics and paginated suggestions; separate voluntary feedback/context and administrator triage |
 | `tts`, `i18n` | Voice previews and application-string translation |
 | `httpx` | HTTP errors, bounded JSON decoding, safe logging and shared middleware |
 
