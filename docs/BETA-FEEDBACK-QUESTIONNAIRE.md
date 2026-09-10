@@ -36,8 +36,8 @@ Optional comment: **What should we improve first? Please avoid sharing personal,
 
 ## Optional comparison with other tools
 
-An additive **`tool-comparison-v1`** section is being added after the six required
-items. Deployment evidence is tracked in
+An additive **`tool-comparison-v1`** section was deployed after the six required
+items on 10 September 2026. Deployment evidence is recorded in
 [the comparison release record](TOOL-COMPARISON-RELEASE-2026-09-10.md). It does not
 change `post-interview-v1`, its six dimensions or the next-interview gate.
 

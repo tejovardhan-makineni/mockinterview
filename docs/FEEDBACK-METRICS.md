@@ -60,7 +60,7 @@ These are separate dimensions with different scale directions. **Do not average 
 
 ## Optional tool-comparison metrics
 
-The additive `tool-comparison-v1` extension is tracked in
+The additive `tool-comparison-v1` extension was deployed on 10 September 2026; see
 [the comparison release record](TOOL-COMPARISON-RELEASE-2026-09-10.md). It adds a
 separate `comparison` aggregate at the response top level and in each group;
 none of its answers enter the six core dimensions or a composite score.
