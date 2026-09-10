@@ -61,11 +61,17 @@ class DeployTest(unittest.TestCase):
             if method == 'GET' and parsed.path.endswith('/uptimeCheckConfigs'):
                 if not parse_qs(parsed.query).get('pageToken'):
                     return {'uptimeCheckConfigs': [{'displayName': 'Other app', 'name': 'projects/12345/uptimeCheckConfigs/other'}], 'nextPageToken': 'second'}
-                return {'uptimeCheckConfigs': [{'displayName': 'Mockinterview '+kind, 'name': 'projects/12345/uptimeCheckConfigs/'+kind.lower()} for kind in ['Web', 'API']]}
+                return {'uptimeCheckConfigs': [{'displayName': 'Mockinterview '+kind,
+                    'name': 'projects/12345/uptimeCheckConfigs/'+kind.lower(),
+                    'monitoredResource': {'type': 'uptime_url', 'labels': {'project_id': 'test-project', 'host': host}}}
+                    for kind, host in [('Web', 'practice.example.com'), ('API', 'api.example.com')]]}
             if method == 'GET' and parsed.path.endswith('/alertPolicies'):
                 return {'alertPolicies': [{'displayName': 'Mockinterview '+kind+' unavailable', 'name': 'projects/12345/alertPolicies/'+kind.lower(), 'conditions': [{'name': 'projects/12345/alertPolicies/'+kind.lower()+'/conditions/old'}]} for kind in ['Web', 'API']]}
             if method == 'PATCH':
                 self.assertNotIn('/other', url)
+                if '/uptimeCheckConfigs/' in parsed.path:
+                    self.assertNotIn('monitoredResource', body)
+                    self.assertNotIn('monitoredResource', parse_qs(parsed.query)['updateMask'][0].split(','))
                 return body
             self.fail('Unexpected operation: '+method+' '+url)
         calls = self.run_helper('monitor.py', env, response)
@@ -73,10 +79,22 @@ class DeployTest(unittest.TestCase):
         self.assertEqual(len(changes), 4)
         api = next(row for row in changes if row['displayName'] == 'Mockinterview API')
         self.assertEqual(api['httpCheck']['path'], '/ready')
-        self.assertEqual(api['monitoredResource']['labels']['host'], 'api.example.com')
         for row in changes:
             if 'notificationChannels' in row:
                 self.assertEqual(row['notificationChannels'], [env['MONITORING_NOTIFICATION_CHANNEL']])
+
+    def test_monitor_resource_identity_change_requires_explicit_recreation(self):
+        env = {'PROJECT_ID': 'test-project', 'PUBLIC_URL': 'https://practice.example.com',
+               'WEB_API_BASE': 'https://api.example.com'}
+        def response(method, url, body):
+            self.assertEqual(method, 'GET', 'an identity mismatch must not replace or delete the check')
+            if url.endswith('/uptimeCheckConfigs'):
+                return {'uptimeCheckConfigs': [{'displayName': 'Mockinterview Web',
+                    'name': 'projects/12345/uptimeCheckConfigs/web',
+                    'monitoredResource': {'type': 'uptime_url', 'labels': {'project_id': 'test-project', 'host': 'old.example.com'}}}]}
+            self.fail('Unexpected operation: '+method+' '+url)
+        with self.assertRaisesRegex(ValueError, 'immutable resource identity; explicitly recreate'):
+            self.run_helper('monitor.py', env, response)
 
     def test_new_database_user_requires_explicit_app_role(self):
         env = {'PROJECT_ID': 'test-project', 'CLOUDSQL_INSTANCE': 'test-project:us-west1:shared',
