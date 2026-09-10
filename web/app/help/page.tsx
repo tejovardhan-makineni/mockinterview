@@ -52,7 +52,10 @@ export default function Help() {
             {configuredSupport
               ? "the service operator"
               : "the project maintainer"}
-            . You do not need to sign in. There is no guaranteed response time.
+            . You do not need to sign in. Ordinary support has no guaranteed
+            response time; applicable legal deadlines still govern privacy
+            requests. You can also report accessibility barriers, underage use,
+            sensitive-data uploads or suspected copyright infringement here.
           </p>
           <Button href={"mailto:" + support} variant="ghost">
             {support}

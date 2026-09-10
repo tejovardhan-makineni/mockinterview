@@ -24,6 +24,7 @@ type Options struct {
 	PublicURL           string
 	Mailer              Mailer
 	RequireVerification bool
+	RequirePolicies     bool
 	Development         bool
 }
 

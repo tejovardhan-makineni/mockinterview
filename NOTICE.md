@@ -16,4 +16,4 @@ endorsed the interview packs, and company names do not imply affiliation.
 
 The Code of Conduct adapts Contributor Covenant 2.1, with attribution in
 `CODE_OF_CONDUCT.md`. Report suspected ownership or attribution errors to the
-maintainer through a repository issue, omitting confidential material.
+maintainer privately using [SUPPORT.md](SUPPORT.md), omitting credentials and unnecessary personal information. A public issue is optional for non-sensitive corrections.

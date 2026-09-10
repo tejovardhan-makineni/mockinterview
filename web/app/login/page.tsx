@@ -1,8 +1,10 @@
 "use client";
-import { Suspense, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { api, IS_MOCK } from "@/lib/api";
-import { account } from "@/lib/features/auth";
+import { account, type LegalPolicy } from "@/lib/features/auth";
+import { localDestination } from "@/lib/policyNavigation";
+import { PolicyFields } from "@/components/PolicyFields";
 import { errorMessage } from "@/lib/http";
 import { AppShell } from "@/components/AppShell";
 import { Button, Field, Input, Panel, ErrorNotice } from "@/components/ui";
@@ -16,9 +18,25 @@ function Login() {
   const [notice, setNotice] = useState("");
   const [link, setLink] = useState("");
   const [busy, setBusy] = useState(false);
-  const next = params.get("next") ?? "/interviews";
-  const destination =
-    next.startsWith("/") && !next.startsWith("//") ? next : "/interviews";
+  const [adult, setAdult] = useState(false);
+  const [accepted, setAccepted] = useState(false);
+  const [policy, setPolicy] = useState<LegalPolicy | null>(null);
+  const destination = localDestination(params.get("next"));
+  useEffect(() => {
+    if (mode !== "register") return;
+    let cancelled = false;
+    void api
+      .legalPolicy()
+      .then((value) => {
+        if (!cancelled) setPolicy(value);
+      })
+      .catch((e) => {
+        if (!cancelled) setError(errorMessage(e));
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [mode]);
   async function submit(e: React.FormEvent) {
     e.preventDefault();
     setBusy(true);
@@ -33,7 +51,12 @@ function Login() {
         );
         setLink(r.development_action_url ?? "");
       } else if (mode === "register") {
-        const r = await api.register(email, password);
+        if (!policy || !adult || !accepted) return;
+        const r = await api.register(email, password, {
+          adult_confirmed: adult,
+          terms_version: policy.terms_version,
+          privacy_version: policy.privacy_version,
+        });
         if (r.verification_required) {
           setNotice(
             "Your account is ready. Verify your email before starting a hosted interview. Check your inbox and spam folder for a verification link.",
@@ -99,8 +122,22 @@ function Login() {
               />
             </Field>
           )}
+          {mode === "register" && (
+            <PolicyFields
+              adult={adult}
+              accepted={accepted}
+              onAdult={setAdult}
+              onAccepted={setAccepted}
+            />
+          )}
           {error && <ErrorNotice message={error} />}
-          <Button type="submit" disabled={busy} className="w-full">
+          <Button
+            type="submit"
+            disabled={
+              busy || (mode === "register" && (!policy || !adult || !accepted))
+            }
+            className="w-full"
+          >
             {busy
               ? "Please wait…"
               : mode === "forgot"
@@ -141,7 +178,7 @@ function Login() {
           )}
         </div>
         <p className="mt-6 text-xs text-[var(--color-muted)]">
-          By using this service, review{" "}
+          Read{" "}
           <a href="/terms" className="underline">
             Using mockinterview
           </a>{" "}

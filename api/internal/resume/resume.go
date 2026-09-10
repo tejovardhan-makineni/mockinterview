@@ -35,6 +35,7 @@ type Repo interface {
 	SaveResume(ctx context.Context, userID, filename, parsedText string, parsedJSON json.RawMessage) (store.Resume, error)
 	LatestResume(ctx context.Context, userID string) (store.Resume, error)
 	SaveResumeReview(ctx context.Context, userID, resumeID, provider, model string, result json.RawMessage) (string, error)
+	DeleteResumes(ctx context.Context, userID string) error
 }
 
 type Service struct {
@@ -171,6 +172,21 @@ func (s *Service) Get(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	httpx.WriteJSON(w, http.StatusOK, map[string]any{"id": res.ID, "filename": res.Filename, "parsed": res.ParsedJSON, "text": res.ParsedText})
+}
+
+// Delete removes the authenticated owner's uploads and standalone reviews.
+// Existing interview context and reports remain part of interview history.
+func (s *Service) Delete(w http.ResponseWriter, r *http.Request) {
+	uid := auth.UserID(r.Context())
+	if uid == "" {
+		httpx.WriteProblem(w, http.StatusUnauthorized, "authentication required")
+		return
+	}
+	if err := s.store.DeleteResumes(r.Context(), uid); err != nil {
+		httpx.WriteProblem(w, http.StatusInternalServerError, "resume deletion failed")
+		return
+	}
+	w.WriteHeader(http.StatusNoContent)
 }
 
 var reviewSchema = map[string]any{

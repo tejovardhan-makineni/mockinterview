@@ -49,6 +49,22 @@ func (s *Store) LatestResume(ctx context.Context, userID string) (Resume, error)
 	return r, err
 }
 
+// DeleteResumes atomically removes all uploads and standalone reviews owned by
+// the user, including reviews whose previous upload was replaced. Deleting an
+// upload alone only sets resume_reviews.resume_id to NULL; it does not erase
+// review content. Session context and interview reports are intentionally kept.
+func (s *Store) DeleteResumes(ctx context.Context, userID string) error {
+	return pgx.BeginFunc(ctx, s.Pool, func(tx pgx.Tx) error {
+		// Remove uploads first so an in-flight review cannot insert a reference
+		// to a deleted upload between clearing reviews and clearing uploads.
+		if _, err := tx.Exec(ctx, `DELETE FROM resumes WHERE user_id=$1`, userID); err != nil {
+			return err
+		}
+		_, err := tx.Exec(ctx, `DELETE FROM resume_reviews WHERE user_id=$1`, userID)
+		return err
+	})
+}
+
 func (s *Store) SaveResumeReview(ctx context.Context, userID, resumeID, provider, model string, result json.RawMessage) (string, error) {
 	id := NewID()
 	var resumePtr any

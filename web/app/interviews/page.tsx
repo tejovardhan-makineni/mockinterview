@@ -76,7 +76,7 @@ export default function Catalog() {
           <h1 className="page-title mt-3">What would you like to practice?</h1>
           <p className="mt-3 text-[var(--color-muted)]">
             Find a conversation that fits your role. Set your level and pace
-            before you begin.
+            before you begin. Hosted practice is for adults 18 and older.
           </p>
         </div>
         <Button href="/packs" variant="ghost">

@@ -24,6 +24,8 @@ import {
   type AvatarDrive,
 } from "@/components/studio/Avatar3D";
 import { DeviceCheck } from "@/components/studio/DeviceCheck";
+import { policyDestination } from "@/lib/policyNavigation";
+import { ResumeNotice } from "@/components/ResumeNotice";
 const pretty = (value: string) =>
   value.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
 const date = (value?: string) =>
@@ -59,6 +61,8 @@ function Setup() {
   const [model, setModel] = useState("");
   const [key, setKey] = useState("");
   const [keyValid, setKeyValid] = useState(false);
+  const [paidBilling, setPaidBilling] = useState(false);
+  const [voiceAcknowledged, setVoiceAcknowledged] = useState(false);
   const [notice, setNotice] = useState("");
   const [resumeName, setResumeName] = useState("");
   const drive = useRef<AvatarDrive>({
@@ -196,7 +200,7 @@ function Setup() {
       : 0,
   );
   async function check() {
-    if (!user) {
+    if (!user || user.policies_required) {
       writeSetupDraft(draftKey, {
         config: cfg,
         minutes,
@@ -205,13 +209,18 @@ function Setup() {
         provider,
         model,
       });
+      const returnTo = packId
+        ? "/setup?pack=" + packId + "&round=" + roundId
+        : "/setup?q=" + qid;
       router.push(
-        "/login?next=" +
-          encodeURIComponent(
-            packId
-              ? "/setup?pack=" + packId + "&round=" + roundId
-              : "/setup?q=" + qid,
-          ),
+        user?.policies_required
+          ? policyDestination(returnTo)
+          : "/login?next=" +
+              encodeURIComponent(
+                packId
+                  ? "/setup?pack=" + packId + "&round=" + roundId
+                  : "/setup?q=" + qid,
+              ),
       );
       return;
     }
@@ -236,6 +245,7 @@ function Setup() {
         model: model || undefined,
         api_key: key,
         mode,
+        paid_billing_confirmed: paidBilling,
       });
       setKeyValid(r.valid);
       setNotice(
@@ -261,8 +271,14 @@ function Setup() {
         minutes,
         mode,
         funding,
+        voice_processing_acknowledged: mode === "voice" && voiceAcknowledged,
         ...(funding === "byok"
-          ? { provider, model: model || undefined, api_key: key }
+          ? {
+              provider,
+              model: model || undefined,
+              api_key: key,
+              paid_billing_confirmed: paidBilling,
+            }
           : {}),
       };
       const session = await api.createSession(
@@ -494,10 +510,11 @@ function Setup() {
                     </Field>
                   </div>
                   <div className="mt-5">
+                    <ResumeNotice />
                     <Button
                       variant="ghost"
                       onClick={() => file.current?.click()}
-                      disabled={!user || busy}
+                      disabled={!user || busy || user.policies_required}
                     >
                       {resumeName
                         ? "Replace optional resume"
@@ -551,6 +568,7 @@ function Setup() {
                       value={mode}
                       onChange={(e) => {
                         setMode(e.target.value as "voice" | "text");
+                        setVoiceAcknowledged(false);
                         setKeyValid(false);
                       }}
                       className="field-select"
@@ -576,6 +594,31 @@ function Setup() {
                   onReady={ready}
                   onDevice={setDevice}
                 />
+                {mode === "voice" && (
+                  <label className="mt-5 flex items-start gap-3 text-sm">
+                    <input
+                      className="mt-1"
+                      type="checkbox"
+                      checked={voiceAcknowledged}
+                      onChange={(e) => setVoiceAcknowledged(e.target.checked)}
+                    />
+                    <span>
+                      When I start, my microphone audio will stream to
+                      mockinterview and Google Gemini for this AI conversation,
+                      and my transcript will be saved. I will speak in a private
+                      space without recording other people. I can choose text
+                      above instead.{" "}
+                      <a
+                        href="/privacy"
+                        className="underline"
+                        target="_blank"
+                        rel="noopener"
+                      >
+                        Privacy details
+                      </a>
+                    </span>
+                  </label>
+                )}
                 <Button
                   className="mt-6"
                   variant="ghost"
@@ -633,23 +676,19 @@ function Setup() {
                       value={provider}
                       onChange={(e) => {
                         setProvider(e.target.value);
+                        setPaidBilling(false);
                         setKeyValid(false);
                         if (e.target.value !== "gemini") setMode("text");
                       }}
                       className="field-select"
                     >
-                      {[
-                        "gemini",
-                        "openai",
-                        "anthropic",
-                        "deepseek",
-                        "xai",
-                        "meta",
-                      ].map((p) => (
-                        <option key={p} value={p}>
-                          {pretty(p)}
-                        </option>
-                      ))}
+                      {["gemini", "openai", "anthropic", "deepseek", "xai"].map(
+                        (p) => (
+                          <option key={p} value={p}>
+                            {pretty(p)}
+                          </option>
+                        ),
+                      )}
                     </select>
                   </Field>
                   <Field label="API key">
@@ -659,6 +698,7 @@ function Setup() {
                       value={key}
                       onChange={(e) => {
                         setKey(e.target.value);
+                        setPaidBilling(false);
                         setKeyValid(false);
                       }}
                       placeholder="Used only for this attempt"
@@ -682,10 +722,43 @@ function Setup() {
                     provider may charge for use. One hosted attempt per 24
                     hours.
                   </p>
+                  {provider === "gemini" && (
+                    <label className="flex items-start gap-3 text-xs">
+                      <input
+                        className="mt-1"
+                        type="checkbox"
+                        checked={paidBilling}
+                        onChange={(e) => {
+                          setPaidBilling(e.target.checked);
+                          setKeyValid(false);
+                        }}
+                      />
+                      <span>
+                        This key belongs to a Google project with paid billing
+                        enabled. Free-tier Gemini keys are unsuitable for
+                        personal interview data.{" "}
+                        <a
+                          className="underline"
+                          href="https://ai.google.dev/gemini-api/docs/billing"
+                          target="_blank"
+                          rel="noopener"
+                        >
+                          Check billing in Google AI Studio
+                        </a>
+                        . Connection validation does not verify billing.
+                      </span>
+                    </label>
+                  )}
                   <Button
                     variant="ghost"
                     onClick={() => void validate()}
-                    disabled={!key || busy || !user}
+                    disabled={
+                      !key ||
+                      busy ||
+                      !user ||
+                      user.policies_required ||
+                      (provider === "gemini" && !paidBilling)
+                    }
                   >
                     {keyValid
                       ? "Connection verified"
@@ -743,7 +816,11 @@ function Setup() {
                   onClick={() => void check()}
                   disabled={busy}
                 >
-                  {user ? "Check devices →" : "Sign in to continue →"}
+                  {user?.policies_required
+                    ? "Review terms to continue →"
+                    : user
+                      ? "Check devices →"
+                      : "Sign in to continue →"}
                 </Button>
               ) : (
                 <Button
@@ -754,6 +831,8 @@ function Setup() {
                     !usage ||
                     blocked ||
                     !deviceReady ||
+                    user?.policies_required ||
+                    (mode === "voice" && !voiceAcknowledged) ||
                     (funding === "byok" && !keyValid) ||
                     (user?.email_verified === false && !usage?.local_unlimited)
                   }

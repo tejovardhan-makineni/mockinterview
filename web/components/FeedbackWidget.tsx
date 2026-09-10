@@ -42,9 +42,7 @@ export function FeedbackWidget({
       const context = diagnostics
         ? {
             ...getContext?.(),
-            path: window.location.pathname,
-            user_agent: navigator.userAgent,
-            viewport: window.innerWidth + "x" + window.innerHeight,
+            page: window.location.pathname,
           }
         : undefined;
       const id = sessionId ?? String(getContext?.().session_id ?? "");
@@ -146,6 +144,11 @@ export function FeedbackWidget({
                 ))}
               </select>
             </Field>
+            <p className="text-xs text-[var(--color-muted)]">
+              Feedback is private to the operator and associated with your
+              account email. Do not include sensitive personal information.
+              Optional sharing controls below start off.
+            </p>
             <Field label="Anything you would like us to know? · optional">
               <textarea
                 rows={4}
@@ -162,7 +165,7 @@ export function FeedbackWidget({
                 checked={diagnostics}
                 onChange={(e) => setDiagnostics(e.target.checked)}
               />
-              Include browser and connection diagnostics
+              Include page and connection diagnostics
             </label>
             {(sessionId || variant === "studio") && (
               <label className="flex items-start gap-2 text-xs">

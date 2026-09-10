@@ -13,6 +13,7 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/tejo/mockinterview-api/internal/auth"
 	"github.com/tejo/mockinterview-api/internal/config"
 	"github.com/tejo/mockinterview-api/internal/corpus"
 	"github.com/tejo/mockinterview-api/internal/llm"
@@ -110,6 +111,9 @@ func TestHostedPaidRoutesRequireVerificationAndResumeUploadIsLimited(t *testing.
 		t.Fatal("unverified legacy finish queued scoring")
 	}
 	repo.verified = true
+	if _, err := repo.AcceptPolicies(ctx, u.ID, auth.TermsVersion, auth.PrivacyVersion); err != nil {
+		t.Fatal(err)
+	}
 	request("POST", "/sessions/"+legacy.ID+"/finish", "", nil, 202)
 	job, err := repo.ClaimScoring(ctx)
 	if err != nil || job.SessionID != legacy.ID || model.calls.Load() != 0 {

@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"time"
 
 	"github.com/jackc/pgx/v5"
 )
@@ -11,12 +12,16 @@ import (
 var ErrNotFound = errors.New("not found")
 
 type User struct {
-	ID            string
-	Email         string
-	PasswordHash  string
-	Role          string
-	EmailVerified bool
-	TokenVersion  int
+	ID                 string
+	Email              string
+	PasswordHash       string
+	Role               string
+	EmailVerified      bool
+	TokenVersion       int
+	AdultConfirmedAt   *time.Time
+	TermsVersion       string
+	PrivacyVersion     string
+	PoliciesAcceptedAt *time.Time
 }
 
 func (s *Store) CreateUser(ctx context.Context, email, passwordHash string) (User, error) {
@@ -30,8 +35,8 @@ func (s *Store) CreateUser(ctx context.Context, email, passwordHash string) (Use
 func (s *Store) UserByEmail(ctx context.Context, email string) (User, error) {
 	var u User
 	err := s.Pool.QueryRow(ctx,
-		`SELECT id, email, password_hash, role, email_verified, token_version FROM users WHERE email=$1`, email).
-		Scan(&u.ID, &u.Email, &u.PasswordHash, &u.Role, &u.EmailVerified, &u.TokenVersion)
+		`SELECT `+userColumns+` FROM users WHERE email=$1`, email).
+		Scan(userDestinations(&u)...)
 	if errors.Is(err, pgx.ErrNoRows) {
 		return u, ErrNotFound
 	}
@@ -41,8 +46,8 @@ func (s *Store) UserByEmail(ctx context.Context, email string) (User, error) {
 func (s *Store) UserByID(ctx context.Context, id string) (User, error) {
 	var u User
 	err := s.Pool.QueryRow(ctx,
-		`SELECT id, email, password_hash, role, email_verified, token_version FROM users WHERE id=$1`, id).
-		Scan(&u.ID, &u.Email, &u.PasswordHash, &u.Role, &u.EmailVerified, &u.TokenVersion)
+		`SELECT `+userColumns+` FROM users WHERE id=$1`, id).
+		Scan(userDestinations(&u)...)
 	if errors.Is(err, pgx.ErrNoRows) {
 		return u, ErrNotFound
 	}

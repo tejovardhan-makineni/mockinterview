@@ -140,21 +140,36 @@ type credentials struct {
 	Password string `json:"password"`
 }
 
+type registration struct {
+	credentials
+	policyAssertion
+}
+
 type authResponse struct {
 	Token string      `json:"token"`
 	User  userPayload `json:"user"`
 }
 
 type userPayload struct {
-	ID            string `json:"id"`
-	Email         string `json:"email"`
-	EmailVerified bool   `json:"email_verified"`
-	Role          string `json:"role"`
+	ID                 string     `json:"id"`
+	Email              string     `json:"email"`
+	EmailVerified      bool       `json:"email_verified"`
+	Role               string     `json:"role"`
+	AdultConfirmed     bool       `json:"adult_confirmed"`
+	PoliciesRequired   bool       `json:"policies_required"`
+	TermsVersion       string     `json:"terms_version"`
+	PrivacyVersion     string     `json:"privacy_version"`
+	PoliciesAcceptedAt *time.Time `json:"policies_accepted_at,omitempty"`
+	AdultConfirmedAt   *time.Time `json:"adult_confirmed_at,omitempty"`
 }
 
 func (s *Service) Register(w http.ResponseWriter, r *http.Request) {
-	var c credentials
+	var c registration
 	if !httpx.DecodeJSON(w, r, &c) {
+		return
+	}
+	if s.options.RequirePolicies && !c.current() {
+		PolicyRequired(w)
 		return
 	}
 	c.Email = strings.ToLower(strings.TrimSpace(c.Email))
@@ -179,7 +194,17 @@ func (s *Service) Register(w http.ResponseWriter, r *http.Request) {
 		httpx.WriteProblem(w, http.StatusInternalServerError, "hash failed")
 		return
 	}
-	u, err := s.store.CreateUser(r.Context(), c.Email, hash)
+	var u store.User
+	if c.current() {
+		repo, ok := s.store.(store.PolicyStore)
+		if !ok {
+			httpx.WriteProblem(w, 503, "account service unavailable")
+			return
+		}
+		u, err = repo.CreateUserWithPolicies(r.Context(), c.Email, hash, c.TermsVersion, c.PrivacyVersion)
+	} else {
+		u, err = s.store.CreateUser(r.Context(), c.Email, hash)
+	}
 	if err != nil {
 		httpx.WriteProblem(w, http.StatusInternalServerError, "create failed")
 		return
@@ -222,11 +247,13 @@ func (s *Service) Me(w http.ResponseWriter, r *http.Request) {
 		httpx.WriteProblem(w, http.StatusNotFound, "user not found")
 		return
 	}
-	httpx.WriteJSON(w, http.StatusOK, payload(u))
+	httpx.WriteJSON(w, http.StatusOK, s.payload(u))
 }
 
-func payload(u store.User) userPayload {
-	return userPayload{ID: u.ID, Email: u.Email, EmailVerified: u.EmailVerified, Role: u.Role}
+func (s *Service) payload(u store.User) userPayload {
+	return userPayload{ID: u.ID, Email: u.Email, EmailVerified: u.EmailVerified, Role: u.Role,
+		AdultConfirmed: u.AdultConfirmedAt != nil, PoliciesRequired: s.options.RequirePolicies && !PoliciesAccepted(u),
+		TermsVersion: u.TermsVersion, PrivacyVersion: u.PrivacyVersion, PoliciesAcceptedAt: u.PoliciesAcceptedAt, AdultConfirmedAt: u.AdultConfirmedAt}
 }
 func (s *Service) respondAuth(w http.ResponseWriter, u store.User) { s.respondAuthExtra(w, u, nil) }
 func (s *Service) respondAuthExtra(w http.ResponseWriter, u store.User, extra map[string]any) {
@@ -239,7 +266,7 @@ func (s *Service) respondAuthExtra(w http.ResponseWriter, u store.User, extra ma
 		extra = map[string]any{}
 	}
 	extra["token"] = token
-	extra["user"] = payload(u)
+	extra["user"] = s.payload(u)
 	httpx.WriteJSON(w, http.StatusOK, extra)
 }
 

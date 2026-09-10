@@ -26,6 +26,48 @@ evidence that the process is unhealthy.
 - Set `WEB_API_BASE` to the candidate API URL. Add the exact Firebase preview origin to the candidate's CORS configuration. `deploy/deploy-web.sh preview launch-candidate` builds with `npm ci`, real API mode and the source SHA, then publishes only the dedicated site. It does not modify shared Firebase Auth domains.
 - Verify real-provider readiness separately with a short, controlled interview. A green readiness endpoint does not prove a vendor's key or model works.
 
+### Policy-control update (deployment verification pending)
+
+Build the API and web from the same reviewed source, or record and verify exact
+matching API/web trees when their build SHAs differ. Match the published policy
+documents and forms to the API versions; do not release one side independently.
+`GET /api/v1/legal-policy` currently returns `terms_version` and `privacy_version`
+of `2026-09-10`, `minimum_age: 18`, and `required` for the hosted configuration.
+Hosted registration requires `adult_confirmed: true` plus both current version
+strings. Existing authenticated users submit those fields to
+`POST /api/v1/auth/policies`, which returns the user directly with
+`policies_required`, `adult_confirmed`, versions and server timestamps.
+
+Verify these release boundaries with synthetic accounts and isolated PostgreSQL:
+
+- Missing, false or stale acknowledgment must prevent hosted registration/AI
+  calls. Legacy login, recovery, history, export and deletion must remain usable.
+  New migration `0009_policy_acknowledgments.sql` leaves existing accounts
+  unacknowledged; do not backfill acceptance or infer adulthood from prior use.
+- New hosted voice attempts require `voice_processing_acknowledged: true`
+  before reservation/provider use. Check the notice before audio streams to a
+  provider and the text alternative. Existing voice reconnects retain their
+  compatibility path after account acknowledgment.
+- Hosted Gemini BYOK validation, new attempts and credential replacement require
+  `paid_billing_confirmed: true`. The connection check does not verify billing;
+  new attempts record a declaration timestamp, while key replacement does not
+  retain a separate declaration timestamp. Never describe this as verified
+  provider eligibility or silently use platform billing instead.
+- `DELETE /api/v1/resume` must remove the owner's uploads and standalone reviews,
+  including reviews detached by an earlier replacement, while preserving
+  interview history. Explain that already-used interview content needs separate
+  session/account deletion. Retired behavior ingestion must return `410` without
+  reading or storing camera-analysis samples.
+- Already acknowledged interviews can finish queued feedback across a policy
+  revision. Pre-policy jobs remain saved but require account review/verification
+  before retry; verify the actionable report message and no provider call while
+  blocked.
+
+Record exact validation and deployment evidence before marking these controls
+live. Review [legal readiness](LEGAL-READINESS-2026-09-10.md) and
+[privacy operations](PRIVACY-OPERATIONS.md); operator identity, audience and
+contract/retention decisions remain separate from passing tests.
+
 ## Promote
 
 1. Record the currently serving API revision and Firebase live version/channel in a private release record.
@@ -39,10 +81,18 @@ evidence that the process is unhealthy.
 
 Route API traffic back with `deploy/deploy-api.sh rollback PREVIOUS_REVISION`. Restore the recorded Firebase Hosting version using its release history or clone a retained previous channel. Do not roll database schema backward automatically: additive migrations must remain compatible with the prior binary. If not, use a forward fix and a reviewed data recovery plan. Never restore the entire shared Cloud SQL instance to fix this application's data.
 
+Migration `0009` adds nullable timestamps and version columns with safe defaults;
+the prior API can read its existing columns with the migration left in place.
+However, rolling back to that binary **removes the new age/policy enforcement**.
+It also rejects new registration fields and lacks `/auth/policies`. Coordinate
+the matching web rollback so signup does not silently break, and explicitly
+assess the lost safeguards; database compatibility is not policy equivalence.
+Prefer a forward fix when the previous release cannot meet the required controls.
+
 Existing WebSockets can remain attached to their original revision during a traffic change. Do not forcibly terminate healthy interviews just to complete rollout. During process shutdown, leases and saved transcripts allow reconnection; a scoring job can be reclaimed after its lease expires. Verify that recovery behavior before relying on it.
 
 ## Ongoing operation
 
-Review failed interview starts, input/persistence failures, feedback jobs, provider errors and latency. Logs contain route templates and safe request IDs, without query strings or request bodies. The hourly maintenance worker removes expired email actions and personal keys, the expired seven-day eligibility ledger, and raw legacy behavioral telemetry older than thirty days. Completed interview history remains until the user deletes it or the account. Backups age out under the database's configured backup policy; do not claim immediate deletion from backups.
+Review failed interview starts, input/persistence failures, feedback jobs, provider errors and latency. Keep application diagnostics free of request bodies, action links, keys and provider output; verify infrastructure access-log fields separately, including query strings. The hourly maintenance worker removes expired email actions and personal keys, the expired seven-day eligibility ledger, and raw legacy behavioral telemetry older than thirty days. Completed interview history remains until the user deletes it or the account. Automated backups age out under the database's configured backup policy; manual backups need a separate retention decision. Do not claim immediate deletion from backups. See the actual retention inventory in [privacy operations](PRIVACY-OPERATIONS.md).
 
 The global platform-funded daily start limit complements the per-user weekly/daily admission limits. Cloud billing alerts provide notifications; they do not cap usage. Personal-key requests must remain on that user's selected provider, including scoring, and must not silently fall back to platform billing.
