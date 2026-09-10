@@ -65,8 +65,12 @@ for suffix, url, path in [('Web', os.environ['PUBLIC_URL'], '/'), ('API', os.env
     if len(matches) > 1:
         raise ValueError('Duplicate app uptime check names; resolve them before changing monitoring')
     if matches:
+        if matches[0].get('monitoredResource') != desired['monitoredResource']:
+            raise ValueError(f'{name} has a different immutable resource identity; explicitly recreate the check and update its alert policy separately. The existing check was not changed.')
         desired['name'] = matches[0]['name']
-        mask = 'displayName,monitoredResource,httpCheck,period,timeout,selectedRegions'
+        # The API rejects this immutable field in a PATCH, even when unchanged.
+        del desired['monitoredResource']
+        mask = 'displayName,httpCheck,period,timeout,selectedRegions'
         check = call('PATCH', resource_path(desired['name'])+'?'+urllib.parse.urlencode({'updateMask': mask}), desired)
     else:
         check = call('POST', '/uptimeCheckConfigs', desired)

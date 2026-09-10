@@ -4,9 +4,11 @@ Practice interviews with a clearly identified AI interviewer, keep your work and
 feedback, and contribute new interview formats. The hosted application is at
 [mockinterview.live](https://mockinterview.live).
 
-**Release status:** this redesigned version is available to run locally. The
-hosted site still runs the previous release while verification/recovery email
-is configured. See [release validation](docs/RELEASE-VALIDATION-2026-09-09.md).
+**The redesigned public beta is live.** The API and website were promoted on
+September 10, 2026. Production signup, verification, a real AI text interview,
+saved evidence/report, history, feedback and quota checks passed. See
+[release validation](docs/RELEASE-VALIDATION-2026-09-09.md) for exact deployed
+versions, completed checks and remaining limits.
 
 Choose a profession, format, target level and duration. Optional controls adjust
 challenge, interview style and simulation versus coaching. A device check leads
@@ -23,8 +25,9 @@ questions. Code and SQL are reviewed as text; there is no execution sandbox.
 
 ## Run locally
 
-Install **Go 1.26.8+**, **Node.js 22**, **Python 3** (content tools), and **Docker
-with Compose v2** (Postgres 16). No paid service is needed for the demo.
+Install **Go 1.26.8+**, **Node.js 22 with npm 10**, **Python 3** (content tools),
+and **Docker with Compose v2** (Postgres 16). No paid service is needed for the
+demo.
 
 ```bash
 git clone https://github.com/tejovardhan-makineni/mockinterview.git
@@ -71,17 +74,30 @@ Two alternatives after copying `.env.example`:
 
 - **Containers:** `make local-stack` builds the API and static web application and
   starts Postgres. Only loopback ports 3000, 8080 and 5432 are published. This is a
-  development setup, without production TLS or mail configuration.
+  development setup, without production TLS or mail configuration. Compose
+  configuration has been checked; a complete container boot remains unverified
+  in this release's validation environment.
 - **UI preview:** after `make install`, run
   `cd web && NEXT_PUBLIC_MOCK=1 npm run dev`. This uses example data without an API.
 
 ## Hosted usage and continued practice
 
 The free allowance is one interview start per rolling seven days. All hosted
-starts, including your own provider key, share a one-start-per-rolling-24-hours
-limit. Resume and report retries do not consume another start. Your own-key
+accounts, including maintainers, share the same allowance. All hosted starts,
+including your own provider key, share a one-start-per-rolling-24-hours limit.
+Resume and report retries do not consume another start. Your own-key
 option still uses the hosted service; self-hosting is the route to unrestricted
 local practice.
+
+Hosted accounts verify their email before starting or using hosted resume AI.
+Existing accounts can still read history and export data before verification;
+retrying a legacy unfinished interview's assessment requires verification too.
+Verification and recovery
+messages use the project's verified sender domain through Resend. Check spam as
+well as your inbox; delivery tests do not guarantee inbox placement. If feedback
+fails, the report offers a retry for that saved attempt. An invalid assessment
+is rejected rather than replaced with invented scores, and a retry is not a
+guarantee of success.
 
 Between interviews, revisit saved evidence, rewrite an answer and complete the
 report's short self-guided exercises. These exercises make no model request.
@@ -106,6 +122,11 @@ Scaffolds go to `scratch/content/` and are not published automatically. The auth
 preview includes private answers and probes; do not expose its output to a live
 candidate. Schema validation and context tests are a first gate, followed by
 human content review and real-provider evaluation before any quality claim.
+
+Public beta validation has not covered a human microphone/browser matrix,
+production load, or calibration of all 143 scenarios. Report reproducible
+problems through [support](SUPPORT.md), without sharing keys or private interview
+content in public issues.
 
 ## Development checks
 
