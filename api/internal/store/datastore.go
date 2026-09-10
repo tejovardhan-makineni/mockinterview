@@ -19,6 +19,7 @@ type Datastore interface {
 	AccountStore
 	PolicyStore
 	SessionRuntime
+	InterviewFeedbackStore
 	// users
 	CreateUser(ctx context.Context, email, passwordHash string) (User, error)
 	UserByEmail(ctx context.Context, email string) (User, error)

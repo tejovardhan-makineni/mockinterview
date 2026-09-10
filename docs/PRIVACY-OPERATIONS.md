@@ -6,6 +6,23 @@ Read the [legal-readiness assessment](LEGAL-READINESS-2026-09-10.md) for unresol
 
 ## Private records and ownership
 
+The new required product check-in is distinct from voluntary bug reports and
+research. It records versioned choices and limited interview metadata, with
+optional comments and transcript permission. Structured responses are included
+in account export and removed with their interview or account; general feedback
+can have a different lifecycle. Follow the
+[questionnaire](BETA-FEEDBACK-QUESTIONNAIRE.md) and
+[metric definitions](FEEDBACK-METRICS.md), and consult the current release record
+for deployed status. Do not reuse identifiable responses or transcripts in a
+university study merely because they were collected for product improvement.
+
+Where relying on legitimate interests, the operator must document the purpose,
+necessity and balancing assessment and handle applicable objections. Making a
+survey required does not itself establish that basis, and a product terms
+acknowledgment is not freely given research consent. Preserve the existing
+private rights route and assess requests without requiring survey submission.
+[EDPB lawful-processing guidance](https://www.edpb.europa.eu/sme/be-compliant/process-personal-data-lawfully_en).
+
 Keep a restricted request/incident register outside Git. Assign an accountable operator and, where appropriate, counsel. Record only: reference, received/awareness time in UTC, request type, necessary contact/account reference, relevant jurisdiction, verified authority, applicable deadline and source, actions, exceptions and closure. Keep content out of CI artifacts, model prompts and ordinary logs. Decide and record retention for this register; do not retain copies of entire interviews by default.
 
 Maintain a provider register covering legal entity, service, controller/processor role, data types, purposes, countries, accepted agreement/version, subprocessors, transfer mechanism, retention/deletion route and security contact. The hosted Gemini project's paid billing was verified on 10 September 2026; BYOK eligibility declarations are not independent billing verification. An operator must review and accept applicable contracts personally or through authorized representation.
@@ -20,7 +37,7 @@ Maintain a provider register covering legal entity, service, controller/processo
 
 ## Deletion and restoration checklist
 
-- **Session:** use the owner-scoped deletion operation. A leased/ending/scoring session can return a conflict; resolve activity safely instead of bypassing persistence safeguards. Separate feedback can retain account-linked comments/context after session deletion and must be considered in a broader erasure request.
+- **Session:** use the owner-scoped deletion operation. A leased/ending/scoring session can return a conflict; resolve activity safely instead of bypassing persistence safeguards. Structured product check-ins are removed with their interview. Separate general feedback can retain account-linked comments/context after session deletion and must be considered in a broader erasure request.
 - **Resume:** a new upload replaces the previous upload, but older standalone review results can remain. The deployed explicit resume-delete operation removes uploads and standalone reviews, including detached reviews. Deleting a resume does not rewrite interview transcripts, saved session context or reports that already used it.
 - **Account:** account deletion cascades linked application records. Verify related data and credential removal using scoped counts, not transcript dumps. The rolling quota ledger survives temporarily; review any exceptional erasure request against its documented anti-abuse purpose.
 - **Browser:** logout/deletion clears private application caches on the current origin. It cannot wipe other devices, alternate hostnames, previously downloaded exports or user copies. Explain how to clear those locally if requested.
@@ -36,7 +53,8 @@ The following combines source behavior with read-only production configuration c
 | --- | --- |
 | Accounts, interviews, transcripts, workspace, reports | No general automatic expiry. Retained until applicable user/operator deletion. Define any future inactivity schedule before promising one. |
 | Resume uploads/reviews | Latest upload replaces prior upload; standalone reviews can persist. Account deletion removes linked data. Independent resume/review deletion passed owner-isolation and idempotence tests and is deployed. |
-| Feedback | Account-linked; separate from session lifecycle. Optional diagnostic/transcript flags do not make it anonymous. |
+| Required interview check-in | Account/interview-linked six answers, version, timestamps, optional comment and transcript permission. Included in account export; cascades with session/account deletion. Private aggregate metrics and paginated suggestions do not make the underlying records anonymous. |
+| General/support feedback | Account-linked; separate from the session lifecycle. Optional diagnostic/transcript flags do not make it anonymous. |
 | Verification/reset actions | One-use tokens stored hashed; verification validity 24 hours, reset 30 minutes; expired rows cleaned periodically. Never log action links. |
 | BYOK credentials | Encrypted server-side session credentials expire after three hours and are removed following terminal processing/maintenance. Do not claim this controls vendor logs. |
 | Usage ledger | Purpose-specific HMAC of normalized email plus activation/funding; retained for rolling seven-day enforcement with hourly cleanup. Pseudonymous, not anonymous; survives account deletion for that limited purpose. |

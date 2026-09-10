@@ -26,13 +26,13 @@ evidence that the process is unhealthy.
 - Set `WEB_API_BASE` to the candidate API URL. Add the exact Firebase preview origin to the candidate's CORS configuration. `deploy/deploy-web.sh preview launch-candidate` builds with `npm ci`, real API mode and the source SHA, then publishes only the dedicated site. It does not modify shared Firebase Auth domains.
 - Verify real-provider readiness separately with a short, controlled interview. A green readiness endpoint does not prove a vendor's key or model works.
 
-### Policy-control update (deployment verification pending)
+### Policy controls and required product feedback
 
 Build the API and web from the same reviewed source, or record and verify exact
 matching API/web trees when their build SHAs differ. Match the published policy
 documents and forms to the API versions; do not release one side independently.
 `GET /api/v1/legal-policy` currently returns `terms_version` and `privacy_version`
-of `2026-09-10`, `minimum_age: 18`, and `required` for the hosted configuration.
+of `2026-09-10.1` in this source, `minimum_age: 18`, and `required` for the hosted configuration.
 Hosted registration requires `adult_confirmed: true` plus both current version
 strings. Existing authenticated users submit those fields to
 `POST /api/v1/auth/policies`, which returns the user directly with
@@ -67,6 +67,22 @@ Record exact validation and deployment evidence before marking these controls
 live. Review [legal readiness](LEGAL-READINESS-2026-09-10.md) and
 [privacy operations](PRIVACY-OPERATIONS.md); operator identity, audience and
 contract/retention decisions remain separate from passing tests.
+
+For the required product-feedback release, also verify that a new, started,
+finished attempt requires a versioned questionnaire before another new interview
+can reserve capacity or call a provider. An unused reservation and an older
+attempt must not block practice. Verify failed and unscored attempts, all
+unable-to-judge answers, concurrent/repeated submissions, ownership, and recovery
+from an unsuccessful save. Reopening a saved response must not count it twice.
+Reports, retry, history, export and deletion remain accessible. Session/account
+deletion removes structured responses; general problem reports have their own
+documented lifecycle. Check full-window metric denominators and stored-admin
+authorization. See [metric definitions](FEEDBACK-METRICS.md).
+
+The terms/privacy version change explains required product feedback; it is not
+consent to optional transcript sharing or research. Coordinate API and web
+promotion. A rollback to an earlier binary removes the new survey enforcement
+and endpoints even if the additive migration is compatible.
 
 ## Promote
 

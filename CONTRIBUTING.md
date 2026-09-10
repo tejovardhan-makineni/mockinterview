@@ -91,3 +91,10 @@ See the [legal readiness assessment](docs/LEGAL-READINESS-2026-09-10.md) and
 [privacy operations guide](docs/PRIVACY-OPERATIONS.md) before changing data flows,
 providers or sharing defaults. The hosted terms do not replace the code license;
 private interviews and product feedback are not public source contributions.
+
+New interview domains should have appropriate subject wording in the versioned
+[post-interview questionnaire](docs/BETA-FEEDBACK-QUESTIONNAIRE.md). Review the
+[metric definitions](docs/FEEDBACK-METRICS.md) before changing question IDs,
+wording, response options or denominators. Preserve existing attempt versions;
+do not reinterpret earlier answers under a new scale. Use fictional survey
+fixtures and keep opinion ratings separate from measured interview performance.

@@ -21,6 +21,7 @@ type Workspace struct {
 	Data     json.RawMessage `json:"data,omitempty"`
 }
 type Usage struct {
+	PendingFeedback bool       `json:"-"`
 	FundedAvailable bool       `json:"funded_available"`
 	NextFundedAt    *time.Time `json:"next_funded_at,omitempty"`
 	NextStartAt     *time.Time `json:"next_start_at,omitempty"`
@@ -68,11 +69,11 @@ type SessionRuntime interface {
 	DeleteSession(context.Context, string) error
 }
 
-const sessionSelect = `SELECT id,user_id,question_id,modality,track,status,phase,config,pack_id,pack_round_id,duration_minutes,started_at,deadline_at,created_at,reserved_until,funding,provider,model,mode,question_snapshot,usage_identity,live_model FROM sessions`
+const sessionSelect = `SELECT id,user_id,question_id,modality,track,status,phase,config,pack_id,pack_round_id,duration_minutes,started_at,deadline_at,created_at,reserved_until,funding,provider,model,mode,question_snapshot,usage_identity,live_model,feedback_version FROM sessions`
 
 func scanSession(row pgx.Row) (Session, error) {
 	var s Session
-	err := row.Scan(&s.ID, &s.UserID, &s.QuestionID, &s.Modality, &s.Track, &s.Status, &s.Phase, &s.Config, &s.PackID, &s.PackRoundID, &s.DurationMinutes, &s.StartedAt, &s.DeadlineAt, &s.CreatedAt, &s.ReservedUntil, &s.Funding, &s.Provider, &s.Model, &s.Mode, &s.QuestionSnapshot, &s.UsageIdentity, &s.LiveModel)
+	err := row.Scan(&s.ID, &s.UserID, &s.QuestionID, &s.Modality, &s.Track, &s.Status, &s.Phase, &s.Config, &s.PackID, &s.PackRoundID, &s.DurationMinutes, &s.StartedAt, &s.DeadlineAt, &s.CreatedAt, &s.ReservedUntil, &s.Funding, &s.Provider, &s.Model, &s.Mode, &s.QuestionSnapshot, &s.UsageIdentity, &s.LiveModel, &s.FeedbackVersion)
 	if errors.Is(err, pgx.ErrNoRows) {
 		err = ErrNotFound
 	}
@@ -95,12 +96,13 @@ func readUsage(ctx context.Context, q queryer, uid, identity string, unlimited b
 		u.NextFundedAt = weekly
 		u.FundedAvailable = weekly == nil && daily == nil
 	}
-	var active string
-	err := q.QueryRow(ctx, `SELECT id FROM sessions WHERE (user_id=$1 OR usage_identity=$2) AND (status IN ('reserved','created') AND COALESCE(reserved_until,created_at+interval '10 minutes')>now() OR status IN ('active','interrupted','ending') AND COALESCE(deadline_at,created_at+interval '70 minutes')>now()) ORDER BY created_at DESC LIMIT 1`, uid, identity).Scan(&active)
-	if err != nil && !errors.Is(err, pgx.ErrNoRows) {
+	// Active and pending states share one MVCC statement snapshot. A scoring
+	// worker may transition ending -> scoring without the admission lock.
+	err := q.QueryRow(ctx, `SELECT COALESCE((SELECT id::text FROM sessions WHERE (user_id=$1 OR usage_identity=$2) AND (status IN ('reserved','created') AND COALESCE(reserved_until,created_at+interval '10 minutes')>now() OR status IN ('active','interrupted','ending') AND (started_at IS NOT NULL OR COALESCE(deadline_at,created_at+interval '70 minutes')>now())) ORDER BY created_at DESC LIMIT 1),''),
+ EXISTS(SELECT 1 FROM sessions WHERE user_id=$1 AND `+feedbackEligibleSQL+` AND NOT EXISTS(SELECT 1 FROM interview_feedback f WHERE f.session_id=sessions.id))`, uid, identity).Scan(&u.ActiveSessionID, &u.PendingFeedback)
+	if err != nil {
 		return u, err
 	}
-	u.ActiveSessionID = active
 	return u, nil
 }
 func (s *Store) Usage(ctx context.Context, uid, identity string, unlimited bool) (Usage, error) {
@@ -123,6 +125,9 @@ func (s *Store) ReserveSession(ctx context.Context, r Reservation) (Session, err
 	if e != nil {
 		return Session{}, e
 	}
+	if u.PendingFeedback {
+		return Session{}, ErrInterviewFeedbackRequired
+	}
 	if u.ActiveSessionID != "" {
 		return Session{}, ErrSessionConflict
 	}
@@ -144,7 +149,7 @@ func (s *Store) ReserveSession(ctx context.Context, r Reservation) (Session, err
 	if len(a.QuestionSnapshot) == 0 {
 		a.QuestionSnapshot = json.RawMessage(`{}`)
 	}
-	_, e = tx.Exec(ctx, `INSERT INTO sessions(id,user_id,question_id,modality,track,status,phase,config,pack_id,pack_round_id,duration_minutes,reserved_until,funding,provider,model,mode,question_snapshot,usage_identity,quota_exempt,global_daily_limit,live_model) VALUES($1,$2,$3,$4,$5,'reserved','lobby',$6,$7,$8,$9,now()+interval '10 minutes',$10,$11,$12,$13,$14,$15,$16,$17,$18)`, a.ID, uid, a.QuestionID, a.Modality, a.Track, a.Config, a.PackID, a.PackRoundID, a.DurationMinutes, a.Funding, a.Provider, a.Model, a.Mode, a.QuestionSnapshot, r.Identity, r.Unlimited, r.GlobalDailyLimit, a.LiveModel)
+	_, e = tx.Exec(ctx, `INSERT INTO sessions(id,user_id,question_id,modality,track,status,phase,config,pack_id,pack_round_id,duration_minutes,reserved_until,funding,provider,model,mode,question_snapshot,usage_identity,quota_exempt,global_daily_limit,live_model,feedback_version) VALUES($1,$2,$3,$4,$5,'reserved','lobby',$6,$7,$8,$9,now()+interval '10 minutes',$10,$11,$12,$13,$14,$15,$16,$17,$18,$19)`, a.ID, uid, a.QuestionID, a.Modality, a.Track, a.Config, a.PackID, a.PackRoundID, a.DurationMinutes, a.Funding, a.Provider, a.Model, a.Mode, a.QuestionSnapshot, r.Identity, r.Unlimited, r.GlobalDailyLimit, a.LiveModel, a.FeedbackVersion)
 	if e != nil {
 		return Session{}, e
 	}
@@ -196,6 +201,9 @@ func (s *Store) ActivateLive(ctx context.Context, id, owner string) (Session, er
 		usage, e := readUsage(ctx, tx, a.UserID, a.UsageIdentity, exempt)
 		if e != nil {
 			return Session{}, e
+		}
+		if usage.PendingFeedback {
+			return Session{}, ErrInterviewFeedbackRequired
 		}
 		if !exempt && (usage.NextStartAt != nil || (a.Funding == "platform" && usage.NextFundedAt != nil)) {
 			return Session{}, ErrQuota

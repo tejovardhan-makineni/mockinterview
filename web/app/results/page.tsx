@@ -3,11 +3,23 @@ import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { api } from "@/lib/api";
 import type { SessionHistoryItem } from "@/lib/features/interview";
+import {
+  RequiredFeedbackNotice,
+  useRequiredFeedback,
+  feedbackChanged,
+} from "@/components/RequiredFeedbackNotice";
+import { feedbackHref } from "@/lib/interviewFeedback";
 import { errorMessage } from "@/lib/http";
 import { AppShell } from "@/components/AppShell";
 import { Badge, Button, Panel, ErrorNotice } from "@/components/ui";
 export default function History() {
   const router = useRouter();
+  const [signedIn, setSignedIn] = useState(false);
+  const {
+    pending,
+    error: pendingError,
+    refresh: refreshPending,
+  } = useRequiredFeedback(signedIn);
   const [items, setItems] = useState<SessionHistoryItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -26,6 +38,7 @@ export default function History() {
           router.replace("/login?next=/results");
           return;
         }
+        setSignedIn(true);
         const records = await api.listSessions(before);
         setItems((prev) =>
           before
@@ -53,6 +66,7 @@ export default function History() {
       await api.deleteSession(id);
       setItems((prev) => prev.filter((s) => s.id !== id));
       setConfirm("");
+      feedbackChanged();
       setNotice("Interview deleted. Your usage allowance is unchanged.");
     } catch (e) {
       setError(errorMessage(e));
@@ -77,6 +91,13 @@ export default function History() {
         </div>
         <Button href="/interviews">Practice an interview →</Button>
       </div>
+      {pending && <RequiredFeedbackNotice pending={pending} />}
+      {pendingError && (
+        <ErrorNotice
+          message={"Check-in status could not load. " + pendingError}
+          onRetry={() => void refreshPending().catch(() => {})}
+        />
+      )}
       <label className="mt-8 block">
         <span className="sr-only">Search loaded interview history</span>
         <input
@@ -114,9 +135,11 @@ export default function History() {
       ) : (
         <div className="mt-6 space-y-3">
           {shown.map((item) => {
-            const processing = ["scoring", "feedback_failed"].includes(
-              item.status,
-            );
+            const processing = [
+              "scoring",
+              "ending",
+              "feedback_failed",
+            ].includes(item.status);
             const recoverable = [
               "created",
               "reserved",
@@ -155,6 +178,20 @@ export default function History() {
                     ) : recoverable ? (
                       <Button href={"/interview?s=" + item.id} variant="ghost">
                         Resume →
+                      </Button>
+                    ) : null}
+                    {pending?.items.some((p) => p.session_id === item.id) ? (
+                      <Button href={feedbackHref(item.id)} variant="ghost">
+                        Check-in needed →
+                      </Button>
+                    ) : [
+                        "expired",
+                        "abandoned",
+                        "complete",
+                        "feedback_failed",
+                      ].includes(item.status) ? (
+                      <Button href={feedbackHref(item.id)} variant="ghost">
+                        Interview check-in
                       </Button>
                     ) : null}
                     <button

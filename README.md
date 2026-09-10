@@ -108,7 +108,7 @@ identity document is collected by this acknowledgment flow.
 
 API clients can read `GET /api/v1/legal-policy` for `terms_version`,
 `privacy_version`, `minimum_age` and `required`. The current document versions are
-`2026-09-10`. Hosted registration includes `adult_confirmed: true` and both exact
+`2026-09-10.1`. Hosted registration includes `adult_confirmed: true` and both exact
 version strings alongside email/password; existing users submit the same three
 fields to authenticated `POST /api/v1/auth/policies`. That endpoint returns the
 user directly, including `policies_required`, `adult_confirmed`, accepted versions,
@@ -136,6 +136,26 @@ Rehearsing the same scenario builds fluency; a new scenario tests whether the
 skill transfers. Repeated scores are not independent evidence of readiness.
 
 ## Contribute
+
+### Help improve the beta
+
+New started interviews include a required six-question product check-in after
+they end, including unsuccessful attempts. Complete it before starting another
+interview. Existing history, reports, report retries, export and deletion remain
+available. Unstarted reservations and older interviews do not create a backlog.
+Every question accepts an unable-to-judge response; comments and transcript
+sharing remain optional. The check-in does not change your interview score.
+
+Questions cover ease of use, interviewer realism, subject-specific probing,
+challenge fit, report actionability and technical disruption. See the exact
+[questionnaire](docs/BETA-FEEDBACK-QUESTIONNAIRE.md) and
+[metric definitions](docs/FEEDBACK-METRICS.md). Stored administrators can review
+the aggregated results at `/admin/feedback`. These are product-experience
+measures, not proof of learning gains or a validated assessment of job readiness.
+Public research or university studies require a separate participation and
+data-handling process.
+
+### Contribute a format or improvement
 
 You can contribute a scenario, a reusable format, a rubric review, an accessibility
 fix or a product improvement. Start with [CONTRIBUTING.md](CONTRIBUTING.md) and the

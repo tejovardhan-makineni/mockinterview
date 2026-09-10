@@ -33,7 +33,7 @@ func (m *Mem) usage(uid, identity string, unlimited bool) store.Usage {
 			continue
 		}
 		st := v.sess.Status
-		if (st == "reserved" || st == "created") && v.sess.ReservedUntil != nil && v.sess.ReservedUntil.After(now) || (st == "active" || st == "interrupted" || st == "ending") && v.sess.DeadlineAt != nil && v.sess.DeadlineAt.After(now) {
+		if (st == "reserved" || st == "created") && v.sess.ReservedUntil != nil && v.sess.ReservedUntil.After(now) || (st == "active" || st == "interrupted" || st == "ending") && (v.sess.StartedAt != nil || v.sess.DeadlineAt != nil && v.sess.DeadlineAt.After(now)) {
 			u.ActiveSessionID = v.sess.ID
 		}
 	}
@@ -47,6 +47,9 @@ func (m *Mem) Usage(_ context.Context, uid, identity string, unlimited bool) (st
 func (m *Mem) ReserveSession(_ context.Context, r store.Reservation) (store.Session, error) {
 	m.mu.Lock()
 	defer m.mu.Unlock()
+	if len(m.pendingSurvey(r.Session.UserID)) > 0 {
+		return store.Session{}, store.ErrInterviewFeedbackRequired
+	}
 	u := m.usage(r.Session.UserID, r.Identity, r.Unlimited)
 	if u.ActiveSessionID != "" {
 		return store.Session{}, store.ErrSessionConflict
@@ -118,6 +121,9 @@ func (m *Mem) ActivateLive(_ context.Context, id, owner string) (store.Session, 
 		return store.Session{}, store.ErrSessionConflict
 	}
 	if v.sess.StartedAt == nil {
+		if len(m.pendingSurvey(v.sess.UserID)) > 0 {
+			return store.Session{}, store.ErrInterviewFeedbackRequired
+		}
 		now := time.Now().UTC()
 		until := now.Add(time.Duration(v.sess.DurationMinutes) * time.Minute)
 		v.sess.StartedAt = &now
@@ -298,6 +304,7 @@ func (m *Mem) DeleteSession(_ context.Context, id string) error {
 		return store.ErrSessionConflict
 	}
 	delete(m.sessions, id)
+	delete(m.interviewFeedback, id)
 	delete(m.reports, id)
 	return nil
 }

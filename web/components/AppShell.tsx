@@ -38,6 +38,7 @@ export function AppShell({
   active: NavKey;
   children: ReactNode;
 }) {
+  const [admin, setAdmin] = useState(false);
   const [signedIn, setSignedIn] = useState(false);
   const [policiesRequired, setPoliciesRequired] = useState(false);
   const router = useRouter();
@@ -48,6 +49,7 @@ export function AppShell({
       .then((u) => {
         if (alive) {
           setSignedIn(!!u);
+          setAdmin(u?.role === "admin");
           setPoliciesRequired(!!u?.policies_required);
         }
       })
@@ -120,6 +122,14 @@ export function AppShell({
                 >
                   Resume review
                 </Link>
+                {admin && (
+                  <Link
+                    href="/admin/feedback"
+                    className="block rounded-lg p-3 text-sm"
+                  >
+                    Interview feedback metrics
+                  </Link>
+                )}
                 <button
                   className="w-full rounded-lg p-3 text-left text-sm"
                   onClick={() => {

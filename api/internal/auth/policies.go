@@ -9,8 +9,8 @@ import (
 
 // These versions identify the actual published documents, not general consent
 // to optional research, marketing, recording or third-party content processing.
-const TermsVersion = "2026-09-10"
-const PrivacyVersion = "2026-09-10"
+const TermsVersion = "2026-09-10.1"
+const PrivacyVersion = "2026-09-10.1"
 
 type policyAssertion struct {
 	AdultConfirmed bool   `json:"adult_confirmed"`

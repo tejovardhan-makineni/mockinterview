@@ -10,6 +10,7 @@ import (
 )
 
 type Session struct {
+	FeedbackVersion  string          `json:"feedback_version,omitempty"`
 	DurationMinutes  int             `json:"duration_minutes"`
 	StartedAt        *time.Time      `json:"started_at,omitempty"`
 	DeadlineAt       *time.Time      `json:"deadline_at,omitempty"`
