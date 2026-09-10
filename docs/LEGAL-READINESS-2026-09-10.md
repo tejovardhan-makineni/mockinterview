@@ -6,7 +6,7 @@ This report combines a source/data-flow audit and current official US and intern
 
 The assessed purpose is private interview rehearsal: individuals receive AI practice feedback, without employer selection, advertising, data sale or paid checkout identified in this review. Camera self-view is local in the current client; audio and text can reach AI providers. These facts must be reassessed when the product changes.
 
-**Still unanswered:** the operator's legal identity, establishment/state/country, commercial status, intended countries and actual age audience. Do not infer these from the domain, maintainer email or hosting region. Also confirm whole-business revenue, affiliates/headcount, complete provider contracts, and actual log/backup retention. The existing private contact is [makinenitejovardhan@gmail.com](mailto:makinenitejovardhan@gmail.com); it is not a substitute for identifying the legal controller. No new entity, regulator registration, representative appointment or contract acceptance has been performed.
+**Still unanswered:** the operator's legal identity, establishment/state/country, commercial status, intended countries and actual age audience. Do not infer these from the domain, maintainer email or hosting region. Also confirm whole-business revenue, affiliates/headcount, complete provider contracts, and retention decisions for manual backups, provider records and other operational copies. Current Cloud Logging and automated Cloud SQL retention settings were verified separately and are recorded in [privacy operations](PRIVACY-OPERATIONS.md#retention-inventory); that does not settle every copy's retention. The existing private contact is [makinenitejovardhan@gmail.com](mailto:makinenitejovardhan@gmail.com); it is not a substitute for identifying the legal controller. No new entity, regulator registration, representative appointment or contract acceptance has been performed.
 
 ## Evidence and implementation status
 
@@ -14,10 +14,12 @@ The assessed purpose is private interview rehearsal: individuals receive AI prac
 | --- | --- |
 | Audited baseline | Source `83f17fa510ea614f39805d04400067c5b85499b1`: email verification/recovery; authenticated export, session/account deletion; private support; optional feedback-sharing flags; text practice; local optional camera preview; encrypted, expiring BYOK credentials. These controls do not establish legal compliance. |
 | Provider fact verified | The hosted Gemini API key's parent project has active billing, checked through official provider metadata without a paid model request. Evidence is retained privately as `legal-provider-billing-check-2026-09-10.json`; no secret belongs in Git. User BYOK billing remains unverified. |
-| New work pending validation/deployment | Versioned adult/terms/privacy acknowledgments and hosted-route enforcement; pre-upload/pre-voice notices; BYOK eligibility acknowledgment; disabling unused camera-analysis ingestion; resume deletion and more accurate privacy/terms copy. Presence in a working tree does not mean these controls are live. |
+| Deployed and verified | Versioned adult/terms/privacy acknowledgments, hosted-route enforcement, pre-upload/pre-voice notices, Gemini BYOK billing declarations, retired camera-analysis ingestion, resume deletion and revised notices are deployed. Production API `mockinterview-api-00041-cic` serves 100% traffic from build source `58280bab2d55c1047c7e388ba72c1ddefe51befe`. Web source `061b56bc6b26ab33baf092a9679f123a60b92764` has the same API tree; Firebase version `b8a9451c163cb83d` was promoted at `2026-09-10T09:15:21.533Z` and verified at `2026-09-10T09:17:02Z`. All six required checks and CodeQL passed. Exact evidence and limits are in the [policy release validation](RELEASE-VALIDATION-2026-09-10.md). |
 | Owner/legal work open | Identity/audience, lawful bases and sensitive-data policy, regional scope/representation, vendor agreements/transfers, retention decisions, DPIA screening and any needed local advice. |
 
-The release owner must replace the pending status with exact tested source/revision evidence before claiming deployment. See [privacy operations](PRIVACY-OPERATIONS.md) and the [release runbook](RELEASE-RUNBOOK.md).
+Staging browser checks on the `b6f5756` web build verified legacy history access, two initially unchecked policy choices, rejection with only one choice checked, saved acknowledgment metadata, preserved Senior/15-minute setup, an unchecked voice-processing choice, text mode without microphone access and an unchecked Gemini billing declaration. The synthetic fixture was deleted, its token revoked, and staging returned to zero users/sessions. These are bounded checks, not a new paid-interview or complete browser-matrix test. See [privacy operations](PRIVACY-OPERATIONS.md) and the [release runbook](RELEASE-RUNBOOK.md).
+
+Production checks confirmed `/health`, `/ready` and `/api/v1/legal-policy` returned `200`, and registration without the declarations returned `403` without creating an account or sending mail. The public signup page displayed both choices unchecked with account creation disabled. Migration `0009` preserved 15 users, 38 sessions, 27 reports and 821 transcript turns; all 15 existing users remained unacknowledged, with zero active sessions or pending jobs. The retention worker completed. No new paid AI request was made for this update; earlier interview evidence and its limits remain separate in the release record.
 
 ## Data that drives the assessment
 
@@ -26,7 +28,7 @@ The release owner must replace the pending status with exact tested source/revis
 | Account and email | Email/password go to the API; password hashes and account data stay in PostgreSQL. Resend receives recipient/action-link data for verification and recovery. Browser storage contains authentication state. |
 | Resumes | Upload immediately extracts/parses content through the configured reasoning provider; optional later interview inclusion is a different choice. Extracted text, profiles and reviews are retained. No original-file persistence was found in this upload path. |
 | Interviews | Answers, transcript, workspace and reports are stored; reasoning providers receive relevant evidence. Voice streams through the API to Gemini Live. No application raw-audio recording store was found; this does not establish provider retention. |
-| Camera/behavior | Current self-view sends no frames. The baseline API still accepted legacy gaze/expression-shaped samples; disabling it is pending, so a blanket claim that the whole service cannot receive these was unsupported. |
+| Camera/behavior | Self-view sends no frames. The audited baseline still accepted legacy gaze/expression-shaped samples. The deployed update retires that endpoint with `410` without reading or storing the body. Historical records have separate retention controls. |
 | Feedback | Comments are linked to an account; diagnostics-off does not mean anonymous. Session deletion does not automatically erase separately stored feedback. Optional context/transcript permissions are not public publication or unrestricted research consent. |
 | Deletion limits | History/resumes have no automatic general expiry at baseline. Short-lived tokens/keys/usage records have cleanup jobs. Browser copies, downloaded exports, provider records and backups need separate handling. |
 
@@ -58,15 +60,15 @@ Further targeted-country review is required. For example, Switzerland has its ow
 
 ## Audience review: concrete catalog findings
 
-A source search of the landing page, catalog, packs and scenarios found no explicit K–12, high-school, teen or undergraduate-admissions offering. `teacher-classroom` addresses a teaching professional; `mba-admissions` asks about an existing career; `medicine-mmi` already describes residency-style practice. The individual `mmi-teamwork` prompt says only “students,” and the Education label is broad. These are audience ambiguities, not proof of child-directed use.
+A source search of the landing page, catalog, packs and scenarios found no explicit K–12, high-school, teen or undergraduate-admissions offering. `teacher-classroom` addresses a teaching professional; `mba-admissions` asks about an existing career; `medicine-mmi` describes residency-style practice. The baseline `mmi-teamwork` prompt's general “students” wording was an audience ambiguity, not proof of child-directed use. The tested update now says “adult graduate students,” and landing/catalog copy explicitly limits hosted practice to adults aged 18 or older. These implementation changes are included in the release record above.
 
-Recommended bounded changes: make 18+ personal practice clear on landing/catalog pages, label teaching-professional practice clearly, and give the MMI student scenario explicit adult medical-training context. Withhold/remove any future minor-directed admissions formats from hosted Gemini pending a separate provider/legal solution. There is no basis to remove adult MBA/teacher scenarios merely for mentioning schools. Actual marketing and user evidence still matter; a source search cannot prove minors are unlikely to access the service.
+Keep teaching-professional and adult admissions practice clearly labeled, and withhold/remove any future minor-directed admissions formats from hosted Gemini pending a separate provider/legal solution. There is no basis to remove adult MBA/teacher scenarios merely for mentioning schools. Actual marketing and user evidence still matter; wording changes and a source search cannot prove minors are unlikely to access the service.
 
 ## Provider eligibility and contracts
 
 Gemini's current terms require 18+ use and prohibit clients directed toward or likely accessed by minors. EEA/UK/Swiss clients must use Paid Services; API paid status depends on an active billing account. Unpaid services permit improvement/human review and prohibit personal/sensitive/confidential inputs. Paid input/output receives different treatment, including a processor agreement; do not generalize “no training” across providers or plans. [Gemini terms, effective 23 March 2026](https://ai.google.dev/gemini-api/terms)
 
-Hosted billing is verified. A separate unchecked BYOK confirmation of authorized use and active project billing, recorded/enforced server-side, is a practical minimum control. It is **an attestation, not verified billing or a contractual safe harbor**. Reject known ineligible keys; resolve residual uncertainty or restrict the mode. Do not request keys or billing documents in public support.
+Hosted billing is verified. The tested hosted Gemini BYOK flow requires a separate, initially unchecked paid-project declaration for validation, new attempts and key replacement; authorized key use is also required by the terms. New attempts retain a server-generated declaration timestamp in session configuration. Validation and credential replacement enforce the declaration but do not retain a separate declaration timestamp. This is **an attestation, not verified billing or a contractual safe harbor**. Reject known ineligible keys; resolve residual uncertainty or restrict the mode. Do not request keys or billing documents in public support.
 
 Confirm accepted agreements and applicable entities for [Google processor terms](https://business.safety.google/processorterms/), [Google Cloud DPA](https://cloud.google.com/terms/data-processing-addendum) and [Resend DPA](https://resend.com/legal/dpa). Record recipients, countries, subprocessors, retention and transfer safeguards. These documents differ by service; no contract was accepted during this review.
 
@@ -79,6 +81,15 @@ version and third-party copyright/license notices when distributing or modifying
 the app. AGPL network-source duties do not grant rights in unrelated question
 text, employer trademarks or historical assets. [GNU license guidance](https://www.gnu.org/licenses/),
 [AGPL remote source provision](https://www.gnu.org/licenses/agpl-3.0.de.html).
+
+The deployed browser release publishes generated [dependency and asset notices](https://mockinterview.live/third-party-notices.txt),
+backed by exact-version supplements and source hashes.
+Its Excalidraw font asset uses official OFL Liberation Sans 2.1.5 in place of the
+older GPL font, with the original license, source, conversion and browser-decoding
+evidence preserved. The replacement is not pixel-identical. See the
+[release validation](RELEASE-VALIDATION-2026-09-10.md) and
+[notice documentation](../web/licenses/README.md). This packaging evidence does
+not clear every dependency, historical question, trademark or redistribution use.
 
 The unverified legacy avatar binaries were removed from public Git history with a
 verified private backup retained. **Older question-corpus authorship remains
@@ -111,7 +122,7 @@ accommodation testing with participants and retain a private accessibility route
 ## Closure criteria
 
 1. Owner supplies identity/location/audience and confirms business/provider facts; update notices accurately.
-2. Validate and deploy the pending controls, including rejection before provider calls and continued access to recovery/export/deletion for legacy users.
+2. Preserve the completed production, automated and staging evidence in the [release validation](RELEASE-VALIDATION-2026-09-10.md). Recheck rejection before provider calls and continued recovery/export/deletion access when changing these controls; this rollout is not a full interview or legal-compliance certification.
 3. Complete processing/retention records, vendor/transfer review and regional representative/DPIA/counsel decisions; audit generated-audio marking.
 4. Exercise rights, incident, underage/sensitive-upload and backup-restoration procedures in [privacy operations](PRIVACY-OPERATIONS.md). Triage **all 50 US states plus DC/territories and relevant foreign laws** when an incident's affected population requires it; this report is not that exhaustive incident-specific survey.
 5. Reassess before minors, employer/school decisions, emotion/identity analysis, new providers, marketing, paid plans or new target countries. Automated tests and legal notices cannot establish zero bugs or universal legal compliance.

@@ -2,7 +2,7 @@
 
 Maintainer contact: [makinenitejovardhan@gmail.com](mailto:makinenitejovardhan@gmail.com). This is the existing private support route, including for people who cannot sign in. Do not put personal records, credentials or rights requests into public GitHub issues. This project has no staffed response-time guarantee; the operator must still meet applicable legal deadlines and arrange coverage when necessary.
 
-Read the [legal-readiness assessment](LEGAL-READINESS-2026-09-10.md) for unresolved operator identity, location, audience and legal scope. Procedures below are operational instructions, not proof that every process has been exercised. Baseline behavior refers to `83f17fa`; new policy gates, notices, behavior-ingestion closure and resume deletion remain pending until release evidence is recorded.
+Read the [legal-readiness assessment](LEGAL-READINESS-2026-09-10.md) for unresolved operator identity, location, audience and legal scope. Procedures below are operational instructions, not proof that every process has been exercised. The policy gates, notices, behavior-ingestion closure and resume deletion are deployed; [release evidence](RELEASE-VALIDATION-2026-09-10.md) records exact artifacts, focused checks and limitations. Earlier baseline references describe `83f17fa`.
 
 ## Private records and ownership
 
@@ -21,7 +21,7 @@ Maintain a provider register covering legal entity, service, controller/processo
 ## Deletion and restoration checklist
 
 - **Session:** use the owner-scoped deletion operation. A leased/ending/scoring session can return a conflict; resolve activity safely instead of bypassing persistence safeguards. Separate feedback can retain account-linked comments/context after session deletion and must be considered in a broader erasure request.
-- **Resume:** at baseline a new upload replaces the previous upload, but older standalone review results can remain. The new explicit resume-delete operation is intended to remove uploads and standalone reviews; until deployed/validated, do not advertise it as available. Deleting a resume does not rewrite interview transcripts, saved session context or reports that already used it.
+- **Resume:** a new upload replaces the previous upload, but older standalone review results can remain. The deployed explicit resume-delete operation removes uploads and standalone reviews, including detached reviews. Deleting a resume does not rewrite interview transcripts, saved session context or reports that already used it.
 - **Account:** account deletion cascades linked application records. Verify related data and credential removal using scoped counts, not transcript dumps. The rolling quota ledger survives temporarily; review any exceptional erasure request against its documented anti-abuse purpose.
 - **Browser:** logout/deletion clears private application caches on the current origin. It cannot wipe other devices, alternate hostnames, previously downloaded exports or user copies. Explain how to clear those locally if requested.
 - **Providers/backups:** determine whether additional vendor deletion is available/required. Record a minimal suppression/deletion record where justified so restoration cannot silently revive deleted data. Before a restore serves traffic, replay applicable deletions and restrictions, test them, and remove temporary restored copies. Do not keep a second unrestricted archive of deleted interviews as a “deletion log.”
@@ -35,7 +35,7 @@ The following combines source behavior with read-only production configuration c
 | Data | Verified behavior or open decision |
 | --- | --- |
 | Accounts, interviews, transcripts, workspace, reports | No general automatic expiry. Retained until applicable user/operator deletion. Define any future inactivity schedule before promising one. |
-| Resume uploads/reviews | Latest upload replaces prior upload; standalone reviews can persist. Account deletion removes linked data. New independent deletion needs release verification. |
+| Resume uploads/reviews | Latest upload replaces prior upload; standalone reviews can persist. Account deletion removes linked data. Independent resume/review deletion passed owner-isolation and idempotence tests and is deployed. |
 | Feedback | Account-linked; separate from session lifecycle. Optional diagnostic/transcript flags do not make it anonymous. |
 | Verification/reset actions | One-use tokens stored hashed; verification validity 24 hours, reset 30 minutes; expired rows cleaned periodically. Never log action links. |
 | BYOK credentials | Encrypted server-side session credentials expire after three hours and are removed following terminal processing/maintenance. Do not claim this controls vendor logs. |
@@ -74,4 +74,4 @@ Before accepting new formats, review the intended audience and data needs. Do no
 
 ## Review evidence
 
-Before marking new controls live, record source/revision, policy versions, migration result and focused tests: stale/missing assertions rejected before provider calls; legacy recovery/export/deletion accessible; resume/voice notices before transfer; deletion scope/cache behavior; and retention worker health. Exercise procedures with synthetic accounts/content. Preserve unresolved operator, contract, audience and manual-backup questions as open items rather than treating passing tests as legal clearance.
+The [deployed release record](RELEASE-VALIDATION-2026-09-10.md) includes source/revision, policy versions, migration and focused evidence for: stale/missing assertions rejected before provider calls; legacy recovery/export/deletion accessible; resume/voice notices before transfer; deletion scope/cache behavior; and retention worker health. Exercise procedures with synthetic accounts/content. Preserve unresolved operator, contract, audience and manual-backup questions as open items rather than treating passing tests as legal clearance.

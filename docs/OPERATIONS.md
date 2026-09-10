@@ -2,35 +2,47 @@
 
 ## Release status
 
-The redesigned public beta is **live** with **143 preview scenarios**. API
-revision `mockinterview-api-00039-qam` serves 100% of production traffic, and the
-tested Firebase web version is published. Public health, routes, assets,
-security headers, CORS and catalog checks passed. Production interview acceptance
-also passed, including signup/verification, a real AI text interview, exact saved
-evidence, report/history, feedback and quota enforcement. Test accounts were
-removed, their tokens revoked and production data counts restored while retaining
-quota records. See the
-[dated validation record](RELEASE-VALIDATION-2026-09-09.md) for precise evidence,
-including the recovered staging scoring failure whose original cause is unknown.
-Content review and scoring calibration remain pending.
+The redesigned public beta is **live** with **143 preview scenarios**. The
+September 10 policy/privacy update is deployed: explicit adult and current-policy
+acknowledgments, voice/Gemini-key declarations, resume deletion, clearer notices,
+and browser dependency/font licenses. The retired camera-analysis ingestion
+endpoint returns 410. Existing accounts retain history, export and deletion
+access while reviewing the current policies; none were automatically marked adult
+or accepted.
 
 | Deployed release field | Recorded value |
 |---|---|
-| API build source | `fd60df42be9c8f3c804f77239d30762bb4c68402` |
-| Web build source | `45432972e5c7163e7eadf0f9cbb95306504dd6d9` |
-| Production Cloud Run revision | `mockinterview-api-00039-qam` — 100% traffic |
-| API image digest | `sha256:1a0846ac334e8b31b8c9a8e0a503dd17465f05aad90d5b0ae20a2ee3e433c906` |
-| Cloud Build | `325e19de-9aff-47ec-a319-f123f4b3d392` |
-| Production Firebase version | `c8dee48c3e3cb3b9` |
-| Firebase hosting release | `1789027056695000` |
-| Firebase promotion time (UTC) | `2026-09-10T07:57:36.695Z` |
-| Production interview acceptance | **PASSED** |
+| API build source | `58280bab2d55c1047c7e388ba72c1ddefe51befe` |
+| Web build source | `061b56bc6b26ab33baf092a9679f123a60b92764` |
+| Production Cloud Run revision | `mockinterview-api-00041-cic` — 100% traffic |
+| API image digest | `sha256:d38fdc7583f67602994bc93f4541f731be1810d168bf50dceef3f1b6220af48e` |
+| Cloud Build | `31e8d60b-39fc-489f-b579-d925c97cca93` |
+| Production Firebase version | `b8a9451c163cb83d` |
+| Firebase hosting release | `1789031721533000` |
+| Firebase promotion time (UTC) | `2026-09-10T09:15:21.533Z` |
+| Public verification time (UTC) | `2026-09-10T09:17:02.886581Z` |
 
-The `web/` and `firebase.json` trees are identical between these API and web source
-commits. The tested web artifact was promoted without rebuilding. Its staging
-version is `49d3661208e89f45`; `c8dee48c3e3cb3b9` is now live. A later
-operations/documentation commit does not change these build SHAs; runtime trees
-must remain identical unless a new application release is explicitly built.
+The API source tree is identical in the API and web build commits. The web and
+Firebase configuration trees match the staging-tested `b6f5756` source; staging
+web version `11cdb49cee568add` targets the isolated staging API. Production version
+`b8a9451c163cb83d` targets the stable production API and was cloned from its tested
+preview without rebuilding. Documentation-only commits do not change these
+build-source identifiers.
+
+Public health, current policy enforcement, CORS, routes/security headers, license
+notices and the replacement font hash passed. Migration 0009 preserved existing
+application data; no hosted account or paid provider request was created for this
+update. The new revision's retention worker completed. See the
+[policy/privacy validation record](RELEASE-VALIDATION-2026-09-10.md) and the
+[initial real interview acceptance](RELEASE-VALIDATION-2026-09-09.md), which also
+records the recovered staging scoring failure with unknown original cause.
+Content rights/review, scoring calibration and the owner/legal decisions in the
+[legal assessment](LEGAL-READINESS-2026-09-10.md) remain open.
+
+The prior rollback pair is API `mockinterview-api-00039-qam` and Firebase version
+`c8dee48c3e3cb3b9`. Rolling back removes the new policy safeguards; coordinate both
+artifacts and assess that consequence. The database migration is additive, so a
+routine binary rollback does not require restoring the shared SQL instance.
 
 Use the [release and recovery runbook](RELEASE-RUNBOOK.md) as the authoritative
 procedure for staging, promotion, rollback and operational verification. Earlier
@@ -128,7 +140,7 @@ Secret Manager, and never place action links, tokens or message bodies in logs.
 Development returns action links locally without requiring a mail provider.
 
 Existing accounts, including the maintainer account, must verify their email
-before hosted AI use. Resume upload parses through a provider and now shares the
+before hosted AI use and review the current adult/terms/privacy declarations. Resume upload parses through a provider and shares the
 verified, per-user 30-request/hour limit with the other ancillary AI endpoints.
 Legacy unfinished attempts cannot queue paid scoring until their owner verifies;
 history, export and recovery remain accessible. Resume provider failures use
