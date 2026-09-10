@@ -125,9 +125,9 @@ func (a *App) Routes(r chi.Router) {
 		// JWT out of the WS URL).
 		r.Get("/ws-ticket", authSvc.WSTicket)
 
-		// Resume upload / parse / review. Review calls the LLM, so it's per-user
-		// rate-limited.
-		r.Post("/resume", resumeSvc.Upload)
+		// Upload also calls the LLM for parsing, so every paid resume action
+		// requires verification and the shared per-user rate limit.
+		r.With(authSvc.Verified, perUser).Post("/resume", resumeSvc.Upload)
 		r.Get("/resume", resumeSvc.Get)
 		r.With(authSvc.Verified, perUser).Post("/resume/review", resumeSvc.Review)
 		r.With(authSvc.Verified, perUser).Post("/resume/match", resumeSvc.Match)
@@ -177,7 +177,7 @@ func (a *App) Routes(r chi.Router) {
 		r.Post("/sessions/{id}/turns", interviewSvc.AddTurn)
 		r.Post("/sessions/{id}/workspace", interviewSvc.SaveWorkspace)
 		r.Post("/sessions/{id}/behavior", interviewSvc.Ingest)
-		r.Post("/sessions/{id}/finish", interviewSvc.Finish)
+		r.With(authSvc.Verified).Post("/sessions/{id}/finish", interviewSvc.Finish)
 		r.Get("/sessions/{id}/transcript", interviewSvc.Transcript)
 		r.Get("/sessions/{id}/report", interviewSvc.Report)
 	})

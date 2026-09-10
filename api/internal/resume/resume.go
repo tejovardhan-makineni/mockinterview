@@ -145,9 +145,8 @@ func (s *Service) Upload(w http.ResponseWriter, r *http.Request) {
 		Temperature: 0.1,
 	})
 	if err != nil {
-		// GO-9/SEC-9: log the raw provider error server-side; return a generic
-		// message so upstream detail never reaches the client.
-		slog.Error("resume parse failed", "user", uid, "err", err)
+		// Provider errors can contain private request or response content.
+		slog.Error("resume parse failed", "category", "provider_request", "route", "/resume")
 		httpx.WriteProblem(w, http.StatusBadGateway, "resume parsing failed")
 		return
 	}
@@ -269,7 +268,7 @@ func (s *Service) Review(w http.ResponseWriter, r *http.Request) {
 		Temperature: 0.4,
 	})
 	if err != nil {
-		slog.Error("resume review failed", "user", uid, "err", err)
+		slog.Error("resume review failed", "category", "provider_request", "route", "/resume/review")
 		httpx.WriteProblem(w, http.StatusBadGateway, "review failed")
 		return
 	}
@@ -321,7 +320,7 @@ func (s *Service) Match(w http.ResponseWriter, r *http.Request) {
 		Temperature: 0.3,
 	})
 	if err != nil {
-		slog.Error("resume match failed", "user", uid, "err", err)
+		slog.Error("resume match failed", "category", "provider_request", "route", "/resume/match")
 		httpx.WriteProblem(w, http.StatusBadGateway, "match failed")
 		return
 	}
