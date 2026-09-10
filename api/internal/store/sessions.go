@@ -81,7 +81,7 @@ func (s *Store) ListUserSessions(ctx context.Context, userID string, limit int) 
 	}
 	rows, err := s.Pool.Query(ctx, `
 		SELECT s.id, s.question_id, s.modality, s.track, s.status,
-		       to_char(s.created_at, 'YYYY-MM-DD"T"HH24:MI:SS'), r.overall, r.scored,
+		       to_char(s.created_at AT TIME ZONE 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS.US"Z"'), r.overall, r.scored,
 		       s.pack_id, s.pack_round_id
 		FROM sessions s LEFT JOIN reports r ON r.session_id = s.id
 		WHERE s.user_id=$1 ORDER BY s.created_at DESC LIMIT $2`, userID, limit)
@@ -105,7 +105,7 @@ func (s *Store) ListUserSessions(ctx context.Context, userID string, limit int) 
 func (s *Store) SessionsForPack(ctx context.Context, userID, packID string) ([]SessionSummary, error) {
 	rows, err := s.Pool.Query(ctx, `
 		SELECT s.id, s.question_id, s.modality, s.track, s.status,
-		       to_char(s.created_at, 'YYYY-MM-DD"T"HH24:MI:SS'), r.overall, r.scored,
+		       to_char(s.created_at AT TIME ZONE 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS.US"Z"'), r.overall, r.scored,
 		       s.pack_id, s.pack_round_id
 		FROM sessions s LEFT JOIN reports r ON r.session_id = s.id
 		WHERE s.user_id=$1 AND s.pack_id=$2 ORDER BY s.created_at DESC`, userID, packID)

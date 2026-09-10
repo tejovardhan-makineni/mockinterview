@@ -263,7 +263,7 @@ func (m *Mem) SessionsForPack(_ context.Context, userID, packID string) ([]store
 		ss := store.SessionSummary{
 			ID: rec.sess.ID, QuestionID: rec.sess.QuestionID, Modality: rec.sess.Modality,
 			Track: rec.sess.Track, Status: rec.sess.Status,
-			CreatedAt:   rec.created.UTC().Format("2006-01-02T15:04:05"),
+			CreatedAt:   rec.created.UTC().Format(time.RFC3339Nano),
 			PackID:      rec.sess.PackID,
 			PackRoundID: rec.sess.PackRoundID,
 		}
@@ -315,7 +315,7 @@ func (m *Mem) ListUserSessions(_ context.Context, userID string, limit int) ([]s
 		ss := store.SessionSummary{
 			ID: rec.sess.ID, QuestionID: rec.sess.QuestionID, Modality: rec.sess.Modality,
 			Track: rec.sess.Track, Status: rec.sess.Status,
-			CreatedAt:   rec.created.UTC().Format("2006-01-02T15:04:05"),
+			CreatedAt:   rec.created.UTC().Format(time.RFC3339Nano),
 			PackID:      rec.sess.PackID,
 			PackRoundID: rec.sess.PackRoundID,
 		}

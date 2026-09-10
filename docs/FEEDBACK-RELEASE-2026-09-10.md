@@ -2,7 +2,9 @@
 
 This update adds the `post-interview-v1` product check-in and private metrics.
 Local implementation, automated validation, browser checks and a backup restore
-have passed. Staging and production deployment are pending at this commit.
+have passed. The first staging feedback flow also passed. A replacement build
+is pending for the history timestamp and archive-permission fixes below;
+production traffic still serves the preceding release at this commit.
 The earlier [policy release](RELEASE-VALIDATION-2026-09-10.md) remains a separate
 record; this update does not certify interview accuracy or legal compliance.
 
@@ -54,6 +56,30 @@ disposable accounts and fictional data. One initial coding fixture used a local
 SQL start marker; the behavioral interview traversed the normal browser/relay
 start path. No paid provider or email-delivery request was made. This is bounded
 feedback-flow validation, not a new cross-browser or all-scenario calibration.
+
+Staging on source `4a4299c8ae542de640e28762073da36640be7baa` also verified the
+required form for a synthetic failed interview with no report. Chromium saved
+five unable-to-judge answers and an explicit report-unavailable answer with
+transcript permission unchecked. HTTP checks at `2026-09-10T16:05:20Z` confirmed
+persistence, idempotent retries, separate unrated distributions, private
+suggestions, account export and unlocking the next unused reservation. That
+reservation was deleted without activation. No provider or mail call was made;
+the failed-attempt fixture used a staging-only SQL start/status marker.
+
+Two release findings were addressed before production promotion:
+
+- A caller umask of `077` made archived corpus directories unreadable by the
+  non-root container. The first staging revision `00007-moq` failed startup and
+  was never promoted. Rebuilding with readable source permissions succeeded;
+  the deployment script now normalizes only archive extraction to `022`.
+  A direct test under caller umask `077` verified public directories `0755`,
+  files `0644`, and the private outer directory still `0700`. Six deployment
+  tests and shell syntax validation passed.
+- Existing history queries omitted timezone information, displaying a UTC
+  timestamp as the viewer's local wall-clock time. Both database and memory
+  history paths now return RFC3339 UTC timestamps. PostgreSQL tests using a
+  non-UTC database connection and input offset verify the exact instant and
+  fractional precision; the store/memory race suites passed.
 
 ## Database protection
 
