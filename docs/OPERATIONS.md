@@ -2,62 +2,78 @@
 
 ## Release status
 
-The public beta is **live** with **143 preview scenarios**. The September 10
-feedback update adds a required six-question check-in after each new started and
-ended interview, before another interview can start. One question adapts to the
-subject. Every item allows an unrated answer; comments and transcript-inspection
-permission remain optional. Reports, history, recovery, export and deletion stay
-available. Old interviews and unused reservations have no retroactive backlog.
+The public beta is **live** with **143 preview scenarios**. New started and ended
+interviews require the six-question check-in before another interview can start.
+One question adapts to the subject, and every item allows an unrated answer.
+Reports, history, recovery, export and deletion stay available. Old interviews
+and unused reservations have no retroactive backlog.
+
+The latest update adds an **optional comparison with other interview tools**.
+Users can skip it, decline to answer, edit it or clear it. Its separate
+`tool-comparison-v1` instrument leaves the required `post-interview-v1` questions
+and interview allowance unchanged. Tool names and comparison details are optional;
+comments and transcript-inspection permission also remain optional.
 
 Private `/admin/feedback/` metrics show full-window completion, distributions,
-rated/unrated counts and optional suggestions, with JSON/CSV aggregates. They
-require the current stored administrator role; owner access is still pending
-email verification and an authorized grant, as described below.
+rated/unrated counts and comparison summaries, with JSON/CSV aggregates. Optional
+suggestions and comparison responses are available separately; comparison free
+text is excluded from aggregates. These endpoints require the current stored
+administrator role; owner access is still pending email verification and an
+authorized grant, as described below.
 
 | Deployed release field | Recorded value |
 |---|---|
-| API and web build source | `13a7619ffa9583e8cfe1bfe88bf68c1284ddd759` |
-| Production Cloud Run revision | `mockinterview-api-00044-sib` — 100% traffic |
-| API image digest | `sha256:7c005eb8d5c900aafe2233b9ad98646c6bf1d05836ac2e2dc7dba3105cfdc114` |
-| Cloud Build | `a26db7c2-9964-482a-aa55-7a81bdd9a5cb` |
-| Production Firebase version | `4fde692b40426e74` |
-| Firebase hosting release | `1789057224552000` |
-| Firebase promotion time (UTC) | `2026-09-10T16:20:24.552Z` |
-| Public verification time (UTC) | `2026-09-10T16:20:56.728822Z` |
+| API and web build source | `7446dc6280bfe56ecf9f27c257b110c1359e970e` |
+| Production Cloud Run revision | `mockinterview-api-00046-riq` — 100% traffic |
+| API image digest | `sha256:8456cbb4e16592b82d605da4d7affb0c936a9855c8f7bfe79ba42c9061290647` |
+| Cloud Build | `f15d144d-5437-487b-a15e-91490d3f4467` |
+| Production Firebase version | `2a28ff1f89e667da` |
+| Firebase hosting release | `1789059111801000` |
+| Firebase promotion time (UTC) | `2026-09-10T16:51:51.801Z` |
+| Public verification time (UTC) | `2026-09-10T16:52:34.462960Z` |
 
 The tested immutable image was reused from staging revision
-`mockinterview-api-staging-00010-jup`. Staging web `282e8910af606b94` targets the
-isolated staging API. Production web `4fde692b40426e74` targets the stable
+`mockinterview-api-staging-00012-xar`. Staging web `02b1df5072b02b3d` targets the
+isolated staging API. Production web `2a28ff1f89e667da` targets the stable
 production API and was cloned from `launch-production` without rebuilding.
 Both web exports used the recorded committed source; the web does not embed a
-Git SHA. Protected PR #22 merged as `adf2a8d` with an identical source tree.
+Git SHA. Protected PR #24 merged as `8811591` with an identical source tree.
 Documentation-only commits do not change these build-source identifiers.
 
-Public health, current policy enforcement, CORS, routes/security headers,
-private-route authentication, license notices and the replacement font hash
-passed. Migration 0010 preserved existing application data and kept all legacy
-interviews exempt. The private application backup was actually restored and
-migrated locally before rollout. No production test account, provider request
-or email was created. Staging/local disposable feedback accounts were removed,
-deleted tokens were rejected and the production retention worker completed.
-See the [feedback release validation](FEEDBACK-RELEASE-2026-09-10.md),
+The final production verification used only GET/OPTIONS and read-only database
+queries. Health, current policies, CORS, routes/security headers, private-route
+authentication, exact preview/live assets, license notices and the replacement
+font hash passed. Migration 0011 adds nullable comparison JSONB with validated
+constraints and a suggestions index. It preserves existing responses on omitted
+updates from older clients/binaries; explicit null clears the comparison.
+Existing production data remained 15 users, 38 sessions, 27 reports and 821
+transcript turns, with zero feedback/comparison records, active sessions or
+pending jobs; all 38 legacy interviews remain exempt. The actual private
+application backup was restored and migrated locally before rollout. No
+production account creation, provider request or email was requested. The new
+revision's retention worker completed at `2026-09-10T16:48:46.197913179Z`.
+See the [comparison release validation](TOOL-COMPARISON-RELEASE-2026-09-10.md),
 [questionnaire](BETA-FEEDBACK-QUESTIONNAIRE.md) and
 [metric definitions](FEEDBACK-METRICS.md).
 
-The earlier [policy/privacy release](RELEASE-VALIDATION-2026-09-10.md)'s adult,
-voice, personal-key, resume-deletion and licensing controls remain in effect.
-Current terms/privacy version is `2026-09-10.1`; no existing account was
-automatically marked adult or accepted. The
-[initial real interview acceptance](RELEASE-VALIDATION-2026-09-09.md) remains
+The [six-question release](FEEDBACK-RELEASE-2026-09-10.md) and earlier
+[policy/privacy release](RELEASE-VALIDATION-2026-09-10.md) remain historical
+acceptance evidence. Their adult, voice, personal-key, resume-deletion and
+licensing controls remain in effect. Current terms/privacy version is
+`2026-09-10.1`; no existing account was automatically marked adult or accepted.
+The [initial real interview acceptance](RELEASE-VALIDATION-2026-09-09.md) remains
 separate evidence, including the recovered staging scoring failure with unknown
-original cause. Content rights/review, scoring calibration and the owner/legal
-decisions in the [legal assessment](LEGAL-READINESS-2026-09-10.md) remain open.
+original cause. This comparison release did not repeat paid provider acceptance.
+Content rights/review, scoring calibration and the owner/legal decisions in the
+[legal assessment](LEGAL-READINESS-2026-09-10.md) remain open.
 
-The prior paired rollback target is API `mockinterview-api-00041-cic` and Firebase
-version `b8a9451c163cb83d`. Rolling back disables required check-ins and their
-current client notice/form; coordinate both artifacts. Preserve the additive
-migration and saved responses. A routine binary rollback does not require
-restoring the shared SQL instance.
+The prior paired rollback target is API `mockinterview-api-00044-sib` and Firebase
+version `4fde692b40426e74`. Rolling back disables the optional comparison while
+retaining the six required questions and existing interview gate; coordinate
+both artifacts. Preserve additive migration 0011 and saved comparison data.
+Older binary writes preserve that column. A routine binary rollback does not
+require restoring the shared SQL instance. Older release documents retain their
+historical rollback targets; use this current pair for this release.
 
 Use the [release and recovery runbook](RELEASE-RUNBOOK.md) as the authoritative
 procedure for staging, promotion, rollback and operational verification. Earlier
@@ -71,7 +87,7 @@ audits describe the application at their recorded dates.
 | Firebase Hosting site | `mockinterview-web` in project `storybytes-495010` |
 | Firebase default domain | [mockinterview-web.web.app](https://mockinterview-web.web.app) |
 | Cloud Run service | `mockinterview-api`, region `us-west1`, project `storybytes-495010` |
-| Stable API origin | [mockinterview-api-661893776515.us-west1.run.app](https://mockinterview-api-661893776515.us-west1.run.app) |
+| Stable API origin | [mockinterview-api-a35kjmd22q-uw.a.run.app](https://mockinterview-api-a35kjmd22q-uw.a.run.app) |
 | PostgreSQL | App database/login `mockinterview` on the shared Cloud SQL instance |
 
 Do not deploy to another Firebase site or assume ownership of mockinterview.io.
