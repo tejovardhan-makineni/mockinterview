@@ -1,11 +1,12 @@
 # Implementation validation — 2026-09-09
 
 **Status at this checkpoint:** the improved application is implemented and has
-been tested locally. Production still serves the previous release. Production
-mail configuration and delivery verification are pending, and the repository
-has not yet been made public. This document records completed checks; it is not
-a claim that deployment, publication or every launch gate is complete. Follow
-[the release runbook](RELEASE-RUNBOOK.md) for the remaining release procedure.
+been tested locally. The cleaned source repository is now public and an
+unauthenticated mirror clone was verified. Production still serves the previous
+release. Production mail configuration and delivery verification are pending.
+This document records completed checks; it is not a claim that deployment or
+every launch gate is complete. Follow
+  [the release runbook](RELEASE-RUNBOOK.md) for the remaining release procedure.
 
 The earlier [audit](AUDIT-2026-09-09.md),
 [improvement plan](IMPROVEMENT-PLAN.md),
@@ -62,6 +63,27 @@ CI now provisions PostgreSQL and runs Go race tests, deterministic corpus and
 deployment-tool fixtures, web lint/tests and a real-API static export. Real paid
 provider checks are deliberately separate from CI. A workflow definition is not
 evidence of a successful GitHub run; inspect the actual run for the release commit.
+
+## Source publication
+
+The release source was committed as `d610c7195aa4cff416b4e8206da35df5e384d1db`
+after removing seven legacy avatar binary paths from all published Git history.
+The release tree itself was unchanged by filtering. A complete private Git
+bundle was verified before filtering; the production application database also
+has a separate private backup.
+
+GitHub retained an old pull-request reference in the existing private repository.
+To avoid making that reference public, the original repository was retained as a
+private archive and an independent repository with the cleaned history was
+published at the original URL. An unauthenticated mirror clone contained none of
+the seven binaries across its advertised branches and tags. No private Codex
+capture references were published.
+
+Private vulnerability reporting, Dependabot security updates, secret scanning and
+push protection are enabled. The repository includes contribution and format
+templates, conduct/support guidance, dependency updates and CI/security workflows.
+GitHub-hosted checks and branch protection must be verified against their actual
+results before declaring the source release gate complete.
 
 ## Restored production-backup rehearsal
 
