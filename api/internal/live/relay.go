@@ -77,6 +77,12 @@ func (c *wsConn) writePing() error {
 	return c.conn.WriteControl(websocket.PingMessage, nil, time.Now().Add(writeWait))
 }
 
+func (c *wsConn) writeClose(code int) error {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	return c.conn.WriteControl(websocket.CloseMessage, websocket.FormatCloseMessage(code, ""), time.Now().Add(writeWait))
+}
+
 func (c *wsConn) close() error { return c.conn.Close() }
 
 // Relay bridges the browser and the interview director. When a Gemini API key is
@@ -802,10 +808,23 @@ readLoop:
 	// prevents a delayed SDK reader from enqueuing after the lease is released.
 	persistDrained := waitTimeout(&persistWg, writeWait)
 	if gracefulEnd.Load() {
+		closeCode := websocket.CloseNormalClosure
 		if readerDrained && persistDrained {
 			_ = wc.writeServerMsg(serverMsg{Type: "saved"})
 		} else {
+			closeCode = websocket.CloseInternalServerErr
 			_ = wc.writeServerMsg(serverMsg{Type: "error", Code: "save_unavailable", Text: "Some final speech could not be confirmed saved. Review your transcript.", Retryable: false})
+		}
+		// Complete the WebSocket closing handshake after the final save result.
+		// Closing TCP immediately reports an abnormal 1006 to browser/proxy
+		// clients, even when the final application message was written locally.
+		if wc.writeClose(closeCode) == nil {
+			_ = conn.SetReadDeadline(time.Now().Add(time.Second))
+			for {
+				if _, _, err := conn.ReadMessage(); err != nil {
+					break
+				}
+			}
 		}
 		_ = wc.close()
 	}
