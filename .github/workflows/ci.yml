@@ -71,6 +71,8 @@ jobs:
         run: npm run lint
       - name: Unit tests
         run: npm test
+      - name: Third-party notice packaging
+        run: node --test scripts/generate-notices.test.mjs
       - name: Build production export (no running backend needed)
         run: npm run build
         env:

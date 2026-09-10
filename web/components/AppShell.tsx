@@ -26,6 +26,7 @@ export function Footer({ feedback = false }: { feedback?: boolean }) {
         <Link href="/terms">Terms</Link>
         <Link href="/help">Help</Link>
         <a href={SOURCE_URL}>Source</a>
+        <a href="/third-party-notices.txt">Licenses</a>
       </nav>
     </footer>
   );

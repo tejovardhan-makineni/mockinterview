@@ -1,0 +1,51 @@
+{
+  "installed": {
+    "unitsPerEm": 2048,
+    "hheaAscender": 1854,
+    "hheaDescender": -434,
+    "hheaLineGap": 67,
+    "sTypoAscender": 1491,
+    "sTypoDescender": -431,
+    "sTypoLineGap": 307,
+    "usWinAscent": 1854,
+    "usWinDescent": 434,
+    "glyphs": 675,
+    "unicodeCodepoints": 662
+  },
+  "replacement": {
+    "unitsPerEm": 2048,
+    "hheaAscender": 1854,
+    "hheaDescender": -434,
+    "hheaLineGap": 67,
+    "sTypoAscender": 1491,
+    "sTypoDescender": -431,
+    "sTypoLineGap": 307,
+    "usWinAscent": 1854,
+    "usWinDescent": 434,
+    "glyphs": 2620,
+    "unicodeCodepoints": 2327
+  },
+  "asciiAdvanceDifferences": [],
+  "sharedCodepoints": 658,
+  "allAdvanceDifferences": [
+    {
+      "codepoint": "U+00B7",
+      "character": "·",
+      "old": 569,
+      "new": 682
+    },
+    {
+      "codepoint": "U+2012",
+      "character": "‒",
+      "old": 682,
+      "new": 1139
+    }
+  ],
+  "lostCodepoints": [
+    "U+2011",
+    "U+F001",
+    "U+F002",
+    "U+F005"
+  ],
+  "addedCodepoints": 1669
+}

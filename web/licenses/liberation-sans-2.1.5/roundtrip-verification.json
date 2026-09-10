@@ -1,0 +1,128 @@
+{
+  "fontToolsVersion": "4.62.1",
+  "allOriginalSfntTableBytesPreserved": true,
+  "woff2Transforms": [],
+  "woff2ExtendedMetadata": null,
+  "woff2PrivateData": null,
+  "tables": [
+    {
+      "tag": "FFTM",
+      "length": 28,
+      "sha256": "8efcceffca4ab101faf866e18e86a2c9396aee259735bcf061081e3b8b3afd2b",
+      "exactlyEqual": true
+    },
+    {
+      "tag": "GDEF",
+      "length": 298,
+      "sha256": "1693581d503201987f32f75794b5a442346d4544b444cda06018cdc032daf307",
+      "exactlyEqual": true
+    },
+    {
+      "tag": "GPOS",
+      "length": 76664,
+      "sha256": "fa101b9b6874d48d3500203f8092820852178818b0fabe38776edbff97b2bb6a",
+      "exactlyEqual": true
+    },
+    {
+      "tag": "GSUB",
+      "length": 2372,
+      "sha256": "6689d7e614c2070399df69f90b320c7077d1a48f01adb1e58d4a32b5e3873193",
+      "exactlyEqual": true
+    },
+    {
+      "tag": "OS/2",
+      "length": 96,
+      "sha256": "0fe422f83851ef360f9212fe862777d89b62ad3f05ed78f14a5baca670d57b82",
+      "exactlyEqual": true
+    },
+    {
+      "tag": "cmap",
+      "length": 1574,
+      "sha256": "a2d9dbaa94232dbb2b811dae35320d7ba4c2bdc37d863d287c350bd0c5b5c8c5",
+      "exactlyEqual": true
+    },
+    {
+      "tag": "cvt ",
+      "length": 648,
+      "sha256": "71e7daad079c2bea66ddbc2c54492c1d937c60252ed38b257190b34917fe3c5b",
+      "exactlyEqual": true
+    },
+    {
+      "tag": "fpgm",
+      "length": 1972,
+      "sha256": "84187f628d2064cf07fee7d7b3570d091b19ad75727c8f191c5e6e82fab3b907",
+      "exactlyEqual": true
+    },
+    {
+      "tag": "gasp",
+      "length": 16,
+      "sha256": "ed0c69fa6b09906a5907f5f21d01eb5f968ecb14e10f606ef09910a5d113419d",
+      "exactlyEqual": true
+    },
+    {
+      "tag": "glyf",
+      "length": 269356,
+      "sha256": "907f66ed3fea9b4c6e44b5670cfb867ec31592036ae3884e3676228d51e5deab",
+      "exactlyEqual": true
+    },
+    {
+      "tag": "head",
+      "length": 54,
+      "sha256": "f81cbb165452661b398dc3ec39fb440a8fb9f2dff73abdca7392d58b1af4ec33",
+      "exactlyEqual": true
+    },
+    {
+      "tag": "hhea",
+      "length": 36,
+      "sha256": "e770211be3c39496f347d88e35a41f075436586aa67dac6b458d8f4e53840419",
+      "exactlyEqual": true
+    },
+    {
+      "tag": "hmtx",
+      "length": 10480,
+      "sha256": "c9f473a8fd4df095d13fbffafccec051d1c33e69c690589dec702bdab327dda0",
+      "exactlyEqual": true
+    },
+    {
+      "tag": "kern",
+      "length": 5466,
+      "sha256": "459c94be90c17daee93dc98d66c3b6da4ab66fc27f0323af5b35eb66eae96570",
+      "exactlyEqual": true
+    },
+    {
+      "tag": "loca",
+      "length": 10484,
+      "sha256": "ffc8abde0c8e93ae33d599f4da107c50a8511927f0ee1bc7024bb975b99aafe9",
+      "exactlyEqual": true
+    },
+    {
+      "tag": "maxp",
+      "length": 32,
+      "sha256": "af199c256f40ded7f12f409e121dfbeb048c4ff079b31100e6f04c753423ad64",
+      "exactlyEqual": true
+    },
+    {
+      "tag": "name",
+      "length": 2952,
+      "sha256": "403148ab3bee1c6f9930451e4ff3c40a2ce64c11cd0e822d6ed6e92d88de1e6c",
+      "exactlyEqual": true
+    },
+    {
+      "tag": "post",
+      "length": 27021,
+      "sha256": "c7f3bf3f3bfa31f10918088363eb99bb75ccf741d91ba414b796dfc9a877798e",
+      "exactlyEqual": true
+    },
+    {
+      "tag": "prep",
+      "length": 835,
+      "sha256": "e55ed7af8410ac133a114e4a45357c172980999d29ba87cb2439cda7d04929c4",
+      "exactlyEqual": true
+    }
+  ],
+  "outputSha256": "8735a5218d55ca4a6b6131c3a5fef598b5d68f291de6bcd5a294fb022d86fd04",
+  "outputBytes": 169648,
+  "containerAlignedTo4Bytes": true,
+  "terminalPaddingBytes": 2,
+  "repeatedBuildIdentical": true
+}

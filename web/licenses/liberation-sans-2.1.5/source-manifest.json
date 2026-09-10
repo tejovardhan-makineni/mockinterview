@@ -1,0 +1,129 @@
+{
+  "name": "Liberation Sans Regular",
+  "version": "2.1.5",
+  "license": "OFL-1.1",
+  "upstream": {
+    "repository": "https://github.com/liberationfonts/liberation-fonts",
+    "tag": "2.1.5",
+    "commit": "4b0192046158094654e865245832c66d2104219e",
+    "releasePage": "https://github.com/liberationfonts/liberation-fonts/releases/tag/2.1.5",
+    "archiveUrl": "https://github.com/liberationfonts/liberation-fonts/files/7261482/liberation-fonts-ttf-2.1.5.tar.gz",
+    "archiveSha256": "7191c669bf38899f73a2094ed00f7b800553364f90e2637010a69c0e268f25d0",
+    "archiveFontPath": "liberation-fonts-ttf-2.1.5/LiberationSans-Regular.ttf",
+    "fontSha256": "76d04c18ea243f426b7de1f3ad208e927008f961dc5945e5aad352d0dfde8ee8",
+    "archiveLicensePath": "liberation-fonts-ttf-2.1.5/LICENSE",
+    "licenseSha256": "93fed46019c38bbe566b479d22148e2e8a1e85ada614accb0211c37b2c61c19b"
+  },
+  "output": {
+    "file": "LiberationSans-Regular.woff2",
+    "sha256": "8735a5218d55ca4a6b6131c3a5fef598b5d68f291de6bcd5a294fb022d86fd04",
+    "bytes": 169648
+  },
+  "conversion": {
+    "script": "build-woff2.mjs",
+    "scriptSha256": "64cfef44cbc5e425498f0948ff60d5f5db859e094b194bbb6ea8bb0632de35e3",
+    "node": "v25.9.0",
+    "brotli": "1.2.0",
+    "compression": {
+      "mode": "font",
+      "quality": 11,
+      "lgwin": 22
+    },
+    "woff2TableTransforms": [],
+    "metadataBlock": null,
+    "privateDataBlock": null,
+    "changes": "WOFF2 container and Brotli compression only. Every original SFNT table is preserved byte for byte, including names, copyright, license, outlines, metrics, hinting and head table. No subsetting or renaming. The WOFF2 container includes required terminal zero padding to a 4-byte boundary.",
+    "reproducibility": "Two independent script runs produced identical output bytes.",
+    "terminalPaddingBytes": 2
+  },
+  "verification": {
+    "decoder": "fontTools 4.62.1 with Node Brotli decompression",
+    "all19SfntTablesExactlyEqual": true,
+    "evidence": "roundtrip-verification.json",
+    "metricsEvidence": "metrics-comparison.json",
+    "browserDecodeTest": {
+      "browser": "HeadlessChrome 152.0.0.0 on macOS",
+      "isolatedLocalFixture": true,
+      "fontFaceStatus": "loaded",
+      "documentFontAvailable": true,
+      "canvasHasInk": true,
+      "embeddedSvgDecoded": true,
+      "embeddedSvgHasInk": true,
+      "testedAssetSha256": "8735a5218d55ca4a6b6131c3a5fef598b5d68f291de6bcd5a294fb022d86fd04"
+    },
+    "initialContainerBug": "Fixed missing terminal padding; corrected output awaits parent Chromium retest."
+  },
+  "reservedFontNameBasis": {
+    "source": "https://openfontlicense.org/ofl-faq/",
+    "sections": [
+      "2.2",
+      "2.2.1"
+    ],
+    "assessment": "Original name retained because original font data is unchanged except WOFF2 compression and WOFF-specific extended metadata is absent; independently verified at SFNT table byte level."
+  },
+  "replaces": {
+    "installedPackage": "@excalidraw/excalidraw@0.18.1",
+    "originalAsset": "dist/prod/fonts/Liberation/LiberationSans-Regular.woff2",
+    "originalVersion": "1.05",
+    "originalLicense": "GPL-2.0 with Liberation font embedding exception",
+    "purpose": "Preserve Excalidraw numeric font family 9 and Liberation Sans CSS FontFace family while serving official OFL release."
+  },
+  "compatibility": {
+    "installed": {
+      "unitsPerEm": 2048,
+      "hheaAscender": 1854,
+      "hheaDescender": -434,
+      "hheaLineGap": 67,
+      "sTypoAscender": 1491,
+      "sTypoDescender": -431,
+      "sTypoLineGap": 307,
+      "usWinAscent": 1854,
+      "usWinDescent": 434,
+      "glyphs": 675,
+      "unicodeCodepoints": 662
+    },
+    "replacement": {
+      "unitsPerEm": 2048,
+      "hheaAscender": 1854,
+      "hheaDescender": -434,
+      "hheaLineGap": 67,
+      "sTypoAscender": 1491,
+      "sTypoDescender": -431,
+      "sTypoLineGap": 307,
+      "usWinAscent": 1854,
+      "usWinDescent": 434,
+      "glyphs": 2620,
+      "unicodeCodepoints": 2327
+    },
+    "asciiAdvanceDifferences": [],
+    "sharedCodepoints": 658,
+    "allAdvanceDifferences": [
+      {
+        "codepoint": "U+00B7",
+        "character": "\u00b7",
+        "old": 569,
+        "new": 682
+      },
+      {
+        "codepoint": "U+2012",
+        "character": "\u2012",
+        "old": 682,
+        "new": 1139
+      }
+    ],
+    "lostCodepoints": [
+      "U+2011",
+      "U+F001",
+      "U+F002",
+      "U+F005"
+    ],
+    "addedCodepoints": 1669
+  },
+  "risks": [
+    "Not pixel-identical to Liberation 1.05: 2.x uses the Google Croscore design with different outlines and hinting.",
+    "All 95 printable ASCII advance widths and vertical metrics match; kerning/shaping and rasterization may differ.",
+    "U+00B7 MIDDLE DOT advance changes from 569 to 682 font units; U+2012 FIGURE DASH changes from 682 to 1139.",
+    "Old U+2011 NON-BREAKING HYPHEN and private-use U+F001/U+F002/U+F005 are absent from the replacement cmap and will use browser fallback if present in a scene.",
+    "Keep original upstream OFL copyright and reserved-name statements alongside the served font."
+  ]
+}
