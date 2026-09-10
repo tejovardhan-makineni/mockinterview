@@ -8,10 +8,15 @@ import { Button, Field, Input, Panel, ErrorNotice } from "@/components/ui";
 function Action() {
   const params = useSearchParams();
   const token = params.get("token") ?? "";
-  const reset = params.get("action") === "reset";
+  const [completedAction, setCompletedAction] = useState<
+    "reset" | "verify" | null
+  >(null);
+  const reset = completedAction
+    ? completedAction === "reset"
+    : params.get("action") === "reset";
   const [password, setPassword] = useState("");
   const [busy, setBusy] = useState(false);
-  const [done, setDone] = useState(false);
+  const done = completedAction !== null;
   const [error, setError] = useState("");
   async function submit(e: React.FormEvent) {
     e.preventDefault();
@@ -20,7 +25,7 @@ function Action() {
     try {
       if (reset) await account.reset(token, password);
       else await account.verify(token);
-      setDone(true);
+      setCompletedAction(reset ? "reset" : "verify");
       window.history.replaceState({}, "", window.location.pathname);
     } catch (e) {
       setError(errorMessage(e));
