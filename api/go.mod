@@ -3,7 +3,7 @@ module github.com/tejo/mockinterview-api
 go 1.26.8
 
 require (
-	github.com/go-chi/chi/v5 v5.3.1
+	github.com/go-chi/chi/v5 v5.3.2
 	github.com/go-chi/cors v1.2.2
 	github.com/go-chi/httprate v0.16.0
 	github.com/golang-jwt/jwt/v5 v5.3.1
@@ -12,7 +12,7 @@ require (
 	github.com/jackc/pgx/v5 v5.10.0
 	github.com/ledongthuc/pdf v0.0.0-20250511090121-5959a4027728
 	golang.org/x/crypto v0.56.0
-	google.golang.org/genai v1.66.0
+	google.golang.org/genai v1.71.0
 )
 
 require (
