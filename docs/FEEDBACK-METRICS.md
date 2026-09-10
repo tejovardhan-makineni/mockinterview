@@ -1,6 +1,6 @@
 # Interpreting beta product feedback
 
-Instrument: **`post-interview-v1`**, defined in the [questionnaire](BETA-FEEDBACK-QUESTIONNAIRE.md). Status: implementation in progress; validation and deployment are pending. The cohort/window contract below has been reconciled with the backend source. This document does not assert that a production dashboard or unimplemented telemetry exists.
+Instrument: **`post-interview-v1`**, defined in the [questionnaire](BETA-FEEDBACK-QUESTIONNAIRE.md). The private dashboard at `/admin/feedback/` and its API were deployed on 10 September 2026; see the [release validation](FEEDBACK-RELEASE-2026-09-10.md). The cohort/window contract below matches the deployed implementation. Supplementary operational measures identified below remain separate from these dashboard metrics.
 
 ## Administrator API
 
@@ -22,7 +22,7 @@ This list is distinct from aggregate JSON/CSV exports and does not define the ag
 
 Every aggregate must describe its window, eligibility rule, instrument version, numerator, and denominator. Select a cohort of attempts once and compute the entire aggregate from that cohort, not from the newest page of survey responses or the administrator's recent-feedback list.
 
-The eligible population is newly created attempts assigned a survey version, with a non-null server `started_at` and status `scoring`, `feedback_failed`, `complete`, `abandoned`, or `expired`. Exclude legacy attempts and unused reservations. Pending scoring or scoring failure does not mean the participant's product experience is absent; report availability is represented separately in the questionnaire. These predicates match the implementation under development and still require release validation.
+The eligible population is newly created attempts assigned a survey version, with a non-null server `started_at` and status `scoring`, `feedback_failed`, `complete`, `abandoned`, or `expired`. Exclude legacy attempts and unused reservations. Pending scoring or scoring failure does not mean the participant's product experience is absent; report availability is represented separately in the questionnaire. These predicates match the deployed implementation and are covered by release validation.
 
 The cohort query uses server `started_at >= from AND started_at < to`, a fixed UTC window over started attempts, and reads the full qualifying cohort without a recent-response limit. The upper bound is the response's `generated_at`. The lower bound is exactly `generated_at - days × 24 hours`; the default is 30 elapsed days, and the accepted range is 1–365. The bounds are not rounded to midnight and are independent of browser time zones or daylight-saving transitions. This is not a session-creation, completion, or survey-submission window.
 
@@ -37,7 +37,7 @@ For a selected cohort, report at least:
 
 The survey is editable and stored once per session; analyze its current response once, not each submission or edit as another participant. Session/account deletion cascades to the survey and can change retained cohorts. Describe counts as a snapshot of retained application records; no separate immutable aggregate-retention mechanism is implied.
 
-The API represents rates as fractions in `[0, 1]`; the UI displays percentages. For example, `0.75` renders as `75%`, not `0.75%`. Include raw counts to make rounding and small samples visible. If the final API returns counts only, derive these fractions from those counts without inventing additional fields.
+The API represents rates as fractions in `[0, 1]`; the UI displays percentages. For example, `0.75` renders as `75%`, not `0.75%`. Include raw counts to make rounding and small samples visible.
 
 ## Dimension distributions
 

@@ -1,12 +1,35 @@
 # Required interview feedback — release validation
 
 This update adds the `post-interview-v1` product check-in and private metrics.
-Local implementation, automated validation, browser checks and a backup restore
-have passed. The first staging feedback flow also passed. A replacement build
-is pending for the history timestamp and archive-permission fixes below;
-production traffic still serves the preceding release at this commit.
+It is live at [mockinterview.live](https://mockinterview.live). The paired
+API/website rollout was verified at `2026-09-10T16:20:56.728822Z` after automated,
+staging browser/API, backup-restore and deletion checks passed.
 The earlier [policy release](RELEASE-VALIDATION-2026-09-10.md) remains a separate
 record; this update does not certify interview accuracy or legal compliance.
+
+## Deployed artifacts
+
+| Field | Verified value |
+| --- | --- |
+| API and web build source | `13a7619ffa9583e8cfe1bfe88bf68c1284ddd759` |
+| Protected implementation PR | [#22](https://github.com/tejovardhan-makineni/mockinterview/pull/22), squash commit `adf2a8d1f5cda3d0e1308b589f594f3f367b9330` |
+| Cloud Build | `a26db7c2-9964-482a-aa55-7a81bdd9a5cb` |
+| API image digest | `sha256:7c005eb8d5c900aafe2233b9ad98646c6bf1d05836ac2e2dc7dba3105cfdc114` |
+| Staging API | `mockinterview-api-staging-00010-jup` — 100% traffic |
+| Production API | `mockinterview-api-00044-sib` — 100% traffic |
+| Staging Firebase preview | `launch-candidate`, version `282e8910af606b94` |
+| Production Firebase preview and live | `launch-production`, version `4fde692b40426e74` |
+| Firebase live release | `1789057224552000` |
+| Firebase promotion time | `2026-09-10T16:20:24.552Z` |
+
+The exact immutable image was tested in staging and reused in production without
+rebuilding. The production-target web preview was cloned to live; the staging
+preview targets a different API and was never promoted to production. Both web
+builds used isolated `git archive` exports of the recorded source. The web does
+not embed a Git SHA; provenance is bound to that build process and the verified
+Firebase version. The squash commit has the identical source tree. All six
+required CI/security checks and the CodeQL findings gate passed on the build
+source before normal protected-branch merge; no bypass was used.
 
 ## Behavior
 
@@ -81,6 +104,31 @@ Two release findings were addressed before production promotion:
   non-UTC database connection and input offset verify the exact instant and
   fractional precision; the store/memory race suites passed.
 
+The final source `13a7619` passed the same-image staging rollout check at
+`2026-09-10T16:17:35Z`: the saved response survived, identical retries remained
+idempotent, level/unrated metrics and export stayed correct, and history returned
+the exact UTC instant. Chromium confirmed the local display changed from the
+incorrect `4:00:25 PM` to `9:00:25 AM` in America/Los_Angeles. This final build
+also succeeded with caller umask `077` using the hardened archive extraction.
+
+All three disposable staging accounts were deleted through the account API at
+`2026-09-10T16:18:11Z`. Responses and sessions cascaded, the metrics returned an
+empty cohort with a null completion rate, suggestions were empty and the deleted
+tokens returned `401`. Staging was left with zero users, sessions, responses and
+scoring jobs; the pre-existing short-lived eligibility ledger was preserved.
+The two local accounts were likewise deleted and their tokens rejected. Owned
+local test services and PostgreSQL were stopped and removed; revoked fixture
+credential files were deleted. The private production backup is preserved.
+
+Final public checks confirmed the expected API revision at 100%, image/source,
+`/health`, `/ready`, current policies, feedback, history, report, admin
+and account web routes, security headers, exact CORS allowlist and rejection of an
+untrusted origin. Unauthenticated feedback/admin requests returned `401`.
+License notices and the replacement font hash matched. Registration without
+policy declarations returned `403` without creating an account or sending mail.
+The production retention worker completed at `2026-09-10T16:18:22Z`.
+No production test account, provider request or email was created for this update.
+
 ## Database protection
 
 Migration `0010_interview_feedback.sql` adds a default-empty session version and
@@ -98,13 +146,28 @@ no feedback response or legacy obligation was manufactured. The restored test
 database was removed. The restricted backup is retained outside Git; no shared
 Cloud SQL instance restore was performed.
 
+Production aggregate checks after promotion still showed 15 users, 38 sessions,
+27 reports and 821 transcript turns, with zero pending jobs or active sessions.
+Migration 0010 is applied. All 38 existing sessions retain the empty version;
+there are zero production survey responses and zero legacy obligations at this
+verification snapshot. This is preservation evidence, not user-research data.
+
 ## Rollout and limits
 
 Use the [release runbook](RELEASE-RUNBOOK.md) for committed-source candidate
 builds, isolated staging checks, the paired API/web promotion and rollback.
 Terms/privacy version `2026-09-10.1` explains required product feedback. Publish
 the matching API and notice/form build together; preserve the additive migration
-on rollback so saved responses survive.
+on rollback so saved responses survive. The prior paired rollback target is API
+`mockinterview-api-00041-cic` and Firebase version `b8a9451c163cb83d`. A binary
+rollback disables the new check-in flow; coordinate both artifacts and preserve
+the additive database schema. Unpromoted intermediate candidates are not the
+rollback target.
+
+The existing maintainer account remains unverified with the `user` role. It
+must complete email verification and then receive an authorized UUID-based
+administrator grant before using the private dashboard. No verification or role
+bypass was applied; public practice does not depend on that owner action.
 
 Required product feedback is not research consent or permission to publish a
 quotation. These self-report items are unvalidated, and mandatory completion can

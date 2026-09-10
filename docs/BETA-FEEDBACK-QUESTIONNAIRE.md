@@ -1,6 +1,6 @@
 # Post-interview product feedback
 
-Version: **`post-interview-v1`**. Status: implementation in progress; validation and deployment are pending. This document defines the six-item questionnaire and its intended enforcement boundary. Release evidence must confirm the final behavior before it is described as deployed.
+Version: **`post-interview-v1`**. Deployed on 10 September 2026. This document defines the six-item questionnaire and its enforcement boundary. See the [release validation](FEEDBACK-RELEASE-2026-09-10.md) for the tested source, exact production artifacts and limits.
 
 This is product feedback about an interview attempt, not the AI's assessment of the candidate and not enrollment in academic research. Ratings describe the user's experience. They do not establish learning gains, grading accuracy, hiring readiness, or clinical/legal competence.
 
@@ -8,7 +8,7 @@ This is product feedback about an interview attempt, not the AI's assessment of 
 
 New attempts carrying this survey version require feedback after they have started and ended. Eligible statuses are `scoring`, `feedback_failed`, `complete`, `abandoned`, and `expired`, with a non-null server `started_at`. An unanswered required survey prevents starting the **next new interview**. It must not prevent opening the existing report, history, settings, data export, deletion, or support. A scoring failure or an unavailable report must not force the user to claim they read a report.
 
-Legacy attempts have no retroactive survey backlog. Unused reservations are excluded. The server determines whether an attempt started and ended; the browser cannot waive eligibility, forge completion, or satisfy the gate by hiding the form. The status selection above matches the implementation under development; validation evidence must confirm it before deployment.
+Legacy attempts have no retroactive survey backlog. Unused reservations are excluded. The server determines whether an attempt started and ended; the browser cannot waive eligibility, forge completion, or satisfy the gate by hiding the form. The status selection above is enforced by the server and covered by the release validation.
 
 Every item requires an answer, but an answer may be **Unable to judge**. All six answers may use that option. No rating is preselected, a favorable opinion is never required, and the comment is optional. Ordinary in-interview problem reports remain separate and do not satisfy this questionnaire.
 
@@ -63,7 +63,7 @@ Unknown future domains use group `general` with focus **your reasoning about thi
 
 ## Data contract and trust boundaries
 
-The implemented routes below require authentication; ownership checks apply to session routes. Release validation and deployment are still pending.
+The deployed routes below require authentication; ownership checks apply to session routes.
 
 | Route | Purpose |
 | --- | --- |
