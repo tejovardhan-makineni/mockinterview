@@ -4,14 +4,17 @@ import { req, errorMessage } from "@/lib/http";
 import { Button, Field, Input } from "./ui";
 export function PersonalKeyRecovery({
   sessionId,
+  provider,
   onSaved,
 }: {
   sessionId: string;
+  provider?: string;
   onSaved: () => void | Promise<void>;
 }) {
   const [key, setKey] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
+  const [paidBilling, setPaidBilling] = useState(false);
   return (
     <details className="notice">
       <summary className="font-semibold">
@@ -31,7 +34,10 @@ export function PersonalKeyRecovery({
           try {
             await req("/api/v1/sessions/" + sessionId + "/credentials", {
               method: "PUT",
-              body: JSON.stringify({ api_key: key }),
+              body: JSON.stringify({
+                api_key: key,
+                paid_billing_confirmed: paidBilling,
+              }),
             });
             setKey("");
             await onSaved();
@@ -46,17 +52,46 @@ export function PersonalKeyRecovery({
           <Input
             type="password"
             value={key}
-            onChange={(e) => setKey(e.target.value)}
+            onChange={(e) => {
+              setKey(e.target.value);
+              setPaidBilling(false);
+            }}
             autoComplete="off"
             required
           />
         </Field>
+        {provider === "gemini" && (
+          <label className="flex items-start gap-3 text-xs">
+            <input
+              className="mt-1"
+              type="checkbox"
+              checked={paidBilling}
+              onChange={(e) => setPaidBilling(e.target.checked)}
+            />
+            <span>
+              This Gemini key belongs to a project with paid billing enabled. A
+              connection check does not verify billing.{" "}
+              <a
+                className="underline"
+                href="https://ai.google.dev/gemini-api/docs/billing"
+                target="_blank"
+                rel="noopener"
+              >
+                Check billing
+              </a>
+            </span>
+          </label>
+        )}
         {error && (
           <p role="alert" className="text-sm text-[var(--color-bad)]">
             {error}
           </p>
         )}
-        <Button type="submit" variant="ghost" disabled={busy || !key}>
+        <Button
+          type="submit"
+          variant="ghost"
+          disabled={busy || !key || (provider === "gemini" && !paidBilling)}
+        >
           {busy ? "Checking connection…" : "Save key & retry"}
         </Button>
       </form>

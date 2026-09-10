@@ -23,6 +23,8 @@ export interface SessionOptions {
   model?: string;
   api_key?: string;
   mode?: "voice" | "text";
+  paid_billing_confirmed?: boolean;
+  voice_processing_acknowledged?: boolean;
 }
 export interface Usage {
   funded_available: boolean;

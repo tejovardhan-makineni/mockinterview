@@ -135,6 +135,7 @@ export interface ResumeMatch {
 }
 
 export interface ResumeSlice {
+  deleteResumes(): Promise<void>;
   uploadResume(file: File): Promise<Resume>;
   getResume(): Promise<Resume | null>;
   reviewResume(): Promise<ResumeReview>;
@@ -142,6 +143,10 @@ export interface ResumeSlice {
 }
 
 export const resumeHttp: ResumeSlice = {
+  async deleteResumes() {
+    await req<void>("/api/v1/resume", { method: "DELETE" });
+    clearResumeCaches();
+  },
   async uploadResume(file) {
     const fd = new FormData();
     fd.append("file", file);
@@ -347,6 +352,9 @@ export const MOCK_RESUME_MATCH: ResumeMatch = {
 };
 
 export const resumeMock: ResumeSlice = {
+  async deleteResumes() {
+    clearResumeCaches();
+  },
   async uploadResume(file) {
     const resume: Resume = {
       id: "mock-resume",
@@ -370,3 +378,17 @@ export const resumeMock: ResumeSlice = {
     return MOCK_RESUME_MATCH;
   },
 };
+
+export function clearResumeCaches() {
+  if (typeof window === "undefined") return;
+  try {
+    const keys = Array.from({ length: window.localStorage.length }, (_, i) =>
+      window.localStorage.key(i),
+    );
+    for (const key of keys)
+      if (key && (key.startsWith("mi_resume_") || key === RESUME_KEY))
+        window.localStorage.removeItem(key);
+  } catch {
+    /* Browser storage can be restricted. */
+  }
+}

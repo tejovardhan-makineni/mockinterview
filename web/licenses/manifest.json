@@ -1,0 +1,569 @@
+{
+  "supplements": [
+    {
+      "packages": ["@excalidraw/excalidraw@0.18.1"],
+      "files": [
+        {
+          "path": "Excalidraw-0.18.1.txt",
+          "sha256": "1352d204fdb90d5e482c13139d848bc2c9300a9a7de358a0a558a23e72d0d8be",
+          "source": "https://raw.githubusercontent.com/excalidraw/excalidraw/a2ec2889babf7d2295469c6d90ebe77fae57df84/LICENSE"
+        }
+      ],
+      "note": ""
+    },
+    {
+      "packages": ["@excalidraw/excalidraw@0.18.1"],
+      "files": [
+        {
+          "path": "Excalidraw-font-Assistant.txt",
+          "sha256": "3ec1fe726bc79826018c818875503e4543ef4af95300107587d85537aa392b27",
+          "source": "Installed WOFF2 name table: web/node_modules/@excalidraw/excalidraw/dist/prod/fonts/Assistant/Assistant-Bold.woff2\nhttps://raw.githubusercontent.com/google/fonts/c08cd288696d8ca30bf0296dc214d80d33a65d8f/ofl/assistant/OFL.txt"
+        }
+      ],
+      "note": ""
+    },
+    {
+      "packages": ["@excalidraw/excalidraw@0.18.1"],
+      "files": [
+        {
+          "path": "Excalidraw-font-Lilita.txt",
+          "sha256": "653e7bd5083b6aa237314d8a3dcc99cb012dba7ed470d4b4c95c96b217ae8a22",
+          "source": "Installed WOFF2 name table: web/node_modules/@excalidraw/excalidraw/dist/prod/fonts/Lilita/Lilita-Regular-i7dPIFZ9Zz-WBtRtedDbYE98RXi4EwSsbg.woff2\nhttps://raw.githubusercontent.com/google/fonts/c08cd288696d8ca30bf0296dc214d80d33a65d8f/ofl/lilitaone/OFL.txt"
+        }
+      ],
+      "note": ""
+    },
+    {
+      "packages": ["@excalidraw/excalidraw@0.18.1"],
+      "files": [
+        {
+          "path": "Excalidraw-font-Nunito.txt",
+          "sha256": "2fec12c44038a094f1bec760cec328b31eac5a73e93feb0a732099579d9f0f28",
+          "source": "Installed WOFF2 name table: web/node_modules/@excalidraw/excalidraw/dist/prod/fonts/Nunito/Nunito-Regular-XRXI3I6Li01BKofiOc5wtlZ2di8HDIkhdTA3j6zbXWjgevT5.woff2\nhttps://raw.githubusercontent.com/google/fonts/c08cd288696d8ca30bf0296dc214d80d33a65d8f/ofl/nunito/OFL.txt"
+        }
+      ],
+      "note": ""
+    },
+    {
+      "packages": ["@excalidraw/excalidraw@0.18.1"],
+      "files": [
+        {
+          "path": "Excalidraw-font-Cascadia.txt",
+          "sha256": "9324b9c0db1d5475ddc32dbdb30e83aa87998348dc57141b7807da760f9758ef",
+          "source": "Installed WOFF2 name table: web/node_modules/@excalidraw/excalidraw/dist/prod/fonts/Cascadia/CascadiaCode-Regular.woff2\nhttps://raw.githubusercontent.com/microsoft/cascadia-code/0610f2df4356200adb93cb5bca2221b92ad6ee7e/LICENSE"
+        }
+      ],
+      "note": ""
+    },
+    {
+      "packages": ["@excalidraw/excalidraw@0.18.1"],
+      "files": [
+        {
+          "path": "Excalidraw-font-Virgil.txt",
+          "sha256": "2d45d0a0ed96678befb252196a02dcc8f7da5f9f0bdbdd489aa9514e8e09618c",
+          "source": "Installed WOFF2 name table: web/node_modules/@excalidraw/excalidraw/dist/prod/fonts/Virgil/Virgil-Regular.woff2"
+        }
+      ],
+      "note": ""
+    },
+    {
+      "packages": ["@excalidraw/excalidraw@0.18.1"],
+      "files": [
+        {
+          "path": "Excalidraw-font-ComicShanns.txt",
+          "sha256": "144c4771343a7104f981d9a4d47bbdcd27459d5ef37641e805457e753923dfb0",
+          "source": "Installed WOFF2 name table: web/node_modules/@excalidraw/excalidraw/dist/prod/fonts/ComicShanns/ComicShanns-Regular-279a7b317d12eb88de06167bd672b4b4.woff2"
+        }
+      ],
+      "note": ""
+    },
+    {
+      "packages": ["@excalidraw/excalidraw@0.18.1"],
+      "files": [
+        {
+          "path": "Excalidraw-font-Excalifont.txt",
+          "sha256": "212a7702339e3467b2ab3fc63255b940449d5c38e25aeae1da062ec15514b06e",
+          "source": "Installed WOFF2 name table: web/node_modules/@excalidraw/excalidraw/dist/prod/fonts/Excalifont/Excalifont-Regular-349fac6ca4700ffec595a7150a0d1e1d.woff2\nhttps://raw.githubusercontent.com/excalidraw/excalidraw/a2ec2889babf7d2295469c6d90ebe77fae57df84/packages/excalidraw/fonts/Excalifont/index.ts"
+        }
+      ],
+      "note": ""
+    },
+    {
+      "packages": ["@excalidraw/excalidraw@0.18.1"],
+      "files": [
+        {
+          "path": "Excalidraw-font-Xiaolai.txt",
+          "sha256": "cf5eda975b1c1bfb8688265fd2faeeef8e9da13445039ed15565ce3a620376bb",
+          "source": "Installed WOFF2 name table: web/node_modules/@excalidraw/excalidraw/dist/prod/fonts/Xiaolai/Xiaolai-Regular-019d66dcad46dc156b162d267f981c20.woff2\nhttps://raw.githubusercontent.com/excalidraw/excalidraw/a2ec2889babf7d2295469c6d90ebe77fae57df84/packages/excalidraw/fonts/Xiaolai/index.ts\nhttps://raw.githubusercontent.com/lxgw/kose-font/21828241081eb0ecc1b4cb40bd9a1b253c09c488/License.txt"
+        }
+      ],
+      "note": ""
+    },
+    {
+      "packages": ["@excalidraw/excalidraw@0.18.1"],
+      "files": [
+        {
+          "path": "Excalidraw-bundled-fonteditor-core-2.4.0.txt",
+          "sha256": "a039b39cbe22dc9be5a8334bd1dacdc8505eb0088abf9fbb8de774a0258ab354",
+          "source": "Installed package comment"
+        }
+      ],
+      "note": ""
+    },
+    {
+      "packages": ["@excalidraw/excalidraw@0.18.1"],
+      "files": [
+        {
+          "path": "Excalidraw-bundled-harfbuzzjs-0.3.6.txt",
+          "sha256": "75056630b34c4aca1b807c97dd13b5650b632c8bdde0770a517038f05bc1ef0c",
+          "source": "Installed package comment"
+        }
+      ],
+      "note": "harfbuzzjs notice mentions Zephyr libc and Emscripten Apache code but does not include full Apache text."
+    },
+    {
+      "packages": ["@radix-ui/primitive@1.1.1"],
+      "files": [
+        {
+          "path": "Radix-0e80a2d229d2.txt",
+          "source": "https://raw.githubusercontent.com/radix-ui/primitives/3c5e05fab070dfa68212230e85baf0879269c57d/LICENSE",
+          "sha256": "0e80a2d229d2fd4fc7e8636142ec5d0ff0bc031f14c15b682e2ac01dfd5b5138"
+        }
+      ],
+      "note": "npm published gitHead"
+    },
+    {
+      "packages": ["@radix-ui/react-arrow@1.1.2"],
+      "files": [
+        {
+          "path": "Radix-0e80a2d229d2.txt",
+          "source": "https://raw.githubusercontent.com/radix-ui/primitives/e1bdb77ea2445407b239558f2902c2e1950586fe/LICENSE",
+          "sha256": "0e80a2d229d2fd4fc7e8636142ec5d0ff0bc031f14c15b682e2ac01dfd5b5138"
+        }
+      ],
+      "note": "npm published gitHead"
+    },
+    {
+      "packages": ["@radix-ui/react-compose-refs@1.1.1"],
+      "files": [
+        {
+          "path": "Radix-0e80a2d229d2.txt",
+          "source": "https://raw.githubusercontent.com/radix-ui/primitives/3c5e05fab070dfa68212230e85baf0879269c57d/LICENSE",
+          "sha256": "0e80a2d229d2fd4fc7e8636142ec5d0ff0bc031f14c15b682e2ac01dfd5b5138"
+        }
+      ],
+      "note": "npm published gitHead"
+    },
+    {
+      "packages": ["@radix-ui/react-context@1.1.1"],
+      "files": [
+        {
+          "path": "Radix-0e80a2d229d2.txt",
+          "source": "https://raw.githubusercontent.com/radix-ui/primitives/157415ed1f34c53b5afbf53a047895ed6a7f957f/LICENSE",
+          "sha256": "0e80a2d229d2fd4fc7e8636142ec5d0ff0bc031f14c15b682e2ac01dfd5b5138"
+        }
+      ],
+      "note": "npm published gitHead"
+    },
+    {
+      "packages": ["@radix-ui/react-dismissable-layer@1.1.5"],
+      "files": [
+        {
+          "path": "Radix-0e80a2d229d2.txt",
+          "source": "https://raw.githubusercontent.com/radix-ui/primitives/e1bdb77ea2445407b239558f2902c2e1950586fe/LICENSE",
+          "sha256": "0e80a2d229d2fd4fc7e8636142ec5d0ff0bc031f14c15b682e2ac01dfd5b5138"
+        }
+      ],
+      "note": "npm published gitHead"
+    },
+    {
+      "packages": ["@radix-ui/react-focus-guards@1.1.1"],
+      "files": [
+        {
+          "path": "Radix-0e80a2d229d2.txt",
+          "source": "https://raw.githubusercontent.com/radix-ui/primitives/157415ed1f34c53b5afbf53a047895ed6a7f957f/LICENSE",
+          "sha256": "0e80a2d229d2fd4fc7e8636142ec5d0ff0bc031f14c15b682e2ac01dfd5b5138"
+        }
+      ],
+      "note": "npm published gitHead"
+    },
+    {
+      "packages": ["@radix-ui/react-focus-scope@1.1.2"],
+      "files": [
+        {
+          "path": "Radix-0e80a2d229d2.txt",
+          "source": "https://raw.githubusercontent.com/radix-ui/primitives/e1bdb77ea2445407b239558f2902c2e1950586fe/LICENSE",
+          "sha256": "0e80a2d229d2fd4fc7e8636142ec5d0ff0bc031f14c15b682e2ac01dfd5b5138"
+        }
+      ],
+      "note": "npm published gitHead"
+    },
+    {
+      "packages": ["@radix-ui/react-id@1.1.0"],
+      "files": [
+        {
+          "path": "Radix-0e80a2d229d2.txt",
+          "source": "https://raw.githubusercontent.com/radix-ui/primitives/704069ee4c40c3b6f342c104dff5ad873ee39c43/LICENSE",
+          "sha256": "0e80a2d229d2fd4fc7e8636142ec5d0ff0bc031f14c15b682e2ac01dfd5b5138"
+        }
+      ],
+      "note": "npm published gitHead"
+    },
+    {
+      "packages": ["@radix-ui/react-popover@1.1.6"],
+      "files": [
+        {
+          "path": "Radix-0e80a2d229d2.txt",
+          "source": "https://raw.githubusercontent.com/radix-ui/primitives/e1bdb77ea2445407b239558f2902c2e1950586fe/LICENSE",
+          "sha256": "0e80a2d229d2fd4fc7e8636142ec5d0ff0bc031f14c15b682e2ac01dfd5b5138"
+        }
+      ],
+      "note": "npm published gitHead"
+    },
+    {
+      "packages": ["@radix-ui/react-popper@1.2.2"],
+      "files": [
+        {
+          "path": "Radix-0e80a2d229d2.txt",
+          "source": "https://raw.githubusercontent.com/radix-ui/primitives/e1bdb77ea2445407b239558f2902c2e1950586fe/LICENSE",
+          "sha256": "0e80a2d229d2fd4fc7e8636142ec5d0ff0bc031f14c15b682e2ac01dfd5b5138"
+        }
+      ],
+      "note": "npm published gitHead"
+    },
+    {
+      "packages": ["@radix-ui/react-portal@1.1.4"],
+      "files": [
+        {
+          "path": "Radix-0e80a2d229d2.txt",
+          "source": "https://raw.githubusercontent.com/radix-ui/primitives/e1bdb77ea2445407b239558f2902c2e1950586fe/LICENSE",
+          "sha256": "0e80a2d229d2fd4fc7e8636142ec5d0ff0bc031f14c15b682e2ac01dfd5b5138"
+        }
+      ],
+      "note": "npm published gitHead"
+    },
+    {
+      "packages": ["@radix-ui/react-presence@1.1.2"],
+      "files": [
+        {
+          "path": "Radix-0e80a2d229d2.txt",
+          "source": "https://raw.githubusercontent.com/radix-ui/primitives/3c5e05fab070dfa68212230e85baf0879269c57d/LICENSE",
+          "sha256": "0e80a2d229d2fd4fc7e8636142ec5d0ff0bc031f14c15b682e2ac01dfd5b5138"
+        }
+      ],
+      "note": "npm published gitHead"
+    },
+    {
+      "packages": ["@radix-ui/react-primitive@2.0.2"],
+      "files": [
+        {
+          "path": "Radix-0e80a2d229d2.txt",
+          "source": "https://raw.githubusercontent.com/radix-ui/primitives/e1bdb77ea2445407b239558f2902c2e1950586fe/LICENSE",
+          "sha256": "0e80a2d229d2fd4fc7e8636142ec5d0ff0bc031f14c15b682e2ac01dfd5b5138"
+        }
+      ],
+      "note": "npm published gitHead"
+    },
+    {
+      "packages": ["@radix-ui/react-slot@1.1.2"],
+      "files": [
+        {
+          "path": "Radix-0e80a2d229d2.txt",
+          "source": "https://raw.githubusercontent.com/radix-ui/primitives/e1bdb77ea2445407b239558f2902c2e1950586fe/LICENSE",
+          "sha256": "0e80a2d229d2fd4fc7e8636142ec5d0ff0bc031f14c15b682e2ac01dfd5b5138"
+        }
+      ],
+      "note": "npm published gitHead"
+    },
+    {
+      "packages": ["@radix-ui/react-use-callback-ref@1.1.0"],
+      "files": [
+        {
+          "path": "Radix-0e80a2d229d2.txt",
+          "source": "https://raw.githubusercontent.com/radix-ui/primitives/704069ee4c40c3b6f342c104dff5ad873ee39c43/LICENSE",
+          "sha256": "0e80a2d229d2fd4fc7e8636142ec5d0ff0bc031f14c15b682e2ac01dfd5b5138"
+        }
+      ],
+      "note": "npm published gitHead"
+    },
+    {
+      "packages": ["@radix-ui/react-use-controllable-state@1.1.0"],
+      "files": [
+        {
+          "path": "Radix-0e80a2d229d2.txt",
+          "source": "https://raw.githubusercontent.com/radix-ui/primitives/704069ee4c40c3b6f342c104dff5ad873ee39c43/LICENSE",
+          "sha256": "0e80a2d229d2fd4fc7e8636142ec5d0ff0bc031f14c15b682e2ac01dfd5b5138"
+        }
+      ],
+      "note": "npm published gitHead"
+    },
+    {
+      "packages": ["@radix-ui/react-use-escape-keydown@1.1.0"],
+      "files": [
+        {
+          "path": "Radix-0e80a2d229d2.txt",
+          "source": "https://raw.githubusercontent.com/radix-ui/primitives/704069ee4c40c3b6f342c104dff5ad873ee39c43/LICENSE",
+          "sha256": "0e80a2d229d2fd4fc7e8636142ec5d0ff0bc031f14c15b682e2ac01dfd5b5138"
+        }
+      ],
+      "note": "npm published gitHead"
+    },
+    {
+      "packages": ["@radix-ui/react-use-layout-effect@1.1.0"],
+      "files": [
+        {
+          "path": "Radix-0e80a2d229d2.txt",
+          "source": "https://raw.githubusercontent.com/radix-ui/primitives/704069ee4c40c3b6f342c104dff5ad873ee39c43/LICENSE",
+          "sha256": "0e80a2d229d2fd4fc7e8636142ec5d0ff0bc031f14c15b682e2ac01dfd5b5138"
+        }
+      ],
+      "note": "npm published gitHead"
+    },
+    {
+      "packages": ["@radix-ui/react-use-rect@1.1.0"],
+      "files": [
+        {
+          "path": "Radix-0e80a2d229d2.txt",
+          "source": "https://raw.githubusercontent.com/radix-ui/primitives/704069ee4c40c3b6f342c104dff5ad873ee39c43/LICENSE",
+          "sha256": "0e80a2d229d2fd4fc7e8636142ec5d0ff0bc031f14c15b682e2ac01dfd5b5138"
+        }
+      ],
+      "note": "npm published gitHead"
+    },
+    {
+      "packages": ["@radix-ui/react-use-size@1.1.0"],
+      "files": [
+        {
+          "path": "Radix-0e80a2d229d2.txt",
+          "source": "https://raw.githubusercontent.com/radix-ui/primitives/704069ee4c40c3b6f342c104dff5ad873ee39c43/LICENSE",
+          "sha256": "0e80a2d229d2fd4fc7e8636142ec5d0ff0bc031f14c15b682e2ac01dfd5b5138"
+        }
+      ],
+      "note": "npm published gitHead"
+    },
+    {
+      "packages": ["@radix-ui/rect@1.1.0"],
+      "files": [
+        {
+          "path": "Radix-0e80a2d229d2.txt",
+          "source": "https://raw.githubusercontent.com/radix-ui/primitives/704069ee4c40c3b6f342c104dff5ad873ee39c43/LICENSE",
+          "sha256": "0e80a2d229d2fd4fc7e8636142ec5d0ff0bc031f14c15b682e2ac01dfd5b5138"
+        }
+      ],
+      "note": "npm published gitHead"
+    },
+    {
+      "packages": ["@radix-ui/primitive@1.0.0"],
+      "files": [
+        {
+          "path": "Radix-0e80a2d229d2.txt",
+          "source": "https://raw.githubusercontent.com/radix-ui/primitives/511ca883b41f63ab99b135c6f29d0937ff0cbef0/LICENSE",
+          "sha256": "0e80a2d229d2fd4fc7e8636142ec5d0ff0bc031f14c15b682e2ac01dfd5b5138"
+        }
+      ],
+      "note": "npm package omits gitHead. All 2 package source-map source files match 511ca883b41f63ab99b135c6f29d0937ff0cbef0, the package commit before publication 2022-07-20T18:48:43.576Z."
+    },
+    {
+      "packages": ["@radix-ui/react-tabs@1.0.2"],
+      "files": [
+        {
+          "path": "Radix-0e80a2d229d2.txt",
+          "source": "https://raw.githubusercontent.com/radix-ui/primitives/f85d5e98d65bc05e1c05651dc728e6142e8864a5/LICENSE",
+          "sha256": "0e80a2d229d2fd4fc7e8636142ec5d0ff0bc031f14c15b682e2ac01dfd5b5138"
+        }
+      ],
+      "note": "npm package omits gitHead. All 2 package source-map source files match f85d5e98d65bc05e1c05651dc728e6142e8864a5, the package commit before publication 2023-01-17T13:40:48.722Z."
+    },
+    {
+      "packages": ["@radix-ui/react-context@1.0.0"],
+      "files": [
+        {
+          "path": "Radix-0e80a2d229d2.txt",
+          "source": "https://raw.githubusercontent.com/radix-ui/primitives/511ca883b41f63ab99b135c6f29d0937ff0cbef0/LICENSE",
+          "sha256": "0e80a2d229d2fd4fc7e8636142ec5d0ff0bc031f14c15b682e2ac01dfd5b5138"
+        }
+      ],
+      "note": "npm package omits gitHead. All 2 package source-map source files match 511ca883b41f63ab99b135c6f29d0937ff0cbef0, the package commit before publication 2022-07-20T18:48:50.721Z."
+    },
+    {
+      "packages": ["@radix-ui/react-direction@1.0.0"],
+      "files": [
+        {
+          "path": "Radix-0e80a2d229d2.txt",
+          "source": "https://raw.githubusercontent.com/radix-ui/primitives/511ca883b41f63ab99b135c6f29d0937ff0cbef0/LICENSE",
+          "sha256": "0e80a2d229d2fd4fc7e8636142ec5d0ff0bc031f14c15b682e2ac01dfd5b5138"
+        }
+      ],
+      "note": "npm package omits gitHead. All 2 package source-map source files match 511ca883b41f63ab99b135c6f29d0937ff0cbef0, the package commit before publication 2022-07-20T18:48:53.147Z."
+    },
+    {
+      "packages": ["@radix-ui/react-id@1.0.0"],
+      "files": [
+        {
+          "path": "Radix-0e80a2d229d2.txt",
+          "source": "https://raw.githubusercontent.com/radix-ui/primitives/511ca883b41f63ab99b135c6f29d0937ff0cbef0/LICENSE",
+          "sha256": "0e80a2d229d2fd4fc7e8636142ec5d0ff0bc031f14c15b682e2ac01dfd5b5138"
+        }
+      ],
+      "note": "npm package omits gitHead. All 2 package source-map source files match 511ca883b41f63ab99b135c6f29d0937ff0cbef0, the package commit before publication 2022-07-20T18:48:55.687Z."
+    },
+    {
+      "packages": ["@radix-ui/react-use-layout-effect@1.0.0"],
+      "files": [
+        {
+          "path": "Radix-0e80a2d229d2.txt",
+          "source": "https://raw.githubusercontent.com/radix-ui/primitives/511ca883b41f63ab99b135c6f29d0937ff0cbef0/LICENSE",
+          "sha256": "0e80a2d229d2fd4fc7e8636142ec5d0ff0bc031f14c15b682e2ac01dfd5b5138"
+        }
+      ],
+      "note": "npm package omits gitHead. All 2 package source-map source files match 511ca883b41f63ab99b135c6f29d0937ff0cbef0, the package commit before publication 2022-07-20T18:49:13.304Z."
+    },
+    {
+      "packages": ["@radix-ui/react-presence@1.0.0"],
+      "files": [
+        {
+          "path": "Radix-0e80a2d229d2.txt",
+          "source": "https://raw.githubusercontent.com/radix-ui/primitives/511ca883b41f63ab99b135c6f29d0937ff0cbef0/LICENSE",
+          "sha256": "0e80a2d229d2fd4fc7e8636142ec5d0ff0bc031f14c15b682e2ac01dfd5b5138"
+        }
+      ],
+      "note": "npm package omits gitHead. All 3 package source-map source files match 511ca883b41f63ab99b135c6f29d0937ff0cbef0, the package commit before publication 2022-07-20T18:49:00.070Z."
+    },
+    {
+      "packages": ["@radix-ui/react-compose-refs@1.0.0"],
+      "files": [
+        {
+          "path": "Radix-0e80a2d229d2.txt",
+          "source": "https://raw.githubusercontent.com/radix-ui/primitives/511ca883b41f63ab99b135c6f29d0937ff0cbef0/LICENSE",
+          "sha256": "0e80a2d229d2fd4fc7e8636142ec5d0ff0bc031f14c15b682e2ac01dfd5b5138"
+        }
+      ],
+      "note": "npm package omits gitHead. All 2 package source-map source files match 511ca883b41f63ab99b135c6f29d0937ff0cbef0, the package commit before publication 2022-07-20T18:48:50.087Z."
+    },
+    {
+      "packages": ["@radix-ui/react-primitive@1.0.1"],
+      "files": [
+        {
+          "path": "Radix-0e80a2d229d2.txt",
+          "source": "https://raw.githubusercontent.com/radix-ui/primitives/3ead2147159bf81a100376079b4ab04ccc381cd1/LICENSE",
+          "sha256": "0e80a2d229d2fd4fc7e8636142ec5d0ff0bc031f14c15b682e2ac01dfd5b5138"
+        }
+      ],
+      "note": "npm package omits gitHead. All 2 package source-map source files match 3ead2147159bf81a100376079b4ab04ccc381cd1, the package commit before publication 2022-10-17T09:49:55.585Z."
+    },
+    {
+      "packages": ["@radix-ui/react-slot@1.0.1"],
+      "files": [
+        {
+          "path": "Radix-0e80a2d229d2.txt",
+          "source": "https://raw.githubusercontent.com/radix-ui/primitives/3ead2147159bf81a100376079b4ab04ccc381cd1/LICENSE",
+          "sha256": "0e80a2d229d2fd4fc7e8636142ec5d0ff0bc031f14c15b682e2ac01dfd5b5138"
+        }
+      ],
+      "note": "npm package omits gitHead. All 2 package source-map source files match 3ead2147159bf81a100376079b4ab04ccc381cd1, the package commit before publication 2022-10-17T09:49:59.098Z."
+    },
+    {
+      "packages": ["@radix-ui/react-roving-focus@1.0.2"],
+      "files": [
+        {
+          "path": "Radix-0e80a2d229d2.txt",
+          "source": "https://raw.githubusercontent.com/radix-ui/primitives/f85d5e98d65bc05e1c05651dc728e6142e8864a5/LICENSE",
+          "sha256": "0e80a2d229d2fd4fc7e8636142ec5d0ff0bc031f14c15b682e2ac01dfd5b5138"
+        }
+      ],
+      "note": "npm package omits gitHead. All 2 package source-map source files match f85d5e98d65bc05e1c05651dc728e6142e8864a5, the package commit before publication 2023-01-17T13:40:43.800Z."
+    },
+    {
+      "packages": ["@radix-ui/react-collection@1.0.1"],
+      "files": [
+        {
+          "path": "Radix-0e80a2d229d2.txt",
+          "source": "https://raw.githubusercontent.com/radix-ui/primitives/3ead2147159bf81a100376079b4ab04ccc381cd1/LICENSE",
+          "sha256": "0e80a2d229d2fd4fc7e8636142ec5d0ff0bc031f14c15b682e2ac01dfd5b5138"
+        }
+      ],
+      "note": "npm package omits gitHead. All 2 package source-map source files match 3ead2147159bf81a100376079b4ab04ccc381cd1, the package commit before publication 2022-10-17T09:49:47.273Z."
+    },
+    {
+      "packages": ["@radix-ui/react-use-callback-ref@1.0.0"],
+      "files": [
+        {
+          "path": "Radix-0e80a2d229d2.txt",
+          "source": "https://raw.githubusercontent.com/radix-ui/primitives/511ca883b41f63ab99b135c6f29d0937ff0cbef0/LICENSE",
+          "sha256": "0e80a2d229d2fd4fc7e8636142ec5d0ff0bc031f14c15b682e2ac01dfd5b5138"
+        }
+      ],
+      "note": "npm package omits gitHead. All 2 package source-map source files match 511ca883b41f63ab99b135c6f29d0937ff0cbef0, the package commit before publication 2022-07-20T18:49:10.408Z."
+    },
+    {
+      "packages": ["@radix-ui/react-use-controllable-state@1.0.0"],
+      "files": [
+        {
+          "path": "Radix-0e80a2d229d2.txt",
+          "source": "https://raw.githubusercontent.com/radix-ui/primitives/511ca883b41f63ab99b135c6f29d0937ff0cbef0/LICENSE",
+          "sha256": "0e80a2d229d2fd4fc7e8636142ec5d0ff0bc031f14c15b682e2ac01dfd5b5138"
+        }
+      ],
+      "note": "npm package omits gitHead. All 2 package source-map source files match 511ca883b41f63ab99b135c6f29d0937ff0cbef0, the package commit before publication 2022-07-20T18:49:12.696Z."
+    },
+    {
+      "packages": [
+        "@next/env@16.3.4",
+        "@next/swc-darwin-arm64@16.3.4",
+        "@next/swc-darwin-x64@16.3.4",
+        "@next/swc-linux-arm64-gnu@16.3.4",
+        "@next/swc-linux-arm64-musl@16.3.4",
+        "@next/swc-linux-x64-gnu@16.3.4",
+        "@next/swc-linux-x64-musl@16.3.4",
+        "@next/swc-win32-arm64-msvc@16.3.4",
+        "@next/swc-win32-x64-msvc@16.3.4"
+      ],
+      "files": [
+        {
+          "path": "Next-16.3.4.txt",
+          "source": "next@16.3.4/license.md (same-version upstream monorepo distribution)",
+          "sha256": "ee765244e2d59f5234d474f62e0766fa0c8b99af967fdd4c0cb8dcb0c76ea224"
+        }
+      ],
+      "note": "@next/env and platform compiler packages declare the same Next.js monorepo MIT license, but their tarballs omit the root text. Native compiler packages are build tooling, not static browser artifacts."
+    },
+    {
+      "packages": ["react-remove-scroll-bar@2.3.8"],
+      "files": [
+        {
+          "path": "React-remove-scroll-bar.txt",
+          "source": "https://raw.githubusercontent.com/theKashey/react-remove-scroll-bar/8ca9ba5ea52de03308fe8ced94f7b159a44d28ff/LICENSE",
+          "sha256": "a79aae0c0f21990d9d963bb3c5a79cdcea9a46f8523ba55c58d7fe776b6ebc84"
+        }
+      ],
+      "note": "Upstream package.json identifies 2.3.7. All 12 distributed JavaScript files in npm 2.3.8 are byte-identical to npm 2.3.7; full license preserved from that upstream project. Published 2.3.8 gitHead is unavailable in the declared repository."
+    },
+    {
+      "packages": ["client-only@0.0.1"],
+      "files": [
+        {
+          "path": "Next-16.3.4.txt",
+          "source": "next@16.3.4/license.md (same-version upstream monorepo distribution)",
+          "sha256": "ee765244e2d59f5234d474f62e0766fa0c8b99af967fdd4c0cb8dcb0c76ea224"
+        },
+        {
+          "path": "React-license.txt",
+          "source": "react@19.2.4/LICENSE; React is the upstream project named in client-only package metadata",
+          "sha256": "da6d3703ed11cbe42bd212c725957c98da23cbff1998c05fa4b3d976d1a58e93"
+        }
+      ],
+      "note": "The entire client-only 0.0.1 package (package.json, index.js, error.js) matches the copy distributed under https://github.com/vercel/next.js/tree/v16.3.4/packages/next/src/compiled/client-only. Preserve the Next.js monorepo and referenced React project MIT notices rather than inventing an individual copyright holder."
+    },
+    {
+      "packages": ["@excalidraw/excalidraw@0.18.1"],
+      "files": [
+        {
+          "path": "liberation-sans-2.1.5/OFL.txt",
+          "source": "https://github.com/liberationfonts/liberation-fonts/releases/tag/2.1.5 \u2014 exact archive/source hashes in liberation-sans-2.1.5/source-manifest.json",
+          "sha256": "93fed46019c38bbe566b479d22148e2e8a1e85ada614accb0211c37b2c61c19b"
+        }
+      ],
+      "note": "Browser vendor-assets replaces only the old GPL Liberation 1.05 font with official OFL Liberation Sans 2.1.5 at the same URL/family 9. All original 2.1.5 font tables retained byte-for-byte in WOFF2. The old npm font is not included in the static release. See source-manifest.json for compatibility differences and reproducibility."
+    }
+  ]
+}

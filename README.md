@@ -99,6 +99,36 @@ fails, the report offers a retry for that saved attempt. An invalid assessment
 is rejected rather than replaced with invented scores, and a retry is not a
 guarantee of success.
 
+The **policy-control update in this source is awaiting deployment verification**.
+It adds an 18+ assertion, acceptance of the current terms and acknowledgment of
+the privacy notice before hosted AI use. Existing users keep login, recovery,
+history, export and deletion access while reviewing the update. No birth date or
+identity document is collected by this acknowledgment flow.
+
+API clients can read `GET /api/v1/legal-policy` for `terms_version`,
+`privacy_version`, `minimum_age` and `required`. The current document versions are
+`2026-09-10`. Hosted registration includes `adult_confirmed: true` and both exact
+version strings alongside email/password; existing users submit the same three
+fields to authenticated `POST /api/v1/auth/policies`. That endpoint returns the
+user directly, including `policies_required`, `adult_confirmed`, accepted versions,
+`adult_confirmed_at` and `policies_accepted_at`. Local demo mode preserves its
+existing setup.
+
+New hosted voice attempts require `voice_processing_acknowledged: true` after
+the microphone-processing notice; text practice needs no microphone permission.
+Hosted personal Gemini keys require `paid_billing_confirmed: true` for validation,
+session creation and key replacement. This is the user's declaration, **not a
+verified billing check**; provider charges and terms still apply.
+
+Resume upload sends extracted text to the configured AI provider immediately;
+later interview inclusion is a separate choice. The update adds authenticated
+`DELETE /api/v1/resume` to remove uploads and standalone reviews. It preserves
+interview history and content already used there; delete the relevant interviews
+or account when needed. See [legal readiness](docs/LEGAL-READINESS-2026-09-10.md)
+and [privacy operations](docs/PRIVACY-OPERATIONS.md) for remaining operator,
+audience and retention decisions. These controls are not a claim of universal
+legal compliance.
+
 Between interviews, revisit saved evidence, rewrite an answer and complete the
 report's short self-guided exercises. These exercises make no model request.
 Rehearsing the same scenario builds fluency; a new scenario tests whether the

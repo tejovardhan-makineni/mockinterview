@@ -88,16 +88,18 @@ func (s *Service) List(w http.ResponseWriter, r *http.Request) {
 }
 
 type createReq struct {
-	Minutes    int             `json:"minutes"`
-	Funding    string          `json:"funding"`
-	Provider   string          `json:"provider"`
-	Model      string          `json:"model"`
-	APIKey     string          `json:"api_key"`
-	Mode       string          `json:"mode"`
-	QuestionID string          `json:"question_id"`
-	Config     json.RawMessage `json:"config"`
-	PackID     string          `json:"pack_id,omitempty"`
-	RoundID    string          `json:"round_id,omitempty"`
+	Minutes                     int             `json:"minutes"`
+	Funding                     string          `json:"funding"`
+	Provider                    string          `json:"provider"`
+	Model                       string          `json:"model"`
+	APIKey                      string          `json:"api_key"`
+	Mode                        string          `json:"mode"`
+	PaidBillingConfirmed        bool            `json:"paid_billing_confirmed"`
+	VoiceProcessingAcknowledged bool            `json:"voice_processing_acknowledged"`
+	QuestionID                  string          `json:"question_id"`
+	Config                      json.RawMessage `json:"config"`
+	PackID                      string          `json:"pack_id,omitempty"`
+	RoundID                     string          `json:"round_id,omitempty"`
 }
 
 // PackResolver resolves a pack round to a concrete corpus question + an
@@ -165,6 +167,10 @@ func (s *Service) Create(w http.ResponseWriter, r *http.Request) {
 		httpx.WriteProblem(w, 403, "verify your email before starting an interview")
 		return
 	}
+	if s.options.Hosted && !auth.PoliciesAccepted(u) {
+		auth.PolicyRequired(w)
+		return
+	}
 	if req.Minutes == 0 {
 		req.Minutes = 30
 	}
@@ -177,6 +183,28 @@ func (s *Service) Create(w http.ResponseWriter, r *http.Request) {
 	}
 	if req.Mode == "" {
 		req.Mode = "voice"
+	}
+	if s.options.Hosted && req.Mode == "voice" && !req.VoiceProcessingAcknowledged {
+		httpx.WriteJSON(w, 400, map[string]string{"code": "voice_processing_required", "detail": "Review the microphone processing notice and acknowledge it before starting a voice interview, or choose text."})
+		return
+	}
+	if req.Funding == "byok" && !s.requirePaidBilling(w, req.Provider, req.PaidBillingConfirmed) {
+		return
+	}
+	if s.options.Hosted {
+		var recorded map[string]any
+		_ = json.Unmarshal(req.Config, &recorded)
+		if recorded == nil {
+			recorded = map[string]any{}
+		}
+		if req.Mode == "voice" && req.VoiceProcessingAcknowledged {
+			recorded["voice_processing_acknowledged_at"] = time.Now().UTC().Format(time.RFC3339Nano)
+			recorded["voice_processing_notice_version"] = auth.PrivacyVersion
+		}
+		if req.Funding == "byok" && req.Provider == "gemini" && req.PaidBillingConfirmed {
+			recorded["paid_billing_confirmed_at"] = time.Now().UTC().Format(time.RFC3339Nano)
+		}
+		req.Config, _ = json.Marshal(recorded)
 	}
 	if req.Funding != "platform" && req.Funding != "byok" {
 		httpx.WriteProblem(w, 400, "invalid funding mode")
@@ -412,7 +440,14 @@ func (s *Service) Report(w http.ResponseWriter, r *http.Request) {
 	}
 	if sess.Status == "scoring" || sess.Status == "ending" || sess.Status == "feedback_failed" {
 		s.Wake()
-		httpx.WriteJSON(w, 202, map[string]string{"status": mapStatus(sess.Status), "error": processingMessage(sess.Status)})
+		state := map[string]string{"status": mapStatus(sess.Status), "error": processingMessage(sess.Status)}
+		if s.options.Hosted && sess.Status == "feedback_failed" {
+			if u, err := s.store.UserByID(r.Context(), sess.UserID); err == nil && !auth.HasPolicyAcknowledgment(u) {
+				state["code"] = "policies_required"
+				state["error"] = "Your interview is saved. Review the current terms and privacy notice, confirm you are at least 18, and verify your email in your account before retrying feedback."
+			}
+		}
+		httpx.WriteJSON(w, 202, state)
 		return
 	}
 	rep, scores, err := s.store.GetReport(r.Context(), sess.ID)

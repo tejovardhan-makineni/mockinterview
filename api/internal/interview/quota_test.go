@@ -47,6 +47,9 @@ func TestHostedAllowanceAppliesToAdminsAndLocalRemainsUnlimited(t *testing.T) {
 				if err != nil {
 					t.Fatal(err)
 				}
+				if _, err := repo.AcceptPolicies(ctx, u.ID, auth.TermsVersion, auth.PrivacyVersion); err != nil {
+					t.Fatal(err)
+				}
 				const signingKey = "synthetic-quota-test-signing-secret"
 				token, err := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.RegisteredClaims{Subject: u.ID, Audience: jwt.ClaimStrings{"api"}, ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Hour))}).SignedString([]byte(signingKey))
 				if err != nil {

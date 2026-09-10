@@ -134,7 +134,7 @@ function ReportView() {
           {processing?.status === "feedback_failed" &&
             session?.funding === "byok" && (
               <div className="mt-4">
-                <PersonalKeyRecovery sessionId={sid} onSaved={retryScoring} />
+                <PersonalKeyRecovery sessionId={sid} provider={session.provider} onSaved={retryScoring} />
               </div>
             )}
           {processing?.status === "feedback_failed" && (

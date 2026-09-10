@@ -46,7 +46,8 @@ func (a *App) Routes(r chi.Router) {
 	} else if a.Cfg.SMTPAddress != "" {
 		mailer = auth.SMTPMailer{Address: a.Cfg.SMTPAddress, Username: a.Cfg.SMTPUsername, Password: a.Cfg.SMTPPassword, From: a.Cfg.MailFrom, AllowLocalPlaintext: a.Cfg.Environment != "production"}
 	}
-	authSvc.Configure(auth.Options{PublicURL: a.Cfg.PublicURL, Mailer: mailer, RequireVerification: a.Cfg.Hosted, Development: !a.Cfg.Hosted})
+	authSvc.Configure(auth.Options{PublicURL: a.Cfg.PublicURL, Mailer: mailer, RequireVerification: a.Cfg.Hosted, RequirePolicies: a.Cfg.Hosted, Development: !a.Cfg.Hosted})
+	r.Get("/legal-policy", authSvc.LegalPolicy)
 
 	r.Get("/ping", func(w http.ResponseWriter, _ *http.Request) {
 		httpx.WriteJSON(w, 200, map[string]string{"pong": "ok"})
@@ -72,6 +73,7 @@ func (a *App) Routes(r chi.Router) {
 		r.With(authSvc.Required, authLimit).Post("/verification/resend", authSvc.ResendVerification)
 		r.With(authSvc.Required, authLimit).Post("/password/change", authSvc.ChangePassword)
 		r.With(authSvc.Required).Post("/logout", authSvc.Logout)
+		r.With(authSvc.Required, authLimit).Post("/policies", authSvc.AcceptPolicies)
 	})
 
 	// Live interview WebSocket relay. Auth is via ?token= (WS can't set headers),
@@ -123,26 +125,27 @@ func (a *App) Routes(r chi.Router) {
 
 		// Short-lived ticket to open the interview WebSocket (keeps the long-lived
 		// JWT out of the WS URL).
-		r.Get("/ws-ticket", authSvc.WSTicket)
+		r.With(authSvc.Verified, authSvc.Eligible).Get("/ws-ticket", authSvc.WSTicket)
 
 		// Upload also calls the LLM for parsing, so every paid resume action
 		// requires verification and the shared per-user rate limit.
-		r.With(authSvc.Verified, perUser).Post("/resume", resumeSvc.Upload)
+		r.With(authSvc.Verified, authSvc.Eligible, perUser).Post("/resume", resumeSvc.Upload)
 		r.Get("/resume", resumeSvc.Get)
-		r.With(authSvc.Verified, perUser).Post("/resume/review", resumeSvc.Review)
-		r.With(authSvc.Verified, perUser).Post("/resume/match", resumeSvc.Match)
+		r.Delete("/resume", resumeSvc.Delete)
+		r.With(authSvc.Verified, authSvc.Eligible, perUser).Post("/resume/review", resumeSvc.Review)
+		r.With(authSvc.Verified, authSvc.Eligible, perUser).Post("/resume/match", resumeSvc.Match)
 
 		// Interviewer configuration + catalogs.
 		r.Get("/config", profileSvc.Get)
 		r.Put("/config", profileSvc.Save)
 		r.Get("/voices", profileSvc.ListVoices)
-		r.With(authSvc.Verified, perUser).Get("/voices/preview", profileSvc.PreviewVoice) // TTS costs money
+		r.With(authSvc.Verified, authSvc.Eligible, perUser).Get("/voices/preview", profileSvc.PreviewVoice) // TTS costs money
 		r.Get("/faces", profileSvc.ListFaces)
 		r.Get("/personalities", profileSvc.ListPersonalities)
 
 		// UI localization: list languages + translate app-owned strings (LLM,
 		// per-user rate-limited; the client caches heavily so this is rare).
-		r.With(authSvc.Verified, perUser).Post("/i18n/translate", i18nSvc.Translate)
+		r.With(authSvc.Verified, authSvc.Eligible, perUser).Post("/i18n/translate", i18nSvc.Translate)
 
 		// User profile + account deletion.
 		r.Get("/profile", profileSvc.GetProfile)
@@ -168,16 +171,16 @@ func (a *App) Routes(r chi.Router) {
 		// Interview sessions + scoring + report.
 		r.Get("/usage", interviewSvc.Usage)
 		r.Get("/providers", interviewSvc.Providers)
-		r.With(authSvc.Verified, perUser).Post("/providers/validate", interviewSvc.ValidateProvider)
-		r.With(perUser).Put("/sessions/{id}/credentials", interviewSvc.Credentials)
+		r.With(authSvc.Verified, authSvc.Eligible, perUser).Post("/providers/validate", interviewSvc.ValidateProvider)
+		r.With(authSvc.Verified, authSvc.Eligible, perUser).Put("/sessions/{id}/credentials", interviewSvc.Credentials)
 		r.Delete("/sessions/{id}", interviewSvc.Delete)
 		r.Get("/sessions", interviewSvc.List)
-		r.Post("/sessions", interviewSvc.Create)
+		r.With(authSvc.Verified, authSvc.Eligible).Post("/sessions", interviewSvc.Create)
 		r.Get("/sessions/{id}", interviewSvc.Get)
 		r.Post("/sessions/{id}/turns", interviewSvc.AddTurn)
 		r.Post("/sessions/{id}/workspace", interviewSvc.SaveWorkspace)
 		r.Post("/sessions/{id}/behavior", interviewSvc.Ingest)
-		r.With(authSvc.Verified).Post("/sessions/{id}/finish", interviewSvc.Finish)
+		r.With(authSvc.Verified, authSvc.Eligible).Post("/sessions/{id}/finish", interviewSvc.Finish)
 		r.Get("/sessions/{id}/transcript", interviewSvc.Transcript)
 		r.Get("/sessions/{id}/report", interviewSvc.Report)
 	})

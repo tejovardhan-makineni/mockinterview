@@ -26,6 +26,7 @@ export function Footer({ feedback = false }: { feedback?: boolean }) {
         <Link href="/terms">Terms</Link>
         <Link href="/help">Help</Link>
         <a href={SOURCE_URL}>Source</a>
+        <a href="/third-party-notices.txt">Licenses</a>
       </nav>
     </footer>
   );
@@ -38,13 +39,17 @@ export function AppShell({
   children: ReactNode;
 }) {
   const [signedIn, setSignedIn] = useState(false);
+  const [policiesRequired, setPoliciesRequired] = useState(false);
   const router = useRouter();
   useEffect(() => {
     let alive = true;
     api
       .me()
       .then((u) => {
-        if (alive) setSignedIn(!!u);
+        if (alive) {
+          setSignedIn(!!u);
+          setPoliciesRequired(!!u?.policies_required);
+        }
       })
       .catch(() => {});
     return () => {
@@ -147,6 +152,16 @@ export function AppShell({
         </div>
       )}
       <main id="main-content" className="page-width" tabIndex={-1}>
+        {signedIn && policiesRequired && active !== "public" && (
+          <p className="notice mb-6 text-sm">
+            Before your next AI practice,{" "}
+            <Link href="/consent" className="underline">
+              review the updated terms and privacy notice and confirm you are 18
+              or older
+            </Link>
+            . Your history and account controls remain available.
+          </p>
+        )}
         {children}
       </main>
       <Footer feedback={signedIn} />

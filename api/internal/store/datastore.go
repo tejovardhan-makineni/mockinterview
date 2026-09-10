@@ -17,6 +17,7 @@ import (
 // not yet wired into a handler; keeping them off this contract keeps it honest.
 type Datastore interface {
 	AccountStore
+	PolicyStore
 	SessionRuntime
 	// users
 	CreateUser(ctx context.Context, email, passwordHash string) (User, error)
@@ -36,6 +37,7 @@ type Datastore interface {
 	// resume
 	SaveResume(ctx context.Context, userID, filename, parsedText string, parsedJSON json.RawMessage) (Resume, error)
 	LatestResume(ctx context.Context, userID string) (Resume, error)
+	DeleteResumes(ctx context.Context, userID string) error
 	SaveResumeReview(ctx context.Context, userID, resumeID, provider, model string, result json.RawMessage) (string, error)
 	// sessions
 	CreateSession(ctx context.Context, userID, questionID, modality, track, packID, roundID string, cfg json.RawMessage) (Session, error)

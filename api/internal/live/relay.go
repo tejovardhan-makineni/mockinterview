@@ -18,6 +18,7 @@ import (
 	"github.com/gorilla/websocket"
 	"google.golang.org/genai"
 
+	"github.com/tejo/mockinterview-api/internal/auth"
 	"github.com/tejo/mockinterview-api/internal/corpus"
 	"github.com/tejo/mockinterview-api/internal/llm"
 	"github.com/tejo/mockinterview-api/internal/persona"
@@ -204,6 +205,10 @@ func (r *Relay) Handle(w http.ResponseWriter, req *http.Request) {
 	user, err := r.store.UserByID(req.Context(), uid)
 	if err != nil || r.hosted && !user.EmailVerified {
 		http.Error(w, "verified account required", 403)
+		return
+	}
+	if r.hosted && !auth.PoliciesAccepted(user) {
+		auth.PolicyRequired(w)
 		return
 	}
 	owner := store.NewID()

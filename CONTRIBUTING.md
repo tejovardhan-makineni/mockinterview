@@ -77,3 +77,17 @@ and screenshots when useful. Explain migrations and recovery for durable-state
 changes. Never use real resumes, transcripts, provider keys or customer data in
 fixtures. Contributor submissions use the project's AGPL v3 license unless an
 explicit compatible exception is documented and approved.
+
+## Audience and privacy boundaries
+
+The hosted AI service is for adults 18+ practicing independently. New formats
+must make that audience clear. Do not add minor-directed admissions, employer
+selection, covert recording, face/emotion scoring or real patient/client workflows
+without a separate product, provider and legal assessment. Use original fictional
+fixtures, keep AI identity clear during roleplay, and avoid promises of guaranteed
+jobs, professional competence or error-free feedback.
+
+See the [legal readiness assessment](docs/LEGAL-READINESS-2026-09-10.md) and
+[privacy operations guide](docs/PRIVACY-OPERATIONS.md) before changing data flows,
+providers or sharing defaults. The hosted terms do not replace the code license;
+private interviews and product feedback are not public source contributions.

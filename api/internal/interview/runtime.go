@@ -91,6 +91,15 @@ func (s *Service) scoreJob(ctx context.Context, job store.ScoringJob) error {
 	if e != nil {
 		return e
 	}
+	if s.options.Hosted {
+		u, err := s.store.UserByID(ctx, sess.UserID)
+		if err != nil {
+			return errors.New("account eligibility unavailable")
+		}
+		if !u.EmailVerified || !auth.HasPolicyAcknowledgment(u) {
+			return errors.New("account verification and policy acknowledgment required before feedback can be retried")
+		}
+	}
 	var q corpus.Question
 	if len(sess.QuestionSnapshot) > 2 {
 		e = json.Unmarshal(sess.QuestionSnapshot, &q)
@@ -215,15 +224,29 @@ func (s *Service) Providers(w http.ResponseWriter, r *http.Request) {
 }
 
 type providerReq struct {
-	Provider string `json:"provider"`
-	Model    string `json:"model"`
-	Mode     string `json:"mode"`
-	APIKey   string `json:"api_key"`
+	Provider             string `json:"provider"`
+	Model                string `json:"model"`
+	Mode                 string `json:"mode"`
+	APIKey               string `json:"api_key"`
+	PaidBillingConfirmed bool   `json:"paid_billing_confirmed"`
+}
+
+// This records a user's assertion, not a billing lookup or verified provider
+// entitlement. Self-hosted operators remain responsible for their own setup.
+func (s *Service) requirePaidBilling(w http.ResponseWriter, provider string, confirmed bool) bool {
+	if s.options.Hosted && provider == "gemini" && !confirmed {
+		httpx.WriteJSON(w, 400, map[string]string{"code": "paid_billing_required", "detail": "Confirm this Gemini API key belongs to a project with paid billing enabled."})
+		return false
+	}
+	return true
 }
 
 func (s *Service) ValidateProvider(w http.ResponseWriter, r *http.Request) {
 	var req providerReq
 	if !httpx.DecodeJSON(w, r, &req) {
+		return
+	}
+	if !s.requirePaidBilling(w, req.Provider, req.PaidBillingConfirmed) {
 		return
 	}
 	if len(s.options.EncryptionKey) != 32 {
@@ -249,9 +272,13 @@ func (s *Service) Credentials(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	var req struct {
-		APIKey string `json:"api_key"`
+		APIKey               string `json:"api_key"`
+		PaidBillingConfirmed bool   `json:"paid_billing_confirmed"`
 	}
 	if !httpx.DecodeJSON(w, r, &req) {
+		return
+	}
+	if !s.requirePaidBilling(w, sess.Provider, req.PaidBillingConfirmed) {
 		return
 	}
 	ctx, cancel := context.WithTimeout(r.Context(), 20*time.Second)

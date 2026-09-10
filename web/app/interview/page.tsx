@@ -85,6 +85,10 @@ function Room() {
           throw new Error(
             "This attempt can no longer be resumed. Your saved record is available in History.",
           );
+        if (user.policies_required) {
+          router.replace("/consent?next=" + encodeURIComponent("/interview?s=" + sid));
+          return;
+        }
         const [q, prior] = await Promise.all([
           api.getQuestion(s.question_id),
           api.getTranscript(sid),
@@ -340,6 +344,7 @@ function Room() {
           <div className="mb-4">
             <PersonalKeyRecovery
               sessionId={sid}
+              provider={session.provider}
               onSaved={() => {
                 setError("");
                 live.current?.reconnect();

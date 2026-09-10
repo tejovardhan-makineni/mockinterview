@@ -16,6 +16,22 @@ export interface User {
   email: string;
   email_verified?: boolean;
   role?: string;
+  policies_required?: boolean;
+  adult_confirmed?: boolean;
+  terms_version?: string;
+  privacy_version?: string;
+}
+
+export interface LegalPolicy {
+  terms_version: string;
+  privacy_version: string;
+  minimum_age: number;
+  required: boolean;
+}
+export interface PolicyAcceptance {
+  adult_confirmed: boolean;
+  terms_version: string;
+  privacy_version: string;
 }
 
 export interface AuthResult {
@@ -27,7 +43,13 @@ export interface AuthResult {
 }
 
 export interface AuthSlice {
-  register(email: string, password: string): Promise<AuthResult>;
+  register(
+    email: string,
+    password: string,
+    acceptance?: PolicyAcceptance,
+  ): Promise<AuthResult>;
+  legalPolicy(): Promise<LegalPolicy>;
+  acceptPolicies(acceptance: PolicyAcceptance): Promise<User>;
   login(email: string, password: string): Promise<AuthResult>;
   me(): Promise<User | null>;
   logout(): void | Promise<void>;
@@ -40,10 +62,19 @@ function persist(r: AuthResult) {
 }
 
 export const authHttp: AuthSlice = {
-  async register(email, password) {
+  legalPolicy: () => req<LegalPolicy>("/api/v1/legal-policy"),
+  async acceptPolicies(acceptance) {
+    const user = await req<User>("/api/v1/auth/policies", {
+      method: "POST",
+      body: JSON.stringify(acceptance),
+    });
+    window.localStorage.setItem(USER_KEY, JSON.stringify(user));
+    return user;
+  },
+  async register(email, password, acceptance) {
     const r = await req<AuthResult>("/api/v1/auth/register", {
       method: "POST",
-      body: JSON.stringify({ email, password }),
+      body: JSON.stringify({ email, password, ...acceptance }),
     });
     persist(r);
     return r;
@@ -78,6 +109,21 @@ export const authHttp: AuthSlice = {
 };
 
 export const authMock: AuthSlice = {
+  async legalPolicy() {
+    return {
+      terms_version: "2026-09-10",
+      privacy_version: "2026-09-10",
+      minimum_age: 18,
+      required: false,
+    };
+  },
+  async acceptPolicies(acceptance) {
+    const user = await authMock.me();
+    if (!user) throw new Error("Sign in to continue.");
+    const updated = { ...user, ...acceptance, policies_required: false };
+    window.localStorage.setItem(USER_KEY, JSON.stringify(updated));
+    return updated;
+  },
   async register(email) {
     return mockAuth(email);
   },
