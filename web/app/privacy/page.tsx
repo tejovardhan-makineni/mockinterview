@@ -102,7 +102,10 @@ export default function Privacy() {
             DeepSeek
           </a>
           ,{" "}
-          <a className="underline" href="https://x.ai/legal/data-processing-addendum">
+          <a
+            className="underline"
+            href="https://x.ai/legal/data-processing-addendum"
+          >
             xAI
           </a>
           . Provider policies, account plans and locations differ. A working API
@@ -163,19 +166,22 @@ export default function Privacy() {
           after a started interview ends. Complete it before starting another
           interview; saved reports, history, export, deletion and report retries
           remain accessible. Each question allows an unable-to-judge answer.
-          Comments and permission to inspect your transcript are optional and
-          do not affect whether you can complete the check-in.
+          Comments and permission to inspect your transcript are optional and do
+          not affect whether you can complete the check-in. An optional section
+          can also record prior use of other interview-practice tools, tool
+          names, a comparison rating and written details for product
+          improvement.
         </p>
         <p>
-          These answers are associated with your account and interview; they
-          are not anonymous. We retain the questionnaire version, answers,
-          optional comment and sharing choice, submission/update times, and
-          relevant interview metadata such as subject, format, selected level,
-          mode and provider. The operator uses aggregate counts and rating
-          distributions to understand usability, interviewer behavior, content
-          and service reliability. The questionnaire does not send your answers
-          to an AI model or change your interview score. It does not enroll you
-          in research or authorize publication of private records.
+          These answers are associated with your account and interview; they are
+          not anonymous. We retain the questionnaire version, answers, optional
+          comment and sharing choice, submission/update times, and relevant
+          interview metadata such as subject, format, selected level, mode and
+          provider. The operator uses aggregate counts and rating distributions
+          to understand usability, interviewer behavior, content and service
+          reliability. The questionnaire does not send your answers to an AI
+          model or change your interview score. It does not enroll you in
+          research or authorize publication of private records.
         </p>
         <p>
           The separate “Share feedback” and “Report a problem” controls remain
@@ -204,11 +210,10 @@ export default function Privacy() {
           and balancing requirements. A required product check-in is not a
           request for consent to research. Optional diagnostic and transcript
           sharing for support is based on your consent. You can withdraw that
-          permission by contacting us; withdrawal does not affect earlier
-          lawful processing. Reading this notice
-          is not blanket consent for every use of personal information. We do
-          not request special-category data or use interview content for
-          advertising or our own model training.
+          permission by contacting us; withdrawal does not affect earlier lawful
+          processing. Reading this notice is not blanket consent for every use
+          of personal information. We do not request special-category data or
+          use interview content for advertising or our own model training.
         </p>
         <h2>Storage, retention and deletion</h2>
         <p>

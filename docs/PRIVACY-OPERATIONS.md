@@ -93,3 +93,16 @@ Before accepting new formats, review the intended audience and data needs. Do no
 ## Review evidence
 
 The [deployed release record](RELEASE-VALIDATION-2026-09-10.md) includes source/revision, policy versions, migration and focused evidence for: stale/missing assertions rejected before provider calls; legacy recovery/export/deletion accessible; resume/voice notices before transfer; deletion scope/cache behavior; and retention worker health. Exercise procedures with synthetic accounts/content. Preserve unresolved operator, contract, audience and manual-backup questions as open items rather than treating passing tests as legal clearance.
+
+## Optional interview-tool comparisons
+
+The `tool-comparison-v1` extension records optional prior use, freely typed tool
+names, a balanced preference and an optional explanation for product improvement.
+It follows the structured interview-feedback account association, access, export
+and cascade-deletion rules. Optional participation does not permit public
+quotation, research enrollment or transcript sharing. Free text is restricted to
+owner responses/exports and the administrator suggestions view; aggregate
+readers select only the version and categorical answers. Clearing with explicit
+`comparison: null` removes the comparison from the active record; backup copies
+follow the separately documented retention process. Existing clients that omit
+this field preserve it. No provider call is needed to collect these responses.

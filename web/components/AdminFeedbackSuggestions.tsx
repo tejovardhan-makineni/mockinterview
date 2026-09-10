@@ -3,6 +3,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { api } from "@/lib/api";
 import type { FeedbackSuggestions } from "@/lib/features/feedback";
 import { errorMessage } from "@/lib/http";
+import { ToolComparisonSummary } from "./ToolComparison";
 import { Button, ErrorNotice, Panel } from "./ui";
 export function AdminFeedbackSuggestions() {
   const [data, setData] = useState<FeedbackSuggestions | null>(null);
@@ -77,11 +78,11 @@ export function AdminFeedbackSuggestions() {
         </Button>
       </div>
       <p className="mt-3 text-sm text-[var(--color-muted)]">
-        Optional comments, newest update first, across all dates and subjects.
-        The aggregate filters above do not filter this list. Treat comments as
-        private; do not publish them. Account identifiers and transcripts are
-        not returned by this view, but comments may contain personal
-        information.
+        Optional comments and tool comparisons, newest update first, across all
+        dates and subjects. The aggregate filters above do not filter this list.
+        Treat comments as private; do not publish them. Account identifiers and
+        transcripts are not returned by this view, but comments may contain
+        personal information.
       </p>
       {error && (
         <div className="mt-4">
@@ -97,7 +98,9 @@ export function AdminFeedbackSuggestions() {
         </p>
       )}
       {data && !data.items.length && !busy && (
-        <p className="mt-4 text-sm">No optional comments yet.</p>
+        <p className="mt-4 text-sm">
+          No optional comments or tool comparisons yet.
+        </p>
       )}
       <div className="mt-5 space-y-4">
         {data?.items.map((item) => (
@@ -108,9 +111,14 @@ export function AdminFeedbackSuggestions() {
               {item.status.replaceAll("_", " ")} · Updated{" "}
               {new Date(item.updated_at).toLocaleString()}
             </p>
-            <p className="mt-4 whitespace-pre-wrap break-words text-sm">
-              {item.comment}
-            </p>
+            {item.comment && (
+              <p className="mt-4 whitespace-pre-wrap break-words text-sm">
+                {item.comment}
+              </p>
+            )}
+            {item.comparison && (
+              <ToolComparisonSummary value={item.comparison} />
+            )}
           </Panel>
         ))}
       </div>

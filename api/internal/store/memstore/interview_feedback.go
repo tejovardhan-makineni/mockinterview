@@ -3,10 +3,11 @@ package memstore
 import (
 	"context"
 	"encoding/json"
-	"github.com/tejo/mockinterview-api/internal/store"
 	"reflect"
 	"sort"
 	"time"
+
+	"github.com/tejo/mockinterview-api/internal/store"
 )
 
 func cloneSurvey(f store.InterviewFeedback) store.InterviewFeedback {
@@ -15,6 +16,11 @@ func cloneSurvey(f store.InterviewFeedback) store.InterviewFeedback {
 		answers[k] = v
 	}
 	f.Answers = answers
+	if f.Comparison != nil {
+		comparison := *f.Comparison
+		f.Comparison = &comparison
+	}
+	f.ComparisonSet = false
 	return f
 }
 func (m *Mem) pendingSurvey(uid string) []store.Session {
@@ -51,6 +57,12 @@ func (m *Mem) GetInterviewFeedback(_ context.Context, uid, id string) (*store.In
 func (m *Mem) PutInterviewFeedback(_ context.Context, f store.InterviewFeedback) (store.InterviewFeedback, error) {
 	m.mu.Lock()
 	defer m.mu.Unlock()
+	if !f.ComparisonSet {
+		f.Comparison = nil
+		if old, ok := m.interviewFeedback[f.SessionID]; ok {
+			f.Comparison = old.Comparison
+		}
+	}
 	if e := store.ValidateInterviewFeedback(f); e != nil {
 		return store.InterviewFeedback{}, e
 	}
@@ -65,7 +77,7 @@ func (m *Mem) PutInterviewFeedback(_ context.Context, f store.InterviewFeedback)
 	if old, ok := m.interviewFeedback[f.SessionID]; ok {
 		f.SubmittedAt = old.SubmittedAt
 		f.UpdatedAt = old.UpdatedAt
-		if !reflect.DeepEqual(f.Answers, old.Answers) || f.Comment != old.Comment || f.ShareTranscript != old.ShareTranscript {
+		if !reflect.DeepEqual(f.Answers, old.Answers) || f.Comment != old.Comment || f.ShareTranscript != old.ShareTranscript || !reflect.DeepEqual(f.Comparison, old.Comparison) {
 			f.UpdatedAt = now
 		}
 	} else {
@@ -89,6 +101,10 @@ func (m *Mem) InterviewFeedbackWindow(_ context.Context, from, to time.Time) ([]
 		r := store.InterviewFeedbackRow{Session: v.sess}
 		if f, ok := m.interviewFeedback[v.sess.ID]; ok {
 			f = cloneSurvey(f)
+			if f.Comparison != nil {
+				f.Comparison.ToolNames = ""
+				f.Comparison.Details = ""
+			}
 			r.Response = &f
 		}
 		out = append(out, r)
@@ -127,7 +143,7 @@ func (m *Mem) InterviewFeedbackComments(_ context.Context, limit int, before *st
 	}
 	out := []store.InterviewFeedbackRow{}
 	for id, f := range m.interviewFeedback {
-		if f.Comment == "" {
+		if f.Comment == "" && f.Comparison == nil {
 			continue
 		}
 		if before != nil && (f.UpdatedAt.After(before.UpdatedAt) || f.UpdatedAt.Equal(before.UpdatedAt) && id >= before.SessionID) {

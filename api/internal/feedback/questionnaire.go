@@ -16,10 +16,11 @@ type SurveyQuestion struct {
 	Options []SurveyOption `json:"options"`
 }
 type Questionnaire struct {
-	Version      string           `json:"version"`
-	SubjectKey   string           `json:"subject_key"`
-	SubjectLabel string           `json:"subject_label"`
-	Questions    []SurveyQuestion `json:"questions"`
+	ComparisonVersion string           `json:"comparison_version"`
+	Version           string           `json:"version"`
+	SubjectKey        string           `json:"subject_key"`
+	SubjectLabel      string           `json:"subject_label"`
+	Questions         []SurveyQuestion `json:"questions"`
 }
 type subject struct{ key, label, focus, domains string }
 
@@ -83,7 +84,7 @@ func questionnaire(s store.Session) Questionnaire {
 		{"report_actionability", "After reading the report, how clear is what you should practice next?", []string{"Not at all clear", "Slightly clear", "Moderately clear", "Very clear", "Extremely clear"}},
 		{"disruption_severity", "How much did technical problems interrupt this interview?", []string{"No interruption", "Minor interruption", "Moderate interruption", "Major interruption", "Could not finish"}},
 	}
-	out := Questionnaire{Version: store.InterviewFeedbackVersion, SubjectKey: sub.key, SubjectLabel: sub.label, Questions: []SurveyQuestion{}}
+	out := Questionnaire{ComparisonVersion: store.ToolComparisonVersion, Version: store.InterviewFeedbackVersion, SubjectKey: sub.key, SubjectLabel: sub.label, Questions: []SurveyQuestion{}}
 	for _, r := range rows {
 		q := SurveyQuestion{ID: r.id, Prompt: r.prompt, Options: []SurveyOption{}}
 		for i, l := range r.labels {

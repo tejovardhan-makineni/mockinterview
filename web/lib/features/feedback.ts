@@ -18,6 +18,28 @@ export interface FeedbackPayload {
   context?: FeedbackContext;
 }
 
+export interface ToolComparison {
+  version: "tool-comparison-v1";
+  prior_use: "yes" | "no" | "prefer_not_to_say";
+  tool_names: string;
+  preference:
+    | ""
+    | "mockinterview_better"
+    | "about_same"
+    | "other_tools_better"
+    | "unable_to_judge";
+  details: string;
+}
+export interface ToolComparisonMetrics {
+  instrument_version: "tool-comparison-v1";
+  answered_count: number;
+  skipped_count: number;
+  prior_use: Record<ToolComparison["prior_use"], number>;
+  preference: Record<Exclude<ToolComparison["preference"], "">, number>;
+  compared_count: number;
+  other_tools_better_rate: number | null;
+}
+
 export interface FeedbackSuggestions {
   items: {
     session_id: string;
@@ -29,6 +51,7 @@ export interface FeedbackSuggestions {
     provider: string;
     status: string;
     comment: string;
+    comparison?: ToolComparison | null;
     share_transcript: boolean;
     submitted_at: string;
     updated_at: string;
@@ -55,6 +78,7 @@ export interface InterviewFeedbackInput {
   answers: Record<string, string>;
   comment?: string;
   share_transcript?: boolean;
+  comparison?: ToolComparison | null;
 }
 export interface InterviewFeedbackEnvelope {
   required: boolean;
@@ -63,6 +87,7 @@ export interface InterviewFeedbackEnvelope {
   session_status?: string;
   feedback_version?: string;
   questionnaire: {
+    comparison_version?: string;
     version: string;
     subject_key: string;
     subject_label: string;
@@ -100,9 +125,11 @@ export interface InterviewFeedbackMetrics {
   group_by: FeedbackGroupBy;
   generated_at: string;
   totals: FeedbackTotals;
+  comparison?: ToolComparisonMetrics;
   groups: (FeedbackTotals & {
     key: string;
     label: string;
+    comparison?: ToolComparisonMetrics;
     questions: {
       id: string;
       label: string;

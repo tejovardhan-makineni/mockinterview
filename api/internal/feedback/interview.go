@@ -1,11 +1,14 @@
 package feedback
 
 import (
+	"bytes"
+	"encoding/json"
 	"errors"
 	"github.com/go-chi/chi/v5"
 	"github.com/tejo/mockinterview-api/internal/auth"
 	"github.com/tejo/mockinterview-api/internal/httpx"
 	"github.com/tejo/mockinterview-api/internal/store"
+	"io"
 	"net/http"
 	"strings"
 	"unicode/utf8"
@@ -67,6 +70,7 @@ func (s *Service) PutInterview(w http.ResponseWriter, r *http.Request) {
 		Answers         map[string]string `json:"answers"`
 		Comment         string            `json:"comment"`
 		ShareTranscript bool              `json:"share_transcript"`
+		Comparison      json.RawMessage   `json:"comparison"`
 	}
 	if !httpx.DecodeJSON(w, r, &req) {
 		return
@@ -80,6 +84,23 @@ func (s *Service) PutInterview(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	f := store.InterviewFeedback{SessionID: a.ID, UserID: a.UserID, Version: req.Version, Answers: req.Answers, Comment: redact(strings.TrimSpace(req.Comment)), ShareTranscript: req.ShareTranscript}
+	f.ComparisonSet = len(req.Comparison) > 0
+	if f.ComparisonSet && string(req.Comparison) != "null" {
+		decoder := json.NewDecoder(bytes.NewReader(req.Comparison))
+		decoder.DisallowUnknownFields()
+		var comparison store.ToolComparison
+		if !utf8.Valid(req.Comparison) || decoder.Decode(&comparison) != nil || decoder.Decode(new(any)) != io.EOF || store.ValidateToolComparison(&comparison) != nil {
+			httpx.WriteProblem(w, 400, "Optional tool comparison must use valid text and the listed options, with tool names at most 300 characters and details at most 1000 characters")
+			return
+		}
+		comparison.ToolNames = redact(strings.TrimSpace(comparison.ToolNames))
+		comparison.Details = redact(strings.TrimSpace(comparison.Details))
+		if store.ValidateToolComparison(&comparison) != nil {
+			httpx.WriteProblem(w, 400, "Optional tool comparison exceeds the allowed text limits after credential redaction")
+			return
+		}
+		f.Comparison = &comparison
+	}
 	if e := store.ValidateInterviewFeedback(f); e != nil {
 		httpx.WriteProblem(w, 400, "Answer each of the six questions using one of its listed options")
 		return

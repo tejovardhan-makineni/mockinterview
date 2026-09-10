@@ -34,6 +34,56 @@ Explain near the realism question that users without comparable interview experi
 
 Optional comment: **What should we improve first? Please avoid sharing personal, confidential, or identifying information.** The API accepts at most 2,000 Unicode characters, requires valid UTF-8, trims surrounding whitespace, and redacts recognized credential patterns. Redaction is not a guarantee that all identifying or secret material will be removed. A validation error must preserve the user's completed answers.
 
+## Optional comparison with other tools
+
+An additive **`tool-comparison-v1`** section is being added after the six required
+items. Deployment evidence is tracked in
+[the comparison release record](TOOL-COMPARISON-RELEASE-2026-09-10.md). It does not
+change `post-interview-v1`, its six dimensions or the next-interview gate.
+
+- **Have you used another interview-practice tool?** Optional, with no default:
+  Yes (`yes`), No (`no`), or Prefer not to say (`prefer_not_to_say`). Users can
+  clear the entire section. No comparison saved is different from answering No.
+- When Yes: **Which tools have you tried?** Optional free text, at most 300
+  Unicode characters. Do not suggest vendor names or prepopulate the field.
+- When Yes: **Compared with the other tools you’ve used, how was this interview
+  experience?** Optional choices: mockinterview.live was better
+  (`mockinterview_better`), About the same (`about_same`), The other tools were better
+  (`other_tools_better`), or Unable to judge (`unable_to_judge`). No default.
+- When Yes: **What worked better or worse, and in which tool?** Optional free
+  text, at most 1,000 Unicode characters. Neither a preference nor a tool name
+  nor an explanation is required to submit the six core answers.
+
+Changing Yes to No or Prefer not to say clears the conditional fields. Clearing
+or skipping the section saves `comparison: null`. Users can edit or remove this
+optional answer without resubmitting a separate interview. The same save-error,
+privacy, ownership, export and session/account deletion boundaries apply.
+Recognized credential patterns in both text fields are redacted; this does not
+ensure that every secret or identifying detail is detected. Do not put private
+comparisons into public issues or send them to model providers.
+
+The server advertises `questionnaire.comparison_version: "tool-comparison-v1"`.
+Only clients that recognize this capability should display/send the extension.
+The top-level PUT field is `comparison`, either `null` or this object:
+
+```json
+{
+  "version": "tool-comparison-v1",
+  "prior_use": "yes",
+  "tool_names": "A tool the respondent chooses to name",
+  "preference": "other_tools_better",
+  "details": "Their optional explanation in their own words."
+}
+```
+
+Within a non-null object, `version` and a valid `prior_use` are required. Empty
+strings for `tool_names`, `preference` and `details` are valid; when prior use is
+not Yes all three must be empty. Unsupported fields, codes, versions or oversized
+text are rejected. Omitted `comparison` preserves an existing comparison so an
+older client cannot erase it on an ordinary edit; explicit `null` clears it.
+Only a changed persisted value advances `updated_at`; it never adds a second
+survey or changes `submitted_at`.
+
 ## Subject-specific wording
 
 Use the attempt's server-owned scenario domain to select the subject group and focus. Do not accept a client-supplied domain, group, prompt, or question ID as authoritative. The following mapping covers all **143 scenarios across 35 domains** in the corpus reviewed on 10 September 2026. Counts are a catalog snapshot, not usage or survey-response counts.
@@ -73,7 +123,7 @@ The deployed routes below require authentication; ownership checks apply to sess
 
 The envelope contains `session_status`, the attempt's `feedback_version`, `required`, `eligible`, `report_available`, `questionnaire`, and `response`. The questionnaire carries `version`, `subject_key`, `subject_label`, and the six questions with their permitted options. Clients should render those server-provided definitions rather than maintaining a separate authoritative copy of domain mappings or accepted answers.
 
-The submission shape uses `version` plus an `answers` object containing exactly the six known dimensions. Optional `comment` and independent `share_transcript` fields may be included. For example:
+The submission shape uses `version` plus an `answers` object containing exactly the six known dimensions. Optional `comment`, independent `share_transcript`, and the capability-gated `comparison` extension may be included. For example:
 
 ```json
 {
@@ -97,7 +147,7 @@ Session or account deletion cascades to this dedicated survey record. Ordinary a
 
 The feedback is account-associated. Display that fact before submission. Do not describe a survey without a visible name field as anonymous. Session linkage and ordinary operational metadata do not authorize access to a transcript for research or public distribution. Keep private comments out of public GitHub issues, analytics labels, and model prompts.
 
-Administrators can review nonempty optional comments through a separate, paginated suggestions route. It checks the stored administrator role on each request and returns limited interview context plus the recorded transcript-inspection choice; it does not return email addresses, owner IDs, transcripts, or diagnostics. Comments may still contain identifying material supplied by the user. This view is separate from the aggregate export and does not authorize public quotation or research reuse. See the [metrics and suggestions API](FEEDBACK-METRICS.md#qualitative-suggestions) for its contract.
+Administrators can review nonempty optional comments and saved tool comparisons through a separate, paginated suggestions route. It checks the stored administrator role on each request and returns limited interview context plus the recorded transcript-inspection choice; it does not return email addresses, owner IDs, transcripts, or diagnostics. Comments and comparison text may still contain identifying material supplied by the user. This view is separate from the aggregate export and does not authorize public quotation or research reuse. See the [metrics and suggestions API](FEEDBACK-METRICS.md#qualitative-suggestions) for its contract.
 
 ## Product feedback and optional research
 

@@ -6,6 +6,8 @@ import type {
   InterviewFeedbackMetrics,
 } from "@/lib/features/feedback";
 import { downloadAggregate, meanText, rateText } from "@/lib/interviewFeedback";
+import { ComparisonMetrics } from "@/components/ComparisonMetrics";
+import { downloadComparisonMetrics } from "@/lib/comparisonMetrics";
 import { errorMessage } from "@/lib/http";
 import { AdminFeedbackSuggestions } from "@/components/AdminFeedbackSuggestions";
 import { AppShell } from "@/components/AppShell";
@@ -165,7 +167,7 @@ export default function FeedbackMetricsPage() {
                   {new Date(data.generated_at).toLocaleString()}.
                   {busy ? " Updating; the previous result is shown below." : ""}
                 </p>
-                <div className="flex gap-3">
+                <div className="flex flex-wrap gap-3">
                   <Button
                     variant="ghost"
                     onClick={() => downloadAggregate(data, "json")}
@@ -176,8 +178,17 @@ export default function FeedbackMetricsPage() {
                     variant="ghost"
                     onClick={() => downloadAggregate(data, "csv")}
                   >
-                    Download CSV
+                    Download ratings CSV
                   </Button>
+                  {(data.comparison ||
+                    data.groups.some((g) => g.comparison)) && (
+                    <Button
+                      variant="ghost"
+                      onClick={() => downloadComparisonMetrics(data)}
+                    >
+                      Download comparison CSV
+                    </Button>
+                  )}
                 </div>
               </div>
               <dl className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
@@ -200,6 +211,19 @@ export default function FeedbackMetricsPage() {
                   </Panel>
                 ))}
               </dl>
+              {data.comparison && (
+                <div className="mt-5">
+                  <ComparisonMetrics
+                    data={data.comparison}
+                    title="Optional tool comparison · all submitted check-ins"
+                  />
+                  <p className="mt-2 text-xs text-[var(--color-muted)]">
+                    This optional section is separate from the six required
+                    ratings. It describes participants’ comparisons, not a
+                    verified benchmark of other tools.
+                  </p>
+                </div>
+              )}
               <p className="notice my-5 text-sm">
                 {data.note} “Unable to judge,” “Report not read,” and “Report
                 unavailable” are excluded from numeric averages and
@@ -225,6 +249,11 @@ export default function FeedbackMetricsPage() {
                           : rateText(g.response_rate)}{" "}
                         response rate
                       </p>
+                      {g.comparison && (
+                        <div className="mt-4">
+                          <ComparisonMetrics data={g.comparison} />
+                        </div>
+                      )}
                       <div className="mt-4 space-y-4">
                         {g.questions.map((q) => (
                           <section

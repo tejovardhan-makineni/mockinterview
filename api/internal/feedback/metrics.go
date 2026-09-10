@@ -12,6 +12,38 @@ import (
 	"time"
 )
 
+type comparisonMetric struct {
+	InstrumentVersion    string         `json:"instrument_version"`
+	Answered             int            `json:"answered_count"`
+	Skipped              int            `json:"skipped_count"`
+	PriorUse             map[string]int `json:"prior_use"`
+	Preference           map[string]int `json:"preference"`
+	Compared             int            `json:"compared_count"`
+	OtherToolsBetterRate *float64       `json:"other_tools_better_rate"`
+}
+
+func newComparisonMetric() comparisonMetric {
+	return comparisonMetric{InstrumentVersion: store.ToolComparisonVersion, PriorUse: map[string]int{"yes": 0, "no": 0, "prefer_not_to_say": 0}, Preference: map[string]int{"mockinterview_better": 0, "about_same": 0, "other_tools_better": 0, "unable_to_judge": 0}}
+}
+func (m *comparisonMetric) add(c *store.ToolComparison) {
+	if c == nil {
+		m.Skipped++
+		return
+	}
+	m.Answered++
+	m.PriorUse[c.PriorUse]++
+	if c.PriorUse == "yes" && c.Preference != "" {
+		m.Preference[c.Preference]++
+		if c.Preference != "unable_to_judge" {
+			m.Compared++
+		}
+	}
+	if m.Compared > 0 {
+		rate := float64(m.Preference["other_tools_better"]) / float64(m.Compared)
+		m.OtherToolsBetterRate = &rate
+	}
+}
+
 type metricTotals struct {
 	Eligible     int      `json:"eligible_sessions"`
 	Responded    int      `json:"responded_sessions"`
@@ -34,19 +66,21 @@ type metricGroup struct {
 	Key   string `json:"key"`
 	Label string `json:"label"`
 	metricTotals
-	Questions []questionMetric `json:"questions"`
+	Questions  []questionMetric `json:"questions"`
+	Comparison comparisonMetric `json:"comparison"`
 }
 type metricResponse struct {
-	SchemaVersion string        `json:"schema_version"`
-	Days          int           `json:"days"`
-	GroupBy       string        `json:"group_by"`
-	GeneratedAt   time.Time     `json:"generated_at"`
-	Totals        metricTotals  `json:"totals"`
-	Groups        []metricGroup `json:"groups"`
-	Note          string        `json:"note"`
+	SchemaVersion string           `json:"schema_version"`
+	Days          int              `json:"days"`
+	GroupBy       string           `json:"group_by"`
+	GeneratedAt   time.Time        `json:"generated_at"`
+	Totals        metricTotals     `json:"totals"`
+	Comparison    comparisonMetric `json:"comparison"`
+	Groups        []metricGroup    `json:"groups"`
+	Note          string           `json:"note"`
 }
 
-const metricsNote = "All eligible started attempts in the rolling UTC window [generated_at minus days*24h, generated_at) are included, including failed or unavailable reports. Legacy, unstarted and deleted attempts are excluded. Each current response counts once; later edits/submissions and deletions can change historical results. Unrated answers are excluded from numeric summaries and favorable-rate denominators. Means describe ordinal responses only; challenge and disruption have no mean. Favorable means 4–5 for positive items, 3 for challenge fit and 1 for disruption. Rates are fractions from 0 to 1. These are unvalidated self-report items, not objective accuracy or calibrated quality measures; no composite score is calculated. Small groups can identify a participant; restrict access and do not publish raw groups."
+const metricsNote = "All eligible started attempts in the rolling UTC window [generated_at minus days*24h, generated_at) are included, including failed or unavailable reports. Legacy, unstarted and deleted attempts are excluded. Each current response counts once; later edits/submissions and deletions can change historical results. Unrated answers are excluded from numeric summaries and favorable-rate denominators. Means describe ordinal responses only; challenge and disruption have no mean. Favorable means 4–5 for positive items, 3 for challenge fit and 1 for disruption. Rates are fractions from 0 to 1. These are unvalidated self-report items, not objective accuracy or calibrated quality measures; no composite score is calculated. Optional tool-comparison counts include submitted feedback only; skipped means its comparison is absent. Other-tools-better rate excludes blank and unable-to-judge preferences and is a subjective comparison, not a representative market benchmark. Small groups can identify a participant; restrict access and do not publish raw groups."
 
 func tally(t *metricTotals) {
 	t.Pending = t.Eligible - t.Responded
@@ -92,13 +126,13 @@ func grouping(a store.Session, by string) (string, string) {
 	return "unspecified", "Unspecified"
 }
 func aggregateMetrics(rows []store.InterviewFeedbackRow, days int, by string, now time.Time) metricResponse {
-	out := metricResponse{SchemaVersion: store.InterviewFeedbackVersion, Days: days, GroupBy: by, GeneratedAt: now, Groups: []metricGroup{}, Note: metricsNote}
+	out := metricResponse{SchemaVersion: store.InterviewFeedbackVersion, Days: days, GroupBy: by, GeneratedAt: now, Groups: []metricGroup{}, Note: metricsNote, Comparison: newComparisonMetric()}
 	groups := map[string]*metricGroup{}
 	for _, r := range rows {
 		key, label := grouping(r.Session, by)
 		g := groups[key]
 		if g == nil {
-			g = &metricGroup{Key: key, Label: label, Questions: []questionMetric{}}
+			g = &metricGroup{Key: key, Label: label, Questions: []questionMetric{}, Comparison: newComparisonMetric()}
 			for _, q := range questionnaire(r.Session).Questions {
 				prompt := q.Prompt
 				if q.ID == "subject_probe_quality" && by != "subject" && by != "domain" && by != "question" {
@@ -125,6 +159,8 @@ func aggregateMetrics(rows []store.InterviewFeedbackRow, days int, by string, no
 		}
 		out.Totals.Responded++
 		g.Responded++
+		out.Comparison.add(r.Response.Comparison)
+		g.Comparison.add(r.Response.Comparison)
 		for i := range g.Questions {
 			q := &g.Questions[i]
 			v := r.Response.Answers[q.ID]

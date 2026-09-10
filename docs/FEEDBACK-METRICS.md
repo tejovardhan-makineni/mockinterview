@@ -10,11 +10,11 @@ The response contains `schema_version`, `days`, `group_by`, `generated_at`, over
 
 ## Qualitative suggestions
 
-`GET /api/v1/admin/interview-feedback/comments?limit=25&before=<opaque cursor>` is a separate administrator view of nonempty optional comments. It rechecks the stored administrator role on every request. The default page size is 25 and the maximum is 100. Results are ordered by `updated_at DESC, session_id DESC`; pass the returned `next_cursor` unchanged as `before` to request the next page. A null cursor means no next page was returned.
+`GET /api/v1/admin/interview-feedback/comments?limit=25&before=<opaque cursor>` is a separate administrator view of nonempty optional comments or saved tool comparisons. It rechecks the stored administrator role on every request. The default page size is 25 and the maximum is 100. Results are ordered by `updated_at DESC, session_id DESC`; pass the returned `next_cursor` unchanged as `before` to request the next page. A null cursor means no next page was returned.
 
-The response is `{items, next_cursor}`. Each item contains `session_id`, `version`, `question_title`, `subject_key`, `subject_label`, `mode`, `provider`, `status`, `comment`, `share_transcript`, `submitted_at`, and `updated_at`. It contains no email address, owner ID, transcript, or diagnostic payload. Free-text comments and small contextual groups can still identify a person; this is a restricted view, not anonymized public data.
+The response is `{items, next_cursor}`. Each item contains `session_id`, `version`, `question_title`, `subject_key`, `subject_label`, `mode`, `provider`, `status`, `comment`, `comparison`, `share_transcript`, `submitted_at`, and `updated_at`. It contains no email address, owner ID, transcript, or diagnostic payload. Free-text comments and small contextual groups can still identify a person; this is a restricted view, not anonymized public data.
 
-This list is distinct from aggregate JSON/CSV exports and does not define the aggregate cohort or its denominator. Comment pages contain only people who chose to write something; do not treat them as a representative sample of all survey responses. Edits change ordering, so a series of pages is not an immutable historical snapshot.
+This list is distinct from aggregate JSON/CSV exports and does not define the aggregate cohort or its denominator. Suggestions contain only people who saved a comment or a comparison; do not treat them as a representative sample of all survey responses. Edits change ordering, so a series of pages is not an immutable historical snapshot.
 
 `share_transcript` records the user's optional permission for maintainers to inspect that interview's transcript to investigate feedback. The flag does not automatically fetch or export a transcript and does not authorize research, quotation, or publication. Qualitative review must respect the separate purpose, access, retention, and consent boundaries described below.
 
@@ -57,6 +57,47 @@ For each dimension show five rated counts, each permitted unrated count, **rated
 Example: 20 submitted surveys yield 15 rated usability answers, five unable-to-judge answers, and 12 ratings of `4` or `5`. The positive share is **12/15 = 80% among rated answers**. The unable-to-judge share is **5/20 = 25% of submitted answers**. Neither number is the survey-completion rate, whose denominator is all eligible attempts.
 
 These are separate dimensions with different scale directions. **Do not average all items into an overall score.** Difficulty's preferred point is `3`, disruption's favorable response is `1` (no interruption), and the other dimensions increase positively. The API supplies a descriptive ordinal `mean` for the four positive-direction items when rated n is nonzero; `mean` is null for difficulty and disruption. It is also null for any item with no rated answers. Favor distributions and clearly labeled response shares over presenting a decimal mean as a precise scientific measurement. No benchmark or target threshold is validated merely by defining these formulas.
+
+## Optional tool-comparison metrics
+
+The additive `tool-comparison-v1` extension is tracked in
+[the comparison release record](TOOL-COMPARISON-RELEASE-2026-09-10.md). It adds a
+separate `comparison` aggregate at the response top level and in each group;
+none of its answers enter the six core dimensions or a composite score.
+
+| Field | Meaning |
+| --- | --- |
+| `instrument_version` | `tool-comparison-v1` |
+| `answered_count` | Submitted core surveys with a non-null saved comparison, including No and Prefer not to say. |
+| `skipped_count` | Submitted core surveys with no comparison saved. This includes older responses and clients that never showed the extension; it does not prove a deliberate skip. |
+| `prior_use` | Separate counts for `yes`, `no`, and `prefer_not_to_say`. |
+| `preference` | Separate counts for `mockinterview_better`, `about_same`, `other_tools_better`, and `unable_to_judge`. Empty preferences are not silently assigned a category. |
+| `compared_count` | Count of the first three substantive preferences, excluding empty and unable-to-judge responses. |
+| `other_tools_better_rate` | `preference.other_tools_better / compared_count`, or `null` when no substantive comparisons were saved. |
+
+Within a cohort, `answered_count + skipped_count = responded_sessions` and the
+three prior-use counts sum to `answered_count`. Pending core surveys enter
+neither count. All preferences require prior use Yes. The number with Yes but
+no selected preference equals `prior_use.yes - sum(preference counts)`.
+Show these counts beside the preference rate. Label `skipped_count` as **No
+comparison saved** in the dashboard; never count it as no prior experience.
+
+Example: five surveys with substantive preferences include two saying other
+tools were better. The comparison share is **2/5 = 40%**, independent of the
+number that skipped, said No or could not judge. This is a comparison of
+respondents' recalled experiences, not a randomized head-to-head performance
+benchmark. The named tools, subscriptions, scenarios, prior familiarity and
+versions can differ. Tool names are unverified free text and are not
+canonicalized into vendor rankings.
+
+The same rolling started-at cohort, current-response, access and deletion rules
+apply. JSON includes the aggregate extension. A separate comparison CSV export
+keeps its instrument, window, grouping, counts and denominator distinct from the
+existing six-question CSV. Neither aggregate export includes tool names or
+explanations. The restricted suggestions view includes the comparison object,
+even when the general comment is empty. Its all-date pagination remains separate
+from aggregate filters. A No/Prefer-not comparison can therefore appear without
+any free text.
 
 ## Context that belongs on the server
 
