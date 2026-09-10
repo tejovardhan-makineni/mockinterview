@@ -18,6 +18,13 @@ format definitions.
 
 ## Local checks completed
 
+- Health routing now exposes `/health` and `/ready`, with the original `z`
+  aliases retained. The old public `/healthz` path returned a Google frontend
+  404; Cloud Run documents reserved paths ending in `z`. Deployment probes and
+  monitoring now use the new paths. API race tests passed, including liveness
+  during dependency failure and readiness returning 503 on database failure
+  through both aliases. Public verification of the new routes requires deploying
+  the candidate.
 - The final Go race suite passed with real PostgreSQL. Frontend checks cover 55
   tests, lint and TypeScript; static export produces all 20 pages. JavaScript
   dependency audits found no vulnerabilities. `govulncheck` found no reachable
@@ -37,8 +44,8 @@ format definitions.
   local HTTP/WebSocket API origins added to `connect-src` for the test. Actual
   Firebase preview origins and production CSP still need deployment verification.
 - GitHub workflow syntax passed Actionlint. Release-file and original full-history
-  Gitleaks scans found no secrets. Later publication and history-cleanup results
-  are recorded separately when complete.
+  Gitleaks scans found no secrets. Publication and history-cleanup results
+  are recorded in the Source publication section below.
 - Corpus validation loads all 143 scenarios. It checks the versioned format
   contract, required metadata, conditional facts/probes, rubric bounds and
   compatibility. Context fixtures confirm private authored material reaches the
@@ -168,7 +175,9 @@ scripts reject remote API targets and must not be repurposed for real user data.
 Configure and verify production mail, deploy and test the exact committed
 candidate, confirm preview CORS and browser flows, verify alert delivery, promote
 the tested API/web versions and check the public application. Complete the
-authorized history cleanup and secret review, then publish and verify an anonymous
-clone and private vulnerability reporting. Update this checkpoint after those
-actions actually succeed. Content remains a community preview while practitioner
-review and scoring calibration are pending.
+GitHub checks and branch-protection verification for the release commit, then tag
+the tested release. History cleanup, secret review, source publication, anonymous
+clone verification and private vulnerability reporting are complete as recorded
+above. Update this checkpoint after the remaining actions actually succeed.
+Content remains a community preview while practitioner review and scoring
+calibration are pending.

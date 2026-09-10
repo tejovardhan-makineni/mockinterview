@@ -1,6 +1,6 @@
 """Reconcile this app's uptime checks and optional verified alert routing.
 
-Run after deploying an API with /readyz. Uses PROJECT_ID, PUBLIC_URL,
+Run after deploying an API with /ready. Uses PROJECT_ID, PUBLIC_URL,
 WEB_API_BASE and optional MONITORING_NOTIFICATION_CHANNEL. No channel is chosen
 implicitly and another application's monitoring resources are never changed.
 """
@@ -52,7 +52,7 @@ if channel:
 
 existing = listing('/uptimeCheckConfigs', 'uptimeCheckConfigs')
 checks = []
-for suffix, url, path in [('Web', os.environ['PUBLIC_URL'], '/'), ('API', os.environ['WEB_API_BASE'], '/readyz')]:
+for suffix, url, path in [('Web', os.environ['PUBLIC_URL'], '/'), ('API', os.environ['WEB_API_BASE'], '/ready')]:
     origin = urllib.parse.urlparse(url)
     if origin.scheme != 'https' or not origin.hostname or origin.username or origin.query or origin.fragment or origin.path not in ('', '/'):
         raise ValueError('A valid HTTPS application origin is required')

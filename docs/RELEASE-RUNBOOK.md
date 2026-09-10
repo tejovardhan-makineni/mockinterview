@@ -7,9 +7,16 @@ The hosted application uses Cloud Run, PostgreSQL and Firebase Hosting. Keep pro
 1. Configure a verified sender in Resend or a STARTTLS SMTP service. Verify delivery, expired links, reset/revocation and spam-folder guidance using an account you control. Production refuses to start without mail configuration.
 2. Run `deploy/push-secrets.sh`. This creates a dedicated runtime service account, grants Cloud SQL connection permission and grants access at each app secret. It does not remove permissions from shared service accounts or replace another application's database.
 3. Use a separate staging service, database, database user and secret prefix. Never point destructive tests at production. Bind database users to their own database and verify a restore into the staging database before launch.
-4. Configure uptime checks for `/readyz` on the API and `/` on the web domain. Configure alert notification channels and verify actual delivery. `/healthz` is process liveness; `/readyz` checks the database and model configuration, not a paid provider request.
+4. Configure uptime checks for `/ready` on the API and `/` on the web domain. Configure alert notification channels and verify actual delivery. `/health` is process liveness; `/ready` checks the database and model configuration, not a paid provider request.
 5. Keep Cloud Run CPU allocated outside requests: the portable scoring/retention worker runs within the API process. Production uses one minimum instance. A stopped worker leaves durable scoring jobs to be reclaimed after the lease expires.
 6. Grant feedback administration by **verified user UUID**, not by an email allowlist: from `api/`, `go run ./cmd/admin -grant-admin-user USER_UUID`. Use operator credentials and the intended database. This revokes old login sessions.
+
+Use `/health` and `/ready` for probes and external checks. Cloud Run reserves
+some paths ending in `z`; the live service's `/healthz` request returned a Google
+frontend 404 before reaching the container. The API retains `/healthz` and
+`/readyz` as local compatibility aliases. Do not interpret their public 404 as
+evidence that the process is unhealthy.
+[Cloud Run reserved URL paths](https://docs.cloud.google.com/run/docs/known-issues)
 
 ## Build and stage
 

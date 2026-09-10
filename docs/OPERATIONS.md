@@ -66,10 +66,14 @@ runbook for exact commands, mail verification, preview CORS, backups and rollbac
 
 ## Health and recovery
 
-`/healthz` reports process liveness. `/readyz` checks database access and model
+`/health` reports process liveness. `/ready` checks database access and model
 configuration; it does not make a paid provider request. Monitor the API readiness
 endpoint and website, and verify alert delivery through a configured notification
 channel. A created uptime check alone does not prove notifications work.
+The legacy `/healthz` and `/readyz` aliases remain for local compatibility; Cloud
+Run can intercept reserved paths ending in `z` before they reach the application.
+Use the non-`z` paths for probes and public checks; see
+[Cloud Run reserved paths](https://docs.cloud.google.com/run/docs/known-issues).
 
 Keep CPU allocated and a minimum production instance for the durable scoring and
 retention workers. Watch failed starts, provider errors, persistence failures and

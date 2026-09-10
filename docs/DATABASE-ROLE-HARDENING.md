@@ -1,15 +1,22 @@
 # App database role hardening
 
-**Review artifact; not applied to production.** The observed `mockinterview`
-login has `CREATEROLE`, `CREATEDB` and membership in `cloudsqlsuperuser` on a shared
-Cloud SQL instance. Those privileges exceed this application's needs. Cloud SQL
+**Applied to the hosted app on September 9, 2026.** The `mockinterview` login
+previously had `CREATEROLE`, `CREATEDB` and membership in `cloudsqlsuperuser` on a
+shared Cloud SQL instance. The guarded self-demotion script passed a live
+rollback rehearsal, then removed those privileges. A fresh app connection
+verified identity sequences, reads, writes and schema DDL inside a rolled-back
+disposable-table transaction. The previous API revision still answered its ping
+and database-backed authentication check. Credentials and object ownership were
+preserved; before/after role metadata is retained with the private release backup.
+
+Those administrative privileges exceeded this application's needs. Cloud SQL
 grants them by default to a built-in user created without custom database roles;
 specifying a precreated custom role avoids that default.
 [Cloud SQL user management](https://docs.cloud.google.com/sql/docs/postgres/create-manage-users)
 
-The observed app database is owned by `cloudsqlsuperuser`; its `public` schema
+The app database remains owned by `cloudsqlsuperuser`; its `public` schema
 is owned by `pg_database_owner`. The 14 existing tables and 27 indexes belong to
-`mockinterview`. The app's `cloudsqlsuperuser` membership has no admin option.
+`mockinterview`. The former `cloudsqlsuperuser` membership had no admin option.
 A rollback-only rehearsal confirmed that this existing login can grant access
 to its own database/schema by temporarily assuming its existing membership,
 reset its role, reduce its own attributes, and then revoke that membership. The
@@ -72,6 +79,11 @@ connections. If application checks fail, restore only the reviewed app-specific
 grants needed; do not blanket regrant `cloudsqlsuperuser` or alter other apps.
 
 ## New installations
+
+The hosted staging database and user were created separately with the restricted
+`mockinterview_staging_owner` role. Both staging roles were verified to have no
+superuser, database-creation or role-creation attributes; the staging login has
+only its own custom-role membership. Its database/schema grants are explicit.
 
 Precreate `mockinterview_owner` as a reviewed `NOLOGIN NOCREATEDB NOCREATEROLE`
 role using the database operator, with no privileged memberships. Do not use

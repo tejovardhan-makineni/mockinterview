@@ -114,23 +114,7 @@ func main() {
 		MaxAge:           300,
 	}))
 
-	r.Get("/healthz", func(w http.ResponseWriter, _ *http.Request) {
-		httpx.WriteJSON(w, http.StatusOK, map[string]any{"ok": true, "llm_stub": ai.Stubbed()})
-	})
-
-	r.Get("/readyz", func(w http.ResponseWriter, r *http.Request) {
-		check, cancel := context.WithTimeout(r.Context(), 3*time.Second)
-		defer cancel()
-		if err := st.Pool.Ping(check); err != nil {
-			httpx.WriteJSON(w, 503, map[string]any{"ready": false, "dependency": "database"})
-			return
-		}
-		if cfg.Environment == "production" && ai.Stubbed() {
-			httpx.WriteJSON(w, 503, map[string]any{"ready": false, "dependency": "model_configuration"})
-			return
-		}
-		httpx.WriteJSON(w, 200, map[string]any{"ready": true, "release": cfg.ReleaseSHA, "llm_stub": ai.Stubbed(), "provider": info.Provider})
-	})
+	registerHealthRoutes(r, cfg, ai, st.Pool.Ping)
 	r.Route("/api/v1", app.Routes)
 
 	srv := &http.Server{

@@ -1,187 +1,205 @@
 # Architecture — mockinterview.live
 
-A modular monolith. Each concern is one package (backend) / one file (frontend),
-so upgrading a piece means touching that file, not the whole app. This doc is the
-map: diagrams + a "where do I change X" table.
+The application is a Next.js static web export and a Go API backed by PostgreSQL.
+Feature packages own their handlers and small repository interfaces; the API
+wires them together in `api/cmd/mockinterview/app.go`. This describes the current
+source implementation. See [release validation](RELEASE-VALIDATION-2026-09-09.md)
+for checks actually completed and the status of the hosted release.
 
 ## System overview
 
 ```mermaid
 flowchart LR
   subgraph Browser
-    W[Next.js static app<br/>web/]
-    Cam[Webcam + MediaPipe]
-    Mic[Mic PCM]
+    W[Next.js static app]
+    Mic[Optional microphone]
+    Cam[Optional local camera self-view]
   end
-  subgraph GCP
-    API[Go API on Cloud Run<br/>api/]
-    DB[(Cloud SQL Postgres<br/>shared storybytes-beta-db)]
+  subgraph Hosting
+    API[Go API on Cloud Run]
+    DB[(PostgreSQL)]
+    Worker[Scoring and retention workers]
   end
-  G[Gemini API<br/>Live audio · TTS · reasoning]
-  W -- REST /api/v1 --> API
-  W -- WebSocket /live --> API
-  Mic -- PCM16 --> API
+  G[Gemini native audio]
+  L[Configured reasoning provider]
+  Mail[Resend or SMTP]
+  W -->|REST and authenticated WebSocket| API
+  Mic -->|PCM audio through live client| API
+  Cam -. local preview only .-> W
   API <--> DB
-  API <-- native-audio Live / TTS / scoring --> G
-  W -. optional providers .-> G
+  API <--> G
+  API <--> L
+  API --> Mail
+  Worker <--> DB
+  Worker --> L
 ```
 
-The web is a **static export on Firebase Hosting** (no server runtime). All logic
-is the Go API. With no Gemini key the API uses a deterministic stub so everything
-runs offline.
+The browser calls the application API; provider requests and personal-key
+decryption happen on the server. Gemini supplies native voice. Text interviews
+and scoring use the selected reasoning provider. Personal-key sessions retain
+that provider and model for feedback, without a platform-funded fallback.
+Development supports a labelled deterministic text demo without a provider key;
+production rejects demo mode and unlimited local usage.
 
-## Backend module map (`api/internal/*`)
+Camera self-view stays local. The current UI does not perform gaze, posture or
+appearance analysis, and appearance is excluded from assessment. The interviewer
+portraits are original SVG artwork with audio-driven animation and reduced-motion
+support, not a real person or a photoreal video service.
 
-```mermaid
-flowchart TD
-  main[cmd/mockinterview<br/>main.go + app.go router] --> auth
-  main --> corpus
-  main --> resume
-  main --> profile
-  main --> interview
-  main --> live
-  main --> scoring
-  interview --> scoring
-  interview --> store
-  live --> store
-  live --> corpus
-  live --> llm
-  scoring --> llm
-  scoring --> corpus
-  resume --> llm
-  profile --> tts
-  auth --> store
-  llm -->|gemini/openai/deepseek/xai/meta/anthropic/stub| ext[(LLM providers)]
-```
+## Backend module map
 
-| Package | Owns | Change here to… |
-|---|---|---|
-| `config` | env → typed config, `.env` load, provider resolution, admin allowlist, daily limit | add a setting / provider key / tier rule |
-| `store` | pgx pool, **embedded migrations**, all SQL (users, sessions, transcripts, scores, reports, behavior…), the `Datastore` contract, and `store/memstore` (in-memory impl for tests) | change the schema (add `migrations/NNNN_*.sql`) or a query |
-| `persona` | swappable catalogs — `voices.go`, `faces.go`, `personalities.go`, `languages.go`, `delivery.go` (each a one-file registry + validators) | add/change a voice, face, interviewer personality, language, or delivery style |
-| `i18n` | server-side UI-string translation (`/i18n/translate`, LLM-backed, 1 MB-capped + ≤200 texts/call) | change how chrome strings are translated |
-| `auth` | email/password + JWT, middleware | change auth / add an identity provider |
-| `corpus` | load + validate + serve questions (`data/corpus/*.json`) | add/edit questions, change the question schema/validator |
-| `llm` | provider-agnostic `Client` (Gemini/OpenAI/DeepSeek/xAI/Meta/Anthropic + stub) | add an LLM provider / change model defaults |
-| `tts` | one-shot Gemini text-to-speech (voice previews) | change how voice previews are generated |
-| `resume` | upload, PDF/DOCX/text extraction, LLM parse + review | change resume parsing / review |
-| `profile` | interviewer config, voice/face catalogs, user profile, delete-account, voice preview | change catalogs / profile fields |
-| `interview` | session lifecycle, transcript/workspace ingest, **finish→score**, report, results list, daily limit | change session flow, scoring trigger, report shape |
-| `live` | **the interviewer**: `director.go` (system prompt, persona, per-domain pacing, phases) + `relay.go` (Gemini Live WebSocket, turn-taking, tools, transcript tap) | change interviewer behavior / the live transport |
-| `scoring` | corpus-driven rubric evaluation, not-enough-info guard, per-dimension "assessed", persistence | change how interviews are scored |
-| `behavior` (in store) | telemetry ingest + aggregation | change behavioral signals |
-| `httpx` | RFC-7807 errors, JSON helpers | change error/response format |
+Paths below are relative to `api/internal/` unless stated otherwise.
 
-**The interviewer's personality lives in exactly one file: `internal/live/director.go`.**
-The provider used for reasoning is one env var (`LLM_PROVIDER`); the live voice is
-always Gemini.
-
-**Handlers depend on interfaces, not the database.** Each feature package declares
-the small `Repo` interface it needs (consumer-defined). Both `*store.Store`
-(Postgres) and `store/memstore.Mem` (in-memory) satisfy the `store.Datastore`
-union, so the whole HTTP API is tested with `go test ./...` — no Postgres, no
-Gemini key. If you add a store method: add it to the feature's `Repo`, to
-`store.Datastore`, and to `memstore`.
-
-## Frontend module map (`web/`)
-
-The frontend mirrors the backend's feature isolation. **Each feature is one file
-under `lib/features/`** owning its types + HTTP calls + mock + fixtures:
-
-| File / dir | Owns |
+| Package | Responsibility |
 |---|---|
-| `lib/features/auth.ts` | register/login/me/logout + `User` type |
-| `lib/features/profile.ts` | interviewer config, voice/face catalogs, profile, delete-account, voice preview |
-| `lib/features/resume.ts` | upload / fetch / review + resume types + review mock |
-| `lib/features/catalog.ts` | question catalog + `matchScore` fuzzy search + `QuestionSummary` |
-| `lib/features/interview.ts` | session lifecycle, workspace/turn/behavior ingest, report, results, `liveUrl` |
-| `lib/api.ts` | **thin composer** — intersects the slices into one `api` object; picks `http` vs `mock` via `NEXT_PUBLIC_MOCK`. Nothing calls `fetch` directly. |
-| `lib/http.ts` | shared transport (base URL, bearer token, `req`, `wsBase`) |
-| `lib/domain.ts` | cross-feature primitives (`Modality`, `Personality`, `Phase`) |
-| `lib/types.ts`, `lib/mockdata.ts` | back-compat barrels re-exporting from features |
-| `lib/live.ts` | live client: WS transport, mic/voice, captions, nudge, **reconnect w/ backoff**, ended |
-| `lib/behavior.ts` | in-browser MediaPipe + luminance behavioral capture — **opt-in only** (gated on `localStorage["mi.cameraConsent"]==="granted"`; no-ops otherwise) |
-| `lib/voicePreview.ts` | real Gemini voice preview (+ browser fallback), play/stop |
-| `lib/features/i18n.ts` | translation + language-list slice (http + mock twin); consumed by `lib/i18n.tsx` via `api` (never a raw `fetch`) |
-| `lib/features/achievements.ts` | pure client-side derivation over already-fetched sessions (no transport — intentional composer exception) |
-| `lib/i18n.tsx` | language context + `t()`; personality & language catalogs are fetched from the backend (`/personalities`, `/languages`), not hardcoded |
-| `components/AppShell.tsx` | left-sidebar app shell (nav, theme, sign-out) wrapping every signed-in page |
-| `components/ThemeToggle.tsx` | Dark / Light / Quantum themes |
-| `components/studio/*` | interview room: `Avatar3D` + `avatars/*` (plug-and-play), `Workspace` (Excalidraw/Monaco/text), `Webcam` |
-| `app/*/page.tsx` | one page per route (dashboard, interviews, setup, interview, report, resume-review, results, settings, login) |
-| `app/globals.css` | design tokens + the 3 themes (change palette/glass here) |
+| `config` | Environment loading, provider settings, production validation and hosted admission settings |
+| `auth` | Password authentication, JWT/token-version revocation, verification/recovery actions, mail and WebSocket tickets |
+| `store` | PostgreSQL queries, embedded migrations, transactions, leases, usage ledger, scoring jobs, export and retention |
+| `store/memstore` | Repository implementation for deterministic tests |
+| `corpus` | Scenario/format validation, session configuration and candidate-safe catalog projections |
+| `pack` | Multi-round packs, scenario selection and progress |
+| `persona` | Voice, face, personality, delivery and language catalogs |
+| `interview` | Reservation/admission, session lifecycle, workspace/transcript access, credentials, reports and scoring worker |
+| `live` | Director/pacing policy, browser relay, native Gemini transport, acknowledged input and reconnect recovery |
+| `llm` | Reasoning adapters, deterministic demo and personal-key encryption helpers |
+| `scoring` | Canonical rubric weights, evidence validation, not-assessed dimensions and learning exercises |
+| `profile` | Interviewer settings, profile, account export/deletion and voice preview |
+| `resume` | Resume extraction, review and matching |
+| `feedback` | Product/interviewer feedback, optional consented context and administrator triage |
+| `tts`, `i18n` | Voice previews and application-string translation |
+| `httpx` | HTTP errors, bounded JSON decoding, safe logging and shared middleware |
 
-**To improve a feature (e.g. resume review):** edit `lib/features/resume.ts`
-(front-end data) + `app/resume-review/page.tsx` (UI) + `internal/resume` +
-`store/resumes.go` (backend/db). No other file needs to change.
-**To add an avatar:** drop a builder in `components/studio/avatars/` and
-`register()` it under the same id used in `persona/faces.go`.
-**To change the theme/palette:** `app/globals.css` (`:root[data-theme=…]`).
+Repository changes require both PostgreSQL and memory-store implementations and
+updates to the consuming feature interface and `store.Datastore`. Memory tests
+cover deterministic behavior; concurrency and durable recovery require the real
+PostgreSQL integration tests using an isolated `TEST_DATABASE_URL`.
 
-## Live interview flow
+Administration uses the stored user role, not an email allowlist. The operator
+command `api/cmd/admin` grants the role to an explicitly selected, verified user
+UUID and revokes earlier login tokens. Verification/recovery actions are
+single-use and stored as hashes. Production requires configured mail delivery.
+
+## Interview lifecycle
 
 ```mermaid
 sequenceDiagram
-  participant C as Candidate (browser)
-  participant R as relay.go
-  participant G as Gemini Live
-  participant D as DB
-  C->>R: WS connect (?minutes)
-  R->>G: connect (system prompt from director.go, patient VAD, end_interview tool)
-  G-->>C: greeting audio + transcript
-  loop interview
-    C->>R: mic PCM (speech) / user_text (typed) / canvas (context-only)
-    R->>G: realtime audio / client-content
-    G-->>C: audio + transcript (coalesced)
-    R->>D: persist transcript turns
-    C->>R: behavior samples (batched)
+  participant C as Candidate browser
+  participant A as API and live relay
+  participant P as Selected provider
+  participant D as PostgreSQL
+  participant W as Scoring worker
+  C->>A: Create configured attempt
+  A->>D: Atomically reserve and check eligibility
+  C->>A: Request ticket, open session WebSocket
+  A->>P: Initialize frozen scenario/configuration
+  P-->>A: Provider ready
+  A->>D: Activate and record allowance usage
+  A-->>C: Ready and fixed deadline
+  loop Interview
+    C->>A: Audio, typed answer or versioned workspace
+    A->>P: Candidate input and workspace context
+    P-->>A: Interviewer response
+    A->>D: Persist ordered turns and workspace
+    A-->>C: Response and saved-input acknowledgment
   end
-  G->>R: tool call end_interview (time up / wrap)
-  R-->>C: "ended"
-  C->>R: POST /finish
-  R->>D: score (scoring.go, corpus rubric) + persist report
-  C->>R: GET /report → scorecard
+  C->>A: Finish after final input is saved
+  A->>D: Enqueue durable scoring job
+  A-->>C: Processing status
+  W->>D: Claim job lease and freeze input
+  W->>P: Evaluate evidence against rubric
+  W->>D: Atomically persist validated report
+  C->>A: Retrieve report or retry failed feedback
 ```
 
-## Data model (Postgres, embedded migrations)
+Hosted admission allows one platform-funded start per rolling seven days and
+one total start per rolling 24 hours, including personal-key starts. A separate
+global budget limits platform-funded starts. Reservations and failures before
+provider readiness do not consume an allowance. Resuming or retrying a report
+does not create another start. Local unlimited mode disables hosted admission
+limits; provider charges still apply.
 
-`users · resumes · resume_reviews · interview_configs · sessions · transcript_turns ·
-canvas_snapshots · workspace_snapshots · behavior_samples · events · scores · reports`
-— all keyed by UUIDv7, every child `ON DELETE CASCADE` from `users` (so account
-deletion erases everything).
+Session records freeze the scenario, resolved format, configuration, provider/model
+and duration. The server deadline survives reconnects. Database leases fence
+competing live connections; transcript sequence numbers and event IDs support
+ordered recovery and duplicate-input rejection. Workspace revisions reject
+conflicting saves instead of silently overwriting newer work.
 
-## Deploy
+Finishing is asynchronous and idempotent. A worker claims a durable job with a
+lease, retains scoring input across retries and validates evidence before
+committing the report. An expired lease can be reclaimed after restart; stale
+workers cannot overwrite a later attempt. Production must allocate CPU outside
+requests and keep a minimum instance for these in-process workers.
 
-```mermaid
-flowchart LR
-  src[api/] -->|gcloud builds submit| img[gcr.io image]
-  img -->|gcloud run deploy| run[Cloud Run us-west1]
-  run --> sql[(shared Cloud SQL)]
-  web[web/ static export] -->|firebase deploy| fh[Firebase Hosting<br/>mockinterview-web]
-```
+The director uses authored facts and conditional probes, format stages, target
+level, challenge and simulation/coaching settings. Code and SQL workspaces provide
+text for review; they do not execute code. Scoring accepts known rubric dimensions
+and exact candidate-evidence quotations, with an explicit 512 KiB evidence limit.
+These safeguards do not establish practitioner calibration or hiring validity;
+content and feedback remain community previews.
 
-New installations use `deploy/setup-db.sh` after an operator prepares the app's
-custom database role; see [database role hardening](DATABASE-ROLE-HARDENING.md).
-Routine releases use the staged API and web flows in
-[the release runbook](RELEASE-RUNBOOK.md), without reprovisioning the shared SQL
-instance or changing other applications' grants.
+## Frontend module map
 
-## Upgrade cheat-sheet
+Paths below are relative to `web/`.
 
-| I want to… | Touch |
+| Location | Responsibility |
 |---|---|
-| Change interviewer behavior/pacing | `api/internal/live/director.go` |
-| Change turn-taking / voice transport | `api/internal/live/relay.go` |
-| Add/edit interview questions | `api/data/corpus/*.json` (+ `docs/CORPUS.md`) |
-| Change scoring | `api/internal/scoring/scoring.go` |
-| Swap/ add an LLM provider | `api/internal/llm/*` + `LLM_PROVIDER` |
-| Add/change a voice | `api/internal/persona/voices.go` (one line) |
-| Add/change a face | `api/internal/persona/faces.go` + a builder in `web/components/studio/avatars/` |
-| Add an interviewer personality | `api/internal/persona/personalities.go` + prompt in `director.go` |
-| Improve one frontend feature | `web/lib/features/<feature>.ts` (+ its page) |
-| Change the DB schema | new `api/internal/store/migrations/NNNN_*.sql` |
-| Change tiers / limits / admins | `api/internal/config/config.go` (or env) |
-| Restyle / add a theme | `web/app/globals.css` |
-| Change a page | that page's `web/app/*/page.tsx` |
-| Add an avatar | `web/components/studio/avatars/` |
-```
+| `lib/features/` | Feature-owned API types, HTTP operations and mock behavior |
+| `lib/api.ts`, `lib/http.ts` | API composition, authentication transport and recoverable network errors |
+| `lib/live.ts` | WebSocket, media capture/playback, acknowledgment and bounded reconnect |
+| `lib/setupDraft.ts` | Safe setup choices preserved through authentication, without keys |
+| `lib/workspaceSave.ts` | Workspace save sequencing and conflict handling |
+| `components/AppShell.tsx` | Navigation, account controls and feedback entry |
+| `components/studio/DeviceCheck.tsx` | Text/voice choice and optional device checks |
+| `components/studio/Avatar3D.tsx` | Alex, Jordan and Sam SVG portraits and playback animation |
+| `components/studio/Workspace.tsx` | Excalidraw, Monaco and accessible written alternatives |
+| `components/studio/Webcam.tsx` | Local camera self-view and media cleanup |
+| `app/*/page.tsx` | Catalog, setup, interview, report, history, account and public information pages |
+| `app/globals.css`, `components/ui.tsx` | Shared presentation and interface controls |
+| `scripts/vendor-assets.mjs` | Local Monaco assets and Excalidraw fonts for development and static builds |
+
+Provider keys stay in transient UI state until sent to the API; they are not
+stored in browser local storage. Server-side session credentials are encrypted
+with the configured 32-byte key and expire after three hours. A feedback retry
+can request re-entry after expiry. Consult
+[the artwork record](../web/components/studio/ARTWORK.md) before adding portraits;
+there is no legacy third-party avatar registry to extend.
+
+## Data and retention
+
+PostgreSQL stores accounts, resumes/reviews, configuration, sessions, ordered
+transcripts, workspace/canvas snapshots, scores/reports, feedback, scoring jobs,
+short-lived credentials and auth actions. Legacy behavioral tables remain for
+historical compatibility; the current UI does not collect camera-derived signals.
+
+Account export includes saved user records and excludes credentials, auth actions,
+private interviewer references and internal usage/lease fields. Deletion removes
+account-linked records. The independent usage ledger contains an HMAC of verified
+email and remains for the rolling seven-day window so deletion cannot reset
+hosted eligibility. Database backups follow their separate retention policy.
+
+Maintenance runs on startup and hourly. It removes expired auth actions and
+personal keys, credentials for completed/abandoned/failed sessions, usage entries
+older than seven days and legacy raw behavioral samples older than thirty days;
+it also abandons expired reservations. Completed history remains until the user
+deletes the interview or account.
+
+## Deployment and change guide
+
+Cloud Build creates the API image from committed source. Cloud Run stages an
+immutable candidate before explicit traffic promotion. Firebase Hosting serves a
+static export built and previewed from committed source, then promotes that same
+version. The app uses its own database/login on a shared Cloud SQL instance,
+with app-scoped secrets and a dedicated runtime identity.
+
+Use [the release runbook](RELEASE-RUNBOOK.md) for validation, mail, monitoring,
+promotion and rollback. New database setup also requires
+[database role hardening](DATABASE-ROLE-HARDENING.md). `/health` checks liveness;
+`/ready` checks database access and model configuration, not provider or mail
+availability.
+
+For content changes, follow [the corpus contract](CORPUS.md) and
+[contribution guide](../CONTRIBUTING.md). Director behavior lives in
+`api/internal/live/director.go` and `policy.go`, native transport in
+`gemini_socket.go` and `relay.go`, assessment in `api/internal/scoring`, and durable
+lifecycle in `api/internal/interview` and `store`. Update portraits in
+`web/components/studio/Avatar3D.tsx` alongside `api/internal/persona/faces.go`.

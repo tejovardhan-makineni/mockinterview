@@ -59,7 +59,7 @@ with tempfile.TemporaryDirectory(prefix='mockinterview-provider-') as temporary:
             if server.poll() is not None:
                 break
             try:
-                with urllib.request.urlopen(origin+'/readyz', timeout=1) as response:
+                with urllib.request.urlopen(origin+'/ready', timeout=1) as response:
                     ready = response.status == 200
                 if ready:
                     break

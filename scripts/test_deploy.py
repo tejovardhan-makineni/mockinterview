@@ -72,7 +72,7 @@ class DeployTest(unittest.TestCase):
         changes = [body for method, _, body in calls if method == 'PATCH']
         self.assertEqual(len(changes), 4)
         api = next(row for row in changes if row['displayName'] == 'Mockinterview API')
-        self.assertEqual(api['httpCheck']['path'], '/readyz')
+        self.assertEqual(api['httpCheck']['path'], '/ready')
         self.assertEqual(api['monitoredResource']['labels']['host'], 'api.example.com')
         for row in changes:
             if 'notificationChannels' in row:

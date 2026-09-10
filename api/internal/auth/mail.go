@@ -107,7 +107,11 @@ func (m SMTPMailer) Send(ctx context.Context, to, subject, body string) error {
 	if err != nil {
 		return errors.New("mail data rejected")
 	}
-	_, err = fmt.Fprintf(w, "From: %s\r\nTo: %s\r\nSubject: %s\r\nMIME-Version: 1.0\r\nContent-Type: text/plain; charset=UTF-8\r\n\r\n%s", from.String(), recipient.String(), subject, strings.ReplaceAll(body, "\n", "\r\n"))
+	// Account messages use a fixed empty group (RFC 5322 section 3.4) in the
+	// visible To header. Delivery still targets the single validated SMTP
+	// envelope recipient above; user-provided names and addresses never become
+	// message content. SMTP clients display this group instead of the address.
+	_, err = fmt.Fprintf(w, "From: %s\r\nTo: Mockinterview candidate:;\r\nSubject: %s\r\nMIME-Version: 1.0\r\nContent-Type: text/plain; charset=UTF-8\r\n\r\n%s", from.String(), subject, strings.ReplaceAll(body, "\n", "\r\n"))
 	if err != nil {
 		return err
 	}

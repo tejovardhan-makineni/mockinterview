@@ -69,8 +69,8 @@ PY
    --platform managed --allow-unauthenticated --ingress all --service-account "$RUNTIME_SA" \
    --set-cloudsql-instances "$CLOUDSQL_INSTANCE" --cpu 1 --memory 512Mi --concurrency 20 \
    --min-instances "${MIN_INSTANCES:-1}" --max-instances 5 --no-cpu-throttling --timeout 3600 \
-   --startup-probe='httpGet.path=/readyz,httpGet.port=8080,initialDelaySeconds=0,periodSeconds=10,timeoutSeconds=5,failureThreshold=12' \
-   --liveness-probe='httpGet.path=/healthz,httpGet.port=8080,periodSeconds=30,timeoutSeconds=5,failureThreshold=3' \
+   --startup-probe='httpGet.path=/ready,httpGet.port=8080,initialDelaySeconds=0,periodSeconds=10,timeoutSeconds=5,failureThreshold=12' \
+   --liveness-probe='httpGet.path=/health,httpGet.port=8080,periodSeconds=30,timeoutSeconds=5,failureThreshold=3' \
    --env-vars-file "$BUILD_DIR/env.json" --set-secrets "$SECRETS" "${TRAFFIC_ARGS[@]}"
   gcloud run services describe "$TARGET_SERVICE" --project "$PROJECT_ID" --region "$REGION" --format='json(status.latestReadyRevisionName,status.traffic)'
   ;;

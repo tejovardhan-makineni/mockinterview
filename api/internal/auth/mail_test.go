@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"context"
 	"fmt"
+	"io"
 	"net"
 	"net/http"
 	"net/mail"
@@ -50,15 +51,16 @@ func TestMailRejectsInjectedRecipientsAndHeadersBeforeSending(t *testing.T) {
 
 // Observe the actual SMTP envelope and message, including DATA framing, rather
 // than only checking a validation helper's return value.
-func TestSMTPUsesParsedMailboxAtEnvelopeAndHeaderBoundaries(t *testing.T) {
+func TestSMTPDeliversToOneParsedMailboxWithoutReflectingItIntoMessage(t *testing.T) {
 	listener, err := net.Listen("tcp", "127.0.0.1:0")
 	if err != nil {
 		t.Fatal(err)
 	}
 	defer listener.Close()
 	type capture struct {
-		recipient, message string
-		err                error
+		recipients []string
+		message    string
+		err        error
 	}
 	captured := make(chan capture, 1)
 	go func() {
@@ -85,7 +87,7 @@ func TestSMTPUsesParsedMailboxAtEnvelopeAndHeaderBoundaries(t *testing.T) {
 			case strings.HasPrefix(line, "EHLO "), strings.HasPrefix(line, "HELO "), strings.HasPrefix(line, "MAIL FROM:"):
 				reply("250 OK")
 			case strings.HasPrefix(line, "RCPT TO:"):
-				result.recipient = line
+				result.recipients = append(result.recipients, line)
 				reply("250 OK")
 			case line == "DATA":
 				reply("354 Send message")
@@ -118,18 +120,32 @@ func TestSMTPUsesParsedMailboxAtEnvelopeAndHeaderBoundaries(t *testing.T) {
 	if result.err != nil {
 		t.Fatal(result.err)
 	}
-	if result.recipient != "RCPT TO:<candidate@example.com>" {
-		t.Fatalf("uncanonical envelope: %q", result.recipient)
+	if len(result.recipients) != 1 || result.recipients[0] != "RCPT TO:<candidate@example.com>" {
+		t.Fatalf("expected exactly one canonical envelope recipient: %q", result.recipients)
 	}
 	message, err := mail.ReadMessage(strings.NewReader(result.message))
 	if err != nil {
 		t.Fatal(err)
 	}
 	to, err := message.Header.AddressList("To")
-	if err != nil || len(to) != 1 || to[0].Address != "candidate@example.com" {
+	if err != nil || len(to) != 0 || message.Header.Get("To") != "Mockinterview candidate:;" {
 		t.Fatalf("unexpected To header: %+v %v", to, err)
 	}
 	if len(message.Header["To"]) != 1 || len(message.Header["Bcc"]) != 0 || message.Header.Get("Subject") != "Verify email" {
 		t.Fatalf("message headers altered: %+v", message.Header)
+	}
+	if strings.Contains(result.message, "candidate@example.com") || strings.Contains(result.message, "Candidate Name") {
+		t.Fatal("SMTP message reflected the untrusted recipient")
+	}
+	from, err := message.Header.AddressList("From")
+	if err != nil || len(from) != 1 || from[0].Address != "sender@example.com" || from[0].Name != "Practice Team" {
+		t.Fatalf("unexpected From header: %+v %v", from, err)
+	}
+	if message.Header.Get("MIME-Version") != "1.0" || message.Header.Get("Content-Type") != "text/plain; charset=UTF-8" {
+		t.Fatalf("message MIME headers altered: %+v", message.Header)
+	}
+	body, err := io.ReadAll(message.Body)
+	if err != nil || string(body) != "Open the trusted verification link.\n" {
+		t.Fatalf("trusted message body altered: %q %v", body, err)
 	}
 }
