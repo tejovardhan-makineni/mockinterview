@@ -36,7 +36,7 @@ function Login() {
         const r = await api.register(email, password);
         if (r.verification_required) {
           setNotice(
-            "Your account is ready. Verify your email before starting a hosted interview. Check your inbox for a verification link.",
+            "Your account is ready. Verify your email before starting a hosted interview. Check your inbox and spam folder for a verification link.",
           );
           setLink(r.development_action_url ?? "");
         } else router.push(destination);

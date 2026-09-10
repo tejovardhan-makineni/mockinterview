@@ -221,7 +221,7 @@ func (s *Service) Create(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 	snapshot, _ := json.Marshal(q)
-	sess, err := s.store.ReserveSession(r.Context(), store.Reservation{GlobalDailyLimit: s.options.GlobalDailyLimit, Session: store.Session{ID: id, UserID: uid, QuestionID: q.ID, Modality: q.Modality, Track: q.Track, PackID: req.PackID, PackRoundID: req.RoundID, Config: req.Config, DurationMinutes: req.Minutes, Funding: req.Funding, Mode: req.Mode, Provider: req.Provider, Model: req.Model, LiveModel: s.options.LiveModel, QuestionSnapshot: snapshot}, Identity: llm.UsageIdentity(s.options.EncryptionKey, u.Email), Unlimited: !s.options.Hosted || u.Role == "admin", Credential: encrypted, CredentialExpires: time.Now().Add(3 * time.Hour)})
+	sess, err := s.store.ReserveSession(r.Context(), store.Reservation{GlobalDailyLimit: s.options.GlobalDailyLimit, Session: store.Session{ID: id, UserID: uid, QuestionID: q.ID, Modality: q.Modality, Track: q.Track, PackID: req.PackID, PackRoundID: req.RoundID, Config: req.Config, DurationMinutes: req.Minutes, Funding: req.Funding, Mode: req.Mode, Provider: req.Provider, Model: req.Model, LiveModel: s.options.LiveModel, QuestionSnapshot: snapshot}, Identity: llm.UsageIdentity(s.options.EncryptionKey, u.Email), Unlimited: !s.options.Hosted, Credential: encrypted, CredentialExpires: time.Now().Add(3 * time.Hour)})
 	if err != nil {
 		switch {
 		case errors.Is(err, store.ErrQuota):
@@ -357,6 +357,12 @@ func (s *Service) Finish(w http.ResponseWriter, r *http.Request) {
 // are NOT transient: a retry would fail identically, so we skip it.
 func isTransient(err error) bool {
 	if err == nil {
+		return false
+	}
+	category, _ := scoring.FailureDetails(err)
+	if category == "assessment_invalid" || category == "evidence_limit" {
+		// Model-controlled dimension names must not turn an unsupported response
+		// into a paid retry just by containing "503" or "timeout".
 		return false
 	}
 	if errors.Is(err, context.DeadlineExceeded) || errors.Is(err, context.Canceled) {

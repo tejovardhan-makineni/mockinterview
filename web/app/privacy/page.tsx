@@ -19,6 +19,12 @@ export default function Privacy() {
           provider. Your transcript, workspace and generated report are saved
           with your account so you can review them later.
         </p>
+        <h2>Account emails</h2>
+        <p>
+          The hosted service uses Resend to deliver email verification and
+          password-recovery messages. Your email address and a single-use
+          action link are sent to that service.
+        </p>
         <h2>Camera and microphone</h2>
         <p>
           Camera self-view is optional, starts off, and is shown locally in your

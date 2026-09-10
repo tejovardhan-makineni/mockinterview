@@ -79,10 +79,11 @@ func (s *Service) process(parent context.Context, job store.ScoringJob) {
 		}
 		pctx, stop := context.WithTimeout(context.Background(), 5*time.Second)
 		defer stop()
-		if fail := s.store.FailScoring(pctx, job.SessionID, job.Attempts, "Feedback could not be completed. Retry when your provider is available."); fail != nil {
+		category, message := scoring.FailureDetails(e)
+		if fail := s.store.FailScoring(pctx, job.SessionID, job.Attempts, message); fail != nil {
 			slog.Error("scoring failure status unavailable", "session", job.SessionID)
 		}
-		slog.Warn("scoring attempt failed", "session", job.SessionID)
+		slog.Warn("scoring attempt failed", "session", job.SessionID, "attempt", job.Attempts, "category", category)
 	}
 }
 func (s *Service) scoreJob(ctx context.Context, job store.ScoringJob) error {
@@ -191,7 +192,7 @@ func (s *Service) Usage(w http.ResponseWriter, r *http.Request) {
 		httpx.WriteProblem(w, 401, "account unavailable")
 		return
 	}
-	usage, e := s.store.Usage(r.Context(), uid, llm.UsageIdentity(s.options.EncryptionKey, u.Email), !s.options.Hosted || u.Role == "admin")
+	usage, e := s.store.Usage(r.Context(), uid, llm.UsageIdentity(s.options.EncryptionKey, u.Email), !s.options.Hosted)
 	if e != nil {
 		httpx.WriteProblem(w, 503, "Allowance temporarily unavailable")
 		return
