@@ -2,51 +2,66 @@
 
 ## Release status
 
-The redesigned public beta is **live** with **143 preview scenarios**. The
-September 10 policy/privacy update is deployed: explicit adult and current-policy
-acknowledgments, voice/Gemini-key declarations, resume deletion, clearer notices,
-and browser dependency/font licenses. The retired camera-analysis ingestion
-endpoint returns 410. Existing accounts retain history, export and deletion
-access while reviewing the current policies; none were automatically marked adult
-or accepted.
+The public beta is **live** with **143 preview scenarios**. The September 10
+feedback update adds a required six-question check-in after each new started and
+ended interview, before another interview can start. One question adapts to the
+subject. Every item allows an unrated answer; comments and transcript-inspection
+permission remain optional. Reports, history, recovery, export and deletion stay
+available. Old interviews and unused reservations have no retroactive backlog.
+
+Private `/admin/feedback/` metrics show full-window completion, distributions,
+rated/unrated counts and optional suggestions, with JSON/CSV aggregates. They
+require the current stored administrator role; owner access is still pending
+email verification and an authorized grant, as described below.
 
 | Deployed release field | Recorded value |
 |---|---|
-| API build source | `58280bab2d55c1047c7e388ba72c1ddefe51befe` |
-| Web build source | `061b56bc6b26ab33baf092a9679f123a60b92764` |
-| Production Cloud Run revision | `mockinterview-api-00041-cic` — 100% traffic |
-| API image digest | `sha256:d38fdc7583f67602994bc93f4541f731be1810d168bf50dceef3f1b6220af48e` |
-| Cloud Build | `31e8d60b-39fc-489f-b579-d925c97cca93` |
-| Production Firebase version | `b8a9451c163cb83d` |
-| Firebase hosting release | `1789031721533000` |
-| Firebase promotion time (UTC) | `2026-09-10T09:15:21.533Z` |
-| Public verification time (UTC) | `2026-09-10T09:17:02.886581Z` |
+| API and web build source | `13a7619ffa9583e8cfe1bfe88bf68c1284ddd759` |
+| Production Cloud Run revision | `mockinterview-api-00044-sib` — 100% traffic |
+| API image digest | `sha256:7c005eb8d5c900aafe2233b9ad98646c6bf1d05836ac2e2dc7dba3105cfdc114` |
+| Cloud Build | `a26db7c2-9964-482a-aa55-7a81bdd9a5cb` |
+| Production Firebase version | `4fde692b40426e74` |
+| Firebase hosting release | `1789057224552000` |
+| Firebase promotion time (UTC) | `2026-09-10T16:20:24.552Z` |
+| Public verification time (UTC) | `2026-09-10T16:20:56.728822Z` |
 
-The API source tree is identical in the API and web build commits. The web and
-Firebase configuration trees match the staging-tested `b6f5756` source; staging
-web version `11cdb49cee568add` targets the isolated staging API. Production version
-`b8a9451c163cb83d` targets the stable production API and was cloned from its tested
-preview without rebuilding. Documentation-only commits do not change these
-build-source identifiers.
+The tested immutable image was reused from staging revision
+`mockinterview-api-staging-00010-jup`. Staging web `282e8910af606b94` targets the
+isolated staging API. Production web `4fde692b40426e74` targets the stable
+production API and was cloned from `launch-production` without rebuilding.
+Both web exports used the recorded committed source; the web does not embed a
+Git SHA. Protected PR #22 merged as `adf2a8d` with an identical source tree.
+Documentation-only commits do not change these build-source identifiers.
 
-Public health, current policy enforcement, CORS, routes/security headers, license
-notices and the replacement font hash passed. Migration 0009 preserved existing
-application data; no hosted account or paid provider request was created for this
-update. The new revision's retention worker completed. See the
-[policy/privacy validation record](RELEASE-VALIDATION-2026-09-10.md) and the
-[initial real interview acceptance](RELEASE-VALIDATION-2026-09-09.md), which also
-records the recovered staging scoring failure with unknown original cause.
-Content rights/review, scoring calibration and the owner/legal decisions in the
-[legal assessment](LEGAL-READINESS-2026-09-10.md) remain open.
+Public health, current policy enforcement, CORS, routes/security headers,
+private-route authentication, license notices and the replacement font hash
+passed. Migration 0010 preserved existing application data and kept all legacy
+interviews exempt. The private application backup was actually restored and
+migrated locally before rollout. No production test account, provider request
+or email was created. Staging/local disposable feedback accounts were removed,
+deleted tokens were rejected and the production retention worker completed.
+See the [feedback release validation](FEEDBACK-RELEASE-2026-09-10.md),
+[questionnaire](BETA-FEEDBACK-QUESTIONNAIRE.md) and
+[metric definitions](FEEDBACK-METRICS.md).
 
-The prior rollback pair is API `mockinterview-api-00039-qam` and Firebase version
-`c8dee48c3e3cb3b9`. Rolling back removes the new policy safeguards; coordinate both
-artifacts and assess that consequence. The database migration is additive, so a
-routine binary rollback does not require restoring the shared SQL instance.
+The earlier [policy/privacy release](RELEASE-VALIDATION-2026-09-10.md)'s adult,
+voice, personal-key, resume-deletion and licensing controls remain in effect.
+Current terms/privacy version is `2026-09-10.1`; no existing account was
+automatically marked adult or accepted. The
+[initial real interview acceptance](RELEASE-VALIDATION-2026-09-09.md) remains
+separate evidence, including the recovered staging scoring failure with unknown
+original cause. Content rights/review, scoring calibration and the owner/legal
+decisions in the [legal assessment](LEGAL-READINESS-2026-09-10.md) remain open.
+
+The prior paired rollback target is API `mockinterview-api-00041-cic` and Firebase
+version `b8a9451c163cb83d`. Rolling back disables required check-ins and their
+current client notice/form; coordinate both artifacts. Preserve the additive
+migration and saved responses. A routine binary rollback does not require
+restoring the shared SQL instance.
 
 Use the [release and recovery runbook](RELEASE-RUNBOOK.md) as the authoritative
 procedure for staging, promotion, rollback and operational verification. Earlier
-audits describe the pre-implementation application.
+audits describe the application at their recorded dates.
 
 ## Current hosting targets
 
