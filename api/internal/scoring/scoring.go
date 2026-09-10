@@ -144,14 +144,14 @@ there is real evidence. Be specific and honest; never inflate.`,
 		MaxTokens:   8000,
 	})
 	if err != nil {
-		return Result{}, err
+		return Result{}, &failure{category: "provider_request", cause: err}
 	}
 	var r Result
 	if err := json.Unmarshal([]byte(out), &r); err != nil {
-		return Result{}, fmt.Errorf("parse score json: %w", err)
+		return Result{}, &failure{category: "assessment_invalid", cause: fmt.Errorf("parse score json: %w", err)}
 	}
 	if err := validateScores(q, &r, evidence); err != nil {
-		return Result{}, err
+		return Result{}, &failure{category: "assessment_invalid", cause: err}
 	}
 	r.Scored = true
 	e.applyWeightsAndOverall(q, &r)

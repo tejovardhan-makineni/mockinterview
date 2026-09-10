@@ -46,7 +46,7 @@ func encodeEvidence(turns []store.Turn, workspace string) (map[string]string, []
 		return nil, nil, err
 	}
 	if len(encoded) > maxEvidenceBytes {
-		return nil, nil, fmt.Errorf("interview evidence exceeds the supported 512 KiB assessment limit; saved work has not been truncated")
+		return nil, nil, &failure{category: "evidence_limit", cause: errEvidenceLimit}
 	}
 	return sources, encoded, nil
 }

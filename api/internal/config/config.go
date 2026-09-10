@@ -59,8 +59,8 @@ type Config struct {
 	CorpusDir string
 	PacksDir  string
 
-	// Tiers / cost control. Free users get FreeDailyLimit interviews/day; admin
-	// emails (developers/testers) are unlimited. Tiers are behind-the-scenes.
+	// Legacy constructor inputs, retained for compatibility. They do not grant
+	// roles or override the persisted hosted quotas.
 	AdminEmails    []string
 	FreeDailyLimit int
 }
