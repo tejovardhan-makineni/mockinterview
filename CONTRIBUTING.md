@@ -98,3 +98,10 @@ New interview domains should have appropriate subject wording in the versioned
 wording, response options or denominators. Preserve existing attempt versions;
 do not reinterpret earlier answers under a new scale. Use fictional survey
 fixtures and keep opinion ratings separate from measured interview performance.
+
+The optional `tool-comparison-v1` extension is versioned separately from the six
+required items. Preserve omitted-versus-null update semantics, neutral comparison
+choices and the distinction between No prior use and No comparison saved. Keep
+respondents’ tool names and explanations out of aggregate exports and public
+issues. Test old-client preservation, explicit clearing, Unicode limits and
+comparison-only suggestions when changing this extension.

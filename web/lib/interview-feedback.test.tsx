@@ -426,6 +426,51 @@ describe("administrator aggregates", () => {
     expect(document.body.textContent).toContain("Not rated");
     expect(document.body.textContent).toContain("Unable to judge: 1");
     expect(document.body.textContent).not.toContain("0.00");
+    expect(
+      document.querySelector('[aria-label^="Optional tool comparison"]'),
+    ).toBeNull();
+    expect(
+      Array.from(document.querySelectorAll("button")).some(
+        (b) => b.textContent === "Download comparison CSV",
+      ),
+    ).toBe(false);
+  });
+  it("shows optional comparison aggregates and their separate export only when returned", async () => {
+    vi.mocked(api.me).mockResolvedValue({
+      id: "synthetic-admin",
+      email: "admin@example.test",
+      role: "admin",
+    });
+    const comparison = {
+      instrument_version: "tool-comparison-v1" as const,
+      answered_count: 1,
+      skipped_count: 0,
+      prior_use: { yes: 1, no: 0, prefer_not_to_say: 0 },
+      preference: {
+        mockinterview_better: 1,
+        about_same: 0,
+        other_tools_better: 0,
+        unable_to_judge: 0,
+      },
+      compared_count: 1,
+      other_tools_better_rate: 0,
+    };
+    vi.mocked(api.getInterviewFeedbackMetrics).mockResolvedValue({
+      ...metrics,
+      comparison,
+      groups: metrics.groups.map((g) => ({ ...g, comparison })),
+    });
+    await act(async () => root.render(<FeedbackMetricsPage />));
+    expect(
+      document.querySelectorAll('[aria-label^="Optional tool comparison"]'),
+    ).toHaveLength(2);
+    expect(document.body.textContent).toContain("0 / 1 · 0%");
+    expect(document.body.textContent).toContain("including older responses");
+    expect(
+      Array.from(document.querySelectorAll("button")).some(
+        (b) => b.textContent === "Download comparison CSV",
+      ),
+    ).toBe(true);
   });
   it("shows no attempts rather than zero response rate when the eligible cohort is empty", async () => {
     vi.mocked(api.me).mockResolvedValue({

@@ -2,7 +2,16 @@
 import { useEffect, useId, useRef, useState } from "react";
 import Link from "next/link";
 import { api, IS_MOCK } from "@/lib/api";
-import type { InterviewFeedbackEnvelope } from "@/lib/features/feedback";
+import {
+  COMPARISON_VERSION,
+  ToolComparisonFields,
+  ToolComparisonSummary,
+  comparisonTooLong,
+} from "./ToolComparison";
+import type {
+  ToolComparison,
+  InterviewFeedbackEnvelope,
+} from "@/lib/features/feedback";
 import { completeFeedback } from "@/lib/interviewFeedback";
 import { errorMessage } from "@/lib/http";
 import { Button, ErrorNotice, Panel } from "./ui";
@@ -23,6 +32,7 @@ export function InterviewCheckIn({
     null,
   );
   const [answers, setAnswers] = useState<Record<string, string>>({});
+  const [comparison, setComparison] = useState<ToolComparison | null>(null);
   const [comment, setComment] = useState("");
   const [share, setShare] = useState(false);
   const [editing, setEditing] = useState(true);
@@ -33,6 +43,9 @@ export function InterviewCheckIn({
   const [reload, setReload] = useState(0);
   const commentLength = Array.from(comment).length;
   const commentTooLong = commentLength > 2000;
+  const supportsComparison =
+    envelope?.questionnaire.comparison_version === COMPARISON_VERSION;
+  const invalidComparison = supportsComparison && comparisonTooLong(comparison);
   const submitting = useRef(false);
   const prefix = useId();
   useEffect(() => {
@@ -45,6 +58,7 @@ export function InterviewCheckIn({
         onEligibilityChange?.(value.eligible);
         setAnswers(value.response?.answers ?? {});
         setComment(value.response?.comment ?? "");
+        setComparison(value.response?.comparison ?? null);
         setShare(value.response?.share_transcript ?? false);
         setEditing(!value.response);
         setDirty(false);
@@ -87,6 +101,7 @@ export function InterviewCheckIn({
       !envelope ||
       !completeFeedback(envelope, answers) ||
       commentTooLong ||
+      invalidComparison ||
       submitting.current
     )
       return;
@@ -100,6 +115,7 @@ export function InterviewCheckIn({
         answers,
         comment,
         share_transcript: share,
+        ...(supportsComparison ? { comparison } : {}),
       });
       if (!next.response)
         throw new Error(
@@ -108,6 +124,7 @@ export function InterviewCheckIn({
       setEnvelope(next);
       setAnswers(next.response.answers);
       setComment(next.response.comment ?? "");
+      setComparison(next.response.comparison ?? null);
       setShare(next.response.share_transcript ?? false);
       setDirty(false);
       setEditing(false);
@@ -213,6 +230,7 @@ export function InterviewCheckIn({
                 </div>
               ))}
             </dl>
+            {supportsComparison && <ToolComparisonSummary value={comparison} />}
             {comment && (
               <p className="mt-4 whitespace-pre-wrap break-words text-sm">
                 {comment}
@@ -277,6 +295,17 @@ export function InterviewCheckIn({
                 </div>
               </fieldset>
             ))}
+            {supportsComparison && (
+              <ToolComparisonFields
+                value={comparison}
+                disabled={busy}
+                onChange={(value) => {
+                  setComparison(value);
+                  setDirty(true);
+                  setSaved(false);
+                }}
+              />
+            )}
             <label className="block text-sm" htmlFor={prefix + "-comment"}>
               What should we improve first? (optional)
               <textarea
@@ -350,7 +379,10 @@ export function InterviewCheckIn({
               <Button
                 type="submit"
                 disabled={
-                  busy || commentTooLong || !completeFeedback(envelope, answers)
+                  busy ||
+                  commentTooLong ||
+                  invalidComparison ||
+                  !completeFeedback(envelope, answers)
                 }
               >
                 {busy
@@ -366,6 +398,7 @@ export function InterviewCheckIn({
                   onClick={() => {
                     setAnswers(envelope.response!.answers);
                     setComment(envelope.response!.comment ?? "");
+                    setComparison(envelope.response!.comparison ?? null);
                     setShare(envelope.response!.share_transcript ?? false);
                     setDirty(false);
                     setEditing(false);

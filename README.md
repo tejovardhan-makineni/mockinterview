@@ -144,7 +144,9 @@ they end, including unsuccessful attempts. Complete it before starting another
 interview. Existing history, reports, report retries, export and deletion remain
 available. Unstarted reservations and older interviews do not create a backlog.
 Every question accepts an unable-to-judge response; comments and transcript
-sharing remain optional. The check-in does not change your interview score.
+sharing remain optional. An optional comparison section asks which other
+interview tools you have tried, how this experience compares, and what worked
+better or worse. The check-in does not change your interview score.
 
 Questions cover ease of use, interviewer realism, subject-specific probing,
 challenge fit, report actionability and technical disruption. See the exact

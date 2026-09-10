@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"strings"
 	"time"
 	"unicode/utf8"
 
@@ -11,6 +12,38 @@ import (
 )
 
 const InterviewFeedbackVersion = "post-interview-v1"
+const ToolComparisonVersion = "tool-comparison-v1"
+
+type ToolComparison struct {
+	Version    string `json:"version"`
+	PriorUse   string `json:"prior_use"`
+	ToolNames  string `json:"tool_names"`
+	Preference string `json:"preference"`
+	Details    string `json:"details"`
+}
+
+func ValidateToolComparison(c *ToolComparison) error {
+	if c == nil {
+		return nil
+	}
+	if c.Version != ToolComparisonVersion || strings.ContainsRune(c.ToolNames, 0) || strings.ContainsRune(c.Details, 0) || !utf8.ValidString(c.ToolNames) || !utf8.ValidString(c.Details) || utf8.RuneCountInString(c.ToolNames) > 300 || utf8.RuneCountInString(c.Details) > 1000 {
+		return ErrInterviewFeedbackInvalid
+	}
+	switch c.PriorUse {
+	case "yes", "no", "prefer_not_to_say":
+	default:
+		return ErrInterviewFeedbackInvalid
+	}
+	switch c.Preference {
+	case "", "mockinterview_better", "about_same", "other_tools_better", "unable_to_judge":
+	default:
+		return ErrInterviewFeedbackInvalid
+	}
+	if c.PriorUse != "yes" && (c.ToolNames != "" || c.Preference != "" || c.Details != "") {
+		return ErrInterviewFeedbackInvalid
+	}
+	return nil
+}
 
 var ErrInterviewFeedbackRequired = errors.New("interview feedback required")
 var ErrInterviewFeedbackInvalid = errors.New("invalid interview feedback")
@@ -24,8 +57,11 @@ type InterviewFeedback struct {
 	Answers         map[string]string `json:"answers"`
 	Comment         string            `json:"comment"`
 	ShareTranscript bool              `json:"share_transcript"`
-	SubmittedAt     time.Time         `json:"submitted_at"`
-	UpdatedAt       time.Time         `json:"updated_at"`
+	Comparison      *ToolComparison   `json:"comparison"`
+	// ComparisonSet is write-only presence: omission preserves, explicit nil clears.
+	ComparisonSet bool      `json:"-"`
+	SubmittedAt   time.Time `json:"submitted_at"`
+	UpdatedAt     time.Time `json:"updated_at"`
 }
 
 type InterviewFeedbackRow struct {
@@ -53,6 +89,9 @@ func InterviewFeedbackEligible(s Session) bool {
 }
 
 func ValidateInterviewFeedback(f InterviewFeedback) error {
+	if err := ValidateToolComparison(f.Comparison); err != nil {
+		return err
+	}
 	if f.Version != InterviewFeedbackVersion || len(f.Answers) != len(InterviewFeedbackQuestionIDs) || !utf8.ValidString(f.Comment) || utf8.RuneCountInString(f.Comment) > 2000 {
 		return ErrInterviewFeedbackInvalid
 	}
@@ -90,11 +129,11 @@ func (s *Store) PendingInterviewFeedback(ctx context.Context, uid string) ([]Ses
 
 func scanInterviewFeedback(row pgx.Row) (InterviewFeedback, error) {
 	var f InterviewFeedback
-	err := row.Scan(&f.SessionID, &f.UserID, &f.Version, &f.Answers, &f.Comment, &f.ShareTranscript, &f.SubmittedAt, &f.UpdatedAt)
+	err := row.Scan(&f.SessionID, &f.UserID, &f.Version, &f.Answers, &f.Comment, &f.ShareTranscript, &f.SubmittedAt, &f.UpdatedAt, &f.Comparison)
 	return f, err
 }
 
-const interviewFeedbackSelect = `SELECT session_id,user_id,version,answers,comment,share_transcript,submitted_at,updated_at FROM interview_feedback`
+const interviewFeedbackSelect = `SELECT session_id,user_id,version,answers,comment,share_transcript,submitted_at,updated_at,comparison FROM interview_feedback`
 
 func (s *Store) GetInterviewFeedback(ctx context.Context, uid, id string) (*InterviewFeedback, error) {
 	var owner string
@@ -114,6 +153,9 @@ func (s *Store) GetInterviewFeedback(ctx context.Context, uid, id string) (*Inte
 }
 
 func (s *Store) PutInterviewFeedback(ctx context.Context, f InterviewFeedback) (InterviewFeedback, error) {
+	if !f.ComparisonSet {
+		f.Comparison = nil
+	}
 	if e := ValidateInterviewFeedback(f); e != nil {
 		return InterviewFeedback{}, e
 	}
@@ -130,10 +172,15 @@ func (s *Store) PutInterviewFeedback(ctx context.Context, f InterviewFeedback) (
 		return InterviewFeedback{}, ErrInterviewFeedbackInvalid
 	}
 	answers, _ := json.Marshal(f.Answers)
-	f, e = scanInterviewFeedback(tx.QueryRow(ctx, `INSERT INTO interview_feedback(session_id,user_id,version,answers,comment,share_transcript) VALUES($1,$2,$3,$4,$5,$6)
+	var comparison any
+	if f.Comparison != nil {
+		comparison, _ = json.Marshal(f.Comparison)
+	}
+	f, e = scanInterviewFeedback(tx.QueryRow(ctx, `INSERT INTO interview_feedback(session_id,user_id,version,answers,comment,share_transcript,comparison) VALUES($1,$2,$3,$4,$5,$6,CASE WHEN $8 THEN $7::jsonb ELSE NULL END)
  ON CONFLICT(session_id) DO UPDATE SET answers=EXCLUDED.answers,comment=EXCLUDED.comment,share_transcript=EXCLUDED.share_transcript,
- updated_at=CASE WHEN (interview_feedback.answers,interview_feedback.comment,interview_feedback.share_transcript) IS DISTINCT FROM (EXCLUDED.answers,EXCLUDED.comment,EXCLUDED.share_transcript) THEN now() ELSE interview_feedback.updated_at END
- RETURNING session_id,user_id,version,answers,comment,share_transcript,submitted_at,updated_at`, f.SessionID, f.UserID, f.Version, answers, f.Comment, f.ShareTranscript))
+ comparison=CASE WHEN $8 THEN EXCLUDED.comparison ELSE interview_feedback.comparison END,
+ updated_at=CASE WHEN (interview_feedback.answers,interview_feedback.comment,interview_feedback.share_transcript,interview_feedback.comparison) IS DISTINCT FROM (EXCLUDED.answers,EXCLUDED.comment,EXCLUDED.share_transcript,CASE WHEN $8 THEN EXCLUDED.comparison ELSE interview_feedback.comparison END) THEN now() ELSE interview_feedback.updated_at END
+ RETURNING session_id,user_id,version,answers,comment,share_transcript,submitted_at,updated_at,comparison`, f.SessionID, f.UserID, f.Version, answers, f.Comment, f.ShareTranscript, comparison, f.ComparisonSet))
 	if e != nil {
 		return InterviewFeedback{}, e
 	}
@@ -149,7 +196,7 @@ func (s *Store) InterviewFeedbackWindow(ctx context.Context, from, to time.Time)
 	rows, err := s.Pool.Query(ctx, `SELECT s.question_id,s.mode,s.provider,
  jsonb_build_object('target_level',s.config->>'target_level'),
  jsonb_build_object('title',s.question_snapshot->>'title','domain',s.question_snapshot->>'domain','format_id',s.question_snapshot->>'format_id'),
- CASE WHEN f.session_id IS NULL THEN NULL ELSE jsonb_build_object('version',f.version,'answers',f.answers) END
+ CASE WHEN f.session_id IS NULL THEN NULL ELSE jsonb_build_object('version',f.version,'answers',f.answers,'comparison',CASE WHEN f.comparison IS NULL THEN NULL ELSE jsonb_build_object('version',f.comparison->>'version','prior_use',f.comparison->>'prior_use','preference',f.comparison->>'preference') END) END
  FROM sessions s LEFT JOIN interview_feedback f ON f.session_id=s.id
  WHERE s.started_at>=$1 AND s.started_at<$2 AND `+feedbackEligibleSQL+` ORDER BY s.started_at,s.id`, from, to)
 	if err != nil {
@@ -191,9 +238,9 @@ func (s *Store) InterviewFeedbackComments(ctx context.Context, limit int, before
 	}
 	rows, e := s.Pool.Query(ctx, `SELECT s.id,s.question_id,s.mode,s.provider,s.status,
  jsonb_build_object('title',s.question_snapshot->>'title','domain',s.question_snapshot->>'domain','format_id',s.question_snapshot->>'format_id'),
- f.version,f.comment,f.share_transcript,f.submitted_at,f.updated_at
+ f.version,f.comment,f.share_transcript,f.submitted_at,f.updated_at,f.comparison
  FROM interview_feedback f JOIN sessions s ON s.id=f.session_id
- WHERE f.comment<>'' AND ($2::timestamptz IS NULL OR (f.updated_at,f.session_id)<($2,$3::uuid))
+ WHERE (f.comment<>'' OR f.comparison IS NOT NULL) AND ($2::timestamptz IS NULL OR (f.updated_at,f.session_id)<($2,$3::uuid))
  ORDER BY f.updated_at DESC,f.session_id DESC LIMIT $1`, limit+1, at, id)
 	if e != nil {
 		return nil, false, e
@@ -202,7 +249,7 @@ func (s *Store) InterviewFeedbackComments(ctx context.Context, limit int, before
 	out := []InterviewFeedbackRow{}
 	for rows.Next() {
 		r := InterviewFeedbackRow{Response: &InterviewFeedback{}}
-		if e = rows.Scan(&r.Session.ID, &r.Session.QuestionID, &r.Session.Mode, &r.Session.Provider, &r.Session.Status, &r.Session.QuestionSnapshot, &r.Response.Version, &r.Response.Comment, &r.Response.ShareTranscript, &r.Response.SubmittedAt, &r.Response.UpdatedAt); e != nil {
+		if e = rows.Scan(&r.Session.ID, &r.Session.QuestionID, &r.Session.Mode, &r.Session.Provider, &r.Session.Status, &r.Session.QuestionSnapshot, &r.Response.Version, &r.Response.Comment, &r.Response.ShareTranscript, &r.Response.SubmittedAt, &r.Response.UpdatedAt, &r.Response.Comparison); e != nil {
 			return nil, false, e
 		}
 		out = append(out, r)

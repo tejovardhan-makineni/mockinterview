@@ -17,18 +17,19 @@ import (
 var surveyCursorID = regexp.MustCompile(`^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$`)
 
 type commentItem struct {
-	SessionID       string    `json:"session_id"`
-	Version         string    `json:"version"`
-	QuestionTitle   string    `json:"question_title"`
-	SubjectKey      string    `json:"subject_key"`
-	SubjectLabel    string    `json:"subject_label"`
-	Mode            string    `json:"mode"`
-	Provider        string    `json:"provider"`
-	Status          string    `json:"status"`
-	Comment         string    `json:"comment"`
-	ShareTranscript bool      `json:"share_transcript"`
-	SubmittedAt     time.Time `json:"submitted_at"`
-	UpdatedAt       time.Time `json:"updated_at"`
+	SessionID       string                `json:"session_id"`
+	Version         string                `json:"version"`
+	QuestionTitle   string                `json:"question_title"`
+	SubjectKey      string                `json:"subject_key"`
+	SubjectLabel    string                `json:"subject_label"`
+	Mode            string                `json:"mode"`
+	Provider        string                `json:"provider"`
+	Status          string                `json:"status"`
+	Comment         string                `json:"comment"`
+	ShareTranscript bool                  `json:"share_transcript"`
+	Comparison      *store.ToolComparison `json:"comparison"`
+	SubmittedAt     time.Time             `json:"submitted_at"`
+	UpdatedAt       time.Time             `json:"updated_at"`
 }
 
 func (s *Service) InterviewComments(w http.ResponseWriter, r *http.Request) {
@@ -72,7 +73,7 @@ func (s *Service) InterviewComments(w http.ResponseWriter, r *http.Request) {
 		f := row.Response
 		a := row.Session
 		sub := surveySubject(a)
-		items = append(items, commentItem{a.ID, f.Version, surveyMetadata(a).Title, sub.key, sub.label, a.Mode, a.Provider, a.Status, f.Comment, f.ShareTranscript, f.SubmittedAt, f.UpdatedAt})
+		items = append(items, commentItem{a.ID, f.Version, surveyMetadata(a).Title, sub.key, sub.label, a.Mode, a.Provider, a.Status, f.Comment, f.ShareTranscript, f.Comparison, f.SubmittedAt, f.UpdatedAt})
 	}
 	if more && len(rows) > 0 {
 		last := rows[len(rows)-1]
