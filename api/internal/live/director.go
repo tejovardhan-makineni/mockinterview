@@ -47,6 +47,10 @@ var phaseObjective = map[string]string{
 // all share the same rigor expectations. Keyed to each such domain below.
 const engineeringGuidance = "Professional engineering interview: have the candidate state assumptions and the governing principles/equations FIRST, set the problem up with a clear sketch (free-body / circuit / system diagram) before computing, then work it QUANTITATIVELY with correct units and sanity-checked magnitudes. Probe where each number comes from, the design constraints and safety factors, and the trade-offs behind their choices. Don't accept a plugged-in formula without the assumptions behind it; let them reason out loud."
 
+const behavioralGuidance = "Conversational behavioral interview: invite one specific situation related to the selected topic, then listen to the story. STAR is a private evidence guide, never a checklist to read aloud or a required answer order. Concrete personal actions satisfy ownership; do not ask for those actions again merely to seek more detail. An outcome satisfies the result dimension, including a meaningful qualitative outcome. Follow up only on a material missing element. When the story is complete, a useful new question explores a distinct judgment or competency rather than requesting actions, results or reflection already supplied. Completing one story does not end the interview while there is useful time for a new question. Do not demand invented numbers, a replacement example after an exhausted gap, or particular pronouns. Apply the DELIVERY DECISION to choose the next turn."
+
+const mbaGuidance = "MBA admissions conversation about career motivation, goals and program fit. Follow the candidate's reasoning one topic at a time; this is not a mandatory STAR story sequence."
+
 // domainGuidance gives per-domain expectations + pacing so each interview type
 // is run distinctly, not as a generic interview. Keys are the corpus `domain`
 // strings (see internal/corpus). director_test.go asserts every corpus domain is
@@ -57,8 +61,8 @@ var domainGuidance = map[string]string{
 	"system_design":    "Let them drive: requirements → back-of-envelope estimates → high-level design → data model/API → deep dives (bottlenecks, scaling, failure, CDC, caching) → tradeoffs. Give them long stretches to draw on the whiteboard. Don't rush; go deep on one or two areas rather than skimming everything.",
 	"ml_system_design": "As system design, but center it on ML infra: data/feature pipeline, training vs serving, evaluation, drift/monitoring, feedback loops. Probe eval and drift specifically.",
 	"low_level_design": "Object-oriented design: expect classes, responsibilities, relationships, and design patterns. Probe SOLID and extensibility ('how would you add feature X?'). Let them sketch a class diagram.",
-	"coding":           "Pace: clarify the problem + edge cases → discuss approach and complexity BEFORE coding → have them write it in the editor → then walk time/space complexity and test edge cases. Nudge to a better approach with questions if they're stuck; never give the solution. ONCE THEY'VE WRITTEN CODE, REVIEW IT CLOSELY — read it line by line for real bugs: missing/incorrect return statements, off-by-one and boundary errors, unhandled edge cases (empty input, nulls, overflow), wrong data structure, or complexity worse than they claimed. For each real mistake you find, do NOT point it out or fix it — ask a targeted follow-up that leads them to it (e.g. 'walk me through what this returns for an empty list', 'trace this line by line for input [2, 2, 3]', or 'what does the function hand back on that branch?') and see if they catch and fix it. Don't move on from buggy code without probing at least the significant bugs.",
-	"behavioral":       "Conversational STAR. Push relentlessly for the candidate's OWN actions ('I' not 'we') and a MEASURABLE result. Follow up on vague claims. Keep it flowing like a real conversation.",
+	"coding":           "Pace: clarify the problem → discuss approach → implement → verify correctness and complexity. These are separate conversation steps, not a checklist to ask at once. Let the candidate work and self-correct. Review the current code for real correctness or complexity issues, then choose one significant uncertainty to probe with a neutral request to trace or test their code. Do not reveal the bug, its location, the fix, or a better algorithm in simulation mode. If the code has changed, reassess it before asking; never repeat a stale bug probe after a valid correction. If they remain stuck, apply the shared follow-up limit and move to another useful assessment area.",
+	"behavioral":       behavioralGuidance,
 	// Medicine.
 	"clinical_reasoning": "Clinical reasoning: structured history → differential (life-threatening causes FIRST) → targeted investigations → management → safety-netting. Do not accept jumping to treatment without a differential.",
 	"medical_residency":  "MMI-style: assess ethical reasoning, empathy, communication, and structure. Present the station scenario and probe how they'd act and why; look for balanced perspectives.",
@@ -121,10 +125,10 @@ var sectionTitle = map[string]string{
 var sectionGuidance = map[string]string{
 	"intro":      "Open warmly: greet the candidate, say your name, ONE bit of genuine small talk, and let them give a short self-introduction. Keep it light and human — no interview question yet. React naturally to what they say.",
 	"resume":     "Deep-dive ONE project they're genuinely proud of. Probe their INDIVIDUAL contribution ('what was YOUR part, specifically?'), the key decisions they made and why, and the tradeoffs they weighed. Ask 1-2 varied, specific follow-ups drawn from THEIR answer. VARY your questions every run — do not fall back on the same stock resume questions; make each one fit what they actually said. If their answer is thin, evasive, or a joke, ask ONE genuine follow-up to draw out the real story before moving on.",
-	"coding":     "Watch them code. Do NOT jump on every mistake — sometimes wait and see if they catch it themselves (strong signal), sometimes point out a small syntax slip, sometimes just let a minor thing ride. As code appears, ask about time/space complexity and edge cases (empty input, nulls, boundaries, overflow). Follow up on the data structures and approach they chose ('why a heap there?'). When you spot a real bug, probe it with ONE leading question that points at the problem area WITHOUT revealing the fix ('walk me through what this returns for an empty list').",
-	"lld":        "Whenever the candidate introduces a COMPONENT (a class, an interface, a design pattern, a relationship), ask 1-2 targeted follow-ups on THAT component: why that choice, the tradeoffs, how it fails or gets abused, and what the alternatives were. Deep-dive one or two areas properly (SOLID, extensibility — 'how would you add feature X?') rather than skimming everything.",
-	"design":     "Let them drive requirements → estimates → high-level design → data model/API → deep dives. Whenever they introduce a COMPONENT (a queue, cache, database, load balancer, index, replica), ask 1-2 targeted follow-ups on THAT component: why it, the tradeoffs, its failure modes, and the alternatives. Go DEEP on one or two areas (bottlenecks, scaling, consistency, failure) rather than skimming the whole diagram.",
-	"behavioral": "Conversational STAR. Push relentlessly for the candidate's OWN actions ('I', not 'we') and a MEASURABLE result. Decompose multi-part prompts into one question at a time; follow up on vague claims. Keep it flowing like a real conversation.",
+	"coding":     "Let the candidate explain their approach and work in the editor. Review their latest code, allowing self-correction before selecting one significant correctness or complexity issue. Ask one neutral testing or reasoning question without disclosing a bug or fix in simulation mode. Credit a valid correction immediately; do not repeat resolved probes. Respect the shared follow-up limit if progress stops.",
+	"lld":        "Let the candidate explain classes, interfaces and relationships. Select one or two important design choices for depth; a newly mentioned component is not automatically a reason to interrupt or start another probe sequence. Ask about one unresolved aspect of a specific choice at a time, such as responsibility or extensibility. Credit explanations already given and move on when there is enough evidence or the gap's follow-ups are exhausted.",
+	"design":     "Let them drive requirements → estimates → high-level design → data model/API → deep dives, with room to draw. Select one or two important choices for depth from what they actually propose. If they mention a queue, cache and database together, choose one high-value unresolved aspect rather than probing every component. Ask one focused question, credit reasoning already given, and move on when there is enough evidence or the gap's follow-ups are exhausted.",
+	"behavioral": behavioralGuidance,
 	"clinical":   "Structured clinical reasoning: history → differential (life-threatening causes FIRST) → targeted investigations → management → safety-netting, or MMI-style ethical/communication probing for a station scenario. Do not accept jumping to treatment without a differential; probe the 'why' behind each step.",
 	"case":       "Expect an upfront STRUCTURE/framework before diving in, a clear hypothesis, and QUANTITATIVE reasoning. Provide case data (numbers) when they ask. Push back on hand-waving with 'how would you structure this?' and make them show the math.",
 	"core":       "Run the main question in a domain-appropriate, structured way. Let the candidate drive; probe their reasoning, choices, and tradeoffs one question at a time, and go deep on the highest-signal areas rather than skimming.",
@@ -178,6 +182,9 @@ func SectionPlan(q corpus.Question, hasResume bool, roundFocus string) []Section
 	}
 	ck := coreKind(q.Domain)
 	core := mk("core", ck)
+	if q.ID == "mba-admissions" {
+		core.Kind, core.Title, core.Guidance = "core", "MBA admissions", mbaGuidance
+	}
 	if rf := strings.TrimSpace(roundFocus); rf != "" {
 		core.Guidance = strings.TrimSpace(core.Guidance) + " EXTRA EMPHASIS FOR THIS ROUND: " + rf
 	}
@@ -315,7 +322,7 @@ func NextTurn(ctx context.Context, ai llm.Client, model, system string, history 
 	if len(history) == 0 {
 		// Gemini requires at least one content turn even with a system prompt.
 		// Keep kickoff aligned with the authored format instead of adding rapport.
-		history = []llm.Message{{Role: "user", Text: "Begin the interview using its authored opening and active stage. Keep the introduction brief, ask one question and wait."}}
+		history = []llm.Message{{Role: "user", Text: openingInstruction}}
 	}
 	return ai.Generate(ctx, llm.GenerateRequest{
 		Purpose:     llm.PurposeDirector,
