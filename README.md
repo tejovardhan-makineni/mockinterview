@@ -4,12 +4,13 @@ Practice interviews with a clearly identified AI interviewer, keep your work and
 feedback, and contribute new interview formats. The hosted application is at
 [mockinterview.live](https://mockinterview.live).
 
-**The redesigned public beta is live.** The API and website were promoted on
-September 10, 2026. Production signup, verification, a real AI text interview,
-saved evidence/report, history, feedback and quota checks passed. See
-[initial interview acceptance](docs/RELEASE-VALIDATION-2026-09-09.md) and the
-[policy/privacy release record](docs/RELEASE-VALIDATION-2026-09-10.md) for exact
-deployed versions, completed checks and remaining limits.
+**The public beta is live.** The microphone readiness fix and unlimited tester
+access were deployed and verified on September 13, 2026. See the
+[September 13 release record](docs/MICROPHONE-TESTERS-RELEASE-2026-09-13.md)
+for artifact versions, validation and rollback. Earlier production signup,
+verification, real AI text interview and saved-report acceptance remain documented
+in the [initial interview acceptance](docs/RELEASE-VALIDATION-2026-09-09.md) and
+[policy/privacy release record](docs/RELEASE-VALIDATION-2026-09-10.md).
 
 Choose a profession, format, target level and duration. Optional controls adjust
 challenge, interview style and simulation versus coaching. A device check leads

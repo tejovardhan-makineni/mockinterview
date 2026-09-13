@@ -2,82 +2,73 @@
 
 ## Release status
 
-The public beta is **live** with **143 preview scenarios**. New started and ended
-interviews require the six-question check-in before another interview can start.
-One question adapts to the subject, and every item allows an unrated answer.
-Reports, history, recovery, export and deletion stay available. Old interviews
-and unused reservations have no retroactive backlog.
+The public beta is **live** with **143 preview scenarios**. The microphone and
+unlimited-tester update was **deployed and verified** on 13 September 2026 at
+04:56 UTC.
 
-The latest update adds an **optional comparison with other interview tools**.
-Users can skip it, decline to answer, edit it or clear it. Its separate
-`tool-comparison-v1` instrument leaves the required `post-interview-v1` questions
-and interview allowance unchanged. Tool names and comparison details are optional;
-comments and transcript-inspection permission also remain optional.
+The update accepts a live microphone as ready, shows detected sound separately,
+makes the speaker test optional and retains the voice-processing acknowledgment.
+Verified approved testers
+receive unlimited hosted interview starts and ancillary AI requests; their
+post-interview check-ins are optional. Standard accounts retain the seven-day
+funded allowance, daily start cooldown and required six-question check-in.
+Tester access is separate from administrator privileges. See the
+[tester registry and management API](TESTER-ACCESS.md).
 
-Private `/admin/feedback/` metrics show full-window completion, distributions,
-rated/unrated counts and comparison summaries, with JSON/CSV aggregates. Optional
-suggestions and comparison responses are available separately; comparison free
-text is excluded from aggregates. These endpoints require the current stored
-administrator role; owner access is still pending email verification and an
-authorized grant, as described below.
-
-| Deployed release field | Recorded value |
+| Release field | Recorded value |
 |---|---|
-| API and web build source | `7446dc6280bfe56ecf9f27c257b110c1359e970e` |
-| Production Cloud Run revision | `mockinterview-api-00046-riq` — 100% traffic |
-| API image digest | `sha256:8456cbb4e16592b82d605da4d7affb0c936a9855c8f7bfe79ba42c9061290647` |
-| Cloud Build | `f15d144d-5437-487b-a15e-91490d3f4467` |
-| Production Firebase version | `2a28ff1f89e667da` |
-| Firebase hosting release | `1789059111801000` |
-| Firebase promotion time (UTC) | `2026-09-10T16:51:51.801Z` |
-| Public verification time (UTC) | `2026-09-10T16:52:34.462960Z` |
+| API and web build source | `f76e2435b4df8f61063627411a5426cca4dfaad9` |
+| Production Cloud Run revision | `mockinterview-api-00048-lad` — 100% traffic |
+| API image digest | `sha256:08c379933870dcee4e8e7411bdf4bee670c9d58989af74eede9afa6dfad129d4` |
+| Cloud Build | `5ace0534-8d25-4e28-b189-6be82c63a4f0` |
+| Production Firebase version | `0eff85b22b1957a1` |
+| Firebase live release | `1789275315170000` |
+| Web promotion (UTC) | `2026-09-13T04:55:15.170Z` |
+| Public verification (UTC) | `2026-09-13T04:56:49.483794Z` |
 
-The tested immutable image was reused from staging revision
-`mockinterview-api-staging-00012-xar`. Staging web `02b1df5072b02b3d` targets the
-isolated staging API. Production web `2a28ff1f89e667da` targets the stable
-production API and was cloned from `launch-production` without rebuilding.
-Both web exports used the recorded committed source; the web does not embed a
-Git SHA. Protected PR #24 merged as `8811591` with an identical source tree.
-Documentation-only commits do not change these build-source identifiers.
+The immutable image was tested as staging revision
+`mockinterview-api-staging-00014-wup`; staging web `3f0df8f81a269272` targets the
+isolated staging API. Production-target web `0eff85b22b1957a1` targets the stable
+production API and was promoted through the Hosting release API without rebuilding.
+Protected PR #26 merged as
+`42565aaa11ccee26b4321363269feb0523ba67f1` with an identical source tree to the build
+commit. Documentation-only commits do not change these artifact identifiers.
 
-The final production verification used only GET/OPTIONS and read-only database
-queries. Health, current policies, CORS, routes/security headers, private-route
-authentication, exact preview/live assets, license notices and the replacement
-font hash passed. Migration 0011 adds nullable comparison JSONB with validated
-constraints and a suggestions index. It preserves existing responses on omitted
-updates from older clients/binaries; explicit null clears the comparison.
-Existing production data remained 15 users, 38 sessions, 27 reports and 821
-transcript turns, with zero feedback/comparison records, active sessions or
-pending jobs; all 38 legacy interviews remain exempt. The actual private
-application backup was restored and migrated locally before rollout. No
-production account creation, provider request or email was requested. The new
-revision's retention worker completed at `2026-09-10T16:48:46.197913179Z`.
-See the [comparison release validation](TOOL-COMPARISON-RELEASE-2026-09-10.md),
-[questionnaire](BETA-FEEDBACK-QUESTIONNAIRE.md) and
-[metric definitions](FEEDBACK-METRICS.md).
+All 110 web tests, the full isolated PostgreSQL race suite, lint, TypeScript,
+Go vet/build, corpus validation and required CI/CodeQL checks passed. The actual
+application backup was restored and migrated locally before rollout; migration
+0012 preserved 16 users, 38 sessions, 27 reports and 821 transcript turns. Staging
+verified tester add/remove/re-add and access guards through the real API, plus an
+authenticated browser microphone check using synthetic Web Audio input. No paid
+provider requests or email sends were made for these checks.
 
-The [six-question release](FEEDBACK-RELEASE-2026-09-10.md) and earlier
-[policy/privacy release](RELEASE-VALIDATION-2026-09-10.md) remain historical
-acceptance evidence. Their adult, voice, personal-key, resume-deletion and
-licensing controls remain in effect. Current terms/privacy version is
-`2026-09-10.1`; no existing account was automatically marked adult or accepted.
-The [initial real interview acceptance](RELEASE-VALIDATION-2026-09-09.md) remains
-separate evidence, including the recovered staging scoring failure with unknown
-original cause. This comparison release did not repeat paid provider acceptance.
-Content rights/review, scoring calibration and the owner/legal decisions in the
+Final public checks verified API traffic/source, CORS, private tester-management
+authentication and exact preview/live HTML and setup JavaScript identity.
+Production history counts remained unchanged, with zero pending jobs. Two
+requested tester addresses were added: one verified account has active access;
+one awaits email verification and policy acknowledgment. Neither was made an
+administrator. Staging fixtures were removed and its two baseline usage markers
+preserved.
+
+See the [microphone and tester release record](MICROPHONE-TESTERS-RELEASE-2026-09-13.md)
+for artifacts, backup evidence and acceptance limits. Existing optional comparison,
+report/history/export/deletion and privacy controls remain available. Current
+terms/privacy version is `2026-09-10.1`; tester membership does not verify accounts
+or accept policies. The [comparison release](TOOL-COMPARISON-RELEASE-2026-09-10.md),
+[six-question release](FEEDBACK-RELEASE-2026-09-10.md) and
+[initial real interview acceptance](RELEASE-VALIDATION-2026-09-09.md) remain historical
+evidence. Content review, scoring calibration and the owner/legal decisions in the
 [legal assessment](LEGAL-READINESS-2026-09-10.md) remain open.
 
-The prior paired rollback target is API `mockinterview-api-00044-sib` and Firebase
-version `4fde692b40426e74`. Rolling back disables the optional comparison while
-retaining the six required questions and existing interview gate; coordinate
-both artifacts. Preserve additive migration 0011 and saved comparison data.
-Older binary writes preserve that column. A routine binary rollback does not
-require restoring the shared SQL instance. Older release documents retain their
-historical rollback targets; use this current pair for this release.
+The paired rollback target for this update is API `mockinterview-api-00046-riq`
+and Firebase version `2a28ff1f89e667da`. Reverting both restores the prior microphone
+flow and applies the standard hosted quota/check-in gate to testers again. Keep
+additive migration 0012 and saved tester entries; a routine binary rollback does
+not require restoring the shared SQL instance. Older release documents retain
+their historical rollback pairs.
 
 Use the [release and recovery runbook](RELEASE-RUNBOOK.md) as the authoritative
-procedure for staging, promotion, rollback and operational verification. Earlier
-audits describe the application at their recorded dates.
+procedure for staging, promotion, rollback and operational verification.
 
 ## Current hosting targets
 
