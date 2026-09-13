@@ -45,10 +45,11 @@ export default function Contribute() {
         <div>
           <h2 className="text-2xl font-medium">Make room for more practice.</h2>
           <p className="mt-3 text-sm text-[var(--color-muted)]">
-            Hosted access includes one funded interview every seven days. Using
-            your own key is limited to one hosted interview per 24 hours. Run
-            your own copy for more practice, subject to your model provider’s
-            limits and charges.
+            Standard hosted access includes one funded interview every seven
+            days and one hosted start per 24 hours across funding modes.
+            Approved testers have unlimited interview starts. Run your own copy
+            for more practice, subject to your model provider’s limits and
+            charges.
           </p>
           <Button href={SOURCE_URL + "#run-locally"} className="mt-5">
             Follow the local setup guide ↗

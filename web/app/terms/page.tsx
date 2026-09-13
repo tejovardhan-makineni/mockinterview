@@ -65,11 +65,13 @@ export default function Terms() {
         </p>
         <h2>Hosted access and model costs</h2>
         <p>
-          One platform-funded attempt is available per rolling seven days, with
-          a shared limit of one hosted attempt per rolling 24 hours across
-          funding modes. Availability also depends on service capacity. Setup
-          shows eligibility and next-start times. Reconnecting or retrying a
-          report stays with the original attempt. Deletion does not reset the
+          Standard access includes one platform-funded attempt per rolling seven
+          days, with a shared limit of one hosted attempt per rolling 24 hours
+          across funding modes. Approved testers are exempt from these
+          allowances while tester access is enabled; one active interview per
+          account still applies. Availability also depends on service capacity.
+          Setup shows eligibility and next-start times. Reconnecting or retrying
+          a report stays with the original attempt. Deletion does not reset the
           allowance. You can run the open-source project locally for more
           practice, subject to provider costs and terms.
         </p>
@@ -86,11 +88,12 @@ export default function Terms() {
         <p>
           New interview attempts include a required product-feedback check-in
           after an interview has started and ended, including unsuccessful
-          attempts. Complete it before starting another interview. Choose the
-          answer that reflects your experience; an unable-to-judge response is
-          valid. Older attempts and reservations that never started do not
-          create a feedback requirement. Your saved reports, history, export,
-          deletion and report-retry controls remain available.
+          attempts. Complete it before starting another interview; this check-in
+          is optional for approved testers. Choose the answer that reflects your
+          experience; an unable-to-judge response is valid. Older attempts and
+          reservations that never started do not create a feedback requirement.
+          Your saved reports, history, export, deletion and report-retry
+          controls remain available.
         </p>
         <p>
           Comments and permission to inspect a transcript are optional. Your

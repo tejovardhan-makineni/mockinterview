@@ -10,6 +10,7 @@ import (
 	"context"
 	"encoding/json"
 	"sort"
+	"strings"
 	"sync"
 	"time"
 
@@ -17,6 +18,8 @@ import (
 )
 
 type sessionRec struct {
+	localUnlimited    bool
+	globalDailyLimit  int
 	artifact          store.Workspace
 	owner             string
 	lease             time.Time
@@ -48,6 +51,7 @@ var _ store.Datastore = (*Mem)(nil)
 
 // Mem is a thread-safe in-memory Repo. Construct with New().
 type Mem struct {
+	testers           map[string]store.Tester
 	interviewFeedback map[string]store.InterviewFeedback
 	runtimeUsage      []usageRec
 	authActions       map[string]authAction
@@ -165,6 +169,9 @@ func (m *Mem) DeleteUser(_ context.Context, userID string) error {
 	defer m.mu.Unlock()
 	if u, ok := m.users[userID]; ok {
 		delete(m.byEmail, u.Email)
+		if u.EmailVerified {
+			delete(m.testers, strings.ToLower(strings.TrimSpace(u.Email)))
+		}
 	}
 	retained := m.feedback[:0]
 	for _, item := range m.feedback {

@@ -134,7 +134,10 @@ The host-run API/web path and real PostgreSQL checks were exercised. Compose
 configuration validates, but the complete container profile has not been booted
 in the release validation environment. Local practice remains unlimited; hosted
 administrators use the same seven-day funded and 24-hour overall start allowance
-as other users. Resuming and retrying feedback preserve the original attempt.
+as other users unless separately granted tester access. Resuming and retrying
+feedback preserve the original attempt. The [tester registry and management API](TESTER-ACCESS.md)
+provide unlimited hosted interview starts by verified email without granting an
+administrator role. Tester check-ins are optional.
 
 ## Release controls
 
@@ -182,7 +185,8 @@ fixed category/route diagnostics without raw errors, account identity or content
 verification. An authorized operator can then grant the stored admin role;
 verification alone does not grant it. No admin role or verification bypass was
 applied during launch. This affects the owner's feedback-triage access, not public
-beta availability. The normal hosted interview allowance still applies.
+beta availability. Administrator privileges and tester access are separate;
+granting one does not grant the other.
 
 ## Health and recovery
 

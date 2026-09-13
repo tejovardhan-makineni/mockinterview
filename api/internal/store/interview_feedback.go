@@ -111,7 +111,7 @@ func ValidateInterviewFeedback(f InterviewFeedback) error {
 const feedbackEligibleSQL = `feedback_version<>'' AND started_at IS NOT NULL AND status IN ('scoring','feedback_failed','complete','abandoned','expired')`
 
 func (s *Store) PendingInterviewFeedback(ctx context.Context, uid string) ([]Session, error) {
-	rows, err := s.Pool.Query(ctx, sessionSelect+` WHERE user_id=$1 AND `+feedbackEligibleSQL+` AND NOT EXISTS(SELECT 1 FROM interview_feedback f WHERE f.session_id=sessions.id) ORDER BY created_at,id`, uid)
+	rows, err := s.Pool.Query(ctx, sessionSelect+` WHERE user_id=$1 AND NOT `+testerEligibleSQL+` AND `+feedbackEligibleSQL+` AND NOT EXISTS(SELECT 1 FROM interview_feedback f WHERE f.session_id=sessions.id) ORDER BY created_at,id`, uid)
 	if err != nil {
 		return nil, err
 	}

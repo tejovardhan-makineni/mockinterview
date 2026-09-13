@@ -14,6 +14,7 @@ export function DeviceCheck({
   const [devices, setDevices] = useState<MediaDeviceInfo[]>([]);
   const [device, setDevice] = useState("");
   const [mic, setMic] = useState(false);
+  const [inputDetected, setInputDetected] = useState(false);
   const [heard, setHeard] = useState(false);
   const [busy, setBusy] = useState(false);
   const [tonePlayed, setTonePlayed] = useState(false);
@@ -29,20 +30,28 @@ export function DeviceCheck({
     void audio.current?.close().catch(() => {});
     audio.current = null;
     cancelAnimationFrame(raf.current);
+    if (meter.current) meter.current.value = 0;
   };
   useEffect(() => {
-    onReady(mode === "text" || (mic && heard));
-  }, [mode, mic, heard, onReady]);
+    // The speaker test is optional. A working microphone must not be blocked
+    // by the separate confirmation that only appears after playing a tone.
+    onReady(mode === "text" || mic);
+  }, [mode, mic, onReady]);
   useEffect(() => () => stop(), []);
   async function check(id = device) {
-    const own = ++generation.current;
+    stop();
+    const own = generation.current;
     setBusy(true);
     setMessage("");
     setMic(false);
-    stream.current?.getTracks().forEach((t) => t.stop());
-    void audio.current?.close().catch(() => {});
-    cancelAnimationFrame(raf.current);
+    setInputDetected(false);
     try {
+      // Start browser audio within the check-button gesture, before waiting
+      // for microphone permission (which can outlast that gesture).
+      const ctx = new AudioContext();
+      audio.current = ctx;
+      if (ctx.state === "suspended") await ctx.resume();
+      if (own !== generation.current) return;
       const media = await navigator.mediaDevices.getUserMedia({
         audio: {
           echoCancellation: true,
@@ -56,36 +65,58 @@ export function DeviceCheck({
         return;
       }
       stream.current = media;
-      const ctx = new AudioContext();
-      audio.current = ctx;
+      const track = media.getAudioTracks()[0];
+      if (!track || track.readyState !== "live")
+        throw new Error("No live microphone track");
+      track.onended = () => {
+        if (own !== generation.current) return;
+        stop();
+        setBusy(false);
+        setMic(false);
+        setInputDetected(false);
+        setMessage(
+          "Microphone disconnected. Check your microphone again or choose text.",
+        );
+      };
       const source = ctx.createMediaStreamSource(media);
       const analyser = ctx.createAnalyser();
       analyser.fftSize = 256;
       source.connect(analyser);
       const data = new Float32Array(256);
+      let detected = false;
       const draw = () => {
+        if (own !== generation.current) return;
         analyser.getFloatTimeDomainData(data);
         let n = 0;
         for (const value of data) n += value * value;
-        if (meter.current)
-          meter.current.value = Math.min(1, Math.sqrt(n / data.length) * 5);
+        const level = Math.sqrt(n / data.length);
+        if (meter.current) meter.current.value = Math.min(1, level * 5);
+        if (!detected && level > 0.002) {
+          detected = true;
+          setInputDetected(true);
+        }
         raf.current = requestAnimationFrame(draw);
       };
       draw();
       setMic(true);
-      setDevices(
-        (await navigator.mediaDevices.enumerateDevices()).filter(
-          (d) => d.kind === "audioinput",
-        ),
-      );
+      // Device labels are helpful, but a browser that cannot list them must
+      // still accept the microphone it has already opened successfully.
+      void Promise.resolve()
+        .then(() => navigator.mediaDevices.enumerateDevices())
+        .then((available) => {
+          if (own === generation.current)
+            setDevices(available.filter((d) => d.kind === "audioinput"));
+        })
+        .catch(() => {});
       setMessage(
-        "Microphone permission is ready. Say a few words and check the meter.",
+        "Microphone connected and ready. Say a few words to check the input meter.",
       );
     } catch {
-      stream.current?.getTracks().forEach((track) => track.stop());
-      stream.current = null;
-      void audio.current?.close().catch(() => {});
-      audio.current = null;
+      if (own !== generation.current) return;
+      stop();
+      setBusy(false);
+      setMic(false);
+      setInputDetected(false);
       setMessage(
         "Microphone unavailable. Check your browser permissions, try another device, or choose text.",
       );
@@ -175,7 +206,7 @@ export function DeviceCheck({
       )}
       <div className="flex flex-wrap items-center gap-3">
         <Button variant="ghost" onClick={tone}>
-          Play speaker test
+          Play speaker test (optional)
         </Button>
         {tonePlayed && (
           <label className="flex items-center gap-2 text-sm">
@@ -188,9 +219,11 @@ export function DeviceCheck({
           </label>
         )}
       </div>
-      {message && (
+      {(message || inputDetected) && (
         <p role="status" className="text-sm text-[var(--color-muted)]">
-          {message}
+          {mic && inputDetected
+            ? "Microphone is working — input detected. You’re ready for a voice interview."
+            : message}
         </p>
       )}
       <p className="text-xs text-[var(--color-muted)]">

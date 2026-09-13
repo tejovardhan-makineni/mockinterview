@@ -48,7 +48,12 @@ func (s *Service) writeSurvey(w http.ResponseWriter, r *http.Request, a store.Se
 		f.SessionID = ""
 	}
 	eligible := store.InterviewFeedbackEligible(a)
-	httpx.WriteJSON(w, 200, surveyEnvelope{SessionStatus: a.Status, FeedbackVersion: a.FeedbackVersion, Required: eligible && f == nil, Eligible: eligible, ReportAvailable: available, Questionnaire: questionnaire(a), Response: f})
+	tester, e := s.store.IsTester(r.Context(), a.UserID)
+	if e != nil {
+		httpx.WriteProblem(w, 503, "Could not check interview feedback eligibility")
+		return
+	}
+	httpx.WriteJSON(w, 200, surveyEnvelope{SessionStatus: a.Status, FeedbackVersion: a.FeedbackVersion, Required: eligible && f == nil && !tester, Eligible: eligible, ReportAvailable: available, Questionnaire: questionnaire(a), Response: f})
 }
 func (s *Service) GetInterview(w http.ResponseWriter, r *http.Request) {
 	a, ok := s.ownedSurvey(w, r)

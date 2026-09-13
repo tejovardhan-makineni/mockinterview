@@ -83,12 +83,20 @@ Two alternatives after copying `.env.example`:
 
 ## Hosted usage and continued practice
 
-The free allowance is one interview start per rolling seven days. All hosted
-accounts, including maintainers, share the same allowance. All hosted starts,
-including your own provider key, share a one-start-per-rolling-24-hours limit.
+The standard free allowance is one interview start per rolling seven days.
+Hosted accounts, including maintainers, use the same allowance unless separately
+granted tester access. Standard hosted starts, including your own provider key,
+share a one-start-per-rolling-24-hours limit.
 Resume and report retries do not consume another start. Your own-key
 option still uses the hosted service; self-hosting is the route to unrestricted
 local practice.
+
+Approved testers have unlimited hosted interview starts and optional post-interview
+check-ins. Tester access is an email-based entitlement, separate from the
+administrator role, and still requires verified email and the normal policy and
+voice acknowledgments. Authorized administrators can list, add and remove testers
+through `GET`, `POST` and `DELETE /api/v1/admin/testers`; operators can use the admin
+CLI. See [tester access operations and API examples](docs/TESTER-ACCESS.md).
 
 Hosted accounts verify their email before starting or using hosted resume AI.
 Existing accounts can still read history and export data before verification;
@@ -141,7 +149,8 @@ skill transfers. Repeated scores are not independent evidence of readiness.
 
 New started interviews include a required six-question product check-in after
 they end, including unsuccessful attempts. Complete it before starting another
-interview. Existing history, reports, report retries, export and deletion remain
+interview; this check-in is optional for approved testers. Existing history,
+reports, report retries, export and deletion remain
 available. Unstarted reservations and older interviews do not create a backlog.
 Every question accepts an unable-to-judge response; comments and transcript
 sharing remain optional. An optional comparison section asks which other

@@ -344,6 +344,16 @@ describe("required interview check-in", () => {
     expect(document.querySelectorAll("input:checked")).toHaveLength(0);
     expect(submit().disabled).toBe(true);
   });
+  it("describes an unsaved tester check-in as optional", async () => {
+    vi.mocked(api.getInterviewFeedback).mockResolvedValue({
+      ...envelope(),
+      required: false,
+    });
+    await act(async () => root.render(<InterviewCheckIn sessionId="tester" />));
+    expect(document.body.textContent).toContain("This check-in is optional.");
+    expect(document.body.textContent).not.toContain("Your check-in is saved.");
+    expect(document.querySelector("form")).not.toBeNull();
+  });
   it("shows pending setup recovery while preserving selected options and keeping start disabled", async () => {
     vi.mocked(api.getQuestion).mockResolvedValue({
       id: "synthetic-question",

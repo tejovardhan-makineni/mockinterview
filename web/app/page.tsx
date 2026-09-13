@@ -23,8 +23,8 @@ export default function Home() {
             </Button>
           </div>
           <p className="mt-4 text-xs text-[var(--color-muted)]">
-            Personal practice for adults 18+. One funded interview every 7 days.
-            Camera and resume are optional.
+            Personal practice for adults 18+. Standard access includes one
+            funded interview every 7 days. Camera and resume are optional.
           </p>
         </div>
         <Panel className="p-7 sm:p-9">
