@@ -162,24 +162,27 @@ export class LiveSession {
     );
   }
 
-  // Reset the silence clock whenever anyone speaks.
-  private touch() {
+  // Any speech refreshes the idle clock. Only candidate activity earns a new
+  // nudge; the interviewer's own nudge must never restart its budget.
+  private touch(candidate = false) {
     this.lastActivity = Date.now();
-    this.nudged = false;
+    if (candidate) this.nudged = false;
   }
 
   // After ~60s of silence (and the AI isn't talking), nudge ONCE — don't repeat.
   private startNudgeWatch() {
     this.nudgeTimer = window.setInterval(() => {
-      if (this.stopped || this.aiSpeaking || this.nudged) return;
+      if (this.stopped || !this.ready || this.aiSpeaking || this.nudged) return;
       if (Date.now() - this.lastActivity < 60000) return;
-      this.nudged = true;
       if (this.mode === "local") {
+        this.nudged = true;
         this.localNudge();
         return;
       }
+      if (this.ws?.readyState !== WebSocket.OPEN) return;
       try {
-        this.ws?.send(JSON.stringify({ type: "nudge" }));
+        this.ws.send(JSON.stringify({ type: "nudge" }));
+        this.nudged = true;
       } catch {
         /* ignore */
       }
@@ -344,6 +347,7 @@ export class LiveSession {
     switch (m.type) {
       case "ready":
         this.ready = true;
+        this.touch();
         this.attempts = 0;
         this.setConn("connected");
         this.emit("status", "Interviewer ready");
@@ -384,7 +388,7 @@ export class LiveSession {
         break;
       case "say":
         // Text-director full line: display + speak. The server persists the turn.
-        this.touch();
+        if (m.text?.trim()) this.touch();
         this.emit("caption", {
           role: "interviewer",
           text: m.text ?? "",
@@ -394,8 +398,8 @@ export class LiveSession {
         break;
       case "transcript": {
         // Voice-mode transcript: full-text-so-far, coalesced client-side.
-        this.touch();
         const role = m.role === "candidate" ? "candidate" : "interviewer";
+        if (m.text?.trim()) this.touch(role === "candidate");
         this.emit("caption", {
           role,
           text: m.text ?? "",
@@ -472,7 +476,7 @@ export class LiveSession {
       for (let i = ev.resultIndex; i < ev.results.length; i++) {
         const res = ev.results[i];
         const text = res[0].transcript.trim();
-        this.noteSpeech();
+        if (text) this.noteSpeech();
         if (res.isFinal && text) this.handleCandidate(text);
       }
     };
@@ -554,6 +558,7 @@ export class LiveSession {
   }
 
   private noteSpeech() {
+    this.touch(true);
     const gap = Date.now() - this.lastSpeechAt;
     if (gap > 4000) this.emit("pause", gap);
     this.lastSpeechAt = Date.now();
@@ -573,7 +578,8 @@ export class LiveSession {
   }
 
   handleCandidate(text: string) {
-    this.touch();
+    if (!text.trim()) return;
+    this.touch(true);
     const id = crypto.randomUUID();
     this.pushCaption({
       role: "candidate",

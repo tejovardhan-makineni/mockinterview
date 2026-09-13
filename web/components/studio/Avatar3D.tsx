@@ -2,7 +2,7 @@
 
 // Original vector character artwork created for this project. No third-party
 // avatar assets, likenesses, textures or fonts are used. AGPL-3.0, same as project.
-import { memo, useEffect, useRef, type MutableRefObject } from "react";
+import { memo, useEffect, useId, useRef, type MutableRefObject } from "react";
 export type AvatarDrive = {
   speaking: boolean;
   amplitude: number;
@@ -18,6 +18,12 @@ export const INTERVIEWERS = [
 export function interviewerName(id?: string) {
   return INTERVIEWERS.find((p) => p.id === id)?.name ?? "Alex";
 }
+// Keep the corners and upper lip anchored. Only the lower contour opens, so
+// speech reads as a mouth rather than a dark oval floating above a fixed smile.
+function mouthShape(opening: number) {
+  return `M148 184 Q161 188 174 184 Q161 ${(188 + opening * 2).toFixed(2)} 148 184 Z`;
+}
+
 function Portrait({
   faceId,
   drive,
@@ -25,7 +31,10 @@ function Portrait({
   faceId: string;
   drive: MutableRefObject<AvatarDrive>;
 }) {
-  const mouth = useRef<SVGEllipseElement>(null);
+  const mouth = useRef<SVGPathElement>(null);
+  const mouthClip = useRef<SVGPathElement>(null);
+  const teeth = useRef<SVGPathElement>(null);
+  const mouthClipId = useId();
   const head = useRef<SVGGElement>(null);
   const eyes = useRef<SVGGElement>(null);
   const skin =
@@ -34,12 +43,30 @@ function Portrait({
   useEffect(() => {
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)");
     let raf = 0;
+    let opening = 0;
+    let lastTime: number | undefined;
     const loop = (time: number) => {
       const d = drive.current;
-      const speaking = d.speaking && !reduce.matches;
-      mouth.current?.setAttribute(
-        "ry",
-        String(speaking ? 2 + Math.min(1, d.level ?? d.amplitude) * 5 : 1.4),
+      const rawLevel = d.level ?? d.amplitude;
+      const level = Number.isFinite(rawLevel)
+        ? Math.max(0, Math.min(1, rawLevel))
+        : 0;
+      const target = d.speaking ? Math.max(0, (level - 0.025) / 0.975) * 6 : 0;
+      const elapsed =
+        lastTime === undefined ? 16 : Math.min(64, time - lastTime);
+      lastTime = time;
+      // Ease audio samples over a few frames; silence still closes the mouth
+      // while the playback session remains marked as speaking between words.
+      opening = reduce.matches
+        ? 0
+        : opening + (target - opening) * (1 - Math.exp(-elapsed / 45));
+      if (opening < 0.02) opening = 0;
+      const shape = mouthShape(opening);
+      mouth.current?.setAttribute("d", shape);
+      mouthClip.current?.setAttribute("d", shape);
+      teeth.current?.setAttribute(
+        "opacity",
+        String(Math.min(1, Math.max(0, (opening - 1.2) / 1.5))),
       );
       head.current?.setAttribute(
         "transform",
@@ -116,21 +143,28 @@ function Portrait({
             strokeLinecap="round"
             fill="none"
           />
-          <path
-            d="M143 185Q161 196 178 184"
-            stroke="#a0614e"
-            strokeWidth="3"
-            strokeLinecap="round"
-            fill="none"
-          />
-          <ellipse
-            ref={mouth}
-            cx="161"
-            cy="184"
-            rx="12"
-            ry="1.4"
-            fill="#754b3d"
-          />
+          <defs>
+            <clipPath id={mouthClipId}>
+              <path ref={mouthClip} d={mouthShape(0)} />
+            </clipPath>
+          </defs>
+          <g data-avatar-mouth="true">
+            <path
+              ref={mouth}
+              d={mouthShape(0)}
+              fill="#663f39"
+              stroke="#a0614e"
+              strokeWidth="1.6"
+              strokeLinejoin="round"
+            />
+            <path
+              ref={teeth}
+              d="M150 184H172V187Q161 190 150 187Z"
+              fill="#f8ede1"
+              opacity="0"
+              clipPath={`url(#${mouthClipId})`}
+            />
+          </g>
           {faceId === "sam" && (
             <g fill="none" stroke="#485349" strokeWidth="3">
               <rect x="122" y="133" width="31" height="20" rx="7" />

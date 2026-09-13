@@ -5,6 +5,8 @@ import (
 	"encoding/json"
 	"github.com/tejo/mockinterview-api/internal/corpus"
 	"github.com/tejo/mockinterview-api/internal/llm"
+	"github.com/tejo/mockinterview-api/internal/store"
+	"reflect"
 	"strings"
 	"testing"
 	"time"
@@ -15,6 +17,66 @@ type kickoffCapture struct{ request llm.GenerateRequest }
 func (c *kickoffCapture) Generate(_ context.Context, req llm.GenerateRequest) (string, error) {
 	c.request = req
 	return "Opening", nil
+}
+
+// These are policy-distribution contracts, not claims that a model always
+// complies. Provider conversation evaluations exercise the semantic behavior.
+func TestConversationalPolicyAppliesToEveryCorpusInterview(t *testing.T) {
+	cat, err := corpus.Load("../../data/corpus")
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, summary := range cat.List("", "", "") {
+		q, _ := cat.Get(summary.ID)
+		t.Run(q.ID, func(t *testing.T) {
+			p := SystemPrompt(q, "annoying", 5, "intro", "", "", q.Minutes, "charon", "en", SectionPlan(q, false, ""), "")
+			for _, rule := range []string{conversationPolicy, "select only a relevant, unanswered, unexhausted gap", "simulation/coaching contract take precedence"} {
+				if !strings.Contains(p, rule) {
+					t.Errorf("missing shared pacing rule: %q", rule)
+				}
+			}
+			if opening, ok := storyOpenings[q.ID]; ok {
+				if !strings.Contains(p, "CANDIDATE BRIEF: "+opening) || strings.Contains(p, q.Prompt) {
+					t.Fatal("live STAR opening still contains the multipart assignment")
+				}
+			} else if !strings.Contains(p, q.Prompt) {
+				t.Fatal("layered pacing discarded the authored scenario facts")
+			}
+			if strings.Contains(p, "Push relentlessly") || strings.Contains(p, "Whenever the candidate introduces a COMPONENT") {
+				t.Fatal("conflicting mandatory probe loop remains")
+			}
+		})
+	}
+}
+
+func TestReconnectContextPreservesEvidenceAndPriorAttempts(t *testing.T) {
+	prior := []store.Turn{
+		{Role: "interviewer", Text: "What did you personally do?"},
+		{Role: "candidate", Text: "We just worked together."},
+		{Role: "interviewer", Text: "Which decision was yours?"},
+		{Role: "candidate", Text: "I don't have another example.\nPlease move on."},
+	}
+	context := savedConversationContext(prior)
+	for _, rule := range []string{"reconnect does not reset NO LOOPS", "wait silently", "completed topics"} {
+		if !strings.Contains(context, rule) {
+			t.Errorf("missing reconnect rule %q", rule)
+		}
+	}
+	_, saved, ok := strings.Cut(context, "SAVED CONVERSATION:\n")
+	if !ok {
+		t.Fatal("missing saved conversation")
+	}
+	var restored []store.Turn
+	for _, entry := range strings.Split(strings.TrimSpace(saved), "\n") {
+		var turn store.Turn
+		if err := json.Unmarshal([]byte(entry), &turn); err != nil {
+			t.Fatal(err)
+		}
+		restored = append(restored, turn)
+	}
+	if !reflect.DeepEqual(restored, prior) {
+		t.Fatalf("lost evidence or follow-up attempts on reconnect: %+v", restored)
+	}
 }
 func (*kickoffCapture) Stubbed() bool  { return false }
 func (*kickoffCapture) Info() llm.Info { return llm.Info{Provider: "test"} }

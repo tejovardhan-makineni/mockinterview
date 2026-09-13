@@ -105,7 +105,7 @@ export function stopPreview(drive: MutableRefObject<AvatarDrive>) {
   currentAnalyser?.disconnect(); currentAnalyser = undefined;
   if (currentUrl) { URL.revokeObjectURL(currentUrl); currentUrl = undefined; }
   if (typeof window !== "undefined" && "speechSynthesis" in window) window.speechSynthesis.cancel();
-  drive.current.speaking = false; drive.current.amplitude = 0;
+  drive.current.speaking = false; drive.current.amplitude = 0; drive.current.level = 0;
   const cb = onEndCb; onEndCb = undefined; cb?.();
 }
 
@@ -158,8 +158,8 @@ function fallbackTTS(req: PreviewReq, drive: MutableRefObject<AvatarDrive>) {
   const v = pool.find((x) => (female ? fem : male).test(x.name)) ?? pool[0];
   if (v) u.voice = v;
   u.rate = 0.9 + (req.intensity - 3) * 0.09; // intensity nudges pace, like the real path
-  u.onstart = () => { drive.current.speaking = true; ampInterval = window.setInterval(() => { drive.current.amplitude = 0.25 + Math.abs(Math.sin(Date.now() / 90)) * 0.6; }, 60); };
-  u.onend = () => { drive.current.speaking = false; drive.current.amplitude = 0; clearAmp(); const cb = onEndCb; onEndCb = undefined; cb?.(); };
+  u.onstart = () => { drive.current.speaking = true; ampInterval = window.setInterval(() => { const level = 0.25 + Math.abs(Math.sin(Date.now() / 90)) * 0.6; drive.current.amplitude = level; drive.current.level = level; }, 60); };
+  u.onend = () => { drive.current.speaking = false; drive.current.amplitude = 0; drive.current.level = 0; clearAmp(); const cb = onEndCb; onEndCb = undefined; cb?.(); };
   window.speechSynthesis.speak(u);
 }
 

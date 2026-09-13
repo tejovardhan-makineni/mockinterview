@@ -1,0 +1,159 @@
+[
+  {
+    "id": "behavioral-opening",
+    "question": "behavioral-leadership-conflict",
+    "review": "Invite situation/example only; do not bundle actions, result and reflection.",
+    "history": [
+      {
+        "Role": "model",
+        "Text": "Hi, I'm Alex. Tell me briefly about yourself before we begin."
+      },
+      {
+        "Role": "user",
+        "Text": "I'm a software engineer with five years of experience. I'm ready to begin the selected scenario."
+      }
+    ]
+  },
+  {
+    "id": "complete-star",
+    "question": "behavioral-leadership-conflict",
+    "review": "Recognize actions and results already supplied; probe one new gap or move on, never ask what they did or the result again. With the main stage still available, choose useful new depth instead of immediately ending the interview.",
+    "history": [
+      {
+        "Role": "model",
+        "Text": "Tell me about a conflict you had to lead your team through."
+      },
+      {
+        "Role": "user",
+        "Text": "Two engineers disagreed over replacing our billing API two weeks before launch. I was the project lead. I interviewed both, wrote a decision matrix comparing rollback risk and migration time, then chose a compatibility adapter with a feature flag. I personally built the adapter and assigned each engineer a paired validation task. We shipped on schedule, migration errors fell from 3 percent to 0.2 percent, and both signed off. I learned to agree on decision criteria before debating solutions; on the next project I did that at kickoff and we resolved the architecture decision in one meeting."
+      }
+    ]
+  },
+  {
+    "id": "exhausted-gap",
+    "question": "behavioral-handling-failure",
+    "review": "Two ownership probes and an explicit unknown must end this gap; do not rephrase the same request.",
+    "history": [
+      {
+        "Role": "model",
+        "Text": "Tell me about a professional failure."
+      },
+      {
+        "Role": "user",
+        "Text": "Our launch went badly. We fixed it."
+      },
+      {
+        "Role": "model",
+        "Text": "What did you personally do to fix it?"
+      },
+      {
+        "Role": "user",
+        "Text": "We all worked together; I cannot recall my specific tasks."
+      },
+      {
+        "Role": "model",
+        "Text": "Can you recall one decision you personally made?"
+      },
+      {
+        "Role": "user",
+        "Text": "I do not remember, and I cannot give more detail about my own actions."
+      }
+    ]
+  },
+  {
+    "id": "move-on",
+    "question": "behavioral-leadership-conflict",
+    "review": "Honor move-on; no retry of requested metric or outcome.",
+    "history": [
+      {
+        "Role": "model",
+        "Text": "How did you measure the result?"
+      },
+      {
+        "Role": "user",
+        "Text": "I do not have a measurable outcome. Please move on to another question."
+      }
+    ]
+  },
+  {
+    "id": "coding-correction",
+    "question": "two-sum-variants",
+    "review": "Accept self-correction and supplied O(n) time/space and tests; do not reprobe same-index bug or ask all variants at once.",
+    "history": [
+      {
+        "Role": "model",
+        "Text": "How will you avoid using the same element twice?"
+      },
+      {
+        "Role": "user",
+        "Text": "I originally inserted first, but that was wrong. I now check if target minus nums[i] exists in the map before inserting the current value and index. This means only earlier indices can match, so the same index cannot be used twice. With [3,3] and target 6 I return [0,1]. With [2,7,11,15] and 9 I return [0,1]. The hash map approach uses expected O(n) time and O(n) space."
+      }
+    ]
+  },
+  {
+    "id": "design-components",
+    "question": "notification-system",
+    "review": "Choose one important design gap; do not dump database/cache/queue questions together.",
+    "history": [
+      {
+        "Role": "model",
+        "Text": "What is your initial architecture?"
+      },
+      {
+        "Role": "user",
+        "Text": "An API validates notification requests and stores each request in Postgres with an outbox entry in the same transaction. A dispatcher publishes the outbox entries to Kafka. Workers call channel providers, storing delivery state. Redis holds short-lived rate limits. I use notification ID plus channel as the idempotency key, and retry transient errors with exponential backoff before routing exhausted attempts to a dead-letter queue."
+      }
+    ]
+  },
+  {
+    "id": "case-clarification",
+    "question": "case-profitability",
+    "review": "Answer known cost figures directly; at most one focused next ask and no premature solution.",
+    "history": [
+      {
+        "Role": "model",
+        "Text": "Where would you start investigating the profit decline?"
+      },
+      {
+        "Role": "user",
+        "Text": "I would split profit into revenue minus costs. Since revenue is flat, what do we know about changes in cost of goods, labor, and rent?"
+      }
+    ]
+  },
+  {
+    "id": "candidate-led",
+    "question": "candidate-questions-role-fit",
+    "review": "Respond as the hiring manager using provided facts; do not add a forced assessment question.",
+    "history": [
+      {
+        "Role": "model",
+        "Text": "What would you like to know about the role?"
+      },
+      {
+        "Role": "user",
+        "Text": "How will you decide whether I am successful in my first three months?"
+      }
+    ]
+  },
+  {
+    "id": "coding-opening",
+    "question": "two-sum-variants",
+    "review": "Preserve Two Sum inputs, indices, one solution and no index reuse; ask only its first task, holding Three Sum for later.",
+    "history": [
+      {
+        "Role": "model",
+        "Text": "Hi, I'm Alex. Tell me briefly about yourself before we begin."
+      },
+      {
+        "Role": "user",
+        "Text": "I'm a software engineer with five years of experience. I'm ready to begin the selected scenario."
+      }
+    ]
+  },
+  {
+    "id": "critique-opening",
+    "question": "ai-output-critique-forecast",
+    "review": "Preserve cohorts, conversion numbers and channel change; ask for initial critique only, holding missing evidence and decision note for later.",
+    "history": []
+  }
+]

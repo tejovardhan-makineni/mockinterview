@@ -32,6 +32,7 @@ class Socket {
 const sources: {
   stop: ReturnType<typeof vi.fn>;
   disconnect: ReturnType<typeof vi.fn>;
+  onended: (() => void) | null;
 }[] = [];
 class Audio {
   currentTime = 0;
@@ -52,7 +53,7 @@ class Audio {
       start: vi.fn(),
       stop: vi.fn(),
       disconnect: vi.fn(),
-      onended: null,
+      onended: null as (() => void) | null,
     };
     sources.push(source);
     return source;
@@ -174,5 +175,108 @@ describe("live transport lifecycle", () => {
     }
     expect(live.connectionState()).toBe("failed");
     expect(Socket.instances).toHaveLength(6);
+  });
+});
+
+function sentMessages(type: string) {
+  return Socket.instances.flatMap((socket) =>
+    socket.send.mock.calls
+      .filter(([data]) => typeof data === "string")
+      .map(([data]) => JSON.parse(data))
+      .filter((message) => message.type === type),
+  );
+}
+
+describe("silence nudge budget", () => {
+  it("waits for interview readiness without consuming the nudge during connection", async () => {
+    const socket = await start();
+    await vi.advanceTimersByTimeAsync(128000);
+    expect(sentMessages("nudge")).toHaveLength(0);
+    socket.message({ type: "ready", mode: "text" });
+    await vi.advanceTimersByTimeAsync(64000);
+    expect(sentMessages("nudge")).toHaveLength(1);
+  });
+
+  it("refreshes idle timing for interviewer speech without letting a nudge rearm itself", async () => {
+    const socket = await start("voice");
+    live.setMuted(true);
+    socket.message({ type: "ready", mode: "voice" });
+    await vi.advanceTimersByTimeAsync(56000);
+    socket.message({
+      type: "transcript",
+      role: "interviewer",
+      text: "How would you approach this?",
+    });
+    await vi.advanceTimersByTimeAsync(56000);
+    expect(sentMessages("nudge")).toHaveLength(0);
+    await vi.advanceTimersByTimeAsync(8000);
+    expect(sentMessages("nudge")).toHaveLength(1);
+
+    socket.onmessage?.({ data: new Int16Array([100, 200, 300]).buffer });
+    socket.message({
+      type: "transcript",
+      role: "interviewer",
+      text: "Take your time — whenever you're ready.",
+    });
+    sources[0].onended?.();
+    socket.message({ type: "turn_complete" });
+    await vi.advanceTimersByTimeAsync(128000);
+    expect(sentMessages("nudge")).toHaveLength(1);
+
+    socket.message({ type: "say", text: "I am still listening." });
+    socket.message({ type: "interrupted" });
+    await vi.advanceTimersByTimeAsync(128000);
+    expect(sentMessages("nudge")).toHaveLength(1);
+  });
+
+  it("rearms only for nonempty candidate speech or a typed answer", async () => {
+    const socket = await start("voice");
+    live.setMuted(true);
+    socket.message({ type: "ready", mode: "voice" });
+    await vi.advanceTimersByTimeAsync(64000);
+    expect(sentMessages("nudge")).toHaveLength(1);
+
+    socket.message({ type: "transcript", role: "candidate", text: "  " });
+    live.submitText(" ");
+    await vi.advanceTimersByTimeAsync(64000);
+    expect(sentMessages("nudge")).toHaveLength(1);
+    expect(sentMessages("user_text")).toHaveLength(0);
+
+    socket.message({
+      type: "transcript",
+      role: "candidate",
+      text: "I would start by clarifying the requirements.",
+      streaming: true,
+    });
+    await vi.advanceTimersByTimeAsync(64000);
+    expect(sentMessages("nudge")).toHaveLength(2);
+
+    live.submitText("My next step is to estimate the traffic.");
+    expect(sentMessages("user_text")).toHaveLength(1);
+    await vi.advanceTimersByTimeAsync(64000);
+    expect(sentMessages("nudge")).toHaveLength(3);
+    await vi.advanceTimersByTimeAsync(128000);
+    expect(sentMessages("nudge")).toHaveLength(3);
+  });
+
+  it("preserves the spent budget across reconnect and pending-answer replay", async () => {
+    const socket = await start();
+    socket.message({ type: "ready", mode: "text" });
+    live.submitText("My saved answer");
+    await vi.advanceTimersByTimeAsync(64000);
+    expect(sentMessages("nudge")).toHaveLength(1);
+
+    socket.close();
+    await vi.advanceTimersByTimeAsync(500);
+    const resumed = Socket.instances.at(-1)!;
+    expect(resumed).not.toBe(socket);
+    resumed.message({ type: "ready", mode: "text" });
+    const answers = sentMessages("user_text");
+    expect(answers).toHaveLength(2);
+    expect(answers[1].event_id).toBe(answers[0].event_id);
+    resumed.message({ type: "ack", event_id: answers[1].event_id });
+    await vi.advanceTimersByTimeAsync(128000);
+    expect(live.pendingAnswers()).toBe(0);
+    expect(sentMessages("nudge")).toHaveLength(1);
   });
 });

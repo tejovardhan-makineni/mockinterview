@@ -170,40 +170,60 @@ func stubScore() map[string]any {
 	}
 }
 
-// stubDirectorTurn produces a short interviewer utterance. It lightly reacts to
-// the last candidate message so a scripted local interview feels alive.
+// stubDirectorTurn is a finite local demo, not a semantic assessment engine.
+// Keep it single-focus and never recycle its probe bank indefinitely. Real
+// providers follow the shared director policy using the full conversation.
 func stubDirectorTurn(req GenerateRequest) string {
 	last := ""
+	asked := make(map[string]bool)
+	for _, message := range req.Messages {
+		if message.Role == "model" || message.Role == "assistant" {
+			asked[message.Text] = true
+		}
+	}
 	for i := len(req.Messages) - 1; i >= 0; i-- {
 		if req.Messages[i].Role == "user" {
 			last = strings.ToLower(req.Messages[i].Text)
 			break
 		}
 	}
-	if last == "" || strings.HasPrefix(last, "begin the interview using its authored opening") {
-		if _, brief, ok := strings.Cut(req.System, "CANDIDATE BRIEF: "); ok {
-			brief, _, _ = strings.Cut(brief, "\nPRIVATE SCENARIO MATERIAL")
-			if brief = strings.TrimSpace(brief); brief != "" {
-				return "Demo interview. " + brief
+	if last == "" || strings.HasPrefix(last, "begin the interview using its authored opening") || strings.HasPrefix(last, "begin with a brief greeting") {
+		intro := "Demo interview. "
+		if _, title, ok := strings.Cut(req.System, "INTERVIEW: "); ok {
+			if title, _, ok = strings.Cut(title, ". Format: "); ok && strings.TrimSpace(title) != "" {
+				intro = "Demo interview: " + strings.TrimSpace(title) + ". "
 			}
 		}
-		return "Demo interview. Tell me how you would approach the scenario you selected."
+		if strings.Contains(req.System, "Domain: behavioral.") {
+			return intro + "Tell me about one specific situation related to this topic."
+		}
+		return intro + "What would you clarify first about the scenario shown in your workspace?"
 	}
-	// Demo follow-ups cannot infer professional facts. Keep them useful across
-	// domains and reserve technical examples for an actual technical workspace.
-	if !strings.Contains(req.System, "Workspace: system_design.") && !strings.Contains(req.System, "Workspace: coding.") {
-		return "What evidence supports that choice, and what uncertainty would you clarify next?"
+	closing := "Let's leave this topic there. What would you like to ask before we wrap up?"
+	if asked[closing] {
+		return "Thank you for trying the demo. You can finish the session when you're ready."
 	}
-	switch {
-	case strings.Contains(last, "database") || strings.Contains(last, "postgres") || strings.Contains(last, "sql"):
-		return "You mentioned a database. How would you capture changes out of it — say for a search index or cache? Would you use change data capture, something like Debezium?"
-	case strings.Contains(last, "cache"):
-		return "Good. What eviction policy would you use for that cache, and how do you handle a cache stampede on a cold key?"
-	case strings.Contains(last, "queue") || strings.Contains(last, "kafka"):
-		return "How do you guarantee ordering and exactly-once semantics through that queue?"
-	default:
-		return "Okay. Can you make your back-of-the-envelope numbers concrete — expected QPS, storage per year, and the read/write ratio?"
+	if strings.Contains(last, "don't know") || strings.Contains(last, "move on") || strings.Contains(last, "skip this") {
+		return closing
 	}
+	var probes []string
+	if strings.Contains(req.System, "Workspace: system_design.") || strings.Contains(req.System, "Workspace: coding.") {
+		switch {
+		case strings.Contains(last, "database") || strings.Contains(last, "postgres") || strings.Contains(last, "sql"):
+			probes = append(probes, "What failure would you plan for in that database?")
+		case strings.Contains(last, "cache"):
+			probes = append(probes, "How would you keep the cached data consistent?")
+		case strings.Contains(last, "queue") || strings.Contains(last, "kafka"):
+			probes = append(probes, "What ordering does your queue need to preserve?")
+		}
+	}
+	probes = append(probes, "What evidence supports that choice?", "What is the main uncertainty that remains?")
+	for _, probe := range probes {
+		if !asked[probe] {
+			return probe
+		}
+	}
+	return closing
 }
 
 func mustJSON(v any) string {

@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"errors"
 	"github.com/gorilla/websocket"
-	"github.com/tejo/mockinterview-api/internal/corpus"
 	"github.com/tejo/mockinterview-api/internal/store"
 	"google.golang.org/genai"
 	"sync"
@@ -119,24 +118,32 @@ func (r *Relay) watch(ctx context.Context, conn *websocket.Conn, wc *wsConn, sto
 	}
 }
 
-func (r *Relay) stageContext(q corpus.Question, wc *wsConn) string {
-	sections := SectionPlan(q, false, "")
+func (r *Relay) stageContext(sections []Section, wc *wsConn) string {
 	elapsed := time.Duration(0)
 	if r.attempt.StartedAt != nil {
 		elapsed = time.Since(*r.attempt.StartedAt)
 	}
-	stage := 0
-	for i, at := range SectionSchedule(time.Duration(r.attempt.DurationMinutes)*time.Minute, sections) {
-		if elapsed >= at {
-			stage = i + 1
-		}
-	}
+	stage := activeStageIndex(time.Duration(r.attempt.DurationMinutes)*time.Minute, sections, elapsed)
 	if stage >= len(sections) {
 		return ""
 	}
 	sec := sections[stage]
 	_ = wc.writeServerMsg(serverMsg{Type: "section", Index: stage, Total: len(sections), Title: sec.Title, Kind: sec.Kind})
-	return "\nACTIVE STAGE: " + sec.Title + ". " + sec.Guidance
+	remaining := time.Duration(r.attempt.DurationMinutes)*time.Minute - elapsed
+	if r.attempt.DeadlineAt != nil {
+		remaining = time.Until(*r.attempt.DeadlineAt)
+	}
+	return "\n" + activeStageInstruction(sec, remaining)
+}
+
+func activeStageIndex(total time.Duration, sections []Section, elapsed time.Duration) int {
+	stage := 0
+	for i, at := range SectionSchedule(total, sections) {
+		if elapsed >= at {
+			stage = i + 1
+		}
+	}
+	return stage
 }
 
 func (r *Relay) parentContext() context.Context {

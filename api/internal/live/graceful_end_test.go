@@ -38,17 +38,30 @@ func TestGeminiEndDrainsTranscriptAndRemainsResumable(t *testing.T) {
 			t.Error(err)
 			return
 		}
+		stageEstablished := false
 		for {
 			var message map[string]json.RawMessage
 			if err = conn.ReadJSON(&message); err != nil {
 				return
 			}
 			if content := message["clientContent"]; content != nil {
+				if strings.Contains(string(content), "ACTIVE STAGE: Current technical problem") {
+					stageEstablished = true
+					if !strings.Contains(string(content), "SERVER CLOCK:") || !strings.Contains(string(content), "WORKING STAGE") {
+						t.Error("native stage cue omitted remaining time or working-stage guard")
+					}
+				}
 				var value struct {
 					TurnComplete bool `json:"turnComplete"`
 				}
 				_ = json.Unmarshal(content, &value)
 				if value.TurnComplete {
+					if !stageEstablished {
+						t.Error("provider asked to speak before receiving the active stage")
+					}
+					if !strings.Contains(string(content), "FIRST QUESTION FOCUS") || !strings.Contains(string(content), "OPENING SETUP") {
+						t.Error("voice kickoff did not use the shared layered opening")
+					}
 					_ = conn.WriteJSON(map[string]any{"serverContent": map[string]any{"outputTranscription": map[string]any{"text": "A final partial interviewer sentence."}}})
 				}
 			}
@@ -103,7 +116,8 @@ func TestGeminiEndDrainsTranscriptAndRemainsResumable(t *testing.T) {
 		defer conn.Close()
 		defer memory.ReleaseLive(context.Background(), sess.ID, owner)
 		relay := &Relay{store: memory, attempt: sess, owner: owner, apiKey: "synthetic-test-key", liveModel: "synthetic-native-model"}
-		relay.runGemini(conn, sess.ID, corpus.Question{}, "Synthetic test", "aoede", nil, 5)
+		sections := []Section{{ID: "core", Kind: "core", Title: "Current technical problem", Guidance: "Probe one unresolved risk."}}
+		relay.runGemini(conn, sess.ID, corpus.Question{}, "Synthetic test", "aoede", sections, 5)
 	}))
 	defer server.Close()
 	client, _, err := websocket.DefaultDialer.Dial("ws"+strings.TrimPrefix(server.URL, "http"), nil)
