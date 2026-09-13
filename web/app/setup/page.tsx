@@ -200,6 +200,7 @@ function Setup() {
     !!usage?.next_start_at && new Date(usage.next_start_at).getTime() > now;
   const blocked =
     !usage?.local_unlimited &&
+    !usage?.tester_unlimited &&
     (dailyBlocked ||
       (funding === "platform" && usage?.funded_available === false));
   const availableAt = Math.max(
@@ -764,8 +765,10 @@ function Setup() {
                       ? "This provider supports text interviews in this release. "
                       : ""}
                     Gemini voice uses the service’s configured Live model. Your
-                    provider may charge for use. One hosted attempt per 24
-                    hours.
+                    provider may charge for use.
+                    {!usage?.local_unlimited &&
+                      !usage?.tester_unlimited &&
+                      " Standard hosted allowance: one attempt per 24 hours."}
                   </p>
                   {provider === "gemini" && (
                     <label className="flex items-start gap-3 text-xs">
@@ -823,16 +826,18 @@ function Setup() {
                     ? "Checking your practice allowance…"
                     : usage?.local_unlimited
                       ? "Local installation · no product practice limit."
-                      : blocked
-                        ? "Next available: " +
-                          date(
-                            availableAt
-                              ? new Date(availableAt).toISOString()
-                              : undefined,
-                          )
-                        : funding === "platform"
-                          ? "Your weekly interview is available."
-                          : "Your daily personal-key interview is available."}
+                      : usage?.tester_unlimited
+                        ? "Tester access · unlimited interviews."
+                        : blocked
+                          ? "Next available: " +
+                            date(
+                              availableAt
+                                ? new Date(availableAt).toISOString()
+                                : undefined,
+                            )
+                          : funding === "platform"
+                            ? "Your weekly interview is available."
+                            : "Your daily personal-key interview is available."}
               </div>
               {user?.email_verified === false && !usage?.local_unlimited && (
                 <div className="notice">

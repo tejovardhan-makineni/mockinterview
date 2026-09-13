@@ -188,7 +188,9 @@ export function InterviewCheckIn({
         <p className="mt-3 text-sm text-[var(--color-muted)]">
           {envelope.required
             ? "A short required check-in before your next interview. Your report and account controls remain available."
-            : "Your check-in is saved. Editing it is optional."}{" "}
+            : envelope.response
+              ? "Your check-in is saved. Editing it is optional."
+              : "This check-in is optional. You can start another interview without completing it."}{" "}
           Your responses are saved to your account for product improvement.
           Choose “Unable to judge” when you cannot rate an item.
         </p>

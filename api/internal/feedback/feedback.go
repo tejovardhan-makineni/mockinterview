@@ -23,6 +23,7 @@ const maxMessage = 5000
 // Repo is the persistence this package needs. *store.Store satisfies it.
 type Repo interface {
 	store.InterviewFeedbackStore
+	IsTester(context.Context, string) (bool, error)
 	GetReport(context.Context, string) (store.Report, []store.ScoreRow, error)
 	GetSession(context.Context, string) (store.Session, error)
 	SaveFeedback(ctx context.Context, userID, kind, message string, rating int, contextJSON json.RawMessage) (string, error)

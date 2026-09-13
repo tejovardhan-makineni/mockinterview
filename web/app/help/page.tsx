@@ -35,6 +35,14 @@ export default function Help() {
           Never share passwords, verification links or API keys in a public
           issue.
         </p>
+        <h2>Tester access</h2>
+        <p>
+          Approved testers have unlimited interview starts and optional product
+          check-ins. Verify the email added to the tester list and refresh setup
+          to see your access. Finish or resume an active interview before
+          starting another. Email verification, policy review and voice
+          acknowledgment still apply.
+        </p>
         <h2>Browsers and accessibility</h2>
         <p>
           Choose text if your browser does not support the voice path or you

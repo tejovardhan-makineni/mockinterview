@@ -12,6 +12,7 @@ func (s *Store) ExportAccount(ctx context.Context, uid string) (json.RawMessage,
 	err := s.Pool.QueryRow(ctx, `SELECT jsonb_build_object(
  'export_version',1,'exported_at',now(),
  'account',(SELECT to_jsonb(u)-'password_hash'-'token_version' FROM users u WHERE id=$1),
+ 'tester_access',(SELECT to_jsonb(t) FROM tester_emails t JOIN users u ON t.email=lower(btrim(u.email)) WHERE u.id=$1 AND u.email_verified=true),
  'settings',(SELECT settings FROM users WHERE id=$1),
  'interviewer_config',(SELECT to_jsonb(c)-'user_id' FROM interview_configs c WHERE user_id=$1),
  'resumes',COALESCE((SELECT jsonb_agg(to_jsonb(r)) FROM resumes r WHERE user_id=$1),'[]'::jsonb),

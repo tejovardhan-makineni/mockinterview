@@ -79,6 +79,17 @@ func (s *Store) SaveSettings(ctx context.Context, userID string, settings json.R
 // DeleteUser removes the user; every related table has ON DELETE CASCADE, so
 // this erases all of their data (resumes, sessions, transcripts, scores, ...).
 func (s *Store) DeleteUser(ctx context.Context, userID string) error {
-	_, err := s.Pool.Exec(ctx, `DELETE FROM users WHERE id=$1`, userID)
-	return err
+	tx, err := s.Pool.Begin(ctx)
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback(ctx)
+	// Only a verified owner may erase a pre-added tester invitation.
+	if _, err := tx.Exec(ctx, `DELETE FROM tester_emails t USING users u WHERE u.id=$1 AND u.email_verified=true AND t.email=lower(btrim(u.email))`, userID); err != nil {
+		return err
+	}
+	if _, err := tx.Exec(ctx, `DELETE FROM users WHERE id=$1`, userID); err != nil {
+		return err
+	}
+	return tx.Commit(ctx)
 }

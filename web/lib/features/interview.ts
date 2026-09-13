@@ -32,6 +32,7 @@ export interface Usage {
   next_start_at?: string;
   active_session_id?: string;
   local_unlimited?: boolean;
+  tester_unlimited?: boolean;
 }
 export interface ProcessingReport {
   status: "scoring" | "feedback_failed";

@@ -31,6 +31,12 @@ export default function Privacy() {
           can restrict use and arrange deletion. An age declaration is not
           identity verification.
         </p>
+        <p>
+          For approved testers, we also store an email address and the time it
+          was added to the tester registry to manage unlimited practice access.
+          An operator can add this email before account registration. Tester
+          access takes effect after the matching account verifies its email.
+        </p>
         <h2>Practice, resumes and AI providers</h2>
         <p>
           Your scenario, chosen settings, answers, notes/code/diagram and
@@ -164,13 +170,13 @@ export default function Privacy() {
         <p>
           New interview attempts include a required product-feedback check-in
           after a started interview ends. Complete it before starting another
-          interview; saved reports, history, export, deletion and report retries
-          remain accessible. Each question allows an unable-to-judge answer.
-          Comments and permission to inspect your transcript are optional and do
-          not affect whether you can complete the check-in. An optional section
-          can also record prior use of other interview-practice tools, tool
-          names, a comparison rating and written details for product
-          improvement.
+          interview; the check-in is optional for approved testers. Saved
+          reports, history, export, deletion and report retries remain
+          accessible. Each question allows an unable-to-judge answer. Comments
+          and permission to inspect your transcript are optional and do not
+          affect whether you can complete the check-in. An optional section can
+          also record prior use of other interview-practice tools, tool names, a
+          comparison rating and written details for product improvement.
         </p>
         <p>
           These answers are associated with your account and interview; they are

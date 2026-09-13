@@ -55,9 +55,9 @@ func (a *App) Routes(r chi.Router) {
 
 	// Per-user limiter for paid LLM/TTS endpoints (keyed by the authenticated
 	// user id, so one account can't loop them to burn tokens).
-	perUser := httprate.Limit(30, time.Hour, httprate.WithKeyFuncs(func(req *http.Request) (string, error) {
+	perUser := a.testerUnlimited(httprate.Limit(30, time.Hour, httprate.WithKeyFuncs(func(req *http.Request) (string, error) {
 		return auth.UserID(req.Context()), nil
-	}))
+	})))
 
 	// Public auth endpoints. register/login are throttled per-IP to blunt brute
 	// force / spam; /me is NOT throttled — it's called on every page load, so a
@@ -166,6 +166,9 @@ func (a *App) Routes(r chi.Router) {
 		r.Put("/sessions/{id}/feedback", feedbackSvc.PutInterview)
 		r.Get("/admin/interview-feedback/metrics", feedbackSvc.InterviewMetrics)
 		r.Get("/admin/interview-feedback/comments", feedbackSvc.InterviewComments)
+		r.Get("/admin/testers", a.listTesters)
+		r.Post("/admin/testers", a.updateTester)
+		r.Delete("/admin/testers", a.updateTester)
 		r.Patch("/feedback/{id}", feedbackSvc.Triage)
 
 		// Practice packs (company/goal interview loops) + per-user progress.

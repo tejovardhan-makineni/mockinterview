@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"reflect"
 	"sort"
+	"strings"
 	"time"
 
 	"github.com/tejo/mockinterview-api/internal/store"
@@ -25,6 +26,9 @@ func cloneSurvey(f store.InterviewFeedback) store.InterviewFeedback {
 }
 func (m *Mem) pendingSurvey(uid string) []store.Session {
 	out := []store.Session{}
+	if m.isTester(uid) {
+		return out
+	}
 	for _, v := range m.sessions {
 		if v.sess.UserID == uid && store.InterviewFeedbackEligible(v.sess) {
 			if _, ok := m.interviewFeedback[v.sess.ID]; !ok {
@@ -132,7 +136,12 @@ func (m *Mem) ExportAccount(_ context.Context, uid string) (json.RawMessage, err
 			responses = append(responses, cloneSurvey(f))
 		}
 	}
-	return json.Marshal(map[string]any{"export_version": 1, "account": map[string]any{"id": u.ID, "email": u.Email, "role": u.Role, "email_verified": u.EmailVerified, "adult_confirmed_at": u.AdultConfirmedAt, "terms_version": u.TermsVersion, "privacy_version": u.PrivacyVersion, "policies_accepted_at": u.PoliciesAcceptedAt}, "sessions": sessions, "interview_feedback": responses})
+	var tester *store.Tester
+	if m.isTester(uid) {
+		item := m.testers[strings.ToLower(strings.TrimSpace(u.Email))]
+		tester = &item
+	}
+	return json.Marshal(map[string]any{"export_version": 1, "account": map[string]any{"id": u.ID, "email": u.Email, "role": u.Role, "email_verified": u.EmailVerified, "adult_confirmed_at": u.AdultConfirmedAt, "terms_version": u.TermsVersion, "privacy_version": u.PrivacyVersion, "policies_accepted_at": u.PoliciesAcceptedAt}, "tester_access": tester, "sessions": sessions, "interview_feedback": responses})
 }
 
 func (m *Mem) InterviewFeedbackComments(_ context.Context, limit int, before *store.FeedbackCursor) ([]store.InterviewFeedbackRow, bool, error) {
