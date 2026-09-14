@@ -1,9 +1,10 @@
 # Interview bank audit and expansion
 
-Reviewed September 14, 2026. The public production API returned 143 scenarios,
-16 professions, and six practice paths, matching the repository before this
-change. The additions below are implemented in this checkout; this document is
-not a deployment record.
+Reviewed September 14, 2026. Before this expansion, the public production API
+returned 143 scenarios, 16 professions, and six practice paths. The additions
+below were subsequently deployed; the
+[September 14 release record](INTERVIEW-BANK-RELEASE-2026-09-14.md) documents
+artifact versions and production verification.
 
 ## What the bank needs
 
@@ -216,7 +217,7 @@ the matrix above gives a concrete route to deeper coverage.
 
 ## Verification
 
-Completed locally:
+Implementation verification completed before deployment:
 
 - Full Go test suite, `go vet ./...`, and API build passed.
 - All **139 web tests**, ESLint, TypeScript, and production static export passed.
@@ -239,6 +240,8 @@ Completed locally:
   count-based research comparisons, offer decisions, and ambiguous trial
   periods. Twelve shared behavioral references were revised for broader use.
 
-No live-provider interviews, human scoring-calibration study, or production
-deployment was performed for this expansion. No new content is marked
-practitioner-reviewed solely because automated tests pass.
+Subsequent staging and production verification is recorded in the
+[release record](INTERVIEW-BANK-RELEASE-2026-09-14.md), including the scope of
+provider and browser checks. Human scoring calibration and practitioner review
+remain pending. No new content is marked practitioner-reviewed solely because
+automated tests pass or deployment succeeds.
