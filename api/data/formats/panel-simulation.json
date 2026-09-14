@@ -1,0 +1,41 @@
+{
+  "schema_version": 1,
+  "revision": 1,
+  "id": "panel-simulation",
+  "name": "Panel perspective simulation",
+  "interviewer_role": "one AI interviewer alternating clearly labeled fictional panel perspectives",
+  "workspaces": [
+    "conversational"
+  ],
+  "tool_policy": "One AI interviewer conducts the conversation. Text and voice are equally valid; no external lookup, code execution, or real employer contact occurs. Allow notes, clarification, and thinking time. Do not infer competence from accent, appearance, eye contact, disability, or a career gap.",
+  "stages": [
+    {
+      "id": "intro",
+      "title": "Meet the perspectives",
+      "kind": "intro",
+      "guidance": "Explain that one AI simulates the panel; it is not multiple independent agents or raters. Name the perspectives in the scenario.",
+      "share": 0.05
+    },
+    {
+      "id": "proposal",
+      "title": "Present a proposal",
+      "kind": "core",
+      "guidance": "Allow a short initial proposal and listen before probing.",
+      "share": 0.35
+    },
+    {
+      "id": "perspectives",
+      "title": "Explore competing priorities",
+      "kind": "core",
+      "guidance": "Switch perspectives explicitly, ask one question per turn, and use only authored constraints. Accept corrections and do not stage simultaneous interruptions.",
+      "share": 0.5
+    },
+    {
+      "id": "wrap",
+      "title": "Synthesize",
+      "kind": "wrap",
+      "guidance": "Ask the candidate to reconcile the competing priorities and identify an unresolved decision.",
+      "share": 0.1
+    }
+  ]
+}

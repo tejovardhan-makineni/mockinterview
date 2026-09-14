@@ -1,0 +1,58 @@
+{
+  "id": "quality-assurance-practice",
+  "revision": 1,
+  "review_status": "preview",
+  "source_note": "Original community practice path. Each round is a separate attempt. Content is an AI-assisted preview awaiting practitioner review and calibration; this is not an employer process or a hiring-readiness certification.",
+  "name": "Quality Assurance Practice",
+  "areas": [
+    "quality_assurance"
+  ],
+  "track": "professional",
+  "blurb": "Practice a recruiter screen, two quality assurance decisions, and questions about role fit.",
+  "rounds": [
+    {
+      "id": "round-1",
+      "title": "Practice a Recruiter Screening Call",
+      "kind": "recruiter-screen",
+      "domain": "recruiter_screen",
+      "modality": "conversational",
+      "difficulty": "junior",
+      "minutes": 15,
+      "question_id": "career-recruiter-screen",
+      "focus": "Practice motivation, relevant experience, role questions, and clear next steps in a short screening call."
+    },
+    {
+      "id": "round-2",
+      "title": "QA Analyst: Build a Risk-Based Checkout Test Plan",
+      "kind": "work-sample-defense",
+      "domain": "test_design",
+      "modality": "written",
+      "difficulty": "junior",
+      "minutes": 20,
+      "question_id": "qa-checkout-test-plan",
+      "focus": "Build focused tests for payment retries and stock changes with concrete inputs and expected outcomes."
+    },
+    {
+      "id": "round-3",
+      "title": "QA Lead: Make a Release Recommendation from Uneven Evidence",
+      "kind": "stakeholder-simulation",
+      "domain": "release_quality",
+      "modality": "conversational",
+      "difficulty": "senior",
+      "minutes": 30,
+      "question_id": "qa-release-risk-decision",
+      "focus": "Use defect impact and missing evidence to negotiate a defensible release scope and verification plan."
+    },
+    {
+      "id": "round-4",
+      "title": "Use the Final Five Minutes",
+      "kind": "reverse-interview",
+      "domain": "candidate_questions",
+      "modality": "conversational",
+      "difficulty": "mid",
+      "minutes": 10,
+      "question_id": "candidate-questions-role-fit",
+      "focus": "Practice questions about expectations, support, working conditions, and real examples so you can judge role fit."
+    }
+  ]
+}

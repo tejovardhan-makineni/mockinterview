@@ -3,16 +3,20 @@
 // Backend: api/internal/corpus + api/data/corpus/*.json.
 
 import { req } from "../http";
+import preview from "./catalog-preview.json";
 import type { Modality } from "../domain";
+import type { Profession, SpecialistAgent } from "./profile";
 
 // A question as served to the client (a trimmed view of the corpus entry — the
 // reference answer and deep-dive banks stay server-side so they can't be seen).
 export interface QuestionSummary {
   id: string;
   format_id?: string;
+  format_name?: string;
+  agent?: SpecialistAgent;
   review_status?: string;
   minutes?: number;
-  revision?: string;
+  revision?: number;
   title: string;
   track: string; // engineering | professional
   domain: string; // sub-topic: system_design | coding | clinical_reasoning | ...
@@ -38,203 +42,126 @@ export const catalogHttp: CatalogSlice = {
   },
 };
 
-// matchScore is the catalog's fuzzy search ranking. It rewards exact substring
-// hits and token overlap (including 4+ char prefix matches) so close/partial
-// queries surface, not just exact ones. Returns 1 for an empty query (show all),
-// 3 for a full-string substring hit, else the fraction of query tokens matched.
-// Lives here (not in the page) so it can be unit-tested and reused.
-export function matchScore(q: QuestionSummary, query: string): number {
-  const s = query.trim().toLowerCase();
+// Search the scenario and its own specialist first. Additional eligible roles
+// provide useful context, but shared career practice must not bury a teacher's
+// classroom scenario when someone searches for "teacher".
+const searchable = (value: string) =>
+  value.toLowerCase().replace(/[_-]/g, " ").replace(/\s+/g, " ").trim();
+
+export function matchScore(
+  q: QuestionSummary,
+  query: string,
+  professions: Profession[] = [],
+): number {
+  const s = searchable(query);
   if (!s) return 1;
-  const hay =
-    `${q.title} ${q.domain} ${q.track} ${q.tags.join(" ")} ${q.blurb}`.toLowerCase();
-  if (hay.includes(s)) return 3;
+  const roleText = (profession: Profession) =>
+    [
+      profession.label,
+      profession.family_label,
+      ...(profession.aliases ?? []),
+      profession.agent?.name,
+      profession.agent?.summary,
+    ]
+      .filter(Boolean)
+      .join(" ");
+  const primary = professions.filter((p) => p.key === q.areas[0]);
+  const additional = professions.filter((p) =>
+    q.areas.slice(1).includes(p.key),
+  );
+  const hay = searchable(
+    [
+      q.title,
+      q.domain,
+      q.track,
+      q.areas[0],
+      ...q.tags,
+      q.blurb,
+      q.prompt,
+      q.format_name,
+      q.format_id,
+      q.agent?.name,
+      q.agent?.summary,
+      ...primary.map(roleText),
+    ]
+      .filter(Boolean)
+      .join(" "),
+  );
+  const context = searchable(
+    [...q.areas.slice(1), ...additional.map(roleText)].join(" "),
+  );
+  const words = hay.split(/\W+/);
+  const contextWords = context.split(/\W+/);
+  // Short job aliases must be words: "HR" should not match "through".
+  const contains = (source: string, tokens: string[], term: string) =>
+    term.length <= 3 ? tokens.includes(term) : source.includes(term);
+  const prefix = (tokens: string[], term: string) =>
+    term.length >= 4 &&
+    tokens.some(
+      (word) =>
+        word.length >= 4 &&
+        (word.startsWith(term.slice(0, 4)) ||
+          term.startsWith(word.slice(0, 4))),
+    );
+  if (contains(hay, words, s)) return 3;
   const toks = s.split(/\s+/).filter(Boolean);
   let hits = 0;
-  for (const t of toks) {
-    if (hay.includes(t)) {
-      hits += 1;
-      continue;
-    }
-    if (
-      hay
-        .split(/\W+/)
-        .some(
-          (w) =>
-            w.length >= 4 &&
-            (w.startsWith(t.slice(0, 4)) || t.startsWith(w.slice(0, 4))),
-        )
-    )
-      hits += 0.5;
+  for (const token of toks) {
+    if (contains(hay, words, token)) hits += 1;
+    else if (prefix(words, token)) hits += 0.5;
+    else if (contains(context, contextWords, token)) hits += 0.4;
+    else if (prefix(contextWords, token)) hits += 0.2;
   }
   return hits / toks.length;
 }
 
+export interface CatalogFilters {
+  query?: string;
+  family?: string;
+  profession?: string;
+  topic?: string;
+  format?: string;
+  level?: string;
+  workspace?: string;
+}
+
+// Filtering runs over the whole collection before the page applies its display
+// limit. Families come from the profession registry, never a separate UI list.
+export function filterCatalog(
+  questions: QuestionSummary[],
+  professions: Profession[],
+  filters: CatalogFilters,
+): QuestionSummary[] {
+  const familyAreas = new Set(
+    professions.filter((p) => p.family === filters.family).map((p) => p.key),
+  );
+  return questions
+    .filter(
+      (q) =>
+        (!filters.family || q.areas.some((area) => familyAreas.has(area))) &&
+        (!filters.profession || q.areas.includes(filters.profession)) &&
+        (!filters.topic || q.domain === filters.topic) &&
+        (!filters.format || q.format_id === filters.format) &&
+        (!filters.level || q.difficulty === filters.level) &&
+        (!filters.workspace || q.modality === filters.workspace),
+    )
+    .map((q) => ({ q, score: matchScore(q, filters.query ?? "", professions) }))
+    .filter(({ score }) => score > 0.34)
+    .sort(
+      (a, b) =>
+        b.score - a.score ||
+        Number(b.q.areas[0] === filters.profession) -
+          Number(a.q.areas[0] === filters.profession),
+    )
+    .map(({ q }) => q);
+}
+
 // ---- mock ----
-export const MOCK_QUESTIONS: QuestionSummary[] = [
-  {
-    id: "url-shortener",
-    title: "Design a URL Shortener (TinyURL)",
-    track: "engineering",
-    domain: "system_design",
-    areas: ["software_engineering"],
-    modality: "system_design",
-    difficulty: "mid",
-    tags: ["hashing", "kv-store", "caching"],
-    prompt:
-      "Design a service that turns long URLs into short links and redirects users.",
-    blurb:
-      "The classic read-heavy KV design — hashing, collisions, cache, analytics.",
-  },
-  {
-    id: "rag-service",
-    title: "Design a RAG Service (LLM + Retrieval)",
-    track: "engineering",
-    domain: "ml_system_design",
-    areas: ["software_engineering", "data_science"],
-    modality: "system_design",
-    difficulty: "senior",
-    tags: ["ai", "vector-db", "embeddings"],
-    prompt:
-      "Design a retrieval-augmented generation service answering over private docs.",
-    blurb:
-      "Chunking, embeddings, vector search, reranking, and grounding an LLM.",
-  },
-  {
-    id: "lru-cache",
-    title: "Implement an LRU Cache",
-    track: "engineering",
-    domain: "coding",
-    areas: ["software_engineering", "data_science"],
-    modality: "coding",
-    difficulty: "mid",
-    tags: ["hashmap", "linked-list", "O(1)"],
-    prompt:
-      "Implement an LRU cache with O(1) get and put. Code it in the editor — no compiler, walk me through it.",
-    blurb: "Doc-style coding (no run/compile) — hashmap + doubly linked list.",
-  },
-  {
-    id: "thermo-cycle-sizing",
-    title: "Size a Steam Power Cycle (Rankine)",
-    track: "engineering",
-    domain: "thermodynamics",
-    areas: ["mechanical_engineering"],
-    modality: "conversational",
-    difficulty: "mid",
-    tags: ["rankine", "thermodynamics", "efficiency"],
-    prompt:
-      "Size a Rankine steam cycle to deliver a target net power output. Walk me through your assumptions and the energy balance.",
-    blurb:
-      "Spoken station — cycle states, energy balance, efficiency, and practical tradeoffs.",
-  },
-  {
-    id: "beam-load-analysis",
-    title: "Analyze a Loaded Cantilever Beam",
-    track: "engineering",
-    domain: "mechanics",
-    areas: ["mechanical_engineering"],
-    modality: "conversational",
-    difficulty: "mid",
-    tags: ["statics", "bending", "stress", "safety-factor"],
-    prompt:
-      "A cantilever beam carries a point load at its tip. Talk me through reactions, the bending-moment diagram, peak stress, and whether it's safe.",
-    blurb:
-      "Spoken statics station — free body, shear/moment, bending stress, factor of safety.",
-  },
-  {
-    id: "opamp-circuit-analysis",
-    title: "Analyze an Op-Amp Amplifier",
-    track: "engineering",
-    domain: "circuits",
-    areas: ["electrical_engineering"],
-    modality: "conversational",
-    difficulty: "mid",
-    tags: ["op-amp", "gain", "feedback", "analog"],
-    prompt:
-      "Given a non-inverting op-amp stage, derive the gain, then reason about bandwidth, input/output impedance, and real-world non-idealities.",
-    blurb:
-      "Spoken analog station — ideal-op-amp assumptions, gain, and where reality bites.",
-  },
-  {
-    id: "structural-load-path",
-    title: "Trace a Building's Gravity Load Path",
-    track: "engineering",
-    domain: "structural",
-    areas: ["civil_engineering"],
-    modality: "conversational",
-    difficulty: "mid",
-    tags: ["load-path", "beams", "columns", "foundations"],
-    prompt:
-      "Walk me through how gravity load travels from a floor slab down to the foundation, and how you'd size a representative beam.",
-    blurb:
-      "Spoken structural station — load path, tributary areas, member sizing, safety.",
-  },
-  {
-    id: "behavioral-ownership",
-    title: "Behavioral: Ownership",
-    track: "professional",
-    domain: "behavioral",
-    areas: [
-      "software_engineering",
-      "mechanical_engineering",
-      "electrical_engineering",
-      "civil_engineering",
-      "data_science",
-      "medicine",
-      "nursing",
-      "law",
-      "consulting",
-      "product_management",
-      "finance",
-    ],
-    modality: "conversational",
-    difficulty: "mid",
-    tags: ["ownership", "STAR", "leadership"],
-    prompt:
-      "Tell me about a time you took ownership of a problem outside your formal responsibilities.",
-    blurb:
-      "Shared behavioral station — valid for every profession; STAR structure and real impact.",
-  },
-  {
-    id: "clinical-reasoning-chest-pain",
-    title: "Acute Chest Pain — Clinical Reasoning",
-    track: "professional",
-    domain: "clinical_reasoning",
-    areas: ["medicine"],
-    modality: "conversational",
-    difficulty: "mid",
-    tags: ["differential", "SOCRATES", "safety"],
-    prompt:
-      "A patient presents with acute chest pain. Talk me through your approach.",
-    blurb:
-      "Spoken station — history, life-threatening-first differential, workup.",
-  },
-  {
-    id: "law-issue-spotting-contract",
-    title: "Contract Issue-Spotting (IRAC)",
-    track: "professional",
-    domain: "issue_spotting",
-    areas: ["law"],
-    modality: "written",
-    difficulty: "mid",
-    tags: ["IRAC", "contracts"],
-    prompt:
-      "Read the fact pattern and write an IRAC analysis of the contract-formation issues.",
-    blurb: "Written doc — spot issues, state rules, apply, conclude.",
-  },
-  {
-    id: "case-market-entry",
-    title: "Market Entry Case",
-    track: "professional",
-    domain: "case",
-    areas: ["consulting"],
-    modality: "conversational",
-    difficulty: "senior",
-    tags: ["structure", "hypothesis", "quant"],
-    prompt: "Should our client enter a new market? Structure your approach.",
-    blurb: "Spoken case — MECE structure, hypothesis, back-of-envelope math.",
-  },
-];
+// A small client-safe snapshot generated from the corpus Summary/Professions
+// projections. It contains public practice briefs and specialist descriptions;
+// reference answers and interviewer instructions are never bundled here.
+export const MOCK_QUESTIONS: QuestionSummary[] =
+  preview.questions as QuestionSummary[];
 
 export const catalogMock: CatalogSlice = {
   async listQuestions() {

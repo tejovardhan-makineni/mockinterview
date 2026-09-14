@@ -9,7 +9,7 @@ import (
 	"github.com/tejo/mockinterview-api/internal/persona"
 )
 
-const DirectorVersion = "2026-09-13.3"
+const DirectorVersion = "2026-09-14.1"
 
 // These rules apply to every domain, authored format and delivery mode. Keep
 // pacing semantic: counting question marks or cutting provider output can still
@@ -66,8 +66,9 @@ func buildSystemPrompt(q corpus.Question, personality string, intensity int, pha
 		name = face.Label
 	}
 	var b strings.Builder
-	fmt.Fprintf(&b, "You are %s, an AI practice interviewer simulating %s. Be honest about being AI if asked. Never claim a real employer, real employment history, or real hiring authority. Voice selection changes timbre, never your identity.\n", name, interviewerRole(q))
+	fmt.Fprintf(&b, "You are %s, an AI practice interviewer simulating %s. Be honest about being AI if asked. Never claim a real employer, real employment history, professional credentials, or real hiring authority. Voice selection changes timbre, never your identity.\n", name, interviewerRole(q))
 	fmt.Fprintf(&b, "Run this interview in %s. Use natural, concise spoken language. Respect the candidate's communication style; do not judge accent, appearance, disability or camera use.\n", persona.LanguageName(language))
+	b.WriteString("FAIR ACCESS: assess job-relevant evidence, not age, race, ethnicity, gender, religion, disability, family status, political affiliation, employer prestige or career gaps. Accept relevant examples from study, paid work, volunteering, caregiving, military service and community activities. Let candidates choose what personal context to disclose. If they request a communication accommodation, adapt the interaction without changing the competency being assessed.\n")
 	fmt.Fprintf(&b, "INTERVIEW: %s. Format: %s. Domain: %s. Workspace: %s. Target level: %s. Challenge: %s. Duration: %d minutes. Content status: %s.\n", q.Title, q.FormatID, q.Domain, q.Modality, settings.TargetLevel, settings.Challenge, minutes, q.ReviewStatus)
 	b.WriteString("ASSESSMENT CONTRACT: when eliciting evidence, ask at most ONE focused question then wait. Follow up on the actual answer, not a script. Allow thinking, drawing, typing and self-correction. Ask for clarification when audio or meaning is unclear. Never interpret silence as refusal without checking. Do not manufacture mistakes or demand a particular tool when alternatives work. Brief acknowledgment is enough; avoid constant praise.\n")
 	b.WriteString(conversationPolicy)
@@ -82,6 +83,9 @@ func buildSystemPrompt(q corpus.Question, personality string, intensity int, pha
 		fmt.Fprintf(&b, "TOOLS POLICY: %s\n", q.FormatDefinition.ToolPolicy)
 	}
 	b.WriteString("The simulation/coaching contract above takes precedence over any demeanor hint or interruption instruction. Interrupt only at a useful pause, never repeatedly while they are answering. Use the NO LOOPS limit for unresolved gaps; requested clarification is not a failed attempt.\n")
+	profile := corpus.InterviewerFor(q)
+	fmt.Fprintf(&b, "SPECIALIST PROFILE: %s (%s). %s\n", profile.Name, profile.ID, profile.Summary)
+	fmt.Fprintf(&b, "SPECIALIST GUIDANCE: %s\n", profile.Guidance)
 	if q.ID == "mba-admissions" {
 		fmt.Fprintf(&b, "DOMAIN GUIDANCE: %s\n", mbaGuidance)
 	} else if domain := domainGuidance[q.Domain]; domain != "" {

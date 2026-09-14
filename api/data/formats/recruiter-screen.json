@@ -1,0 +1,41 @@
+{
+  "schema_version": 1,
+  "revision": 1,
+  "id": "recruiter-screen",
+  "name": "Recruiter screen",
+  "interviewer_role": "an AI recruiter for the fictional role described in the scenario",
+  "workspaces": [
+    "conversational"
+  ],
+  "tool_policy": "One AI interviewer conducts the conversation. Text and voice are equally valid; no external lookup, code execution, or real employer contact occurs. Allow notes, clarification, and thinking time. Do not infer competence from accent, appearance, eye contact, disability, or a career gap.",
+  "stages": [
+    {
+      "id": "intro",
+      "title": "Role context",
+      "kind": "intro",
+      "guidance": "Name the fictional role and invite one brief introduction. Do not ask for private personal information.",
+      "share": 0.05
+    },
+    {
+      "id": "motivation",
+      "title": "Motivation and fit",
+      "kind": "core",
+      "guidance": "Ask about motivation and one relevant strength, one question at a time.",
+      "share": 0.35
+    },
+    {
+      "id": "evidence",
+      "title": "Relevant experience",
+      "kind": "core",
+      "guidance": "Probe concrete evidence, accepting study, volunteering, caregiving, informal work, and paid work. Clarify role expectations using supplied facts.",
+      "share": 0.5
+    },
+    {
+      "id": "wrap",
+      "title": "Candidate questions",
+      "kind": "wrap",
+      "guidance": "Let the candidate ask a question and confirm the fictional next step without promising an offer.",
+      "share": 0.1
+    }
+  ]
+}

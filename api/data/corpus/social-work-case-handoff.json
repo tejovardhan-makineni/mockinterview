@@ -1,0 +1,123 @@
+{
+  "schema_version": 1,
+  "revision": 1,
+  "format_id": "work-sample-defense",
+  "review_status": "preview",
+  "provenance": {
+    "authorship": "Original project scenario, AI-assisted draft. Practitioner review and calibration pending.",
+    "license": "AGPL-3.0-only"
+  },
+  "minutes": 30,
+  "id": "social-work-case-handoff",
+  "title": "Social Services Coordinator: Review a Respectful Case Handoff",
+  "track": "professional",
+  "domain": "case_coordination",
+  "areas": [
+    "social_work"
+  ],
+  "modality": "written",
+  "difficulty": "mid",
+  "tags": [
+    "social-worker",
+    "case-manager",
+    "social-services-coordinator",
+    "case-handoff",
+    "practical",
+    "community-preview"
+  ],
+  "prompt": "You coordinate a fictional community employment-support team. Review this handoff: \"Client is unmotivated and keeps missing meetings. Send their entire file to the partner training provider. Close the case if they miss again.\" The record shows two missed appointments and one completed skills session, with no recorded reason for the absences. Team policy requires separating observation from interpretation, confirming consent before routine partner sharing, and supervisor review before case closure. Rewrite the handoff and propose the next contact.",
+  "blurb": "Replace judgmental case notes with factual evidence, a consent-based handoff, and a workable engagement plan.",
+  "rubric": [
+    {
+      "key": "record_quality",
+      "label": "Separate evidence from judgment",
+      "description": "Writes a factual account that preserves strengths and uncertainty.",
+      "weight": 1,
+      "anchors": {
+        "0": "Repeats \"unmotivated\" as a fact or treats missed meetings as proof of unwillingness.",
+        "2": "Records two missed appointments and one completed session without the label.",
+        "4": "Includes the client-reported shift change with attribution, notes unknowns, and preserves the completed session as relevant evidence of engagement."
+      }
+    },
+    {
+      "key": "sharing",
+      "label": "Bound the partner handoff",
+      "description": "Uses specific consent and minimum necessary content.",
+      "weight": 1,
+      "anchors": {
+        "0": "Sends the entire file without recorded consent.",
+        "2": "Pauses sharing to confirm consent and the provider’s needs.",
+        "4": "Asks the client about the named recipient and limited fields, records consent, and shares only the agreed attendance availability and course details."
+      }
+    },
+    {
+      "key": "engagement_plan",
+      "label": "Test a practical alternative before closure",
+      "description": "Responds to access barriers and uses the closure review process.",
+      "weight": 1,
+      "anchors": {
+        "0": "Closes the case automatically after another absence.",
+        "2": "Offers an evening appointment and seeks supervisor review if disengagement continues.",
+        "4": "Uses the preferred after-18:00 text route with consent, agrees a realistic next step, documents its outcome, and asks the supervisor to review unresolved barriers before a closure decision."
+      }
+    }
+  ],
+  "reference": {
+    "scenario": "You coordinate a fictional community employment-support team. Review this handoff: \"Client is unmotivated and keeps missing meetings. Send their entire file to the partner training provider. Close the case if they miss again.\" The record shows two missed appointments and one completed skills session, with no recorded reason for the absences. Team policy requires separating observation from interpretation, confirming consent before routine partner sharing, and supervisor review before case closure. Rewrite the handoff and propose the next contact.",
+    "facts": [
+      {
+        "id": "fact-1",
+        "value": "The client left a message saying their shift pattern changed and they cannot answer calls during work. They prefer texts after 18:00. Consent to send records to the training provider has not been recorded.",
+        "reveal_when": "candidate asks about contact attempts, the client’s account, or consent"
+      },
+      {
+        "id": "fact-2",
+        "value": "The training provider needs attendance availability and the chosen course, not the full case history. The team can offer an evening appointment, and the supervisor can review a revised engagement plan.",
+        "reveal_when": "candidate asks about the partner’s information needs or appointment alternatives"
+      }
+    ],
+    "model_points": [
+      "The evidence supports attendance facts, not a character judgment. Attribute the shift explanation to the client and avoid asserting that it has been independently verified. Include the completed session to prevent a selectively negative record.",
+      "The provider’s limited need does not justify sending a full case history. Confirm specific consent before routine sharing and use only the relevant course and availability details.",
+      "Try a workable contact and appointment arrangement based on the client’s stated availability. An unsuccessful attempt is information for a supervisor-reviewed decision, not automatic permission to close the case or punish the client."
+    ],
+    "probes": [
+      {
+        "trigger": "candidate keeps the motivation label but softens its wording",
+        "question": "Which observed fact establishes motivation rather than an access barrier?"
+      },
+      {
+        "trigger": "candidate asks for general consent to share the file",
+        "question": "What information does this particular partner actually need?"
+      }
+    ],
+    "fair_alternatives": [
+      "A brief factual bullet handoff or a short narrative is acceptable if observation and interpretation remain distinct.",
+      "The client can decline the partner referral; the plan should record that choice accurately and discuss available next steps within the team’s remit."
+    ],
+    "red_flags": [
+      "Repeats \"unmotivated\" as a fact or treats missed meetings as proof of unwillingness.",
+      "Sends the entire file without recorded consent.",
+      "Closes the case automatically after another absence."
+    ],
+    "follow_ups": [
+      "Rewrite the draft in 100 words using observations, attributed client information, specific consent status, and an agreed action."
+    ],
+    "exemplar_answer": "I would record two missed appointments and one completed skills session, then attribute the shift-pattern explanation to the client’s message. Consent to partner sharing is not recorded, so I would confirm whether the client wants the referral and agrees to sharing only course choice and availability. I would use their preferred after-18:00 contact route and offer an evening appointment. Any unresolved engagement or closure question would go to the supervisor with this factual record and the alternatives tried."
+  },
+  "interviewer_notes": "This is community employment-support coordination, not clinical or legal practice. Do not require diagnostic language. Reward record accuracy, specific consent, and practical engagement. Use only supplied facts; say when something is unknown. Accept plain language and equivalent approaches. Assess the demonstrated decisions, not accent, confidence, credentials, or access to particular employers. This is a fictional exercise; do not imply real actions were performed.",
+  "learning_drills": [
+    {
+      "id": "focused-practice",
+      "title": "Rewrite a biased case note",
+      "minutes": 5,
+      "prompt": "Rewrite the draft in 100 words using observations, attributed client information, specific consent status, and an agreed action. This is self-guided practice; no model assessment is performed.",
+      "checklist": [
+        "Remove unsupported character labels",
+        "Include the completed session",
+        "Limit proposed sharing",
+        "Keep closure with supervisor review"
+      ]
+    }
+  ]
+}

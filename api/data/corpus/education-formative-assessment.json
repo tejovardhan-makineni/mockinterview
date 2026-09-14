@@ -1,0 +1,123 @@
+{
+  "schema_version": 1,
+  "revision": 1,
+  "format_id": "work-sample-defense",
+  "review_status": "preview",
+  "provenance": {
+    "authorship": "Original project scenario, AI-assisted draft. Practitioner review and calibration pending.",
+    "license": "AGPL-3.0-only"
+  },
+  "minutes": 30,
+  "id": "education-formative-assessment",
+  "title": "Teacher: Use Exit-Ticket Evidence to Adapt the Next Lesson",
+  "track": "professional",
+  "domain": "instructional_assessment",
+  "areas": [
+    "education"
+  ],
+  "modality": "written",
+  "difficulty": "mid",
+  "tags": [
+    "teacher",
+    "learning-specialist",
+    "instructional-coach",
+    "formative-assessment",
+    "practical",
+    "community-preview"
+  ],
+  "prompt": "You teach a fictional class of 24 learners to compare fractions. An exit ticket asks which is greater, 1/3 or 1/4, and why. Fourteen choose 1/3 and explain with equal-sized wholes; six choose 1/4 because \"4 is bigger than 3\"; four leave it blank. A draft plan says, \"The class mostly understands; move on and give the ten weaker learners extra worksheets.\" Review the inference and plan the first 15 minutes of the next lesson. Do not assume a blank answer diagnoses a learning difficulty.",
+  "blurb": "Use learner explanations and missing evidence to target instruction and check understanding on a fresh example.",
+  "rubric": [
+    {
+      "key": "interpretation",
+      "label": "Read evidence without labeling learners",
+      "description": "Distinguishes demonstrated understanding, a specific misconception, and missing evidence.",
+      "weight": 1,
+      "anchors": {
+        "0": "Labels all ten as low ability or treats blanks as proof of misunderstanding.",
+        "2": "Identifies the denominator misconception and separates blank responses.",
+        "4": "Uses the explanation evidence for the 14, tests the six learners’ reasoning, and gathers missing evidence from the four before grouping or drawing conclusions."
+      }
+    },
+    {
+      "key": "instruction",
+      "label": "Target the next teaching move",
+      "description": "Designs a feasible response to the stated mathematical idea.",
+      "weight": 1,
+      "anchors": {
+        "0": "Assigns undifferentiated extra worksheets or repeats that bigger denominators mean smaller fractions without explanation.",
+        "2": "Uses equal-sized wholes and fraction strips to address the misconception.",
+        "4": "Sequences a short common representation and flexible guided practice while offering an extension for demonstrated understanding, all manageable without an assistant."
+      }
+    },
+    {
+      "key": "assessment",
+      "label": "Check transfer and adapt",
+      "description": "Defines evidence that the teaching response worked.",
+      "weight": 1,
+      "anchors": {
+        "0": "Moves on after learners repeat the taught answer.",
+        "2": "Uses a fresh comparison and asks for an explanation.",
+        "4": "Checks a new same-whole case through oral, visual, or written responses, names what would show persistent misconception, and revises grouping or support from that evidence."
+      }
+    }
+  ],
+  "reference": {
+    "scenario": "You teach a fictional class of 24 learners to compare fractions. An exit ticket asks which is greater, 1/3 or 1/4, and why. Fourteen choose 1/3 and explain with equal-sized wholes; six choose 1/4 because \"4 is bigger than 3\"; four leave it blank. A draft plan says, \"The class mostly understands; move on and give the ten weaker learners extra worksheets.\" Review the inference and plan the first 15 minutes of the next lesson. Do not assume a blank answer diagnoses a learning difficulty.",
+    "facts": [
+      {
+        "id": "fact-1",
+        "value": "The four blank responses were collected near the bell; two learners had not reached the question. No individual explanation is available from those four yet.",
+        "reveal_when": "candidate asks about blank responses, timing, or additional evidence"
+      },
+      {
+        "id": "fact-2",
+        "value": "You have fraction strips, paper, and a visual board. There is no teaching assistant. Learners may explain orally, draw, or write; all are working toward comparing fractions with the same whole.",
+        "reveal_when": "candidate asks about resources, staffing, response modes, or learning goal"
+      }
+    ],
+    "model_points": [
+      "Fourteen explanations provide stronger evidence than correct choices alone. Six responses reveal a specific numerator/denominator reasoning error. The four blanks are missing evidence and may reflect time, so they need a brief check rather than an ability label.",
+      "Use equal-sized wholes to make the comparison visible, then ask learners to explain why dividing the same whole into more equal parts makes each part smaller. Avoid a rule detached from its condition.",
+      "For a 15-minute opening without an assistant, a short shared demonstration, independent/paired task with a targeted teacher check, and an individual exit check is workable. Use a new case such as 1/5 versus 1/6 to look for transfer, while keeping the whole equal."
+    ],
+    "probes": [
+      {
+        "trigger": "candidate groups all blank answers with the misconception",
+        "question": "What do you know about why those four responses are blank?"
+      },
+      {
+        "trigger": "candidate checks understanding by repeating 1/3 versus 1/4",
+        "question": "What new response would show reasoning rather than recall?"
+      }
+    ],
+    "fair_alternatives": [
+      "A whole-class re-teach can be justified if it stays brief and includes challenge for learners already secure.",
+      "Temporary flexible grouping or individual check-ins are valid; avoid permanent ability labels and required written-only answers."
+    ],
+    "red_flags": [
+      "Labels all ten as low ability or treats blanks as proof of misunderstanding.",
+      "Assigns undifferentiated extra worksheets or repeats that bigger denominators mean smaller fractions without explanation.",
+      "Moves on after learners repeat the taught answer."
+    ],
+    "follow_ups": [
+      "Write one new fraction comparison, two acceptable explanation forms, and the next action for a repeated misconception."
+    ],
+    "exemplar_answer": "I would separate the 14 supported explanations, the six denominator misconceptions, and four missing responses. In the first few minutes I would use equal-sized fraction strips to revisit why one third is larger than one fourth, then give a short task with a deeper explanation prompt for those already secure. While the class works, I would check the blank responses and guide the misconception group. A new comparison such as one fifth versus one sixth, explained orally, visually, or in writing, would guide my next step."
+  },
+  "interviewer_notes": "Assess instructional reasoning, resource realism, and evidence use. Do not require a branded pedagogy or diagnose learning needs from the vignette. Accept equivalent correct fraction representations. Use only supplied facts; say when something is unknown. Accept plain language and equivalent approaches. Assess the demonstrated decisions, not accent, confidence, credentials, or access to particular employers. This is a fictional exercise; do not imply real actions were performed.",
+  "learning_drills": [
+    {
+      "id": "focused-practice",
+      "title": "Design a transfer check",
+      "minutes": 5,
+      "prompt": "Write one new fraction comparison, two acceptable explanation forms, and the next action for a repeated misconception. This is self-guided practice; no model assessment is performed.",
+      "checklist": [
+        "Use equal-sized wholes",
+        "Change the numbers from the taught example",
+        "Allow oral or visual reasoning",
+        "State how the evidence changes support"
+      ]
+    }
+  ]
+}

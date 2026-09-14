@@ -1,0 +1,58 @@
+{
+  "id": "social-work-practice",
+  "revision": 1,
+  "review_status": "preview",
+  "source_note": "Original community practice path. Each round is a separate attempt. Content is an AI-assisted preview awaiting practitioner review and calibration; this is not an employer process or a hiring-readiness certification.",
+  "name": "Social Work Practice",
+  "areas": [
+    "social_work"
+  ],
+  "track": "professional",
+  "blurb": "Practice a recruiter screen, two social work decisions, and questions about role fit.",
+  "rounds": [
+    {
+      "id": "round-1",
+      "title": "Practice a Recruiter Screening Call",
+      "kind": "recruiter-screen",
+      "domain": "recruiter_screen",
+      "modality": "conversational",
+      "difficulty": "junior",
+      "minutes": 15,
+      "question_id": "career-recruiter-screen",
+      "focus": "Practice motivation, relevant experience, role questions, and clear next steps in a short screening call."
+    },
+    {
+      "id": "round-2",
+      "title": "Community Support Worker: Make a Consent-Based Referral",
+      "kind": "stakeholder-simulation",
+      "domain": "community_support",
+      "modality": "conversational",
+      "difficulty": "entry",
+      "minutes": 20,
+      "question_id": "social-work-referral-intake",
+      "focus": "Understand a client’s immediate support needs and make a practical referral with specific, limited consent."
+    },
+    {
+      "id": "round-3",
+      "title": "Social Services Coordinator: Review a Respectful Case Handoff",
+      "kind": "work-sample-defense",
+      "domain": "case_coordination",
+      "modality": "written",
+      "difficulty": "mid",
+      "minutes": 30,
+      "question_id": "social-work-case-handoff",
+      "focus": "Replace judgmental case notes with factual evidence, a consent-based handoff, and a workable engagement plan."
+    },
+    {
+      "id": "round-4",
+      "title": "Use the Final Five Minutes",
+      "kind": "reverse-interview",
+      "domain": "candidate_questions",
+      "modality": "conversational",
+      "difficulty": "mid",
+      "minutes": 10,
+      "question_id": "candidate-questions-role-fit",
+      "focus": "Practice questions about expectations, support, working conditions, and real examples so you can judge role fit."
+    }
+  ]
+}

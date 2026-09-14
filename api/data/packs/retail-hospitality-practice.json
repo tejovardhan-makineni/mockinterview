@@ -1,0 +1,58 @@
+{
+  "id": "retail-hospitality-practice",
+  "revision": 1,
+  "review_status": "preview",
+  "source_note": "Original community practice path. Each round is a separate attempt. Content is an AI-assisted preview awaiting practitioner review and calibration; this is not an employer process or a hiring-readiness certification.",
+  "name": "Retail and Hospitality Practice",
+  "areas": [
+    "retail_hospitality"
+  ],
+  "track": "professional",
+  "blurb": "Practice a recruiter screen, two retail and hospitality decisions, and questions about role fit.",
+  "rounds": [
+    {
+      "id": "round-1",
+      "title": "Practice a Recruiter Screening Call",
+      "kind": "recruiter-screen",
+      "domain": "recruiter_screen",
+      "modality": "conversational",
+      "difficulty": "junior",
+      "minutes": 15,
+      "question_id": "career-recruiter-screen",
+      "focus": "Practice motivation, relevant experience, role questions, and clear next steps in a short screening call."
+    },
+    {
+      "id": "round-2",
+      "title": "Retail Associate: Handle a Return Outside the Standard Window",
+      "kind": "stakeholder-simulation",
+      "domain": "retail_service",
+      "modality": "conversational",
+      "difficulty": "entry",
+      "minutes": 20,
+      "question_id": "retail-return-conversation",
+      "focus": "Explain a return boundary, request an appropriate exception, and manage a waiting customer with care."
+    },
+    {
+      "id": "round-3",
+      "title": "Hotel Duty Manager: Recover an Overbooked Arrival",
+      "kind": "stakeholder-simulation",
+      "domain": "hospitality_operations",
+      "modality": "conversational",
+      "difficulty": "mid",
+      "minutes": 30,
+      "question_id": "hospitality-overbooking-recovery",
+      "focus": "Coordinate a suitable room alternative by verifying access needs, transport, guest consent, and arrival arrangements."
+    },
+    {
+      "id": "round-4",
+      "title": "Use the Final Five Minutes",
+      "kind": "reverse-interview",
+      "domain": "candidate_questions",
+      "modality": "conversational",
+      "difficulty": "mid",
+      "minutes": 10,
+      "question_id": "candidate-questions-role-fit",
+      "focus": "Practice questions about expectations, support, working conditions, and real examples so you can judge role fit."
+    }
+  ]
+}

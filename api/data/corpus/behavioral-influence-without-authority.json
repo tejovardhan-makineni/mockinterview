@@ -4,17 +4,37 @@
   "track": "professional",
   "domain": "behavioral",
   "areas": [
-    "software_engineering",
+    "career_foundations",
+    "accounting",
+    "business_operations",
+    "civil_engineering",
+    "consulting",
+    "creative_communications",
+    "customer_support",
+    "cybersecurity",
     "data_science",
+    "education",
+    "electrical_engineering",
+    "finance",
+    "human_resources",
+    "it_support",
+    "law",
+    "marketing",
+    "mechanical_engineering",
     "medicine",
     "nursing",
-    "law",
-    "consulting",
     "product_management",
-    "finance",
-    "mechanical_engineering",
-    "electrical_engineering",
-    "civil_engineering"
+    "project_management",
+    "public_service",
+    "quality_assurance",
+    "research",
+    "retail_hospitality",
+    "sales",
+    "skilled_trades",
+    "social_work",
+    "software_engineering",
+    "supply_chain",
+    "ux_design"
   ],
   "modality": "conversational",
   "difficulty": "senior",
@@ -25,93 +45,82 @@
     "persuasion",
     "star"
   ],
-  "prompt": "Tell me about a time you needed to get people or teams you had no authority over to change direction or adopt your approach. What did you want, why did they resist, and how did you actually move them?",
+  "prompt": "Tell me about a time you tried to build agreement with people you could not direct. Explain their concerns, how you approached them, and what happened. The outcome can be agreement, a compromise, a reasoned refusal or an issue that remained open.",
   "blurb": "Influence without authority (senior): did they persuade with evidence, empathy and trust — or just escalate?",
   "rubric": [
     {
       "key": "situation_clarity",
       "label": "Situation & the ask",
-      "description": "Clearly frames what they needed, from whom, and why those people had no obligation to say yes — the authority gap is real.",
+      "description": "Explains the desired change, the people involved and why the candidate could not simply direct it.",
       "weight": 1.0
     },
     {
       "key": "task_ownership",
       "label": "Owning the outcome",
-      "description": "Shows they took responsibility for driving alignment across boundaries, understanding the other parties' incentives and objections.",
+      "description": "Identifies their contribution to understanding the other parties’ needs and building a workable path without claiming authority they did not have.",
       "weight": 1.1
     },
     {
       "key": "action_specificity",
-      "label": "Influence tactics",
-      "description": "Describes the concrete tactics THEY used — data, a compelling narrative, finding shared goals, addressing the other side's incentives, building coalitions, trading, prototyping — rather than mandating or escalating.",
+      "label": "Specific contribution and decisions",
+      "description": "Describes a concrete influence method such as listening, evidence, a small trial, an alternative or a shared goal; justified escalation is allowed.",
       "weight": 1.4
     },
     {
       "key": "result_impact",
-      "label": "Result & durability",
-      "description": "Shows the other parties actually changed course and stayed bought-in, with a measurable outcome — not grudging compliance that unravels.",
+      "label": "Outcome and evidence",
+      "description": "Describes the actual response and consequences with supported qualitative or quantitative evidence; success does not require persuading everyone.",
       "weight": 1.2
     },
     {
       "key": "reflection",
       "label": "Reflection & relationships",
-      "description": "Reflects on preserving the relationship for the long run, when to escalate as a last resort, and what they learned about persuasion.",
+      "description": "Explains limits of persuasion, what could improve a future approach and when a boundary or escalation is appropriate.",
       "weight": 1.1
     },
     {
       "key": "communication",
-      "label": "Communication & structure",
-      "description": "Structured, concise, and shows they can articulate another party's viewpoint fairly.",
+      "label": "Clear, relevant communication",
+      "description": "Makes the relevant situation, reasoning and contribution understandable in any clear order. No required STAR structure, pronouns, performance of confidence or emotional tone.",
       "weight": 0.9
     }
   ],
   "reference": {
-    "scenario": "A senior story: the candidate needed another team, a peer, or a more senior stakeholder — over whom they had no authority — to adopt a standard, reprioritize, change an interface, or back a direction, and those people had their own goals and initially resisted. They won them over through influence, not org power, and the change stuck. The signal is earning alignment across boundaries and keeping the relationship intact.",
+    "scenario": "Explore an attempt to build agreement across different priorities without direct authority. A peer group, volunteer activity or professional setting is suitable. Assess the approach and understanding of concerns, not the power to obtain a yes or pressure someone past a legitimate boundary.",
     "model_points": [
-      "Situation: a concrete cross-team or cross-level ask where the candidate had no lever to compel, and the other side had real reasons to resist.",
-      "Task: they owned getting to a 'yes' that would actually hold, which meant first understanding the other party's incentives and objections.",
-      "Action: led with the other side's interest — framed the ask in terms of shared or their goals; brought evidence (data, a prototype, a pilot) to de-risk the change; built a coalition of supporters; and where needed, traded or made concessions.",
-      "Action: chose persuasion over escalation, using escalation only as a transparent last resort rather than a first move that would poison the relationship.",
-      "Result: the other team genuinely changed course and stayed committed; a measurable outcome followed (adoption %, project unblocked, standard rolled out), and the relationship was intact or stronger.",
-      "Reflection: understands influence compounds through trust and reciprocity over time; knows when to escalate and how to do it without burning bridges; what they'd do differently to get to yes faster."
+      "States a concrete change and why another person might reasonably view it differently.",
+      "Asks or otherwise checks the other party’s concerns rather than guessing their motives.",
+      "Uses a specific method, such as a demonstration, evidence, an alternative or a limited trial.",
+      "Respects consent, authority and legitimate limits; uses an appropriate escalation when the risk warrants it.",
+      "Describes agreement, compromise, refusal or uncertainty accurately and explains what was learned.",
+      "Reflects on relationships and future collaboration without making approval from others a prerequisite for a strong answer."
     ],
     "probes": [
       {
-        "trigger": "just escalated to a manager",
-        "question": "Did you win them over, or did someone above force the decision? What did YOU do to change their minds before escalating?"
+        "trigger": "candidate assumes the other party’s motives",
+        "question": "How did you learn what mattered to them?"
       },
       {
-        "trigger": "doesn't mention the other side's incentives",
-        "question": "Why were they resisting — what did the situation look like from their side? How did you address their actual concerns?"
+        "trigger": "candidate says only that they persuaded someone",
+        "question": "What did you do that helped them consider the idea?"
       },
       {
-        "trigger": "vague on tactics",
-        "question": "What specifically moved them — data, a pilot, a trade, a coalition? Walk me through the moment they said yes."
-      },
-      {
-        "trigger": "compliance may be shallow",
-        "question": "Did they actually buy in, or just comply? How do you know it held up after the meeting?"
-      },
-      {
-        "trigger": "relationship cost ignored",
-        "question": "How was your relationship with that team afterward? Did winning cost you anything long-term?"
+        "trigger": "candidate mentions escalation without its purpose",
+        "question": "What made escalation appropriate at that point?"
       }
     ],
     "red_flags": [
-      "'Influence' was really just escalating to a shared boss to force the outcome.",
-      "Never understood or engaged with why the other side resisted — only pushed their own view harder.",
-      "Won the battle but damaged the relationship, with no awareness of the cost.",
-      "Outcome was grudging compliance that unraveled, or there's no evidence it stuck.",
-      "No concrete tactics — 'I convinced them' with no mechanism.",
-      "Framed the other team as obstacles/idiots rather than people with legitimate incentives."
+      "Uses knowingly false evidence, threats or deception to obtain agreement.",
+      "Claims voluntary agreement when their own account describes coercion.",
+      "Dismisses an explicitly stated safety or consent boundary as an obstacle to winning."
     ],
     "follow_ups": [
-      "How do you build the kind of relationships that make future influence easier — before you need something?",
-      "When is escalation the right move, and how do you do it without burning the relationship?",
-      "Tell me about a time you tried to influence someone and failed. Why?",
-      "How do you influence someone more senior than you who disagrees?"
+      "What would you try if the person still disagreed?",
+      "What did their response teach you about your proposal?"
     ],
-    "exemplar_answer": "Situation: 'I needed the platform team to add rate-limiting to a shared API my product depended on. It wasn't on their roadmap, I had no authority over them, and their PM saw it as our problem to work around.' Task: 'I owned getting them to genuinely prioritize it, in a way that would stick — not a forced favor.' Action: 'First I understood their world: they were slammed and measured on platform reliability. So I reframed the ask around their goal — I pulled data showing our unthrottled traffic was a top cause of their own latency incidents, which made rate-limiting a reliability win for them, not a favor to me. I built a quick prototype to show it was a small change, and I lined up two other teams hitting the same issue so it wasn't just my voice. I offered to do the integration work on our side to lower their cost.' Result: 'Their PM put it in the next sprint; adoption across the three teams cut platform latency incidents by ~40% that quarter, and it stayed in place. I never had to escalate.' Reflection: 'The unlock was translating my need into their metric and bringing evidence plus a coalition. I also invested in that PM relationship afterward, which made the next three cross-team asks far easier. Escalation would've gotten a grudging yes and cost me a partner — influence got a real one.'"
+    "exemplar_answer": "Illustrative example only; it is not a required setting, answer order or achievement standard. Other volunteers disliked my idea for a shared handoff sheet because a previous form took too long. I asked which parts had been burdensome, then showed a version with only the next action and owner. Two people agreed to try it for a shift; another preferred the existing method. We compared what was missed and kept one useful field. I learned more from the objections than from trying to sell the full idea.",
+    "assessment_contract": "Assess the selected competency from concrete job-relevant evidence. Examples from paid work, study, volunteering, caregiving, informal work, military service and community activities are equally eligible when relevant. A modest example is sufficient if it shows the competency; employer prestige, formal title and financial scale are not criteria. Accept qualitative or quantitative outcomes supported by the account, including partial or unsuccessful outcomes. Do not require a numeric metric, STAR order, particular pronouns, composure, enthusiasm or a particular communication style. Identify personal contribution by meaning while preserving credit to others. Assess intelligibility and relevance, not accent, fluency, verbosity, visible emotion, disability or private circumstances. Mark genuinely missing evidence not assessed; do not infer poor competence or dishonesty from an absent example. A clearly labeled hypothetical may be discussed as situational practice but must not count as demonstrated past experience. Respect scope of practice, authorization, safety and ethical duties; pausing, declining, reporting or escalating can be sound judgment. Never require obedience, direct confrontation, unpaid overwork or successful persuasion regardless of the circumstances."
   },
-  "interviewer_notes": "Senior bar. The single biggest discriminator: did they PERSUADE or did they ESCALATE? Probe immediately if the story resolves via a shared boss forcing it — that's authority, not influence. Look for genuine engagement with the other party's incentives (can they articulate the resistance fairly?) and for concrete tactics: data, pilots, coalitions, trades, framing around others' goals. Test durability — buy-in vs shallow compliance that unravels. Senior maturity shows in protecting the long-term relationship and treating escalation as a transparent last resort. Probe I-vs-we on the persuasion actions."
+  "interviewer_notes": "Assess the selected competency from concrete job-relevant evidence. Examples from paid work, study, volunteering, caregiving, informal work, military service and community activities are equally eligible when relevant. A modest example is sufficient if it shows the competency; employer prestige, formal title and financial scale are not criteria. Accept qualitative or quantitative outcomes supported by the account, including partial or unsuccessful outcomes. Do not require a numeric metric, STAR order, particular pronouns, composure, enthusiasm or a particular communication style. Identify personal contribution by meaning while preserving credit to others. Assess intelligibility and relevance, not accent, fluency, verbosity, visible emotion, disability or private circumstances. Mark genuinely missing evidence not assessed; do not infer poor competence or dishonesty from an absent example. A clearly labeled hypothetical may be discussed as situational practice but must not count as demonstrated past experience. Respect scope of practice, authorization, safety and ethical duties; pausing, declining, reporting or escalating can be sound judgment. Never require obedience, direct confrontation, unpaid overwork or successful persuasion regardless of the circumstances. Explore an attempt to build agreement across different priorities without direct authority. A peer group, volunteer activity or professional setting is suitable. Assess the approach and understanding of concerns, not the power to obtain a yes or pressure someone past a legitimate boundary. Ask one focused question at a time. Use the candidate’s actual answer to select one material missing detail, respect the shared follow-up limit, and do not require a replacement example.",
+  "revision": 2
 }

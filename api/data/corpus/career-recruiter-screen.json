@@ -1,0 +1,150 @@
+{
+  "schema_version": 1,
+  "revision": 1,
+  "format_id": "recruiter-screen",
+  "review_status": "preview",
+  "provenance": {
+    "authorship": "Original project scenario, AI-assisted draft. Practitioner review and scoring calibration pending.",
+    "license": "AGPL-3.0-only"
+  },
+  "minutes": 15,
+  "id": "career-recruiter-screen",
+  "title": "Practice a Recruiter Screening Call",
+  "track": "professional",
+  "domain": "recruiter_screen",
+  "areas": [
+    "career_foundations",
+    "accounting",
+    "business_operations",
+    "civil_engineering",
+    "consulting",
+    "creative_communications",
+    "customer_support",
+    "cybersecurity",
+    "data_science",
+    "education",
+    "electrical_engineering",
+    "finance",
+    "human_resources",
+    "it_support",
+    "law",
+    "marketing",
+    "mechanical_engineering",
+    "medicine",
+    "nursing",
+    "product_management",
+    "project_management",
+    "public_service",
+    "quality_assurance",
+    "research",
+    "retail_hospitality",
+    "sales",
+    "skilled_trades",
+    "social_work",
+    "software_engineering",
+    "supply_chain",
+    "ux_design"
+  ],
+  "modality": "conversational",
+  "difficulty": "junior",
+  "tags": [
+    "career-foundations",
+    "all-careers",
+    "community-preview",
+    "recruiter",
+    "phone-screen",
+    "screening",
+    "tell-me-about-yourself"
+  ],
+  "prompt": "You are screening for a fictional service coordinator role. It involves organizing incoming requests, keeping accurate records, and communicating with colleagues. Start by explaining why the role interests you and the experience you would bring. Ask the recruiter about anything you need to judge the fit. The role is fictional; you do not need to share private personal details.",
+  "blurb": "Practice motivation, relevant experience, role questions, and clear next steps in a short screening call.",
+  "rubric": [
+    {
+      "key": "fit",
+      "label": "Role connection",
+      "description": "Connects interests to the stated work.",
+      "weight": 1,
+      "anchors": {
+        "0": "Misstates the role and ignores correction.",
+        "2": "Explains interest in one actual responsibility.",
+        "4": "Connects motivation, evidence, and one realistic expectation about the work."
+      }
+    },
+    {
+      "key": "evidence",
+      "label": "Relevant contribution",
+      "description": "Supports a skill claim with a specific contribution.",
+      "weight": 1,
+      "anchors": {
+        "0": "Presents invented qualifications or experiences.",
+        "2": "Gives an example of organization, records, or communication.",
+        "4": "Explains their contribution and outcome and relates it to reliable handoffs."
+      }
+    },
+    {
+      "key": "inquiry",
+      "label": "Useful clarification",
+      "description": "Asks questions that inform a fit decision.",
+      "weight": 1,
+      "anchors": {
+        "0": "Treats unspecified conditions as confirmed after clarification.",
+        "2": "Asks about expectations, working arrangements, or next steps.",
+        "4": "Follows an answer with a focused question and identifies what still needs confirmation."
+      }
+    }
+  ],
+  "reference": {
+    "scenario": "You are screening for a fictional service coordinator role. It involves organizing incoming requests, keeping accurate records, and communicating with colleagues. Start by explaining why the role interests you and the experience you would bring. Ask the recruiter about anything you need to judge the fit. The role is fictional; you do not need to share private personal details.",
+    "facts": [
+      {
+        "id": "priorities",
+        "value": "The team needs more reliable handoffs; a request should have an owner and next update.",
+        "reveal_when": "candidate asks about priorities"
+      },
+      {
+        "id": "schedule",
+        "value": "The fictional role uses a published weekly schedule. Exact shifts and work location have not yet been supplied and must be confirmed later.",
+        "reveal_when": "candidate asks about schedule or location"
+      },
+      {
+        "id": "process",
+        "value": "The next stage is a practical request-triage conversation with the hiring manager. No outcome is guaranteed.",
+        "reveal_when": "candidate asks about interview stages"
+      }
+    ],
+    "model_points": [
+      "Keep the screen focused and relevant; do not demand an entire biography.",
+      "Clarifying availability or requirements is acceptable without asking why a candidate has constraints.",
+      "Evaluate the evidence, not confidence or enthusiasm as a personality proxy."
+    ],
+    "probes": [
+      {
+        "trigger": "candidate lists only titles",
+        "question": "What did you personally do in one of those experiences?"
+      },
+      {
+        "trigger": "candidate assumes details not supplied",
+        "question": "Which part of the role would you want to confirm before deciding?"
+      }
+    ],
+    "red_flags": [
+      "Invents qualifications, accomplishments, or employer commitments.",
+      "Uses unsupported assumptions about the candidate instead of job-related evidence."
+    ]
+  },
+  "interviewer_notes": "Use only supplied role facts and candidate-provided experience. Accept examples from study, volunteering, caregiving, military service, informal work, and paid work without ranking their prestige. Do not demand disclosure of health, family, age, nationality, salary history, or reasons for a career gap. Do not score accent, appearance, eye contact, or native-like grammar. A hypothetical example must be identified as hypothetical, not passed off as experience. Missing evidence is not assessed, not automatically scored zero. In simulation ask neutral probes without giving a model answer; coaching may provide graduated help. Play the fictional recruiter. Do not ask work-authorization questions or imply legal eligibility decisions; this scenario assesses role fit and communication.",
+  "learning_drills": [
+    {
+      "id": "practice-next-step",
+      "title": "Prepare a screen outline",
+      "minutes": 5,
+      "prompt": "Write a brief role connection, one evidence example, and two questions that would affect your decision. This is self-guided practice; no model assessment is performed.",
+      "checklist": [
+        "Use a stated responsibility",
+        "Support one skill",
+        "Ask about an uncertainty",
+        "Confirm the next step"
+      ]
+    }
+  ]
+}

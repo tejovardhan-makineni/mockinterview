@@ -1,0 +1,123 @@
+{
+  "schema_version": 1,
+  "revision": 1,
+  "format_id": "work-sample-defense",
+  "review_status": "preview",
+  "provenance": {
+    "authorship": "Original project scenario, AI-assisted draft. Practitioner review and calibration pending.",
+    "license": "AGPL-3.0-only"
+  },
+  "minutes": 30,
+  "id": "operations-backlog-redesign",
+  "title": "Operations Manager: Reduce a Service Backlog Without Hiding Rework",
+  "track": "professional",
+  "domain": "process_improvement",
+  "areas": [
+    "business_operations"
+  ],
+  "modality": "written",
+  "difficulty": "mid",
+  "tags": [
+    "operations-manager",
+    "business-operations",
+    "process-analyst",
+    "service-operations",
+    "practical",
+    "community-preview"
+  ],
+  "prompt": "Fictional Willow Services receives 120 membership applications each week. The team closes 100 weekly, and 240 are waiting. Of the 100 closures, 20 are returned to applicants for missing information. A draft improvement plan says, \"Close every incomplete application immediately; measure success by closures per employee.\" Review the plan and propose a four-week pilot that improves the applicant’s actual experience.",
+  "blurb": "Design a practical backlog pilot that improves completed outcomes and waiting time while reducing rework.",
+  "rubric": [
+    {
+      "key": "measurement",
+      "label": "Define the real outcome",
+      "description": "Separates transaction counts from resolved applicant needs.",
+      "weight": 1,
+      "anchors": {
+        "0": "Uses closure count as the only measure or treats all closures as completed memberships.",
+        "2": "Identifies returns and resubmissions as rework and asks for completion data.",
+        "4": "Defines applicant-level completion and elapsed time alongside backlog age and repeat contacts; explains why 120 minus 100 is a flow signal, not a clean unique-applicant completion estimate."
+      }
+    },
+    {
+      "key": "intervention",
+      "label": "Address a supported cause",
+      "description": "Selects a bounded improvement from observed evidence.",
+      "weight": 1,
+      "anchors": {
+        "0": "Rejects applicants faster or removes eligibility requirements without authority.",
+        "2": "Targets clearer proof-of-address instructions and reminders.",
+        "4": "Uses the 18-of-30 pattern as pilot evidence, tests understandable instructions and support, and keeps other causes and sample limits visible."
+      }
+    },
+    {
+      "key": "evaluation",
+      "label": "Evaluate the pilot fairly",
+      "description": "Checks results without creating a new metric incentive.",
+      "weight": 1,
+      "anchors": {
+        "0": "Declares success from higher closures or compares incomparable groups without caveats.",
+        "2": "Tracks completion and rework over four weeks with baseline measures.",
+        "4": "Defines comparable cohorts, tracks age of older cases and access barriers, assigns review ownership, and states a stop/adjust rule if faster handling increases incorrect returns."
+      }
+    }
+  ],
+  "reference": {
+    "scenario": "Fictional Willow Services receives 120 membership applications each week. The team closes 100 weekly, and 240 are waiting. Of the 100 closures, 20 are returned to applicants for missing information. A draft improvement plan says, \"Close every incomplete application immediately; measure success by closures per employee.\" Review the plan and propose a four-week pilot that improves the applicant’s actual experience.",
+    "facts": [
+      {
+        "id": "fact-1",
+        "value": "Returned applications are counted as closed, but 15 of those applicants usually resubmit the next week. The incoming total includes resubmissions.",
+        "reveal_when": "candidate asks how closure, intake, or rework are counted"
+      },
+      {
+        "id": "fact-2",
+        "value": "A sample of 30 incomplete applications found 18 missing the same proof-of-address item. The team may revise instructions and send reminders, but cannot change eligibility requirements.",
+        "reveal_when": "candidate asks about common causes or permitted process changes"
+      }
+    ],
+    "model_points": [
+      "The backlog grows by about 20 recorded transactions per week at current rates, but resubmissions make that different from 20 unique new people. Do not infer an exact clearance date without stable intake, staffing, and applicant-level data.",
+      "Faster administrative closure could improve the dashboard while making applicants resubmit. Prioritize completed outcomes, waiting time, aged cases, and preventable rework instead of a single per-worker speed metric.",
+      "Pilot clearer proof-of-address instructions and an appropriate reminder route while preserving requirements. Compare similar intake cohorts and review unsuccessful cases, including people who need help with digital submission."
+    ],
+    "probes": [
+      {
+        "trigger": "candidate predicts a clearance date from 100 closures",
+        "question": "Which closures actually resolve an applicant’s need, and which come back?"
+      },
+      {
+        "trigger": "candidate proposes a digital checklist only",
+        "question": "How will the pilot work for someone who needs help accessing the form?"
+      }
+    ],
+    "fair_alternatives": [
+      "A staffed pre-submission check can be a valid pilot if its time cost and accessibility are measured.",
+      "A before/after pilot is acceptable when random assignment is impractical, provided volume, mix, and staffing differences are acknowledged."
+    ],
+    "red_flags": [
+      "Uses closure count as the only measure or treats all closures as completed memberships.",
+      "Rejects applicants faster or removes eligibility requirements without authority.",
+      "Declares success from higher closures or compares incomparable groups without caveats."
+    ],
+    "follow_ups": [
+      "Replace \"closures per employee\" with three measures and explain one behavior each measure might accidentally encourage."
+    ],
+    "exemplar_answer": "I would not call a returned application a completed membership. I would track unique applicants through completion, including resubmissions, and monitor waiting time and aged cases. Because missing proof of address is common in the sample, I would pilot clearer instructions plus an accessible reminder or help route for four weeks. We would compare similar cohorts and inspect incorrect returns, then keep the change only if completion improves without leaving harder cases waiting longer."
+  },
+  "interviewer_notes": "Ask for a practical pilot, not a full transformation strategy. Reward outcome definitions and tradeoffs. Do not make cost cutting or staff surveillance the implied objective. Use only supplied facts; say when something is unknown. Accept plain language and equivalent approaches. Assess the demonstrated decisions, not accent, confidence, credentials, or access to particular employers. This is a fictional exercise; do not imply real actions were performed.",
+  "learning_drills": [
+    {
+      "id": "focused-practice",
+      "title": "Replace a misleading metric",
+      "minutes": 5,
+      "prompt": "Replace \"closures per employee\" with three measures and explain one behavior each measure might accidentally encourage. This is self-guided practice; no model assessment is performed.",
+      "checklist": [
+        "Include applicant-level completion",
+        "Include waiting or backlog age",
+        "Include rework or incorrect returns",
+        "State a balancing check"
+      ]
+    }
+  ]
+}

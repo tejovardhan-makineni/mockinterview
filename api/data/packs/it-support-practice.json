@@ -1,0 +1,58 @@
+{
+  "id": "it-support-practice",
+  "revision": 1,
+  "review_status": "preview",
+  "source_note": "Original community practice path. Each round is a separate attempt. Content is an AI-assisted preview awaiting practitioner review and calibration; this is not an employer process or a hiring-readiness certification.",
+  "name": "IT Support Practice",
+  "areas": [
+    "it_support"
+  ],
+  "track": "professional",
+  "blurb": "Practice a recruiter screen, two it support decisions, and questions about role fit.",
+  "rounds": [
+    {
+      "id": "round-1",
+      "title": "Practice a Recruiter Screening Call",
+      "kind": "recruiter-screen",
+      "domain": "recruiter_screen",
+      "modality": "conversational",
+      "difficulty": "junior",
+      "minutes": 15,
+      "question_id": "career-recruiter-screen",
+      "focus": "Practice motivation, relevant experience, role questions, and clear next steps in a short screening call."
+    },
+    {
+      "id": "round-2",
+      "title": "IT Support: Restore Access Without Skipping Identity Checks",
+      "kind": "stakeholder-simulation",
+      "domain": "service_desk",
+      "modality": "conversational",
+      "difficulty": "entry",
+      "minutes": 20,
+      "question_id": "it-support-account-access",
+      "focus": "Help a caller recover account access while preserving identity checks and supporting an urgent work deadline."
+    },
+    {
+      "id": "round-3",
+      "title": "IT Support Lead: Triage an Office Connectivity Outage",
+      "kind": "incident-simulation",
+      "domain": "it_incident_management",
+      "modality": "conversational",
+      "difficulty": "mid",
+      "minutes": 30,
+      "question_id": "it-support-office-outage",
+      "focus": "Narrow an office outage, coordinate authorized investigation, and keep an imminent meeting moving."
+    },
+    {
+      "id": "round-4",
+      "title": "Use the Final Five Minutes",
+      "kind": "reverse-interview",
+      "domain": "candidate_questions",
+      "modality": "conversational",
+      "difficulty": "mid",
+      "minutes": 10,
+      "question_id": "candidate-questions-role-fit",
+      "focus": "Practice questions about expectations, support, working conditions, and real examples so you can judge role fit."
+    }
+  ]
+}

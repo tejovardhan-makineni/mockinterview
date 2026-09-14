@@ -67,7 +67,7 @@
     "scenario_id": "candidate-questions-role-fit",
     "expected_format": "reverse-interview",
     "context_contains": [
-      "The first three months focus on shipping a small customer-facing improvement with a mentor.",
+      "The first three months focus on improving one recurring service task with a mentor.",
       "candidate asks about success or initial expectations",
       "candidate accepts a vague answer"
     ],

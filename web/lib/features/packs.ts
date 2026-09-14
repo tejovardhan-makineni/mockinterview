@@ -41,6 +41,7 @@ export interface PackDetailRound {
   difficulty: string;
   minutes: number;
   focus: string; // becomes the director's round_focus for the session
+  question_id?: string; // authored scenario for a pinned round; absent for pooled rounds
 }
 
 // A pack detail as served by GET /packs/{id}.

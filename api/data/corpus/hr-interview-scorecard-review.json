@@ -1,0 +1,123 @@
+{
+  "schema_version": 1,
+  "revision": 1,
+  "format_id": "work-sample-defense",
+  "review_status": "preview",
+  "provenance": {
+    "authorship": "Original project scenario, AI-assisted draft. Practitioner review and calibration pending.",
+    "license": "AGPL-3.0-only"
+  },
+  "minutes": 30,
+  "id": "hr-interview-scorecard-review",
+  "title": "HR Partner: Repair an Inconsistent Interview Scorecard",
+  "track": "professional",
+  "domain": "structured_hiring",
+  "areas": [
+    "human_resources"
+  ],
+  "modality": "written",
+  "difficulty": "mid",
+  "tags": [
+    "hr-generalist",
+    "talent-acquisition",
+    "recruiter",
+    "people-operations",
+    "practical",
+    "community-preview"
+  ],
+  "prompt": "You are an HR partner reviewing fictional Westbrook’s customer-support hiring panel. The role requires explaining a policy accurately and resolving a customer’s next step. Candidate A’s note says, \"Confident, knows our hobbies, culture fit: 5/5.\" Candidate B’s note says, \"Quiet, needed time, not a fit: 2/5,\" but records that B explained the policy correctly and agreed a callback. Company hiring practice requires the same core questions, job-related evidence, and anchored scoring before a decision. Review the notes and recommend a fair next step.",
+  "blurb": "Replace affinity-based interview judgments with comparable questions, observable evidence, and anchored scoring.",
+  "rubric": [
+    {
+      "key": "evidence_quality",
+      "label": "Separate job evidence from affinity",
+      "description": "Identifies the unsupported basis for the current scores.",
+      "weight": 1,
+      "anchors": {
+        "0": "Uses shared hobbies or confidence as proof of role competence.",
+        "2": "Flags culture-fit judgments and cites B’s recorded policy and callback evidence.",
+        "4": "Distinguishes absent evidence for A from poor performance, avoids penalizing thinking time by itself, and maps the available evidence to the actual role requirements."
+      }
+    },
+    {
+      "key": "assessment_design",
+      "label": "Restore comparable assessment",
+      "description": "Uses shared questions and behavior anchors without fabricating past performance.",
+      "weight": 1,
+      "anchors": {
+        "0": "Keeps unequal interviews and simply adjusts scores to a preferred candidate.",
+        "2": "Recommends a common follow-up scenario and an anchored rubric.",
+        "4": "Defines observable low, adequate, and strong behaviors for accuracy, resolution, and communication; provides equivalent conditions and records missing evidence rather than guessing it."
+      }
+    },
+    {
+      "key": "decision_process",
+      "label": "Support a documented hiring decision",
+      "description": "Sets panel steps that reduce unsupported judgments.",
+      "weight": 1,
+      "anchors": {
+        "0": "Chooses a hire from the present notes alone or treats the assistant’s impression as a definitive prediction.",
+        "2": "Asks the panel to rescore against job evidence after follow-up.",
+        "4": "Uses independent initial scoring, evidence-based discussion of differences, and a documented decision with unresolved limits; separates practice feedback from employment guarantees."
+      }
+    }
+  ],
+  "reference": {
+    "scenario": "You are an HR partner reviewing fictional Westbrook’s customer-support hiring panel. The role requires explaining a policy accurately and resolving a customer’s next step. Candidate A’s note says, \"Confident, knows our hobbies, culture fit: 5/5.\" Candidate B’s note says, \"Quiet, needed time, not a fit: 2/5,\" but records that B explained the policy correctly and agreed a callback. Company hiring practice requires the same core questions, job-related evidence, and anchored scoring before a decision. Review the notes and recommend a fair next step.",
+    "facts": [
+      {
+        "id": "fact-1",
+        "value": "A was not asked the customer scenario because the panel ran out of time. B answered it after 30 seconds to think. The notes contain no comparable policy-explanation evidence for A.",
+        "reveal_when": "candidate asks whether both candidates received the same questions or what evidence supports scores"
+      },
+      {
+        "id": "fact-2",
+        "value": "The panel can offer both candidates the same short additional scenario under equivalent conditions before the decision. The rubric should assess accuracy, practical next steps, and clear customer communication.",
+        "reveal_when": "candidate asks about collecting missing evidence or agreed role criteria"
+      }
+    ],
+    "model_points": [
+      "The current notes confuse affinity and delivery style with job competence. B has some relevant evidence; A’s missing scenario means a gap, not a demonstrated failure. Neither record supports a complete comparable decision.",
+      "Repair the process prospectively with the same short scenario under equivalent conditions and a shared anchored rubric. Accuracy might distinguish incorrect policy, correct policy without limits, and accurate explanation with relevant limits and verification.",
+      "Have panelists score independently using notes before discussing differences. Record why the final judgment follows the evidence and what remains unknown; do not make a final hiring recommendation from this incomplete vignette."
+    ],
+    "probes": [
+      {
+        "trigger": "candidate recommends B solely from these notes",
+        "question": "What evidence is still missing for a comparable decision about A?"
+      },
+      {
+        "trigger": "candidate retains culture fit but renames it communication",
+        "question": "Which observable customer-support behavior would that score measure?"
+      }
+    ],
+    "fair_alternatives": [
+      "A structured re-interview of the missing competency can work if conditions remain comparable and the organization follows its stated process.",
+      "A written or spoken scenario can be appropriate to the job task; thinking time alone is not evidence of poor communication."
+    ],
+    "red_flags": [
+      "Uses shared hobbies or confidence as proof of role competence.",
+      "Keeps unequal interviews and simply adjusts scores to a preferred candidate.",
+      "Chooses a hire from the present notes alone or treats the assistant’s impression as a definitive prediction."
+    ],
+    "follow_ups": [
+      "Write 0, 2, and 4 anchors for explaining a refund policy, using observable behavior rather than confidence or likability."
+    ],
+    "exemplar_answer": "I would pause the decision because the scores use affinity and speaking style while the candidates received different questions. B’s policy explanation and callback are relevant evidence, but A’s missing scenario is an evidence gap, not a failure. I would define behavior anchors for accuracy, next steps, and customer communication, then offer both the same short scenario under equivalent conditions. Panelists should score independently first and discuss specific evidence before documenting a decision."
+  },
+  "interviewer_notes": "Use the fictional company’s process rather than legal claims. Do not introduce protected characteristics or infer personality. Reward job-relevant evidence and comparable conditions, not a mandated candidate choice. Use only supplied facts; say when something is unknown. Accept plain language and equivalent approaches. Assess the demonstrated decisions, not accent, confidence, credentials, or access to particular employers. This is a fictional exercise; do not imply real actions were performed.",
+  "learning_drills": [
+    {
+      "id": "focused-practice",
+      "title": "Anchor one hiring criterion",
+      "minutes": 5,
+      "prompt": "Write 0, 2, and 4 anchors for explaining a refund policy, using observable behavior rather than confidence or likability. This is self-guided practice; no model assessment is performed.",
+      "checklist": [
+        "Make accuracy observable",
+        "Include policy limits",
+        "Separate thinking time from performance",
+        "Specify evidence rather than a personality label"
+      ]
+    }
+  ]
+}

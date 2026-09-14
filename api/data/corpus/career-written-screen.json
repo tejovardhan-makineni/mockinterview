@@ -1,0 +1,150 @@
+{
+  "schema_version": 1,
+  "revision": 1,
+  "format_id": "written-response",
+  "review_status": "preview",
+  "provenance": {
+    "authorship": "Original project scenario, AI-assisted draft. Practitioner review and scoring calibration pending.",
+    "license": "AGPL-3.0-only"
+  },
+  "minutes": 15,
+  "id": "career-written-screen",
+  "title": "Answer a Written Screening Question",
+  "track": "professional",
+  "domain": "written_screen",
+  "areas": [
+    "career_foundations",
+    "accounting",
+    "business_operations",
+    "civil_engineering",
+    "consulting",
+    "creative_communications",
+    "customer_support",
+    "cybersecurity",
+    "data_science",
+    "education",
+    "electrical_engineering",
+    "finance",
+    "human_resources",
+    "it_support",
+    "law",
+    "marketing",
+    "mechanical_engineering",
+    "medicine",
+    "nursing",
+    "product_management",
+    "project_management",
+    "public_service",
+    "quality_assurance",
+    "research",
+    "retail_hospitality",
+    "sales",
+    "skilled_trades",
+    "social_work",
+    "software_engineering",
+    "supply_chain",
+    "ux_design"
+  ],
+  "modality": "written",
+  "difficulty": "entry",
+  "tags": [
+    "career-foundations",
+    "all-careers",
+    "community-preview",
+    "asynchronous",
+    "written-screen",
+    "prioritization",
+    "business-writing"
+  ],
+  "prompt": "Practice a written screening response to: How would you organize three requests due this afternoon? Request A is due at 2 pm and takes 30 minutes; B is due at 4 pm and takes 90 minutes; C is due at 3 pm but its scope is unclear. It is now noon. Write a concise response explaining your first action, provisional order, and how you would communicate uncertainty. Aim for about 150 words; the word count is a guide, not a scored typing-speed test.",
+  "blurb": "Practice clear written reasoning and a realistic plan for an asynchronous screening question.",
+  "rubric": [
+    {
+      "key": "priority",
+      "label": "Prioritization",
+      "description": "Uses deadlines, effort, and uncertainty.",
+      "weight": 1,
+      "anchors": {
+        "0": "Treats unclear C as definitely short after being told it is unknown.",
+        "2": "Identifies the need to clarify C and proposes a reasonable provisional order.",
+        "4": "Explains a feasible order, checks the effect of C’s possible scope, and names when the plan changes."
+      }
+    },
+    {
+      "key": "communication",
+      "label": "Written clarity",
+      "description": "Makes a coherent plan understandable to a reader.",
+      "weight": 1,
+      "anchors": {
+        "0": "Provides contradictory instructions without resolving them.",
+        "2": "States an understandable next action and rationale.",
+        "4": "Separates the plan, assumption, and update in a concise structure without relying on jargon."
+      }
+    },
+    {
+      "key": "followthrough",
+      "label": "Managing uncertainty",
+      "description": "Explains how to confirm scope and update others.",
+      "weight": 1,
+      "anchors": {
+        "0": "Promises all work will finish regardless of unknown scope.",
+        "2": "Asks for clarification and flags a possible change.",
+        "4": "States what to ask, when to revisit the plan, and who needs an updated expectation."
+      }
+    }
+  ],
+  "reference": {
+    "scenario": "Practice a written screening response to: How would you organize three requests due this afternoon? Request A is due at 2 pm and takes 30 minutes; B is due at 4 pm and takes 90 minutes; C is due at 3 pm but its scope is unclear. It is now noon. Write a concise response explaining your first action, provisional order, and how you would communicate uncertainty. Aim for about 150 words; the word count is a guide, not a scored typing-speed test.",
+    "facts": [
+      {
+        "id": "scope",
+        "value": "Request C takes 45 minutes if only a summary is needed or two hours for a full review; its owner has not chosen.",
+        "reveal_when": "candidate asks about the scope of C"
+      },
+      {
+        "id": "owner",
+        "value": "C’s owner can reply by 12:15 if contacted now.",
+        "reveal_when": "candidate asks when clarification is available"
+      },
+      {
+        "id": "interruptions",
+        "value": "No other work is scheduled in this fictional exercise; do not invent meetings or resources.",
+        "reveal_when": "candidate asks about availability"
+      }
+    ],
+    "model_points": [
+      "Clarify C early; A and B together require two hours before their deadlines.",
+      "A full two-hour C creates a different schedule than the 45-minute version; justified alternatives are valid.",
+      "Assess comprehensibility and reasoning, not native-like grammar, exact word count, or typing speed."
+    ],
+    "probes": [
+      {
+        "trigger": "response omits scope uncertainty",
+        "question": "What assumption about Request C does your plan rely on?"
+      },
+      {
+        "trigger": "candidate only says communicate",
+        "question": "What would your update to the request owner say?"
+      }
+    ],
+    "red_flags": [
+      "Invents qualifications, accomplishments, or employer commitments.",
+      "Uses unsupported assumptions about the candidate instead of job-related evidence."
+    ]
+  },
+  "interviewer_notes": "Use only supplied role facts and candidate-provided experience. Accept examples from study, volunteering, caregiving, military service, informal work, and paid work without ranking their prestige. Do not demand disclosure of health, family, age, nationality, salary history, or reasons for a career gap. Do not score accent, appearance, eye contact, or native-like grammar. A hypothetical example must be identified as hypothetical, not passed off as experience. Missing evidence is not assessed, not automatically scored zero. In simulation ask neutral probes without giving a model answer; coaching may provide graduated help. Let the candidate write before discussing the response. Do not claim this is a timed one-way video feature; it uses the existing written workspace and conversation.",
+  "learning_drills": [
+    {
+      "id": "practice-next-step",
+      "title": "Revise a written answer",
+      "minutes": 5,
+      "prompt": "Rewrite your answer in three short paragraphs: first action, provisional plan, and update if scope changes. This is self-guided practice; no model assessment is performed.",
+      "checklist": [
+        "Use supplied deadlines",
+        "State one assumption",
+        "Explain the next action",
+        "Write a useful update"
+      ]
+    }
+  ]
+}

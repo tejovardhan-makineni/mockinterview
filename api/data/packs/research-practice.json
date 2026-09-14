@@ -1,0 +1,58 @@
+{
+  "id": "research-practice",
+  "revision": 1,
+  "review_status": "preview",
+  "source_note": "Original community practice path. Each round is a separate attempt. Content is an AI-assisted preview awaiting practitioner review and calibration; this is not an employer process or a hiring-readiness certification.",
+  "name": "Research Practice",
+  "areas": [
+    "research"
+  ],
+  "track": "professional",
+  "blurb": "Practice a recruiter screen, two research decisions, and questions about role fit.",
+  "rounds": [
+    {
+      "id": "round-1",
+      "title": "Practice a Recruiter Screening Call",
+      "kind": "recruiter-screen",
+      "domain": "recruiter_screen",
+      "modality": "conversational",
+      "difficulty": "junior",
+      "minutes": 15,
+      "question_id": "career-recruiter-screen",
+      "focus": "Practice motivation, relevant experience, role questions, and clear next steps in a short screening call."
+    },
+    {
+      "id": "round-2",
+      "title": "Research Assistant: Critique an Overconfident Evidence Summary",
+      "kind": "ai-output-critique",
+      "domain": "evidence_appraisal",
+      "modality": "written",
+      "difficulty": "entry",
+      "minutes": 20,
+      "question_id": "research-evidence-summary",
+      "focus": "Correct misleading percentages and causal claims in an AI draft while preserving useful research findings."
+    },
+    {
+      "id": "round-3",
+      "title": "Researcher: Design a Credible Evaluation Under Practical Constraints",
+      "kind": "work-sample-defense",
+      "domain": "study_design",
+      "modality": "written",
+      "difficulty": "mid",
+      "minutes": 30,
+      "question_id": "research-study-design-review",
+      "focus": "Compare feasible study designs and plan consent, measurement, follow-up, and honest limits on conclusions."
+    },
+    {
+      "id": "round-4",
+      "title": "Use the Final Five Minutes",
+      "kind": "reverse-interview",
+      "domain": "candidate_questions",
+      "modality": "conversational",
+      "difficulty": "mid",
+      "minutes": 10,
+      "question_id": "candidate-questions-role-fit",
+      "focus": "Practice questions about expectations, support, working conditions, and real examples so you can judge role fit."
+    }
+  ]
+}

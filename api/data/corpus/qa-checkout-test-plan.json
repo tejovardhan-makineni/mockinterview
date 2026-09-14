@@ -1,0 +1,123 @@
+{
+  "schema_version": 1,
+  "revision": 1,
+  "format_id": "work-sample-defense",
+  "review_status": "preview",
+  "provenance": {
+    "authorship": "Original project scenario, AI-assisted draft. Practitioner review and calibration pending.",
+    "license": "AGPL-3.0-only"
+  },
+  "minutes": 20,
+  "id": "qa-checkout-test-plan",
+  "title": "QA Analyst: Build a Risk-Based Checkout Test Plan",
+  "track": "professional",
+  "domain": "test_design",
+  "areas": [
+    "quality_assurance"
+  ],
+  "modality": "written",
+  "difficulty": "junior",
+  "tags": [
+    "qa-analyst",
+    "software-tester",
+    "manual-testing",
+    "test-cases",
+    "practical",
+    "community-preview"
+  ],
+  "prompt": "Review this fictional checkout specification and draft test list. Specification: an order reserves stock only after a successful payment; a declined payment must leave stock unchanged; retries with the same order ID must not charge twice. Draft tests: \"Buy one item successfully. Check that the button is blue. Refresh the page.\" The shop has five units of an item. Explain the highest-priority gaps and write a focused set of tests with expected results. This is a written exercise; no software is executed.",
+  "blurb": "Build focused tests for payment retries and stock changes with concrete inputs and expected outcomes.",
+  "rubric": [
+    {
+      "key": "risk_selection",
+      "label": "Prioritize business failure",
+      "description": "Ranks payment and inventory behavior above cosmetic assertions for this change.",
+      "weight": 1,
+      "anchors": {
+        "0": "Tests only appearance or the successful purchase path.",
+        "2": "Prioritizes declined payments and repeated order IDs.",
+        "4": "Maps charge duplication, stock mutation, and uncertain payment status to release risk and uses the six-case limit deliberately."
+      }
+    },
+    {
+      "key": "test_oracle",
+      "label": "Specify testable outcomes",
+      "description": "Writes inputs, actions, and observable results.",
+      "weight": 1,
+      "anchors": {
+        "0": "Lists vague actions with no expected result.",
+        "2": "Includes concrete payment outcomes and expected stock or charge behavior.",
+        "4": "States starting stock, order ID reuse, charge count, order state, and unchanged stock expectations for failures; avoids assuming a timeout means decline."
+      }
+    },
+    {
+      "key": "coverage",
+      "label": "Handle boundaries and uncertainty",
+      "description": "Uses distinct cases to examine retries and limited stock.",
+      "weight": 1,
+      "anchors": {
+        "0": "Claims a successful payment proves retries are safe.",
+        "2": "Adds a retry test and an insufficient-stock case.",
+        "4": "Includes duplicate submission and timeout-after-acceptance, explains what evidence distinguishes outcomes, and identifies remaining coverage or specification questions."
+      }
+    }
+  ],
+  "reference": {
+    "scenario": "Review this fictional checkout specification and draft test list. Specification: an order reserves stock only after a successful payment; a declined payment must leave stock unchanged; retries with the same order ID must not charge twice. Draft tests: \"Buy one item successfully. Check that the button is blue. Refresh the page.\" The shop has five units of an item. Explain the highest-priority gaps and write a focused set of tests with expected results. This is a written exercise; no software is executed.",
+    "facts": [
+      {
+        "id": "fact-1",
+        "value": "The payment simulator can return success, decline, or a timeout after accepting a payment. The order status can be inspected in a test environment.",
+        "reveal_when": "candidate asks about available payment outcomes or observability"
+      },
+      {
+        "id": "fact-2",
+        "value": "The release changes retry handling only. You have time for six manual cases; supported devices and accessibility behavior are unchanged in this fictional change.",
+        "reveal_when": "candidate asks about scope, time, or environment"
+      }
+    ],
+    "model_points": [
+      "The draft has no useful expected result for refresh and misses the changed retry behavior. Choose cases by financial and inventory impact, not by how many clicks they cover.",
+      "A declined payment should leave five units unchanged. A successful one-unit order should have one charge and four units remaining. Retrying that same successful order ID should still produce only one charge and one reservation.",
+      "A timeout after acceptance is an uncertain result, not evidence of failure. The test should examine order/payment state and retry behavior. Ask how out-of-stock success is handled instead of inventing a refund policy that the brief does not define."
+    ],
+    "probes": [
+      {
+        "trigger": "candidate proposes many cases without priority",
+        "question": "Which six cases would you actually run before this retry release?"
+      },
+      {
+        "trigger": "candidate equates timeout with declined payment",
+        "question": "The simulator accepted payment before timing out. What should your test observe?"
+      }
+    ],
+    "fair_alternatives": [
+      "Equivalent pairwise or table-based test cases are valid when expected outcomes and risks are clear.",
+      "Automating high-value cases is a reasonable later improvement, but the exercise does not execute tests or require a specific framework."
+    ],
+    "red_flags": [
+      "Tests only appearance or the successful purchase path.",
+      "Lists vague actions with no expected result.",
+      "Claims a successful payment proves retries are safe."
+    ],
+    "follow_ups": [
+      "Rewrite \"refresh the page\" as a test of a completed order retry with an initial state, actions, and expected outcomes."
+    ],
+    "exemplar_answer": "I would replace the color check with cases for a successful purchase, decline, duplicate submission, retry after success, timeout after payment acceptance, and a stock boundary. For a one-unit successful order starting at five, I expect one charge and stock of four; retrying the same order must leave those counts unchanged. The timeout case needs inspection of payment and order state before concluding failure. I would ask how the system should handle stock becoming unavailable around payment before assigning that case a pass result."
+  },
+  "interviewer_notes": "Give time to inspect the specification. Reward clear test oracles and explicit specification gaps. Do not score code syntax or insist on one ordering of equally important cases. Use only supplied facts; say when something is unknown. Accept plain language and equivalent approaches. Assess the demonstrated decisions, not accent, confidence, credentials, or access to particular employers. This is a fictional exercise; do not imply real actions were performed.",
+  "learning_drills": [
+    {
+      "id": "focused-practice",
+      "title": "Turn a vague check into a test",
+      "minutes": 5,
+      "prompt": "Rewrite \"refresh the page\" as a test of a completed order retry with an initial state, actions, and expected outcomes. This is self-guided practice; no model assessment is performed.",
+      "checklist": [
+        "Use one explicit order ID",
+        "State initial stock and payment state",
+        "Count expected charges and reservations",
+        "State what observation would indicate failure"
+      ]
+    }
+  ]
+}

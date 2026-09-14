@@ -6,6 +6,7 @@
 
 import { req, BASE, authHeader } from "../http";
 import type { Personality } from "../domain";
+import preview from "./catalog-preview.json";
 
 export interface Profile {
   name?: string;
@@ -28,6 +29,18 @@ export interface Profession {
   label: string;
   count: number;
   tracks: string[];
+  family?: string;
+  family_label?: string;
+  aliases?: string[];
+  agent?: SpecialistAgent;
+}
+
+// Public description only; specialist interview and scoring instructions stay
+// on the server. The same metadata accompanies an individual scenario.
+export interface SpecialistAgent {
+  id: string;
+  name: string;
+  summary: string;
 }
 
 export interface InterviewConfig {
@@ -234,58 +247,11 @@ export const MOCK_PERSONALITIES: PersonalityOption[] = [
   },
 ];
 
-// The 11 canonical professions (= corpus `areas`). Mirrors what the backend
-// GET /api/v1/professions derives from the loaded corpus, so the onboarding /
-// settings pickers work offline under NEXT_PUBLIC_MOCK=1. The live app is the
-// single source; counts here are indicative only.
-export const MOCK_PROFESSIONS: Profession[] = [
-  {
-    key: "software_engineering",
-    label: "Software Engineering",
-    count: 24,
-    tracks: ["engineering"],
-  },
-  {
-    key: "data_science",
-    label: "Data Science",
-    count: 12,
-    tracks: ["engineering"],
-  },
-  { key: "medicine", label: "Medicine", count: 10, tracks: ["professional"] },
-  { key: "nursing", label: "Nursing", count: 6, tracks: ["professional"] },
-  { key: "law", label: "Law", count: 6, tracks: ["professional"] },
-  {
-    key: "consulting",
-    label: "Consulting",
-    count: 8,
-    tracks: ["professional"],
-  },
-  { key: "finance", label: "Finance", count: 8, tracks: ["professional"] },
-  {
-    key: "product_management",
-    label: "Product Management",
-    count: 8,
-    tracks: ["professional"],
-  },
-  {
-    key: "mechanical_engineering",
-    label: "Mechanical Engineering",
-    count: 6,
-    tracks: ["engineering"],
-  },
-  {
-    key: "electrical_engineering",
-    label: "Electrical Engineering",
-    count: 6,
-    tracks: ["engineering"],
-  },
-  {
-    key: "civil_engineering",
-    label: "Civil Engineering",
-    count: 6,
-    tracks: ["engineering"],
-  },
-];
+// Public registry metadata accompanying the small mock catalog snapshot.
+// Counts and tracks reflect only those preview scenarios, not the full bank.
+// The live application always obtains this metadata from /professions.
+export const MOCK_PROFESSIONS: Profession[] =
+  preview.professions as Profession[];
 
 export const profileMock: ProfileSlice = {
   async getConfig() {

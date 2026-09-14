@@ -1,0 +1,166 @@
+{
+  "schema_version": 1,
+  "revision": 1,
+  "format_id": "panel-simulation",
+  "review_status": "preview",
+  "provenance": {
+    "authorship": "Original project scenario, AI-assisted draft. Practitioner review and scoring calibration pending.",
+    "license": "AGPL-3.0-only"
+  },
+  "minutes": 20,
+  "id": "career-panel-priorities",
+  "title": "Handle Competing Panel Priorities",
+  "track": "professional",
+  "domain": "panel_interview",
+  "areas": [
+    "career_foundations",
+    "accounting",
+    "business_operations",
+    "civil_engineering",
+    "consulting",
+    "creative_communications",
+    "customer_support",
+    "cybersecurity",
+    "data_science",
+    "education",
+    "electrical_engineering",
+    "finance",
+    "human_resources",
+    "it_support",
+    "law",
+    "marketing",
+    "mechanical_engineering",
+    "medicine",
+    "nursing",
+    "product_management",
+    "project_management",
+    "public_service",
+    "quality_assurance",
+    "research",
+    "retail_hospitality",
+    "sales",
+    "skilled_trades",
+    "social_work",
+    "software_engineering",
+    "supply_chain",
+    "ux_design"
+  ],
+  "modality": "conversational",
+  "difficulty": "senior",
+  "tags": [
+    "career-foundations",
+    "all-careers",
+    "community-preview",
+    "panel",
+    "leadership",
+    "prioritization",
+    "presentation"
+  ],
+  "prompt": "One AI interviewer will simulate three fictional panel perspectives: the team lead, a colleague, and a service manager. You have ten staff-hours this week to improve a handoff process. Drafting a shared checklist takes four hours, testing it takes four, and training everyone takes four. Propose a first step and explain your tradeoffs as each panel perspective asks a question. There is no requirement to fund all three activities this week.",
+  "blurb": "Practice a concise proposal, changing interviewer perspectives, and tradeoffs under a fixed capacity limit.",
+  "rubric": [
+    {
+      "key": "feasibility",
+      "label": "Feasible proposal",
+      "description": "Plans within ten staff-hours.",
+      "weight": 1,
+      "anchors": {
+        "0": "Continues committing twelve hours despite the capacity constraint.",
+        "2": "Proposes activities totaling at most ten hours.",
+        "4": "Gives a feasible sequence with a clear deferred task and a check before wider rollout."
+      }
+    },
+    {
+      "key": "perspectives",
+      "label": "Responding to perspectives",
+      "description": "Uses concerns raised by different panel roles.",
+      "weight": 1,
+      "anchors": {
+        "0": "Dismisses a stated concern without addressing its consequence.",
+        "2": "Responds to each concern that is actually raised.",
+        "4": "Connects competing concerns and revises the plan without losing the shared goal."
+      }
+    },
+    {
+      "key": "judgment",
+      "label": "Tradeoff reasoning",
+      "description": "Explains why one scope is preferable.",
+      "weight": 1,
+      "anchors": {
+        "0": "Claims all goals can be achieved without acknowledging constraints.",
+        "2": "Explains one benefit and one cost of their choice.",
+        "4": "Compares a viable alternative, states a risk, and identifies evidence that would change their choice."
+      }
+    },
+    {
+      "key": "closure",
+      "label": "Clear synthesis",
+      "description": "Ends with a coherent decision and open question.",
+      "weight": 1,
+      "anchors": {
+        "0": "Ends with contradictory commitments without resolving them.",
+        "2": "Summarizes the next step and a remaining uncertainty.",
+        "4": "Names the next action, owner role, review point, and unresolved decision consistently."
+      }
+    }
+  ],
+  "reference": {
+    "scenario": "One AI interviewer will simulate three fictional panel perspectives: the team lead, a colleague, and a service manager. You have ten staff-hours this week to improve a handoff process. Drafting a shared checklist takes four hours, testing it takes four, and training everyone takes four. Propose a first step and explain your tradeoffs as each panel perspective asks a question. There is no requirement to fund all three activities this week.",
+    "facts": [
+      {
+        "id": "lead",
+        "value": "The team lead wants a usable improvement this week and can approve a small pilot.",
+        "reveal_when": "team lead perspective is introduced or candidate asks about authority"
+      },
+      {
+        "id": "colleague",
+        "value": "A colleague reports that an earlier checklist was too long and unused.",
+        "reveal_when": "candidate asks about past attempts or colleague perspective is introduced"
+      },
+      {
+        "id": "service",
+        "value": "The service manager needs normal request handling to continue; no extra staff-hours are available this week.",
+        "reveal_when": "candidate asks about service coverage or service manager perspective is introduced"
+      },
+      {
+        "id": "pilot",
+        "value": "A pilot can train two people within two hours instead of the four-hour full rollout; its results would be incomplete evidence for wider rollout.",
+        "reveal_when": "candidate asks whether a smaller rollout is possible"
+      }
+    ],
+    "model_points": [
+      "A four-hour draft, four-hour test, and two-hour pilot can fit; deferring training is also defensible.",
+      "Do not reveal the small-pilot fact until the candidate asks about options.",
+      "The same AI shifts perspectives; this does not provide independent panel scores."
+    ],
+    "probes": [
+      {
+        "trigger": "proposal exceeds capacity",
+        "question": "How does that plan fit within the ten available hours?"
+      },
+      {
+        "trigger": "candidate ignores the earlier unused checklist",
+        "question": "Colleague perspective: What would make this attempt useful in daily work?"
+      }
+    ],
+    "red_flags": [
+      "Invents qualifications, accomplishments, or employer commitments.",
+      "Uses unsupported assumptions about the candidate instead of job-related evidence."
+    ]
+  },
+  "interviewer_notes": "Use only supplied role facts and candidate-provided experience. Accept examples from study, volunteering, caregiving, military service, informal work, and paid work without ranking their prestige. Do not demand disclosure of health, family, age, nationality, salary history, or reasons for a career gap. Do not score accent, appearance, eye contact, or native-like grammar. A hypothetical example must be identified as hypothetical, not passed off as experience. Missing evidence is not assessed, not automatically scored zero. In simulation ask neutral probes without giving a model answer; coaching may provide graduated help. Announce each perspective switch with its role. Ask one question per turn, avoid simultaneous voices or interruptions, and assess only perspectives reached in the session.",
+  "learning_drills": [
+    {
+      "id": "practice-next-step",
+      "title": "Make a tradeoff brief",
+      "minutes": 5,
+      "prompt": "Write a six-line plan: goal, time budget, selected work, deferred work, risk, and review point. This is self-guided practice; no model assessment is performed.",
+      "checklist": [
+        "Keep within capacity",
+        "Name a deferred task",
+        "Address a colleague concern",
+        "Define a review point"
+      ]
+    }
+  ]
+}

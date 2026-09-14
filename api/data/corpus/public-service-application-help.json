@@ -1,0 +1,123 @@
+{
+  "schema_version": 1,
+  "revision": 1,
+  "format_id": "stakeholder-simulation",
+  "review_status": "preview",
+  "provenance": {
+    "authorship": "Original project scenario, AI-assisted draft. Practitioner review and calibration pending.",
+    "license": "AGPL-3.0-only"
+  },
+  "minutes": 20,
+  "id": "public-service-application-help",
+  "title": "Public Service Adviser: Help an Applicant Complete a Form",
+  "track": "professional",
+  "domain": "public_service_delivery",
+  "areas": [
+    "public_service"
+  ],
+  "modality": "conversational",
+  "difficulty": "entry",
+  "tags": [
+    "public-service-adviser",
+    "council-service-officer",
+    "government-service-assistant",
+    "community-services",
+    "practical",
+    "community-preview"
+  ],
+  "prompt": "You staff the fictional Northborough community-program desk. An applicant says the online transport-voucher form keeps rejecting their address and asks you to submit it for them. Program procedure allows staff to explain questions, provide a paper route, and help enter answers with the applicant’s consent. Staff cannot invent answers or promise eligibility. The applicant does not have reliable internet at home. Handle the conversation and agree on a useful next step.",
+  "blurb": "Help an applicant choose an accessible form-completion route with consent, accurate information, and clear follow-up.",
+  "rubric": [
+    {
+      "key": "clarification",
+      "label": "Find the form problem without assumptions",
+      "description": "Asks about the failed field and uses the actual form requirements.",
+      "weight": 1,
+      "anchors": {
+        "0": "Changes the address to a convenient false value or assumes temporary accommodation means ineligibility.",
+        "2": "Clarifies the address error and distinguishes residence from mailing address.",
+        "4": "Checks the field requirements with the applicant, identifies the documentation question for the reviewer, and preserves unknown answers as pending."
+      }
+    },
+    {
+      "key": "access",
+      "label": "Provide respectful assisted access",
+      "description": "Offers a usable route with consent and privacy.",
+      "weight": 1,
+      "anchors": {
+        "0": "Requires home internet or takes over the form without consent.",
+        "2": "Offers paper or supported entry and asks for consent.",
+        "4": "Lets the applicant choose the route, uses the private desk for personal information, reads back entered answers, and avoids unnecessary personal detail."
+      }
+    },
+    {
+      "key": "follow_through",
+      "label": "Set an accurate next step",
+      "description": "Routes eligibility questions and confirms status and contact arrangements.",
+      "weight": 1,
+      "anchors": {
+        "0": "Promises approval or says the form has been submitted when it is only a draft.",
+        "2": "Explains reviewer ownership and arranges documentation clarification.",
+        "4": "Distinguishes saved draft from submission, confirms an accessible next-day contact route, and summarizes what the applicant and program team will each do."
+      }
+    }
+  ],
+  "reference": {
+    "scenario": "You staff the fictional Northborough community-program desk. An applicant says the online transport-voucher form keeps rejecting their address and asks you to submit it for them. Program procedure allows staff to explain questions, provide a paper route, and help enter answers with the applicant’s consent. Staff cannot invent answers or promise eligibility. The applicant does not have reliable internet at home. Handle the conversation and agree on a useful next step.",
+    "facts": [
+      {
+        "id": "fact-1",
+        "value": "The applicant lives in temporary accommodation and uses a mailing address different from their current residence. The form requires both fields; acceptable documentation is determined by the program reviewer, not the desk adviser.",
+        "reveal_when": "candidate asks which field fails or what address information the form requires"
+      },
+      {
+        "id": "fact-2",
+        "value": "A private desk and paper form are available. The program team can clarify documentation by the next working day, and the application can be saved as a draft while waiting.",
+        "reveal_when": "candidate asks about accessible alternatives, privacy, or review support"
+      }
+    ],
+    "model_points": [
+      "The adviser can help with process, not determine eligibility or fabricate information to bypass validation. Check whether the address problem reflects separate residence and mailing fields before proposing a solution.",
+      "Offer the paper route or consent-based assisted entry, and use the private desk. Read the entered answers back so assistance does not take control away from the applicant.",
+      "The program reviewer decides acceptable documentation. Save a draft if information is pending and give a practical follow-up route that does not depend on reliable home internet."
+    ],
+    "probes": [
+      {
+        "trigger": "candidate suggests using another address to pass validation",
+        "question": "How would that preserve the applicant’s actual information?"
+      },
+      {
+        "trigger": "candidate gives only a web link",
+        "question": "Which route can this applicant use without reliable internet at home?"
+      }
+    ],
+    "fair_alternatives": [
+      "Paper submission or supported digital entry is acceptable if the applicant chooses it and required information is accurate.",
+      "A return visit or agreed phone contact is reasonable for the next-day clarification; email is not the default requirement."
+    ],
+    "red_flags": [
+      "Changes the address to a convenient false value or assumes temporary accommodation means ineligibility.",
+      "Requires home internet or takes over the form without consent.",
+      "Promises approval or says the form has been submitted when it is only a draft."
+    ],
+    "follow_ups": [
+      "Write a plain-language closing stating form status, pending information, reviewer action, and the applicant’s chosen contact route."
+    ],
+    "exemplar_answer": "I can help you work through the form, and you can choose paper or supported entry at our private desk. With your permission, I would check the residence and mailing-address fields and read the answers back to you. I would not substitute a false address or promise eligibility. We can save a draft while the program team checks acceptable documentation, then agree on a phone call or return visit by the next working day."
+  },
+  "interviewer_notes": "Use the fictional program’s process only; do not introduce benefits law or immigration assumptions. Do not score typing speed, formal language, or familiarity with government terminology. Use only supplied facts; say when something is unknown. Accept plain language and equivalent approaches. Assess the demonstrated decisions, not accent, confidence, credentials, or access to particular employers. This is a fictional exercise; do not imply real actions were performed.",
+  "learning_drills": [
+    {
+      "id": "focused-practice",
+      "title": "Explain the next step clearly",
+      "minutes": 5,
+      "prompt": "Write a plain-language closing stating form status, pending information, reviewer action, and the applicant’s chosen contact route. This is self-guided practice; no model assessment is performed.",
+      "checklist": [
+        "Do not promise eligibility",
+        "Separate draft from submission",
+        "Respect the chosen assistance route",
+        "Avoid an internet-only follow-up"
+      ]
+    }
+  ]
+}

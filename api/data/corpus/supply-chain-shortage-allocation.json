@@ -1,0 +1,123 @@
+{
+  "schema_version": 1,
+  "revision": 1,
+  "format_id": "stakeholder-simulation",
+  "review_status": "preview",
+  "provenance": {
+    "authorship": "Original project scenario, AI-assisted draft. Practitioner review and calibration pending.",
+    "license": "AGPL-3.0-only"
+  },
+  "minutes": 30,
+  "id": "supply-chain-shortage-allocation",
+  "title": "Supply Chain Planner: Allocate a Short Shipment Transparently",
+  "track": "professional",
+  "domain": "supply_planning",
+  "areas": [
+    "supply_chain"
+  ],
+  "modality": "conversational",
+  "difficulty": "mid",
+  "tags": [
+    "supply-chain-planner",
+    "procurement-specialist",
+    "inventory-planner",
+    "demand-planning",
+    "practical",
+    "community-preview"
+  ],
+  "prompt": "You plan supplies for fictional Oak Catering. A late shipment means only 80 sealed meal packs are available for tomorrow; branch A requested 50 and branch B requested 60. Branch A’s manager asks you to send their full 50 because they ordered first. Company priority is confirmed customer commitments, then a fair documented allocation of flexible demand. An alternate supplier is possible but unconfirmed. Negotiate a provisional plan and explain what you need to verify.",
+  "blurb": "Allocate scarce stock against confirmed commitments and negotiate a transparent plan for flexible demand.",
+  "rubric": [
+    {
+      "key": "allocation",
+      "label": "Apply an explicit allocation basis",
+      "description": "Uses commitments and available quantities consistently.",
+      "weight": 1,
+      "anchors": {
+        "0": "Gives A all 50 solely for asking first or allocates more than 80.",
+        "2": "Protects the 75 confirmed meals and identifies five packs for flexible demand.",
+        "4": "States a documented fair rule for the remaining five, checks rounding and total allocation, and explains it consistently to both branches."
+      }
+    },
+    {
+      "key": "contingency",
+      "label": "Separate available from potential supply",
+      "description": "Builds a plan around evidence and decision cutoffs.",
+      "weight": 1,
+      "anchors": {
+        "0": "Promises the unconfirmed 20 packs as available tomorrow.",
+        "2": "Keeps alternate supply conditional and sets a confirmation deadline.",
+        "4": "Coordinates the 15:30 cost approval and 16:00 supplier confirmation before 17:00 dispatch, with a fallback allocation if either fails."
+      }
+    },
+    {
+      "key": "stakeholder_alignment",
+      "label": "Negotiate and communicate tradeoffs",
+      "description": "Makes the plan understandable and accountable.",
+      "weight": 1,
+      "anchors": {
+        "0": "Conceals one branch’s shortfall or lets the louder manager set the rule.",
+        "2": "Explains priority and asks branches to confirm their demand.",
+        "4": "Confirms the provisional and final quantities, names who tells affected flexible customers, and records assumptions and a reassignment rule if demand changes."
+      }
+    }
+  ],
+  "reference": {
+    "scenario": "You plan supplies for fictional Oak Catering. A late shipment means only 80 sealed meal packs are available for tomorrow; branch A requested 50 and branch B requested 60. Branch A’s manager asks you to send their full 50 because they ordered first. Company priority is confirmed customer commitments, then a fair documented allocation of flexible demand. An alternate supplier is possible but unconfirmed. Negotiate a provisional plan and explain what you need to verify.",
+    "facts": [
+      {
+        "id": "fact-1",
+        "value": "Branch A has 30 confirmed meals and 20 flexible requests. Branch B has 45 confirmed meals and 15 flexible requests. All packs in this scenario are interchangeable for these orders.",
+        "reveal_when": "candidate asks about confirmed versus flexible demand or product suitability"
+      },
+      {
+        "id": "fact-2",
+        "value": "The alternate supplier may deliver 20 packs by 11:00, but confirmation is due at 16:00 today. Both branches need final dispatch quantities by 17:00. The cost approver is available at 15:30.",
+        "reveal_when": "candidate asks about alternate supply, cutoff times, or budget approval"
+      }
+    ],
+    "model_points": [
+      "Confirmed demand is 30 plus 45, totaling 75; 80 available leaves five flexible packs. The flexible shortfall is 30, not 20, before alternate supply.",
+      "One fair illustrative allocation is three of the five flexible packs to A and two to B, roughly proportional to 20 versus 15 flexible requests. Other transparent rules can work; consistency matters more than that exact split.",
+      "An additional 20 packs would increase supply to 100 and still leave ten of the 110 requests uncovered. Use approval and supplier-confirmation deadlines to define the final plan rather than promising all demand will be met."
+    ],
+    "probes": [
+      {
+        "trigger": "candidate assumes the alternate order removes the shortage",
+        "question": "If all 20 extra packs arrive, how does 100 compare with 110 requested?"
+      },
+      {
+        "trigger": "candidate gives A priority because it ordered first",
+        "question": "How does that follow the organization’s confirmed-commitment rule?"
+      }
+    ],
+    "fair_alternatives": [
+      "A documented rotation, proportional split, or mutually agreed transfer can fairly handle the five flexible packs.",
+      "Declining alternate supply is defensible if its cost or timing cannot be authorized, provided the fallback is clearly communicated."
+    ],
+    "red_flags": [
+      "Gives A all 50 solely for asking first or allocates more than 80.",
+      "Promises the unconfirmed 20 packs as available tomorrow.",
+      "Conceals one branch’s shortfall or lets the louder manager set the rule."
+    ],
+    "follow_ups": [
+      "Create a branch table with confirmed need, flexible need, baseline allocation, and conditional extra supply."
+    ],
+    "exemplar_answer": "I would protect A’s 30 and B’s 45 confirmed meals, leaving five packs for flexible requests. I would propose a transparent three-and-two split and ask both branches to confirm their numbers. The alternate 20 are conditional: I would seek cost approval at 15:30 and supplier confirmation at 16:00, then issue final quantities before 17:00. Even with that delivery, we would still be ten short, so the branch owners need a clear plan for remaining flexible requests."
+  },
+  "interviewer_notes": "Play branch A’s manager, then ask how the plan would be explained to B. Do not introduce food safety, perishability, or dietary differences absent from the stated interchangeable-pack exercise. Use only supplied facts; say when something is unknown. Accept plain language and equivalent approaches. Assess the demonstrated decisions, not accent, confidence, credentials, or access to particular employers. This is a fictional exercise; do not imply real actions were performed.",
+  "learning_drills": [
+    {
+      "id": "focused-practice",
+      "title": "Make an allocation table",
+      "minutes": 5,
+      "prompt": "Create a branch table with confirmed need, flexible need, baseline allocation, and conditional extra supply. This is self-guided practice; no model assessment is performed.",
+      "checklist": [
+        "Keep baseline total at 80",
+        "Protect 75 confirmed meals",
+        "Explain the flexible-allocation rule",
+        "Show a fallback before dispatch cutoff"
+      ]
+    }
+  ]
+}

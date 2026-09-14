@@ -1,0 +1,123 @@
+{
+  "schema_version": 1,
+  "revision": 1,
+  "format_id": "incident-simulation",
+  "review_status": "preview",
+  "provenance": {
+    "authorship": "Original project scenario, AI-assisted draft. Practitioner review and calibration pending.",
+    "license": "AGPL-3.0-only"
+  },
+  "minutes": 30,
+  "id": "trades-maintenance-priority",
+  "title": "Facilities Lead: Prioritize Competing Maintenance Requests",
+  "track": "professional",
+  "domain": "facilities_coordination",
+  "areas": [
+    "skilled_trades"
+  ],
+  "modality": "conversational",
+  "difficulty": "mid",
+  "tags": [
+    "facilities-coordinator",
+    "maintenance-lead",
+    "building-services",
+    "work-order-prioritization",
+    "practical",
+    "community-preview"
+  ],
+  "prompt": "You coordinate maintenance at fictional Cedar Hall with one general technician available. Three reports arrive: water is dripping beside an electrical cabinet in a service corridor; an office is too warm; and a meeting-room door handle is loose. Site policy says suspected water near electrical equipment requires keeping people out and immediate escalation to the authorized facilities emergency team. Your technician is not qualified for electrical work. Set priorities, communicate with occupants, and plan the handoffs. Do not describe electrical repair steps.",
+  "blurb": "Prioritize competing facilities requests and match each response to qualified staff and verified safety conditions.",
+  "rubric": [
+    {
+      "key": "priority",
+      "label": "Prioritize by hazard and impact",
+      "description": "Ranks the potential electrical hazard without ignoring uncertainty elsewhere.",
+      "weight": 1,
+      "anchors": {
+        "0": "Sends the general technician to work on the wet cabinet or prioritizes comfort first.",
+        "2": "Keeps the corridor clear and escalates the water report first.",
+        "4": "Uses the alternate route, confirms no immediate injury, and assesses the door and comfort reports for changes in urgency while awaiting authorized help."
+      }
+    },
+    {
+      "key": "resource_use",
+      "label": "Match tasks to competence",
+      "description": "Assigns work within qualification and available capacity.",
+      "weight": 1,
+      "anchors": {
+        "0": "Assumes a general technician can diagnose or repair electrical equipment.",
+        "2": "Reserves the cabinet issue for the emergency team and assigns permitted inspections.",
+        "4": "Separates coordination from repair, sequences the door inspection and comfort investigation, and rechecks technician availability before promising completion times."
+      }
+    },
+    {
+      "key": "communication",
+      "label": "Maintain ownership through resolution",
+      "description": "Sets clear occupant guidance, updates, and release conditions.",
+      "weight": 1,
+      "anchors": {
+        "0": "Reports the cabinet safe because help is en route or closes uninspected requests.",
+        "2": "Notifies affected occupants and gives an emergency-team update time.",
+        "4": "Names each owner, uses the temporary room and alternate route, records unresolved observations, and requires the appropriate qualified release or inspection result before closure."
+      }
+    }
+  ],
+  "reference": {
+    "scenario": "You coordinate maintenance at fictional Cedar Hall with one general technician available. Three reports arrive: water is dripping beside an electrical cabinet in a service corridor; an office is too warm; and a meeting-room door handle is loose. Site policy says suspected water near electrical equipment requires keeping people out and immediate escalation to the authorized facilities emergency team. Your technician is not qualified for electrical work. Set priorities, communicate with occupants, and plan the handoffs. Do not describe electrical repair steps.",
+    "facts": [
+      {
+        "id": "fact-1",
+        "value": "No injury is reported and the source of the water is unknown. The service corridor can be avoided using a marked alternate route. The emergency facilities team can respond in 20 minutes.",
+        "reveal_when": "candidate asks about immediate impact, access, or authorized response"
+      },
+      {
+        "id": "fact-2",
+        "value": "The warm office has a working alternative room. The meeting-room door still opens normally, but the technician must inspect its condition before it is treated as safe for continued use. No occupant is trapped.",
+        "reveal_when": "candidate asks about the other requests, affected people, or temporary arrangements"
+      }
+    ],
+    "model_points": [
+      "Treat the water-near-electrical report as the first priority using the fictional site procedure. Keep people out through the permitted alternate route and contact the authorized team; do not give electrical intervention instructions.",
+      "The remaining reports still need assessment. A loose handle can affect access, so verify its condition with the general technician rather than dismissing it as cosmetic. A working alternative room may reduce the immediate comfort impact.",
+      "Communicate temporary arrangements and an honest update window. Twenty minutes is the response estimate, not a repair-completion promise. Keep each work order open until its actual owner supplies the required inspection or release evidence."
+    ],
+    "probes": [
+      {
+        "trigger": "candidate assigns the technician to stop the leak beside the cabinet",
+        "question": "What qualification and site rule govern work near that equipment?"
+      },
+      {
+        "trigger": "candidate ignores the door as minor",
+        "question": "What do you need to know before treating the door as safe for continued use?"
+      }
+    ],
+    "fair_alternatives": [
+      "The order of the door inspection and comfort investigation can change if new occupant-impact evidence warrants it.",
+      "A coordinator may delegate communications while retaining incident ownership; no specific work-order tool is required."
+    ],
+    "red_flags": [
+      "Sends the general technician to work on the wet cabinet or prioritizes comfort first.",
+      "Assumes a general technician can diagnose or repair electrical equipment.",
+      "Reports the cabinet safe because help is en route or closes uninspected requests."
+    ],
+    "follow_ups": [
+      "Write one sentence per request naming priority, temporary arrangement, owner, and next evidence needed."
+    ],
+    "exemplar_answer": "I would first keep people out of the service corridor, direct them to the alternate route, and call the authorized emergency team. Our general technician should not work on the cabinet. I would ask that technician to inspect the loose handle, confirm no access issue is developing, and then assess the warm office while occupants use the available alternative room. Updates would name the owners and response times; closure would depend on inspection or qualified release, not an assumption that the work is finished."
+  },
+  "interviewer_notes": "Keep all technical work inside stated qualification boundaries. Do not provide diagnoses or repair instructions. Probe prioritization, continuity, and verification rather than trade credentials. Use only supplied facts; say when something is unknown. Accept plain language and equivalent approaches. Assess the demonstrated decisions, not accent, confidence, credentials, or access to particular employers. This is a fictional exercise; do not imply real actions were performed.",
+  "learning_drills": [
+    {
+      "id": "focused-practice",
+      "title": "Write three maintenance updates",
+      "minutes": 5,
+      "prompt": "Write one sentence per request naming priority, temporary arrangement, owner, and next evidence needed. This is self-guided practice; no model assessment is performed.",
+      "checklist": [
+        "Give the electrical concern an authorized response",
+        "Avoid equating arrival with repair",
+        "Check the door before closure",
+        "Use the available comfort workaround"
+      ]
+    }
+  ]
+}

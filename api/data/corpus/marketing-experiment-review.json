@@ -1,0 +1,123 @@
+{
+  "schema_version": 1,
+  "revision": 1,
+  "format_id": "ai-output-critique",
+  "review_status": "preview",
+  "provenance": {
+    "authorship": "Original project scenario, AI-assisted draft. Practitioner review and calibration pending.",
+    "license": "AGPL-3.0-only"
+  },
+  "minutes": 30,
+  "id": "marketing-experiment-review",
+  "title": "Marketing Analyst: Review a Campaign Winner Claim",
+  "track": "professional",
+  "domain": "marketing_experimentation",
+  "areas": [
+    "marketing"
+  ],
+  "modality": "written",
+  "difficulty": "mid",
+  "tags": [
+    "marketing-analyst",
+    "growth-marketer",
+    "performance-marketing",
+    "campaign-analysis",
+    "practical",
+    "community-preview"
+  ],
+  "prompt": "Fictional Summit Training tested two landing-page messages for a course. Variant A: 1,000 visits, 100 enquiry forms, 20 confirmed bookings, $500 ad spend. Variant B: 1,000 visits, 150 enquiry forms, 15 confirmed bookings, $500 ad spend. The business goal is confirmed bookings at sustainable acquisition cost. An AI summary says, \"B wins because enquiries rose 50%; move the entire budget to B.\" Review the claim, calculate useful measures, and recommend a next decision without inventing profitability or statistical certainty.",
+  "blurb": "Evaluate a campaign using booking cost, comparable follow-up, and evidence needed for the next spending decision.",
+  "rubric": [
+    {
+      "key": "metrics",
+      "label": "Calculate goal-aligned measures",
+      "description": "Uses bookings and cost alongside the enquiry funnel.",
+      "weight": 1,
+      "anchors": {
+        "0": "Selects B solely on enquiry count or calculates bookings per enquiry incorrectly.",
+        "2": "Calculates A at 2% booking conversion and $25 per booking, B at 1.5% and about $33.33 based on current observations.",
+        "4": "Also identifies 10% versus 15% enquiry conversion and 20% versus 10% enquiry-to-booking conversion, labeling all booking comparisons as provisional because follow-up differs."
+      }
+    },
+    {
+      "key": "validity",
+      "label": "Inspect the comparison design",
+      "description": "Identifies confounding and incomplete outcome observation.",
+      "weight": 1,
+      "anchors": {
+        "0": "Calls either variant a proven causal winner from the current totals.",
+        "2": "Flags nonrandom timing and B’s shorter follow-up.",
+        "4": "Explains weekday/weekend audience differences and immature bookings separately, waits for comparable outcome windows, and avoids treating equal visit counts as equivalent audiences."
+      }
+    },
+    {
+      "key": "decision",
+      "label": "Recommend a proportionate next step",
+      "description": "Connects uncertainty to an operational test and economic limits.",
+      "weight": 1,
+      "anchors": {
+        "0": "Moves all spend immediately or declares profitability without margin data.",
+        "2": "Recommends completing follow-up and testing concurrently.",
+        "4": "Defines the booking metric and observation window before the next test, uses comparable or randomized allocation if feasible, retains bounded spend, and identifies cancellation and margin evidence needed for a sustainable-cost decision."
+      }
+    }
+  ],
+  "reference": {
+    "scenario": "Fictional Summit Training tested two landing-page messages for a course. Variant A: 1,000 visits, 100 enquiry forms, 20 confirmed bookings, $500 ad spend. Variant B: 1,000 visits, 150 enquiry forms, 15 confirmed bookings, $500 ad spend. The business goal is confirmed bookings at sustainable acquisition cost. An AI summary says, \"B wins because enquiries rose 50%; move the entire budget to B.\" Review the claim, calculate useful measures, and recommend a next decision without inventing profitability or statistical certainty.",
+    "facts": [
+      {
+        "id": "fact-1",
+        "value": "A ran during weekdays and B during the weekend; visitors were not randomly assigned. Confirmed bookings are measured after seven days, but B has only three days of follow-up so far.",
+        "reveal_when": "candidate asks about assignment, timing, or outcome maturity"
+      },
+      {
+        "id": "fact-2",
+        "value": "Course capacity and booking revenue are the same for the two variants, but revenue amount, contribution margin, and cancellations are not supplied. The team can run both messages concurrently for a further week.",
+        "reveal_when": "candidate asks about economics, cancellations, or a better test"
+      }
+    ],
+    "model_points": [
+      "Enquiries rose from 100 to 150, a 50% relative increase, but the stated outcome is confirmed bookings. Current observed cost per booking is $25 for A and $500/15, approximately $33.33, for B.",
+      "The current booking measures do not settle a winner: B has four fewer days of maturation, and weekday versus weekend placement confounds the audience and time comparison. Neither higher enquiries nor current booking cost proves a treatment effect.",
+      "Wait for equal follow-up and run messages concurrently with comparable assignment, ideally random where feasible. Predefine booking outcomes and guardrails; without margin and cancellations, a cost figure cannot establish sustainable profitability."
+    ],
+    "probes": [
+      {
+        "trigger": "candidate reverses the winner immediately to A",
+        "question": "What effect could B’s shorter follow-up have on the observed bookings?"
+      },
+      {
+        "trigger": "candidate calls $25 a profitable acquisition cost",
+        "question": "What revenue, margin, and cancellation evidence do you have?"
+      }
+    ],
+    "fair_alternatives": [
+      "Keeping the current budget split while outcomes mature is reasonable if spend remains within the team’s authority.",
+      "A bounded pilot with a documented decision threshold is acceptable; no particular statistical test is required without a justified design and assumptions."
+    ],
+    "red_flags": [
+      "Selects B solely on enquiry count or calculates bookings per enquiry incorrectly.",
+      "Calls either variant a proven causal winner from the current totals.",
+      "Moves all spend immediately or declares profitability without margin data."
+    ],
+    "follow_ups": [
+      "Write a 100-word memo separating current metrics, comparison limits, and the next budget decision."
+    ],
+    "exemplar_answer": "B has more enquiries, but the goal is bookings. So far A converts 2% of visits at $25 per booking and B converts 1.5% at about $33.33; those are provisional because B has only three days of follow-up. The weekday/weekend split also prevents a clean causal comparison. I would avoid moving the entire budget, finish equal follow-up, and run a concurrent comparable test with a predefined booking window. Margin and cancellation data are still needed to judge sustainable acquisition cost."
+  },
+  "interviewer_notes": "Let the candidate use approximate arithmetic. The AI summary is intentionally incomplete; do not invent significance levels, margin, or future bookings. Assess metric selection and design reasoning. Use only supplied facts; say when something is unknown. Accept plain language and equivalent approaches. Assess the demonstrated decisions, not accent, confidence, credentials, or access to particular employers. This is a fictional exercise; do not imply real actions were performed.",
+  "learning_drills": [
+    {
+      "id": "focused-practice",
+      "title": "Write a campaign decision memo",
+      "minutes": 5,
+      "prompt": "Write a 100-word memo separating current metrics, comparison limits, and the next budget decision. This is self-guided practice; no model assessment is performed.",
+      "checklist": [
+        "Use confirmed bookings as the goal",
+        "Calculate both observed costs",
+        "Equalize outcome follow-up",
+        "State the missing economics"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,123 @@
+{
+  "schema_version": 1,
+  "revision": 1,
+  "format_id": "ai-output-critique",
+  "review_status": "preview",
+  "provenance": {
+    "authorship": "Original project scenario, AI-assisted draft. Practitioner review and calibration pending.",
+    "license": "AGPL-3.0-only"
+  },
+  "minutes": 20,
+  "id": "communications-brief-review",
+  "title": "Communications Assistant: Repair an Unsupported Event Announcement",
+  "track": "professional",
+  "domain": "communications_review",
+  "areas": [
+    "creative_communications"
+  ],
+  "modality": "written",
+  "difficulty": "entry",
+  "tags": [
+    "communications-assistant",
+    "copywriter",
+    "content-coordinator",
+    "editorial",
+    "practical",
+    "community-preview"
+  ],
+  "prompt": "You are a communications assistant at fictional Valley Careers. Verified brief: a free job-search workshop is on 18 October, 10:00–12:00, at East Hall; booking is required because capacity is 30. Attendees will practice an introduction and receive feedback. Step-free access is confirmed; a contact address is available for other access requests. AI draft: \"Guaranteed job offers! Drop in anytime this weekend for unlimited one-to-one coaching. Everyone will leave with a professional CV.\" Review the draft and write a useful replacement under 100 words. Do not infer the weekday or invent contact details.",
+  "blurb": "Turn an exaggerated AI announcement into accurate, accessible event copy ready for organizer review.",
+  "rubric": [
+    {
+      "key": "accuracy",
+      "label": "Check each claim against the brief",
+      "description": "Finds unsupported outcomes, timing, capacity, and service claims.",
+      "weight": 1,
+      "anchors": {
+        "0": "Retains guaranteed jobs or invents CV and one-to-one services.",
+        "2": "Removes unsupported guarantees and corrects date, booking, and capacity.",
+        "4": "Maps each major draft claim to verified facts, preserves the actual practice-and-feedback benefit, and flags missing details rather than inventing them."
+      }
+    },
+    {
+      "key": "audience",
+      "label": "Write an actionable accessible announcement",
+      "description": "Gives readers the details needed to decide and attend.",
+      "weight": 1,
+      "anchors": {
+        "0": "Writes only promotional language with no usable date, location, or booking instruction.",
+        "2": "Includes the date, time, venue, free cost, and booking requirement.",
+        "4": "Uses plain language, a clear approved booking action, confirmed step-free information, and the supplied contact for other access requests without claiming universal accessibility."
+      }
+    },
+    {
+      "key": "editorial_process",
+      "label": "Prepare a reviewable final draft",
+      "description": "Separates a draft from an approved published message.",
+      "weight": 1,
+      "anchors": {
+        "0": "Claims the announcement is published or invents an organizer approval.",
+        "2": "Submits the revised announcement for organizer review.",
+        "4": "Checks the under-100-word limit and factual details, explains any removed promises, and presents the remaining approval as a named final step."
+      }
+    }
+  ],
+  "reference": {
+    "scenario": "You are a communications assistant at fictional Valley Careers. Verified brief: a free job-search workshop is on 18 October, 10:00–12:00, at East Hall; booking is required because capacity is 30. Attendees will practice an introduction and receive feedback. Step-free access is confirmed; a contact address is available for other access requests. AI draft: \"Guaranteed job offers! Drop in anytime this weekend for unlimited one-to-one coaching. Everyone will leave with a professional CV.\" Review the draft and write a useful replacement under 100 words. Do not infer the weekday or invent contact details.",
+    "facts": [
+      {
+        "id": "fact-1",
+        "value": "The approved booking destination is /events/job-search-workshop. The access contact is access@example.invalid, a fictional exercise address. One facilitator will lead group practice.",
+        "reveal_when": "candidate asks for the call to action, access contact, or delivery format"
+      },
+      {
+        "id": "fact-2",
+        "value": "The organizer has approved the verified brief but has not approved the AI draft. The final announcement must be checked by the organizer before publication.",
+        "reveal_when": "candidate asks about approval or publication readiness"
+      }
+    ],
+    "model_points": [
+      "The draft invents guaranteed jobs, a drop-in format, unlimited one-to-one coaching, and a finished CV. The verified benefit is introduction practice with feedback in a capacity-limited workshop.",
+      "Use the stated date and hours without guessing a weekday. Include free attendance, East Hall, required booking, and only confirmed access features. Use the supplied fictional route and contact if asked.",
+      "This exercise creates a reviewable announcement; it does not authorize publication or claim an approval already happened. Strong editing preserves a clear appeal while removing unsupported promises."
+    ],
+    "probes": [
+      {
+        "trigger": "candidate removes exaggeration but loses the benefit",
+        "question": "What useful outcome can you confidently tell a job seeker to expect?"
+      },
+      {
+        "trigger": "candidate says the event is fully accessible",
+        "question": "Which access feature is confirmed, and how can someone ask about other needs?"
+      }
+    ],
+    "fair_alternatives": [
+      "A factual headline plus two short paragraphs or a compact event listing are both acceptable.",
+      "A draft can mark the booking link and contact as pending if the candidate has not yet requested the supplied details."
+    ],
+    "red_flags": [
+      "Retains guaranteed jobs or invents CV and one-to-one services.",
+      "Writes only promotional language with no usable date, location, or booking instruction.",
+      "Claims the announcement is published or invents an organizer approval."
+    ],
+    "follow_ups": [
+      "List five announcement claims and mark each supported, unsupported, or pending before rewriting the copy."
+    ],
+    "exemplar_answer": "Free job-search workshop — 18 October, 10:00–12:00, East Hall. Practice a short introduction and receive feedback in a group session. Booking is required: there are 30 places. Book at /events/job-search-workshop. Step-free access is confirmed; contact access@example.invalid about other access needs. I would send this draft to the organizer for final checking before publication."
+  },
+  "interviewer_notes": "Assess evidence-based editing, audience clarity, and an approval-ready draft. Do not score graphic design or require a marketing tone. The example.invalid address is fictional and must not be treated as a real destination. Use only supplied facts; say when something is unknown. Accept plain language and equivalent approaches. Assess the demonstrated decisions, not accent, confidence, credentials, or access to particular employers. This is a fictional exercise; do not imply real actions were performed.",
+  "learning_drills": [
+    {
+      "id": "focused-practice",
+      "title": "Create a claim check",
+      "minutes": 5,
+      "prompt": "List five announcement claims and mark each supported, unsupported, or pending before rewriting the copy. This is self-guided practice; no model assessment is performed.",
+      "checklist": [
+        "Remove job guarantees",
+        "Keep the real learning benefit",
+        "Use approved date and capacity",
+        "Limit access claims to verified features"
+      ]
+    }
+  ]
+}

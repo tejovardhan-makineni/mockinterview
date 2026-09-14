@@ -1,0 +1,123 @@
+{
+  "schema_version": 1,
+  "revision": 1,
+  "format_id": "work-sample-defense",
+  "review_status": "preview",
+  "provenance": {
+    "authorship": "Original project scenario, AI-assisted draft. Practitioner review and calibration pending.",
+    "license": "AGPL-3.0-only"
+  },
+  "minutes": 20,
+  "id": "supply-chain-receiving-discrepancy",
+  "title": "Warehouse Associate: Resolve a Receiving Discrepancy",
+  "track": "professional",
+  "domain": "warehouse_receiving",
+  "areas": [
+    "supply_chain"
+  ],
+  "modality": "written",
+  "difficulty": "entry",
+  "tags": [
+    "warehouse-associate",
+    "inventory-clerk",
+    "receiving-associate",
+    "logistics",
+    "practical",
+    "community-preview"
+  ],
+  "prompt": "At fictional Spruce Distribution, the delivery paperwork lists 40 cartons of lamp fittings. You count 37: 35 look intact and two have crushed packaging. A draft receiving note says, \"Received 40 in good condition; put everything in available stock so dispatch can start.\" Company procedure requires recording actual counts and placing visibly damaged cartons in the marked inspection area for an authorized check. Review the note and explain the handoff.",
+  "blurb": "Record missing and damaged stock accurately and give dispatch a dependable receiving handoff.",
+  "rubric": [
+    {
+      "key": "record_accuracy",
+      "label": "Record actual receipt",
+      "description": "Keeps quantity and condition evidence accurate.",
+      "weight": 1,
+      "anchors": {
+        "0": "Signs for 40 undamaged cartons despite the count.",
+        "2": "Records 37 received with two visibly damaged cartons.",
+        "4": "Separates 35 apparently intact, two pending inspection, and three missing; seeks carrier acknowledgment and retains the original paperwork."
+      }
+    },
+    {
+      "key": "stock_control",
+      "label": "Respect inspection and stock status",
+      "description": "Prevents unverified stock from being promised to dispatch.",
+      "weight": 1,
+      "anchors": {
+        "0": "Marks all 40 available or opens/releases damaged items without authorization.",
+        "2": "Uses the inspection area for the damaged cartons and follows receiving checks.",
+        "4": "Keeps missing, awaiting-inspection, and released stock distinct, names the inspection owner, and reports only verified availability."
+      }
+    },
+    {
+      "key": "handoff",
+      "label": "Support the downstream decision",
+      "description": "Communicates the shortage and next update to dispatch.",
+      "weight": 1,
+      "anchors": {
+        "0": "Lets dispatch assume the 36-carton order is covered.",
+        "2": "Flags that currently usable stock may be insufficient.",
+        "4": "Explains that 35 intact cartons still need routine release and the order needs 36, provides inspection timing, and asks the dispatch owner to decide the customer-impact plan."
+      }
+    }
+  ],
+  "reference": {
+    "scenario": "At fictional Spruce Distribution, the delivery paperwork lists 40 cartons of lamp fittings. You count 37: 35 look intact and two have crushed packaging. A draft receiving note says, \"Received 40 in good condition; put everything in available stock so dispatch can start.\" Company procedure requires recording actual counts and placing visibly damaged cartons in the marked inspection area for an authorized check. Review the note and explain the handoff.",
+    "facts": [
+      {
+        "id": "fact-1",
+        "value": "The carrier is still at the receiving desk and can acknowledge a discrepancy. No second vehicle or later shipment is listed.",
+        "reveal_when": "candidate asks about the carrier, missing cartons, or supporting delivery records"
+      },
+      {
+        "id": "fact-2",
+        "value": "An inventory supervisor can inspect the damaged cartons today. Intact cartons can enter available stock only after the normal receiving check; dispatch needs 36 cartons for a pending order.",
+        "reveal_when": "candidate asks about inspection ownership, stock release, or downstream demand"
+      }
+    ],
+    "model_points": [
+      "The received count is 37, not 40. Of those, 35 appear intact and two need inspection. Three are missing relative to the paperwork; damaged and missing quantities are separate issues.",
+      "Correct the receiving record and obtain carrier acknowledgment while available. Follow the stated inspection procedure and do not infer that a carton is safe or complete merely from intact packaging.",
+      "Dispatch’s order needs 36, so it cannot rely on 35 apparently intact cartons alone. Share the verified stock status and expected inspection update so the authorized dispatch owner can choose a partial shipment or another permitted response."
+    ],
+    "probes": [
+      {
+        "trigger": "candidate records only three missing cartons",
+        "question": "How are the two damaged cartons represented in stock availability?"
+      },
+      {
+        "trigger": "candidate promises dispatch the 36 cartons",
+        "question": "What quantity is actually released after the normal receiving check?"
+      }
+    ],
+    "fair_alternatives": [
+      "Photographing carton damage using approved warehouse practice is useful if permitted, but a named camera system is not required.",
+      "A partial dispatch can be considered by its owner; the receiving associate should not assume customer permission."
+    ],
+    "red_flags": [
+      "Signs for 40 undamaged cartons despite the count.",
+      "Marks all 40 available or opens/releases damaged items without authorization.",
+      "Lets dispatch assume the 36-carton order is covered."
+    ],
+    "follow_ups": [
+      "Write a receiving note that separates expected, received, damaged, missing, and released quantities."
+    ],
+    "exemplar_answer": "I would record 37 received: 35 apparently intact and two with crushed packaging, plus three missing against the paperwork. I would ask the carrier to acknowledge the discrepancy and route the damaged cartons to the inspection area. The intact cartons still need the normal receiving check before release. I would tell dispatch that its 36-carton need is not yet covered, name the supervisor checking the damaged cartons, and provide the next update time."
+  },
+  "interviewer_notes": "This is a general warehouse scenario; do not add hazardous goods handling rules. Assess counts, record integrity, and clear stock status rather than software knowledge. Use only supplied facts; say when something is unknown. Accept plain language and equivalent approaches. Assess the demonstrated decisions, not accent, confidence, credentials, or access to particular employers. This is a fictional exercise; do not imply real actions were performed.",
+  "learning_drills": [
+    {
+      "id": "focused-practice",
+      "title": "Write a receiving handoff",
+      "minutes": 5,
+      "prompt": "Write a receiving note that separates expected, received, damaged, missing, and released quantities. This is self-guided practice; no model assessment is performed.",
+      "checklist": [
+        "Keep the counts consistent",
+        "Do not count damaged stock as available",
+        "Name the inspection owner",
+        "Explain the 36-carton dispatch dependency"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,123 @@
+{
+  "schema_version": 1,
+  "revision": 1,
+  "format_id": "work-sample-defense",
+  "review_status": "preview",
+  "provenance": {
+    "authorship": "Original project scenario, AI-assisted draft. Practitioner review and calibration pending.",
+    "license": "AGPL-3.0-only"
+  },
+  "minutes": 20,
+  "id": "accounting-invoice-reconciliation",
+  "title": "Accounts Assistant: Reconcile an Invoice Before Payment",
+  "track": "professional",
+  "domain": "accounts_payable",
+  "areas": [
+    "accounting"
+  ],
+  "modality": "written",
+  "difficulty": "entry",
+  "tags": [
+    "accounts-assistant",
+    "accounts-payable",
+    "bookkeeper",
+    "invoice-matching",
+    "practical",
+    "community-preview"
+  ],
+  "prompt": "At fictional Pine Workshops, a supplier invoice lists 12 chairs at $50 each, total $600. The approved purchase order is for 10 chairs at $50 each, and the receiving note records 9 chairs received. The payment is due tomorrow. Company policy requires agreement between approved order, receipt, and invoice, or a documented finance-manager exception. Review the records and draft the next action. Ignore tax for this exercise.",
+  "blurb": "Reconcile ordered, received, and invoiced quantities before proposing a documented payment decision.",
+  "rubric": [
+    {
+      "key": "reconciliation",
+      "label": "Find the distinct mismatches",
+      "description": "Separates ordered, received, and invoiced quantities.",
+      "weight": 1,
+      "anchors": {
+        "0": "Approves $600 or treats 10 ordered as proof that 10 arrived.",
+        "2": "Identifies that 12 invoiced differs from 10 ordered and 9 received.",
+        "4": "Calculates $500 approved, $450 received value, and the separate quantity gaps without treating either amount as automatically payable."
+      }
+    },
+    {
+      "key": "resolution",
+      "label": "Resolve without inventing records",
+      "description": "Routes correction through purchasing, receiving, supplier, and finance authority.",
+      "weight": 1,
+      "anchors": {
+        "0": "Changes the receiving note to match the invoice or pays without required exception.",
+        "2": "Checks records and asks the supplier to correct the discrepancy.",
+        "4": "Confirms receipt and authorization separately, seeks corrected documentation or agreement, and escalates the due-date decision to the finance manager."
+      }
+    },
+    {
+      "key": "audit_trail",
+      "label": "Document an accountable payment decision",
+      "description": "Preserves evidence and communicates the hold or approved exception.",
+      "weight": 1,
+      "anchors": {
+        "0": "Deletes the original invoice or promises a payment the candidate cannot authorize.",
+        "2": "Records the mismatch and informs the payment owner.",
+        "4": "Keeps original and corrected records linked, documents who approves any partial payment, and tells the supplier what remains disputed and when to expect an update."
+      }
+    }
+  ],
+  "reference": {
+    "scenario": "At fictional Pine Workshops, a supplier invoice lists 12 chairs at $50 each, total $600. The approved purchase order is for 10 chairs at $50 each, and the receiving note records 9 chairs received. The payment is due tomorrow. Company policy requires agreement between approved order, receipt, and invoice, or a documented finance-manager exception. Review the records and draft the next action. Ignore tax for this exercise.",
+    "facts": [
+      {
+        "id": "fact-1",
+        "value": "The receiving colleague counted 9 undamaged chairs and reports no separate delivery. The supplier has not yet been contacted about the difference.",
+        "reveal_when": "candidate asks whether the receipt is complete or has been checked"
+      },
+      {
+        "id": "fact-2",
+        "value": "The purchase owner confirms that only 10 chairs were approved. The finance manager can approve partial payment after a corrected invoice or documented supplier agreement.",
+        "reveal_when": "candidate asks about authorization, partial payment, or escalation"
+      }
+    ],
+    "model_points": [
+      "The records show two distinct discrepancies: the invoice exceeds the order by two chairs, and the receipt is one chair short of the order. Multiplying by $50 gives $600 invoiced, $500 ordered, and $450 received value.",
+      "Do not turn $450 into an automatic payment instruction: the fictional policy requires a corrected invoice or documented agreement plus finance-manager approval for partial payment. Check the receiving and purchase records first.",
+      "Record the dispute before the deadline, ask the supplier for correction and delivery clarification, and escalate the timing or exception. Preserve the original evidence rather than editing it to force a match."
+    ],
+    "probes": [
+      {
+        "trigger": "candidate proposes simply paying $500",
+        "question": "What document shows all ten chairs were received?"
+      },
+      {
+        "trigger": "candidate proposes paying $450 immediately",
+        "question": "What approval and documentation does the stated policy require first?"
+      }
+    ],
+    "fair_alternatives": [
+      "Holding the whole invoice pending correction is reasonable if authorized and communicated.",
+      "An approved partial payment can be defensible under the supplied policy; no preferred commercial outcome is assumed."
+    ],
+    "red_flags": [
+      "Approves $600 or treats 10 ordered as proof that 10 arrived.",
+      "Changes the receiving note to match the invoice or pays without required exception.",
+      "Deletes the original invoice or promises a payment the candidate cannot authorize."
+    ],
+    "follow_ups": [
+      "Write a payment-hold note with the three quantities, values, evidence requests, and decision owner."
+    ],
+    "exemplar_answer": "The supplier billed $600 for 12 chairs, but only $500 was approved and the receipt supports nine chairs valued at $450. I would verify the receiving note, confirm the order with the purchaser, and ask the supplier for a corrected invoice and delivery explanation. I would document the dispute and take tomorrow’s payment decision to the finance manager. Partial payment is possible only with the required agreement and approval; I would retain all original records."
+  },
+  "interviewer_notes": "Ignore tax, accounting standards, and jurisdiction-specific payment law. Assess reconciliation, record integrity, and practical communication. Let the candidate use simple arithmetic. Use only supplied facts; say when something is unknown. Accept plain language and equivalent approaches. Assess the demonstrated decisions, not accent, confidence, credentials, or access to particular employers. This is a fictional exercise; do not imply real actions were performed.",
+  "learning_drills": [
+    {
+      "id": "focused-practice",
+      "title": "Write the discrepancy note",
+      "minutes": 5,
+      "prompt": "Write a payment-hold note with the three quantities, values, evidence requests, and decision owner. This is self-guided practice; no model assessment is performed.",
+      "checklist": [
+        "Separate ordered from received",
+        "Calculate each value correctly",
+        "Do not alter source records",
+        "Identify the finance approval needed"
+      ]
+    }
+  ]
+}

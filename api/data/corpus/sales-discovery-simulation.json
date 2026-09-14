@@ -1,0 +1,123 @@
+{
+  "schema_version": 1,
+  "revision": 1,
+  "format_id": "stakeholder-simulation",
+  "review_status": "preview",
+  "provenance": {
+    "authorship": "Original project scenario, AI-assisted draft. Practitioner review and calibration pending.",
+    "license": "AGPL-3.0-only"
+  },
+  "minutes": 20,
+  "id": "sales-discovery-simulation",
+  "title": "Sales Representative: Discover Fit Before Recommending a Package",
+  "track": "professional",
+  "domain": "sales_discovery",
+  "areas": [
+    "sales"
+  ],
+  "modality": "conversational",
+  "difficulty": "junior",
+  "tags": [
+    "sales-development-representative",
+    "account-executive",
+    "inside-sales",
+    "consultative-selling",
+    "practical",
+    "community-preview"
+  ],
+  "prompt": "You sell meeting-room services for fictional Haven Workspaces. A small business owner asks for your largest monthly package because their team \"needs to meet more.\" The 20-session package costs $600 per month; a five-session package costs $200, and individual sessions cost $50. There is no long-term contract in this exercise. Your role is to understand the need, recommend a suitable option honestly, and agree a next step. The interviewer is the owner; do not assume the largest package is the best fit.",
+  "blurb": "Discover real usage and budget, compare suitable options honestly, and agree a useful next step.",
+  "rubric": [
+    {
+      "key": "discovery",
+      "label": "Understand intended use and fit",
+      "description": "Asks about the business need before choosing a package.",
+      "weight": 1,
+      "anchors": {
+        "0": "Pushes the 20-session package without asking about use or constraints.",
+        "2": "Asks team size, meeting frequency, and budget.",
+        "4": "Connects four planned meetings, six attendees, uncertainty after the four-week trial, and screen/quiet needs into a clear summary the owner can correct."
+      }
+    },
+    {
+      "key": "recommendation",
+      "label": "Explain a proportionate offer",
+      "description": "Uses transparent arithmetic and honest tradeoffs.",
+      "weight": 1,
+      "anchors": {
+        "0": "Hides cheaper options or claims the $600 package fits a $250 budget.",
+        "2": "Recommends the $200 five-session package or four $50 sessions with a reason.",
+        "4": "Compares the equal $200 cost of four individual sessions and five-session access, explains flexibility versus the extra session, and asks the owner’s preference without inventing package restrictions."
+      }
+    },
+    {
+      "key": "next_step",
+      "label": "Confirm a useful next commitment",
+      "description": "Makes availability and agreement explicit.",
+      "weight": 1,
+      "anchors": {
+        "0": "Claims rooms are booked or equipment guaranteed without checking.",
+        "2": "Offers to check preferred dates and screen availability.",
+        "4": "Agrees the chosen provisional option, exact availability checks, and follow-up ownership; leaves the customer free to proceed after those facts are confirmed."
+      }
+    }
+  ],
+  "reference": {
+    "scenario": "You sell meeting-room services for fictional Haven Workspaces. A small business owner asks for your largest monthly package because their team \"needs to meet more.\" The 20-session package costs $600 per month; a five-session package costs $200, and individual sessions cost $50. There is no long-term contract in this exercise. Your role is to understand the need, recommend a suitable option honestly, and agree a next step. The interviewer is the owner; do not assume the largest package is the best fit.",
+    "facts": [
+      {
+        "id": "fact-1",
+        "value": "The team has six people and has planned exactly four weekly two-hour meetings over a four-week trial. They have not decided whether to continue afterward. Each listed session covers one two-hour meeting for up to eight people.",
+        "reveal_when": "candidate asks about team size, usage, duration, or planning horizon"
+      },
+      {
+        "id": "fact-2",
+        "value": "The owner’s main concern is a quiet space with a working screen. Their budget is $250 for the four-week trial, and all four dates fall within one package billing period. Room and equipment availability for preferred dates must be checked before any booking is promised.",
+        "reveal_when": "candidate asks about success criteria, budget, or dates"
+      }
+    ],
+    "model_points": [
+      "Discovery should test whether \"needs to meet more\" means frequent use, a better meeting environment, or an uncertain experiment. Ask about people, frequency, horizon, budget, and the conditions for a successful meeting.",
+      "Four sessions at $50 total $200, the same as the five-session package. Both fit the $250 budget; the package offers an additional session, while individual sessions may fit uncertain use. Do not invent cancellation or expiry terms to force a choice.",
+      "Confirm preferred dates and the screen/quiet requirements before making a booking commitment. A strong close is a mutually agreed evidence-gathering next step, not manufactured urgency or an upsell at any cost."
+    ],
+    "probes": [
+      {
+        "trigger": "candidate recommends the large package based on price per session",
+        "question": "How many sessions does this team actually expect to use, and what is the monthly budget?"
+      },
+      {
+        "trigger": "candidate says the five-session package is always better",
+        "question": "What uncertainty about actual use might make individual sessions reasonable?"
+      }
+    ],
+    "fair_alternatives": [
+      "Either the five-session package or individual sessions is a valid recommendation when the customer’s usage uncertainty and preference are explained.",
+      "Recommending no booking yet is reasonable if preferred dates or required equipment cannot be verified."
+    ],
+    "red_flags": [
+      "Pushes the 20-session package without asking about use or constraints.",
+      "Hides cheaper options or claims the $600 package fits a $250 budget.",
+      "Claims rooms are booked or equipment guaranteed without checking."
+    ],
+    "follow_ups": [
+      "Write a 60-second recommendation that compares actual monthly cost for two suitable options and names what must be checked next."
+    ],
+    "exemplar_answer": "Before recommending the largest package, I would check how often the team plans to meet and what would make the room useful. For six people with exactly four planned meetings in a four-week trial, four individual sessions cost $200, the same as the five-session package; both fit the budget. I would explain the extra-session value and uncertainty about future use, then ask which option they prefer. I would confirm dates, a working screen, and a quiet room before promising a booking."
+  },
+  "interviewer_notes": "Play an owner who is open to a smaller option. Provide needs when asked, and do not reward pressure tactics or fabricated product claims. The assessment is discovery and fit, not the highest sale value. Use only supplied facts; say when something is unknown. Accept plain language and equivalent approaches. Assess the demonstrated decisions, not accent, confidence, credentials, or access to particular employers. This is a fictional exercise; do not imply real actions were performed.",
+  "learning_drills": [
+    {
+      "id": "focused-practice",
+      "title": "Give a fit-based recommendation",
+      "minutes": 5,
+      "prompt": "Write a 60-second recommendation that compares actual monthly cost for two suitable options and names what must be checked next. This is self-guided practice; no model assessment is performed.",
+      "checklist": [
+        "Use four expected meetings",
+        "Stay inside the $250 budget",
+        "Explain both $200 options",
+        "Verify dates and screen availability"
+      ]
+    }
+  ]
+}

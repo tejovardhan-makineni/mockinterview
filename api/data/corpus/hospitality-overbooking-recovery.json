@@ -1,0 +1,123 @@
+{
+  "schema_version": 1,
+  "revision": 1,
+  "format_id": "stakeholder-simulation",
+  "review_status": "preview",
+  "provenance": {
+    "authorship": "Original project scenario, AI-assisted draft. Practitioner review and calibration pending.",
+    "license": "AGPL-3.0-only"
+  },
+  "minutes": 30,
+  "id": "hospitality-overbooking-recovery",
+  "title": "Hotel Duty Manager: Recover an Overbooked Arrival",
+  "track": "professional",
+  "domain": "hospitality_operations",
+  "areas": [
+    "retail_hospitality"
+  ],
+  "modality": "conversational",
+  "difficulty": "mid",
+  "tags": [
+    "hotel-duty-manager",
+    "front-office-manager",
+    "guest-services",
+    "hospitality",
+    "practical",
+    "community-preview"
+  ],
+  "prompt": "You are duty manager at fictional Brook Hotel at 21:00. Two guests arrive with a confirmed accessible-room booking, but that room is unavailable because of a maintenance issue. One guest says step-free access and an accessible bathroom are essential. The only empty room on site has stairs and a standard bathroom. Company policy requires confirming a suitable alternative with the guest and obtaining their consent before relocation; you may authorize transport and a comparable nearby room up to the stated emergency budget. Lead the recovery conversation.",
+  "blurb": "Coordinate a suitable room alternative by verifying access needs, transport, guest consent, and arrival arrangements.",
+  "rubric": [
+    {
+      "key": "needs",
+      "label": "Confirm functional requirements with dignity",
+      "description": "Asks what makes an alternative usable without requesting a diagnosis.",
+      "weight": 1,
+      "anchors": {
+        "0": "Pressures the guest to accept stairs or asks for medical proof of the access need.",
+        "2": "Acknowledges the failure and asks which access features must be confirmed.",
+        "4": "Checks route, bathroom needs, staying together, and luggage preferences with consent while avoiding unnecessary health questions."
+      }
+    },
+    {
+      "key": "recovery_plan",
+      "label": "Verify a feasible alternative",
+      "description": "Coordinates room suitability and transport before promising relocation.",
+      "weight": 1,
+      "anchors": {
+        "0": "Treats an \"accessible\" label as sufficient or sends guests away without a confirmed room.",
+        "2": "Contacts the partner hotel to verify the room and requests transport.",
+        "4": "Holds the room while confirming concrete features, arrival arrangements, and suitable transport; presents verified details and uncertainty before seeking guest consent."
+      }
+    },
+    {
+      "key": "ownership",
+      "label": "Own the service failure and handoff",
+      "description": "Makes the guest recovery accountable within the authorized budget.",
+      "weight": 1,
+      "anchors": {
+        "0": "Blames maintenance, makes guests negotiate the partner booking, or guarantees unapproved costs.",
+        "2": "Apologizes and uses the emergency authority to arrange a suitable option.",
+        "4": "Names one hotel contact, confirms payment and luggage arrangements, checks arrival acceptance, and records the failure for follow-up without exposing private information."
+      }
+    }
+  ],
+  "reference": {
+    "scenario": "You are duty manager at fictional Brook Hotel at 21:00. Two guests arrive with a confirmed accessible-room booking, but that room is unavailable because of a maintenance issue. One guest says step-free access and an accessible bathroom are essential. The only empty room on site has stairs and a standard bathroom. Company policy requires confirming a suitable alternative with the guest and obtaining their consent before relocation; you may authorize transport and a comparable nearby room up to the stated emergency budget. Lead the recovery conversation.",
+    "facts": [
+      {
+        "id": "fact-1",
+        "value": "A partner hotel has one room described as accessible, but its bathroom features and arrival route have not been verified. It is 15 minutes away and within the authorized budget.",
+        "reveal_when": "candidate asks about suitable alternative accommodation or cost authority"
+      },
+      {
+        "id": "fact-2",
+        "value": "The guests want to stay together and have luggage. The partner hotel can hold the room for 20 minutes while staff verify the needed features directly. Accessible transport availability is not yet confirmed.",
+        "reveal_when": "candidate asks about guest priorities, room hold, luggage, or transport"
+      }
+    ],
+    "model_points": [
+      "The available on-site room does not meet the stated essential needs. Ask about functional requirements, not a diagnosis, and avoid making the guest justify accessibility.",
+      "A partner room’s label is only a lead. Verify the route and bathroom features with the partner, hold the room while checking, and confirm transport that meets the guest’s needs before promising a complete solution.",
+      "Present the verified option, obtain consent, and arrange the authorized payment and handoff. If suitability or transport cannot be confirmed, keep looking and escalate through hotel operations rather than announcing a completed recovery."
+    ],
+    "probes": [
+      {
+        "trigger": "candidate offers the room with stairs as a compromise",
+        "question": "How does that option meet the essential access needs already stated?"
+      },
+      {
+        "trigger": "candidate books the partner room immediately",
+        "question": "Which features and transport arrangements are still unverified, and has the guest agreed?"
+      }
+    ],
+    "fair_alternatives": [
+      "A different suitable hotel is acceptable if availability, budget, access features, and consent are verified.",
+      "The guest may reject the proposed relocation; a strong answer escalates the unresolved need without pressure or fabricated alternatives."
+    ],
+    "red_flags": [
+      "Pressures the guest to accept stairs or asks for medical proof of the access need.",
+      "Treats an \"accessible\" label as sufficient or sends guests away without a confirmed room.",
+      "Blames maintenance, makes guests negotiate the partner booking, or guarantees unapproved costs."
+    ],
+    "follow_ups": [
+      "Write a guest-centered relocation checklist with suitability, consent, room hold, transport, payment, and arrival follow-up."
+    ],
+    "exemplar_answer": "I am sorry we cannot provide the room you confirmed. I would ask which route and bathroom features we must verify and keep both guests together in the plan. I would hold the partner room, check those features directly, and confirm suitable transport and luggage help before presenting the option. With the guests’ consent I would arrange payment within my authority and stay their contact until the partner confirms arrival. If anything remains unverified, I would say so and escalate the search."
+  },
+  "interviewer_notes": "Roleplay the guest first, then provide partner-hotel information on request. Do not invent a medical emergency, accessibility regulation, or guaranteed vehicle. Reward functional verification and ownership. Use only supplied facts; say when something is unknown. Accept plain language and equivalent approaches. Assess the demonstrated decisions, not accent, confidence, credentials, or access to particular employers. This is a fictional exercise; do not imply real actions were performed.",
+  "learning_drills": [
+    {
+      "id": "focused-practice",
+      "title": "Make a relocation checklist",
+      "minutes": 5,
+      "prompt": "Write a guest-centered relocation checklist with suitability, consent, room hold, transport, payment, and arrival follow-up. This is self-guided practice; no model assessment is performed.",
+      "checklist": [
+        "Ask functional needs without a diagnosis",
+        "Verify features beyond a label",
+        "Confirm transport before promising it",
+        "Keep one accountable hotel contact"
+      ]
+    }
+  ]
+}

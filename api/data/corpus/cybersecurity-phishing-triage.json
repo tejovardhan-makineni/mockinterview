@@ -1,0 +1,123 @@
+{
+  "schema_version": 1,
+  "revision": 1,
+  "format_id": "incident-simulation",
+  "review_status": "preview",
+  "provenance": {
+    "authorship": "Original project scenario, AI-assisted draft. Practitioner review and calibration pending.",
+    "license": "AGPL-3.0-only"
+  },
+  "minutes": 20,
+  "id": "cybersecurity-phishing-triage",
+  "title": "Security Analyst: Triage a Reported Phishing Message",
+  "track": "professional",
+  "domain": "security_operations",
+  "areas": [
+    "cybersecurity"
+  ],
+  "modality": "conversational",
+  "difficulty": "entry",
+  "tags": [
+    "soc-analyst",
+    "security-analyst",
+    "phishing",
+    "incident-triage",
+    "practical",
+    "community-preview"
+  ],
+  "prompt": "You are a trainee security analyst at fictional Cedar Services. At 09:10 an employee reports a payroll email and says, \"I opened the link and entered my work password, but I did not approve any sign-in prompt.\" The email is still available. Company procedure permits you to record a report and contact the on-call analyst; only that analyst may revoke sessions or isolate devices. Walk through your first ten minutes, explain what you would ask, and give the employee an update. This is a tabletop exercise.",
+  "blurb": "Practice triage, evidence preservation, and a clear security handoff within a trainee’s authority.",
+  "rubric": [
+    {
+      "key": "triage",
+      "label": "Establish exposure",
+      "description": "Separates a reported password disclosure from unverified compromise.",
+      "weight": 1,
+      "anchors": {
+        "0": "Dismisses the report because no approval prompt was accepted, or declares a confirmed breach without evidence.",
+        "2": "Establishes what was entered and when and treats the credential disclosure as urgent.",
+        "4": "Builds a short timeline, asks about downloads and sign-ins, and distinguishes confirmed exposure from questions for log review."
+      }
+    },
+    {
+      "key": "safe_response",
+      "label": "Act within authority",
+      "description": "Preserves useful evidence and routes containment through the on-call analyst.",
+      "weight": 1,
+      "anchors": {
+        "0": "Opens the suspicious link, requests the password, or claims to revoke access without authority.",
+        "2": "Preserves the email and promptly escalates the potential credential exposure.",
+        "4": "Provides the on-call analyst a concise evidence package, requests authorized containment and its confirmation, and avoids destroying evidence."
+      }
+    },
+    {
+      "key": "communication",
+      "label": "Support and close the loop",
+      "description": "Gives the employee clear, non-blaming next steps and a check-back.",
+      "weight": 1,
+      "anchors": {
+        "0": "Blames the employee or promises the account is safe without verification.",
+        "2": "Thanks the employee, explains escalation, and asks them not to revisit the link.",
+        "4": "States what is known, what the analyst will verify, and when the employee will hear back; checks whether interrupted work needs support."
+      }
+    }
+  ],
+  "reference": {
+    "scenario": "You are a trainee security analyst at fictional Cedar Services. At 09:10 an employee reports a payroll email and says, \"I opened the link and entered my work password, but I did not approve any sign-in prompt.\" The email is still available. Company procedure permits you to record a report and contact the on-call analyst; only that analyst may revoke sessions or isolate devices. Walk through your first ten minutes, explain what you would ask, and give the employee an update. This is a tabletop exercise.",
+    "facts": [
+      {
+        "id": "fact-1",
+        "value": "The employee used their managed work laptop. They did not download a file and still have access to normal work services.",
+        "reveal_when": "candidate asks about device, downloads, or current impact"
+      },
+      {
+        "id": "fact-2",
+        "value": "The on-call analyst can respond in five minutes. The reporting tool can preserve the original email without opening its link; no sign-in logs are supplied yet.",
+        "reveal_when": "candidate asks about escalation, evidence preservation, or logs"
+      }
+    ],
+    "model_points": [
+      "Treat entering a work password as a meaningful exposure even without an approved sign-in prompt. Ask for the time, affected account, downloads, and unexpected activity; do not ask the employee to repeat the password.",
+      "Preserve the original message using the reporting tool, record the report, and contact the authorized analyst immediately. Ask for review of sign-ins and authorized credential/session containment; do not claim these actions succeeded.",
+      "A useful handoff distinguishes the employee report from verified observations and names the pending checks. Keep communication calm so future reports remain likely."
+    ],
+    "probes": [
+      {
+        "trigger": "candidate says MFA means there is no risk",
+        "question": "What has already been exposed, even if the second factor was not approved?"
+      },
+      {
+        "trigger": "candidate lists many checks before escalation",
+        "question": "Which checks must happen before calling the analyst, and which can run afterward?"
+      }
+    ],
+    "fair_alternatives": [
+      "A direct call or the urgent incident channel is acceptable if it reaches the on-call analyst promptly and leaves a record.",
+      "Requesting a password reset through the approved support process is reasonable; direct execution is outside the trainee role."
+    ],
+    "red_flags": [
+      "Dismisses the report because no approval prompt was accepted, or declares a confirmed breach without evidence.",
+      "Opens the suspicious link, requests the password, or claims to revoke access without authority.",
+      "Blames the employee or promises the account is safe without verification."
+    ],
+    "follow_ups": [
+      "Write a four-line handoff separating reported exposure, preserved evidence, requested action, and next update."
+    ],
+    "exemplar_answer": "I would thank the employee and record that the password was entered at about 09:10; compromise is possible but not confirmed. I would preserve the email through our reporting tool, ask about downloads and unusual sign-ins, and call the on-call analyst now. I would request their account-containment and log-review process, explain to the employee not to reopen the link, and confirm our next update after the analyst responds."
+  },
+  "interviewer_notes": "Play the reporting employee initially, then the on-call partner when requested. Do not invent attacker activity or demand command syntax. Reward prompt escalation without requiring a named security framework. Use only supplied facts; say when something is unknown. Accept plain language and equivalent approaches. Assess the demonstrated decisions, not accent, confidence, credentials, or access to particular employers. This is a fictional exercise; do not imply real actions were performed.",
+  "learning_drills": [
+    {
+      "id": "focused-practice",
+      "title": "Write the incident handoff",
+      "minutes": 5,
+      "prompt": "Write a four-line handoff separating reported exposure, preserved evidence, requested action, and next update. This is self-guided practice; no model assessment is performed.",
+      "checklist": [
+        "Name the affected account without a secret",
+        "Record the reported time",
+        "Identify the authorized owner",
+        "State one verification still needed"
+      ]
+    }
+  ]
+}

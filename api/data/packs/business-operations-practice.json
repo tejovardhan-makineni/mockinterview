@@ -1,0 +1,58 @@
+{
+  "id": "business-operations-practice",
+  "revision": 1,
+  "review_status": "preview",
+  "source_note": "Original community practice path. Each round is a separate attempt. Content is an AI-assisted preview awaiting practitioner review and calibration; this is not an employer process or a hiring-readiness certification.",
+  "name": "Business Operations Practice",
+  "areas": [
+    "business_operations"
+  ],
+  "track": "professional",
+  "blurb": "Practice a recruiter screen, two business operations decisions, and questions about role fit.",
+  "rounds": [
+    {
+      "id": "round-1",
+      "title": "Practice a Recruiter Screening Call",
+      "kind": "recruiter-screen",
+      "domain": "recruiter_screen",
+      "modality": "conversational",
+      "difficulty": "junior",
+      "minutes": 15,
+      "question_id": "career-recruiter-screen",
+      "focus": "Practice motivation, relevant experience, role questions, and clear next steps in a short screening call."
+    },
+    {
+      "id": "round-2",
+      "title": "Operations Assistant: Repair a Front-Desk Schedule",
+      "kind": "work-sample-defense",
+      "domain": "operations_coordination",
+      "modality": "written",
+      "difficulty": "entry",
+      "minutes": 20,
+      "question_id": "operations-scheduling-review",
+      "focus": "Find coverage gaps, work within staff availability, and prepare a rota ready for manager confirmation."
+    },
+    {
+      "id": "round-3",
+      "title": "Operations Manager: Reduce a Service Backlog Without Hiding Rework",
+      "kind": "work-sample-defense",
+      "domain": "process_improvement",
+      "modality": "written",
+      "difficulty": "mid",
+      "minutes": 30,
+      "question_id": "operations-backlog-redesign",
+      "focus": "Design a practical backlog pilot that improves completed outcomes and waiting time while reducing rework."
+    },
+    {
+      "id": "round-4",
+      "title": "Use the Final Five Minutes",
+      "kind": "reverse-interview",
+      "domain": "candidate_questions",
+      "modality": "conversational",
+      "difficulty": "mid",
+      "minutes": 10,
+      "question_id": "candidate-questions-role-fit",
+      "focus": "Practice questions about expectations, support, working conditions, and real examples so you can judge role fit."
+    }
+  ]
+}

@@ -1,0 +1,123 @@
+{
+  "schema_version": 1,
+  "revision": 1,
+  "format_id": "work-sample-defense",
+  "review_status": "preview",
+  "provenance": {
+    "authorship": "Original project scenario, AI-assisted draft. Practitioner review and calibration pending.",
+    "license": "AGPL-3.0-only"
+  },
+  "minutes": 30,
+  "id": "customer-support-escalation-pattern",
+  "title": "Support Lead: Respond to a Repeating Billing Complaint",
+  "track": "professional",
+  "domain": "support_quality",
+  "areas": [
+    "customer_support"
+  ],
+  "modality": "written",
+  "difficulty": "mid",
+  "tags": [
+    "customer-support-lead",
+    "support-operations",
+    "customer-experience",
+    "escalation-management",
+    "practical",
+    "community-preview"
+  ],
+  "prompt": "Fictional Elm Fitness received 40 contacts this week saying members were billed after cancellation, compared with 8 last week. A draft team response says, \"Tell everyone refunds are automatic and close duplicate tickets immediately.\" Internal policy requires checking each member’s cancellation record and payment status; only billing operations can approve refunds. Review the draft and propose a response that helps today’s members and investigates the pattern.",
+  "blurb": "Resolve individual billing complaints while investigating a wider pattern and coordinating consistent support guidance.",
+  "rubric": [
+    {
+      "key": "case_accuracy",
+      "label": "Protect individual resolution",
+      "description": "Reviews member facts and avoids unsupported promises.",
+      "weight": 1,
+      "anchors": {
+        "0": "Promises automatic refunds or closes contacts without linking them to a resolution.",
+        "2": "Replaces the promise with a case check and billing escalation.",
+        "4": "Distinguishes confirmed cancellations, incomplete requests, and unknowns; consolidates duplicates only with preserved context, ownership, and an update route."
+      }
+    },
+    {
+      "key": "pattern_analysis",
+      "label": "Investigate a signal responsibly",
+      "description": "Uses volume and sample evidence without premature causation.",
+      "weight": 1,
+      "anchors": {
+        "0": "Declares the form change the cause or generalizes six cases to every member.",
+        "2": "Recognizes an increase and investigates the recent change.",
+        "4": "Checks contact definitions, membership/billing volume, affected cohorts, and sample bias before estimating scope; labels the form link as a hypothesis."
+      }
+    },
+    {
+      "key": "coordination",
+      "label": "Coordinate response and learning",
+      "description": "Creates a cross-team loop for cases, communications, and verification.",
+      "weight": 1,
+      "anchors": {
+        "0": "Leaves agents to improvise or treats fewer open tickets as proof the issue is fixed.",
+        "2": "Creates a shared case list and consistent interim wording.",
+        "4": "Uses the twice-daily billing review, names case and incident owners, tracks actual member resolution and recurrence, and updates guidance when evidence changes."
+      }
+    }
+  ],
+  "reference": {
+    "scenario": "Fictional Elm Fitness received 40 contacts this week saying members were billed after cancellation, compared with 8 last week. A draft team response says, \"Tell everyone refunds are automatic and close duplicate tickets immediately.\" Internal policy requires checking each member’s cancellation record and payment status; only billing operations can approve refunds. Review the draft and propose a response that helps today’s members and investigates the pattern.",
+    "facts": [
+      {
+        "id": "fact-1",
+        "value": "Of ten sampled cases, six show cancellation confirmed before the billing date, two have incomplete cancellation requests, and two lack enough evidence. The sample was taken from the oldest tickets.",
+        "reveal_when": "candidate asks for case evidence or how the sample was chosen"
+      },
+      {
+        "id": "fact-2",
+        "value": "A cancellation-form change launched last Friday. Billing operations can review a shared case list twice daily; no causal link or automatic refund job has been confirmed.",
+        "reveal_when": "candidate asks about recent changes or cross-team capacity"
+      }
+    ],
+    "model_points": [
+      "Forty versus eight contacts is a meaningful signal but not an incidence rate without a denominator and consistent counting. The oldest-ticket sample may overrepresent slow or complex cases.",
+      "Remove the unverified automatic-refund claim. Agents should acknowledge the issue, check records, preserve the member’s evidence, and route cases to billing operations under the stated approval policy.",
+      "Group duplicate contacts without losing an accountable case or callback. Coordinate billing and the form owner around a shared timeline and compare cancellation records with payment status to test the change hypothesis."
+    ],
+    "probes": [
+      {
+        "trigger": "candidate concludes the form caused all complaints",
+        "question": "What evidence would distinguish a form defect from a billing or communication problem?"
+      },
+      {
+        "trigger": "candidate wants to close all duplicate contacts",
+        "question": "How will a member know which open case still owns their resolution?"
+      }
+    ],
+    "fair_alternatives": [
+      "An incident-style coordination channel is suitable if it complements accountable individual case handling.",
+      "Pausing a suspected form change may be an option for its authorized owner after risk review; the support lead should not claim to execute it."
+    ],
+    "red_flags": [
+      "Promises automatic refunds or closes contacts without linking them to a resolution.",
+      "Declares the form change the cause or generalizes six cases to every member.",
+      "Leaves agents to improvise or treats fewer open tickets as proof the issue is fixed."
+    ],
+    "follow_ups": [
+      "Write a short agent guide with approved wording, required evidence, escalation owner, and what remains unknown."
+    ],
+    "exemplar_answer": "I would replace the refund guarantee with a clear statement that we are checking cancellation and payment records and will route the outcome to billing operations. Each member needs one owned case even if duplicate contacts are consolidated. Internally, I would track the increase, sample limitations, and possible form-change link, then build the twice-daily billing review list. Success means resolved member cases and fewer new incorrect bills, not merely fewer open tickets."
+  },
+  "interviewer_notes": "Ask for a revised two-sentence member response and an internal investigation plan. Do not assume refunds are owed in every case or require jurisdiction-specific billing rules. Use only supplied facts; say when something is unknown. Accept plain language and equivalent approaches. Assess the demonstrated decisions, not accent, confidence, credentials, or access to particular employers. This is a fictional exercise; do not imply real actions were performed.",
+  "learning_drills": [
+    {
+      "id": "focused-practice",
+      "title": "Draft the interim support guidance",
+      "minutes": 5,
+      "prompt": "Write a short agent guide with approved wording, required evidence, escalation owner, and what remains unknown. This is self-guided practice; no model assessment is performed.",
+      "checklist": [
+        "Remove automatic-refund claims",
+        "Preserve one accountable case per member",
+        "Separate pattern hypothesis from proof",
+        "Measure member resolution and recurrence"
+      ]
+    }
+  ]
+}

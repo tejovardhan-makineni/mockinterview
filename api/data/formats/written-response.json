@@ -1,0 +1,39 @@
+{
+  "schema_version": 1,
+  "id": "written-response",
+  "revision": 1,
+  "name": "Written response and discussion",
+  "interviewer_role": "an AI interviewer discussing a response the candidate writes during the exercise",
+  "workspaces": ["written"],
+  "tool_policy": "The candidate drafts their response in the written workspace and may use notes. No external lookup, code execution, document upload, or real application submission is required. Assess reasoning and comprehensibility, not typing speed, exact word count, native-like grammar, or visual polish.",
+  "stages": [
+    {
+      "id": "intro",
+      "title": "Understand the prompt",
+      "kind": "intro",
+      "guidance": "Present the supplied writing task and allow a clarification. There is no completed artifact to critique yet.",
+      "share": 0.05
+    },
+    {
+      "id": "draft",
+      "title": "Draft a response",
+      "kind": "core",
+      "guidance": "Give the candidate time to create the requested answer or evidence table. Answer clarification questions using supplied facts. Do not interrupt to demand critique of a nonexistent artifact or dictate a solution in simulation mode.",
+      "share": 0.55
+    },
+    {
+      "id": "discuss",
+      "title": "Discuss and revise",
+      "kind": "core",
+      "guidance": "Use the candidate's actual draft to ask one neutral question about a consequential decision or uncertainty. Allow a revision and reassess the revised response fairly; do not repeat a criticism that the correction resolves.",
+      "share": 0.3
+    },
+    {
+      "id": "wrap",
+      "title": "Reflect",
+      "kind": "wrap",
+      "guidance": "Invite one concise reflection about a remaining uncertainty or useful improvement, then close.",
+      "share": 0.1
+    }
+  ]
+}

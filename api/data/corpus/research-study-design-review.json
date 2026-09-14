@@ -1,0 +1,123 @@
+{
+  "schema_version": 1,
+  "revision": 1,
+  "format_id": "work-sample-defense",
+  "review_status": "preview",
+  "provenance": {
+    "authorship": "Original project scenario, AI-assisted draft. Practitioner review and calibration pending.",
+    "license": "AGPL-3.0-only"
+  },
+  "minutes": 30,
+  "id": "research-study-design-review",
+  "title": "Researcher: Design a Credible Evaluation Under Practical Constraints",
+  "track": "professional",
+  "domain": "study_design",
+  "areas": [
+    "research"
+  ],
+  "modality": "written",
+  "difficulty": "mid",
+  "tags": [
+    "researcher",
+    "evaluation-specialist",
+    "social-researcher",
+    "research-scientist",
+    "practical",
+    "community-preview"
+  ],
+  "prompt": "Fictional Grove Institute wants to evaluate a new library job-search coaching session. Draft plan: compare people who choose coaching with everyone who does not, then claim any difference in interview invitations is the coaching effect. Four branches can offer the session, and all usual library services remain available. The institute’s ethics process requires voluntary participation, an understandable consent process, and review before recruitment. Review the design and propose a feasible evaluation, including limits on the claim.",
+  "blurb": "Compare feasible study designs and plan consent, measurement, follow-up, and honest limits on conclusions.",
+  "rubric": [
+    {
+      "key": "identification",
+      "label": "Address selection and contamination",
+      "description": "Explains what a proposed comparison can establish.",
+      "weight": 1,
+      "anchors": {
+        "0": "Treats voluntary attendance versus nonattendance as a clean causal comparison.",
+        "2": "Identifies self-selection and proposes a more comparable group.",
+        "4": "Compares an approved randomized offer or later-session design with observational alternatives, notices cross-branch participation, and limits claims to the assignment and population actually studied."
+      }
+    },
+    {
+      "key": "measurement",
+      "label": "Define outcomes and missingness",
+      "description": "Plans a consistent outcome and honest follow-up analysis.",
+      "weight": 1,
+      "anchors": {
+        "0": "Assumes nonrespondents had no invitations or invents verified employment records.",
+        "2": "Defines interview invitations at six weeks and tracks response rates.",
+        "4": "Uses a consistent question and follow-up schedule, retains assignment groups where relevant, reports missingness and sensitivity, and separates self-report from independently verified outcomes."
+      }
+    },
+    {
+      "key": "feasibility_ethics",
+      "label": "Make the study feasible and voluntary",
+      "description": "Respects review, capacity, and the limits of a small study.",
+      "weight": 1,
+      "anchors": {
+        "0": "Starts recruitment before required review or withdraws usual services to force participation.",
+        "2": "Obtains review and consent while retaining usual services.",
+        "4": "Checks whether allocation and later access are acceptable, weighs four-branch clustering and roughly 80 volunteers, prioritizes feasibility/precision, and avoids promising conclusive statistical power."
+      }
+    }
+  ],
+  "reference": {
+    "scenario": "Fictional Grove Institute wants to evaluate a new library job-search coaching session. Draft plan: compare people who choose coaching with everyone who does not, then claim any difference in interview invitations is the coaching effect. Four branches can offer the session, and all usual library services remain available. The institute’s ethics process requires voluntary participation, an understandable consent process, and review before recruitment. Review the design and propose a feasible evaluation, including limits on the claim.",
+    "facts": [
+      {
+        "id": "fact-1",
+        "value": "Each branch can recruit about 20 volunteers over a month. Demand for the new session may exceed its initial capacity; a later-session option is feasible, subject to ethics and service approval. Participants may visit multiple branches.",
+        "reveal_when": "candidate asks about sample size, assignment, capacity, or spillover"
+      },
+      {
+        "id": "fact-2",
+        "value": "The team can measure interview invitations at six weeks using consented follow-up, but can afford only two contact attempts per person. It has no verified employer records and no approved data-sharing arrangement for them.",
+        "reveal_when": "candidate asks about outcomes, attrition, measurement, or data access"
+      }
+    ],
+    "model_points": [
+      "People choosing coaching may differ in motivation, availability, or initial readiness; adjustment can help describe differences but does not automatically remove unmeasured confounding.",
+      "If demand exceeds capacity and approvals permit it, random assignment of an offer or timing can support a more credible comparison while preserving usual services. Define what effect is being estimated: assignment or offer, not automatically attendance. Cross-branch visits may weaken separation.",
+      "A four-branch study with about 80 volunteers may be useful for feasibility and uncertainty estimates but cannot be declared adequately powered without assumptions. Predefine the six-week outcome, consented contact, response tracking, and a transparent missing-data approach before recruitment."
+    ],
+    "probes": [
+      {
+        "trigger": "candidate randomizes the four branches and promises strong evidence",
+        "question": "What does having only four clusters mean for comparability and precision?"
+      },
+      {
+        "trigger": "candidate codes all missing surveys as no invitation",
+        "question": "What evidence supports that assumption, and how would you show its effect?"
+      }
+    ],
+    "fair_alternatives": [
+      "A carefully bounded observational pilot is acceptable if randomized allocation is not approved, with explicit confounding limits.",
+      "Individual randomized offers or a later-session comparison may work if service and ethics review approve the arrangements; neither is mandatory."
+    ],
+    "red_flags": [
+      "Treats voluntary attendance versus nonattendance as a clean causal comparison.",
+      "Assumes nonrespondents had no invitations or invents verified employment records.",
+      "Starts recruitment before required review or withdraws usual services to force participation."
+    ],
+    "follow_ups": [
+      "Compare two feasible designs using allocation, outcome, main bias, consent requirement, and the strongest justified claim."
+    ],
+    "exemplar_answer": "I would reject a causal claim from self-selected attendance alone. If the new session is oversubscribed and the service and ethics reviewers agree, I would consider randomly offering immediate versus later access while retaining usual services. I would compare the groups as assigned on the same six-week invitation question, track cross-branch use and nonresponse, and report uncertainty. With roughly 80 volunteers and only four branches, I would treat this as a feasibility and estimation study unless a justified power analysis supports more."
+  },
+  "interviewer_notes": "Do not require advanced equations, external ethics rules, or one preferred study design. Ask the candidate to explain their estimand in plain language and identify what the small pilot cannot settle. Use only supplied facts; say when something is unknown. Accept plain language and equivalent approaches. Assess the demonstrated decisions, not accent, confidence, credentials, or access to particular employers. This is a fictional exercise; do not imply real actions were performed.",
+  "learning_drills": [
+    {
+      "id": "focused-practice",
+      "title": "Write an evaluation decision table",
+      "minutes": 5,
+      "prompt": "Compare two feasible designs using allocation, outcome, main bias, consent requirement, and the strongest justified claim. This is self-guided practice; no model assessment is performed.",
+      "checklist": [
+        "Name selection or contamination risks",
+        "Keep usual services available",
+        "Plan for nonresponse",
+        "Avoid an unsupported power claim"
+      ]
+    }
+  ]
+}

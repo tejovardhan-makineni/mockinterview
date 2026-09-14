@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "revision": 1,
+  "revision": 2,
   "format_id": "reverse-interview",
   "review_status": "preview",
   "provenance": {
@@ -13,12 +13,36 @@
   "track": "professional",
   "domain": "candidate_questions",
   "areas": [
-    "software_engineering",
-    "product_management",
-    "data_science",
+    "career_foundations",
+    "accounting",
+    "business_operations",
+    "civil_engineering",
     "consulting",
+    "creative_communications",
+    "customer_support",
+    "cybersecurity",
+    "data_science",
+    "education",
+    "electrical_engineering",
     "finance",
+    "human_resources",
+    "it_support",
+    "law",
+    "marketing",
+    "mechanical_engineering",
+    "medicine",
+    "nursing",
+    "product_management",
+    "project_management",
+    "public_service",
+    "quality_assurance",
+    "research",
+    "retail_hospitality",
     "sales",
+    "skilled_trades",
+    "social_work",
+    "software_engineering",
+    "supply_chain",
     "ux_design"
   ],
   "modality": "conversational",
@@ -28,8 +52,8 @@
     "practical",
     "community-preview"
   ],
-  "prompt": "We are at the final part of a fictional interview. Ask questions that help you understand whether this role fits your goals. I will answer as the hiring manager of a small product team. Ask one question at a time and follow up on useful details.",
-  "blurb": "Use the Final Five Minutes \u2014 original practice scenario, awaiting practitioner review.",
+  "prompt": "We are at the final part of a fictional interview for a role on a small service team. Ask questions that help you understand whether the role fits your goals. I will answer as the hiring manager. Ask one question at a time and follow up on useful details. You can ask about expectations, working conditions, learning, support, or anything else relevant to your decision.",
+  "blurb": "Practice questions about expectations, support, working conditions, and real examples so you can judge role fit.",
   "rubric": [
     {
       "key": "relevance",
@@ -37,20 +61,20 @@
       "description": "Connects questions to the role, personal priorities and information still missing.",
       "weight": 1,
       "anchors": {
-        "0": "No demonstrated evidence of this skill.",
-        "2": "Addresses the core point with relevant evidence and a reasonable explanation.",
-        "4": "Gives a precise, well-supported explanation, tests alternatives and states limitations."
+        "0": "Asks only questions unrelated to the role despite clarification.",
+        "2": "Asks about an actual role responsibility or a personal work priority.",
+        "4": "Connects a priority to a specific responsibility and asks what would make the role a fit."
       }
     },
     {
       "key": "followup",
       "label": "Active follow-up",
-      "description": "Uses the interviewer\u2019s answer to deepen the next question.",
+      "description": "Uses the interviewer’s answer to deepen the next question.",
       "weight": 1,
       "anchors": {
-        "0": "No demonstrated evidence of this skill.",
-        "2": "Addresses the core point with relevant evidence and a reasonable explanation.",
-        "4": "Gives a precise, well-supported explanation, tests alternatives and states limitations."
+        "0": "Repeatedly ignores answers and restarts the same question.",
+        "2": "Uses a supplied answer to ask one relevant follow-up.",
+        "4": "Follows an answer to resolve a material uncertainty without repeating what was already answered."
       }
     },
     {
@@ -59,9 +83,9 @@
       "description": "Asks for examples instead of accepting broad culture claims.",
       "weight": 1,
       "anchors": {
-        "0": "No demonstrated evidence of this skill.",
-        "2": "Addresses the core point with relevant evidence and a reasonable explanation.",
-        "4": "Gives a precise, well-supported explanation, tests alternatives and states limitations."
+        "0": "Treats broad unsupported claims as verified examples.",
+        "2": "Asks for a concrete example of a team practice or challenge.",
+        "4": "Uses a concrete example to distinguish a stated aspiration from actual practice."
       }
     },
     {
@@ -70,9 +94,9 @@
       "description": "Investigates expectations, support and tradeoffs relevant to a fit decision.",
       "weight": 1,
       "anchors": {
-        "0": "No demonstrated evidence of this skill.",
-        "2": "Addresses the core point with relevant evidence and a reasonable explanation.",
-        "4": "Gives a precise, well-supported explanation, tests alternatives and states limitations."
+        "0": "Makes a fit judgment based on facts the interviewer explicitly says are unknown.",
+        "2": "Explores one condition or expectation that could affect fit.",
+        "4": "Compares a tradeoff relevant to their own priorities and identifies information still needed."
       }
     },
     {
@@ -81,9 +105,9 @@
       "description": "Uses limited time for important questions rather than exhausting a memorized list.",
       "weight": 1,
       "anchors": {
-        "0": "No demonstrated evidence of this skill.",
-        "2": "Addresses the core point with relevant evidence and a reasonable explanation.",
-        "4": "Gives a precise, well-supported explanation, tests alternatives and states limitations."
+        "0": "Continues unrelated questions without allowing answers or responding to time cues.",
+        "2": "Prioritizes one or two relevant questions and listens to the answers.",
+        "4": "Uses the available time to resolve the most decision-relevant uncertainty and leaves lower priorities for follow-up."
       }
     },
     {
@@ -92,18 +116,18 @@
       "description": "Summarizes what was learned and what remains uncertain without overclaiming.",
       "weight": 1,
       "anchors": {
-        "0": "No demonstrated evidence of this skill.",
-        "2": "Addresses the core point with relevant evidence and a reasonable explanation.",
-        "4": "Gives a precise, well-supported explanation, tests alternatives and states limitations."
+        "0": "Claims a guarantee of role fit or working conditions not provided.",
+        "2": "Summarizes a known fact and one remaining uncertainty.",
+        "4": "Explains how a specific answer informs their decision and what additional evidence would change it."
       }
     }
   ],
   "reference": {
-    "scenario": "We are at the final part of a fictional interview. Ask questions that help you understand whether this role fits your goals. I will answer as the hiring manager of a small product team. Ask one question at a time and follow up on useful details.",
+    "scenario": "We are at the final part of a fictional interview for a role on a small service team. Ask questions that help you understand whether the role fits your goals. I will answer as the hiring manager. Ask one question at a time and follow up on useful details. You can ask about expectations, working conditions, learning, support, or anything else relevant to your decision.",
     "facts": [
       {
         "id": "success",
-        "value": "The first three months focus on shipping a small customer-facing improvement with a mentor.",
+        "value": "The first three months focus on improving one recurring service task with a mentor.",
         "reveal_when": "candidate asks about success or initial expectations"
       },
       {
@@ -113,7 +137,7 @@
       },
       {
         "id": "challenge",
-        "value": "A recent launch slipped because ownership between product and engineering was unclear. The team is trialing a single-owner decision log.",
+        "value": "A recent service improvement slipped because ownership between two teams was unclear. The team is trialing a single-owner decision log.",
         "reveal_when": "candidate asks for a challenge or concrete example"
       },
       {
@@ -124,7 +148,7 @@
     ],
     "model_points": [
       "Connects questions to the role, personal priorities and information still missing.",
-      "Uses the interviewer\u2019s answer to deepen the next question.",
+      "Uses the interviewer’s answer to deepen the next question.",
       "Asks for examples instead of accepting broad culture claims.",
       "Investigates expectations, support and tradeoffs relevant to a fit decision.",
       "Uses limited time for important questions rather than exhausting a memorized list.",
@@ -150,7 +174,7 @@
     ],
     "exemplar_answer": "Multiple approaches are valid. A strong response establishes the goal, uses the provided facts, tests alternatives, explains tradeoffs, and states uncertainty."
   },
-  "interviewer_notes": "Roleplay only this fictional team. Do not invent compensation, legal policies, company names or personal history. Say when a fact is unspecified. Do not score candidates down for reasonable questions about working conditions or support.",
+  "interviewer_notes": "Roleplay only this fictional team. Do not invent compensation, legal policies, company names or personal history. Say when a fact is unspecified. Do not score candidates down for reasonable questions about working conditions or support. Do not assume a technology role or score personal priorities as good or bad. Asking about support, working conditions, compensation, or accessibility is legitimate; unspecified terms stay unknown.",
   "learning_drills": [
     {
       "id": "repair-one-decision",
