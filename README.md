@@ -4,13 +4,15 @@ Practice interviews with a clearly identified AI interviewer, keep your work and
 feedback, and contribute new interview formats. The hosted application is at
 [mockinterview.live](https://mockinterview.live).
 
-**The public beta is live.** The microphone readiness fix and unlimited tester
-access were deployed and verified on September 13, 2026. See the
+**The public beta is live.** The interview bank expansion was deployed and
+verified on September 14, 2026. See the
+[September 14 release record](docs/INTERVIEW-BANK-RELEASE-2026-09-14.md) for
+artifact versions, validation and rollback. The
 [September 13 release record](docs/MICROPHONE-TESTERS-RELEASE-2026-09-13.md)
-for artifact versions, validation and rollback. Earlier production signup,
-verification, real AI text interview and saved-report acceptance remain documented
-in the [initial interview acceptance](docs/RELEASE-VALIDATION-2026-09-09.md) and
-[policy/privacy release record](docs/RELEASE-VALIDATION-2026-09-10.md).
+covers microphone readiness and unlimited tester access. Earlier production
+signup, verification, real AI text interview and saved-report acceptance remain
+documented in the [initial interview acceptance](docs/RELEASE-VALIDATION-2026-09-09.md)
+and [policy/privacy release record](docs/RELEASE-VALIDATION-2026-09-10.md).
 
 Choose a profession, format, target level and duration. Optional controls adjust
 challenge, interview style and simulation versus coaching. A device check leads
@@ -18,12 +20,13 @@ into a room with voice, an optional camera, notes and an appropriate workspace.
 Reports use the scenario's rubric and cited candidate evidence; missing evidence
 is marked **not assessed**. Appearance is not part of the interview score.
 
-The repository catalog contains **185 scenarios** across **30 professional areas
+The hosted catalog contains **185 scenarios** across **30 professional areas
 plus career foundations**, organized into seven career families with specialized
 AI interviewer profiles and 23 practice paths. The
 [September 14 bank audit and expansion](docs/INTERVIEW-BANK-EXPANSION-2026-09-14.md)
-describes the additions, categorization and next priorities. This expansion is
-not yet deployed; the reviewed hosted catalog still contains 143 scenarios.
+describes the additions, categorization and next priorities. The
+[release record](docs/INTERVIEW-BANK-RELEASE-2026-09-14.md) records the deployed
+artifacts and verification.
 The bank includes original work-sample defense,
 AI-output critique, incident triage, SQL review, stakeholder negotiation and
 candidate-question practice. Content and AI feedback are **community previews**:
