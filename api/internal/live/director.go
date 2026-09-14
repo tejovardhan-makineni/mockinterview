@@ -208,59 +208,13 @@ func personaTone(persona string, intensity int) string {
 	return fmt.Sprintf("%s Interview intensity is %s.", base, level)
 }
 
-// interviewerRole returns the human role/title the interviewer plays, tailored
-// to the interview's field — so a software station is run by an engineer and a
-// clinical station by a physician, matching the candidate's selected area.
+// interviewerRole keeps the authored scenario role while the selected specialist
+// supplies profession-specific assessment guidance independently of the format.
 func interviewerRole(q corpus.Question) string {
 	if q.FormatDefinition != nil {
 		return q.FormatDefinition.InterviewerRole
 	}
-	// Behavioral is a shared station across every field; keep the role neutral.
-	if q.Domain == "behavioral" {
-		return "a hiring manager who has run hundreds of interviews"
-	}
-	area := ""
-	if len(q.Areas) > 0 {
-		area = q.Areas[0]
-	}
-	switch area {
-	case "software_engineering":
-		if q.Domain == "ml_system_design" {
-			return "a senior machine-learning engineer"
-		}
-		return "a senior software engineer who interviews candidates often"
-	case "mechanical_engineering":
-		return "a senior mechanical engineer"
-	case "electrical_engineering":
-		return "a senior electrical engineer"
-	case "civil_engineering":
-		return "a senior civil and structural engineer"
-	case "data_science":
-		return "a senior data scientist"
-	case "medicine":
-		return "an attending physician who supervises trainees"
-	case "nursing":
-		return "a senior charge nurse and preceptor"
-	case "law":
-		return "a partner at a law firm"
-	case "consulting":
-		return "an engagement manager at a consulting firm"
-	case "product_management":
-		return "a senior product manager"
-	case "finance":
-		return "a senior finance professional"
-	case "ux_design":
-		return "a design lead"
-	case "sales":
-		return "a sales hiring manager"
-	case "marketing":
-		return "a marketing lead"
-	case "human_resources":
-		return "a people operations lead"
-	case "education":
-		return "an experienced educator"
-	}
-	return "an experienced interviewer in this field"
+	return corpus.InterviewerFor(q).Role
 }
 
 // SystemPrompt builds the full interviewer system instruction for a session.

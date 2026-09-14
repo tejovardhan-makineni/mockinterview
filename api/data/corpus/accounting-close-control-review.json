@@ -1,0 +1,123 @@
+{
+  "schema_version": 1,
+  "revision": 1,
+  "format_id": "work-sample-defense",
+  "review_status": "preview",
+  "provenance": {
+    "authorship": "Original project scenario, AI-assisted draft. Practitioner review and calibration pending.",
+    "license": "AGPL-3.0-only"
+  },
+  "minutes": 30,
+  "id": "accounting-close-control-review",
+  "title": "Accountant: Review a Month-End Reconciliation Control",
+  "track": "professional",
+  "domain": "financial_controls",
+  "areas": [
+    "accounting"
+  ],
+  "modality": "written",
+  "difficulty": "mid",
+  "tags": [
+    "accountant",
+    "financial-accountant",
+    "controller",
+    "month-end-close",
+    "practical",
+    "community-preview"
+  ],
+  "prompt": "Fictional Alder Learning has a $2,400 difference between its bank statement and cash ledger at month end. A draft close note says, \"Post the difference to miscellaneous expense, then have the preparer approve the reconciliation.\" Company policy requires evidence for adjusting entries and an independent reviewer. The close is tomorrow. Review the proposed treatment and set out a defensible close plan. This is an internal-policy exercise, not jurisdiction-specific accounting advice.",
+  "blurb": "Distinguish reconciling items from unsupported adjustments and plan an independently reviewed month-end close.",
+  "rubric": [
+    {
+      "key": "analysis",
+      "label": "Reconcile direction and evidence",
+      "description": "Builds the balance bridge rather than plugging a difference.",
+      "weight": 1,
+      "anchors": {
+        "0": "Posts $2,400 to expense because it equals the unexplained difference.",
+        "2": "Identifies the fee and uncleared payment as different kinds of reconciling items.",
+        "4": "Checks ending balances and signs, distinguishes a supported ledger adjustment from a timing item, and refuses to assume $900 plus $1,500 automatically reconciles the reported difference."
+      }
+    },
+    {
+      "key": "control",
+      "label": "Preserve entry support and independent review",
+      "description": "Applies both stated control requirements.",
+      "weight": 1,
+      "anchors": {
+        "0": "Allows preparer self-approval or unsupported entries to meet the deadline.",
+        "2": "Requires support for entries and assigns the independent reviewer.",
+        "4": "Links each proposed entry and timing item to evidence, schedules review before closure, and records approval and outstanding questions separately."
+      }
+    },
+    {
+      "key": "close_management",
+      "label": "Manage uncertainty under deadline",
+      "description": "Gives the finance lead an actionable exception path.",
+      "weight": 1,
+      "anchors": {
+        "0": "Conceals the discrepancy or states the close is complete before reconciliation.",
+        "2": "Escalates unresolved items with a status note.",
+        "4": "Sets a pre-review evidence cutoff, quantifies confirmed and unresolved items without inventing materiality, and identifies owners and follow-up dates for any logged exception."
+      }
+    }
+  ],
+  "reference": {
+    "scenario": "Fictional Alder Learning has a $2,400 difference between its bank statement and cash ledger at month end. A draft close note says, \"Post the difference to miscellaneous expense, then have the preparer approve the reconciliation.\" Company policy requires evidence for adjusting entries and an independent reviewer. The close is tomorrow. Review the proposed treatment and set out a defensible close plan. This is an internal-policy exercise, not jurisdiction-specific accounting advice.",
+    "facts": [
+      {
+        "id": "fact-1",
+        "value": "The bank statement includes a $900 processing fee not yet in the ledger and a $1,500 supplier payment recorded in the ledger that has not cleared the bank. Their directions have not yet been reconciled; the statement and ledger ending balances must be checked.",
+        "reveal_when": "candidate asks for reconciling items, dates, or supporting documents"
+      },
+      {
+        "id": "fact-2",
+        "value": "A reviewer outside the cash-posting role is available tomorrow morning. Unresolved differences may be reported in the close exception log to the finance lead, who decides how the close proceeds.",
+        "reveal_when": "candidate asks about reviewer capacity or unresolved-item policy"
+      }
+    ],
+    "model_points": [
+      "A processing fee missing from the ledger may justify a supported entry, while an uncleared payment already in the ledger is typically a timing item under this scenario. The direction of the starting difference matters; the two amounts summing to $2,400 does not prove a correct reconciliation.",
+      "Request ending balances, transaction evidence, dates, and the reconciliation convention before claiming the bridge balances. Do not invent missing amounts or local accounting rules.",
+      "Use the available independent reviewer tomorrow morning. If evidence remains incomplete, report it through the stated exception process so the finance lead decides how to proceed; deadline pressure does not authorize an unsupported plug."
+    ],
+    "probes": [
+      {
+        "trigger": "candidate immediately says 900 plus 1500 solves it",
+        "question": "How do these items affect the ledger-to-bank bridge in each direction?"
+      },
+      {
+        "trigger": "candidate gives the preparer approval to save time",
+        "question": "Who can perform the required independent review tomorrow?"
+      }
+    ],
+    "fair_alternatives": [
+      "A worksheet with explicit plus/minus signs or a verbal balance bridge is acceptable.",
+      "Escalation before proposing any entry is reasonable when source balances have not yet been supplied."
+    ],
+    "red_flags": [
+      "Posts $2,400 to expense because it equals the unexplained difference.",
+      "Allows preparer self-approval or unsupported entries to meet the deadline.",
+      "Conceals the discrepancy or states the close is complete before reconciliation."
+    ],
+    "follow_ups": [
+      "Draw a reconciliation bridge that labels the starting balance, each item’s direction, whether it needs an entry, and remaining evidence."
+    ],
+    "exemplar_answer": "I would not book a miscellaneous-expense plug. The $900 fee may need a supported ledger entry; the $1,500 uncleared payment is a timing question, so I need the balances and signs before claiming they explain $2,400. I would document each item and prepare the reconciliation for tomorrow’s independent reviewer. If it remains unresolved at our cutoff, I would put the quantified uncertainty and owners in the exception log for the finance lead’s close decision."
+  },
+  "interviewer_notes": "Do not reveal invented balances to force a single arithmetic result. A strong candidate notices insufficient sign information. Assess control judgment, not memorization of a particular accounting standard. Use only supplied facts; say when something is unknown. Accept plain language and equivalent approaches. Assess the demonstrated decisions, not accent, confidence, credentials, or access to particular employers. This is a fictional exercise; do not imply real actions were performed.",
+  "learning_drills": [
+    {
+      "id": "focused-practice",
+      "title": "Build a reconciliation bridge",
+      "minutes": 5,
+      "prompt": "Draw a reconciliation bridge that labels the starting balance, each item’s direction, whether it needs an entry, and remaining evidence. This is self-guided practice; no model assessment is performed.",
+      "checklist": [
+        "Check source balances before concluding",
+        "Separate timing from ledger omissions",
+        "Link proposed entries to support",
+        "Assign an independent review"
+      ]
+    }
+  ]
+}

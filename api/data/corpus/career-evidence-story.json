@@ -1,0 +1,145 @@
+{
+  "schema_version": 1,
+  "revision": 1,
+  "format_id": "evidence-interview",
+  "review_status": "preview",
+  "provenance": {
+    "authorship": "Original project scenario, AI-assisted draft. Practitioner review and scoring calibration pending.",
+    "license": "AGPL-3.0-only"
+  },
+  "minutes": 15,
+  "id": "career-evidence-story",
+  "title": "Tell a Clear Story About Your Contribution",
+  "track": "professional",
+  "domain": "evidence_story",
+  "areas": [
+    "career_foundations",
+    "accounting",
+    "business_operations",
+    "civil_engineering",
+    "consulting",
+    "creative_communications",
+    "customer_support",
+    "cybersecurity",
+    "data_science",
+    "education",
+    "electrical_engineering",
+    "finance",
+    "human_resources",
+    "it_support",
+    "law",
+    "marketing",
+    "mechanical_engineering",
+    "medicine",
+    "nursing",
+    "product_management",
+    "project_management",
+    "public_service",
+    "quality_assurance",
+    "research",
+    "retail_hospitality",
+    "sales",
+    "skilled_trades",
+    "social_work",
+    "software_engineering",
+    "supply_chain",
+    "ux_design"
+  ],
+  "modality": "conversational",
+  "difficulty": "entry",
+  "tags": [
+    "career-foundations",
+    "all-careers",
+    "community-preview",
+    "behavioral",
+    "STAR",
+    "teamwork",
+    "communication"
+  ],
+  "prompt": "Tell me about a time you helped a group complete a task or solve a problem. The example can come from study, volunteering, informal work, caregiving, or employment. Explain the situation in your own order, what you personally did, and what happened. A small example is enough; you do not need a numerical result.",
+  "blurb": "Practice behavioral answers using truthful actions, outcomes, and reflection instead of memorized formulas.",
+  "rubric": [
+    {
+      "key": "context",
+      "label": "Relevant context",
+      "description": "Makes the task and obstacle understandable.",
+      "weight": 1,
+      "anchors": {
+        "0": "Gives mutually inconsistent descriptions without resolving them.",
+        "2": "States the task and a relevant obstacle.",
+        "4": "Explains the task, obstacle, and what a useful outcome would have meant."
+      }
+    },
+    {
+      "key": "action",
+      "label": "Personal contribution",
+      "description": "Explains a specific action and why it was chosen.",
+      "weight": 1,
+      "anchors": {
+        "0": "Claims others actions as their own after clarification.",
+        "2": "Describes one personal action.",
+        "4": "Explains a personal decision, its reason, and how they worked with others."
+      }
+    },
+    {
+      "key": "result",
+      "label": "Outcome and learning",
+      "description": "Explains an outcome and a lesson grounded in the story.",
+      "weight": 1,
+      "anchors": {
+        "0": "Claims an outcome contradicted by their own account.",
+        "2": "Describes what happened and one lesson.",
+        "4": "Separates their contribution from other factors and identifies a specific change they would make next time."
+      }
+    }
+  ],
+  "reference": {
+    "scenario": "Tell me about a time you helped a group complete a task or solve a problem. The example can come from study, volunteering, informal work, caregiving, or employment. Explain the situation in your own order, what you personally did, and what happened. A small example is enough; you do not need a numerical result.",
+    "facts": [
+      {
+        "id": "example-policy",
+        "value": "The candidate can choose a small everyday example. Hypothetical practice is allowed if clearly labeled; it is not evidence of past experience.",
+        "reveal_when": "candidate asks whether an example counts"
+      },
+      {
+        "id": "outcomes",
+        "value": "Qualitative outcomes such as a clear handoff or an agreed plan count if explained; invented numbers do not.",
+        "reveal_when": "candidate asks whether metrics are required"
+      }
+    ],
+    "model_points": [
+      "STAR can guide listening privately but is not a required order or scoring dimension.",
+      "Do not demand a second example just because the first is modest.",
+      "If the action and result are already clear, move to a distinct reflection instead of repeating the same probe."
+    ],
+    "probes": [
+      {
+        "trigger": "candidate describes only the group action",
+        "question": "What part of that work did you handle?"
+      },
+      {
+        "trigger": "candidate gives an action but no outcome",
+        "question": "What happened after that?"
+      }
+    ],
+    "red_flags": [
+      "Invents qualifications, accomplishments, or employer commitments.",
+      "Uses unsupported assumptions about the candidate instead of job-related evidence."
+    ]
+  },
+  "interviewer_notes": "Use only supplied role facts and candidate-provided experience. Accept examples from study, volunteering, caregiving, military service, informal work, and paid work without ranking their prestige. Do not demand disclosure of health, family, age, nationality, salary history, or reasons for a career gap. Do not score accent, appearance, eye contact, or native-like grammar. A hypothetical example must be identified as hypothetical, not passed off as experience. Missing evidence is not assessed, not automatically scored zero. In simulation ask neutral probes without giving a model answer; coaching may provide graduated help. Use neutral questions and accept concise answers. Do not coach a more impressive invented story. If no past example is available, clearly label a hypothetical exercise and do not score it as past behavior.",
+  "learning_drills": [
+    {
+      "id": "practice-next-step",
+      "title": "Strengthen one story",
+      "minutes": 5,
+      "prompt": "Write a short example and underline only your own actions; add one outcome and one lesson. This is self-guided practice; no model assessment is performed.",
+      "checklist": [
+        "Explain the task",
+        "Identify your action",
+        "Describe the outcome",
+        "Avoid invented numbers"
+      ]
+    }
+  ]
+}

@@ -127,3 +127,25 @@ func TestMBAKeepsCareerGoalsInsteadOfForcingSTAR(t *testing.T) {
 		t.Fatal("MBA goals replaced with an unrelated STAR interview")
 	}
 }
+
+func TestCareerOpeningsMatchTheExercise(t *testing.T) {
+	cat, err := corpus.Load("../../data/corpus")
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, tc := range []struct{ id, focus string }{
+		{"career-written-screen", "Write your response to the screening prompt shown in the workspace."},
+		{"career-job-description-evidence", "Which duty would you match to your strongest evidence first?"},
+		{"career-first-job-introduction", "How would you introduce yourself for this role?"},
+		{"career-return-to-work", "How would you describe what you are ready to contribute in this role?"},
+		{"career-feedback-recovery", "How would you respond to this feedback?"},
+	} {
+		q, ok := cat.Get(tc.id)
+		if !ok {
+			t.Fatalf("missing career scenario %s", tc.id)
+		}
+		if got := firstQuestionFocus(q); got != tc.focus {
+			t.Errorf("%s opens with %q, want %q", tc.id, got, tc.focus)
+		}
+	}
+}

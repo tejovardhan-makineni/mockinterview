@@ -25,14 +25,66 @@ func TestSystemPromptIncludesPersonaAndProbes(t *testing.T) {
 
 func TestInterviewerRoleByField(t *testing.T) {
 	cases := map[string]corpus.Question{
-		"an attending physician who supervises trainees":      {Domain: "clinical_reasoning", Areas: []string{"medicine"}},
-		"a senior mechanical engineer":                        {Domain: "thermodynamics", Areas: []string{"mechanical_engineering"}},
-		"a hiring manager who has run hundreds of interviews": {Domain: "behavioral", Areas: []string{"software_engineering", "medicine"}},
+		"a medical interview facilitator":      {Domain: "clinical_reasoning", Areas: []string{"medicine"}},
+		"a mechanical engineering interviewer": {Domain: "thermodynamics", Areas: []string{"mechanical_engineering"}},
+		"a behavioral interview facilitator":   {Domain: "behavioral", Areas: []string{"software_engineering", "medicine"}},
+		"a career preparation interviewer":     {Domain: "recruiter_screen", Areas: []string{"career_foundations", "medicine"}},
 	}
 	for want, q := range cases {
 		if got := interviewerRole(q); got != want {
 			t.Errorf("interviewerRole(%v) = %q, want %q", q.Areas, got, want)
 		}
+	}
+}
+
+func TestEveryCorpusScenarioReceivesItsSpecialistAndSafetyContract(t *testing.T) {
+	cat, err := corpus.Load("../../data/corpus")
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, summary := range cat.List("", "", "") {
+		q, _ := cat.Get(summary.ID)
+		t.Run(q.ID, func(t *testing.T) {
+			profile := corpus.InterviewerFor(q)
+			if summary.Agent != profile.Agent() {
+				t.Fatal("catalog advertises a different specialist from the session")
+			}
+			p := SystemPrompt(q, "neutral", 3, "intro", "", "", q.Minutes, "charon", "en", SectionPlan(q, false, ""), "")
+			for _, want := range []string{profile.ID, profile.Guidance, "AI practice interviewer", "FAIR ACCESS:", "Let candidates choose what personal context to disclose", "Do not invent missing numbers, institutional rules, laws or patient findings"} {
+				if !strings.Contains(p, want) {
+					t.Errorf("missing specialist or safety instruction %q", want)
+				}
+			}
+			if q.FormatDefinition != nil && !strings.Contains(p, q.FormatDefinition.InterviewerRole) {
+				t.Fatal("specialist replaced authored scenario role")
+			}
+			if liveNotes := liveQuestion(q).InterviewerNotes; liveNotes != "" && !strings.Contains(p, liveNotes) {
+				t.Fatal("specialist replaced authored scenario notes")
+			}
+		})
+	}
+}
+
+func TestEveryProfessionSuppliesActionableGuidanceWithAnAuthoredFormat(t *testing.T) {
+	cat, err := corpus.Load("../../data/corpus")
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, profession := range cat.Professions() {
+		t.Run(profession.Key, func(t *testing.T) {
+			q := corpus.Question{
+				ID: "specialist-contract", Domain: "professional_judgment", Areas: []string{profession.Key},
+				FormatDefinition: &corpus.Format{InterviewerRole: "a fictional stakeholder"},
+			}
+			profile := corpus.InterviewerFor(q)
+			if profile.ID != profession.Agent.ID || profile.Guidance == "" {
+				t.Fatal("profession lacks its own actionable profile")
+			}
+			p := SystemPrompt(q, "neutral", 3, "intro", "", "", 15, "charon", "en", nil, "")
+			if !strings.Contains(p, "SPECIALIST GUIDANCE: "+profile.Guidance) || !strings.Contains(p, "a fictional stakeholder") {
+				t.Fatal("authored format displaced the specialist instructions")
+			}
+		})
 	}
 }
 

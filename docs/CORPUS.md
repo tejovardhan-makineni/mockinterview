@@ -6,6 +6,23 @@ stages. A **workspace** is a tool: `coding`, `system_design`, `written` or
 **drill** is a short self-guided exercise after the interview. Avoid treating these
 as interchangeable catalog categories.
 
+Career families group professions for discovery. The authoritative profession
+registry is `api/internal/corpus/interviewers.go`; it contains labels, families,
+search aliases and AI interviewer profiles. Keep the schema's `areas` enum in
+sync; a corpus test checks this. The **first area** selects the scenario's primary
+profession and specialist; later areas make it discoverable for related roles.
+Cross-career scenarios use `career_foundations` first. The runtime snapshots the
+selected specialist instructions with new attempts and serves only its public
+ID, name and summary to clients. Source JSON must not embed
+`interviewer_definition` or `format_definition`.
+
+When adding a profession, include an accessible entry/junior scenario and a
+deeper specialist scenario with concrete facts, triggered probes, scoring
+anchors and a practice drill. Shared behavioral or career-foundation entries do
+not substitute for specialist coverage. Scoring-visible rubrics and references
+must accept valid alternative approaches and relevant experience outside paid
+work; an inclusive instruction only in `interviewer_notes` is insufficient.
+
 ## Version 1
 
 The machine-readable schemas live in `api/data/schemas`. Runtime validation in
@@ -73,6 +90,13 @@ Current examples include work-sample defense, AI-output critique, incident
 simulation, stakeholder simulation and reverse interviewing. Tool policy must
 state whether execution or external AI is available. The current code and SQL
 workspaces do not run code, and interviewers must not claim that they did.
+
+Recruiter screens, experience/transferable-skills conversations and panel
+perspective simulations also have reusable formats. The panel format is one AI
+alternating labeled perspectives, not independent agents or independent scores.
+Use `written-response` when a candidate creates an answer or table during the
+exercise; `work-sample-defense` starts with an existing supplied artifact to
+review. Their draft/review stages must match the actual task.
 
 ## Validate and review
 

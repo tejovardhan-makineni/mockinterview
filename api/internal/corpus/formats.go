@@ -28,6 +28,27 @@ type Format struct {
 	Stages          []FormatStage `json:"stages"`
 }
 
+// FormatName preserves an authored format's name. Legacy questions retain their
+// existing normalized format IDs, with a readable label until migrated.
+func FormatName(q Question) string {
+	if q.FormatDefinition != nil && strings.TrimSpace(q.FormatDefinition.Name) != "" {
+		return q.FormatDefinition.Name
+	}
+	q = Normalize(q)
+	words := strings.Split(q.FormatID, "-")
+	for i, word := range words {
+		switch word {
+		case "api", "hr", "it", "ml", "mmi", "ux":
+			words[i] = strings.ToUpper(word)
+		default:
+			if word != "" {
+				words[i] = strings.ToUpper(word[:1]) + word[1:]
+			}
+		}
+	}
+	return strings.Join(words, " ")
+}
+
 func ValidateFormat(f Format) error {
 	if f.SchemaVersion != 1 || !idRe.MatchString(f.ID) || f.Revision < 1 || f.Name == "" || f.InterviewerRole == "" || f.ToolPolicy == "" {
 		return fmt.Errorf("invalid format metadata: %s", f.ID)

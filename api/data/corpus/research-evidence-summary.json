@@ -1,0 +1,123 @@
+{
+  "schema_version": 1,
+  "revision": 1,
+  "format_id": "ai-output-critique",
+  "review_status": "preview",
+  "provenance": {
+    "authorship": "Original project scenario, AI-assisted draft. Practitioner review and calibration pending.",
+    "license": "AGPL-3.0-only"
+  },
+  "minutes": 20,
+  "id": "research-evidence-summary",
+  "title": "Research Assistant: Critique an Overconfident Evidence Summary",
+  "track": "professional",
+  "domain": "evidence_appraisal",
+  "areas": [
+    "research"
+  ],
+  "modality": "written",
+  "difficulty": "entry",
+  "tags": [
+    "research-assistant",
+    "policy-research",
+    "evidence-review",
+    "academic-research",
+    "practical",
+    "community-preview"
+  ],
+  "prompt": "You are a research assistant at fictional Field Lab. Supplied study note: 20 volunteers attended a job-search workshop; 12 replied to a survey one month later, and 8 respondents said they had received at least one interview invitation. There was no comparison group and no pre-workshop interview measure. An AI draft says, \"The workshop caused 67% of attendees to get interviews and is proven effective for all job seekers.\" Review the draft and write a more accurate three-sentence summary using only the supplied evidence.",
+  "blurb": "Correct misleading percentages and causal claims in an AI draft while preserving useful research findings.",
+  "rubric": [
+    {
+      "key": "numeracy",
+      "label": "Use the correct denominator",
+      "description": "Reports the supplied counts without overstating population coverage.",
+      "weight": 1,
+      "anchors": {
+        "0": "Calls 8 of 20 equal to 67% or describes all attendees as surveyed.",
+        "2": "States that 8 of 12 respondents reported an interview invitation.",
+        "4": "Separates 20 attendees, 12 respondents, and 8 positive reports; if a percentage is used, gives about 67% only for respondents, and explains why nonresponse prevents an attendee-wide outcome estimate."
+      }
+    },
+    {
+      "key": "inference",
+      "label": "Match claims to study design",
+      "description": "Distinguishes observed reports from causal or universal conclusions.",
+      "weight": 1,
+      "anchors": {
+        "0": "Repeats the causal or all-job-seekers claim as proven.",
+        "2": "Notes the missing comparison group and rejects a causal conclusion.",
+        "4": "Explains selection, nonresponse, self-report, and absent baseline/comparison as distinct limits without assuming the program has no benefit."
+      }
+    },
+    {
+      "key": "communication",
+      "label": "Write a useful evidence summary",
+      "description": "Communicates findings and a justified next research step.",
+      "weight": 1,
+      "anchors": {
+        "0": "Erases the useful observation or invents employment outcomes.",
+        "2": "Replaces the draft with accurate counts and a limitation.",
+        "4": "Produces a short understandable summary that preserves the positive reports, labels uncertainty, and connects a larger evaluation to a specific question rather than promising effectiveness."
+      }
+    }
+  ],
+  "reference": {
+    "scenario": "You are a research assistant at fictional Field Lab. Supplied study note: 20 volunteers attended a job-search workshop; 12 replied to a survey one month later, and 8 respondents said they had received at least one interview invitation. There was no comparison group and no pre-workshop interview measure. An AI draft says, \"The workshop caused 67% of attendees to get interviews and is proven effective for all job seekers.\" Review the draft and write a more accurate three-sentence summary using only the supplied evidence.",
+    "facts": [
+      {
+        "id": "fact-1",
+        "value": "Volunteers were recruited from the workshop organiser’s mailing list. The eight interview invitations were self-reported and have not been independently checked.",
+        "reveal_when": "candidate asks about recruitment, measurement, or verification"
+      },
+      {
+        "id": "fact-2",
+        "value": "The organiser wants to decide whether to run a larger evaluation. No cost data or longer-term job-offer outcomes are available.",
+        "reveal_when": "candidate asks about the decision, costs, or additional outcomes"
+      }
+    ],
+    "model_points": [
+      "Eight divided by twelve is about 67% among survey respondents, while eight divided by twenty is 40% of all attendees known to have reported an invitation. Neither calculation reveals the true rate among nonrespondents.",
+      "Without a baseline or comparison, the invitations cannot be attributed to the workshop. Mailing-list volunteers and survey respondents also limit generalization; self-reports introduce another evidence constraint.",
+      "The data may justify exploring a more informative evaluation, depending on purpose and resources. A balanced summary does not turn lack of causal proof into proof of no benefit."
+    ],
+    "probes": [
+      {
+        "trigger": "candidate repeats 67% of attendees",
+        "question": "Which denominator produced that percentage?"
+      },
+      {
+        "trigger": "candidate concludes the workshop does not work",
+        "question": "Does this design establish no benefit, or does it leave benefit uncertain?"
+      }
+    ],
+    "fair_alternatives": [
+      "Using counts without percentages is equally strong and may be clearer for the small sample.",
+      "A summary may emphasize feasibility or participant-reported outcomes if it clearly separates them from causal effectiveness."
+    ],
+    "red_flags": [
+      "Calls 8 of 20 equal to 67% or describes all attendees as surveyed.",
+      "Repeats the causal or all-job-seekers claim as proven.",
+      "Erases the useful observation or invents employment outcomes."
+    ],
+    "follow_ups": [
+      "Rewrite \"67% of attendees benefited\" using the correct denominator, outcome, and two limitations."
+    ],
+    "exemplar_answer": "Of 20 workshop attendees, 12 answered a one-month survey and 8 of those respondents reported at least one interview invitation. Because there was no baseline or comparison group and participation and response were selective, these reports do not establish that the workshop caused the invitations or works for all job seekers. A larger evaluation could test that question with clearer comparison and follow-up arrangements; job-offer and cost outcomes are not yet known."
+  },
+  "interviewer_notes": "The AI draft is supplied for critique; no external AI or literature search is required. Reward arithmetic, calibrated inference, and clear writing rather than citation style. Use only supplied facts; say when something is unknown. Accept plain language and equivalent approaches. Assess the demonstrated decisions, not accent, confidence, credentials, or access to particular employers. This is a fictional exercise; do not imply real actions were performed.",
+  "learning_drills": [
+    {
+      "id": "focused-practice",
+      "title": "Repair one research claim",
+      "minutes": 5,
+      "prompt": "Rewrite \"67% of attendees benefited\" using the correct denominator, outcome, and two limitations. This is self-guided practice; no model assessment is performed.",
+      "checklist": [
+        "Use 8 of 12 respondents",
+        "Name self-reported interview invitations",
+        "Reject unsupported causation",
+        "Keep the eight nonrespondents visible"
+      ]
+    }
+  ]
+}

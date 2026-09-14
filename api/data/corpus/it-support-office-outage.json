@@ -1,0 +1,123 @@
+{
+  "schema_version": 1,
+  "revision": 1,
+  "format_id": "incident-simulation",
+  "review_status": "preview",
+  "provenance": {
+    "authorship": "Original project scenario, AI-assisted draft. Practitioner review and calibration pending.",
+    "license": "AGPL-3.0-only"
+  },
+  "minutes": 30,
+  "id": "it-support-office-outage",
+  "title": "IT Support Lead: Triage an Office Connectivity Outage",
+  "track": "professional",
+  "domain": "it_incident_management",
+  "areas": [
+    "it_support"
+  ],
+  "modality": "conversational",
+  "difficulty": "mid",
+  "tags": [
+    "it-operations",
+    "desktop-support",
+    "network-support",
+    "outage",
+    "practical",
+    "community-preview"
+  ],
+  "prompt": "You lead IT support for fictional Harbor Offices. At 10:00, six employees on the second floor report that both email and the internal booking page fail. The reception computer on the ground floor works. A meeting with visitors starts in 20 minutes. Company procedure allows documented non-disruptive checks; network configuration changes require the network on-call engineer. Prioritize diagnosis, continuity, and your handoff.",
+  "blurb": "Narrow an office outage, coordinate authorized investigation, and keep an imminent meeting moving.",
+  "rubric": [
+    {
+      "key": "isolation",
+      "label": "Narrow the failure",
+      "description": "Uses scope comparisons to select a likely fault boundary.",
+      "weight": 1,
+      "anchors": {
+        "0": "Declares a global email outage or changes many devices without checking scope.",
+        "2": "Compares affected and unaffected users and identifies a possible local network issue.",
+        "4": "Uses floor, wireless-versus-wired, and multiple-service evidence to prioritize a network hypothesis while keeping other causes open."
+      }
+    },
+    {
+      "key": "coordination",
+      "label": "Coordinate safe diagnosis",
+      "description": "Escalates useful evidence and preserves authorized change control.",
+      "weight": 1,
+      "anchors": {
+        "0": "Reboots shared infrastructure or changes network settings without authorization.",
+        "2": "Collects times and symptoms and contacts the network engineer.",
+        "4": "Sends a concise timeline and change correlation, requests targeted authorized investigation, and avoids treating correlation as a confirmed cause."
+      }
+    },
+    {
+      "key": "recovery",
+      "label": "Verify service and support users",
+      "description": "Separates immediate continuity from verified restoration.",
+      "weight": 1,
+      "anchors": {
+        "0": "Closes the incident after one person reconnects or ignores the visitor meeting.",
+        "2": "Offers the approved room and checks that affected services recover.",
+        "4": "Assigns updates, tests multiple affected users and both services after mitigation, records residual issues, and confirms the meeting workaround with its owner."
+      }
+    }
+  ],
+  "reference": {
+    "scenario": "You lead IT support for fictional Harbor Offices. At 10:00, six employees on the second floor report that both email and the internal booking page fail. The reception computer on the ground floor works. A meeting with visitors starts in 20 minutes. Company procedure allows documented non-disruptive checks; network configuration changes require the network on-call engineer. Prioritize diagnosis, continuity, and your handoff.",
+    "facts": [
+      {
+        "id": "fact-1",
+        "value": "Affected employees are on the same Wi-Fi network; one reports wired access works. There are no reports from remote workers yet.",
+        "reveal_when": "candidate asks about network, scope, or wired-versus-wireless comparison"
+      },
+      {
+        "id": "fact-2",
+        "value": "A planned access-point update ended at 09:55, but no failure is confirmed. The network engineer is reachable; there is an approved visitor meeting room on the ground floor.",
+        "reveal_when": "candidate asks about changes, technical escalation, or meeting alternatives"
+      }
+    ],
+    "model_points": [
+      "The first useful distinction is localized connectivity versus application failure. The shared Wi-Fi symptom and working wired connection support a local network hypothesis; neither proves the update caused it.",
+      "Capture the start time, scope, error descriptions, and comparison results, then involve the network engineer. Do not ask employees to perform repeated disruptive changes or bypass network controls.",
+      "Offer the approved ground-floor room for the imminent meeting. Verify recovery with affected wireless users using both services, update the incident record, and carry unresolved questions into the handoff."
+    ],
+    "probes": [
+      {
+        "trigger": "candidate immediately rolls back the update",
+        "question": "What evidence connects the update to the failure, and who can authorize the change?"
+      },
+      {
+        "trigger": "candidate focuses only on diagnosis",
+        "question": "What happens to the visitor meeting during your investigation?"
+      }
+    ],
+    "fair_alternatives": [
+      "A permitted wired connection can be a temporary option for an individual if available; do not assume enough ports exist for everyone.",
+      "Escalating before finishing every comparison is reasonable when the impact is broad, provided the evidence is labeled incomplete."
+    ],
+    "red_flags": [
+      "Declares a global email outage or changes many devices without checking scope.",
+      "Reboots shared infrastructure or changes network settings without authorization.",
+      "Closes the incident after one person reconnects or ignores the visitor meeting."
+    ],
+    "follow_ups": [
+      "Write a short incident update with affected scope, leading hypothesis, next owner, meeting workaround, and a recovery check."
+    ],
+    "exemplar_answer": "I would check whether the affected people share a floor and connection type. Working reception and wired access suggest a local wireless problem, but I would not call the recent update the cause yet. I would send the network engineer the times and comparison results, ask for targeted investigation, and arrange the approved ground-floor room for the meeting. After mitigation I would check both services from several affected wireless devices before closing the incident."
+  },
+  "interviewer_notes": "Act as the support partner receiving requests for observations. Reveal the update only when asked about changes. Do not invent network outputs or require vendor commands. Use only supplied facts; say when something is unknown. Accept plain language and equivalent approaches. Assess the demonstrated decisions, not accent, confidence, credentials, or access to particular employers. This is a fictional exercise; do not imply real actions were performed.",
+  "learning_drills": [
+    {
+      "id": "focused-practice",
+      "title": "Build an outage update",
+      "minutes": 5,
+      "prompt": "Write a short incident update with affected scope, leading hypothesis, next owner, meeting workaround, and a recovery check. This is self-guided practice; no model assessment is performed.",
+      "checklist": [
+        "Separate observation from hypothesis",
+        "Include one unaffected comparison",
+        "Name the authorized technical owner",
+        "Define a check beyond one successful login"
+      ]
+    }
+  ]
+}

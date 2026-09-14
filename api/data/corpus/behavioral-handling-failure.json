@@ -4,17 +4,37 @@
   "track": "professional",
   "domain": "behavioral",
   "areas": [
-    "software_engineering",
+    "career_foundations",
+    "accounting",
+    "business_operations",
+    "civil_engineering",
+    "consulting",
+    "creative_communications",
+    "customer_support",
+    "cybersecurity",
     "data_science",
+    "education",
+    "electrical_engineering",
+    "finance",
+    "human_resources",
+    "it_support",
+    "law",
+    "marketing",
+    "mechanical_engineering",
     "medicine",
     "nursing",
-    "law",
-    "consulting",
     "product_management",
-    "finance",
-    "mechanical_engineering",
-    "electrical_engineering",
-    "civil_engineering"
+    "project_management",
+    "public_service",
+    "quality_assurance",
+    "research",
+    "retail_hospitality",
+    "sales",
+    "skilled_trades",
+    "social_work",
+    "software_engineering",
+    "supply_chain",
+    "ux_design"
   ],
   "modality": "conversational",
   "difficulty": "mid",
@@ -25,93 +45,82 @@
     "accountability",
     "star"
   ],
-  "prompt": "Tell me about a significant failure — something you were responsible for that didn't work out. What happened, what was your role in it, and what did you take away?",
+  "prompt": "Tell me about a setback or an outcome that did not go as you intended in a responsibility you held. Explain your part, how you responded and what you learned. A modest example is enough; you do not need to disclose traumatic or private experiences.",
   "blurb": "Handling failure: do they own it, extract a real lesson, and show they changed — or deflect blame?",
   "rubric": [
     {
       "key": "situation_clarity",
       "label": "Situation & real stakes",
-      "description": "Picks a genuinely significant failure with real consequences — not a humble-brag or a trivial miss dressed as failure.",
+      "description": "Explains an intended outcome, what did not work and why it mattered in that setting; severe harm or a large failure is not required.",
       "weight": 1.0
     },
     {
       "key": "task_ownership",
       "label": "Ownership & accountability",
-      "description": "Takes clear personal responsibility for their part — 'I' and 'my decision' — without blaming teammates, the org, or bad luck. Honest about their contribution.",
+      "description": "Identifies their actual responsibility and its limits, giving others fair credit and acknowledging relevant system factors without assuming sole blame.",
       "weight": 1.4
     },
     {
       "key": "action_specificity",
-      "label": "Response to the failure",
-      "description": "Describes concretely how THEY responded — contained the damage, communicated it, ran a blameless retro, made it right — not just that it happened.",
+      "label": "Specific contribution and decisions",
+      "description": "Describes a concrete response, such as correcting the issue, notifying someone affected, seeking help or reducing further harm.",
       "weight": 1.1
     },
     {
       "key": "result_impact",
-      "label": "Impact & recovery",
-      "description": "Honestly states the impact (cost, missed goal, damaged trust) and how they or the team recovered.",
+      "label": "Outcome and evidence",
+      "description": "Describes the observed effects and any recovery using qualitative or quantitative evidence, including what remained unresolved.",
       "weight": 1.0
     },
     {
       "key": "reflection",
       "label": "Lesson & lasting change",
-      "description": "Extracts a specific, credible lesson AND shows they changed behavior since — ideally with evidence it didn't recur. This is the heart of the question.",
+      "description": "Connects a specific lesson to the experience and distinguishes a change already tried from a proposed next step.",
       "weight": 1.4
     },
     {
       "key": "communication",
-      "label": "Communication & candor",
-      "description": "Tells it with candor and composure, structured and without defensiveness.",
+      "label": "Clear, relevant communication",
+      "description": "Makes the relevant situation, reasoning and contribution understandable in any clear order. No required STAR structure, pronouns, performance of confidence or emotional tone.",
       "weight": 0.8
     }
   ],
   "reference": {
-    "scenario": "The candidate should recall a real failure they owned — a project that missed, a bad technical or product call, an outage they caused, a hire that went wrong, a deadline blown. The signal is not the failure itself but the ownership and the learning: do they take honest accountability, extract a concrete lesson, and show durable behavior change afterward?",
+    "scenario": "Explore learning from a setback in work, education, volunteering or everyday responsibilities. The candidate controls what to disclose. Assess truthful contribution, proportionate response and reflection, not the severity of the setback, emotional composure or willingness to accept blame for everything.",
     "model_points": [
-      "Situation: a genuinely significant failure with real stakes — chosen honestly, not a disguised strength or trivial issue.",
-      "Task/role: crisp about what THEY were responsible for and where their own judgment or action fell short.",
-      "Action: how they responded in the moment — owned it publicly, contained damage, communicated transparently to stakeholders, and ran an honest (blameless) post-mortem.",
-      "Result: honest accounting of the impact and how recovery went — sometimes partial, and that's fine if told truthfully.",
-      "Reflection: a specific, non-generic lesson tied to the root cause, plus concrete evidence they changed — a new habit, process, or a later situation where they applied the lesson and it didn't recur.",
-      "Tone: accountable and composed, self-aware without wallowing, no scapegoating."
+      "Explains the intended outcome and the mismatch that made this a useful learning example.",
+      "Identifies their contribution and factors outside their control without assigning unsupported blame.",
+      "Describes what they actually did once the problem became apparent.",
+      "Explains the effect and recovery honestly; an unresolved result can still show sound judgment.",
+      "Names a specific lesson and a relevant action already taken or clearly labeled future practice.",
+      "Reflects on a useful check, communication step or support that might prevent a similar issue."
     ],
     "probes": [
       {
-        "trigger": "blames others or circumstances",
-        "question": "Setting aside what others did — what was YOUR part in this? What would you have done differently, regardless of them?"
+        "trigger": "their own responsibility is unclear",
+        "question": "Which part was within your responsibility?"
       },
       {
-        "trigger": "failure is actually a humble-brag",
-        "question": "That sounds like it mostly worked out. Tell me about something that genuinely failed, where you were clearly in the wrong."
+        "trigger": "candidate names a lesson without an action",
+        "question": "What would you do differently next time?"
       },
       {
-        "trigger": "lesson is generic ('communicate more')",
-        "question": "That's broad — what specifically changed in how you work? Give me a concrete example of you doing it differently since."
-      },
-      {
-        "trigger": "no evidence of change",
-        "question": "How do you know you actually learned this? Has a similar situation come up since, and what happened?"
-      },
-      {
-        "trigger": "no impact quantified",
-        "question": "How bad was it really — what did it cost in time, money, or trust?"
+        "trigger": "candidate claims a later change without an example",
+        "question": "Have you tried that change yet, or is it your next step?"
       }
     ],
     "red_flags": [
-      "Blames teammates, the org, leadership, or bad luck; own role is minimized or absent.",
-      "Humble-brag: the 'failure' is really a success or a strength ('I worked too hard').",
-      "Trivial stakes dressed up as a significant failure.",
-      "Generic lesson with no behavior change ('I learned to communicate better') and no evidence it stuck.",
-      "Defensive, still relitigating who was at fault, or clearly hasn't processed it.",
-      "Can't articulate a root cause — treats it as random misfortune."
+      "Knowingly changes the account to claim a result that did not happen.",
+      "Conceals an error despite explaining that others needed the information to prevent further harm.",
+      "Takes credit for a correction the account attributes entirely to another person."
     ],
     "follow_ups": [
-      "Who did you have to tell, and how did you deliver that news?",
-      "How did this change how you approach that kind of decision now?",
-      "Did you rebuild trust with anyone affected? How?",
-      "What's the difference between this failure and one you'd consider unacceptable / not worth the risk?"
+      "What support or check would have helped earlier?",
+      "What part of the recovery remains uncertain?"
     ],
-    "exemplar_answer": "Situation: 'I owned the migration of our billing system to a new provider. I set an aggressive cutover date and, to hit it, I skipped a full dry-run against production-scale data.' Task: 'The migration and the go/no-go call were mine.' Action: 'On cutover night, a data-type mismatch I'd have caught in a real dry-run caused a subset of invoices to generate with wrong amounts. The moment I saw it, I halted the rollout, paused invoicing, and told my manager and the affected customers' account teams directly rather than hoping to quietly fix it. We rolled back within the hour and ran the proper dry-run before retrying.' Result: 'About 300 invoices were affected; we corrected every one and proactively notified those customers, but it cost roughly a week of delay and some trust with finance. No customer was over-charged in the end because we caught it fast.' Reflection: 'The root cause wasn't the bug — it was me trading away a validation step for a date. The specific change: I now treat 'test against production-scale data' as non-negotiable for any migration, and I've made 'what did we skip to hit the date?' a standing question in my go/no-go reviews. On the next two migrations we ran full dry-runs and had clean cutovers. I own that this one was on my judgment, not the tooling.'"
+    "exemplar_answer": "Illustrative example only; it is not a required setting, answer order or achievement standard. I sent a volunteer rota before checking one person’s availability. They could not attend, and another volunteer had to rearrange their task. I told the coordinator as soon as I noticed, apologized for my part and helped find an approved swap. The activity went ahead, but the change inconvenienced people. I now ask for confirmation before publishing. I have used that check on one later rota, so I cannot yet claim it prevents every scheduling mistake.",
+    "assessment_contract": "Assess the selected competency from concrete job-relevant evidence. Examples from paid work, study, volunteering, caregiving, informal work, military service and community activities are equally eligible when relevant. A modest example is sufficient if it shows the competency; employer prestige, formal title and financial scale are not criteria. Accept qualitative or quantitative outcomes supported by the account, including partial or unsuccessful outcomes. Do not require a numeric metric, STAR order, particular pronouns, composure, enthusiasm or a particular communication style. Identify personal contribution by meaning while preserving credit to others. Assess intelligibility and relevance, not accent, fluency, verbosity, visible emotion, disability or private circumstances. Mark genuinely missing evidence not assessed; do not infer poor competence or dishonesty from an absent example. A clearly labeled hypothetical may be discussed as situational practice but must not count as demonstrated past experience. Respect scope of practice, authorization, safety and ethical duties; pausing, declining, reporting or escalating can be sound judgment. Never require obedience, direct confrontation, unpaid overwork or successful persuasion regardless of the circumstances."
   },
-  "interviewer_notes": "The failure is the setup; ownership and learning are the signal. Watch for the two classic evasions: (1) the humble-brag disguised failure — if it basically worked out, push for a real one; (2) blame-shifting — redirect to 'what was YOUR part, regardless of others'. The most important probe is on the lesson: reject generic platitudes ('communicate more') and press for a specific behavior change WITH evidence it stuck (a later situation where they applied it). Reward candor and composure; penalize defensiveness. Quantify the impact once. Distinguish accountability from self-flagellation."
+  "interviewer_notes": "Assess the selected competency from concrete job-relevant evidence. Examples from paid work, study, volunteering, caregiving, informal work, military service and community activities are equally eligible when relevant. A modest example is sufficient if it shows the competency; employer prestige, formal title and financial scale are not criteria. Accept qualitative or quantitative outcomes supported by the account, including partial or unsuccessful outcomes. Do not require a numeric metric, STAR order, particular pronouns, composure, enthusiasm or a particular communication style. Identify personal contribution by meaning while preserving credit to others. Assess intelligibility and relevance, not accent, fluency, verbosity, visible emotion, disability or private circumstances. Mark genuinely missing evidence not assessed; do not infer poor competence or dishonesty from an absent example. A clearly labeled hypothetical may be discussed as situational practice but must not count as demonstrated past experience. Respect scope of practice, authorization, safety and ethical duties; pausing, declining, reporting or escalating can be sound judgment. Never require obedience, direct confrontation, unpaid overwork or successful persuasion regardless of the circumstances. Explore learning from a setback in work, education, volunteering or everyday responsibilities. The candidate controls what to disclose. Assess truthful contribution, proportionate response and reflection, not the severity of the setback, emotional composure or willingness to accept blame for everything. Ask one focused question at a time. Use the candidate’s actual answer to select one material missing detail, respect the shared follow-up limit, and do not require a replacement example.",
+  "revision": 2
 }

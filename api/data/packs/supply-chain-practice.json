@@ -1,0 +1,58 @@
+{
+  "id": "supply-chain-practice",
+  "revision": 1,
+  "review_status": "preview",
+  "source_note": "Original community practice path. Each round is a separate attempt. Content is an AI-assisted preview awaiting practitioner review and calibration; this is not an employer process or a hiring-readiness certification.",
+  "name": "Supply Chain Practice",
+  "areas": [
+    "supply_chain"
+  ],
+  "track": "professional",
+  "blurb": "Practice a recruiter screen, two supply chain decisions, and questions about role fit.",
+  "rounds": [
+    {
+      "id": "round-1",
+      "title": "Practice a Recruiter Screening Call",
+      "kind": "recruiter-screen",
+      "domain": "recruiter_screen",
+      "modality": "conversational",
+      "difficulty": "junior",
+      "minutes": 15,
+      "question_id": "career-recruiter-screen",
+      "focus": "Practice motivation, relevant experience, role questions, and clear next steps in a short screening call."
+    },
+    {
+      "id": "round-2",
+      "title": "Warehouse Associate: Resolve a Receiving Discrepancy",
+      "kind": "work-sample-defense",
+      "domain": "warehouse_receiving",
+      "modality": "written",
+      "difficulty": "entry",
+      "minutes": 20,
+      "question_id": "supply-chain-receiving-discrepancy",
+      "focus": "Record missing and damaged stock accurately and give dispatch a dependable receiving handoff."
+    },
+    {
+      "id": "round-3",
+      "title": "Supply Chain Planner: Allocate a Short Shipment Transparently",
+      "kind": "stakeholder-simulation",
+      "domain": "supply_planning",
+      "modality": "conversational",
+      "difficulty": "mid",
+      "minutes": 30,
+      "question_id": "supply-chain-shortage-allocation",
+      "focus": "Allocate scarce stock against confirmed commitments and negotiate a transparent plan for flexible demand."
+    },
+    {
+      "id": "round-4",
+      "title": "Use the Final Five Minutes",
+      "kind": "reverse-interview",
+      "domain": "candidate_questions",
+      "modality": "conversational",
+      "difficulty": "mid",
+      "minutes": 10,
+      "question_id": "candidate-questions-role-fit",
+      "focus": "Practice questions about expectations, support, working conditions, and real examples so you can judge role fit."
+    }
+  ]
+}

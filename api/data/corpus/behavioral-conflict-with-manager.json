@@ -4,17 +4,37 @@
   "track": "professional",
   "domain": "behavioral",
   "areas": [
-    "software_engineering",
+    "career_foundations",
+    "accounting",
+    "business_operations",
+    "civil_engineering",
+    "consulting",
+    "creative_communications",
+    "customer_support",
+    "cybersecurity",
     "data_science",
+    "education",
+    "electrical_engineering",
+    "finance",
+    "human_resources",
+    "it_support",
+    "law",
+    "marketing",
+    "mechanical_engineering",
     "medicine",
     "nursing",
-    "law",
-    "consulting",
     "product_management",
-    "finance",
-    "mechanical_engineering",
-    "electrical_engineering",
-    "civil_engineering"
+    "project_management",
+    "public_service",
+    "quality_assurance",
+    "research",
+    "retail_hospitality",
+    "sales",
+    "skilled_trades",
+    "social_work",
+    "software_engineering",
+    "supply_chain",
+    "ux_design"
   ],
   "modality": "conversational",
   "difficulty": "senior",
@@ -25,93 +45,82 @@
     "candor",
     "star"
   ],
-  "prompt": "Tell me about a time you disagreed with your manager on something that mattered. What was the disagreement, how did you handle it, and how did it resolve?",
+  "prompt": "Tell me about a time you disagreed with a manager or someone responsible for a group or task. Explain what concerned you, how you chose to respond, and what happened. Use an example you are comfortable discussing; you do not need to disclose private or distressing details.",
   "blurb": "Conflict with manager (senior): can they challenge up with candor and professionalism — and handle either outcome maturely?",
   "rubric": [
     {
       "key": "situation_clarity",
       "label": "Situation & the disagreement",
-      "description": "Clearly frames a substantive disagreement with their manager and why it mattered — a real difference of view, not a trivial gripe.",
+      "description": "Explains the disagreement, relevant facts and why the issue mattered without requiring high financial stakes or a formal reporting relationship.",
       "weight": 1.0
     },
     {
       "key": "task_ownership",
       "label": "Willingness to challenge up",
-      "description": "Shows they took the risk to raise the disagreement directly and respectfully, rather than staying silent or going around their manager.",
+      "description": "Explains a proportionate way to raise or document the concern, including an alternative channel if direct discussion was unsafe or unsuitable.",
       "weight": 1.2
     },
     {
       "key": "action_specificity",
-      "label": "How they handled it",
-      "description": "Describes concretely how THEY approached it — private and direct, backed by reasoning or data, listening to the manager's view, focused on the issue not the person.",
+      "label": "Specific contribution and decisions",
+      "description": "Describes their specific response, supporting reasoning, attention to other relevant information and an appropriate boundary or escalation.",
       "weight": 1.3
     },
     {
       "key": "result_impact",
-      "label": "Resolution & outcome",
-      "description": "Shows a mature resolution and outcome — persuaded them, met in the middle, or committed to the manager's call — with the relationship intact. Handles 'I didn't get my way' well.",
+      "label": "Outcome and evidence",
+      "description": "Describes the response and consequences honestly, including unresolved disagreement; agreement, obedience and preserving a relationship are not required outcomes.",
       "weight": 1.2
     },
     {
       "key": "reflection",
       "label": "Reflection & professionalism",
-      "description": "Reflects on picking battles, respecting the manager's role and context, and what they learned about disagreeing up productively.",
+      "description": "Explains what they learned about raising concerns, authority, evidence and when to seek support or use a different channel.",
       "weight": 1.2
     },
     {
       "key": "communication",
-      "label": "Communication & composure",
-      "description": "Tells it with professionalism and no residual resentment; fair to the manager's perspective.",
+      "label": "Clear, relevant communication",
+      "description": "Makes the relevant situation, reasoning and contribution understandable in any clear order. No required STAR structure, pronouns, performance of confidence or emotional tone.",
       "weight": 0.9
     }
   ],
   "reference": {
-    "scenario": "A senior story: the candidate had a genuine, consequential disagreement with their own manager — on strategy, priorities, a people decision, an approach, or feedback about themselves — and handled it with candor and professionalism. The signal is the ability to challenge upward respectfully AND to handle the resolution maturely whether or not they got their way, keeping the relationship strong.",
+    "scenario": "Explore disagreement with someone coordinating or supervising work, study or a community activity. The concern can involve priorities, quality, fairness or safety. Assess the reasoning and response within the circumstances, without assuming that direct confrontation or compliance is always appropriate.",
     "model_points": [
-      "Situation: a substantive disagreement with their direct manager, with real stakes — not a petty complaint or a values clash dressed up.",
-      "Task: they recognized staying silent wasn't right, and took ownership of raising it directly with their manager.",
-      "Action: chose the right setting (private, direct), led with reasoning or data, framed it around the shared goal, and genuinely listened to the manager's perspective and constraints they might not have seen.",
-      "Action: kept it about the issue, not the person; disagreed without insubordination or going around/over the manager.",
-      "Result: a mature resolution — they changed the manager's mind, found a middle path, or committed fully to the manager's decision after being heard — and the working relationship stayed strong or improved.",
-      "Reflection: judgment about which disagreements are worth raising, respect for the manager's broader context and accountability, and what they learned about disagreeing up."
+      "States the disagreement and separates observations from assumptions about the other person.",
+      "Explains their responsibility and the consequences that mattered.",
+      "Chooses a suitable communication or reporting channel; seeking support, documenting or bypassing the person may be justified.",
+      "Engages with relevant counterevidence without having to excuse unsafe conduct or suppress a legitimate concern.",
+      "Describes an agreement, refusal, escalation or unresolved outcome accurately; winning agreement is not the scoring target.",
+      "Reflects on how to raise future concerns while respecting safety, ethics and applicable responsibilities."
     ],
     "probes": [
       {
-        "trigger": "went around or over the manager",
-        "question": "Did you take this to your manager directly first, or to someone else? Why?"
+        "trigger": "the concern is unclear",
+        "question": "What was the specific concern you wanted addressed?"
       },
       {
-        "trigger": "manager overruled — probe maturity",
-        "question": "So they made a different call than you wanted. How did you handle that, and how did you show up afterward?"
+        "trigger": "the channel choice is unexplained",
+        "question": "What made that channel appropriate in this situation?"
       },
       {
-        "trigger": "disagreement sounds personal / values-based",
-        "question": "Was this a professional judgment difference or something more personal? Keep it to the substance — what were the two positions?"
-      },
-      {
-        "trigger": "didn't consider manager's perspective",
-        "question": "What was your manager seeing or accountable for that you might not have had visibility into? Did that change your view?"
-      },
-      {
-        "trigger": "relationship cost unclear",
-        "question": "How was your relationship with your manager afterward? Did this help or hurt your trust?"
+        "trigger": "candidate gives only the other person’s response",
+        "question": "What did you do after that response?"
       }
     ],
     "red_flags": [
-      "Went around or over the manager instead of addressing it directly.",
-      "Insubordinate or disrespectful — made it personal, or refused to commit after being overruled.",
-      "Stayed silent and resents it in hindsight; never actually raised the disagreement.",
-      "Can't handle 'I didn't get my way' — bitter, undermining, or quit in a huff with no maturity.",
-      "Never considered the manager's broader context or accountability.",
-      "Trivial gripe framed as a principled stand, or badmouths the manager throughout."
+      "Knowingly misrepresents the issue or evidence to undermine another person.",
+      "Threatens or retaliates against someone raising a legitimate concern.",
+      "Claims that an authority’s instruction removes the need to consider an identified safety or ethical concern."
     ],
     "follow_ups": [
-      "How do you decide which disagreements with your manager are worth raising?",
-      "If your manager overruled you and you still thought they were wrong, what would you do?",
-      "How do you give your manager critical feedback about their own decisions or behavior?",
-      "How did this affect how you disagree with authority now?"
+      "What would make a different reporting channel appropriate?",
+      "What did you learn about the evidence needed to explain your concern?"
     ],
-    "exemplar_answer": "Situation: 'My manager wanted to pull two engineers off my team's reliability work to accelerate a feature launch. I thought it would tip us past a breaking point — our on-call load was already unsustainable — and I disagreed strongly.' Task: 'I could have just complied, but I felt I owed it to my team and to him to make the case, since he might not see the on-call data I saw daily.' Action: 'I asked for a 1:1 rather than pushing back in the group meeting. I came with data: our incident rate, on-call hours, and a projection of what deferring reliability would cost in outages during the very launch he cared about. Then I genuinely listened — he was under board pressure on the launch date I hadn't fully appreciated. So instead of a flat 'no', I proposed a middle path: move one engineer, not two, and time-box the reliability pause to four weeks with a checkpoint.' Result: 'He agreed to the compromise. The launch hit its date, we avoided a reliability blowup, and honestly the relationship got stronger — he later told me he valued that I brought data instead of just objecting. Even if he'd overruled me entirely, I'd decided going in that I'd commit once heard.' Reflection: 'I learned to challenge up by leading with the shared goal and data, in private, and to assume my manager has context I don't. I also learned to pick these moments — I don't spend that capital on small things. The maturity test isn't winning the disagreement; it's how you show up if you lose it.'"
+    "exemplar_answer": "Illustrative example only; it is not a required setting, answer order or achievement standard. A volunteer coordinator proposed dropping an accessibility check to save time. I explained which part of the activity could become inaccessible and asked whether we could reduce a different task. When we could not agree, I brought the concern to the event lead using the approved process. The lead kept the check and reduced the activity’s scope. I learned to make the effect on participants concrete while using support when needed.",
+    "assessment_contract": "Assess the selected competency from concrete job-relevant evidence. Examples from paid work, study, volunteering, caregiving, informal work, military service and community activities are equally eligible when relevant. A modest example is sufficient if it shows the competency; employer prestige, formal title and financial scale are not criteria. Accept qualitative or quantitative outcomes supported by the account, including partial or unsuccessful outcomes. Do not require a numeric metric, STAR order, particular pronouns, composure, enthusiasm or a particular communication style. Identify personal contribution by meaning while preserving credit to others. Assess intelligibility and relevance, not accent, fluency, verbosity, visible emotion, disability or private circumstances. Mark genuinely missing evidence not assessed; do not infer poor competence or dishonesty from an absent example. A clearly labeled hypothetical may be discussed as situational practice but must not count as demonstrated past experience. Respect scope of practice, authorization, safety and ethical duties; pausing, declining, reporting or escalating can be sound judgment. Never require obedience, direct confrontation, unpaid overwork or successful persuasion regardless of the circumstances."
   },
-  "interviewer_notes": "Senior bar for managing up. Two things to verify: (1) they raised it DIRECTLY with the manager, not around or over them — probe immediately if it sounds like they escalated past their manager; (2) they can handle being overruled with grace — if the manager made a different call, probe how they showed up afterward (committed vs sulked/undermined). Reward leading with data/reasoning, choosing the private setting, and genuinely engaging the manager's broader context. Distinguish a professional judgment difference from a personal/values clash. Watch tone for residual resentment or badmouthing. The signal is candor plus professionalism, not winning."
+  "interviewer_notes": "Assess the selected competency from concrete job-relevant evidence. Examples from paid work, study, volunteering, caregiving, informal work, military service and community activities are equally eligible when relevant. A modest example is sufficient if it shows the competency; employer prestige, formal title and financial scale are not criteria. Accept qualitative or quantitative outcomes supported by the account, including partial or unsuccessful outcomes. Do not require a numeric metric, STAR order, particular pronouns, composure, enthusiasm or a particular communication style. Identify personal contribution by meaning while preserving credit to others. Assess intelligibility and relevance, not accent, fluency, verbosity, visible emotion, disability or private circumstances. Mark genuinely missing evidence not assessed; do not infer poor competence or dishonesty from an absent example. A clearly labeled hypothetical may be discussed as situational practice but must not count as demonstrated past experience. Respect scope of practice, authorization, safety and ethical duties; pausing, declining, reporting or escalating can be sound judgment. Never require obedience, direct confrontation, unpaid overwork or successful persuasion regardless of the circumstances. Explore disagreement with someone coordinating or supervising work, study or a community activity. The concern can involve priorities, quality, fairness or safety. Assess the reasoning and response within the circumstances, without assuming that direct confrontation or compliance is always appropriate. Ask one focused question at a time. Use the candidate’s actual answer to select one material missing detail, respect the shared follow-up limit, and do not require a replacement example.",
+  "revision": 2
 }

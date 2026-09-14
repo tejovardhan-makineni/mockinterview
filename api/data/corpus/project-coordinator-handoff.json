@@ -1,0 +1,123 @@
+{
+  "schema_version": 1,
+  "revision": 1,
+  "format_id": "work-sample-defense",
+  "review_status": "preview",
+  "provenance": {
+    "authorship": "Original project scenario, AI-assisted draft. Practitioner review and calibration pending.",
+    "license": "AGPL-3.0-only"
+  },
+  "minutes": 20,
+  "id": "project-coordinator-handoff",
+  "title": "Project Coordinator: Repair an Unclear Event Handoff",
+  "track": "professional",
+  "domain": "project_coordination",
+  "areas": [
+    "project_management"
+  ],
+  "modality": "written",
+  "difficulty": "entry",
+  "tags": [
+    "project-coordinator",
+    "program-assistant",
+    "event-coordinator",
+    "handoff",
+    "practical",
+    "community-preview"
+  ],
+  "prompt": "You are coordinating a fictional community employer event for next Friday. Review this plan: \"Sam will handle rooms. Invitations go out soon. Printing depends on the final agenda. Everyone will help on the day.\" Today is Monday. You have two meeting rooms, 60 registered attendees, and a draft agenda. Rewrite the next four days of work so the organizer can see owners, dependencies, and open decisions.",
+  "blurb": "Turn a vague event plan into clear owners, dependencies, deadlines, and accessible attendee arrangements.",
+  "rubric": [
+    {
+      "key": "clarity",
+      "label": "Make work accountable",
+      "description": "Turns vague work into deliverables with named owners and dates.",
+      "weight": 1,
+      "anchors": {
+        "0": "Repeats \"everyone\" and \"soon\" without specifying outcomes.",
+        "2": "Assigns an owner and due date for room confirmation, agenda approval, and invitations.",
+        "4": "Distinguishes accountable owners from helpers, defines finished outputs, and highlights the organizer decision needed before dependent work."
+      }
+    },
+    {
+      "key": "dependencies",
+      "label": "Sequence constrained work",
+      "description": "Plans backward from the event and respects real lead times.",
+      "weight": 1,
+      "anchors": {
+        "0": "Schedules delivery before necessary approval or assumes unlimited room capacity.",
+        "2": "Sequences agenda approval before distribution and checks room capacity; considers printing lead time if choosing print.",
+        "4": "Builds a feasible approval and accessible-delivery sequence, checks seating and access constraints, and verifies the supplier cutoff and fallback if choosing print."
+      }
+    },
+    {
+      "key": "follow_through",
+      "label": "Keep the plan usable",
+      "description": "Tracks unresolved decisions and communicates changes.",
+      "weight": 1,
+      "anchors": {
+        "0": "Presents uncertain bookings as confirmed or overlooks the access request.",
+        "2": "Lists unresolved items and schedules a check-in.",
+        "4": "Records room/access confirmation, an agenda decision deadline, and an escalation trigger; gives the organizer a concise status view that separates confirmed from pending."
+      }
+    }
+  ],
+  "reference": {
+    "scenario": "You are coordinating a fictional community employer event for next Friday. Review this plan: \"Sam will handle rooms. Invitations go out soon. Printing depends on the final agenda. Everyone will help on the day.\" Today is Monday. You have two meeting rooms, 60 registered attendees, and a draft agenda. Rewrite the next four days of work so the organizer can see owners, dependencies, and open decisions.",
+    "facts": [
+      {
+        "id": "fact-1",
+        "value": "Each room seats 35. Sam can confirm the room layout by Tuesday noon. One attendee has requested step-free access and an accessible digital agenda.",
+        "reveal_when": "candidate asks about capacity, room confirmation, or attendee access needs"
+      },
+      {
+        "id": "fact-2",
+        "value": "The printer needs two working days after receiving a final file. The organizer must approve the agenda; they are available Tuesday afternoon. Digital delivery is also permitted.",
+        "reveal_when": "candidate asks about printing lead time, approval, or alternatives"
+      }
+    ],
+    "model_points": [
+      "The plan needs explicit outputs rather than activity labels: approved room plan, approved agenda, invitation message with venue details, and named event-day responsibilities. Proposed owners should be confirmed rather than invented as commitments.",
+      "Two rooms seat 70 in total, but the split and layout still need confirmation. Ask how the agenda uses the rooms and whether the step-free route works; capacity alone does not establish suitability.",
+      "Tuesday afternoon approval leaves a possible Wednesday/Thursday printing window if the supplier cutoff permits it. Confirm that cutoff and use the permitted accessible digital agenda when print timing is uncertain."
+    ],
+    "probes": [
+      {
+        "trigger": "candidate gives every task the same deadline",
+        "question": "Which work cannot begin until another decision is made?"
+      },
+      {
+        "trigger": "candidate treats 70 seats as full venue readiness",
+        "question": "What else must be confirmed before telling all 60 attendees where to go?"
+      }
+    ],
+    "fair_alternatives": [
+      "A simple checklist with owners and dates is as acceptable as a table or timeline.",
+      "Digital-first delivery is reasonable if accessibility and attendee communication are handled; printed material is not intrinsically required."
+    ],
+    "red_flags": [
+      "Repeats \"everyone\" and \"soon\" without specifying outcomes.",
+      "Schedules delivery before necessary approval or assumes unlimited room capacity.",
+      "Presents uncertain bookings as confirmed or overlooks the access request."
+    ],
+    "follow_ups": [
+      "Rewrite the agenda-to-printing chain with an owner, approval time, supplier cutoff check, and fallback."
+    ],
+    "exemplar_answer": "I would ask Sam to confirm a room plan, seating split, and step-free access by Tuesday noon. I would get the organizer’s agenda decision Tuesday afternoon and confirm the printer’s cutoff before promising printed copies. Each item would have an owner and a clear output, with invitations based on confirmed venue details. If the approval misses the print cutoff, I would use an accessible digital agenda and communicate that change. A short daily check-in would focus on decisions and blocked work."
+  },
+  "interviewer_notes": "Ask for a practical four-day plan, not project-management vocabulary. For an entry candidate, reward explicit assumptions and a sensible request for organizer approval rather than invented authority. Use only supplied facts; say when something is unknown. Accept plain language and equivalent approaches. Assess the demonstrated decisions, not accent, confidence, credentials, or access to particular employers. This is a fictional exercise; do not imply real actions were performed.",
+  "learning_drills": [
+    {
+      "id": "focused-practice",
+      "title": "Make one dependency visible",
+      "minutes": 5,
+      "prompt": "Rewrite the agenda-to-printing chain with an owner, approval time, supplier cutoff check, and fallback. This is self-guided practice; no model assessment is performed.",
+      "checklist": [
+        "Identify the approval owner",
+        "Show what printing depends on",
+        "Keep the event date visible",
+        "Name the trigger for digital delivery"
+      ]
+    }
+  ]
+}

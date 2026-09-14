@@ -1,0 +1,1413 @@
+{
+  "professions": [
+    {
+      "key": "accounting",
+      "label": "Accounting",
+      "family": "business",
+      "family_label": "Business, finance \u0026 operations",
+      "aliases": [
+        "accountant",
+        "bookkeeper",
+        "audit",
+        "accounts payable",
+        "accounts receivable",
+        "CPA"
+      ],
+      "agent": {
+        "id": "accounting-interviewer",
+        "name": "Accounting interviewer",
+        "summary": "AI practice for reconciliations, close processes and internal controls."
+      },
+      "count": 5,
+      "tracks": ["professional"]
+    },
+    {
+      "key": "business_operations",
+      "label": "Business Operations",
+      "family": "business",
+      "family_label": "Business, finance \u0026 operations",
+      "aliases": [
+        "operations analyst",
+        "business analyst",
+        "administrator",
+        "office manager",
+        "process improvement"
+      ],
+      "agent": {
+        "id": "business-operations-interviewer",
+        "name": "Business Operations interviewer",
+        "summary": "AI practice for workflow improvement, analysis and operational decisions."
+      },
+      "count": 5,
+      "tracks": ["professional"]
+    },
+    {
+      "key": "career_foundations",
+      "label": "Career Foundations",
+      "family": "career_readiness",
+      "family_label": "Career foundations",
+      "aliases": [
+        "first job",
+        "graduate",
+        "internship",
+        "career change",
+        "return to work",
+        "recruiter",
+        "salary negotiation",
+        "job search"
+      ],
+      "agent": {
+        "id": "career-foundations-interviewer",
+        "name": "Career Foundations interviewer",
+        "summary": "AI practice for first jobs, career changes, recruiter conversations and offers."
+      },
+      "count": 5,
+      "tracks": ["professional"]
+    },
+    {
+      "key": "civil_engineering",
+      "label": "Civil Engineering",
+      "family": "engineering_trades",
+      "family_label": "Engineering \u0026 skilled trades",
+      "aliases": [
+        "civil engineer",
+        "structural",
+        "geotechnical",
+        "transportation"
+      ],
+      "agent": {
+        "id": "civil-engineering-interviewer",
+        "name": "Civil Engineering interviewer",
+        "summary": "AI practice for structures, infrastructure and engineering risk."
+      },
+      "count": 6,
+      "tracks": ["engineering", "professional"]
+    },
+    {
+      "key": "consulting",
+      "label": "Consulting",
+      "family": "business",
+      "family_label": "Business, finance \u0026 operations",
+      "aliases": ["consultant", "case interview", "strategy"],
+      "agent": {
+        "id": "consulting-interviewer",
+        "name": "Consulting interviewer",
+        "summary": "AI practice for structured cases, analysis and recommendations."
+      },
+      "count": 6,
+      "tracks": ["professional"]
+    },
+    {
+      "key": "creative_communications",
+      "label": "Creative \u0026 Communications",
+      "family": "customer_creative",
+      "family_label": "Customer, sales \u0026 creative",
+      "aliases": [
+        "writer",
+        "copywriter",
+        "content",
+        "communications",
+        "PR",
+        "public relations",
+        "creative",
+        "graphic design"
+      ],
+      "agent": {
+        "id": "creative-communications-interviewer",
+        "name": "Creative \u0026 Communications interviewer",
+        "summary": "AI practice for writing, briefs, portfolio choices and stakeholder feedback."
+      },
+      "count": 5,
+      "tracks": ["professional"]
+    },
+    {
+      "key": "customer_support",
+      "label": "Customer Support \u0026 Success",
+      "family": "customer_creative",
+      "family_label": "Customer, sales \u0026 creative",
+      "aliases": [
+        "customer service",
+        "customer success",
+        "contact center",
+        "call center",
+        "support agent"
+      ],
+      "agent": {
+        "id": "customer-support-interviewer",
+        "name": "Customer Support \u0026 Success interviewer",
+        "summary": "AI practice for difficult conversations, case triage and customer follow-through."
+      },
+      "count": 6,
+      "tracks": ["professional"]
+    },
+    {
+      "key": "cybersecurity",
+      "label": "Cybersecurity",
+      "family": "technology",
+      "family_label": "Technology \u0026 data",
+      "aliases": [
+        "security analyst",
+        "SOC",
+        "information security",
+        "incident response",
+        "GRC"
+      ],
+      "agent": {
+        "id": "cybersecurity-interviewer",
+        "name": "Cybersecurity interviewer",
+        "summary": "AI practice for incident response, threat assessment and security judgment."
+      },
+      "count": 5,
+      "tracks": ["professional"]
+    },
+    {
+      "key": "data_science",
+      "label": "Data Science",
+      "family": "technology",
+      "family_label": "Technology \u0026 data",
+      "aliases": [
+        "data analyst",
+        "analytics",
+        "machine learning",
+        "ML",
+        "statistics",
+        "AI engineer"
+      ],
+      "agent": {
+        "id": "data-science-interviewer",
+        "name": "Data Science interviewer",
+        "summary": "AI practice for analysis, experimentation, modeling and data decisions."
+      },
+      "count": 7,
+      "tracks": ["engineering", "professional"]
+    },
+    {
+      "key": "education",
+      "label": "Education",
+      "family": "education_public",
+      "family_label": "Education, research \u0026 public service",
+      "aliases": [
+        "teacher",
+        "teaching assistant",
+        "tutor",
+        "school",
+        "lecturer",
+        "trainer"
+      ],
+      "agent": {
+        "id": "education-interviewer",
+        "name": "Education interviewer",
+        "summary": "AI practice for instruction, classroom judgment and learner support."
+      },
+      "count": 6,
+      "tracks": ["professional"]
+    },
+    {
+      "key": "electrical_engineering",
+      "label": "Electrical Engineering",
+      "family": "engineering_trades",
+      "family_label": "Engineering \u0026 skilled trades",
+      "aliases": [
+        "electrical engineer",
+        "electronics",
+        "power systems",
+        "circuits"
+      ],
+      "agent": {
+        "id": "electrical-engineering-interviewer",
+        "name": "Electrical Engineering interviewer",
+        "summary": "AI practice for circuits, power, signals and verification."
+      },
+      "count": 6,
+      "tracks": ["engineering", "professional"]
+    },
+    {
+      "key": "finance",
+      "label": "Finance",
+      "family": "business",
+      "family_label": "Business, finance \u0026 operations",
+      "aliases": [
+        "financial analyst",
+        "investment banking",
+        "FP\u0026A",
+        "valuation"
+      ],
+      "agent": {
+        "id": "finance-interviewer",
+        "name": "Finance interviewer",
+        "summary": "AI practice for financial analysis, valuation and decision making."
+      },
+      "count": 5,
+      "tracks": ["professional"]
+    },
+    {
+      "key": "human_resources",
+      "label": "Human Resources",
+      "family": "business",
+      "family_label": "Business, finance \u0026 operations",
+      "aliases": [
+        "HR",
+        "people operations",
+        "recruiter",
+        "talent acquisition",
+        "HRBP"
+      ],
+      "agent": {
+        "id": "human-resources-interviewer",
+        "name": "Human Resources interviewer",
+        "summary": "AI practice for employee conversations, hiring operations and fair process."
+      },
+      "count": 6,
+      "tracks": ["professional"]
+    },
+    {
+      "key": "it_support",
+      "label": "IT Support",
+      "family": "technology",
+      "family_label": "Technology \u0026 data",
+      "aliases": [
+        "help desk",
+        "service desk",
+        "desktop support",
+        "technical support",
+        "sysadmin"
+      ],
+      "agent": {
+        "id": "it-support-interviewer",
+        "name": "IT Support interviewer",
+        "summary": "AI practice for troubleshooting, service desks and user communication."
+      },
+      "count": 5,
+      "tracks": ["professional"]
+    },
+    {
+      "key": "law",
+      "label": "Law",
+      "family": "education_public",
+      "family_label": "Education, research \u0026 public service",
+      "aliases": ["lawyer", "attorney", "legal", "paralegal", "solicitor"],
+      "agent": {
+        "id": "law-interviewer",
+        "name": "Law interviewer",
+        "summary": "AI practice for issue spotting, legal analysis and client communication."
+      },
+      "count": 6,
+      "tracks": ["professional"]
+    },
+    {
+      "key": "marketing",
+      "label": "Marketing",
+      "family": "customer_creative",
+      "family_label": "Customer, sales \u0026 creative",
+      "aliases": ["digital marketing", "growth", "brand", "SEO", "campaigns"],
+      "agent": {
+        "id": "marketing-interviewer",
+        "name": "Marketing interviewer",
+        "summary": "AI practice for audiences, campaigns, measurement and marketing judgment."
+      },
+      "count": 5,
+      "tracks": ["professional"]
+    },
+    {
+      "key": "mechanical_engineering",
+      "label": "Mechanical Engineering",
+      "family": "engineering_trades",
+      "family_label": "Engineering \u0026 skilled trades",
+      "aliases": [
+        "mechanical engineer",
+        "manufacturing",
+        "thermal",
+        "mechanics"
+      ],
+      "agent": {
+        "id": "mechanical-engineering-interviewer",
+        "name": "Mechanical Engineering interviewer",
+        "summary": "AI practice for mechanics, thermal systems and practical design tradeoffs."
+      },
+      "count": 7,
+      "tracks": ["engineering", "professional"]
+    },
+    {
+      "key": "medicine",
+      "label": "Medicine",
+      "family": "healthcare",
+      "family_label": "Healthcare \u0026 care",
+      "aliases": ["doctor", "physician", "medical student", "residency", "MMI"],
+      "agent": {
+        "id": "medicine-interviewer",
+        "name": "Medicine interviewer",
+        "summary": "AI practice for clinical reasoning, ethical stations and patient communication."
+      },
+      "count": 6,
+      "tracks": ["professional"]
+    },
+    {
+      "key": "nursing",
+      "label": "Nursing",
+      "family": "healthcare",
+      "family_label": "Healthcare \u0026 care",
+      "aliases": ["nurse", "RN", "LPN", "patient care", "charge nurse"],
+      "agent": {
+        "id": "nursing-interviewer",
+        "name": "Nursing interviewer",
+        "summary": "AI practice for prioritization, patient safety, delegation and handoffs."
+      },
+      "count": 5,
+      "tracks": ["professional"]
+    },
+    {
+      "key": "product_management",
+      "label": "Product Management",
+      "family": "business",
+      "family_label": "Business, finance \u0026 operations",
+      "aliases": ["product manager", "PM", "product owner"],
+      "agent": {
+        "id": "product-management-interviewer",
+        "name": "Product Management interviewer",
+        "summary": "AI practice for product decisions, prioritization and stakeholder tradeoffs."
+      },
+      "count": 5,
+      "tracks": ["professional"]
+    },
+    {
+      "key": "project_management",
+      "label": "Project Management",
+      "family": "business",
+      "family_label": "Business, finance \u0026 operations",
+      "aliases": [
+        "project manager",
+        "program manager",
+        "delivery manager",
+        "scrum master",
+        "PMO"
+      ],
+      "agent": {
+        "id": "project-management-interviewer",
+        "name": "Project Management interviewer",
+        "summary": "AI practice for delivery planning, dependencies and stakeholder decisions."
+      },
+      "count": 5,
+      "tracks": ["professional"]
+    },
+    {
+      "key": "public_service",
+      "label": "Public Service",
+      "family": "education_public",
+      "family_label": "Education, research \u0026 public service",
+      "aliases": [
+        "civil service",
+        "government",
+        "public administration",
+        "policy analyst",
+        "municipal",
+        "public sector"
+      ],
+      "agent": {
+        "id": "public-service-interviewer",
+        "name": "Public Service interviewer",
+        "summary": "AI practice for public-facing decisions, service delivery and accountability."
+      },
+      "count": 6,
+      "tracks": ["professional"]
+    },
+    {
+      "key": "quality_assurance",
+      "label": "Quality Assurance",
+      "family": "technology",
+      "family_label": "Technology \u0026 data",
+      "aliases": ["QA", "tester", "test engineer", "SDET", "quality engineer"],
+      "agent": {
+        "id": "quality-assurance-interviewer",
+        "name": "Quality Assurance interviewer",
+        "summary": "AI practice for test strategy, defect analysis and release decisions."
+      },
+      "count": 5,
+      "tracks": ["professional"]
+    },
+    {
+      "key": "research",
+      "label": "Research",
+      "family": "education_public",
+      "family_label": "Education, research \u0026 public service",
+      "aliases": [
+        "research assistant",
+        "scientist",
+        "lab technician",
+        "academic",
+        "PhD",
+        "study design"
+      ],
+      "agent": {
+        "id": "research-interviewer",
+        "name": "Research interviewer",
+        "summary": "AI practice for study design, evidence, research integrity and communication."
+      },
+      "count": 5,
+      "tracks": ["professional"]
+    },
+    {
+      "key": "retail_hospitality",
+      "label": "Retail \u0026 Hospitality",
+      "family": "customer_creative",
+      "family_label": "Customer, sales \u0026 creative",
+      "aliases": [
+        "retail",
+        "hospitality",
+        "cashier",
+        "store associate",
+        "hotel",
+        "restaurant",
+        "server",
+        "front desk"
+      ],
+      "agent": {
+        "id": "retail-hospitality-interviewer",
+        "name": "Retail \u0026 Hospitality interviewer",
+        "summary": "AI practice for guest service, shift priorities and frontline teamwork."
+      },
+      "count": 6,
+      "tracks": ["professional"]
+    },
+    {
+      "key": "sales",
+      "label": "Sales",
+      "family": "customer_creative",
+      "family_label": "Customer, sales \u0026 creative",
+      "aliases": [
+        "account executive",
+        "SDR",
+        "BDR",
+        "business development",
+        "account manager"
+      ],
+      "agent": {
+        "id": "sales-interviewer",
+        "name": "Sales interviewer",
+        "summary": "AI practice for discovery, objections, negotiation and account judgment."
+      },
+      "count": 6,
+      "tracks": ["professional"]
+    },
+    {
+      "key": "skilled_trades",
+      "label": "Skilled Trades",
+      "family": "engineering_trades",
+      "family_label": "Engineering \u0026 skilled trades",
+      "aliases": [
+        "apprentice",
+        "technician",
+        "electrician",
+        "plumber",
+        "HVAC",
+        "construction",
+        "maintenance"
+      ],
+      "agent": {
+        "id": "skilled-trades-interviewer",
+        "name": "Skilled Trades interviewer",
+        "summary": "AI practice for apprenticeships, safe diagnostics and worksite communication."
+      },
+      "count": 6,
+      "tracks": ["professional"]
+    },
+    {
+      "key": "social_work",
+      "label": "Social Work \u0026 Community Care",
+      "family": "healthcare",
+      "family_label": "Healthcare \u0026 care",
+      "aliases": [
+        "social worker",
+        "case manager",
+        "community support",
+        "care coordinator",
+        "nonprofit",
+        "safeguarding"
+      ],
+      "agent": {
+        "id": "social-work-interviewer",
+        "name": "Social Work \u0026 Community Care interviewer",
+        "summary": "AI practice for safeguarding, boundaries, care coordination and case judgment."
+      },
+      "count": 5,
+      "tracks": ["professional"]
+    },
+    {
+      "key": "software_engineering",
+      "label": "Software Engineering",
+      "family": "technology",
+      "family_label": "Technology \u0026 data",
+      "aliases": [
+        "developer",
+        "programmer",
+        "backend",
+        "frontend",
+        "full stack",
+        "SWE",
+        "DevOps",
+        "SRE"
+      ],
+      "agent": {
+        "id": "software-engineering-interviewer",
+        "name": "Software Engineering interviewer",
+        "summary": "AI practice for code, architecture, debugging and engineering judgment."
+      },
+      "count": 8,
+      "tracks": ["engineering", "professional"]
+    },
+    {
+      "key": "supply_chain",
+      "label": "Supply Chain \u0026 Logistics",
+      "family": "business",
+      "family_label": "Business, finance \u0026 operations",
+      "aliases": [
+        "logistics",
+        "procurement",
+        "warehouse",
+        "inventory",
+        "purchasing",
+        "distribution"
+      ],
+      "agent": {
+        "id": "supply-chain-interviewer",
+        "name": "Supply Chain \u0026 Logistics interviewer",
+        "summary": "AI practice for inventory, logistics, supplier risk and service tradeoffs."
+      },
+      "count": 5,
+      "tracks": ["professional"]
+    },
+    {
+      "key": "ux_design",
+      "label": "UX \u0026 Product Design",
+      "family": "customer_creative",
+      "family_label": "Customer, sales \u0026 creative",
+      "aliases": [
+        "UX",
+        "UI",
+        "designer",
+        "user research",
+        "portfolio",
+        "interaction design"
+      ],
+      "agent": {
+        "id": "ux-design-interviewer",
+        "name": "UX \u0026 Product Design interviewer",
+        "summary": "AI practice for portfolios, research, critique and accessible product design."
+      },
+      "count": 5,
+      "tracks": ["professional"]
+    }
+  ],
+  "questions": [
+    {
+      "schema_version": 0,
+      "revision": 1,
+      "format_id": "system-design",
+      "format_name": "System Design",
+      "agent": {
+        "id": "software-engineering-interviewer",
+        "name": "Software Engineering interviewer",
+        "summary": "AI practice for code, architecture, debugging and engineering judgment."
+      },
+      "review_status": "preview",
+      "minutes": 30,
+      "id": "url-shortener",
+      "title": "Design a URL Shortener (TinyURL)",
+      "track": "engineering",
+      "domain": "system_design",
+      "areas": ["software_engineering"],
+      "modality": "system_design",
+      "difficulty": "mid",
+      "tags": ["hashing", "kv-store", "caching", "read-heavy", "cdn"],
+      "prompt": "Design a service that converts long URLs into short links and redirects users from a short link to the original URL. Assume it must serve a large, read-heavy global audience.",
+      "blurb": "The classic read-heavy KV design — key generation, collisions, cache, CDN, and analytics."
+    },
+    {
+      "schema_version": 0,
+      "revision": 1,
+      "format_id": "ml-system-design",
+      "format_name": "ML System Design",
+      "agent": {
+        "id": "software-engineering-interviewer",
+        "name": "Software Engineering interviewer",
+        "summary": "AI practice for code, architecture, debugging and engineering judgment."
+      },
+      "review_status": "preview",
+      "minutes": 30,
+      "id": "rag-service",
+      "title": "Design a Retrieval-Augmented Generation (RAG) Service",
+      "track": "engineering",
+      "domain": "ml_system_design",
+      "areas": ["software_engineering", "data_science"],
+      "modality": "system_design",
+      "difficulty": "senior",
+      "tags": [
+        "rag",
+        "embeddings",
+        "vector-search",
+        "llm",
+        "reranking",
+        "hallucination",
+        "eval"
+      ],
+      "prompt": "Design a retrieval-augmented generation service that answers user questions over a company's private documents (wikis, PDFs, tickets, code). It must ground answers in the corpus with citations, stay fresh as documents change, and control hallucination. Assume a large enterprise corpus and interactive latency.",
+      "blurb": "The end-to-end RAG design — ingestion and chunking, embeddings, vector index, retrieval plus reranking, grounded generation, eval, and hallucination control."
+    },
+    {
+      "schema_version": 0,
+      "revision": 1,
+      "format_id": "coding",
+      "format_name": "Coding",
+      "agent": {
+        "id": "software-engineering-interviewer",
+        "name": "Software Engineering interviewer",
+        "summary": "AI practice for code, architecture, debugging and engineering judgment."
+      },
+      "review_status": "preview",
+      "minutes": 30,
+      "id": "lru-cache",
+      "title": "Design and Implement an LRU Cache",
+      "track": "engineering",
+      "domain": "coding",
+      "areas": ["software_engineering", "data_science"],
+      "modality": "coding",
+      "difficulty": "mid",
+      "tags": ["hashmap", "linked-list", "design", "cache", "o1"],
+      "prompt": "Design a data structure for a Least Recently Used (LRU) cache. It supports get(key) and put(key, value). get returns the value if the key exists, else -1, and marks the key as most-recently used. put inserts or updates the value; if the cache exceeds its fixed capacity, it evicts the least-recently-used key. Both operations must run in O(1) average time.",
+      "blurb": "The classic O(1) cache design — a hash map for lookup plus a doubly linked list for recency ordering."
+    },
+    {
+      "schema_version": 0,
+      "revision": 1,
+      "format_id": "thermodynamics",
+      "format_name": "Thermodynamics",
+      "agent": {
+        "id": "mechanical-engineering-interviewer",
+        "name": "Mechanical Engineering interviewer",
+        "summary": "AI practice for mechanics, thermal systems and practical design tradeoffs."
+      },
+      "review_status": "preview",
+      "minutes": 30,
+      "id": "thermo-cycle-sizing",
+      "title": "Size a Steam Power Cycle (Rankine)",
+      "track": "engineering",
+      "domain": "thermodynamics",
+      "areas": ["mechanical_engineering"],
+      "modality": "conversational",
+      "difficulty": "senior",
+      "tags": [
+        "thermodynamics",
+        "rankine-cycle",
+        "power-plant",
+        "energy-balance",
+        "cycle-efficiency",
+        "steam-turbine"
+      ],
+      "prompt": "You're asked to size a steam power cycle to deliver about 10 MW of net electrical power. Walk me through your structured approach — the cycle states you'd fix, the first-law energy balance on each component, how you get the steam mass flow rate and thermal efficiency, and the practical tradeoffs you'd weigh. Talk me through your reasoning and estimates out loud.",
+      "blurb": "Spoken station — size a Rankine steam cycle for a target net power: fix the states, do a per-component energy balance, get mass flow and efficiency, and reason about superheat, reheat, and condenser pressure."
+    },
+    {
+      "schema_version": 0,
+      "revision": 1,
+      "format_id": "mechanics",
+      "format_name": "Mechanics",
+      "agent": {
+        "id": "mechanical-engineering-interviewer",
+        "name": "Mechanical Engineering interviewer",
+        "summary": "AI practice for mechanics, thermal systems and practical design tradeoffs."
+      },
+      "review_status": "preview",
+      "minutes": 30,
+      "id": "beam-load-analysis",
+      "title": "Analyze a Loaded Cantilever Beam",
+      "track": "engineering",
+      "domain": "mechanics",
+      "areas": ["mechanical_engineering"],
+      "modality": "conversational",
+      "difficulty": "mid",
+      "tags": [
+        "solid-mechanics",
+        "cantilever-beam",
+        "bending-stress",
+        "deflection",
+        "factor-of-safety",
+        "statics"
+      ],
+      "prompt": "You have a cantilever beam fixed at one end with a point load applied at the free tip. Walk me through your structured approach — the support reactions, the shear and bending-moment diagrams, where and how large the maximum bending moment and stress are, the tip deflection, and how you'd check the factor of safety against yield. Reason it through out loud and put some numbers on it.",
+      "blurb": "Spoken station — analyze a tip-loaded cantilever: reactions, shear and moment diagrams, max bending stress σ = Mc/I, tip deflection PL³/3EI, and factor of safety against yield."
+    },
+    {
+      "schema_version": 0,
+      "revision": 1,
+      "format_id": "circuits",
+      "format_name": "Circuits",
+      "agent": {
+        "id": "electrical-engineering-interviewer",
+        "name": "Electrical Engineering interviewer",
+        "summary": "AI practice for circuits, power, signals and verification."
+      },
+      "review_status": "preview",
+      "minutes": 30,
+      "id": "opamp-circuit-analysis",
+      "title": "Analyze an Op-Amp Amplifier",
+      "track": "engineering",
+      "domain": "circuits",
+      "areas": ["electrical_engineering"],
+      "modality": "conversational",
+      "difficulty": "mid",
+      "tags": [
+        "op-amp",
+        "analog-circuits",
+        "amplifier",
+        "gain-bandwidth",
+        "feedback",
+        "circuit-analysis"
+      ],
+      "prompt": "You're handed a non-inverting op-amp stage: a signal into the + input, a feedback resistor Rf from the output to the - input, and a resistor Rin from that - input to ground. Walk me through how you analyze it — the assumptions you make, how you get the closed-loop gain and input/output impedance, and how bandwidth and slew rate limit what this stage can actually do. Pick some component values and work a real number.",
+      "blurb": "Spoken station — analyze a non-inverting op-amp stage: ideal-op-amp assumptions, closed-loop gain, impedance, gain-bandwidth and slew-rate limits, and real non-idealities."
+    },
+    {
+      "schema_version": 0,
+      "revision": 1,
+      "format_id": "structural",
+      "format_name": "Structural",
+      "agent": {
+        "id": "civil-engineering-interviewer",
+        "name": "Civil Engineering interviewer",
+        "summary": "AI practice for structures, infrastructure and engineering risk."
+      },
+      "review_status": "preview",
+      "minutes": 30,
+      "id": "structural-load-path",
+      "title": "Trace a Building's Gravity Load Path",
+      "track": "engineering",
+      "domain": "structural",
+      "areas": ["civil_engineering"],
+      "modality": "conversational",
+      "difficulty": "mid",
+      "tags": [
+        "structural",
+        "load-path",
+        "gravity-loads",
+        "beam-design",
+        "load-combinations",
+        "tributary-area"
+      ],
+      "prompt": "Walk me through how gravity load travels from a typical office floor down to the foundation. Take a representative interior bay, assign realistic dead and live loads, and trace the load through the slab, beams, girders, columns, and footing. Size one representative simply-supported beam as you go, and tell me how you'd think about the lateral system too.",
+      "blurb": "Spoken station — trace gravity load from slab to foundation: tributary areas, dead/live loads, load combinations, a worked beam sizing, and lateral-system awareness."
+    },
+    {
+      "schema_version": 0,
+      "revision": 2,
+      "format_id": "behavioral",
+      "format_name": "Behavioral",
+      "agent": {
+        "id": "career-foundations-interviewer",
+        "name": "Career Foundations interviewer",
+        "summary": "AI practice for first jobs, career changes, recruiter conversations and offers."
+      },
+      "review_status": "preview",
+      "minutes": 30,
+      "id": "behavioral-ownership",
+      "title": "Tell me about a time you took ownership beyond your role",
+      "track": "professional",
+      "domain": "behavioral",
+      "areas": [
+        "career_foundations",
+        "accounting",
+        "business_operations",
+        "civil_engineering",
+        "consulting",
+        "creative_communications",
+        "customer_support",
+        "cybersecurity",
+        "data_science",
+        "education",
+        "electrical_engineering",
+        "finance",
+        "human_resources",
+        "it_support",
+        "law",
+        "marketing",
+        "mechanical_engineering",
+        "medicine",
+        "nursing",
+        "product_management",
+        "project_management",
+        "public_service",
+        "quality_assurance",
+        "research",
+        "retail_hospitality",
+        "sales",
+        "skilled_trades",
+        "social_work",
+        "software_engineering",
+        "supply_chain",
+        "ux_design"
+      ],
+      "modality": "conversational",
+      "difficulty": "mid",
+      "tags": [
+        "ownership",
+        "leadership-principles",
+        "initiative",
+        "accountability",
+        "star"
+      ],
+      "prompt": "Tell me about a time you noticed a problem with unclear ownership and helped make sure it was addressed. Explain what you did within your responsibility, who else needed to be involved and what happened. Taking appropriate action can include a careful handoff or escalation.",
+      "blurb": "Ownership: did the candidate act like the problem was theirs — end to end — or wait for someone else to own it?"
+    },
+    {
+      "schema_version": 0,
+      "revision": 1,
+      "format_id": "clinical-reasoning",
+      "format_name": "Clinical Reasoning",
+      "agent": {
+        "id": "medicine-interviewer",
+        "name": "Medicine interviewer",
+        "summary": "AI practice for clinical reasoning, ethical stations and patient communication."
+      },
+      "review_status": "preview",
+      "minutes": 30,
+      "id": "clinical-reasoning-chest-pain",
+      "title": "Clinical Reasoning: Acute Chest Pain",
+      "track": "professional",
+      "domain": "clinical_reasoning",
+      "areas": ["medicine"],
+      "modality": "conversational",
+      "difficulty": "mid",
+      "tags": [
+        "clinical-reasoning",
+        "chest-pain",
+        "differential-diagnosis",
+        "acute-care",
+        "safety"
+      ],
+      "prompt": "A 55-year-old presents to the emergency department with chest pain that started two hours ago. Walk me through your structured approach — how you take the history, the differential you're considering, the investigations you'd order, and your initial management.",
+      "blurb": "A structured approach to acute chest pain — history, life-threatening differential, focused workup, and safe initial management."
+    },
+    {
+      "schema_version": 0,
+      "revision": 1,
+      "format_id": "issue-spotting",
+      "format_name": "Issue Spotting",
+      "agent": {
+        "id": "law-interviewer",
+        "name": "Law interviewer",
+        "summary": "AI practice for issue spotting, legal analysis and client communication."
+      },
+      "review_status": "preview",
+      "minutes": 30,
+      "id": "law-issue-spotting-contract",
+      "title": "Issue-Spotting: Contract Formation (Offer, Acceptance, Consideration)",
+      "track": "professional",
+      "domain": "issue_spotting",
+      "areas": ["law"],
+      "modality": "written",
+      "difficulty": "mid",
+      "tags": [
+        "contracts",
+        "issue-spotting",
+        "IRAC",
+        "offer-acceptance",
+        "consideration",
+        "1L"
+      ],
+      "prompt": "Read the fact pattern and write an IRAC analysis identifying the contract-formation issues. Facts: On Monday, Dana emails Rowan, a freelance illustrator: 'I'll pay you $4,000 to design a logo for my bakery. I need it by Friday. Let me know.' Rowan replies Tuesday morning: 'Sounds good — I can do it for $4,000, but I'll need $500 up front for supplies.' Dana does not respond. On Wednesday, before hearing anything further, Rowan starts sketching and buys $500 of software and materials. On Thursday, Dana emails: 'Actually, my cousin will do it for free — never mind.' Rowan demands $4,000, or at least the $500 spent. Analyze whether an enforceable contract was formed and what Rowan's best arguments and likely recovery are. Write a structured IRAC (or multi-issue IRAC) response.",
+      "blurb": "A classic 1L formation fact pattern — spot the counteroffer, the lapse, and the reliance angle, and analyze it with disciplined IRAC."
+    },
+    {
+      "schema_version": 0,
+      "revision": 1,
+      "format_id": "case",
+      "format_name": "Case",
+      "agent": {
+        "id": "consulting-interviewer",
+        "name": "Consulting interviewer",
+        "summary": "AI practice for structured cases, analysis and recommendations."
+      },
+      "review_status": "preview",
+      "minutes": 30,
+      "id": "case-market-entry",
+      "title": "Market Entry: Should the Client Enter a New Market?",
+      "track": "professional",
+      "domain": "case",
+      "areas": ["consulting"],
+      "modality": "conversational",
+      "difficulty": "senior",
+      "tags": [
+        "market-entry",
+        "structure",
+        "hypothesis",
+        "market-sizing",
+        "go-to-market"
+      ],
+      "prompt": "Our client is a mid-sized North American manufacturer of premium pet food. Their board is considering entering the European market for the first time. They want to know: should they enter, and if so, how? Take a few minutes to structure your approach, then walk me through it.",
+      "blurb": "A classic market-entry case — structure the decision, size the prize, and reach an entry recommendation with a real go-to-market path."
+    },
+    {
+      "schema_version": 0,
+      "revision": 1,
+      "format_id": "classroom-management",
+      "format_name": "Classroom Management",
+      "agent": {
+        "id": "education-interviewer",
+        "name": "Education interviewer",
+        "summary": "AI practice for instruction, classroom judgment and learner support."
+      },
+      "review_status": "preview",
+      "minutes": 30,
+      "id": "teacher-classroom",
+      "title": "Teaching Scenario: Classroom Management \u0026 Differentiated Instruction",
+      "track": "professional",
+      "domain": "classroom_management",
+      "areas": ["education"],
+      "modality": "conversational",
+      "difficulty": "entry",
+      "tags": [
+        "teaching",
+        "classroom-management",
+        "differentiation",
+        "engagement",
+        "equity",
+        "scenario"
+      ],
+      "prompt": "You're teaching a mixed-ability class of 28 students. During a lesson, one student keeps calling out and distracting others, a small group in the back has clearly finished the work and is getting bored, and two students look completely lost and disengaged. It's the middle of the lesson and you have to keep it moving. Walk me through how you'd handle the moment and how you'd design the lesson so this goes better next time.",
+      "blurb": "An entry-level teaching scenario — assessed for in-the-moment classroom management, differentiated instruction, and a proactive, relationship-based approach."
+    },
+    {
+      "schema_version": 0,
+      "revision": 1,
+      "format_id": "employee-relations",
+      "format_name": "Employee Relations",
+      "agent": {
+        "id": "human-resources-interviewer",
+        "name": "Human Resources interviewer",
+        "summary": "AI practice for employee conversations, hiring operations and fair process."
+      },
+      "review_status": "preview",
+      "minutes": 30,
+      "id": "hr-people-scenario",
+      "title": "HR Scenario: An Employee-Relations Difficult Conversation",
+      "track": "professional",
+      "domain": "employee_relations",
+      "areas": ["human_resources"],
+      "modality": "conversational",
+      "difficulty": "mid",
+      "tags": [
+        "hr",
+        "employee-relations",
+        "difficult-conversation",
+        "investigation",
+        "conflict",
+        "fairness"
+      ],
+      "prompt": "You're an HR business partner. A manager comes to you frustrated: one of their high-performing engineers, Alex, has become 'impossible to work with' — snapping at teammates in meetings, and two people have quietly complained. The manager wants you to 'just have a talk with Alex and sort it out,' and hints they'd like Alex managed out if it doesn't improve. Walk me through how you'd handle this — with the manager, with Alex, and the process — this is educational, framework-based, not legal advice.",
+      "blurb": "A mid-level employee-relations scenario — assessed for fact-finding, fairness and process, a well-run difficult conversation, and balancing the employee, manager, and organization."
+    },
+    {
+      "schema_version": 0,
+      "revision": 1,
+      "format_id": "sales-roleplay",
+      "format_name": "Sales Roleplay",
+      "agent": {
+        "id": "sales-interviewer",
+        "name": "Sales interviewer",
+        "summary": "AI practice for discovery, objections, negotiation and account judgment."
+      },
+      "review_status": "preview",
+      "minutes": 30,
+      "id": "sales-discovery",
+      "title": "Sales Roleplay: Discovery, Objection Handling, and Advancing the Deal",
+      "track": "professional",
+      "domain": "sales_roleplay",
+      "areas": ["sales"],
+      "modality": "conversational",
+      "difficulty": "mid",
+      "tags": [
+        "sales",
+        "discovery",
+        "objection-handling",
+        "b2b",
+        "qualification",
+        "closing",
+        "roleplay"
+      ],
+      "prompt": "We'll do a roleplay. I'm the VP of Operations at a 500-person logistics company. Your company sells workflow-automation software, and I've agreed to a 30-minute call because my team is drowning in manual processes — but I've told you up front I'm skeptical, I'm busy, and we already looked at a competitor last year and passed. Run the call: open it, run your discovery, handle my pushback, and try to advance the deal. I'll respond as the buyer.",
+      "blurb": "A B2B discovery-and-objection roleplay — assessed for genuine discovery, value articulation tied to the buyer's pain, objection handling, and advancing the deal without pushiness."
+    },
+    {
+      "schema_version": 1,
+      "revision": 1,
+      "format_id": "recruiter-screen",
+      "format_name": "Recruiter screen",
+      "agent": {
+        "id": "career-foundations-interviewer",
+        "name": "Career Foundations interviewer",
+        "summary": "AI practice for first jobs, career changes, recruiter conversations and offers."
+      },
+      "review_status": "preview",
+      "minutes": 10,
+      "id": "career-first-job-introduction",
+      "title": "Your First Job: Introduce Your Strengths",
+      "track": "professional",
+      "domain": "first_job",
+      "areas": [
+        "career_foundations",
+        "accounting",
+        "business_operations",
+        "civil_engineering",
+        "consulting",
+        "creative_communications",
+        "customer_support",
+        "cybersecurity",
+        "data_science",
+        "education",
+        "electrical_engineering",
+        "finance",
+        "human_resources",
+        "it_support",
+        "law",
+        "marketing",
+        "mechanical_engineering",
+        "medicine",
+        "nursing",
+        "product_management",
+        "project_management",
+        "public_service",
+        "quality_assurance",
+        "research",
+        "retail_hospitality",
+        "sales",
+        "skilled_trades",
+        "social_work",
+        "software_engineering",
+        "supply_chain",
+        "ux_design"
+      ],
+      "modality": "conversational",
+      "difficulty": "entry",
+      "tags": [
+        "career-foundations",
+        "all-careers",
+        "community-preview",
+        "first-job",
+        "no-experience",
+        "graduate",
+        "internship",
+        "apprenticeship"
+      ],
+      "prompt": "Practice a first-job interview for a fictional team assistant role. The work involves keeping a task list, helping people find information, and asking for help when a request is unclear. No previous paid work or degree is required. Introduce yourself and explain one strength you would bring; you can use study, volunteering, informal work, or another experience you choose to share.",
+      "blurb": "Build an introduction and support it with everyday experience, even before your first paid job."
+    },
+    {
+      "schema_version": 1,
+      "revision": 1,
+      "format_id": "recruiter-screen",
+      "format_name": "Recruiter screen",
+      "agent": {
+        "id": "career-foundations-interviewer",
+        "name": "Career Foundations interviewer",
+        "summary": "AI practice for first jobs, career changes, recruiter conversations and offers."
+      },
+      "review_status": "preview",
+      "minutes": 15,
+      "id": "career-recruiter-screen",
+      "title": "Practice a Recruiter Screening Call",
+      "track": "professional",
+      "domain": "recruiter_screen",
+      "areas": [
+        "career_foundations",
+        "accounting",
+        "business_operations",
+        "civil_engineering",
+        "consulting",
+        "creative_communications",
+        "customer_support",
+        "cybersecurity",
+        "data_science",
+        "education",
+        "electrical_engineering",
+        "finance",
+        "human_resources",
+        "it_support",
+        "law",
+        "marketing",
+        "mechanical_engineering",
+        "medicine",
+        "nursing",
+        "product_management",
+        "project_management",
+        "public_service",
+        "quality_assurance",
+        "research",
+        "retail_hospitality",
+        "sales",
+        "skilled_trades",
+        "social_work",
+        "software_engineering",
+        "supply_chain",
+        "ux_design"
+      ],
+      "modality": "conversational",
+      "difficulty": "junior",
+      "tags": [
+        "career-foundations",
+        "all-careers",
+        "community-preview",
+        "recruiter",
+        "phone-screen",
+        "screening",
+        "tell-me-about-yourself"
+      ],
+      "prompt": "You are screening for a fictional service coordinator role. It involves organizing incoming requests, keeping accurate records, and communicating with colleagues. Start by explaining why the role interests you and the experience you would bring. Ask the recruiter about anything you need to judge the fit. The role is fictional; you do not need to share private personal details.",
+      "blurb": "Practice motivation, relevant experience, role questions, and clear next steps in a short screening call."
+    },
+    {
+      "schema_version": 1,
+      "revision": 1,
+      "format_id": "evidence-interview",
+      "format_name": "Experience and transferable skills",
+      "agent": {
+        "id": "career-foundations-interviewer",
+        "name": "Career Foundations interviewer",
+        "summary": "AI practice for first jobs, career changes, recruiter conversations and offers."
+      },
+      "review_status": "preview",
+      "minutes": 15,
+      "id": "career-transferable-skills",
+      "title": "Explain a Career Change",
+      "track": "professional",
+      "domain": "career_transition",
+      "areas": [
+        "career_foundations",
+        "accounting",
+        "business_operations",
+        "civil_engineering",
+        "consulting",
+        "creative_communications",
+        "customer_support",
+        "cybersecurity",
+        "data_science",
+        "education",
+        "electrical_engineering",
+        "finance",
+        "human_resources",
+        "it_support",
+        "law",
+        "marketing",
+        "mechanical_engineering",
+        "medicine",
+        "nursing",
+        "product_management",
+        "project_management",
+        "public_service",
+        "quality_assurance",
+        "research",
+        "retail_hospitality",
+        "sales",
+        "skilled_trades",
+        "social_work",
+        "software_engineering",
+        "supply_chain",
+        "ux_design"
+      ],
+      "modality": "conversational",
+      "difficulty": "junior",
+      "tags": [
+        "career-foundations",
+        "all-careers",
+        "community-preview",
+        "career-change",
+        "transferable-skills",
+        "veteran",
+        "industry-switch"
+      ],
+      "prompt": "Practice explaining a move into a different type of work. Choose a target role and state up to two duties you know it involves, or use this fictional fallback: a coordinator who tracks requests and communicates handoffs. Explain how one experience you already have could help, and one skill you would still need to learn. You may use paid work, study, informal work, volunteering, or military experience.",
+      "blurb": "Turn existing experience into credible evidence for a new field without pretending the roles are identical."
+    },
+    {
+      "schema_version": 1,
+      "revision": 1,
+      "format_id": "evidence-interview",
+      "format_name": "Experience and transferable skills",
+      "agent": {
+        "id": "career-foundations-interviewer",
+        "name": "Career Foundations interviewer",
+        "summary": "AI practice for first jobs, career changes, recruiter conversations and offers."
+      },
+      "review_status": "preview",
+      "minutes": 15,
+      "id": "career-return-to-work",
+      "title": "Return to Work with a Clear Skills Story",
+      "track": "professional",
+      "domain": "return_to_work",
+      "areas": [
+        "career_foundations",
+        "accounting",
+        "business_operations",
+        "civil_engineering",
+        "consulting",
+        "creative_communications",
+        "customer_support",
+        "cybersecurity",
+        "data_science",
+        "education",
+        "electrical_engineering",
+        "finance",
+        "human_resources",
+        "it_support",
+        "law",
+        "marketing",
+        "mechanical_engineering",
+        "medicine",
+        "nursing",
+        "product_management",
+        "project_management",
+        "public_service",
+        "quality_assurance",
+        "research",
+        "retail_hospitality",
+        "sales",
+        "skilled_trades",
+        "social_work",
+        "software_engineering",
+        "supply_chain",
+        "ux_design"
+      ],
+      "modality": "conversational",
+      "difficulty": "mid",
+      "tags": [
+        "career-foundations",
+        "all-careers",
+        "community-preview",
+        "return-to-work",
+        "career-break",
+        "returnship",
+        "caregiver",
+        "employment-gap"
+      ],
+      "prompt": "Practice a return-to-work interview. You choose how much, if anything, to say about time away from paid work. Pick a target role and a relevant duty, or use a fictional coordinator role involving planning and handoffs. Focus on a strength you can demonstrate now, a recent learning or practice activity, and the support that would help you start well.",
+      "blurb": "Rehearse current strengths, refreshed skills, and onboarding questions while keeping personal circumstances private."
+    },
+    {
+      "schema_version": 1,
+      "revision": 1,
+      "format_id": "incident-simulation",
+      "format_name": "Incident simulation",
+      "agent": {
+        "id": "skilled-trades-interviewer",
+        "name": "Skilled Trades interviewer",
+        "summary": "AI practice for apprenticeships, safe diagnostics and worksite communication."
+      },
+      "review_status": "preview",
+      "minutes": 20,
+      "id": "trades-apprentice-safety-handoff",
+      "title": "Maintenance Apprentice: Respond to an Unsafe Work Request",
+      "track": "professional",
+      "domain": "maintenance_safety",
+      "areas": ["skilled_trades"],
+      "modality": "conversational",
+      "difficulty": "entry",
+      "tags": [
+        "maintenance-apprentice",
+        "facilities-assistant",
+        "trade-apprentice",
+        "workplace-safety",
+        "practical",
+        "community-preview"
+      ],
+      "prompt": "You are a maintenance apprentice at fictional Mill Yard. A conveyor has stopped and a supervisor asks you to remove a guard and clear a jam so packing can restart. You have not been trained or authorized to isolate or repair this machine. Site policy says only authorized maintenance staff may isolate, remove guards, or clear jams; other workers must keep people away and contact the maintenance lead. Explain your response and handoff. No repair procedure is required.",
+      "blurb": "Recognize an unsafe work request, stay within your training, and hand over to authorized maintenance staff."
+    },
+    {
+      "schema_version": 1,
+      "revision": 1,
+      "format_id": "stakeholder-simulation",
+      "format_name": "Stakeholder simulation",
+      "agent": {
+        "id": "retail-hospitality-interviewer",
+        "name": "Retail \u0026 Hospitality interviewer",
+        "summary": "AI practice for guest service, shift priorities and frontline teamwork."
+      },
+      "review_status": "preview",
+      "minutes": 20,
+      "id": "retail-return-conversation",
+      "title": "Retail Associate: Handle a Return Outside the Standard Window",
+      "track": "professional",
+      "domain": "retail_service",
+      "areas": ["retail_hospitality"],
+      "modality": "conversational",
+      "difficulty": "entry",
+      "tags": [
+        "retail-associate",
+        "cashier",
+        "shop-assistant",
+        "returns",
+        "practical",
+        "community-preview"
+      ],
+      "prompt": "You are a retail associate at fictional Meadow Goods. A customer brings unused headphones with a receipt dated 35 days ago. The store’s posted policy allows standard returns within 30 days. Associates can explain the policy and request a supervisor exception but cannot grant one. The customer says they were away caring for a relative and asks for a refund. Handle the conversation while another customer is waiting.",
+      "blurb": "Explain a return boundary, request an appropriate exception, and manage a waiting customer with care."
+    },
+    {
+      "schema_version": 1,
+      "revision": 1,
+      "format_id": "stakeholder-simulation",
+      "format_name": "Stakeholder simulation",
+      "agent": {
+        "id": "customer-support-interviewer",
+        "name": "Customer Support \u0026 Success interviewer",
+        "summary": "AI practice for difficult conversations, case triage and customer follow-through."
+      },
+      "review_status": "preview",
+      "minutes": 20,
+      "id": "customer-support-delivery-recovery",
+      "title": "Customer Support: Recover a Missed Delivery Promise",
+      "track": "professional",
+      "domain": "customer_service",
+      "areas": ["customer_support"],
+      "modality": "conversational",
+      "difficulty": "entry",
+      "tags": [
+        "customer-service-representative",
+        "contact-centre",
+        "support-agent",
+        "complaint-handling",
+        "practical",
+        "community-preview"
+      ],
+      "prompt": "You are a support representative for fictional Fern Home. A customer says, \"My desk was promised yesterday. I stayed home all day, and tracking has not moved. I need it for work tomorrow.\" The order is paid, and the carrier status says only \"in transit.\" Company policy lets you investigate and request a delivery update. A refund or replacement needs supervisor approval; you cannot promise a date without carrier confirmation. The interviewer is the customer.",
+      "blurb": "Acknowledge a missed delivery promise and agree accurate, owned next steps with a frustrated customer."
+    },
+    {
+      "schema_version": 1,
+      "revision": 1,
+      "format_id": "stakeholder-simulation",
+      "format_name": "Stakeholder simulation",
+      "agent": {
+        "id": "public-service-interviewer",
+        "name": "Public Service interviewer",
+        "summary": "AI practice for public-facing decisions, service delivery and accountability."
+      },
+      "review_status": "preview",
+      "minutes": 20,
+      "id": "public-service-application-help",
+      "title": "Public Service Adviser: Help an Applicant Complete a Form",
+      "track": "professional",
+      "domain": "public_service_delivery",
+      "areas": ["public_service"],
+      "modality": "conversational",
+      "difficulty": "entry",
+      "tags": [
+        "public-service-adviser",
+        "council-service-officer",
+        "government-service-assistant",
+        "community-services",
+        "practical",
+        "community-preview"
+      ],
+      "prompt": "You staff the fictional Northborough community-program desk. An applicant says the online transport-voucher form keeps rejecting their address and asks you to submit it for them. Program procedure allows staff to explain questions, provide a paper route, and help enter answers with the applicant’s consent. Staff cannot invent answers or promise eligibility. The applicant does not have reliable internet at home. Handle the conversation and agree on a useful next step.",
+      "blurb": "Help an applicant choose an accessible form-completion route with consent, accurate information, and clear follow-up."
+    }
+  ]
+}

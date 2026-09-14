@@ -1,0 +1,123 @@
+{
+  "schema_version": 1,
+  "revision": 1,
+  "format_id": "stakeholder-simulation",
+  "review_status": "preview",
+  "provenance": {
+    "authorship": "Original project scenario, AI-assisted draft. Practitioner review and calibration pending.",
+    "license": "AGPL-3.0-only"
+  },
+  "minutes": 20,
+  "id": "social-work-referral-intake",
+  "title": "Community Support Worker: Make a Consent-Based Referral",
+  "track": "professional",
+  "domain": "community_support",
+  "areas": [
+    "social_work"
+  ],
+  "modality": "conversational",
+  "difficulty": "entry",
+  "tags": [
+    "community-support-worker",
+    "social-services-assistant",
+    "casework-assistant",
+    "referral-intake",
+    "practical",
+    "community-preview"
+  ],
+  "prompt": "You are a new community support worker at fictional River Centre. An adult client asks for help finding food support and says, \"Please do not call my employer or family.\" Centre policy requires consent before routine referrals and sharing only the information needed by the chosen service. Immediate safety concerns must be referred to the duty supervisor using the centre’s procedure. No immediate threat is reported in this brief. Begin an intake conversation and agree on a next step within your role.",
+  "blurb": "Understand a client’s immediate support needs and make a practical referral with specific, limited consent.",
+  "rubric": [
+    {
+      "key": "engagement",
+      "label": "Understand the client’s priorities",
+      "description": "Asks relevant practical questions without imposing a personal agenda.",
+      "weight": 1,
+      "anchors": {
+        "0": "Demands employment or family details unrelated to the referral or assumes the client is irresponsible.",
+        "2": "Asks about timing and transport and acknowledges the requested boundaries.",
+        "4": "Summarizes the two-day need and access constraint, offers a choice of suitable services, and checks understanding without making the client repeat sensitive detail."
+      }
+    },
+    {
+      "key": "consent",
+      "label": "Use consent and minimum necessary information",
+      "description": "Makes sharing specific and bounded.",
+      "weight": 1,
+      "anchors": {
+        "0": "Contacts employer or family or shares a full history without permission.",
+        "2": "Requests consent before contacting a service and respects the stated restriction.",
+        "4": "Names the recipient, purpose, and exact information to share, records consent, and explains confidentiality boundaries in line with centre policy without promising absolute secrecy."
+      }
+    },
+    {
+      "key": "referral",
+      "label": "Make the handoff practical and honest",
+      "description": "Verifies availability and agrees on follow-up.",
+      "weight": 1,
+      "anchors": {
+        "0": "Promises food delivery without checking or treats giving a phone number as confirmed assistance.",
+        "2": "Checks the directory and offers to verify service availability.",
+        "4": "With consent, verifies delivery or an accessible alternative, clarifies who contacts whom, and agrees a follow-up and supervisor escalation if support cannot be arranged."
+      }
+    }
+  ],
+  "reference": {
+    "scenario": "You are a new community support worker at fictional River Centre. An adult client asks for help finding food support and says, \"Please do not call my employer or family.\" Centre policy requires consent before routine referrals and sharing only the information needed by the chosen service. Immediate safety concerns must be referred to the duty supervisor using the centre’s procedure. No immediate threat is reported in this brief. Begin an intake conversation and agree on a next step within your role.",
+    "facts": [
+      {
+        "id": "fact-1",
+        "value": "The client needs food for the next two days, has no reliable transport, and is comfortable sharing a first name and callback number with one chosen food-support service.",
+        "reveal_when": "candidate asks about immediate practical needs, access, or consent preferences"
+      },
+      {
+        "id": "fact-2",
+        "value": "The centre has a current directory listing a nearby collection service and a delivery service. Delivery availability must be confirmed; the duty supervisor can help with uncertain referrals.",
+        "reveal_when": "candidate asks about available resources or support with uncertainty"
+      }
+    ],
+    "model_points": [
+      "Keep the discussion focused on the client’s goal and access needs. The absence of a reported immediate threat does not justify inventing a crisis or demanding an extensive personal history.",
+      "Consent is specific to a chosen referral and limited information. Explain what would be shared and respect the request not to contact employer or family. If new safety concerns arise, use the supplied supervisor procedure; do not invent statutory thresholds.",
+      "A directory listing is not a confirmed delivery slot. Verify availability with consent, agree what the client wants to do, and arrange a follow-up that checks whether the connection actually worked."
+    ],
+    "probes": [
+      {
+        "trigger": "candidate immediately phones several services with the client’s story",
+        "question": "Which service and information did the client consent to share?"
+      },
+      {
+        "trigger": "candidate offers a collection address despite no transport",
+        "question": "How would the client actually access that support?"
+      }
+    ],
+    "fair_alternatives": [
+      "The client may prefer to contact the service themselves; provide support without assuming the worker must make the call.",
+      "A supervisor-assisted referral is appropriate if delivery is unavailable or the worker is unsure of the process."
+    ],
+    "red_flags": [
+      "Demands employment or family details unrelated to the referral or assumes the client is irresponsible.",
+      "Contacts employer or family or shares a full history without permission.",
+      "Promises food delivery without checking or treats giving a phone number as confirmed assistance."
+    ],
+    "follow_ups": [
+      "Write a minimal referral note naming the client’s requested help, recipient, permitted information, and follow-up."
+    ],
+    "exemplar_answer": "I would ask what support is needed and what makes it hard to access, then acknowledge that employer and family contact is not part of this routine referral. With the client’s permission, I would contact the chosen delivery service using only the first name and callback number they approved, and check availability. I would explain our policy boundaries without promising absolute secrecy. We would agree who makes the next contact and check back if the referral does not connect."
+  },
+  "interviewer_notes": "Play the client with the boundaries stated in the prompt. Do not introduce a clinical assessment, diagnosis, or emergency twist. Assess consent, practical access, and role-appropriate follow-through. Use only supplied facts; say when something is unknown. Accept plain language and equivalent approaches. Assess the demonstrated decisions, not accent, confidence, credentials, or access to particular employers. This is a fictional exercise; do not imply real actions were performed.",
+  "learning_drills": [
+    {
+      "id": "focused-practice",
+      "title": "Write a consent-based referral note",
+      "minutes": 5,
+      "prompt": "Write a minimal referral note naming the client’s requested help, recipient, permitted information, and follow-up. This is self-guided practice; no model assessment is performed.",
+      "checklist": [
+        "Use only needed details",
+        "Record specific consent",
+        "Keep employer and family outside the referral",
+        "Distinguish listed service from confirmed support"
+      ]
+    }
+  ]
+}

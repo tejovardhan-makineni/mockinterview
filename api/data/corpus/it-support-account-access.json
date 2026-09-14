@@ -1,0 +1,123 @@
+{
+  "schema_version": 1,
+  "revision": 1,
+  "format_id": "stakeholder-simulation",
+  "review_status": "preview",
+  "provenance": {
+    "authorship": "Original project scenario, AI-assisted draft. Practitioner review and calibration pending.",
+    "license": "AGPL-3.0-only"
+  },
+  "minutes": 20,
+  "id": "it-support-account-access",
+  "title": "IT Support: Restore Access Without Skipping Identity Checks",
+  "track": "professional",
+  "domain": "service_desk",
+  "areas": [
+    "it_support"
+  ],
+  "modality": "conversational",
+  "difficulty": "entry",
+  "tags": [
+    "help-desk",
+    "service-desk",
+    "desktop-support",
+    "identity-verification",
+    "practical",
+    "community-preview"
+  ],
+  "prompt": "You are a first-week service desk technician at fictional Birch Studio. A caller says they have a presentation in 15 minutes and cannot sign in after replacing their phone. They ask you to \"just turn off the extra login check.\" Policy requires identity verification using the approved recovery channel before any account recovery; you cannot disable that requirement. The interviewer is the caller. Handle the conversation and explain your next steps.",
+  "blurb": "Help a caller recover account access while preserving identity checks and supporting an urgent work deadline.",
+  "rubric": [
+    {
+      "key": "diagnosis",
+      "label": "Clarify the access failure",
+      "description": "Finds the failed step and available approved recovery route.",
+      "weight": 1,
+      "anchors": {
+        "0": "Assumes a password reset will fix every sign-in problem without asking where it fails.",
+        "2": "Confirms the new-phone issue and asks about approved recovery options.",
+        "4": "Separates credentials from the second-factor issue, confirms the affected work goal, and identifies the supplied recovery path without collecting secrets."
+      }
+    },
+    {
+      "key": "boundary",
+      "label": "Preserve verification",
+      "description": "Explains and follows the policy under time pressure.",
+      "weight": 1,
+      "anchors": {
+        "0": "Disables verification or accepts urgency as proof of identity.",
+        "2": "Declines the shortcut and starts approved identity verification.",
+        "4": "Explains the boundary briefly, obtains the information needed for the approved route, and routes escalation without promising an exception."
+      }
+    },
+    {
+      "key": "service",
+      "label": "Support the deadline",
+      "description": "Provides a legitimate work continuity option and clear ownership.",
+      "weight": 1,
+      "anchors": {
+        "0": "Leaves the caller with a refusal only or guarantees recovery within 15 minutes.",
+        "2": "Acknowledges urgency and offers an update while recovery proceeds.",
+        "4": "Explores the already-authorized teammate option, confirms who owns recovery, and states a realistic next update without guaranteeing completion."
+      }
+    }
+  ],
+  "reference": {
+    "scenario": "You are a first-week service desk technician at fictional Birch Studio. A caller says they have a presentation in 15 minutes and cannot sign in after replacing their phone. They ask you to \"just turn off the extra login check.\" Policy requires identity verification using the approved recovery channel before any account recovery; you cannot disable that requirement. The interviewer is the caller. Handle the conversation and explain your next steps.",
+    "facts": [
+      {
+        "id": "fact-1",
+        "value": "The caller still has their company laptop but no recovery codes. The approved recovery channel can contact the verified manager and check the managed device record; do not invent a new verification method.",
+        "reveal_when": "candidate asks which approved recovery options remain"
+      },
+      {
+        "id": "fact-2",
+        "value": "The presentation is stored in an approved shared team folder. A verified teammate already has permission to present it. Recovery timing has not been confirmed.",
+        "reveal_when": "candidate asks about the immediate work goal or an authorized workaround"
+      }
+    ],
+    "model_points": [
+      "Ask which sign-in step fails and what approved recovery options remain. Do not request passwords or a one-time code. A confident caller and a deadline do not establish identity.",
+      "Use the documented recovery channel, including the verified manager and device record where applicable. Explain that its purpose is to recover the correct person’s account and keep the explanation short.",
+      "Separate restoring the account from meeting the presentation deadline. A teammate who already has permission may present from the shared folder; do not transfer files to personal accounts or share credentials."
+    ],
+    "probes": [
+      {
+        "trigger": "candidate only repeats the policy",
+        "question": "What can you still do to help the presentation happen?"
+      },
+      {
+        "trigger": "candidate promises recovery before the presentation",
+        "question": "What recovery timing has actually been confirmed?"
+      }
+    ],
+    "fair_alternatives": [
+      "Escalating to the designated recovery specialist is appropriate when the technician cannot complete the approved process.",
+      "Using a permitted teammate to present is optional; respect a caller who prefers to reschedule while recovery proceeds."
+    ],
+    "red_flags": [
+      "Assumes a password reset will fix every sign-in problem without asking where it fails.",
+      "Disables verification or accepts urgency as proof of identity.",
+      "Leaves the caller with a refusal only or guarantees recovery within 15 minutes."
+    ],
+    "follow_ups": [
+      "Write a 60-word response that acknowledges the deadline, explains verification, and offers a permitted next step."
+    ],
+    "exemplar_answer": "I understand the presentation is soon. I can help recover access, but first we need the approved identity check so we restore the correct account. Is the problem specifically the code on your old phone? I will start the recovery channel using the verified manager and device record. While that runs, could the teammate who already has the shared presentation present it? I will own the ticket and update you when the recovery team responds."
+  },
+  "interviewer_notes": "Play a worried but cooperative caller. After one explanation of the boundary, accept it and provide requested facts. Do not demand the candidate defeat the verification process. Use only supplied facts; say when something is unknown. Accept plain language and equivalent approaches. Assess the demonstrated decisions, not accent, confidence, credentials, or access to particular employers. This is a fictional exercise; do not imply real actions were performed.",
+  "learning_drills": [
+    {
+      "id": "focused-practice",
+      "title": "Practice a helpful boundary",
+      "minutes": 5,
+      "prompt": "Write a 60-word response that acknowledges the deadline, explains verification, and offers a permitted next step. This is self-guided practice; no model assessment is performed.",
+      "checklist": [
+        "Acknowledge the work impact",
+        "Avoid secrets and invented identity checks",
+        "Name the approved recovery route",
+        "Offer an authorized continuity option"
+      ]
+    }
+  ]
+}

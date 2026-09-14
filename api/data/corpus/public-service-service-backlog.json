@@ -1,0 +1,123 @@
+{
+  "schema_version": 1,
+  "revision": 1,
+  "format_id": "work-sample-defense",
+  "review_status": "preview",
+  "provenance": {
+    "authorship": "Original project scenario, AI-assisted draft. Practitioner review and calibration pending.",
+    "license": "AGPL-3.0-only"
+  },
+  "minutes": 30,
+  "id": "public-service-service-backlog",
+  "title": "Public Service Manager: Improve Waiting Times Fairly",
+  "track": "professional",
+  "domain": "public_service_operations",
+  "areas": [
+    "public_service"
+  ],
+  "modality": "written",
+  "difficulty": "mid",
+  "tags": [
+    "public-service-manager",
+    "local-government",
+    "service-delivery-manager",
+    "accessibility",
+    "practical",
+    "community-preview"
+  ],
+  "prompt": "Fictional Northborough’s permit-information desk has a four-week appointment wait. A draft plan says, \"Move all bookings online and reserve the earliest appointments for people who complete the form fastest.\" The desk gives information, not permit decisions. Its service charter requires an assisted booking route and prioritization by documented urgency criteria. Review the plan and design a six-week pilot with understandable public communication.",
+  "blurb": "Design a fair appointment pilot using documented urgency, assisted booking, and realistic service capacity.",
+  "rubric": [
+    {
+      "key": "fair_access",
+      "label": "Apply fair access and priority rules",
+      "description": "Distinguishes documented urgency from speed or digital advantage.",
+      "weight": 1,
+      "anchors": {
+        "0": "Supports online-only booking or treats faster form completion as greater need.",
+        "2": "Retains assisted booking and replaces speed priority with the stated criteria.",
+        "4": "Offers consistent criteria across routes, a supervisor route for uncertain cases, and plain-language explanations without promising permit outcomes."
+      }
+    },
+    {
+      "key": "capacity",
+      "label": "Design a feasible service pilot",
+      "description": "Uses available slots and identifies the structural gap.",
+      "weight": 1,
+      "anchors": {
+        "0": "Promises the backlog disappears with 50 slots against 60 requests.",
+        "2": "Recognizes the ten-per-week demand-capacity gap and the five urgent slots.",
+        "4": "Allocates the five slots within the existing 50, defines timely release of unused slots, and separates routing improvements from the unresolved capacity problem."
+      }
+    },
+    {
+      "key": "evaluation",
+      "label": "Measure wait and fairness together",
+      "description": "Makes pilot success meaningful for different service users.",
+      "weight": 1,
+      "anchors": {
+        "0": "Measures only online uptake or average wait while ignoring excluded users.",
+        "2": "Tracks waiting time and use of assisted booking.",
+        "4": "Tracks wait by urgency and route, missed appointments, unresolved access barriers, and aged cases; sets a review point to request capacity or revise routing based on evidence."
+      }
+    }
+  ],
+  "reference": {
+    "scenario": "Fictional Northborough’s permit-information desk has a four-week appointment wait. A draft plan says, \"Move all bookings online and reserve the earliest appointments for people who complete the form fastest.\" The desk gives information, not permit decisions. Its service charter requires an assisted booking route and prioritization by documented urgency criteria. Review the plan and design a six-week pilot with understandable public communication.",
+    "facts": [
+      {
+        "id": "fact-1",
+        "value": "Of 100 recent contacts, 25 needed telephone or in-person booking help. Urgency criteria are a deadline within five working days or an unresolved accessibility barrier preventing submission; staff may refer uncertain cases to a supervisor.",
+        "reveal_when": "candidate asks about access needs or the documented prioritization criteria"
+      },
+      {
+        "id": "fact-2",
+        "value": "The desk has 50 weekly appointments, of which five can be reserved for urgent referrals during the pilot. Demand averages 60 weekly. No extra staffing has been approved.",
+        "reveal_when": "candidate asks about capacity, demand, or pilot constraints"
+      }
+    ],
+    "model_points": [
+      "The proposed speed rule rewards digital access and availability rather than the charter’s urgency criteria. Retain assisted booking and make the same criteria visible across channels.",
+      "Five urgent slots are part of 50, not additional capacity. With demand of 60, booking design alone does not establish backlog reduction; the pilot should reveal whether avoidable repeat contacts or missed slots can be reduced and whether capacity must increase.",
+      "Track distributions and older cases as well as averages so a faster service for one group does not mask exclusion elsewhere. Clarify that an information appointment is not a permit approval."
+    ],
+    "probes": [
+      {
+        "trigger": "candidate predicts the backlog will clear during the pilot",
+        "question": "How does 50 weekly capacity compare with 60 demand before existing backlog?"
+      },
+      {
+        "trigger": "candidate reserves urgent slots indefinitely",
+        "question": "What happens to unused urgent slots, and when can other applicants use them?"
+      }
+    ],
+    "fair_alternatives": [
+      "A callback or group information session can be explored if it answers the need and remains accessible; do not assume it replaces individual advice for every applicant.",
+      "A pilot may demonstrate that more capacity is necessary; improvement does not require claiming a no-cost solution."
+    ],
+    "red_flags": [
+      "Supports online-only booking or treats faster form completion as greater need.",
+      "Promises the backlog disappears with 50 slots against 60 requests.",
+      "Measures only online uptake or average wait while ignoring excluded users."
+    ],
+    "follow_ups": [
+      "Write a public notice explaining booking routes, urgency criteria, uncertainty review, and what an appointment can and cannot decide."
+    ],
+    "exemplar_answer": "I would retain phone and in-person assistance and use the same documented urgency criteria for every route. Five of the existing 50 weekly slots could be held briefly for urgent referrals, with a clear release rule for unused slots. Since demand is 60, this does not by itself remove the backlog. Over six weeks I would measure waiting by route and urgency, old cases, missed slots, and unresolved access barriers, then use that evidence for capacity and process decisions."
+  },
+  "interviewer_notes": "Assess service design and fair allocation under the fictional charter. No knowledge of permit statutes is needed. Reward candid capacity limits and accessible communication. Use only supplied facts; say when something is unknown. Accept plain language and equivalent approaches. Assess the demonstrated decisions, not accent, confidence, credentials, or access to particular employers. This is a fictional exercise; do not imply real actions were performed.",
+  "learning_drills": [
+    {
+      "id": "focused-practice",
+      "title": "Write the pilot notice",
+      "minutes": 5,
+      "prompt": "Write a public notice explaining booking routes, urgency criteria, uncertainty review, and what an appointment can and cannot decide. This is self-guided practice; no model assessment is performed.",
+      "checklist": [
+        "Preserve assisted booking",
+        "Use the supplied urgency criteria",
+        "Avoid approval promises",
+        "Explain the supervisor review route"
+      ]
+    }
+  ]
+}

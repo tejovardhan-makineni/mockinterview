@@ -1,0 +1,58 @@
+{
+  "id": "accounting-practice",
+  "revision": 1,
+  "review_status": "preview",
+  "source_note": "Original community practice path. Each round is a separate attempt. Content is an AI-assisted preview awaiting practitioner review and calibration; this is not an employer process or a hiring-readiness certification.",
+  "name": "Accounting Practice",
+  "areas": [
+    "accounting"
+  ],
+  "track": "professional",
+  "blurb": "Practice a recruiter screen, two accounting decisions, and questions about role fit.",
+  "rounds": [
+    {
+      "id": "round-1",
+      "title": "Practice a Recruiter Screening Call",
+      "kind": "recruiter-screen",
+      "domain": "recruiter_screen",
+      "modality": "conversational",
+      "difficulty": "junior",
+      "minutes": 15,
+      "question_id": "career-recruiter-screen",
+      "focus": "Practice motivation, relevant experience, role questions, and clear next steps in a short screening call."
+    },
+    {
+      "id": "round-2",
+      "title": "Accounts Assistant: Reconcile an Invoice Before Payment",
+      "kind": "work-sample-defense",
+      "domain": "accounts_payable",
+      "modality": "written",
+      "difficulty": "entry",
+      "minutes": 20,
+      "question_id": "accounting-invoice-reconciliation",
+      "focus": "Reconcile ordered, received, and invoiced quantities before proposing a documented payment decision."
+    },
+    {
+      "id": "round-3",
+      "title": "Accountant: Review a Month-End Reconciliation Control",
+      "kind": "work-sample-defense",
+      "domain": "financial_controls",
+      "modality": "written",
+      "difficulty": "mid",
+      "minutes": 30,
+      "question_id": "accounting-close-control-review",
+      "focus": "Distinguish reconciling items from unsupported adjustments and plan an independently reviewed month-end close."
+    },
+    {
+      "id": "round-4",
+      "title": "Use the Final Five Minutes",
+      "kind": "reverse-interview",
+      "domain": "candidate_questions",
+      "modality": "conversational",
+      "difficulty": "mid",
+      "minutes": 10,
+      "question_id": "candidate-questions-role-fit",
+      "focus": "Practice questions about expectations, support, working conditions, and real examples so you can judge role fit."
+    }
+  ]
+}

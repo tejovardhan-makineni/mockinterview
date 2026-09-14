@@ -18,7 +18,13 @@ into a room with voice, an optional camera, notes and an appropriate workspace.
 Reports use the scenario's rubric and cited candidate evidence; missing evidence
 is marked **not assessed**. Appearance is not part of the interview score.
 
-The catalog contains **143 scenarios**, including original work-sample defense,
+The repository catalog contains **185 scenarios** across **30 professional areas
+plus career foundations**, organized into seven career families with specialized
+AI interviewer profiles and 23 practice paths. The
+[September 14 bank audit and expansion](docs/INTERVIEW-BANK-EXPANSION-2026-09-14.md)
+describes the additions, categorization and next priorities. This expansion is
+not yet deployed; the reviewed hosted catalog still contains 143 scenarios.
+The bank includes original work-sample defense,
 AI-output critique, incident triage, SQL review, stakeholder negotiation and
 candidate-question practice. Content and AI feedback are **community previews**:
 practitioner review and scoring calibration remain pending. Employer-named packs
@@ -187,7 +193,7 @@ candidate. Schema validation and context tests are a first gate, followed by
 human content review and real-provider evaluation before any quality claim.
 
 Public beta validation has not covered a human microphone/browser matrix,
-production load, or calibration of all 143 scenarios. Report reproducible
+production load, or calibration of the scenario bank. Report reproducible
 problems through [support](SUPPORT.md), without sharing keys or private interview
 content in public issues.
 

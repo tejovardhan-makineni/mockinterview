@@ -1,0 +1,156 @@
+{
+  "schema_version": 1,
+  "revision": 1,
+  "format_id": "stakeholder-simulation",
+  "review_status": "preview",
+  "provenance": {
+    "authorship": "Original project scenario, AI-assisted draft. Practitioner review and scoring calibration pending.",
+    "license": "AGPL-3.0-only"
+  },
+  "minutes": 15,
+  "id": "career-offer-conversation",
+  "title": "Discuss an Offer and Your Priorities",
+  "track": "professional",
+  "domain": "offer_negotiation",
+  "areas": [
+    "career_foundations",
+    "accounting",
+    "business_operations",
+    "civil_engineering",
+    "consulting",
+    "creative_communications",
+    "customer_support",
+    "cybersecurity",
+    "data_science",
+    "education",
+    "electrical_engineering",
+    "finance",
+    "human_resources",
+    "it_support",
+    "law",
+    "marketing",
+    "mechanical_engineering",
+    "medicine",
+    "nursing",
+    "product_management",
+    "project_management",
+    "public_service",
+    "quality_assurance",
+    "research",
+    "retail_hospitality",
+    "sales",
+    "skilled_trades",
+    "social_work",
+    "software_engineering",
+    "supply_chain",
+    "ux_design"
+  ],
+  "modality": "conversational",
+  "difficulty": "mid",
+  "tags": [
+    "career-foundations",
+    "all-careers",
+    "community-preview",
+    "offer",
+    "salary-negotiation",
+    "compensation",
+    "decision-making"
+  ],
+  "prompt": "Practice an offer conversation with a fictional recruiter. The offer is 50,000 practice currency units in base pay, with a stated range of 48,000–54,000 and a proposed start in four weeks. These are invented figures, not market pay data. Ask about missing terms, discuss a priority or counterproposal, and decide what you need before responding. You can accept, negotiate, request time, or decline.",
+  "blurb": "Practice clarifying an offer, making a reasoned request, and confirming terms without bluffing.",
+  "rubric": [
+    {
+      "key": "clarity",
+      "label": "Offer understanding",
+      "description": "Separates known terms from missing information.",
+      "weight": 1,
+      "anchors": {
+        "0": "Treats invented benefits or terms as confirmed.",
+        "2": "Identifies a missing term and asks for clarification.",
+        "4": "Prioritizes missing terms that could affect their decision and distinguishes indicative from confirmed terms."
+      }
+    },
+    {
+      "key": "proposal",
+      "label": "Reasoned request",
+      "description": "Makes a clear request linked to a priority.",
+      "weight": 1,
+      "anchors": {
+        "0": "Fabricates competing offers or gives knowingly false leverage.",
+        "2": "Makes a specific request with a reason, or explains a reasoned acceptance or decline.",
+        "4": "Explains a priority and a reasoned acceptance, decline, or request; considers relevant alternatives without false claims. A counteroffer is not required."
+      }
+    },
+    {
+      "key": "closure",
+      "label": "Decision and next steps",
+      "description": "Confirms what is agreed and what remains pending.",
+      "weight": 1,
+      "anchors": {
+        "0": "Treats a request as an approved change despite clarification.",
+        "2": "Clarifies who will respond and what remains open.",
+        "4": "States the decision or remaining conditions, confirms relevant timing and the next step, and requests written clarification when needed. Pending approval is relevant only if a change was requested."
+      }
+    }
+  ],
+  "reference": {
+    "scenario": "Practice an offer conversation with a fictional recruiter. The offer is 50,000 practice currency units in base pay, with a stated range of 48,000–54,000 and a proposed start in four weeks. These are invented figures, not market pay data. Ask about missing terms, discuss a priority or counterproposal, and decide what you need before responding. You can accept, negotiate, request time, or decline.",
+    "facts": [
+      {
+        "id": "authority",
+        "value": "The recruiter may take a base-pay request within the stated range to the hiring manager but cannot approve it during this conversation.",
+        "reveal_when": "candidate asks for a change or approval authority"
+      },
+      {
+        "id": "start",
+        "value": "The hiring manager can consider a start date between four and six weeks.",
+        "reveal_when": "candidate asks about start-date flexibility"
+      },
+      {
+        "id": "benefits",
+        "value": "Benefits, work arrangements, and other terms are unspecified. They must be requested in writing, not invented.",
+        "reveal_when": "candidate asks about benefits or terms"
+      },
+      {
+        "id": "deadline",
+        "value": "The fictional response deadline is five business days away; an extension can be requested but is not guaranteed.",
+        "reveal_when": "candidate asks about the response deadline"
+      }
+    ],
+    "model_points": [
+      "An increase in pay is not the success metric; a clear informed decision is.",
+      "No market-pay assertion is supported by these fictional numbers.",
+      "Do not recommend a candidate bluff, disclose salary history, or waive unspecified rights.",
+      "Acceptance, a well-reasoned decline, requesting time, and negotiation are equally valid decision paths. Top ratings require clear reasoning and appropriate closure for the path chosen; no counteroffer, pay increase, or pending approval is mandatory."
+    ],
+    "probes": [
+      {
+        "trigger": "candidate assumes approval of a counteroffer",
+        "question": "I can pass that request on, but I cannot approve it here. What would you like me to confirm?"
+      },
+      {
+        "trigger": "candidate only asks for more without a proposal",
+        "question": "What specific change would matter most to you?"
+      }
+    ],
+    "red_flags": [
+      "Invents qualifications, accomplishments, or employer commitments.",
+      "Uses unsupported assumptions about the candidate instead of job-related evidence."
+    ]
+  },
+  "interviewer_notes": "Use only supplied role facts and candidate-provided experience. Accept examples from study, volunteering, caregiving, military service, informal work, and paid work without ranking their prestige. Do not demand disclosure of health, family, age, nationality, salary history, or reasons for a career gap. Do not score accent, appearance, eye contact, or native-like grammar. A hypothetical example must be identified as hypothetical, not passed off as experience. Missing evidence is not assessed, not automatically scored zero. In simulation ask neutral probes without giving a model answer; coaching may provide graduated help. Roleplay the recruiter using the fixed range and limited authority. Do not claim to negotiate a real offer, give financial advice, or supply jurisdiction-specific legal rules. Accepting or declining can score as well as negotiating if supported by reasoning.",
+  "learning_drills": [
+    {
+      "id": "practice-next-step",
+      "title": "Write an offer checklist",
+      "minutes": 5,
+      "prompt": "List known terms, open questions, your priority, and a clear request or response. This is self-guided practice; no model assessment is performed.",
+      "checklist": [
+        "Separate facts from assumptions",
+        "Choose a priority",
+        "State a request or decision",
+        "Request written confirmation"
+      ]
+    }
+  ]
+}

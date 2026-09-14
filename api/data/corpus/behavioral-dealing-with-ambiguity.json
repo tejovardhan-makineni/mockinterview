@@ -4,17 +4,37 @@
   "track": "professional",
   "domain": "behavioral",
   "areas": [
-    "software_engineering",
+    "career_foundations",
+    "accounting",
+    "business_operations",
+    "civil_engineering",
+    "consulting",
+    "creative_communications",
+    "customer_support",
+    "cybersecurity",
     "data_science",
+    "education",
+    "electrical_engineering",
+    "finance",
+    "human_resources",
+    "it_support",
+    "law",
+    "marketing",
+    "mechanical_engineering",
     "medicine",
     "nursing",
-    "law",
-    "consulting",
     "product_management",
-    "finance",
-    "mechanical_engineering",
-    "electrical_engineering",
-    "civil_engineering"
+    "project_management",
+    "public_service",
+    "quality_assurance",
+    "research",
+    "retail_hospitality",
+    "sales",
+    "skilled_trades",
+    "social_work",
+    "software_engineering",
+    "supply_chain",
+    "ux_design"
   ],
   "modality": "conversational",
   "difficulty": "senior",
@@ -25,93 +45,82 @@
     "alignment",
     "star"
   ],
-  "prompt": "Tell me about a time you were handed something genuinely ambiguous — an ill-defined problem, no clear goal or owner, conflicting signals — and you drove it to clarity. How did you approach it, and what did you produce?",
+  "prompt": "Tell me about a time the goal, responsibilities or information for a task were unclear. Explain how you made progress toward a shared understanding and what happened. The example can come from work, study or another responsibility.",
   "blurb": "Ambiguity (senior): did they impose structure on chaos and align others — or just wait for direction?",
   "rubric": [
     {
       "key": "situation_clarity",
       "label": "The ambiguity",
-      "description": "Conveys genuine ambiguity — unclear goals, no owner, conflicting stakeholders or data — and why it was hard, not just a normal under-specified task.",
+      "description": "Identifies what was unclear and why it affected a concrete task or decision.",
       "weight": 1.0
     },
     {
       "key": "task_ownership",
       "label": "Taking on the ambiguity",
-      "description": "Shows they chose to own the fog rather than wait for someone to define it, and framed what 'clarity' would even mean.",
+      "description": "Explains their part in clarifying the problem, including seeking an appropriate owner or decision-maker rather than assuming authority.",
       "weight": 1.2
     },
     {
       "key": "action_specificity",
-      "label": "How they created structure",
-      "description": "Describes the concrete method THEY used to reduce ambiguity — decomposing the problem, gathering data, forming hypotheses, defining scope and success metrics, sequencing.",
+      "label": "Specific contribution and decisions",
+      "description": "Describes specific questions, checks, decomposition or small experiments that reduced uncertainty and informed a next step.",
       "weight": 1.3
     },
     {
       "key": "result_impact",
-      "label": "Alignment & measurable outcome",
-      "description": "Shows they aligned stakeholders on a direction AND drove a real outcome — a decision made, a plan executed, a metric moved — not just a nice document.",
+      "label": "Outcome and evidence",
+      "description": "Describes a useful change in shared understanding, a decision, a handoff or an outcome; a document can be useful evidence when its purpose and use are explained.",
       "weight": 1.2
     },
     {
       "key": "reflection",
       "label": "Reflection & judgment",
-      "description": "Reflects on decisions made under uncertainty, what they'd revisit, and how they knew when 'clear enough' was enough to act.",
+      "description": "Explains remaining uncertainty, an assumption they revisited and when there was enough information to act or escalate.",
       "weight": 1.1
     },
     {
       "key": "communication",
-      "label": "Communication & structure",
-      "description": "The answer itself is well-structured — modeling the clarity they claim to bring — and concise under probing.",
+      "label": "Clear, relevant communication",
+      "description": "Makes the relevant situation, reasoning and contribution understandable in any clear order. No required STAR structure, pronouns, performance of confidence or emotional tone.",
       "weight": 0.9
     }
   ],
   "reference": {
-    "scenario": "A senior-level story: the candidate was given a vague mandate ('improve retention', 'figure out our data strategy', 'this system keeps breaking, fix the org problem') with no clear scope, owner, or success metric, and possibly conflicting stakeholders. They imposed structure, aligned people, and drove a concrete outcome. The signal is turning fog into a shared plan that others could execute against.",
+    "scenario": "Explore an unclear brief, uncertain responsibility or conflicting information. A small handoff, assignment or service task can demonstrate the competency. Assess how uncertainty became an actionable understanding, not the size or prestige of the project.",
     "model_points": [
-      "Situation: real ambiguity — no defined goal, no clear owner, incomplete or conflicting information, multiple stakeholders pulling different ways.",
-      "Task: they took ownership of defining the problem itself, and articulated what a good outcome would look like before diving in.",
-      "Action: applied a structured approach — decomposed the space, gathered data/talked to stakeholders, formed and tested hypotheses, cut scope to a tractable first slice, and defined explicit success metrics.",
-      "Action: drove alignment — wrote it down, socialized a proposed direction, resolved conflicting stakeholder views, and got commitment to a plan.",
-      "Result: a concrete outcome, not just a doc — a decision made, a roadmap executed, a metric moved, ambiguity converted into an ownable stream of work with an owner and milestones.",
-      "Reflection: comfortable making reversible bets under uncertainty; knows when 'clear enough to act' beats waiting for certainty; would revisit specific assumptions."
+      "Specifies the ambiguity rather than simply calling the task confusing.",
+      "Identifies what the candidate could clarify and who held the relevant decision authority.",
+      "Uses concrete questions, available evidence, a sketch or a small trial to narrow uncertainty.",
+      "Checks important assumptions with people affected and records an agreed next step where useful.",
+      "Describes what became clearer or what could proceed, accepting qualitative outcomes and useful intermediate work.",
+      "Acknowledges uncertainty that remained and describes a sensible review or escalation point."
     ],
     "probes": [
       {
-        "trigger": "produced a document but no decision/outcome",
-        "question": "A plan is a start — what actually changed as a result? Was a decision made, did work ship, did a metric move?"
+        "trigger": "the ambiguity is vague",
+        "question": "Which uncertainty most affected your next step?"
       },
       {
-        "trigger": "vague on method",
-        "question": "Concretely, how did you go from fog to a plan? Walk me through the steps you took to reduce the ambiguity."
+        "trigger": "candidate describes a document but not its use",
+        "question": "How did someone use that document to make progress?"
       },
       {
-        "trigger": "conflicting stakeholders glossed over",
-        "question": "Who disagreed about what the goal even was, and how did you get them aligned on a single direction?"
-      },
-      {
-        "trigger": "waited for direction",
-        "question": "How much of the structure did you create versus receive from your manager or a stakeholder?"
-      },
-      {
-        "trigger": "no success metric",
-        "question": "How did you define success for something this open-ended? How did you know when you'd made it 'clear enough' to act?"
+        "trigger": "candidate assumes agreement",
+        "question": "How did you check that others understood the plan?"
       }
     ],
     "red_flags": [
-      "Waited for someone else to define the problem; their role was execution once it was already clear.",
-      "Produced analysis or a doc but nothing was decided or shipped — clarity for its own sake.",
-      "Glosses over stakeholder conflict — no real alignment work, just their own opinion.",
-      "No structured method; 'I just figured it out' with no reproducible approach.",
-      "No success metric or definition of done for an open-ended problem.",
-      "The 'ambiguity' was really just a normal well-scoped task; stakes and openness are missing."
+      "Presents an unresolved assumption as an agreed fact after being corrected.",
+      "Claims authority or agreement that their own account does not support.",
+      "Continues a potentially unsafe task despite recognizing that essential instructions are missing."
     ],
     "follow_ups": [
-      "How did you decide what to scope IN versus out for the first slice?",
-      "What did you do when new information contradicted your initial framing?",
-      "How did you keep the team motivated while the goal was still fuzzy?",
-      "Looking back, which assumption were you most wrong about, and how did you catch it?"
+      "What information caused you to revise the plan?",
+      "Which uncertainty could safely remain open?"
     ],
-    "exemplar_answer": "Situation: 'Leadership told my team 'our onboarding is broken' and asked us to fix it — no defined metric, three stakeholders with three different theories, and data scattered across four tools.' Task: 'I took ownership of defining what 'fixed' meant before we built anything.' Action: 'I decomposed onboarding into a funnel, instrumented each step, and pulled the drop-off data — which showed the problem was concentrated at one step, not everywhere as people assumed. I interviewed churned users to form hypotheses, then wrote a one-page framing: the goal, the metric (activation rate at day 7), the top two hypotheses, and a scoped first experiment. I walked each stakeholder through it, reconciled their competing theories against the data, and got sign-off on a single direction and owner.' Result: 'We ran the first experiment within three weeks; day-7 activation rose from ~X% to ~Y% over the next two quarters, and the vague mandate became an owned workstream with a roadmap. The framing doc became how the team scoped ambiguous asks after that.' Reflection: 'The leverage was refusing to build until we'd defined success and let data settle the stakeholder debate. My biggest wrong assumption was that the problem was UI — it was expectation-setting earlier in the funnel — and instrumenting first is what caught it. I've learned to spend the first week making the problem legible, then move.'"
+    "exemplar_answer": "Illustrative example only; it is not a required setting, answer order or achievement standard. Our class group was told to prepare a presentation but had different ideas about the audience. I listed the assumptions we disagreed on and asked the instructor which audience to use. We then agreed on three topics and recorded who would prepare each. A simple shared outline let us start work without duplicating it. I learned to resolve the uncertainty that changes the work before polishing a plan.",
+    "assessment_contract": "Assess the selected competency from concrete job-relevant evidence. Examples from paid work, study, volunteering, caregiving, informal work, military service and community activities are equally eligible when relevant. A modest example is sufficient if it shows the competency; employer prestige, formal title and financial scale are not criteria. Accept qualitative or quantitative outcomes supported by the account, including partial or unsuccessful outcomes. Do not require a numeric metric, STAR order, particular pronouns, composure, enthusiasm or a particular communication style. Identify personal contribution by meaning while preserving credit to others. Assess intelligibility and relevance, not accent, fluency, verbosity, visible emotion, disability or private circumstances. Mark genuinely missing evidence not assessed; do not infer poor competence or dishonesty from an absent example. A clearly labeled hypothetical may be discussed as situational practice but must not count as demonstrated past experience. Respect scope of practice, authorization, safety and ethical duties; pausing, declining, reporting or escalating can be sound judgment. Never require obedience, direct confrontation, unpaid overwork or successful persuasion regardless of the circumstances."
   },
-  "interviewer_notes": "Senior bar: the differentiator is imposing structure on genuinely open problems AND aligning others, not just personal execution once clarity exists. Probe hard on method (how fog became a plan) and on stakeholder alignment (who disagreed and how they reconciled it). Reject clarity-for-its-own-sake: a beautiful doc with no decision or shipped outcome is not the signal — push for what actually changed. Look for a defined success metric on an open-ended problem and for comfort acting when 'clear enough'. The answer's own structure is itself evidence. Probe I-vs-we on who created the structure."
+  "interviewer_notes": "Assess the selected competency from concrete job-relevant evidence. Examples from paid work, study, volunteering, caregiving, informal work, military service and community activities are equally eligible when relevant. A modest example is sufficient if it shows the competency; employer prestige, formal title and financial scale are not criteria. Accept qualitative or quantitative outcomes supported by the account, including partial or unsuccessful outcomes. Do not require a numeric metric, STAR order, particular pronouns, composure, enthusiasm or a particular communication style. Identify personal contribution by meaning while preserving credit to others. Assess intelligibility and relevance, not accent, fluency, verbosity, visible emotion, disability or private circumstances. Mark genuinely missing evidence not assessed; do not infer poor competence or dishonesty from an absent example. A clearly labeled hypothetical may be discussed as situational practice but must not count as demonstrated past experience. Respect scope of practice, authorization, safety and ethical duties; pausing, declining, reporting or escalating can be sound judgment. Never require obedience, direct confrontation, unpaid overwork or successful persuasion regardless of the circumstances. Explore an unclear brief, uncertain responsibility or conflicting information. A small handoff, assignment or service task can demonstrate the competency. Assess how uncertainty became an actionable understanding, not the size or prestige of the project. Ask one focused question at a time. Use the candidate’s actual answer to select one material missing detail, respect the shared follow-up limit, and do not require a replacement example.",
+  "revision": 2
 }

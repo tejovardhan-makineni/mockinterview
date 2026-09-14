@@ -1,0 +1,151 @@
+{
+  "schema_version": 1,
+  "revision": 1,
+  "format_id": "recruiter-screen",
+  "review_status": "preview",
+  "provenance": {
+    "authorship": "Original project scenario, AI-assisted draft. Practitioner review and scoring calibration pending.",
+    "license": "AGPL-3.0-only"
+  },
+  "minutes": 10,
+  "id": "career-first-job-introduction",
+  "title": "Your First Job: Introduce Your Strengths",
+  "track": "professional",
+  "domain": "first_job",
+  "areas": [
+    "career_foundations",
+    "accounting",
+    "business_operations",
+    "civil_engineering",
+    "consulting",
+    "creative_communications",
+    "customer_support",
+    "cybersecurity",
+    "data_science",
+    "education",
+    "electrical_engineering",
+    "finance",
+    "human_resources",
+    "it_support",
+    "law",
+    "marketing",
+    "mechanical_engineering",
+    "medicine",
+    "nursing",
+    "product_management",
+    "project_management",
+    "public_service",
+    "quality_assurance",
+    "research",
+    "retail_hospitality",
+    "sales",
+    "skilled_trades",
+    "social_work",
+    "software_engineering",
+    "supply_chain",
+    "ux_design"
+  ],
+  "modality": "conversational",
+  "difficulty": "entry",
+  "tags": [
+    "career-foundations",
+    "all-careers",
+    "community-preview",
+    "first-job",
+    "no-experience",
+    "graduate",
+    "internship",
+    "apprenticeship"
+  ],
+  "prompt": "Practice a first-job interview for a fictional team assistant role. The work involves keeping a task list, helping people find information, and asking for help when a request is unclear. No previous paid work or degree is required. Introduce yourself and explain one strength you would bring; you can use study, volunteering, informal work, or another experience you choose to share.",
+  "blurb": "Build an introduction and support it with everyday experience, even before your first paid job.",
+  "rubric": [
+    {
+      "key": "relevance",
+      "label": "Relevant strengths",
+      "description": "Links a strength to one stated duty.",
+      "weight": 1,
+      "anchors": {
+        "0": "Offers only unrelated claims after clarification.",
+        "2": "Connects a strength to keeping tasks organized or helping people.",
+        "4": "Connects a strength and a real example to a specific duty and its benefit."
+      }
+    },
+    {
+      "key": "evidence",
+      "label": "Concrete example",
+      "description": "Describes an action in a chosen experience.",
+      "weight": 1,
+      "anchors": {
+        "0": "Claims an achievement while contradicting their own account.",
+        "2": "Explains one action they took and what happened.",
+        "4": "Explains their action, the outcome, and what the example does and does not demonstrate."
+      }
+    },
+    {
+      "key": "learning",
+      "label": "Learning approach",
+      "description": "Explains how to learn an unfamiliar task.",
+      "weight": 1,
+      "anchors": {
+        "0": "Commits to guessing on unclear requests without checking.",
+        "2": "Names a practical question or source of help.",
+        "4": "Describes trying an appropriate step, checking understanding, and using feedback next time."
+      }
+    }
+  ],
+  "reference": {
+    "scenario": "Practice a first-job interview for a fictional team assistant role. The work involves keeping a task list, helping people find information, and asking for help when a request is unclear. No previous paid work or degree is required. Introduce yourself and explain one strength you would bring; you can use study, volunteering, informal work, or another experience you choose to share.",
+    "facts": [
+      {
+        "id": "training",
+        "value": "The first two weeks include a buddy, written task examples, and daily check-ins.",
+        "reveal_when": "candidate asks about training"
+      },
+      {
+        "id": "success",
+        "value": "Early success means accurate task updates and raising unclear requests before they are missed.",
+        "reveal_when": "candidate asks about expectations"
+      },
+      {
+        "id": "next",
+        "value": "The fictional next stage is a short prioritization exercise.",
+        "reveal_when": "candidate asks what happens next"
+      }
+    ],
+    "model_points": [
+      "No paid work is required; a small, truthful example can show reliability.",
+      "Reward a clear link between an action and a role duty, not polished slogans.",
+      "Asking for training or clarification can be good judgment."
+    ],
+    "probes": [
+      {
+        "trigger": "candidate gives an unsupported strength",
+        "question": "Can you share one time you used that strength?"
+      },
+      {
+        "trigger": "candidate says they have never had a job",
+        "question": "You can use a class, informal task, or volunteer example. Which would you like to discuss?"
+      }
+    ],
+    "red_flags": [
+      "Invents qualifications, accomplishments, or employer commitments.",
+      "Uses unsupported assumptions about the candidate instead of job-related evidence."
+    ]
+  },
+  "interviewer_notes": "Use only supplied role facts and candidate-provided experience. Accept examples from study, volunteering, caregiving, military service, informal work, and paid work without ranking their prestige. Do not demand disclosure of health, family, age, nationality, salary history, or reasons for a career gap. Do not score accent, appearance, eye contact, or native-like grammar. A hypothetical example must be identified as hypothetical, not passed off as experience. Missing evidence is not assessed, not automatically scored zero. In simulation ask neutral probes without giving a model answer; coaching may provide graduated help. Start with the introduction, not a rapid list of questions. Do not assume a student is young or that an adult has prior work experience.",
+  "learning_drills": [
+    {
+      "id": "practice-next-step",
+      "title": "Draft a short introduction",
+      "minutes": 5,
+      "prompt": "Write three sentences: what interests you, one strength with an example, and how it fits this role. This is self-guided practice; no model assessment is performed.",
+      "checklist": [
+        "Name a role duty",
+        "Choose a truthful example",
+        "Describe one action",
+        "Keep the introduction understandable"
+      ]
+    }
+  ]
+}

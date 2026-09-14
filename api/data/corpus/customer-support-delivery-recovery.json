@@ -1,0 +1,123 @@
+{
+  "schema_version": 1,
+  "revision": 1,
+  "format_id": "stakeholder-simulation",
+  "review_status": "preview",
+  "provenance": {
+    "authorship": "Original project scenario, AI-assisted draft. Practitioner review and calibration pending.",
+    "license": "AGPL-3.0-only"
+  },
+  "minutes": 20,
+  "id": "customer-support-delivery-recovery",
+  "title": "Customer Support: Recover a Missed Delivery Promise",
+  "track": "professional",
+  "domain": "customer_service",
+  "areas": [
+    "customer_support"
+  ],
+  "modality": "conversational",
+  "difficulty": "entry",
+  "tags": [
+    "customer-service-representative",
+    "contact-centre",
+    "support-agent",
+    "complaint-handling",
+    "practical",
+    "community-preview"
+  ],
+  "prompt": "You are a support representative for fictional Fern Home. A customer says, \"My desk was promised yesterday. I stayed home all day, and tracking has not moved. I need it for work tomorrow.\" The order is paid, and the carrier status says only \"in transit.\" Company policy lets you investigate and request a delivery update. A refund or replacement needs supervisor approval; you cannot promise a date without carrier confirmation. The interviewer is the customer.",
+  "blurb": "Acknowledge a missed delivery promise and agree accurate, owned next steps with a frustrated customer.",
+  "rubric": [
+    {
+      "key": "understanding",
+      "label": "Understand the practical impact",
+      "description": "Acknowledges the failed promise and asks what resolution matters.",
+      "weight": 1,
+      "anchors": {
+        "0": "Dismisses the inconvenience or blames the customer for relying on the estimate.",
+        "2": "Apologizes for the missed expectation and asks about the needed outcome.",
+        "4": "Clarifies work timing and availability, summarizes the preferred resolution, and avoids making the customer repeat known order details."
+      }
+    },
+    {
+      "key": "resolution",
+      "label": "Offer accurate options",
+      "description": "Uses policy and evidence to propose the next action.",
+      "weight": 1,
+      "anchors": {
+        "0": "Promises tomorrow delivery or guarantees an unapproved refund.",
+        "2": "Opens a carrier investigation and explains approval limits.",
+        "4": "Uses the carrier response window to set a concrete investigation plan and requests supervisor review if the customer’s need cannot be met."
+      }
+    },
+    {
+      "key": "ownership",
+      "label": "Close the communication loop",
+      "description": "Owns follow-up without equating response time with delivery time.",
+      "weight": 1,
+      "anchors": {
+        "0": "Tells the customer to keep refreshing tracking with no owner or next contact.",
+        "2": "Agrees a follow-up update and records the issue.",
+        "4": "Confirms update timing and an agreed contact channel, distinguishes an update from a delivery guarantee, and records the customer’s preferred outcome for the next owner."
+      }
+    }
+  ],
+  "reference": {
+    "scenario": "You are a support representative for fictional Fern Home. A customer says, \"My desk was promised yesterday. I stayed home all day, and tracking has not moved. I need it for work tomorrow.\" The order is paid, and the carrier status says only \"in transit.\" Company policy lets you investigate and request a delivery update. A refund or replacement needs supervisor approval; you cannot promise a date without carrier confirmation. The interviewer is the customer.",
+    "facts": [
+      {
+        "id": "fact-1",
+        "value": "The customer can accept delivery after 16:00 tomorrow but cannot stay home for another full day. They prefer receiving the desk over a refund if the timing is reliable.",
+        "reveal_when": "candidate asks about the customer’s priority or availability"
+      },
+      {
+        "id": "fact-2",
+        "value": "The carrier escalation team responds within four business hours. The support system can set a callback and route a supervisor request; no delivery date has been confirmed.",
+        "reveal_when": "candidate asks about investigation timing, follow-up, or escalation options"
+      }
+    ],
+    "model_points": [
+      "The customer lost time and needs a usable work arrangement; acknowledge both. Ask whether timing, replacement, or refund is most helpful before choosing a resolution.",
+      "The carrier’s four-hour response window supports a promised update, not a promised delivery. Escalate for evidence and seek supervisor approval for options outside the representative’s authority.",
+      "Record availability and preferences so the customer does not have to restart the story. A useful closing says who will contact them, when, and what happens if the carrier still cannot confirm a date."
+    ],
+    "probes": [
+      {
+        "trigger": "candidate promises delivery tomorrow",
+        "question": "Which supplied fact confirms a delivery date?"
+      },
+      {
+        "trigger": "candidate offers an apology but no action",
+        "question": "What will happen after this call, and when will the customer hear from you?"
+      }
+    ],
+    "fair_alternatives": [
+      "A supervisor escalation at the customer’s request is reasonable even while the carrier investigation is pending.",
+      "A written update is as acceptable as a callback when the customer agrees to that channel."
+    ],
+    "red_flags": [
+      "Dismisses the inconvenience or blames the customer for relying on the estimate.",
+      "Promises tomorrow delivery or guarantees an unapproved refund.",
+      "Tells the customer to keep refreshing tracking with no owner or next contact."
+    ],
+    "follow_ups": [
+      "Write a closing that promises a support update while accurately describing the unconfirmed delivery."
+    ],
+    "exemplar_answer": "I am sorry the promised delivery cost you a day at home. I understand reliable timing matters more than a refund if we can still meet your needs. I will ask the carrier escalation team for a confirmed status and set an update within their four-business-hour response window. That is an update promise, not a delivery guarantee. I will record your after-16:00 availability and request supervisor options if the carrier cannot provide a workable date."
+  },
+  "interviewer_notes": "Play a disappointed customer without abusive behavior. When asked, explain the time constraint and preferred outcome. Reward accuracy and ownership rather than compensation beyond authority. Use only supplied facts; say when something is unknown. Accept plain language and equivalent approaches. Assess the demonstrated decisions, not accent, confidence, credentials, or access to particular employers. This is a fictional exercise; do not imply real actions were performed.",
+  "learning_drills": [
+    {
+      "id": "focused-practice",
+      "title": "Separate two promises",
+      "minutes": 5,
+      "prompt": "Write a closing that promises a support update while accurately describing the unconfirmed delivery. This is self-guided practice; no model assessment is performed.",
+      "checklist": [
+        "State the customer’s preference",
+        "Name the investigation owner",
+        "Give an evidence-based update window",
+        "Avoid guaranteeing an unconfirmed remedy"
+      ]
+    }
+  ]
+}

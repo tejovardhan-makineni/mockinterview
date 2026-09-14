@@ -1,0 +1,123 @@
+{
+  "schema_version": 1,
+  "revision": 1,
+  "format_id": "work-sample-defense",
+  "review_status": "preview",
+  "provenance": {
+    "authorship": "Original project scenario, AI-assisted draft. Practitioner review and calibration pending.",
+    "license": "AGPL-3.0-only"
+  },
+  "minutes": 30,
+  "id": "cybersecurity-vendor-access-review",
+  "title": "Security Engineer: Review a Vendor Access Proposal",
+  "track": "professional",
+  "domain": "access_risk_review",
+  "areas": [
+    "cybersecurity"
+  ],
+  "modality": "written",
+  "difficulty": "mid",
+  "tags": [
+    "security-engineer",
+    "iam",
+    "vendor-risk",
+    "access-review",
+    "practical",
+    "community-preview"
+  ],
+  "prompt": "Fictional Maple Logistics needs a vendor to diagnose a reporting failure tomorrow. Review this request: \"Create one shared administrator account, email its password to the vendor team, allow access to all customer records, and remove it after the project.\" A sanitized test environment exists. Company policy requires named accounts, approved scope, an expiry date, and reviewable access records. Propose a workable revision and defend its tradeoffs; do not implement access.",
+  "blurb": "Turn an overbroad vendor request into scoped, approved access with a clear verification and removal plan.",
+  "rubric": [
+    {
+      "key": "risk_scoping",
+      "label": "Understand the task and exposure",
+      "description": "Connects requested privileges and data to a diagnostic need.",
+      "weight": 1,
+      "anchors": {
+        "0": "Approves unrestricted shared access or blocks all help without investigating need.",
+        "2": "Flags shared admin access and broad data exposure and asks what the vendor needs.",
+        "4": "Separates configuration, sample data, and residual production questions; ranks risks by the actual diagnostic task."
+      }
+    },
+    {
+      "key": "access_design",
+      "label": "Design a bounded path",
+      "description": "Uses the stated policy to build an operable access proposal.",
+      "weight": 1,
+      "anchors": {
+        "0": "Emails a shared password or relies on an undefined project end to remove access.",
+        "2": "Proposes named, scoped accounts with an explicit expiry and access records.",
+        "4": "Starts with sanitized testing, sets least necessary permissions and a timed owner-approved production exception only if justified, with a revocation owner."
+      }
+    },
+    {
+      "key": "assurance",
+      "label": "Verify usefulness and removal",
+      "description": "Makes the access decision reviewable and tests both task completion and closure.",
+      "weight": 1,
+      "anchors": {
+        "0": "Assumes creating controls proves the failure is fixed or access has ended.",
+        "2": "Defines a diagnostic success check and confirms account expiry.",
+        "4": "Names evidence of session scope, result, remaining uncertainty, and actual revocation; explains how to adjust if the initial permissions are insufficient."
+      }
+    }
+  ],
+  "reference": {
+    "scenario": "Fictional Maple Logistics needs a vendor to diagnose a reporting failure tomorrow. Review this request: \"Create one shared administrator account, email its password to the vendor team, allow access to all customer records, and remove it after the project.\" A sanitized test environment exists. Company policy requires named accounts, approved scope, an expiry date, and reviewable access records. Propose a workable revision and defend its tradeoffs; do not implement access.",
+    "facts": [
+      {
+        "id": "fact-1",
+        "value": "The vendor says it needs report configuration and an example failure, not complete customer histories. A sanitized example reproduces most but not all failures.",
+        "reveal_when": "candidate asks what data or permissions the vendor needs"
+      },
+      {
+        "id": "fact-2",
+        "value": "The service owner can approve a four-hour, monitored production session if the sanitized environment cannot answer a specific question. The project end date is unknown.",
+        "reveal_when": "candidate asks about approval, urgency, or exceptions"
+      }
+    ],
+    "model_points": [
+      "The proposal conflicts with every stated account-control requirement. Explain the failure mode of each issue instead of reciting a checklist: shared identity weakens attribution, admin scope exceeds diagnostic need, and an unknown project end leaves access open.",
+      "Use the sanitized environment first. If a particular failure cannot be reproduced there, ask the owner to approve a bounded production session with named identities, minimal scope, time limit, and appropriate access records.",
+      "Define the diagnostic deliverable, who supervises production access, and who verifies expiry or revocation. Monitor only authorized work; do not introduce secret employee surveillance or promise controls eliminate all risk."
+    ],
+    "probes": [
+      {
+        "trigger": "candidate rejects vendor access entirely",
+        "question": "How would you let tomorrow's diagnosis proceed while addressing the stated risks?"
+      },
+      {
+        "trigger": "candidate proposes a temporary account without an expiry",
+        "question": "The project end date is unknown. What exact condition closes this access?"
+      }
+    ],
+    "fair_alternatives": [
+      "A supervised screen-sharing diagnosis led by an authorized employee can be reasonable if it limits data exposure and preserves a record.",
+      "Read-only production access may be justified for a specific unresolved question; it still needs a named identity, approval, expiry, and minimum data scope."
+    ],
+    "red_flags": [
+      "Approves unrestricted shared access or blocks all help without investigating need.",
+      "Emails a shared password or relies on an undefined project end to remove access.",
+      "Assumes creating controls proves the failure is fixed or access has ended."
+    ],
+    "follow_ups": [
+      "Rewrite the vendor request in six sentences with scope, identity, time limit, approval, evidence, and closure."
+    ],
+    "exemplar_answer": "I would replace shared administrator access with named, expiring accounts for a sanitized diagnostic environment. The vendor would receive the failing example and needed configuration only. If a specific failure remains unresolved, I would bring that question to the service owner for a four-hour monitored production session, using the narrowest useful permissions. The request would name the supervisor, diagnostic output, and person verifying access removal."
+  },
+  "interviewer_notes": "Act as the service owner defending the deadline. Ask about one operational tradeoff after the revision. Do not reward product-specific tooling or require blanket refusal. Use only supplied facts; say when something is unknown. Accept plain language and equivalent approaches. Assess the demonstrated decisions, not accent, confidence, credentials, or access to particular employers. This is a fictional exercise; do not imply real actions were performed.",
+  "learning_drills": [
+    {
+      "id": "focused-practice",
+      "title": "Rewrite an access request",
+      "minutes": 5,
+      "prompt": "Rewrite the vendor request in six sentences with scope, identity, time limit, approval, evidence, and closure. This is self-guided practice; no model assessment is performed.",
+      "checklist": [
+        "Tie permissions to a diagnostic need",
+        "State a fixed access window",
+        "Identify an approver and revocation owner",
+        "Specify how success and removal will be verified"
+      ]
+    }
+  ]
+}

@@ -7,23 +7,23 @@ import (
 	"github.com/tejo/mockinterview-api/internal/corpus"
 )
 
-// Authored separately from the scored assignment. The legacy STAR briefs bundle
-// situation/actions/results and their references contain aggressive interviewer
-// scripts. Feeding both to a live model made it recite those scripts despite the
-// shared pacing policy. The scorer and candidate's full assignment stay intact.
+// Authored separately from the scored assignment. Saved legacy STAR briefs can
+// bundle situation/actions/results with aggressive interviewer scripts. Keep a
+// focused live opening for old and current attempts; scoring references and the
+// candidate's full assignment stay intact.
 var storyOpenings = map[string]string{
-	"behavioral-leadership-conflict":         "Tell me about a time you led a team through a serious conflict.",
-	"behavioral-handling-failure":            "Tell me about a significant professional failure you experienced.",
+	"behavioral-leadership-conflict":         "Tell me about a time you helped a group navigate a disagreement or recover from a setback.",
+	"behavioral-handling-failure":            "Tell me about a setback or an outcome that did not go as intended in a responsibility you held.",
 	"behavioral-bias-for-action":             "Tell me about a time you had to make an important decision without all the information you wanted.",
-	"behavioral-conflict-with-manager":       "Tell me about a time you disagreed with your manager on something that mattered.",
-	"behavioral-scope-cut":                   "Tell me about a time you had to say no to a feature or request that people wanted.",
-	"behavioral-dealing-with-ambiguity":      "Tell me about an ambiguous problem you were responsible for resolving.",
-	"behavioral-mentoring":                   "Tell me about a time you helped someone develop professionally.",
-	"behavioral-influence-without-authority": "Tell me about a time you needed to influence a team you had no authority over.",
-	"behavioral-ownership":                   "Tell me about a time you took responsibility for a problem outside your assigned role.",
-	"behavioral-customer-obsession":          "Tell me about a time you went beyond the usual expectations for a customer.",
-	"behavioral-tight-deadline":              "Tell me about a time you faced an aggressive deadline for something important.",
-	"behavioral-disagree-commit":             "Tell me about a decision you committed to despite initially disagreeing with it.",
+	"behavioral-conflict-with-manager":       "Tell me about a time you disagreed with a manager or someone responsible for a group or task.",
+	"behavioral-scope-cut":                   "Tell me about a time you reduced scope or explained that a request could not be met as proposed.",
+	"behavioral-dealing-with-ambiguity":      "Tell me about a time the goal, responsibilities or information for a task were unclear.",
+	"behavioral-mentoring":                   "Tell me about a time you helped someone learn or develop a skill.",
+	"behavioral-influence-without-authority": "Tell me about a time you tried to build agreement with people you could not direct.",
+	"behavioral-ownership":                   "Tell me about a time you noticed a problem with unclear ownership and helped make sure it was addressed.",
+	"behavioral-customer-obsession":          "Tell me about a time you made a useful extra effort to understand and help a customer, user, learner or another person you supported.",
+	"behavioral-tight-deadline":              "Tell me about a time you faced a tight deadline for something important.",
+	"behavioral-disagree-commit":             "Tell me about a time a group chose a different approach after you raised a concern.",
 }
 
 func liveQuestion(q corpus.Question) corpus.Question {
@@ -48,6 +48,16 @@ func firstQuestionFocus(q corpus.Question) string {
 	if q.ID == "mba-admissions" {
 		return "What is motivating you to pursue an MBA at this point in your career?"
 	}
+	// These formats can also review supplied artifacts. A written screening or
+	// personal evidence exercise starts with the candidate creating their answer.
+	switch q.Domain {
+	case "written_screen":
+		return "Write your response to the screening prompt shown in the workspace."
+	case "application_review":
+		return "Which duty would you match to your strongest evidence first?"
+	case "panel_interview":
+		return "I am speaking from the team lead's perspective. What would you prioritize first?"
+	}
 	switch q.FormatID {
 	case "ai-output-critique":
 		return "What is your assessment of the AI's main claim?"
@@ -61,6 +71,20 @@ func firstQuestionFocus(q corpus.Question) string {
 		return "What would you like to know about the role?"
 	}
 	switch q.Domain {
+	case "first_job":
+		return "How would you introduce yourself for this role?"
+	case "recruiter_screen":
+		return "What interests you about this role?"
+	case "career_transition":
+		return "Which experience best shows a skill you would bring to this role?"
+	case "return_to_work":
+		return "How would you describe what you are ready to contribute in this role?"
+	case "offer_negotiation":
+		return "How would you open this conversation about the offer?"
+	case "evidence_story":
+		return "Which example would you like to use for this conversation?"
+	case "learning_from_feedback":
+		return "How would you respond to this feedback?"
 	case "coding", "system_design", "ml_system_design", "low_level_design":
 		return "What would you clarify first about the problem?"
 	case "clinical_reasoning", "prioritization":
@@ -93,7 +117,7 @@ func firstQuestionSetup(q corpus.Question) string {
 	case "stakeholder-scope-negotiation":
 		return "The client expects three promised features this month, but the team can safely deliver only two. You play the client lead; the candidate opens the conversation."
 	case "candidate-questions-role-fit":
-		return "This is the final part of a fictional interview with the hiring manager of a small product team. The candidate asks questions to understand role fit."
+		return "This is the final part of a fictional interview with the hiring manager of a small service team. The candidate asks questions to understand role fit."
 	default:
 		return "Briefly state the primary problem from the candidate brief, including the inputs, outputs, essential constraints and facts needed to start. Present any code or diagram as the artifact visible in the workspace. Do not read later variants, probing checklists or all deliverables at once. Then ask the first focused question below."
 	}

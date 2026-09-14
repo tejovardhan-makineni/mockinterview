@@ -1,0 +1,123 @@
+{
+  "schema_version": 1,
+  "revision": 1,
+  "format_id": "incident-simulation",
+  "review_status": "preview",
+  "provenance": {
+    "authorship": "Original project scenario, AI-assisted draft. Practitioner review and calibration pending.",
+    "license": "AGPL-3.0-only"
+  },
+  "minutes": 20,
+  "id": "trades-apprentice-safety-handoff",
+  "title": "Maintenance Apprentice: Respond to an Unsafe Work Request",
+  "track": "professional",
+  "domain": "maintenance_safety",
+  "areas": [
+    "skilled_trades"
+  ],
+  "modality": "conversational",
+  "difficulty": "entry",
+  "tags": [
+    "maintenance-apprentice",
+    "facilities-assistant",
+    "trade-apprentice",
+    "workplace-safety",
+    "practical",
+    "community-preview"
+  ],
+  "prompt": "You are a maintenance apprentice at fictional Mill Yard. A conveyor has stopped and a supervisor asks you to remove a guard and clear a jam so packing can restart. You have not been trained or authorized to isolate or repair this machine. Site policy says only authorized maintenance staff may isolate, remove guards, or clear jams; other workers must keep people away and contact the maintenance lead. Explain your response and handoff. No repair procedure is required.",
+  "blurb": "Recognize an unsafe work request, stay within your training, and hand over to authorized maintenance staff.",
+  "rubric": [
+    {
+      "key": "hazard_recognition",
+      "label": "Recognize the limit of observation",
+      "description": "Does not confuse a stopped machine with a verified safe state.",
+      "weight": 1,
+      "anchors": {
+        "0": "Treats silence as proof of isolation or instructs someone to reach into the jam.",
+        "2": "Recognizes that the energy state is unknown and keeps away from the mechanism.",
+        "4": "Explains the unknown state plainly, alerts the nearby operator to stay clear, and avoids any guard removal or improvised repair."
+      }
+    },
+    {
+      "key": "role_boundary",
+      "label": "Use the authorized response",
+      "description": "Follows site policy despite production pressure.",
+      "weight": 1,
+      "anchors": {
+        "0": "Attempts isolation or repair without training or authority.",
+        "2": "States the training limit and calls the maintenance lead.",
+        "4": "Gives the lead the stoppage location and observed conditions, explains the restriction to the supervisor, and seeks confirmation that the authorized owner has taken over."
+      }
+    },
+    {
+      "key": "handoff",
+      "label": "Maintain a safe and useful handoff",
+      "description": "Keeps people clear and supports permitted continuity.",
+      "weight": 1,
+      "anchors": {
+        "0": "Walks away without alerting anyone or declares the machine safe to restart.",
+        "2": "Uses the safe waiting area and tells the supervisor the work is paused.",
+        "4": "Coordinates people staying clear, asks the supervisor to redirect work, and makes restart dependent on the authorized owner’s release rather than personal assumption."
+      }
+    }
+  ],
+  "reference": {
+    "scenario": "You are a maintenance apprentice at fictional Mill Yard. A conveyor has stopped and a supervisor asks you to remove a guard and clear a jam so packing can restart. You have not been trained or authorized to isolate or repair this machine. Site policy says only authorized maintenance staff may isolate, remove guards, or clear jams; other workers must keep people away and contact the maintenance lead. Explain your response and handoff. No repair procedure is required.",
+    "facts": [
+      {
+        "id": "fact-1",
+        "value": "The machine is quiet but its energy state has not been verified. An operator is standing nearby and wants to reach inside.",
+        "reveal_when": "candidate asks about current machine status or nearby people"
+      },
+      {
+        "id": "fact-2",
+        "value": "The authorized maintenance lead is reachable now. A marked safe waiting area exists, and the packing supervisor can redirect workers to another task.",
+        "reveal_when": "candidate asks about escalation or a permitted work-continuity option"
+      }
+    ],
+    "model_points": [
+      "The visible stoppage does not establish a safe energy state. The apprentice should neither reach into the mechanism nor provide technical isolation instructions beyond their role.",
+      "Use the supplied site policy: keep people away, tell the nearby operator not to reach inside, and contact the maintenance lead. Explain the boundary as a fact about authorization and safe ownership.",
+      "Give a concise location-and-observation handoff. The supervisor can redirect work while the authorized lead handles the machine; only that owner’s release supports restart under this scenario."
+    ],
+    "probes": [
+      {
+        "trigger": "candidate says the machine is already off",
+        "question": "What has actually verified its energy state?"
+      },
+      {
+        "trigger": "candidate refuses then leaves",
+        "question": "Who is keeping the nearby operator clear and who owns the handoff?"
+      }
+    ],
+    "fair_alternatives": [
+      "A clear verbal warning and prompt call to the lead are sufficient; no named isolation method or technical repair language is required.",
+      "If the supervisor challenges the boundary, restating policy and escalating to the authorized lead is appropriate."
+    ],
+    "red_flags": [
+      "Treats silence as proof of isolation or instructs someone to reach into the jam.",
+      "Attempts isolation or repair without training or authority.",
+      "Walks away without alerting anyone or declares the machine safe to restart."
+    ],
+    "follow_ups": [
+      "Give a 30-second maintenance call with location, observations, people at risk, and the authorized action requested."
+    ],
+    "exemplar_answer": "I would say that I am not trained or authorized to remove that guard or clear the jam, and the quiet machine has not been verified safe. I would ask the nearby operator to stay clear and contact the maintenance lead with the location and observations. I would use the marked waiting area and ask the packing supervisor to redirect work. I would hand over to the authorized lead and wait for their release before treating the machine as ready."
+  },
+  "interviewer_notes": "Keep this within an apprentice’s role. Never ask for repair, guard-removal, or isolation steps. Do not portray unsafe compliance as the only route to passing the interview. Use only supplied facts; say when something is unknown. Accept plain language and equivalent approaches. Assess the demonstrated decisions, not accent, confidence, credentials, or access to particular employers. This is a fictional exercise; do not imply real actions were performed.",
+  "learning_drills": [
+    {
+      "id": "focused-practice",
+      "title": "Practice a safe escalation",
+      "minutes": 5,
+      "prompt": "Give a 30-second maintenance call with location, observations, people at risk, and the authorized action requested. This is self-guided practice; no model assessment is performed.",
+      "checklist": [
+        "State that energy status is unknown",
+        "Avoid repair instructions",
+        "Identify who is staying clear",
+        "Request an authorized owner and release"
+      ]
+    }
+  ]
+}

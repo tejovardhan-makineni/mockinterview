@@ -1,0 +1,123 @@
+{
+  "schema_version": 1,
+  "revision": 1,
+  "format_id": "stakeholder-simulation",
+  "review_status": "preview",
+  "provenance": {
+    "authorship": "Original project scenario, AI-assisted draft. Practitioner review and calibration pending.",
+    "license": "AGPL-3.0-only"
+  },
+  "minutes": 20,
+  "id": "retail-return-conversation",
+  "title": "Retail Associate: Handle a Return Outside the Standard Window",
+  "track": "professional",
+  "domain": "retail_service",
+  "areas": [
+    "retail_hospitality"
+  ],
+  "modality": "conversational",
+  "difficulty": "entry",
+  "tags": [
+    "retail-associate",
+    "cashier",
+    "shop-assistant",
+    "returns",
+    "practical",
+    "community-preview"
+  ],
+  "prompt": "You are a retail associate at fictional Meadow Goods. A customer brings unused headphones with a receipt dated 35 days ago. The store’s posted policy allows standard returns within 30 days. Associates can explain the policy and request a supervisor exception but cannot grant one. The customer says they were away caring for a relative and asks for a refund. Handle the conversation while another customer is waiting.",
+  "blurb": "Explain a return boundary, request an appropriate exception, and manage a waiting customer with care.",
+  "rubric": [
+    {
+      "key": "respect",
+      "label": "Respond with dignity",
+      "description": "Acknowledges the request without extracting unnecessary personal information.",
+      "weight": 1,
+      "anchors": {
+        "0": "Challenges the family story or demands private health details.",
+        "2": "Acknowledges the circumstances and explains the standard window calmly.",
+        "4": "Keeps personal details private, checks the customer’s preferred outcome, and clearly distinguishes policy from a pending exception decision."
+      }
+    },
+    {
+      "key": "judgment",
+      "label": "Use the exception path accurately",
+      "description": "Handles an out-of-window request within authority.",
+      "weight": 1,
+      "anchors": {
+        "0": "Grants an unauthorized refund or claims no exception request is possible.",
+        "2": "Offers to ask the supervisor and does not promise the result.",
+        "4": "Summarizes the receipt, item condition, timing, and acceptable alternatives for the supervisor without embellishing the customer’s story."
+      }
+    },
+    {
+      "key": "flow",
+      "label": "Manage service for both customers",
+      "description": "Coordinates a queue and clear wait expectation.",
+      "weight": 1,
+      "anchors": {
+        "0": "Ignores the waiting customer or abandons the return without a handoff.",
+        "2": "Explains the wait and asks for help with the queue.",
+        "4": "Offers the five-minute supervisor wait with consent, asks the available colleague to help, and confirms who will resume the return conversation."
+      }
+    }
+  ],
+  "reference": {
+    "scenario": "You are a retail associate at fictional Meadow Goods. A customer brings unused headphones with a receipt dated 35 days ago. The store’s posted policy allows standard returns within 30 days. Associates can explain the policy and request a supervisor exception but cannot grant one. The customer says they were away caring for a relative and asks for a refund. Handle the conversation while another customer is waiting.",
+    "facts": [
+      {
+        "id": "fact-1",
+        "value": "The customer would accept store credit if a refund is unavailable. They do not want to discuss the relative’s health details.",
+        "reveal_when": "candidate asks about acceptable outcomes without requesting private proof"
+      },
+      {
+        "id": "fact-2",
+        "value": "A supervisor will be available in five minutes. A colleague can assist the waiting customer if asked. Company policy does not require proof of the family situation for requesting an exception.",
+        "reveal_when": "candidate asks about supervisor availability, queue support, or evidence requirements"
+      }
+    ],
+    "model_points": [
+      "The receipt is outside the standard window, but the policy explicitly allows a request for supervisor discretion. A helpful boundary includes that available next step.",
+      "Do not require proof of caregiving or medical details; the fictional policy does not ask for them. Ask only what helps the return decision, such as whether store credit is acceptable.",
+      "Manage the other waiting customer through the available colleague and give a truthful supervisor wait estimate. Keep the return’s ownership clear rather than sending the customer between staff."
+    ],
+    "probes": [
+      {
+        "trigger": "candidate treats policy as the end of the conversation",
+        "question": "What option does your role have for an exception request?"
+      },
+      {
+        "trigger": "candidate asks for family medical proof",
+        "question": "What evidence does this store’s policy actually require?"
+      }
+    ],
+    "fair_alternatives": [
+      "The customer may choose to wait, return later, or decline an exception request; respect that choice.",
+      "A concise supervisor handoff is sufficient; no special compensation or exception outcome is required."
+    ],
+    "red_flags": [
+      "Challenges the family story or demands private health details.",
+      "Grants an unauthorized refund or claims no exception request is possible.",
+      "Ignores the waiting customer or abandons the return without a handoff."
+    ],
+    "follow_ups": [
+      "Give a four-sentence supervisor handoff containing only facts needed for the return decision."
+    ],
+    "exemplar_answer": "I am sorry this has been a difficult time. The standard return window is 30 days, and this receipt is at 35, so I need a supervisor to consider an exception. You do not need to share your relative’s health details. I can ask about a refund or, if you prefer, store credit; the supervisor should be free in five minutes. I will ask my colleague to help the next customer and stay responsible for your request."
+  },
+  "interviewer_notes": "Play a disappointed but reasonable customer. Do not use abuse as an unstated difficulty increase. Score respectful boundaries and practical service, not whether the supervisor grants a refund. Use only supplied facts; say when something is unknown. Accept plain language and equivalent approaches. Assess the demonstrated decisions, not accent, confidence, credentials, or access to particular employers. This is a fictional exercise; do not imply real actions were performed.",
+  "learning_drills": [
+    {
+      "id": "focused-practice",
+      "title": "Practice an exception handoff",
+      "minutes": 5,
+      "prompt": "Give a four-sentence supervisor handoff containing only facts needed for the return decision. This is self-guided practice; no model assessment is performed.",
+      "checklist": [
+        "Include receipt age and item condition",
+        "State the customer’s requested and acceptable outcomes",
+        "Exclude private health detail",
+        "Avoid promising approval"
+      ]
+    }
+  ]
+}

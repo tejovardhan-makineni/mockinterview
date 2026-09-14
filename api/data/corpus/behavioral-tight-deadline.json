@@ -4,17 +4,37 @@
   "track": "professional",
   "domain": "behavioral",
   "areas": [
-    "software_engineering",
+    "career_foundations",
+    "accounting",
+    "business_operations",
+    "civil_engineering",
+    "consulting",
+    "creative_communications",
+    "customer_support",
+    "cybersecurity",
     "data_science",
+    "education",
+    "electrical_engineering",
+    "finance",
+    "human_resources",
+    "it_support",
+    "law",
+    "marketing",
+    "mechanical_engineering",
     "medicine",
     "nursing",
-    "law",
-    "consulting",
     "product_management",
-    "finance",
-    "mechanical_engineering",
-    "electrical_engineering",
-    "civil_engineering"
+    "project_management",
+    "public_service",
+    "quality_assurance",
+    "research",
+    "retail_hospitality",
+    "sales",
+    "skilled_trades",
+    "social_work",
+    "software_engineering",
+    "supply_chain",
+    "ux_design"
   ],
   "modality": "conversational",
   "difficulty": "mid",
@@ -25,93 +45,82 @@
     "delivery",
     "star"
   ],
-  "prompt": "Tell me about a time you had to deliver something important under an aggressive, non-negotiable deadline. How did you make it work, and what tradeoffs did you have to make?",
+  "prompt": "Tell me about a time you faced a tight deadline for something important. Explain how you prioritized, communicated the limits and decided what could be delivered safely. An honest decision to change scope or escalate an unrealistic deadline can be a strong example.",
   "blurb": "Tight deadline: did they prioritize and make smart, honest tradeoffs — or just heroics and hidden debt?",
   "rubric": [
     {
       "key": "situation_clarity",
       "label": "Situation & the deadline",
-      "description": "Clearly frames the deliverable, why the deadline was real and tight, and what was at stake if they missed.",
+      "description": "Explains the deliverable, time constraint and why timing mattered in that setting.",
       "weight": 1.0
     },
     {
       "key": "task_ownership",
       "label": "Owning delivery",
-      "description": "Shows they took charge of making the date achievable — not just grinding, but shaping scope, plan, and expectations.",
+      "description": "Explains their role in planning, prioritizing, clarifying expectations or escalating an unrealistic commitment.",
       "weight": 1.1
     },
     {
       "key": "action_specificity",
-      "label": "Prioritization & tradeoffs",
-      "description": "Describes the concrete tradeoffs THEY made — what to cut, defer, parallelize, or simplify — and the reasoning, rather than 'we just worked harder'.",
+      "label": "Specific contribution and decisions",
+      "description": "Describes specific tradeoffs involving scope, sequencing, help or timing while preserving required safety and quality.",
       "weight": 1.4
     },
     {
       "key": "result_impact",
-      "label": "Result & impact",
-      "description": "States whether they hit the date and the outcome, quantified, including quality and any debt incurred.",
+      "label": "Outcome and evidence",
+      "description": "Reports what was delivered, deferred or missed and any effects using supported qualitative or quantitative evidence; meeting the date at any cost is not required.",
       "weight": 1.1
     },
     {
       "key": "reflection",
       "label": "Reflection & sustainability",
-      "description": "Reflects on managing tradeoffs and stakeholders honestly, the cost of the crunch (debt, team burnout), and how they'd avoid repeat fire-drills.",
+      "description": "Explains a realistic improvement to planning or communication and considers sustainable workload rather than rewarding unpaid or excessive hours.",
       "weight": 1.1
     },
     {
       "key": "communication",
-      "label": "Communication & stakeholder management",
-      "description": "Shows they set expectations and communicated tradeoffs/risk to stakeholders, and tells the story clearly.",
+      "label": "Clear, relevant communication",
+      "description": "Explains how they communicated a material limit, change or risk to the people affected. Assess meaning and relevant evidence, not accent, emotional tone or a prescribed story order.",
       "weight": 0.9
     }
   ],
   "reference": {
-    "scenario": "The candidate should recall a real crunch — a launch tied to an event, a customer commitment, a compliance date, a competitive window — with a deadline they couldn't move. The signal is smart prioritization and honest tradeoff-making (and stakeholder communication), not sustained heroics or hiding corners cut. The best answers show they shaped scope and expectations, not just effort.",
+    "scenario": "Explore planning under a tight deadline in any relevant responsibility. Assess realistic priorities, explicit tradeoffs, communication and safety. The candidate may have changed scope, sought help or escalated the deadline; completing everything or working excessive hours is not the success criterion.",
     "model_points": [
-      "Situation: a genuinely tight, meaningful deadline with clear stakes for missing it.",
-      "Task: they owned hitting it and quickly assessed what was actually required versus nice-to-have.",
-      "Action: made explicit tradeoffs — ruthlessly cut/deferred scope to the true must-haves, simplified, parallelized work, unblocked dependencies, and pulled in help where it mattered.",
-      "Action: communicated proactively — set expectations with stakeholders on what would and wouldn't be in v1, surfaced risk early rather than promising everything and failing late.",
-      "Result: hit the date (or a renegotiated one) with the core value intact; quantified outcome; honest about any tech debt or deferred scope and the plan to pay it down.",
-      "Reflection: recognizes crunch as a tool, not a lifestyle; reflects on team sustainability and on preventing the next avoidable fire-drill (earlier planning, better estimates, saying no sooner)."
+      "Clarifies what was needed, by when and what was known about available capacity.",
+      "Identifies the candidate’s planning or communication contribution.",
+      "Protects required safety and quality while choosing a feasible scope or explaining that it is not feasible.",
+      "Communicates a material change, risk or decision through a suitable channel.",
+      "Describes actual delivery and any remaining work honestly without requiring monetary or numeric impact.",
+      "Identifies a concrete way to reduce future avoidable pressure or make tradeoffs visible earlier."
     ],
     "probes": [
       {
-        "trigger": "'we just worked nights/weekends'",
-        "question": "Beyond working harder, what did you decide NOT to do? Walk me through the specific tradeoffs and how you chose them."
+        "trigger": "candidate describes only working longer",
+        "question": "What choices did you make about the work itself?"
       },
       {
-        "trigger": "delivered everything with no cuts",
-        "question": "If nothing was cut and the deadline was truly aggressive, either the scope was small or something gave — what actually gave? Quality? Debt?"
+        "trigger": "candidate promises full scope despite a stated capacity problem",
+        "question": "What made that plan feasible?"
       },
       {
-        "trigger": "no stakeholder communication",
-        "question": "How did you set expectations with whoever was waiting on this? Did they know what was being deferred?"
-      },
-      {
-        "trigger": "debt hidden / not acknowledged",
-        "question": "What corners did you cut, and what happened to that debt afterward — did it get paid down or bite you?"
-      },
-      {
-        "trigger": "recurring fire-drills",
-        "question": "Was this avoidable? What would have prevented the crunch in the first place?"
+        "trigger": "candidate says expectations changed",
+        "question": "How did you communicate the change?"
       }
     ],
     "red_flags": [
-      "The whole answer is heroics — nights and weekends — with no prioritization or scoping.",
-      "Cut corners silently and left hidden debt or quality problems without acknowledging it.",
-      "Over-promised to stakeholders and there's no honest account of what slipped.",
-      "Burned out the team and shows no awareness of the human cost or sustainability.",
-      "No tradeoff reasoning — 'we did it all somehow' — or claims a truly tight deadline was hit with full scope and no cost.",
-      "Blames others (unrealistic manager, slow teammates) with no ownership of the plan."
+      "Hides a known delivery or safety risk from people who need it to make a decision.",
+      "Treats unpaid or excessive hours as the required proof of commitment.",
+      "Claims completion while acknowledging that essential checks or agreed work remain undone."
     ],
     "follow_ups": [
-      "How did you decide what was a true must-have versus a nice-to-have?",
-      "How did you keep quality acceptable while moving fast — what did you refuse to compromise on?",
-      "What happened to the deferred scope and any debt afterward?",
-      "How did you protect the team from burning out, and would you take this deadline again?"
+      "What did you decide to defer or escalate?",
+      "What would make a similar deadline more realistic next time?"
     ],
-    "exemplar_answer": "Situation: 'We committed to launching a new checkout flow before a major sales event six weeks out — the date was fixed by marketing spend and couldn't move. Our original plan was ten weeks of work.' Task: 'I owned delivery and had to close a four-week gap without slipping the date.' Action: 'Instead of just adding hours, I re-cut the scope. I listed every planned feature and sorted by whether it was required to safely take money on the new flow. Three items — saved cards, a redesigned promo UI, and A/B infra — were valuable but not required for launch, so I deferred them and said so explicitly to the PM and marketing, in writing, with the risk laid out. I parallelized the payment integration and the UI by agreeing on the API contract up front, and I brought in one extra engineer for the critical path only. The one thing I refused to compromise was payment-correctness testing.' Result: 'We shipped the core flow two days before the event; it handled the traffic with zero payment defects and drove roughly $X in event sales. The three deferred items shipped over the following month as planned.' Reflection: 'The lesson was that under a hard date, scope is the lever, not effort — and that saying clearly what you're NOT doing is what keeps trust when you deliver less than the original wish-list. It was also a near-avoidable fire-drill; we've since started pressure-testing timelines against the calendar earlier so commitments are realistic from the start.'"
+    "exemplar_answer": "Illustrative example only; it is not a required setting, answer order or achievement standard. Before a community workshop, our team had less preparation time than expected. I checked which materials were essential and proposed dropping an optional display so we could finish the participant instructions and safety checks. I told the organizer what would be ready and what would be absent. The workshop went ahead with a smaller setup. Next time I would confirm the essential materials earlier instead of treating every idea as a requirement.",
+    "assessment_contract": "Assess the selected competency from concrete job-relevant evidence. Examples from paid work, study, volunteering, caregiving, informal work, military service and community activities are equally eligible when relevant. A modest example is sufficient if it shows the competency; employer prestige, formal title and financial scale are not criteria. Accept qualitative or quantitative outcomes supported by the account, including partial or unsuccessful outcomes. Do not require a numeric metric, STAR order, particular pronouns, composure, enthusiasm or a particular communication style. Identify personal contribution by meaning while preserving credit to others. Assess intelligibility and relevance, not accent, fluency, verbosity, visible emotion, disability or private circumstances. Mark genuinely missing evidence not assessed; do not infer poor competence or dishonesty from an absent example. A clearly labeled hypothetical may be discussed as situational practice but must not count as demonstrated past experience. Respect scope of practice, authorization, safety and ethical duties; pausing, declining, reporting or escalating can be sound judgment. Never require obedience, direct confrontation, unpaid overwork or successful persuasion regardless of the circumstances."
   },
-  "interviewer_notes": "The signal is prioritization and honest tradeoffs, not endurance. If the answer is all heroics, probe 'what did you decide NOT to do'. If they claim full scope on a truly tight deadline, something gave — press on quality or hidden debt. Always check stakeholder communication: did whoever was waiting know what was being deferred, or were they surprised? Reward candor about debt and a plan to pay it down; penalize silent corner-cutting. Senior-ish maturity shows in acknowledging the human cost and in preventing the next avoidable crunch. Probe I-vs-we on who made the scoping calls."
+  "interviewer_notes": "Assess the selected competency from concrete job-relevant evidence. Examples from paid work, study, volunteering, caregiving, informal work, military service and community activities are equally eligible when relevant. A modest example is sufficient if it shows the competency; employer prestige, formal title and financial scale are not criteria. Accept qualitative or quantitative outcomes supported by the account, including partial or unsuccessful outcomes. Do not require a numeric metric, STAR order, particular pronouns, composure, enthusiasm or a particular communication style. Identify personal contribution by meaning while preserving credit to others. Assess intelligibility and relevance, not accent, fluency, verbosity, visible emotion, disability or private circumstances. Mark genuinely missing evidence not assessed; do not infer poor competence or dishonesty from an absent example. A clearly labeled hypothetical may be discussed as situational practice but must not count as demonstrated past experience. Respect scope of practice, authorization, safety and ethical duties; pausing, declining, reporting or escalating can be sound judgment. Never require obedience, direct confrontation, unpaid overwork or successful persuasion regardless of the circumstances. Explore planning under a tight deadline in any relevant responsibility. Assess realistic priorities, explicit tradeoffs, communication and safety. The candidate may have changed scope, sought help or escalated the deadline; completing everything or working excessive hours is not the success criterion. Ask one focused question at a time. Use the candidate’s actual answer to select one material missing detail, respect the shared follow-up limit, and do not require a replacement example.",
+  "revision": 2
 }

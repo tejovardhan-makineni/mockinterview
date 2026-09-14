@@ -1,0 +1,123 @@
+{
+  "schema_version": 1,
+  "revision": 1,
+  "format_id": "stakeholder-simulation",
+  "review_status": "preview",
+  "provenance": {
+    "authorship": "Original project scenario, AI-assisted draft. Practitioner review and calibration pending.",
+    "license": "AGPL-3.0-only"
+  },
+  "minutes": 30,
+  "id": "communications-campaign-recovery",
+  "title": "Communications Lead: Correct a Published Event Error",
+  "track": "professional",
+  "domain": "campaign_coordination",
+  "areas": [
+    "creative_communications"
+  ],
+  "modality": "conversational",
+  "difficulty": "mid",
+  "tags": [
+    "communications-manager",
+    "creative-producer",
+    "content-strategist",
+    "campaign-manager",
+    "practical",
+    "community-preview"
+  ],
+  "prompt": "You lead communications for fictional Clear Path’s careers fair. A published social post and a printable flyer say doors open at 09:00; the approved venue plan says 10:00. The event is tomorrow. The organizer wants you to \"quietly edit the post so nobody notices.\" The website already says 10:00. Company practice requires correcting material event information clearly and using the organizer to approve the correction. Lead the discussion and plan the correction across channels.",
+  "blurb": "Plan a clear correction across social posts, partner flyers, attendee messaging, and event-day arrangements.",
+  "rubric": [
+    {
+      "key": "correction",
+      "label": "Make the correction clear and accurate",
+      "description": "Uses the approved opening time and preserves understandable correction context.",
+      "weight": 1,
+      "anchors": {
+        "0": "Leaves the error hidden in a silent edit only or promises 09:00 entry against venue constraints.",
+        "2": "Corrects the time and explains the update clearly.",
+        "4": "Creates an organizer-approved correction that explicitly replaces 09:00 with 10:00, aligns assets, and avoids distracting blame or unsupported assurances."
+      }
+    },
+    {
+      "key": "reach",
+      "label": "Reach people exposed to the error",
+      "description": "Plans for shared posts, partner flyers, and registered attendees.",
+      "weight": 1,
+      "anchors": {
+        "0": "Assumes editing the original post updates printed or reshared copies.",
+        "2": "Contacts partners with corrected files and flags attendee messaging needs.",
+        "4": "Maps each known channel to an owner, requests authorized attendee contact, asks partners to replace copies, and checks acknowledgments instead of equating sending with reaching everyone."
+      }
+    },
+    {
+      "key": "operations",
+      "label": "Reduce and verify real-world confusion",
+      "description": "Coordinates event-day mitigation and checks completion.",
+      "weight": 1,
+      "anchors": {
+        "0": "Ignores people who may arrive at 09:00 or says the venue will let them in.",
+        "2": "Arranges signage and staff to explain the 10:00 opening.",
+        "4": "Provides consistent staff wording and a verified on-site plan, tracks correction completion and unanswered partner contacts, and reviews how approval and asset control failed afterward."
+      }
+    }
+  ],
+  "reference": {
+    "scenario": "You lead communications for fictional Clear Path’s careers fair. A published social post and a printable flyer say doors open at 09:00; the approved venue plan says 10:00. The event is tomorrow. The organizer wants you to \"quietly edit the post so nobody notices.\" The website already says 10:00. Company practice requires correcting material event information clearly and using the organizer to approve the correction. Lead the discussion and plan the correction across channels.",
+    "facts": [
+      {
+        "id": "fact-1",
+        "value": "The post has been shared 80 times and the flyer went to five community partners. A registration list of 120 attendees exists, but another team owns authorized attendee messaging.",
+        "reveal_when": "candidate asks about distribution, reach, or direct contact routes"
+      },
+      {
+        "id": "fact-2",
+        "value": "The venue can place clear arrival signage and a staff member outside at 09:00, but cannot admit visitors until 10:00. Partners can receive replacement digital and printable files today.",
+        "reveal_when": "candidate asks about early arrivals, venue constraints, or partner correction options"
+      }
+    ],
+    "model_points": [
+      "This is a material logistics error because people may travel for 09:00. A quiet edit does not reach people holding flyers or seeing shared copies. The correction should be explicit, short, and organizer-approved.",
+      "Assign actions for the original social post, community partners, and the team authorized to message registrants. Do not send messages or claim delivery in this interview; describe the coordinated plan and evidence needed.",
+      "Use the available signage and staff for early arrivals without promising venue admission before 10:00. After the immediate correction, review the source-of-truth and approval path to reduce recurrence."
+    ],
+    "probes": [
+      {
+        "trigger": "candidate agrees to silently edit the original",
+        "question": "How will someone with yesterday’s printed flyer learn the correct time?"
+      },
+      {
+        "trigger": "candidate promises every attendee will know",
+        "question": "Which audiences and delivery confirmations remain uncertain?"
+      }
+    ],
+    "fair_alternatives": [
+      "The correction can be a clear update on the original post plus a separate notice if the channel supports it; the exact publishing tool is not assessed.",
+      "An organizer may assign another authorized team to attendee contact, provided the communications lead tracks ownership and confirmation."
+    ],
+    "red_flags": [
+      "Leaves the error hidden in a silent edit only or promises 09:00 entry against venue constraints.",
+      "Assumes editing the original post updates printed or reshared copies.",
+      "Ignores people who may arrive at 09:00 or says the venue will let them in."
+    ],
+    "follow_ups": [
+      "Create a channel-by-channel correction plan with approved message, owner, deadline, and proof of completion."
+    ],
+    "exemplar_answer": "I would explain that a silent edit leaves printed flyers and shared copies wrong, so we need an explicit correction approved by the organizer. I would align the post and replacement files to 10:00, ask the five partners to replace their copies, and coordinate with the team authorized to message registrants. The venue staff and signage should be ready at 09:00 to explain the situation without promising early entry. I would track confirmations and remaining gaps, then review how the wrong time entered approved assets."
+  },
+  "interviewer_notes": "Play the organizer concerned about reputation. Reward a concise evidence-based disagreement and coordinated action, not blame or claims that every affected person can be reached. Use only supplied facts; say when something is unknown. Accept plain language and equivalent approaches. Assess the demonstrated decisions, not accent, confidence, credentials, or access to particular employers. This is a fictional exercise; do not imply real actions were performed.",
+  "learning_drills": [
+    {
+      "id": "focused-practice",
+      "title": "Build a correction matrix",
+      "minutes": 5,
+      "prompt": "Create a channel-by-channel correction plan with approved message, owner, deadline, and proof of completion. This is self-guided practice; no model assessment is performed.",
+      "checklist": [
+        "Include printed and shared content",
+        "Route attendee messaging to its owner",
+        "Prepare for 09:00 arrivals",
+        "Record reach uncertainty"
+      ]
+    }
+  ]
+}

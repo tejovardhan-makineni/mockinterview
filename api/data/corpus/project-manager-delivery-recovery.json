@@ -1,0 +1,123 @@
+{
+  "schema_version": 1,
+  "revision": 1,
+  "format_id": "stakeholder-simulation",
+  "review_status": "preview",
+  "provenance": {
+    "authorship": "Original project scenario, AI-assisted draft. Practitioner review and calibration pending.",
+    "license": "AGPL-3.0-only"
+  },
+  "minutes": 30,
+  "id": "project-manager-delivery-recovery",
+  "title": "Project Manager: Recover a Delivery Plan After a Dependency Slips",
+  "track": "professional",
+  "domain": "delivery_recovery",
+  "areas": [
+    "project_management"
+  ],
+  "modality": "conversational",
+  "difficulty": "mid",
+  "tags": [
+    "project-manager",
+    "program-manager",
+    "delivery-manager",
+    "scope-negotiation",
+    "practical",
+    "community-preview"
+  ],
+  "prompt": "You manage a fictional payroll-process rollout across three offices. Training starts in ten working days. A supplier now says its data import will arrive five days late. The sponsor wants the date unchanged and suggests skipping the rehearsal. Company rollout policy requires a reconciled import and a successful rehearsal before live use. The interviewer is the sponsor. Establish a feasible recovery decision with clear tradeoffs.",
+  "blurb": "Rebuild a slipped delivery plan and negotiate staged scope while preserving required readiness checks.",
+  "rubric": [
+    {
+      "key": "planning",
+      "label": "Rebuild the dependency path",
+      "description": "Calculates a feasible sequence from supplied durations.",
+      "weight": 1,
+      "anchors": {
+        "0": "Keeps all dates by removing required checks or assumes the late batch can be rehearsed immediately.",
+        "2": "Identifies import, reconciliation, and rehearsal as dependent work.",
+        "4": "Shows that one office could be ready in seven working days if staffing holds, while the remainder cannot finish all sequential checks by day ten; distinguishes training from live use."
+      }
+    },
+    {
+      "key": "tradeoffs",
+      "label": "Negotiate a usable scope",
+      "description": "Preserves required gates while offering practical options.",
+      "weight": 1,
+      "anchors": {
+        "0": "Promises the original full rollout without evidence or gives only a refusal.",
+        "2": "Offers a delayed or staged rollout that keeps reconciliation and rehearsal.",
+        "4": "Compares staged live use, demo-data training, and another old-process cycle against disruption and workload, with explicit assumptions for each."
+      }
+    },
+    {
+      "key": "control",
+      "label": "Set decisions and checkpoints",
+      "description": "Turns the recovery plan into accountable commitments.",
+      "weight": 1,
+      "anchors": {
+        "0": "Treats supplier estimates as guaranteed and sets no checkpoint.",
+        "2": "Names owners and asks the sponsor to choose an option.",
+        "4": "Records supplier confirmation, staffing assumptions, acceptance gates, decision deadlines, fallback triggers, and who informs each office of the chosen scope."
+      }
+    }
+  ],
+  "reference": {
+    "scenario": "You manage a fictional payroll-process rollout across three offices. Training starts in ten working days. A supplier now says its data import will arrive five days late. The sponsor wants the date unchanged and suggests skipping the rehearsal. Company rollout policy requires a reconciled import and a successful rehearsal before live use. The interviewer is the sponsor. Establish a feasible recovery decision with clear tradeoffs.",
+    "facts": [
+      {
+        "id": "fact-1",
+        "value": "The supplier can provide one office’s data in three days and the remainder in eight. The team needs two days to reconcile each batch and two days to rehearse the selected scope.",
+        "reveal_when": "candidate asks about partial delivery, durations, or critical dependencies"
+      },
+      {
+        "id": "fact-2",
+        "value": "Training can use a sanitized demonstration dataset, but live payroll cannot. The current process can run for another cycle. Office leads are available for a staged rollout.",
+        "reveal_when": "candidate asks about separating milestones, fallback operations, or stakeholder availability"
+      }
+    ],
+    "model_points": [
+      "The original milestone combines learning and operational readiness unnecessarily. Training may proceed with sanitized data while live use waits for reconciled real data and a successful rehearsal.",
+      "For the first office, three days to data plus two to reconcile plus two to rehearse is seven working days if those tasks can be staffed consecutively. The remaining batch arrives on day eight and needs four additional days; a day-ten full live rollout is unsupported.",
+      "Offer a decision with options and criteria rather than an optimistic promise. Confirm whether staged processing is operationally acceptable, retain the old process for uncovered offices, and define a cutoff that activates the fallback if supplier delivery or gates fail."
+    ],
+    "probes": [
+      {
+        "trigger": "candidate says all offices can launch on day ten",
+        "question": "Walk through the eight-day data arrival plus reconciliation and rehearsal durations."
+      },
+      {
+        "trigger": "candidate preserves all checks but does not address training",
+        "question": "Could the training milestone proceed without authorizing live use?"
+      }
+    ],
+    "fair_alternatives": [
+      "Delaying all live use may be preferable if split operations create too much reconciliation risk.",
+      "A one-office pilot is defensible only after checking staffing, operational separation, and the mandatory acceptance gates."
+    ],
+    "red_flags": [
+      "Keeps all dates by removing required checks or assumes the late batch can be rehearsed immediately.",
+      "Promises the original full rollout without evidence or gives only a refusal.",
+      "Treats supplier estimates as guaranteed and sets no checkpoint."
+    ],
+    "follow_ups": [
+      "Write a 90-second sponsor recommendation comparing a staged launch with one-cycle delay."
+    ],
+    "exemplar_answer": "I would keep the rehearsal because it is a live-use requirement, then separate training from launch. The first office’s data could complete the three-plus-two-plus-two-day path by day seven; the rest would need until about day twelve. I recommend demo-data training on the planned date and either a verified first-office pilot or one more cycle on the current process, depending on split-operation risk. We should confirm staffing and supplier dates today and record the cutoff for falling back."
+  },
+  "interviewer_notes": "Play a sponsor who values the date but can choose among supported options. Do not accept skipping policy gates as ingenuity. Reward clear arithmetic and uncertainty rather than a preferred project methodology. Use only supplied facts; say when something is unknown. Accept plain language and equivalent approaches. Assess the demonstrated decisions, not accent, confidence, credentials, or access to particular employers. This is a fictional exercise; do not imply real actions were performed.",
+  "learning_drills": [
+    {
+      "id": "focused-practice",
+      "title": "Present a recovery choice",
+      "minutes": 5,
+      "prompt": "Write a 90-second sponsor recommendation comparing a staged launch with one-cycle delay. This is self-guided practice; no model assessment is performed.",
+      "checklist": [
+        "Calculate the dependency dates",
+        "Separate training from live use",
+        "Keep both required readiness checks",
+        "State a decision deadline and fallback trigger"
+      ]
+    }
+  ]
+}

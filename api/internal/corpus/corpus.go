@@ -30,20 +30,6 @@ var validDifficulty = map[string]bool{
 	"junior": true, "mid": true, "senior": true, "staff": true, "entry": true,
 }
 
-// validAreas are the professions a question can belong to. Areas are SHARED: one
-// question may list several (e.g. a behavioral interview is valid for every
-// area; an ml_system_design interview counts for engineering AND data_science).
-// The client derives the Area->Domain catalog navigation from these.
-var validAreas = map[string]bool{
-	// Engineering is split by discipline so each has its own Area->Domain track:
-	// software (the original corpus), plus mechanical, electrical, and civil.
-	"software_engineering": true, "mechanical_engineering": true,
-	"electrical_engineering": true, "civil_engineering": true,
-	"data_science": true, "medicine": true, "nursing": true,
-	"law": true, "consulting": true, "product_management": true, "finance": true,
-	"ux_design": true, "sales": true, "marketing": true, "human_resources": true, "education": true,
-}
-
 type RubricDim struct {
 	Key         string            `json:"key"`
 	Label       string            `json:"label"`
@@ -53,53 +39,57 @@ type RubricDim struct {
 }
 
 type Question struct {
-	SchemaVersion    int             `json:"schema_version,omitempty"`
-	Revision         int             `json:"revision,omitempty"`
-	FormatID         string          `json:"format_id,omitempty"`
-	ReviewStatus     string          `json:"review_status,omitempty"`
-	Provenance       *Provenance     `json:"provenance,omitempty"`
-	Minutes          int             `json:"minutes,omitempty"`
-	LearningDrills   []Drill         `json:"learning_drills,omitempty"`
-	Settings         SessionSettings `json:"-"`
-	FormatDefinition *Format         `json:"format_definition,omitempty"`
-	ID               string          `json:"id"`
-	Title            string          `json:"title"`
-	Track            string          `json:"track"`  // engineering | professional
-	Domain           string          `json:"domain"` // system_design, coding, clinical_reasoning, ... (the sub-topic)
-	Areas            []string        `json:"areas"`  // professions this interview is valid for (shared): engineering, medicine, ...
-	Modality         string          `json:"modality"`
-	Difficulty       string          `json:"difficulty"`
-	Tags             []string        `json:"tags"`
-	Prompt           string          `json:"prompt"`
-	Blurb            string          `json:"blurb"`
-	Rubric           []RubricDim     `json:"rubric"`
-	Reference        json.RawMessage `json:"reference"`         // modality-specific ideal-answer material (server-only)
-	InterviewerNotes string          `json:"interviewer_notes"` // guidance for the director
+	SchemaVersion         int                 `json:"schema_version,omitempty"`
+	Revision              int                 `json:"revision,omitempty"`
+	FormatID              string              `json:"format_id,omitempty"`
+	ReviewStatus          string              `json:"review_status,omitempty"`
+	Provenance            *Provenance         `json:"provenance,omitempty"`
+	Minutes               int                 `json:"minutes,omitempty"`
+	LearningDrills        []Drill             `json:"learning_drills,omitempty"`
+	Settings              SessionSettings     `json:"-"`
+	FormatDefinition      *Format             `json:"format_definition,omitempty"`
+	InterviewerDefinition *InterviewerProfile `json:"interviewer_definition,omitempty"`
+	ID                    string              `json:"id"`
+	Title                 string              `json:"title"`
+	Track                 string              `json:"track"`  // engineering | professional
+	Domain                string              `json:"domain"` // system_design, coding, clinical_reasoning, ... (the sub-topic)
+	Areas                 []string            `json:"areas"`  // professions this interview is valid for (shared): engineering, medicine, ...
+	Modality              string              `json:"modality"`
+	Difficulty            string              `json:"difficulty"`
+	Tags                  []string            `json:"tags"`
+	Prompt                string              `json:"prompt"`
+	Blurb                 string              `json:"blurb"`
+	Rubric                []RubricDim         `json:"rubric"`
+	Reference             json.RawMessage     `json:"reference"`         // modality-specific ideal-answer material (server-only)
+	InterviewerNotes      string              `json:"interviewer_notes"` // guidance for the director
 }
 
 // Summary is the client-safe projection (no reference, no rubric internals).
 type Summary struct {
-	SchemaVersion int      `json:"schema_version"`
-	Revision      int      `json:"revision"`
-	FormatID      string   `json:"format_id"`
-	ReviewStatus  string   `json:"review_status"`
-	Minutes       int      `json:"minutes"`
-	ID            string   `json:"id"`
-	Title         string   `json:"title"`
-	Track         string   `json:"track"`
-	Domain        string   `json:"domain"`
-	Areas         []string `json:"areas"`
-	Modality      string   `json:"modality"`
-	Difficulty    string   `json:"difficulty"`
-	Tags          []string `json:"tags"`
-	Prompt        string   `json:"prompt"`
-	Blurb         string   `json:"blurb"`
+	SchemaVersion int              `json:"schema_version"`
+	Revision      int              `json:"revision"`
+	FormatID      string           `json:"format_id"`
+	FormatName    string           `json:"format_name"`
+	Agent         InterviewerAgent `json:"agent"`
+	ReviewStatus  string           `json:"review_status"`
+	Minutes       int              `json:"minutes"`
+	ID            string           `json:"id"`
+	Title         string           `json:"title"`
+	Track         string           `json:"track"`
+	Domain        string           `json:"domain"`
+	Areas         []string         `json:"areas"`
+	Modality      string           `json:"modality"`
+	Difficulty    string           `json:"difficulty"`
+	Tags          []string         `json:"tags"`
+	Prompt        string           `json:"prompt"`
+	Blurb         string           `json:"blurb"`
 }
 
 func (q Question) Summary() Summary {
 	q = Normalize(q)
 	return Summary{
 		SchemaVersion: q.SchemaVersion, Revision: q.Revision, FormatID: q.FormatID, ReviewStatus: q.ReviewStatus, Minutes: q.Minutes,
+		FormatName: FormatName(q), Agent: InterviewerFor(q).Agent(),
 		ID: q.ID, Title: q.Title, Track: q.Track, Domain: q.Domain, Areas: q.Areas, Modality: q.Modality,
 		Difficulty: q.Difficulty, Tags: q.Tags, Prompt: q.Prompt, Blurb: q.Blurb,
 	}
@@ -155,7 +145,7 @@ func Validate(q Question) error {
 			return fmt.Errorf("%s: duplicate area %q", q.ID, a)
 		}
 		seenAreas[a] = true
-		if !validAreas[a] {
+		if !ValidArea(a) {
 			return fmt.Errorf("%s: unknown area %q", q.ID, a)
 		}
 	}
@@ -245,6 +235,10 @@ func Load(dir string) (*Catalog, error) {
 			errs = append(errs, fmt.Sprintf("%s: source must reference format_id, not embed format_definition", e.Name()))
 			continue
 		}
+		if q.InterviewerDefinition != nil {
+			errs = append(errs, fmt.Sprintf("%s: source must select an area, not embed interviewer_definition", e.Name()))
+			continue
+		}
 		if err := Validate(q); err != nil {
 			errs = append(errs, fmt.Sprintf("%s: %v", e.Name(), err))
 			continue
@@ -265,6 +259,8 @@ func Load(dir string) (*Catalog, error) {
 			errs = append(errs, fmt.Sprintf("%s: format_id %q has no definition in sibling formats directory", q.ID, q.FormatID))
 			continue
 		}
+		profile := InterviewerFor(q)
+		q.InterviewerDefinition = &profile
 		c.byID[q.ID] = q
 		c.order = append(c.order, q.ID)
 	}

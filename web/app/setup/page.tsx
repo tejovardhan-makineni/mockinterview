@@ -91,6 +91,16 @@ function Setup() {
           const pack = await api.getPack(packId);
           const round = pack.rounds.find((r) => r.id === roundId);
           if (!round) throw new Error("This round was not found.");
+          if (round.question_id) {
+            const scenario = await api.getQuestion(round.question_id);
+            return {
+              ...scenario,
+              id: "", // The server still resolves and records this pack round.
+              title: round.title,
+              minutes: round.minutes,
+              difficulty: round.difficulty as QuestionSummary["difficulty"],
+            };
+          }
           return {
             id: "",
             title: round.title,
@@ -395,6 +405,11 @@ function Setup() {
             <p className="mt-3 whitespace-pre-wrap text-sm text-[var(--color-muted)]">
               {question.prompt}
             </p>
+            {question.format_name && (
+              <p className="mt-4 text-xs text-[var(--color-muted)]">
+                Interview format · {question.format_name}
+              </p>
+            )}
             {stage === "setup" ? (
               <>
                 <div className="mt-7 grid gap-5 sm:grid-cols-2">
@@ -701,6 +716,17 @@ function Setup() {
                 </p>
               </div>
             </div>
+            {question.agent && (
+              <div className="mt-5 border-t border-[var(--color-line)] pt-5">
+                <p className="eyebrow">Specialist AI interviewer</p>
+                <h3 className="mt-2 text-sm font-semibold">
+                  {question.agent.name}
+                </h3>
+                <p className="mt-2 text-sm text-[var(--color-muted)]">
+                  {question.agent.summary}
+                </p>
+              </div>
+            )}
             <div className="mt-6 space-y-4 border-t border-[var(--color-line)] pt-5">
               <Field label="Practice access">
                 <select

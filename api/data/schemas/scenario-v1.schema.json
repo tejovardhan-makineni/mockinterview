@@ -71,7 +71,22 @@
           "sales",
           "marketing",
           "human_resources",
-          "education"
+          "education",
+          "career_foundations",
+          "cybersecurity",
+          "it_support",
+          "quality_assurance",
+          "project_management",
+          "business_operations",
+          "accounting",
+          "customer_support",
+          "retail_hospitality",
+          "supply_chain",
+          "skilled_trades",
+          "public_service",
+          "social_work",
+          "research",
+          "creative_communications"
         ]
       }
     },

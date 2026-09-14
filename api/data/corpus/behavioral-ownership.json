@@ -4,17 +4,37 @@
   "track": "professional",
   "domain": "behavioral",
   "areas": [
-    "software_engineering",
+    "career_foundations",
+    "accounting",
+    "business_operations",
+    "civil_engineering",
+    "consulting",
+    "creative_communications",
+    "customer_support",
+    "cybersecurity",
     "data_science",
+    "education",
+    "electrical_engineering",
+    "finance",
+    "human_resources",
+    "it_support",
+    "law",
+    "marketing",
+    "mechanical_engineering",
     "medicine",
     "nursing",
-    "law",
-    "consulting",
     "product_management",
-    "finance",
-    "mechanical_engineering",
-    "electrical_engineering",
-    "civil_engineering"
+    "project_management",
+    "public_service",
+    "quality_assurance",
+    "research",
+    "retail_hospitality",
+    "sales",
+    "skilled_trades",
+    "social_work",
+    "software_engineering",
+    "supply_chain",
+    "ux_design"
   ],
   "modality": "conversational",
   "difficulty": "mid",
@@ -25,93 +45,82 @@
     "accountability",
     "star"
   ],
-  "prompt": "Tell me about a time you took ownership of a problem that wasn't really yours to solve — something outside your assigned role or team. What made you step in, what did you do, and how did it turn out?",
+  "prompt": "Tell me about a time you noticed a problem with unclear ownership and helped make sure it was addressed. Explain what you did within your responsibility, who else needed to be involved and what happened. Taking appropriate action can include a careful handoff or escalation.",
   "blurb": "Ownership: did the candidate act like the problem was theirs — end to end — or wait for someone else to own it?",
   "rubric": [
     {
       "key": "situation_clarity",
       "label": "Situation & stakes",
-      "description": "Sets up a concrete situation with enough context to judge why the problem mattered and why it was ambiguous who owned it.",
+      "description": "Explains a specific problem, why it mattered and what was unclear about responsibility.",
       "weight": 1.0
     },
     {
       "key": "task_ownership",
       "label": "Why they owned it",
-      "description": "Explains what pulled them in — customer impact, a gap no one was filling, a risk they saw — rather than being told to. Shows the decision to step up was theirs.",
+      "description": "Explains why they acted and the limits of their responsibility, including arranging an appropriate owner rather than personally doing every task.",
       "weight": 1.3
     },
     {
       "key": "action_specificity",
-      "label": "Specific actions (I not we)",
-      "description": "Describes the concrete steps THEY personally took, including navigating the fact that it wasn't their remit, without excessive 'we'.",
+      "label": "Specific contribution and decisions",
+      "description": "Describes a concrete contribution such as checking facts, notifying the responsible person, coordinating or following up; no particular pronouns are required.",
       "weight": 1.3
     },
     {
       "key": "result_impact",
-      "label": "Result & quantified impact",
-      "description": "States a measurable outcome and ties it to their intervention — incident resolved, metric moved, launch unblocked.",
+      "label": "Outcome and evidence",
+      "description": "Describes a supported qualitative or quantitative outcome and how their action contributed, including an unresolved issue or a completed handoff.",
       "weight": 1.2
     },
     {
       "key": "reflection",
       "label": "Reflection & judgment",
-      "description": "Shows awareness of when stepping in is right vs overstepping; what they learned about ownership and follow-through.",
+      "description": "Explains the boundary between helpful initiative and overstepping and what would make ownership or follow-through clearer next time.",
       "weight": 1.0
     },
     {
       "key": "communication",
-      "label": "Communication & structure",
-      "description": "Answer is structured (roughly STAR), concise, and easy to follow under follow-up probing.",
+      "label": "Clear, relevant communication",
+      "description": "Makes the relevant situation, reasoning and contribution understandable in any clear order. No required STAR structure, pronouns, performance of confidence or emotional tone.",
       "weight": 0.8
     }
   ],
   "reference": {
-    "scenario": "The candidate should recall a moment where a problem fell through the cracks between teams or roles — a broken build no one owned, a customer escalation outside their area, a launch blocked by a dependency team, a data-quality issue upstream — and they chose to drive it to resolution rather than route it away or wait. Strong answers show they owned the outcome, not just their slice.",
+    "scenario": "Explore accountability for a problem that might otherwise be missed. The candidate can demonstrate ownership by acting within scope, finding the right owner, escalating or following through on a handoff. Assess responsible contribution rather than unsupervised work outside their authority.",
     "model_points": [
-      "Situation: a real gap where ownership was genuinely unclear — cross-team seam, on-call surprise, an orphaned system — with stakes (customers affected, revenue, a deadline at risk).",
-      "Task: what they personally decided the outcome needed to be, and why they felt accountable despite it not being their job.",
-      "Action: concrete steps — diagnosed the issue, pulled in the right people, made or drove a decision, filled the gap themselves, and communicated status up and across.",
-      "Action: navigated the org reality — got buy-in or forgiveness, avoided stepping on the actual owner, handed it back cleanly once stable.",
-      "Result: quantified outcome (incident resolved in X, launch shipped on time, defect rate down Y%, cost avoided) attributed to their intervention.",
-      "Reflection: recognized ownership as owning the result end-to-end; also learned where the line is between initiative and overstepping, and set up a durable owner so it wouldn't recur."
+      "Describes the problem and why the existing ownership or handoff was unclear.",
+      "Identifies their role and the authority or expertise needed to address it.",
+      "Takes a concrete safe step or communicates the issue to an appropriate person.",
+      "Checks the handoff or next step within what was reasonably available to them.",
+      "Describes what changed and distinguishes their contribution from others’ work.",
+      "Reflects on a useful prevention, ownership clarification or follow-up practice."
     ],
     "probes": [
       {
-        "trigger": "candidate stays in 'we' / describes team effort",
-        "question": "What specifically did YOU do here, versus what the rest of the team did? Walk me through your individual contribution."
+        "trigger": "candidate claims full ownership without stating their role",
+        "question": "What was within your responsibility here?"
       },
       {
-        "trigger": "no measurable outcome given",
-        "question": "How did you know it worked? What actually changed — a metric, a timeline, an incident count?"
+        "trigger": "candidate mentions a handoff but no next step",
+        "question": "How did you check that the concern reached the right person?"
       },
       {
-        "trigger": "claims they just took over",
-        "question": "How did you handle the fact that this wasn't your job — did the actual owner or their manager know? How did you avoid stepping on toes?"
-      },
-      {
-        "trigger": "problem was solved but recurred / no handoff",
-        "question": "After you fixed it, who owned it going forward? How did you make sure it didn't just land back on you or fall through again?"
-      },
-      {
-        "trigger": "vague on decision to step in",
-        "question": "At the moment you noticed this, what were your options? Why step in yourself instead of escalating or flagging it?"
+        "trigger": "outcome is asserted without evidence",
+        "question": "What did you observe after your action?"
       }
     ],
     "red_flags": [
-      "Only ever says 'we' and never isolates a personal action or decision.",
-      "'Took ownership' means they just complained loudly or escalated — no follow-through to resolution.",
-      "No result, or a result with no connection to what they did.",
-      "Overstepped recklessly — trampled the real owner, created conflict, no coordination — and shows no awareness of it.",
-      "Blames the org or other teams for the gap and frames themselves as the lone hero with no reflection.",
-      "Story is hypothetical or so generic it could describe anyone."
+      "Acts outside required authorization despite recognizing the boundary.",
+      "Conceals an unresolved risk while claiming it has been handled.",
+      "Takes credit for an outcome their own account attributes to someone else."
     ],
     "follow_ups": [
-      "How much time did this take, and what did you deprioritize to do it? Was that the right trade?",
-      "How did your manager react to you spending time outside your lane?",
-      "Would you do it again the same way? What would you change?",
-      "Have you ever decided NOT to step into something that wasn't yours? How did you make that call?"
+      "What made a handoff or escalation appropriate?",
+      "What would make responsibility clearer in a similar situation?"
     ],
-    "exemplar_answer": "Situation: 'Our checkout service started throwing 5xxs at 2am. I was on the payments team, but the root cause was an upstream identity service owned by another team with no one on call that night, and customers couldn't pay.' Task: 'I decided the priority was stopping the customer bleeding, even though the failing service wasn't mine.' Action: 'I traced it to a bad config push on identity, paged their EM, and while waiting I shipped a temporary fallback in our service to degrade gracefully instead of hard-failing. I set up an incident channel, posted 15-minute updates to leadership, and once identity rolled back their change I verified recovery and handed the incident back.' Result: 'We cut the outage from a projected multi-hour event to 40 minutes, roughly $X in payments recovered, and zero data loss.' Reflection: 'Afterward I wrote the postmortem and pushed for cross-team on-call coverage and a graceful-degradation pattern so this class of failure wouldn't need a hero next time. I learned ownership means owning the outcome — but also handing it back with a durable fix rather than becoming the permanent owner by accident.'"
+    "exemplar_answer": "Illustrative example only; it is not a required setting, answer order or achievement standard. At the start of a shift I noticed a damaged cable near a shared workstation. I did not try to repair it. I kept people away in line with our procedure, told the supervisor where it was and checked that the workstation was taken out of use. A qualified person later replaced it. My contribution was recognizing the issue and making a clear handoff, not performing the repair.",
+    "assessment_contract": "Assess the selected competency from concrete job-relevant evidence. Examples from paid work, study, volunteering, caregiving, informal work, military service and community activities are equally eligible when relevant. A modest example is sufficient if it shows the competency; employer prestige, formal title and financial scale are not criteria. Accept qualitative or quantitative outcomes supported by the account, including partial or unsuccessful outcomes. Do not require a numeric metric, STAR order, particular pronouns, composure, enthusiasm or a particular communication style. Identify personal contribution by meaning while preserving credit to others. Assess intelligibility and relevance, not accent, fluency, verbosity, visible emotion, disability or private circumstances. Mark genuinely missing evidence not assessed; do not infer poor competence or dishonesty from an absent example. A clearly labeled hypothetical may be discussed as situational practice but must not count as demonstrated past experience. Respect scope of practice, authorization, safety and ethical duties; pausing, declining, reporting or escalating can be sound judgment. Never require obedience, direct confrontation, unpaid overwork or successful persuasion regardless of the circumstances."
   },
-  "interviewer_notes": "Run this STAR-style. Let them tell the story, then probe hard on I-vs-we — this is the #1 signal for ownership and candidates default to 'we'. If they never quantify, push once for a metric or a concrete before/after. Distinguish real ownership (drove to a durable outcome) from noise (escalated, complained, or heroically overstepped without coordination). Senior-flavored maturity shows in the reflection: knowing when NOT to step in, and setting up a lasting owner. Reserve a probe for the handoff — did the fix stick, or did they just absorb someone else's job?"
+  "interviewer_notes": "Assess the selected competency from concrete job-relevant evidence. Examples from paid work, study, volunteering, caregiving, informal work, military service and community activities are equally eligible when relevant. A modest example is sufficient if it shows the competency; employer prestige, formal title and financial scale are not criteria. Accept qualitative or quantitative outcomes supported by the account, including partial or unsuccessful outcomes. Do not require a numeric metric, STAR order, particular pronouns, composure, enthusiasm or a particular communication style. Identify personal contribution by meaning while preserving credit to others. Assess intelligibility and relevance, not accent, fluency, verbosity, visible emotion, disability or private circumstances. Mark genuinely missing evidence not assessed; do not infer poor competence or dishonesty from an absent example. A clearly labeled hypothetical may be discussed as situational practice but must not count as demonstrated past experience. Respect scope of practice, authorization, safety and ethical duties; pausing, declining, reporting or escalating can be sound judgment. Never require obedience, direct confrontation, unpaid overwork or successful persuasion regardless of the circumstances. Explore accountability for a problem that might otherwise be missed. The candidate can demonstrate ownership by acting within scope, finding the right owner, escalating or following through on a handoff. Assess responsible contribution rather than unsupervised work outside their authority. Ask one focused question at a time. Use the candidate’s actual answer to select one material missing detail, respect the shared follow-up limit, and do not require a replacement example.",
+  "revision": 2
 }

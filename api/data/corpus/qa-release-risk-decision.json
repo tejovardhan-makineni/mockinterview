@@ -1,0 +1,123 @@
+{
+  "schema_version": 1,
+  "revision": 1,
+  "format_id": "stakeholder-simulation",
+  "review_status": "preview",
+  "provenance": {
+    "authorship": "Original project scenario, AI-assisted draft. Practitioner review and calibration pending.",
+    "license": "AGPL-3.0-only"
+  },
+  "minutes": 30,
+  "id": "qa-release-risk-decision",
+  "title": "QA Lead: Make a Release Recommendation from Uneven Evidence",
+  "track": "professional",
+  "domain": "release_quality",
+  "areas": [
+    "quality_assurance"
+  ],
+  "modality": "conversational",
+  "difficulty": "senior",
+  "tags": [
+    "qa-lead",
+    "test-engineer",
+    "quality-engineer",
+    "release-readiness",
+    "practical",
+    "community-preview"
+  ],
+  "prompt": "You are the QA lead for a fictional appointment-booking product. A release is due today: 94 of 100 planned checks passed, four were not run, and two failed. One failure sometimes sends a booking confirmation for the wrong time zone; the other is a misaligned icon. The product lead says, \"94% is good enough; approve it.\" Company process asks QA for a documented risk recommendation, while the release owner makes the final decision. Lead that conversation.",
+  "blurb": "Use defect impact and missing evidence to negotiate a defensible release scope and verification plan.",
+  "rubric": [
+    {
+      "key": "evidence",
+      "label": "Interpret the quality signal",
+      "description": "Assesses consequence and missing coverage rather than a pass-rate threshold.",
+      "weight": 1,
+      "anchors": {
+        "0": "Approves solely because 94% passed or treats the icon and wrong appointment time equally.",
+        "2": "Identifies the time-zone issue and missing checks as material release risks.",
+        "4": "Connects the failure to missed appointments, distinguishes frequency evidence from unknown exposure, and asks what the unrun tests leave unproven."
+      }
+    },
+    {
+      "key": "options",
+      "label": "Develop a justified release path",
+      "description": "Compares delay and scoped release with verification.",
+      "weight": 1,
+      "anchors": {
+        "0": "Demands shipment or cancellation without considering the reversible feature boundary.",
+        "2": "Offers delaying the feature or fixing and retesting the failure.",
+        "4": "Evaluates disabling the feature against dependencies, defines targeted checks for the reduced configuration, and names conditions that would change the recommendation."
+      }
+    },
+    {
+      "key": "governance",
+      "label": "Communicate recommendation and ownership",
+      "description": "Documents uncertainty and residual risk without overstating authority.",
+      "weight": 1,
+      "anchors": {
+        "0": "Hides the failure, guarantees safety, or claims QA alone has final release authority.",
+        "2": "States a clear risk recommendation and routes the decision to the release owner.",
+        "4": "Records supporting evidence, unrun checks, residual risk, monitoring/rollback ownership, and the release owner’s decision without substituting sign-off for verification."
+      }
+    }
+  ],
+  "reference": {
+    "scenario": "You are the QA lead for a fictional appointment-booking product. A release is due today: 94 of 100 planned checks passed, four were not run, and two failed. One failure sometimes sends a booking confirmation for the wrong time zone; the other is a misaligned icon. The product lead says, \"94% is good enough; approve it.\" Company process asks QA for a documented risk recommendation, while the release owner makes the final decision. Lead that conversation.",
+    "facts": [
+      {
+        "id": "fact-1",
+        "value": "The four unrun checks cover rescheduling across a daylight-saving transition. The time-zone failure occurred twice in ten attempts, but affected customer volume is unknown.",
+        "reveal_when": "candidate asks about failed or unrun test details"
+      },
+      {
+        "id": "fact-2",
+        "value": "The new time-zone feature can be disabled independently; existing booking can be tested in that configuration. A contractual demo is tomorrow, but it does not require the new feature.",
+        "reveal_when": "candidate asks about scope reduction, dependencies, or deadline needs"
+      }
+    ],
+    "model_points": [
+      "A pass percentage gives no weighting for harm or missing coverage. Two failures can carry more decision value than dozens of cosmetic passes; the unrun daylight-saving cases cluster around the demonstrated risk.",
+      "A scoped release with the new time-zone feature disabled may preserve the demo if dependency checks show existing booking still works. It is a candidate option, not an already-proven safe state.",
+      "Recommend holding the risky feature unless the defect and coverage gap are resolved. Record what was tested in the actual release configuration, who owns the decision, and how complaints or appointment mismatches would be detected and handled."
+    ],
+    "probes": [
+      {
+        "trigger": "candidate argues only about pass percentage",
+        "question": "Would the same percentage support release if all unrun checks cover the failing path?"
+      },
+      {
+        "trigger": "candidate recommends disabling the feature as sufficient proof",
+        "question": "What must be tested in the disabled configuration before you recommend it?"
+      }
+    ],
+    "fair_alternatives": [
+      "A full delay is reasonable if dependency isolation cannot be established in time.",
+      "Shipping a reduced release can be defensible with targeted evidence and explicit residual risk; there is no required preference for delay over a verified scope reduction."
+    ],
+    "red_flags": [
+      "Approves solely because 94% passed or treats the icon and wrong appointment time equally.",
+      "Demands shipment or cancellation without considering the reversible feature boundary.",
+      "Hides the failure, guarantees safety, or claims QA alone has final release authority."
+    ],
+    "follow_ups": [
+      "Write a decision note with risk, evidence, proposed scope, verification gates, and final owner."
+    ],
+    "exemplar_answer": "I cannot recommend the new time-zone feature on this evidence: a wrong confirmation can cause a missed appointment, and the unrun checks concern the same area. Since tomorrow’s demo does not need the feature, I would explore disabling it and running targeted booking and rescheduling checks in that exact configuration. If isolation or those checks fail, I recommend delay. I would document remaining uncertainty and the release owner’s final decision with monitoring and rollback responsibilities."
+  },
+  "interviewer_notes": "Play the product lead with real deadline pressure, but accept evidence. Ask for a one-minute final recommendation. Do not reward theatrical confrontation or equate assertiveness with quality leadership. Use only supplied facts; say when something is unknown. Accept plain language and equivalent approaches. Assess the demonstrated decisions, not accent, confidence, credentials, or access to particular employers. This is a fictional exercise; do not imply real actions were performed.",
+  "learning_drills": [
+    {
+      "id": "focused-practice",
+      "title": "Write a release decision note",
+      "minutes": 5,
+      "prompt": "Write a decision note with risk, evidence, proposed scope, verification gates, and final owner. This is self-guided practice; no model assessment is performed.",
+      "checklist": [
+        "Replace the pass rate with consequence-based reasoning",
+        "Identify untested behavior",
+        "Set a go/no-go condition",
+        "Record a release and monitoring owner"
+      ]
+    }
+  ]
+}

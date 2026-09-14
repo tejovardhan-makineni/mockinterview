@@ -6,11 +6,13 @@ import { api } from "./api";
 import { DEFAULT_CONFIG } from "./features/profile";
 
 const navigation = vi.hoisted(() => ({ push: vi.fn(), replace: vi.fn() }));
+const route = vi.hoisted(() => ({ query: "q=access-scenario" }));
 vi.mock("./api", () => ({
   IS_MOCK: false,
   api: {
     me: vi.fn(),
     getQuestion: vi.fn(),
+    getPack: vi.fn(),
     getConfig: vi.fn(),
     getUsage: vi.fn(),
     getResume: vi.fn(),
@@ -20,7 +22,7 @@ vi.mock("./api", () => ({
 }));
 vi.mock("next/navigation", () => ({
   useRouter: () => navigation,
-  useSearchParams: () => new URLSearchParams("q=access-scenario"),
+  useSearchParams: () => new URLSearchParams(route.query),
 }));
 vi.mock("../components/AppShell", () => ({
   AppShell: ({ children }: { children: ReactNode }) => children,
@@ -45,6 +47,7 @@ const user = {
 };
 let root: Root;
 beforeEach(() => {
+  route.query = "q=access-scenario";
   vi.stubGlobal("IS_REACT_ACT_ENVIRONMENT", true);
   document.body.innerHTML = '<div id="test-root"></div>';
   root = createRoot(document.querySelector("#test-root")!);
@@ -108,6 +111,55 @@ async function acknowledgeVoice() {
 }
 
 describe("hosted tester setup access", () => {
+  it("shows the pinned scenario specialist and brief while starting through its pack", async () => {
+    route.query = "pack=security-practice&round=triage";
+    vi.mocked(api.getPack).mockResolvedValue({
+      id: "security-practice",
+      name: "Security practice",
+      company: "",
+      blurb: "Practice path",
+      areas: ["cybersecurity"],
+      track: "professional",
+      rounds: [
+        {
+          id: "triage",
+          title: "Security triage",
+          kind: "incident",
+          domain: "security_operations",
+          modality: "conversational",
+          difficulty: "entry",
+          minutes: 20,
+          focus: "Triage safely",
+          question_id: "access-scenario",
+        },
+      ],
+    });
+    const scenario = await api.getQuestion("access-scenario");
+    vi.mocked(api.getQuestion).mockResolvedValue({
+      ...scenario,
+      prompt: "Review the fictional security report.",
+      agent: {
+        id: "security",
+        name: "Cybersecurity interviewer",
+        summary: "Practice safe incident triage.",
+      },
+    });
+    await act(async () => root.render(<SetupPage />));
+    expect(document.body.textContent).toContain("Cybersecurity interviewer");
+    expect(document.body.textContent).toContain(
+      "Review the fictional security report.",
+    );
+    await checkDevices();
+    await acknowledgeVoice();
+    await act(async () => button("Start interview").click());
+    expect(api.createSession).toHaveBeenCalledWith(
+      "",
+      expect.any(Object),
+      { packId: "security-practice", roundId: "triage" },
+      expect.any(Object),
+    );
+  });
+
   it("starts a verified tester despite daily and funded cooldowns", async () => {
     await act(async () => root.render(<SetupPage />));
     expect(document.body.textContent).toContain(

@@ -4,17 +4,37 @@
   "track": "professional",
   "domain": "behavioral",
   "areas": [
-    "software_engineering",
+    "career_foundations",
+    "accounting",
+    "business_operations",
+    "civil_engineering",
+    "consulting",
+    "creative_communications",
+    "customer_support",
+    "cybersecurity",
     "data_science",
+    "education",
+    "electrical_engineering",
+    "finance",
+    "human_resources",
+    "it_support",
+    "law",
+    "marketing",
+    "mechanical_engineering",
     "medicine",
     "nursing",
-    "law",
-    "consulting",
     "product_management",
-    "finance",
-    "mechanical_engineering",
-    "electrical_engineering",
-    "civil_engineering"
+    "project_management",
+    "public_service",
+    "quality_assurance",
+    "research",
+    "retail_hospitality",
+    "sales",
+    "skilled_trades",
+    "social_work",
+    "software_engineering",
+    "supply_chain",
+    "ux_design"
   ],
   "modality": "conversational",
   "difficulty": "mid",
@@ -25,93 +45,82 @@
     "people-development",
     "star"
   ],
-  "prompt": "Tell me about a time you mentored or helped develop someone. Who were they, what did they need, what did you actually do, and how did they grow?",
+  "prompt": "Tell me about a time you helped someone learn or develop a skill. Explain what they wanted help with, what you did and what changed. The example can be informal, and you do not need to identify the person or describe a promotion.",
   "blurb": "Mentoring: did they invest in someone's growth and see real development — or just answer questions?",
   "rubric": [
     {
       "key": "situation_clarity",
       "label": "The person & their need",
-      "description": "Clearly identifies who they mentored and the specific gap or growth need — a skill, a confidence issue, a career step — not a vague 'I help juniors'.",
+      "description": "Explains a specific learning need and how it was understood, without requiring personal details, a career step or a formal mentoring role.",
       "weight": 1.0
     },
     {
       "key": "task_ownership",
       "label": "Investing in their growth",
-      "description": "Shows they genuinely took on the other person's development as something they cared about, tailored to that individual, not a one-size checklist.",
+      "description": "Explains their responsibility and how the help respected the learner’s goals, preferences and boundaries.",
       "weight": 1.1
     },
     {
       "key": "action_specificity",
-      "label": "Concrete coaching actions",
-      "description": "Describes what THEY specifically did — stretch assignments, feedback, pairing, creating opportunities, adjusting their approach to the person — and notably teaching vs doing it for them.",
+      "label": "Specific contribution and decisions",
+      "description": "Describes specific support, feedback, demonstration or practice and how it was adapted; doing part of a task can be appropriate when explained.",
       "weight": 1.3
     },
     {
       "key": "result_impact",
-      "label": "The person's growth",
-      "description": "Shows a real, ideally measurable outcome for the MENTEE — promotion, skill mastered, took on a role, gained confidence — centered on their growth, not the mentor's glory.",
+      "label": "Outcome and evidence",
+      "description": "Describes the learner’s observed progress or remaining difficulty using qualitative or quantitative evidence and gives the learner proper credit.",
       "weight": 1.3
     },
     {
       "key": "reflection",
       "label": "Reflection & adapting",
-      "description": "Reflects on adjusting their approach to the individual, what worked or didn't, and what they learned about developing people.",
+      "description": "Explains what they learned about adapting support and how they would check whether a future approach is useful.",
       "weight": 1.1
     },
     {
       "key": "communication",
-      "label": "Communication & structure",
-      "description": "Structured, concise, and generous — credit centered on the mentee.",
+      "label": "Clear, relevant communication",
+      "description": "Makes the relevant situation, reasoning and contribution understandable in any clear order. No required STAR structure, pronouns, performance of confidence or emotional tone.",
       "weight": 0.8
     }
   ],
   "reference": {
-    "scenario": "The candidate should recall a specific person they helped grow — a junior teammate, a struggling peer, a new hire, an intern, someone they weren't even required to help — with a concrete development need. The signal is deliberate, tailored investment in that person's growth (especially teaching rather than doing the work for them) and a real outcome for the mentee.",
+    "scenario": "Explore helping someone learn in a class, shift, community activity or professional setting. Small skill gains and informal help count. Assess responsiveness to the learner, useful actions and evidence of learning without requiring a promotion or judging confidence from appearance.",
     "model_points": [
-      "Situation: a specific individual and a concrete need — a skill gap, low confidence, readiness for a bigger role, or a performance struggle.",
-      "Task: they chose to invest in this person's development and understood what that particular person needed.",
-      "Action: concrete, tailored coaching — stretch assignments with a safety net, specific and timely feedback, pairing/modeling, creating visibility or opportunities, and crucially guiding them to solve it themselves rather than doing it for them.",
-      "Action: adapted their approach to the individual — more structure for one, more autonomy for another — and adjusted when something wasn't landing.",
-      "Result: a real outcome for the MENTEE — promoted, mastered the skill, led a project, gained confidence — with the credit centered on the mentee's growth.",
-      "Reflection: what they learned about developing people, the difference between helping and enabling, and how they've mentored differently since."
+      "Checks what the learner wants or needs rather than assuming a deficit.",
+      "Explains the candidate’s role and what support was appropriate.",
+      "Uses a specific explanation, demonstration, practice opportunity or feedback suited to the task.",
+      "Checks understanding and adapts when the approach is not helping.",
+      "Describes progress or remaining difficulty with honest evidence; the learner retains credit for their work.",
+      "Identifies a lesson about providing support and knowing when another source of help is needed."
     ],
     "probes": [
       {
-        "trigger": "just answered questions / did the work for them",
-        "question": "Did you solve it for them or help them learn to solve it themselves? How did you resist just taking over?"
+        "trigger": "the learning need is assumed",
+        "question": "How did you find out what help the person wanted?"
       },
       {
-        "trigger": "outcome centers on the mentor",
-        "question": "What changed for THEM — their skills, role, or confidence? How did you measure that they'd actually grown?"
+        "trigger": "candidate says only that they showed someone",
+        "question": "What did you do to check their understanding?"
       },
       {
-        "trigger": "one-size-fits-all approach",
-        "question": "How did you tailor your approach to this specific person? Did you have to adjust when something wasn't working?"
-      },
-      {
-        "trigger": "vague 'I mentor lots of people'",
-        "question": "Pick one specific person. Who were they, and walk me through exactly what you did for them."
-      },
-      {
-        "trigger": "gave feedback but unclear it landed",
-        "question": "How did you deliver the hard feedback, and how did you know it actually changed their behavior?"
+        "trigger": "the candidate claims complete mastery",
+        "question": "What could you actually observe them doing afterward?"
       }
     ],
     "red_flags": [
-      "Vague 'I always help juniors' with no specific person or outcome.",
-      "Did the work for them rather than developing them — created dependence, not growth.",
-      "Outcome is about the mentor looking good, not the mentee growing.",
-      "One-size-fits-all; no adaptation to the individual.",
-      "Took credit for the mentee's achievements.",
-      "Avoided giving needed hard feedback, or gave it in a way that clearly didn't land."
+      "Claims the learner’s work as their own achievement.",
+      "Continues an approach despite clear evidence it is harmful or ignores the learner’s stated boundaries.",
+      "Treats an assumption about confidence or identity as proof of ability."
     ],
     "follow_ups": [
-      "How did you give feedback when they were doing something wrong, without demoralizing them?",
-      "Tell me about a time mentoring someone didn't work. What did you learn?",
-      "How do you know when to push someone versus give them space?",
-      "How did this change the way you develop people now?"
+      "What did you change when the first explanation did not help?",
+      "When would you seek another source of support?"
     ],
-    "exemplar_answer": "Situation: 'A new-grad engineer on my team was strong technically but froze in design discussions and wouldn't take on anything ambiguous — she'd wait to be told exactly what to do.' Task: 'Her growth wasn't my formal responsibility, but I wanted to help her become someone who could own problems, not just tasks.' Action: 'I didn't just answer her questions — that would've kept her dependent. I gave her a small but genuinely ambiguous feature to own end-to-end, and instead of directing, I asked questions to help her reach her own design. I set up a weekly 1:1 where she'd bring decisions and I'd push her to defend them. When she got a design review wrong, I gave the feedback privately and specifically, then had her re-present it herself so the room saw it was hers. I dialed back my involvement as she gained footing.' Result: 'Within about two quarters she was leading design reviews for her own features and mentoring the next new-grad; her manager cited that growth in her promotion to the next level. The work was hers — I just created the space and the safety net.' Reflection: 'The biggest thing I learned was to resist solving it for her — real development came from letting her struggle productively with a net under her. I also had to tailor it: with a more confident engineer I'd have given autonomy sooner. I mentor now by handing over ownership earlier than feels comfortable.'"
+    "exemplar_answer": "Illustrative example only; it is not a required setting, answer order or achievement standard. A new volunteer wanted to learn our filing process. I asked which part was confusing, demonstrated one example and let them try the next while I watched. They could choose the right folder but were unsure about duplicates, so we wrote a short check for that step. They handled the next few examples independently. I cannot claim they mastered every case, but the check helped with the task we practiced.",
+    "assessment_contract": "Assess the selected competency from concrete job-relevant evidence. Examples from paid work, study, volunteering, caregiving, informal work, military service and community activities are equally eligible when relevant. A modest example is sufficient if it shows the competency; employer prestige, formal title and financial scale are not criteria. Accept qualitative or quantitative outcomes supported by the account, including partial or unsuccessful outcomes. Do not require a numeric metric, STAR order, particular pronouns, composure, enthusiasm or a particular communication style. Identify personal contribution by meaning while preserving credit to others. Assess intelligibility and relevance, not accent, fluency, verbosity, visible emotion, disability or private circumstances. Mark genuinely missing evidence not assessed; do not infer poor competence or dishonesty from an absent example. A clearly labeled hypothetical may be discussed as situational practice but must not count as demonstrated past experience. Respect scope of practice, authorization, safety and ethical duties; pausing, declining, reporting or escalating can be sound judgment. Never require obedience, direct confrontation, unpaid overwork or successful persuasion regardless of the circumstances."
   },
-  "interviewer_notes": "The signal is developing a person, not just being helpful. The key discriminator: did they TEACH (build the mentee's capability) or DO IT FOR THEM (create dependence)? Probe that directly. Insist on a specific individual and a mentee-centered outcome — redirect vague 'I help lots of juniors' answers. Watch that credit is centered on the mentee, not the mentor. Reward tailoring the approach to the individual and giving hard feedback that landed. Look for evidence of real growth (promotion, took on a role, measurable skill gain). Probe I-vs-we implicitly by asking what the mentee did vs what the candidate did."
+  "interviewer_notes": "Assess the selected competency from concrete job-relevant evidence. Examples from paid work, study, volunteering, caregiving, informal work, military service and community activities are equally eligible when relevant. A modest example is sufficient if it shows the competency; employer prestige, formal title and financial scale are not criteria. Accept qualitative or quantitative outcomes supported by the account, including partial or unsuccessful outcomes. Do not require a numeric metric, STAR order, particular pronouns, composure, enthusiasm or a particular communication style. Identify personal contribution by meaning while preserving credit to others. Assess intelligibility and relevance, not accent, fluency, verbosity, visible emotion, disability or private circumstances. Mark genuinely missing evidence not assessed; do not infer poor competence or dishonesty from an absent example. A clearly labeled hypothetical may be discussed as situational practice but must not count as demonstrated past experience. Respect scope of practice, authorization, safety and ethical duties; pausing, declining, reporting or escalating can be sound judgment. Never require obedience, direct confrontation, unpaid overwork or successful persuasion regardless of the circumstances. Explore helping someone learn in a class, shift, community activity or professional setting. Small skill gains and informal help count. Assess responsiveness to the learner, useful actions and evidence of learning without requiring a promotion or judging confidence from appearance. Ask one focused question at a time. Use the candidate’s actual answer to select one material missing detail, respect the shared follow-up limit, and do not require a replacement example.",
+  "revision": 2
 }

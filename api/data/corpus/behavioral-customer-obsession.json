@@ -4,17 +4,37 @@
   "track": "professional",
   "domain": "behavioral",
   "areas": [
-    "software_engineering",
+    "career_foundations",
+    "accounting",
+    "business_operations",
+    "civil_engineering",
+    "consulting",
+    "creative_communications",
+    "customer_support",
+    "cybersecurity",
     "data_science",
+    "education",
+    "electrical_engineering",
+    "finance",
+    "human_resources",
+    "it_support",
+    "law",
+    "marketing",
+    "mechanical_engineering",
     "medicine",
     "nursing",
-    "law",
-    "consulting",
     "product_management",
-    "finance",
-    "mechanical_engineering",
-    "electrical_engineering",
-    "civil_engineering"
+    "project_management",
+    "public_service",
+    "quality_assurance",
+    "research",
+    "retail_hospitality",
+    "sales",
+    "skilled_trades",
+    "social_work",
+    "software_engineering",
+    "supply_chain",
+    "ux_design"
   ],
   "modality": "conversational",
   "difficulty": "mid",
@@ -25,93 +45,82 @@
     "impact",
     "star"
   ],
-  "prompt": "Tell me about a time you went above and beyond for a customer or user. What was their problem, what did you do that went past the normal expectation, and what was the outcome for them and for the business?",
+  "prompt": "Tell me about a time you made a useful extra effort to understand and help a customer, user, learner or another person you supported. Explain their need, what you did within your responsibilities, and what changed. Qualitative outcomes are welcome; business revenue is not required.",
   "blurb": "Customer obsession: did they dig into the real customer need and act on it — or just perform helpfulness?",
   "rubric": [
     {
       "key": "situation_clarity",
       "label": "Customer & their real need",
-      "description": "Clearly identifies who the customer was and the underlying need, not just the surface request — shows they understood the problem from the customer's side.",
+      "description": "Explains the person’s actual need, how it was understood and any relevant constraints without assuming that the initial request captures the whole problem.",
       "weight": 1.1
     },
     {
       "key": "task_ownership",
       "label": "Why they went further",
-      "description": "Explains what made them go beyond the minimum — genuine empathy or a working-backwards-from-the-customer instinct, not policy or being told to.",
+      "description": "Explains the candidate’s responsibility and reason for helping, whether self-initiated or part of an assigned duty; unpaid or out-of-scope work is not required.",
       "weight": 1.1
     },
     {
       "key": "action_specificity",
-      "label": "Specific above-and-beyond action",
-      "description": "Describes concretely what THEY did that exceeded the default — and ideally that they dug past the stated ask to the root need.",
+      "label": "Specific contribution and decisions",
+      "description": "Describes a specific helpful action, checks understanding and stays within authorization, consent and safety boundaries.",
       "weight": 1.3
     },
     {
       "key": "result_impact",
-      "label": "Result for customer AND business",
-      "description": "Quantifies the outcome for the customer (problem solved, retained, satisfaction) and connects it to business value — customer obsession isn't charity.",
+      "label": "Outcome and evidence",
+      "description": "Describes a supported qualitative or quantitative outcome for the person or service and any tradeoff; revenue or profit is not required.",
       "weight": 1.2
     },
     {
       "key": "reflection",
       "label": "Reflection & generalization",
-      "description": "Shows they turned a one-off save into something durable — a fix, a process, a product change — so the next customer benefits too.",
+      "description": "Identifies a useful lesson or proportionate improvement that could help in a similar situation; a wider rollout is not mandatory.",
       "weight": 1.1
     },
     {
       "key": "communication",
-      "label": "Communication & structure",
-      "description": "Structured, concise, and centered on the customer rather than on themselves.",
+      "label": "Clear, relevant communication",
+      "description": "Makes the relevant situation, reasoning and contribution understandable in any clear order. No required STAR structure, pronouns, performance of confidence or emotional tone.",
       "weight": 0.8
     }
   ],
   "reference": {
-    "scenario": "The candidate should recall a specific customer or user in real difficulty — a churning account, a blocked user hitting a bug, an internal 'customer' team stuck — where they went past the default response: dug into the real need, fixed the root cause, or delivered something the customer didn't even know to ask for. The best answers balance customer delight with business sense and generalize the fix.",
+    "scenario": "Explore attentive service to a customer, learner, community member or another person receiving support. The context may be commercial, educational, public or nonprofit. Assess understanding, useful action, safe boundaries and the person’s outcome rather than business value or heroics.",
     "model_points": [
-      "Situation: a specific customer and their actual problem, framed from the customer's perspective, with why it mattered to them.",
-      "Task: they recognized the standard response wasn't enough and took it on themselves to solve the real need.",
-      "Action: dug beneath the stated request to the root need; did concrete work beyond their remit — a fast fix, a workaround, hands-on support, or a product change — and closed the loop with the customer.",
-      "Action: balanced the effort against business reality — didn't over-invest in one account at everyone else's expense, or made the case for why this one was worth it.",
-      "Result: quantified customer outcome (retained account worth $X, user unblocked, CSAT/NPS moved) AND business outcome (revenue saved, a fix that helped many customers, a testimonial).",
-      "Reflection: generalized the one-off into something lasting — a bug fix shipped for all users, a runbook, a product insight — so customer obsession scaled beyond heroics."
+      "Explains who needed help and how the candidate checked what mattered to them.",
+      "Distinguishes the request from the underlying need without assuming the person was wrong.",
+      "Takes an appropriate action or arranges qualified help within their role.",
+      "Balances the person’s needs with safety, consent, available resources and fairness to others.",
+      "Describes what changed for the person using honest qualitative or quantitative evidence; no commercial metric is necessary.",
+      "Identifies a lesson, a small process change or when the same approach would not fit."
     ],
     "probes": [
       {
-        "trigger": "solved only the surface request",
-        "question": "Did you address what they asked for, or what they actually needed? How did you figure out the difference?"
+        "trigger": "the underlying need is assumed rather than checked",
+        "question": "How did you check what mattered most to that person?"
       },
       {
-        "trigger": "no business impact mentioned",
-        "question": "What did this mean for the business — retention, revenue, or a fix that helped other customers? How do you know it was worth the effort?"
+        "trigger": "the action may exceed the candidate’s responsibility",
+        "question": "How did you check that this was within your role?"
       },
       {
-        "trigger": "sounds like one-off heroics",
-        "question": "Did this only help that one customer, or did you turn it into something that helps others? Walk me through what you generalized."
-      },
-      {
-        "trigger": "vague on personal action",
-        "question": "What did you specifically do that went beyond the normal expectation — what would a typical response have looked like by comparison?"
-      },
-      {
-        "trigger": "over-invested in one account",
-        "question": "How did you weigh this against your other work and other customers? Was it the right allocation?"
+        "trigger": "the outcome is not described",
+        "question": "What changed for the person after your action?"
       }
     ],
     "red_flags": [
-      "Confuses customer obsession with saying yes to everything or giving discounts — no real problem-solving.",
-      "Only solved the literal request, no sign they understood the underlying need.",
-      "No business value — pure heroics that didn't scale and may have hurt other priorities.",
-      "Takes all the credit and centers themselves rather than the customer's outcome.",
-      "No customer metric or outcome; can't say whether the customer was actually better off.",
-      "Story is generic 'I always put customers first' with no specific instance."
+      "Promises an outcome or benefit they know they cannot authorize.",
+      "Ignores stated consent, safety or privacy boundaries to appear helpful.",
+      "Claims the person benefited despite evidence in their own account that the need remained unresolved."
     ],
     "follow_ups": [
-      "How did you know what the customer actually needed versus what they asked for?",
-      "How do you balance one demanding customer against the needs of all your other customers?",
-      "Was there a moment you had to say no to a customer? How did you keep their trust?",
-      "What did the business learn from this that changed the product or process?"
+      "What would you adapt if another person had a similar need?",
+      "How did you account for other people waiting for help?"
     ],
-    "exemplar_answer": "Situation: 'A mid-size customer was about to churn — they said our reporting export was 'too slow'. It was a top-20 account by revenue.' Task: 'Support would normally file a ticket and move on, but I owned that area and wanted to understand why it was a dealbreaker.' Action: 'I got on a call and watched them work. The real problem wasn't raw speed — they were exporting the full dataset daily just to pull three fields for a board deck. I built them a lightweight filtered export and a scheduled email, then realized dozens of customers likely did the same thing, so I turned it into a proper product feature.' Result: 'The account renewed — about $Y ARR saved — and the shipped feature cut export volume across all customers by ~30% and became one of our most-used reporting options within a quarter.' Reflection: 'I learned to work backward from what the customer is actually trying to accomplish, not the feature they name. The win wasn't saving one account by hand — it was turning that insight into something every customer got.'"
+    "exemplar_answer": "Illustrative example only; it is not a required setting, answer order or achievement standard. At a library volunteer desk, someone asked me to fill out a private online form for them. I checked what help they needed and explained that I could show the navigation without handling their private answers. With their agreement, I used a blank example and stayed available for general questions. They completed the form themselves. I suggested a short navigation guide so future visitors could use the same support.",
+    "assessment_contract": "Assess the selected competency from concrete job-relevant evidence. Examples from paid work, study, volunteering, caregiving, informal work, military service and community activities are equally eligible when relevant. A modest example is sufficient if it shows the competency; employer prestige, formal title and financial scale are not criteria. Accept qualitative or quantitative outcomes supported by the account, including partial or unsuccessful outcomes. Do not require a numeric metric, STAR order, particular pronouns, composure, enthusiasm or a particular communication style. Identify personal contribution by meaning while preserving credit to others. Assess intelligibility and relevance, not accent, fluency, verbosity, visible emotion, disability or private circumstances. Mark genuinely missing evidence not assessed; do not infer poor competence or dishonesty from an absent example. A clearly labeled hypothetical may be discussed as situational practice but must not count as demonstrated past experience. Respect scope of practice, authorization, safety and ethical duties; pausing, declining, reporting or escalating can be sound judgment. Never require obedience, direct confrontation, unpaid overwork or successful persuasion regardless of the circumstances."
   },
-  "interviewer_notes": "Probe for depth-of-understanding: the strongest signal is digging past the stated request to the real need (working backwards from the customer). Watch for the two anti-patterns: (1) customer obsession as pure people-pleasing/discounting with no problem-solving; (2) one-off heroics that don't scale or that hurt other priorities. Push for BOTH a customer metric and a business metric — customer obsession is not charity. The best answers generalize the save into a durable fix; probe explicitly for that. Keep them centered on the customer, not on their own heroism."
+  "interviewer_notes": "Assess the selected competency from concrete job-relevant evidence. Examples from paid work, study, volunteering, caregiving, informal work, military service and community activities are equally eligible when relevant. A modest example is sufficient if it shows the competency; employer prestige, formal title and financial scale are not criteria. Accept qualitative or quantitative outcomes supported by the account, including partial or unsuccessful outcomes. Do not require a numeric metric, STAR order, particular pronouns, composure, enthusiasm or a particular communication style. Identify personal contribution by meaning while preserving credit to others. Assess intelligibility and relevance, not accent, fluency, verbosity, visible emotion, disability or private circumstances. Mark genuinely missing evidence not assessed; do not infer poor competence or dishonesty from an absent example. A clearly labeled hypothetical may be discussed as situational practice but must not count as demonstrated past experience. Respect scope of practice, authorization, safety and ethical duties; pausing, declining, reporting or escalating can be sound judgment. Never require obedience, direct confrontation, unpaid overwork or successful persuasion regardless of the circumstances. Explore attentive service to a customer, learner, community member or another person receiving support. The context may be commercial, educational, public or nonprofit. Assess understanding, useful action, safe boundaries and the person’s outcome rather than business value or heroics. Ask one focused question at a time. Use the candidate’s actual answer to select one material missing detail, respect the shared follow-up limit, and do not require a replacement example.",
+  "revision": 2
 }

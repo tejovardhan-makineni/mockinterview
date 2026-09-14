@@ -4,17 +4,37 @@
   "track": "professional",
   "domain": "behavioral",
   "areas": [
-    "software_engineering",
+    "career_foundations",
+    "accounting",
+    "business_operations",
+    "civil_engineering",
+    "consulting",
+    "creative_communications",
+    "customer_support",
+    "cybersecurity",
     "data_science",
+    "education",
+    "electrical_engineering",
+    "finance",
+    "human_resources",
+    "it_support",
+    "law",
+    "marketing",
+    "mechanical_engineering",
     "medicine",
     "nursing",
-    "law",
-    "consulting",
     "product_management",
-    "finance",
-    "mechanical_engineering",
-    "electrical_engineering",
-    "civil_engineering"
+    "project_management",
+    "public_service",
+    "quality_assurance",
+    "research",
+    "retail_hospitality",
+    "sales",
+    "skilled_trades",
+    "social_work",
+    "software_engineering",
+    "supply_chain",
+    "ux_design"
   ],
   "modality": "conversational",
   "difficulty": "mid",
@@ -25,93 +45,82 @@
     "tradeoffs",
     "star"
   ],
-  "prompt": "Tell me about a time you had to cut scope or say no to something people wanted — a feature, a request, a project. How did you make the call, and how did you handle the people who wanted it?",
+  "prompt": "Tell me about a time you had to reduce scope or explain that a request could not be met as proposed. Explain the constraint, your contribution to the decision and how you communicated it. You can use work, study, volunteering or another responsibility.",
   "blurb": "Scope cut / saying no: did they prioritize with clear reasoning and bring people along — or just refuse or overcommit?",
   "rubric": [
     {
       "key": "situation_clarity",
       "label": "Situation & the pressure",
-      "description": "Frames what was being asked, who wanted it, and the constraint (time, resources, focus) that forced a cut or a no.",
+      "description": "Explains the request, the affected people and a specific constraint that required a tradeoff.",
       "weight": 1.0
     },
     {
       "key": "task_ownership",
       "label": "Owning the decision",
-      "description": "Shows THEY made or drove the call to cut/decline, taking responsibility for a decision that would disappoint someone, rather than deflecting it.",
+      "description": "Explains their role in recommending, making or escalating the decision without claiming authority they did not have.",
       "weight": 1.2
     },
     {
       "key": "action_specificity",
-      "label": "Prioritization reasoning",
-      "description": "Describes the concrete basis for the decision — impact vs cost, alignment to goals, data — and specifically what they cut and what they protected.",
+      "label": "Specific contribution and decisions",
+      "description": "Describes the basis for prioritization and a concrete change, alternative or boundary, including what was protected and why.",
       "weight": 1.3
     },
     {
       "key": "result_impact",
-      "label": "Result & stakeholder handling",
-      "description": "Shows the outcome (focus/quality preserved, right thing shipped) AND that they handled the disappointed stakeholders well — brought them along rather than just refusing.",
+      "label": "Outcome and evidence",
+      "description": "Describes what happened and how the affected people were informed; agreement or satisfaction from everyone is not required.",
       "weight": 1.2
     },
     {
       "key": "reflection",
       "label": "Reflection & judgment",
-      "description": "Reflects on how they weigh trade-offs, the cost of saying yes to everything, and how to say no in a way that preserves relationships.",
+      "description": "Explains an opportunity cost, a condition that would justify revisiting the decision and a lesson about setting expectations.",
       "weight": 1.1
     },
     {
       "key": "communication",
-      "label": "Communication & structure",
-      "description": "Structured and clear, showing they can explain a hard trade-off crisply.",
+      "label": "Clear, relevant communication",
+      "description": "Makes the relevant situation, reasoning and contribution understandable in any clear order. No required STAR structure, pronouns, performance of confidence or emotional tone.",
       "weight": 0.9
     }
   ],
   "reference": {
-    "scenario": "The candidate should recall a moment they had to decline a request or cut committed scope — a feature stakeholders wanted, a project competing for resources, a customer ask, extra scope creeping into a deadline — under a real constraint. The signal is principled prioritization (clear reasoning about what matters most) plus the interpersonal skill to bring the disappointed party along, not just refuse.",
+    "scenario": "Explore a request that exceeds available time, resources or safe scope. The candidate may recommend a smaller option or involve the authorized decision-maker. Assess justified prioritization and honest communication rather than their ability to obtain approval or avoid disappointment.",
     "model_points": [
-      "Situation: a real ask under a real constraint, with a stakeholder who genuinely wanted it and would be disappointed by a no or a cut.",
-      "Task: they owned making the prioritization call rather than saying yes to everything or punting the decision upward.",
-      "Action: reasoned explicitly about trade-offs — impact vs effort, alignment to the top goal, opportunity cost — and decided what to cut/decline and what to protect.",
-      "Action: handled the people — explained the 'why' transparently, acknowledged the ask's value, offered alternatives or a later slot, and negotiated rather than issuing a flat refusal.",
-      "Result: the outcome — focus/quality preserved, the highest-value work shipped — plus stakeholders who understood and stayed on board (not alienated).",
-      "Reflection: understands that saying yes to everything is a failure to prioritize; reflects on how to say no while keeping trust, and when a no should later become a yes."
+      "Specifies the request and constraint using available facts.",
+      "Clarifies what could be decided personally and what needed approval.",
+      "Compares an option or states why a protected requirement cannot be traded away.",
+      "Explains the decision or recommendation and a feasible alternative when one exists.",
+      "Describes the actual outcome, including disappointment or unresolved approval, without claiming universal agreement.",
+      "Identifies what would justify reconsidering scope and what they learned about expectations."
     ],
     "probes": [
       {
-        "trigger": "just refused, no reasoning",
-        "question": "On what basis did you decide this was the thing to cut? What was your prioritization framework — impact, effort, alignment?"
+        "trigger": "the reason for the scope decision is unclear",
+        "question": "Which constraint most affected your choice?"
       },
       {
-        "trigger": "stakeholder handling ignored",
-        "question": "How did the person who wanted it react, and what did you do to bring them along rather than just telling them no?"
+        "trigger": "candidate says someone else decided",
+        "question": "What information or recommendation did you contribute?"
       },
       {
-        "trigger": "actually said yes to everything",
-        "question": "It sounds like you found a way to do it all — did you? If so, what gave, and was that the right call?"
-      },
-      {
-        "trigger": "no outcome",
-        "question": "What did protecting focus actually buy you? Did the higher-priority work benefit measurably?"
-      },
-      {
-        "trigger": "decision made for them",
-        "question": "Was this your call, or did someone above make it? What did YOU drive here?"
+        "trigger": "candidate assumes the affected person understood",
+        "question": "How did you explain the change to them?"
       }
     ],
     "red_flags": [
-      "Said no bluntly with no reasoning or empathy, alienating the stakeholder.",
-      "Couldn't actually say no — took on everything and the real story is overcommitment.",
-      "No prioritization logic; the cut seems arbitrary or self-serving.",
-      "Punted the hard decision to their manager and takes credit for it.",
-      "No account of how the disappointed party was handled — relationship damage ignored.",
-      "No sense of opportunity cost or what saying yes would have cost the top priority."
+      "Promises work they know cannot be delivered without explaining a tradeoff.",
+      "Removes an identified safety or essential quality check solely to satisfy pressure.",
+      "Presents a recommendation as an approved decision after explaining approval is still pending."
     ],
     "follow_ups": [
-      "How do you decide what makes the cut versus what doesn't?",
-      "How do you say no to someone senior or to an important customer?",
-      "Tell me about a no you later reversed. What changed?",
-      "How do you keep a good relationship with someone whose request you declined?"
+      "What new information would justify changing that decision?",
+      "Which part of the request did you protect?"
     ],
-    "exemplar_answer": "Situation: 'Two weeks from a committed launch, our biggest customer's exec asked us to add a custom export format they said was a must-have. Saying yes would have blown the date for everyone else.' Task: 'As the owner of the release, the call to include it or not was mine, and either answer would disappoint someone important.' Action: 'I didn't just refuse. I sized it honestly — it was about a week of work on the critical path — and weighed it against the goal: an on-time launch that served all customers, not one. I decided to decline it for v1. Then I handled the relationship: I called the customer's team, acknowledged the need was real, showed them the launch timeline math, and offered a concrete alternative — a lightweight CSV workaround for now and a committed slot for the full format in the next release, in writing.' Result: 'We launched on time for everyone; the customer accepted the workaround and the roadmap commitment, and we shipped their format six weeks later as promised — the account stayed healthy. Protecting the date also let the core launch land clean.' Reflection: 'Saying yes to everything would've been the easy answer and the wrong one — it's a failure to prioritize. The skill wasn't the no; it was the transparent 'why' plus a real alternative, which is what kept the relationship. I've learned to pair every no with a reason and a path forward.'"
+    "exemplar_answer": "Illustrative example only; it is not a required setting, answer order or achievement standard. Our study group wanted both a survey and interviews for a short assignment. I checked the deadline and estimated that we could analyze one method properly. I proposed keeping the survey and listing interviews as future work, while asking the group to challenge the estimate. We agreed on the smaller scope and explained the limitation in our submission. I learned to state what a smaller plan cannot establish, as well as what it can deliver.",
+    "assessment_contract": "Assess the selected competency from concrete job-relevant evidence. Examples from paid work, study, volunteering, caregiving, informal work, military service and community activities are equally eligible when relevant. A modest example is sufficient if it shows the competency; employer prestige, formal title and financial scale are not criteria. Accept qualitative or quantitative outcomes supported by the account, including partial or unsuccessful outcomes. Do not require a numeric metric, STAR order, particular pronouns, composure, enthusiasm or a particular communication style. Identify personal contribution by meaning while preserving credit to others. Assess intelligibility and relevance, not accent, fluency, verbosity, visible emotion, disability or private circumstances. Mark genuinely missing evidence not assessed; do not infer poor competence or dishonesty from an absent example. A clearly labeled hypothetical may be discussed as situational practice but must not count as demonstrated past experience. Respect scope of practice, authorization, safety and ethical duties; pausing, declining, reporting or escalating can be sound judgment. Never require obedience, direct confrontation, unpaid overwork or successful persuasion regardless of the circumstances."
   },
-  "interviewer_notes": "Two failure modes: (1) can't actually say no — the real story is overcommitment; probe whether anything was truly declined and what gave. (2) said no with no empathy or reasoning — probe the prioritization basis and how the stakeholder was handled. The strong signal is BOTH clear prioritization logic AND bringing the disappointed party along (transparent why + alternative), preserving the relationship. Check ownership — did they drive the call or punt it to their manager? Reward awareness that yes-to-everything is a prioritization failure. Probe I-vs-we on who made the decision."
+  "interviewer_notes": "Assess the selected competency from concrete job-relevant evidence. Examples from paid work, study, volunteering, caregiving, informal work, military service and community activities are equally eligible when relevant. A modest example is sufficient if it shows the competency; employer prestige, formal title and financial scale are not criteria. Accept qualitative or quantitative outcomes supported by the account, including partial or unsuccessful outcomes. Do not require a numeric metric, STAR order, particular pronouns, composure, enthusiasm or a particular communication style. Identify personal contribution by meaning while preserving credit to others. Assess intelligibility and relevance, not accent, fluency, verbosity, visible emotion, disability or private circumstances. Mark genuinely missing evidence not assessed; do not infer poor competence or dishonesty from an absent example. A clearly labeled hypothetical may be discussed as situational practice but must not count as demonstrated past experience. Respect scope of practice, authorization, safety and ethical duties; pausing, declining, reporting or escalating can be sound judgment. Never require obedience, direct confrontation, unpaid overwork or successful persuasion regardless of the circumstances. Explore a request that exceeds available time, resources or safe scope. The candidate may recommend a smaller option or involve the authorized decision-maker. Assess justified prioritization and honest communication rather than their ability to obtain approval or avoid disappointment. Ask one focused question at a time. Use the candidate’s actual answer to select one material missing detail, respect the shared follow-up limit, and do not require a replacement example.",
+  "revision": 2
 }
