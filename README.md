@@ -5,6 +5,9 @@ available to everyone. Practice with a clearly identified AI interviewer, keep
 your work and feedback, and contribute new interview formats. The hosted application is at
 [mockinterview.live](https://mockinterview.live).
 
+Use the hosted website, the desktop app, or a local web installation. The website
+adapts to desktop and phone browsers.
+
 **Community:** [GitHub](https://github.com/tejovardhan-makineni/mockinterview) ·
 [Reddit](https://www.reddit.com/r/mockinterview_live/) ·
 [Discord](https://discord.gg/KvGunFKZwS)
@@ -124,32 +127,6 @@ Two alternatives after copying `.env.example`:
   in this release's validation environment.
 - **UI preview:** after `make install`, run
   `cd web && NEXT_PUBLIC_MOCK=1 npm run dev`. This uses example data without an API.
-
-## Mobile pocket practice (iOS and Android)
-
-The native [mobile companion](mobile/README.md) provides a smaller practice space
-with the same sage and forest theme. Its Today, Practice, and Saved tabs offer
-one- or three-question sessions, twelve prompts across behavioral, career, and
-technical topics, typed answers, native voice recording/playback, bookmarks,
-guided self-review, and resumable drafts. The latest 30 completed practices stay
-on the device. Native recordings are limited to 90 seconds per answer.
-
-```bash
-cd mobile
-npm ci
-npm start
-```
-
-Open with a compatible Expo Go installation on iOS or Android, or follow the
-[local native build instructions](mobile/README.md#create-your-own-local-native-build).
-`npm run web` previews the interface and typed flow in a browser.
-
-Pocket practice works offline once installed as a native app. It uses local
-self-review, without automated scoring, transcription, or account/history sync.
-Optional configured hosted sign-in enables private feedback and consented metrics,
-reflection and self-review sharing; it does not upload raw answers or recordings.
-The app links to the website for full AI interviews. This is an initial mobile
-implementation; store distribution is not configured.
 
 ## Hosted usage and continued practice
 

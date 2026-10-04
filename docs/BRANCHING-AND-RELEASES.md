@@ -7,7 +7,7 @@ keeps a readable history; branch deletion and force pushes to `main` are blocked
 ## Before merging
 
 The repository rules require an up-to-date branch, resolved review conversations,
-Go build/race tests, web lint/tests/export, mobile tests, all four desktop packages,
+Go build/race tests, web lint/tests/export, all four desktop packages,
 local setup checks, release-policy checks, dependency audits, a secret scan and
 CodeQL. CodeQL alerts block merges as well as scanner execution failures.
 Maintainers review behavior and compatibility before enabling auto-merge; a green
@@ -19,11 +19,10 @@ third-party sources. No CLA, payment or external account is required to contribu
 Do not include real interview data, provider keys or confidential questions.
 Report vulnerabilities through the private security reporting link in SECURITY.md.
 
-Current dependency blockers and the one existing, time-limited web lint exception
-are documented in [DEPENDENCY_SECURITY.md](DEPENDENCY_SECURITY.md). The mobile
-audit deliberately fails while its two unpatched advisories remain. Do not remove
-that required check, dismiss an alert without fixing it, or expand an exception to
-publish a release.
+Dependency audit policy and the existing time-limited web lint exception are
+documented in [DEPENDENCY_SECURITY.md](DEPENDENCY_SECURITY.md). Do not remove a
+required security check, dismiss an alert without fixing it, or expand an
+exception to publish a release.
 
 ## Every merged PR: deploy without a version bump
 
@@ -114,7 +113,7 @@ No public release bypasses missing or invalid signing credentials. The existing
 unsigned/ad-hoc `0.1.0-beta.1` draft remains a draft. Before the first public release,
 complete clean installation, upgrade/data-preservation and microphone checks on
 each supported platform. Automated startup tests do not certify microphone/AI
-quality. The current mobile dependency failures also block all production releases.
+quality.
 
 Firebase Hosting cannot currently be scoped by IAM to one site in a shared
 project. Decide between a dedicated Hosting project or explicitly granting the

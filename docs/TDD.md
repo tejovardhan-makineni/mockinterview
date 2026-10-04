@@ -26,7 +26,7 @@ professional domains (medicine, law, consulting, PM, finance, …).
    external keys.
 
 **Non-goals (for now):** multi-tenant orgs, real-time collaborative interviews,
-mobile-native apps, a plugin marketplace.
+a plugin marketplace.
 
 ---
 

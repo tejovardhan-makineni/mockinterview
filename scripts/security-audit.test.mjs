@@ -38,16 +38,14 @@ function fixture() {
   };
 }
 
-test("existing web lint exception cannot silently spread to mobile or desktop", () => {
+test("existing web lint exception cannot silently spread to desktop", () => {
   const { audit, lock } = fixture();
   assert.deepEqual(assessProjectAudit("web", audit, lock, now).accepted, [
     "braces",
   ]);
-  for (const project of ["mobile", "desktop"]) {
-    const report = assessProjectAudit(project, audit, lock, now);
-    assert.deepEqual(report.accepted, []);
-    assert.deepEqual(report.blocked, ["braces"]);
-  }
+  const report = assessProjectAudit("desktop", audit, lock, now);
+  assert.deepEqual(report.accepted, []);
+  assert.deepEqual(report.blocked, ["braces"]);
 });
 
 test("expired or production-shipped web exception still fails", () => {
@@ -78,7 +76,7 @@ test("node-forge stays blocked even if its advisory is development-only", () => 
     ],
   };
   lock.packages["node_modules/node-forge"] = { version: "1.4.0", dev: true };
-  for (const project of ["web", "mobile", "desktop"]) {
+  for (const project of ["web", "desktop"]) {
     assert.deepEqual(assessProjectAudit(project, audit, lock, now).blocked, [
       "node-forge",
     ]);
@@ -88,25 +86,28 @@ test("node-forge stays blocked even if its advisory is development-only", () => 
 test("malformed, inconsistent or unknown-node reports cannot pass", () => {
   const { audit, lock } = fixture();
   assert.throws(() =>
-    assessProjectAudit("mobile", { ...audit, error: {} }, lock),
+    assessProjectAudit("desktop", { ...audit, error: {} }, lock),
   );
   assert.throws(() =>
-    assessProjectAudit("mobile", { ...audit, auditReportVersion: 1 }, lock),
+    assessProjectAudit("desktop", { ...audit, auditReportVersion: 1 }, lock),
   );
   const incomplete = structuredClone(audit);
   incomplete.vulnerabilities = {};
-  assert.throws(() => assessProjectAudit("mobile", incomplete, lock), /counts/);
+  assert.throws(
+    () => assessProjectAudit("desktop", incomplete, lock),
+    /counts/,
+  );
   const unknown = structuredClone(audit);
   unknown.vulnerabilities.braces.nodes = ["node_modules/unknown"];
-  assert.throws(() => assessProjectAudit("mobile", unknown, lock), /unknown/);
+  assert.throws(() => assessProjectAudit("desktop", unknown, lock), /unknown/);
   const malformed = structuredClone(audit);
   malformed.vulnerabilities.braces.severity = "unknown";
-  assert.throws(() => assessProjectAudit("mobile", malformed, lock));
+  assert.throws(() => assessProjectAudit("desktop", malformed, lock));
 });
 
 test("only explicit project selection and report output options are accepted", () => {
-  assert.deepEqual(parseArguments(["mobile"]), {
-    project: "mobile",
+  assert.deepEqual(parseArguments(["desktop"]), {
+    project: "desktop",
     reportDirectory: null,
   });
   assert.ok(
@@ -118,10 +119,16 @@ test("only explicit project selection and report output options are accepted", (
   );
   for (const args of [
     [],
+    ["unsupported-app"],
     ["../private"],
-    ["mobile", "--omit=dev"],
+    ["desktop", "--omit=dev"],
     ["web", "--ignore", "braces"],
-    ["mobile", "--report-dir"],
+    ["desktop", "--report-dir"],
   ])
     assert.throws(() => parseArguments(args));
+  const { audit, lock } = fixture();
+  assert.throws(
+    () => assessProjectAudit("unsupported-app", audit, lock),
+    /Choose web or desktop/,
+  );
 });

@@ -211,22 +211,18 @@ export default function Privacy() {
         <p>
           Sharing includes the report, model and provider, completion or failure
           status, turn count and timing. It does not upload API keys, passwords,
-          recordings, camera images or the interview transcript. Pocket practice
-          shares reflections and self-review checklists, with no answer text or
-          AI score. The mobile sharing choice and server login last for the
-          current app session (until close or reload). Local web sharing
-          requires a configured server and a separate hosted login; otherwise
-          data stays with your local installation.
+          recordings, camera images or the interview transcript. Local
+          installations require a configured server and a separate hosted login
+          for sharing; otherwise data stays with your local installation.
         </p>
         <p>
-          Unavailable servers are skipped quietly so practice continues. Web
-          clients can retry eligible results on a later visit; mobile uploads
-          are attempted once at completion. Turning sharing off stops future
-          uploads. “Delete shared analytics” deletes previous uploads from the
-          connected account; if the server is offline, retry deletion when
-          available. This does not delete your private interview history, which
-          has its own controls. Shared records remain until deleted or the
-          account is deleted.
+          Unavailable servers are skipped quietly so practice continues. Web and
+          desktop clients can retry eligible results on a later visit. Turning
+          sharing off stops future uploads. “Delete shared analytics” deletes
+          previous uploads from the connected account; if the server is offline,
+          retry deletion when available. This does not delete your private
+          interview history, which has its own controls. Shared records remain
+          until deleted or the account is deleted.
         </p>
         <p>
           Beta applications store your motivation, feedback commitment and

@@ -107,6 +107,15 @@ func TestPrivateCommunityConsentAndBetaLifecycle(t *testing.T) {
 	request(userToken, "POST", "/analytics", strings.Replace(analytics, `"2026-10-04"`, `"old"`, 1), 400)
 	request(userToken, "POST", "/analytics", strings.Replace(analytics, `"coaching_md":"More examples"`, `"coaching_md":"`+strings.Repeat("語", 30000)+`"`, 1), 413)
 	request(userToken, "POST", "/analytics", strings.Replace(analytics, `"scored":true`, `"scored":true,"transcript":"private"`, 1), 400)
+	for _, source := range []string{"mobile", "android", "ios", "desktop", "", "unknown"} {
+		response := request(userToken, "POST", "/analytics", strings.Replace(analytics, `"source":"local"`, `"source":"`+source+`"`, 1), 400)
+		if !strings.Contains(response.Body.String(), "Invalid client source") {
+			t.Fatalf("unsupported source %q was rejected for the wrong reason: %s", source, response.Body.String())
+		}
+	}
+	if rows, err := repo.ListSharedInterviewResults(ctx); err != nil || len(rows) != 0 {
+		t.Fatalf("rejected uploads wrote analytics: %v %v", rows, err)
+	}
 	request(userToken, "POST", "/analytics", analytics, 200)
 	request(userToken, "POST", "/analytics", analytics, 200)
 	shared, e := repo.ListSharedInterviewResults(ctx)
@@ -116,9 +125,23 @@ func TestPrivateCommunityConsentAndBetaLifecycle(t *testing.T) {
 	if strings.Contains(string(shared[0].Payload), "private-secret") {
 		t.Fatal("credential leaked")
 	}
+	request(userToken, "POST", "/analytics", strings.Replace(analytics, `"source":"local"`, `"source":"web"`, 1), 200)
+	// A retired client's existing data must remain private, exportable and
+	// removable even though the API no longer accepts new uploads from it.
+	legacyID, e := repo.SaveSharedInterviewResult(ctx, store.SharedInterviewResult{
+		UserID: uid, ClientSessionID: "historical-session", Source: "mobile",
+		ConsentVersion: ConsentVersion, Payload: json.RawMessage(`{"status":"complete"}`),
+	})
+	if e != nil {
+		t.Fatal(e)
+	}
+	overview := request(ownerToken, "GET", "/admin", "", 200)
+	if !strings.Contains(overview.Body.String(), legacyID) {
+		t.Fatal("private admin overview lost historical analytics")
+	}
 	request(otherToken, "DELETE", "/analytics", "", 204)
 	shared, _ = repo.ListSharedInterviewResults(ctx)
-	if len(shared) != 1 {
+	if len(shared) != 3 {
 		t.Fatal("foreign analytics deleted")
 	}
 	raw, e := repo.ExportAccount(ctx, uid)
@@ -129,6 +152,9 @@ func TestPrivateCommunityConsentAndBetaLifecycle(t *testing.T) {
 		if !strings.Contains(string(raw), key) {
 			t.Fatal("missing export key", key)
 		}
+	}
+	if !strings.Contains(string(raw), legacyID) {
+		t.Fatal("account export lost historical analytics")
 	}
 	request(userToken, "DELETE", "/analytics", "", 204)
 	shared, _ = repo.ListSharedInterviewResults(ctx)

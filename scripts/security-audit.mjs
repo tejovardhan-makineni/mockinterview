@@ -5,15 +5,14 @@ import path from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { assessAudit as assessWebAudit } from "../web/scripts/security-audit.mjs";
 
-const PROJECTS = new Set(["web", "mobile", "desktop"]);
+const PROJECTS = new Set(["web", "desktop"]);
 const SEVERITIES = ["info", "low", "moderate", "high", "critical"];
 const root = fileURLToPath(new URL("../", import.meta.url));
 
-// This runner deliberately has no mobile/desktop advisory exceptions. Expo's
-// tooling remains security-relevant even when it is absent from app bundles.
+// This runner deliberately has no desktop advisory exceptions.
 // Keep the original, dated web-only lint exception in its existing assessor.
 export function assessProjectAudit(project, audit, lock, now = Date.now()) {
-  if (!PROJECTS.has(project)) throw new Error("Choose web, mobile or desktop.");
+  if (!PROJECTS.has(project)) throw new Error("Choose web or desktop.");
   if (
     audit?.error ||
     audit?.auditReportVersion !== 2 ||
@@ -85,7 +84,7 @@ export function parseArguments(args) {
     )
   ) {
     throw new Error(
-      "Usage: node scripts/security-audit.mjs web|mobile|desktop [--report-dir PATH]",
+      "Usage: node scripts/security-audit.mjs web|desktop [--report-dir PATH]",
     );
   }
   return { project, reportDirectory: rest[1] ? path.resolve(rest[1]) : null };

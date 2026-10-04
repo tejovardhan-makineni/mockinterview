@@ -184,16 +184,20 @@ Your ordinary account/history belongs to the API installation you are using.
 A self-hosted installation does not automatically upload that history to the
 project maintainer. For optional central analytics, set
 `NEXT_PUBLIC_ANALYTICS_API_BASE` in **web/.env.local** to the intended HTTPS
-analytics API origin before starting/building the web app. The mobile equivalent
-is `EXPO_PUBLIC_ANALYTICS_API_BASE` when building the mobile companion.
+analytics API origin before starting/building the web app.
 
 The user must separately sign in to that API and enable **Share analytics**.
-Shared practice results and feedback are visible to its administrator. Remote sharing credentials remain in memory and require sign-in after restarting or reloading.
-Mobile consent also resets; web consent remains a per-account browser preference
-until disabled. Optional uploads fail quietly if the server is unavailable and do not block
+Shared practice results and feedback are visible to its administrator. Remote
+sharing credentials remain in memory and require sign-in after restarting or
+reloading. Web consent remains a per-account browser preference until disabled.
+Optional uploads fail quietly if the server is unavailable and do not block
 local practice. They are best-effort, not a guaranteed backup or cross-device
 history sync. No server address or central credential is bundled by the launcher.
 Read the app's Privacy page for data categories and controls.
+
+The packaged desktop app has its own default-off analytics and result-sharing
+preferences, saved on the computer. Its optional project connection uses the
+bundled local API bridge; see [desktop setup and storage](#desktop-app).
 
 ## Optional Docker web stack
 
