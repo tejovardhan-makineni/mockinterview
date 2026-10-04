@@ -2,12 +2,9 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 import { AppShell } from "@/components/AppShell";
 import styles from "./project.module.css";
-
-export const PROJECT = {
-  github: "https://github.com/tejovardhan-makineni/mockinterview",
-  reddit: "https://www.reddit.com/r/mockinterview_live/",
-  discord: "https://discord.gg/KvGunFKZwS",
-};
+import { PROJECT } from "@/lib/project";
+export { PROJECT } from "@/lib/project";
+export { CommunityIcons } from "./CommunityIcons";
 
 export function ProjectPage({ children }: { children: ReactNode }) {
   return (
@@ -63,7 +60,6 @@ export function ProjectResources() {
       <Link href="/get-started">Get started →</Link>
       <Link href="/docs">Documentation →</Link>
       <Link href="/updates">Release notes →</Link>
-      <Link href="/about">Behind the project →</Link>
     </nav>
   );
 }

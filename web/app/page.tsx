@@ -1,11 +1,8 @@
 import Link from "next/link";
 import { Button } from "@/components/ui";
-import {
-  CommunityLinks,
-  PROJECT,
-  ProjectPage,
-  ProjectResources,
-} from "@/components/project/Project";
+import { ProjectPage } from "@/components/project/Project";
+import { CommunityIcons } from "@/components/project/CommunityIcons";
+import { Testimonials } from "@/components/project/Testimonials";
 import styles from "@/components/project/project.module.css";
 
 export default function Home() {
@@ -22,9 +19,8 @@ export default function Home() {
             <em>Built together.</em>
           </h1>
           <p className={styles.lead}>
-            Interview practice should be available to everyone. An open source
-            AI interviewer to help you think out loud, learn from feedback, and
-            try again.
+            An open source AI interviewer for voice and text practice, custom
+            questions, and feedback on your answers.
           </p>
           <div className={styles.actions}>
             <Button href="/interviews">Start practicing →</Button>
@@ -32,12 +28,7 @@ export default function Home() {
               Run it locally
             </Button>
           </div>
-          <p className={styles.fine}>
-            One free interview a day. Your own API key unlocks more.
-          </p>
-          <a className={styles.textLink} href={PROJECT.github}>
-            Explore the source on GitHub ↗
-          </a>
+          <CommunityIcons className="mt-5" />
         </div>
         <div
           className={styles.preview}
@@ -71,12 +62,6 @@ export default function Home() {
           </div>
         </div>
       </section>
-      <div className={styles.principles}>
-        <span>MIT licensed</span>
-        <span>Run on your computer</span>
-        <span>Bring your own model</span>
-        <span>Built with the community</span>
-      </div>
       <section className={styles.section}>
         <div className={styles.sectionHead}>
           <div>
@@ -160,15 +145,14 @@ export default function Home() {
       <section className={styles.section}>
         <div className={styles.sectionHead}>
           <div>
-            <p className="eyebrow">A project, not just a product</p>
-            <h2>Make practice better for someone.</h2>
+            <p className="eyebrow">Contribute</p>
+            <h2>Help shape the next version.</h2>
           </div>
         </div>
         <p className={styles.sectionIntro}>
-          A clearer question. An accessibility fix. An honest bug report. You
-          don’t have to write code to help more people practice with confidence.
+          Contribute code, improve interview templates, test accessibility, or
+          share feedback.
         </p>
-        <CommunityLinks />
         <div className={styles.actions}>
           <Button href="/contribute" variant="ghost">
             Ways to contribute →
@@ -182,57 +166,7 @@ export default function Home() {
           feedback.
         </p>
       </section>
-      <section className={styles.section}>
-        <div className={styles.story}>
-          <div>
-            <p className="eyebrow">What people say</p>
-            <h2>Let’s write this part together.</h2>
-          </div>
-          <div>
-            <h3>Your experience belongs in the conversation.</h3>
-            <p>
-              We’re collecting stories from people who use the project. No
-              published testimonials yet. Share what helped, what felt off, and
-              what you’d like to practice next.
-            </p>
-            <a href={PROJECT.reddit} className={styles.textLink}>
-              Join the conversation ↗
-            </a>
-            <p className={styles.fine}>
-              Private product feedback stays private. We ask permission before
-              publishing a testimonial.
-            </p>
-          </div>
-        </div>
-      </section>
-      <section className={styles.section}>
-        <div className={styles.sectionHead}>
-          <div>
-            <p className="eyebrow">Building in the open</p>
-            <h2>What’s changing.</h2>
-          </div>
-          <Link href="/updates" className={styles.textLink}>
-            All release notes →
-          </Link>
-        </div>
-        <article className={styles.release}>
-          <div>
-            <span className={styles.releaseState}>In this source update</span>
-          </div>
-          <div>
-            <h3>Open source, from the front door.</h3>
-            <p>
-              A new project home, simpler local setup, custom practice, personal
-              model choices, and a closer feedback loop with the community.
-            </p>
-          </div>
-        </article>
-      </section>
-      <ProjectResources />
-      <p className={styles.fine}>
-        Made by Tejovardhan Makineni and open to contributors. AI practice for
-        adults 18+; feedback is a learning aid, not a hiring decision.
-      </p>
+      <Testimonials />
     </ProjectPage>
   );
 }
