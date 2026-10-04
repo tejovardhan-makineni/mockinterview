@@ -13,6 +13,7 @@ import (
 
 	"github.com/tejo/mockinterview-api/internal/auth"
 	"github.com/tejo/mockinterview-api/internal/httpx"
+	"github.com/tejo/mockinterview-api/internal/llm"
 	"github.com/tejo/mockinterview-api/internal/persona"
 	"github.com/tejo/mockinterview-api/internal/store"
 	"github.com/tejo/mockinterview-api/internal/tts"
@@ -76,6 +77,14 @@ func (s *Service) storePreview(key string, wav []byte) {
 // cached per-combo so previews are instant after the first synthesis. Falls back
 // (503) if TTS is off (no key).
 func (s *Service) PreviewVoice(w http.ResponseWriter, r *http.Request) {
+	geminiKey := s.geminiKey
+	if personal, desktop := llm.DesktopPersonalSettings(r.Context()); desktop {
+		if personal.Provider != llm.ProviderGemini || len(personal.APIKey) < 8 || len(personal.APIKey) > 4096 {
+			httpx.WriteProblem(w, 400, "Validate your personal Gemini key to preview a native voice")
+			return
+		}
+		geminiKey = personal.APIKey
+	}
 	q := r.URL.Query()
 	voice := persona.NormalizeVoiceID(q.Get("voice"))
 	face := persona.NormalizeFaceID(q.Get("face"))
@@ -89,7 +98,7 @@ func (s *Service) PreviewVoice(w http.ResponseWriter, r *http.Request) {
 	}
 
 	d := persona.PreviewDelivery(voice, face, personality, intensity)
-	wav, err := tts.Synthesize(r.Context(), s.geminiKey, s.ttsModel, persona.GeminiVoiceName(voice), d.TTSPrompt())
+	wav, err := tts.Synthesize(r.Context(), geminiKey, s.ttsModel, persona.GeminiVoiceName(voice), d.TTSPrompt())
 	if err != nil {
 		httpx.WriteProblem(w, http.StatusServiceUnavailable, "voice preview unavailable")
 		return

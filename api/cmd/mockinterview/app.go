@@ -48,6 +48,9 @@ func (a *App) Routes(r chi.Router) {
 		mailer = auth.SMTPMailer{Address: a.Cfg.SMTPAddress, Username: a.Cfg.SMTPUsername, Password: a.Cfg.SMTPPassword, From: a.Cfg.MailFrom, AllowLocalPlaintext: a.Cfg.Environment != "production"}
 	}
 	authSvc.Configure(auth.Options{PublicURL: a.Cfg.PublicURL, Mailer: mailer, RequireVerification: a.Cfg.Hosted, RequirePolicies: a.Cfg.Hosted, Development: !a.Cfg.Hosted})
+	if a.Cfg.LocalDesktop {
+		r.Get("/desktop/bootstrap", authSvc.DesktopBootstrap)
+	}
 	r.Get("/legal-policy", authSvc.LegalPolicy)
 
 	r.Get("/ping", func(w http.ResponseWriter, _ *http.Request) {
@@ -87,6 +90,9 @@ func (a *App) Routes(r chi.Router) {
 	corpusSvc := corpus.NewService(a.Corpus)
 	feedbackSvc := feedback.New(a.Store, a.Cfg.AdminEmails)
 	communitySvc := community.New(a.Store)
+	if a.Cfg.LocalDesktop {
+		communitySvc = community.NewDesktop(a.Store)
+	}
 	i18nSvc := i18n.New(a.LLM, a.Cfg.LLMModel)
 	scorer := scoring.New(a.LLM, a.Cfg.LLMModel)
 	interviewSvc := interview.New(a.Store, a.Corpus, scorer, a.Cfg.AdminEmails, a.Cfg.FreeDailyLimit)
@@ -98,7 +104,7 @@ func (a *App) Routes(r chi.Router) {
 		}
 	}
 	interviewSvc.SetPlanner(a.LLM)
-	interviewSvc.SetOptions(interview.Options{Hosted: a.Cfg.Hosted, EncryptionKey: encryptionKey, PlatformProvider: a.Cfg.LLMProvider, PlatformModel: a.Cfg.LLMModel, GlobalDailyLimit: a.Cfg.HostedDailyStartLimit, LiveModel: a.Cfg.ModelLive})
+	interviewSvc.SetOptions(interview.Options{Hosted: a.Cfg.Hosted, PersonalKeysOnly: a.Cfg.LocalDesktop, EncryptionKey: encryptionKey, PlatformProvider: a.Cfg.LLMProvider, PlatformModel: a.Cfg.LLMModel, GlobalDailyLimit: a.Cfg.HostedDailyStartLimit, LiveModel: a.Cfg.ModelLive})
 	relay.SetOptions(a.Cfg.Hosted, encryptionKey)
 	if a.Background != nil {
 		relay.SetContext(a.Background)

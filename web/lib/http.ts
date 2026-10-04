@@ -1,5 +1,29 @@
+import { IS_DESKTOP } from "./desktop";
+
 // Shared transport: preserve error status so outages never masquerade as logout.
-export const BASE = process.env.NEXT_PUBLIC_API_BASE || "http://localhost:8080";
+export const BASE = IS_DESKTOP
+  ? ""
+  : process.env.NEXT_PUBLIC_API_BASE || "http://localhost:8080";
+export function apiBase(): string {
+  if (!IS_DESKTOP) return BASE;
+  if (typeof window === "undefined") return "";
+  const origin = new URL(window.location.origin);
+  if (origin.protocol !== "http:" || origin.hostname !== "127.0.0.1")
+    throw new Error("Desktop practice requires the bundled local service.");
+  return origin.origin;
+}
+let desktopToken = "";
+let personalModel:
+  { provider: string; model: string; apiKey: string } | undefined;
+export function setDesktopModel(model?: typeof personalModel) {
+  if (IS_DESKTOP) personalModel = model;
+}
+export function getDesktopModel() {
+  return IS_DESKTOP ? personalModel : undefined;
+}
+export function setDesktopToken(token: string) {
+  desktopToken = token;
+}
 export const TOKEN_KEY = "mi_token";
 export const USER_KEY = "mi_user";
 export class ApiError extends Error {
@@ -13,6 +37,7 @@ export class ApiError extends Error {
   }
 }
 export function getToken(): string {
+  if (IS_DESKTOP) return desktopToken;
   if (typeof window === "undefined") return "";
   try {
     return window.localStorage.getItem(TOKEN_KEY) ?? "";
@@ -22,12 +47,21 @@ export function getToken(): string {
 }
 export function authHeader(): Record<string, string> {
   const token = getToken();
-  return token ? { Authorization: "Bearer " + token } : {};
+  return {
+    ...(token ? { Authorization: "Bearer " + token } : {}),
+    ...(IS_DESKTOP && personalModel
+      ? {
+          "X-Mockinterview-Provider": personalModel.provider,
+          "X-Mockinterview-Model": personalModel.model,
+          "X-Mockinterview-Key": personalModel.apiKey,
+        }
+      : {}),
+  };
 }
 export async function req<T>(path: string, init?: RequestInit): Promise<T> {
   let res: Response;
   try {
-    res = await fetch(BASE + path, {
+    res = await fetch(apiBase() + path, {
       ...init,
       headers: {
         "Content-Type": "application/json",
@@ -63,7 +97,7 @@ export async function req<T>(path: string, init?: RequestInit): Promise<T> {
   return res.json();
 }
 export function wsBase(): string {
-  return BASE.replace(/^http/, "ws");
+  return apiBase().replace(/^http/, "ws");
 }
 export function errorMessage(error: unknown): string {
   return error instanceof Error
@@ -71,6 +105,8 @@ export function errorMessage(error: unknown): string {
     : "Something went wrong. Please try again.";
 }
 export function clearPrivateBrowserData() {
+  desktopToken = "";
+  personalModel = undefined;
   if (typeof window === "undefined") return;
   for (const name of ["localStorage", "sessionStorage"] as const) {
     try {

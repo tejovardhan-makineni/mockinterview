@@ -10,6 +10,7 @@ import (
 	"flag"
 	"fmt"
 	"log/slog"
+	"net"
 	"net/http"
 	"os"
 	"os/signal"
@@ -27,6 +28,7 @@ import (
 	"github.com/tejo/mockinterview-api/internal/pack"
 	"github.com/tejo/mockinterview-api/internal/store"
 	"github.com/tejo/mockinterview-api/internal/store/memstore"
+	"github.com/tejo/mockinterview-api/internal/store/sqlitestore"
 )
 
 func main() {
@@ -63,7 +65,20 @@ func main() {
 	defer stopWorkers()
 	var st store.Datastore
 	pingStore := func(context.Context) error { return nil }
-	if cfg.LocalMemory {
+	if cfg.LocalDesktop {
+		database, openErr := sqlitestore.Open(ctx, cfg.DesktopDBPath)
+		if openErr != nil {
+			slog.Error("local database unavailable", "err", openErr)
+			os.Exit(1)
+		}
+		defer database.Close()
+		st, pingStore = database, database.Ping
+		if *migrateOnly {
+			slog.Info("local migrations complete")
+			return
+		}
+		go database.Maintenance(ctx)
+	} else if cfg.LocalMemory {
 		if *migrateOnly {
 			slog.Error("migrations require PostgreSQL; disable LOCAL_MEMORY")
 			os.Exit(1)
@@ -86,13 +101,18 @@ func main() {
 		go database.Maintenance(ctx)
 	}
 
-	ai, err := llm.New(ctx, llm.Settings{
-		Provider:  llm.Provider(cfg.LLMProvider),
-		APIKey:    cfg.LLMAPIKey,
-		Model:     cfg.LLMModel,
-		BaseURL:   cfg.LLMBaseURL,
-		ForceStub: cfg.UseStubLLM,
-	})
+	var ai llm.Client
+	if cfg.LocalDesktop {
+		ai = llm.DesktopClient{}
+	} else {
+		ai, err = llm.New(ctx, llm.Settings{
+			Provider:  llm.Provider(cfg.LLMProvider),
+			APIKey:    cfg.LLMAPIKey,
+			Model:     cfg.LLMModel,
+			BaseURL:   cfg.LLMBaseURL,
+			ForceStub: cfg.UseStubLLM,
+		})
+	}
 	if err != nil {
 		slog.Error("llm", "err", err)
 		os.Exit(1)
@@ -110,10 +130,28 @@ func main() {
 		os.Exit(1)
 	}
 	slog.Info("startup", "mode", cfg.Mode, "llm_provider", info.Provider, "llm_model", info.Model, "llm_stub", ai.Stubbed(), "model_live", cfg.ModelLive, "questions", cat.Count(), "packs", packs.Count())
+	listenHost := os.Getenv("LISTEN_HOST")
+	if cfg.LocalDesktop || cfg.LocalMemory || (listenHost == "" && cfg.Environment != "production") {
+		listenHost = "127.0.0.1"
+	}
+	listener, err := net.Listen("tcp", net.JoinHostPort(listenHost, cfg.Port))
+	if err != nil {
+		slog.Error("listener unavailable", "err", err)
+		os.Exit(1)
+	}
+	defer listener.Close()
+	if cfg.LocalDesktop {
+		cfg.PublicURL = "http://" + listener.Addr().String()
+		cfg.CORSAllow = []string{cfg.PublicURL}
+	}
 
 	app := &App{Background: ctx, Cfg: cfg, Store: st, LLM: ai, Corpus: cat, Packs: packs}
 
 	r := chi.NewRouter()
+	if cfg.LocalDesktop {
+		r.Use(desktopBridge(cfg.DesktopBridgeToken, listener.Addr().String()))
+		r.Use(llm.DesktopCredentials)
+	}
 	r.Use(middleware.RequestID)
 	// Do not trust arbitrary X-Real-IP/True-Client-IP headers for auth limits.
 	r.Use(middleware.Recoverer)
@@ -130,10 +168,9 @@ func main() {
 
 	registerHealthRoutes(r, cfg, ai, pingStore)
 	r.Route("/api/v1", app.Routes)
-
-	listenHost := os.Getenv("LISTEN_HOST")
-	if cfg.LocalMemory || (listenHost == "" && cfg.Environment != "production") {
-		listenHost = "127.0.0.1"
+	if cfg.LocalDesktop {
+		r.Handle("/desktop/remote/*", desktopRemoteProxy())
+		r.Handle("/*", desktopAssets(cfg.DesktopWebDir))
 	}
 	srv := &http.Server{
 		Addr:              listenHost + ":" + cfg.Port,
@@ -143,11 +180,14 @@ func main() {
 
 	go func() {
 		slog.Info("listening", "addr", srv.Addr)
-		if err := srv.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
+		if err := srv.Serve(listener); err != nil && !errors.Is(err, http.ErrServerClosed) {
 			slog.Error("serve", "err", err)
 			os.Exit(1)
 		}
 	}()
+	if cfg.LocalDesktop {
+		slog.Info("desktop_ready", "url", cfg.PublicURL)
+	}
 
 	stop := make(chan os.Signal, 1)
 	signal.Notify(stop, os.Interrupt, syscall.SIGTERM)

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { IS_DESKTOP } from "@/lib/desktop";
 import { Button } from "@/components/ui";
 import { ProjectPage } from "@/components/project/Project";
 import { CommunityIcons } from "@/components/project/CommunityIcons";
@@ -25,8 +26,11 @@ export default function Home() {
           </p>
           <div className={styles.actions}>
             <Button href="/interviews">Start practicing →</Button>
-            <Button href="/get-started" variant="ghost">
-              Run it locally
+            <Button
+              href={IS_DESKTOP ? "/settings" : "/downloads"}
+              variant="ghost"
+            >
+              {IS_DESKTOP ? "Connect your model" : "Get the desktop app"}
             </Button>
           </div>
           <CommunityIcons className="mt-5" />
@@ -78,41 +82,37 @@ export default function Home() {
           ))}
         </div>
       </section>
-      <section className={styles.section}>
-        <div className={styles.runPanel}>
-          <div>
-            <p className="eyebrow">Your computer. Your copy.</p>
-            <h2>
-              Start small.
-              <br />
-              Build what you need.
-            </h2>
-            <p className={styles.sectionIntro}>
-              A Docker-free local demo for macOS, Windows and Linux. Add
-              PostgreSQL for lasting history, or run the complete web app with
-              Docker.
-            </p>
-            <Link href="/get-started" className={styles.textLink}>
-              Installation and setup →
-            </Link>
+      {!IS_DESKTOP && (
+        <section className={styles.section}>
+          <div className={styles.runPanel}>
+            <div>
+              <p className="eyebrow">Desktop practice</p>
+              <h2>
+                Your computer.
+                <br />
+                Your interview history.
+              </h2>
+              <p className={styles.sectionIntro}>
+                The same practice room for macOS, Windows and Linux, with a
+                local database built in. Bring your own AI key. No terminal or
+                Docker needed for packaged releases.
+              </p>
+              <Link href="/downloads" className={styles.textLink}>
+                Downloads and availability →
+              </Link>
+            </div>
+            <div className={styles.card}>
+              <h3>Open. Connect. Practice.</h3>
+              <p>
+                Install the app, validate your model key, and start an
+                interview. Your history stays on your computer. Optional
+                analytics helps improve the project.
+              </p>
+              <p>Cloud AI needs internet. Provider charges apply.</p>
+            </div>
           </div>
-          <div>
-            <pre className={styles.code}>
-              <code>
-                <span className={styles.codeComment}>
-                  # With Git, Node.js 22 and Go installed
-                </span>
-                {
-                  "\ngit clone https://github.com/tejovardhan-makineni/mockinterview.git\ncd mockinterview\nnode scripts/local.mjs"
-                }
-              </code>
-            </pre>
-            <p className={styles.fine}>
-              Demo data resets on exit. No provider key needed.
-            </p>
-          </div>
-        </div>
-      </section>
+        </section>
+      )}
       <section className={styles.section}>
         <div className={styles.sectionHead}>
           <div>
@@ -128,14 +128,18 @@ export default function Home() {
           <Button href="/contribute" variant="ghost">
             Ways to contribute →
           </Button>
-          <Button href="/beta" variant="ghost">
-            Join beta testing →
-          </Button>
+          {!IS_DESKTOP && (
+            <Button href="/beta" variant="ghost">
+              Join beta testing →
+            </Button>
+          )}
         </div>
-        <p className={styles.fine}>
-          Approved beta testers get unlimited interviews and agree to share
-          feedback.
-        </p>
+        {!IS_DESKTOP && (
+          <p className={styles.fine}>
+            Approved beta testers get unlimited interviews and agree to share
+            feedback.
+          </p>
+        )}
       </section>
       <Testimonials />
     </ProjectPage>

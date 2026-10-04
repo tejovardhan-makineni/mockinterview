@@ -4,7 +4,7 @@
 // InterviewConfig, Voice, Face. Backend: api/internal/profile; db:
 // store/users.go + store/config.go.
 
-import { req, BASE, authHeader } from "../http";
+import { req, apiBase, authHeader } from "../http";
 import type { Personality } from "../domain";
 import preview from "./catalog-preview.json";
 
@@ -140,7 +140,7 @@ export const profileHttp: ProfileSlice = {
         personality: req.personality,
         intensity: String(req.intensity),
       }).toString();
-      const res = await fetch(`${BASE}/api/v1/voices/preview?${qs}`, {
+      const res = await fetch(`${apiBase()}/api/v1/voices/preview?${qs}`, {
         headers: authHeader(),
       });
       if (!res.ok) return null;

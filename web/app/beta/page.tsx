@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
+import { IS_DESKTOP } from "@/lib/desktop";
 import { AppShell } from "@/components/AppShell";
 import { Button, ErrorNotice, Field, Panel } from "@/components/ui";
 import { communityApi, type BetaApplication } from "@/lib/features/community";
@@ -16,6 +17,7 @@ export default function BetaPage() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   useEffect(() => {
+    if (IS_DESKTOP) return;
     let alive = true;
     communityApi
       .betaStatus()
@@ -37,6 +39,20 @@ export default function BetaPage() {
       alive = false;
     };
   }, []);
+  if (IS_DESKTOP)
+    return (
+      <AppShell active="public">
+        <p className="eyebrow">Project testing</p>
+        <h1 className="page-title mt-3">Help improve desktop practice</h1>
+        <p className="mt-4 text-[var(--color-muted)]">
+          Desktop interviews always use your own API key. Share feedback in the
+          app, or visit the project to contribute improvements.
+        </p>
+        <Button href="/contribute" className="mt-6">
+          Ways to contribute
+        </Button>
+      </AppShell>
+    );
   const pending = application?.status === "pending";
   return (
     <AppShell active="public">

@@ -1,0 +1,136 @@
+name: Desktop packages
+
+on:
+  pull_request:
+    paths:
+      ["desktop/**", "web/**", "api/**", ".gitattributes", ".github/workflows/desktop-build.yml"]
+  workflow_dispatch:
+    inputs:
+      publish_draft:
+        description: "Upload tested installers to a draft prerelease (never publishes publicly)"
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: desktop-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  packages:
+    name: Desktop (${{ matrix.name }})
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - {
+              name: mac-arm64,
+              runner: macos-latest,
+              target: darwin,
+              arch: arm64,
+              electron_arch: arm64,
+              package: mac-arm64,
+            }
+          - {
+              name: mac-x64,
+              runner: macos-15-intel,
+              target: darwin,
+              arch: amd64,
+              electron_arch: x64,
+              package: mac,
+            }
+          - {
+              name: windows-x64,
+              runner: windows-latest,
+              target: windows,
+              arch: amd64,
+              electron_arch: x64,
+              package: win-unpacked,
+            }
+          - {
+              name: linux-x64,
+              runner: ubuntu-latest,
+              target: linux,
+              arch: amd64,
+              electron_arch: x64,
+              package: linux-unpacked,
+            }
+    runs-on: ${{ matrix.runner }}
+    defaults:
+      run:
+        working-directory: desktop
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: |
+            desktop/package-lock.json
+            web/package-lock.json
+      - uses: actions/setup-go@40f1582b2485089dde7abd97c1529aa768e1baff # v5
+        with:
+          go-version-file: api/go.mod
+          cache-dependency-path: api/go.sum
+      - run: npm ci --no-audit --no-fund
+      - run: npm ci --prefix ../web --no-audit --no-fund
+      - run: npm test
+      - run: npm audit --audit-level=high
+      - run: npm run build:runtime
+        env:
+          DESKTOP_TARGET_OS: ${{ matrix.target }}
+          DESKTOP_TARGET_ARCH: ${{ matrix.arch }}
+      - run: npm run smoke
+      - name: Package installers (sign when configured)
+        run: npm run dist -- --${{ matrix.electron_arch }}
+        env:
+          CSC_LINK: ${{ github.event_name == 'workflow_dispatch' && runner.os == 'macOS' && secrets.DESKTOP_CSC_LINK || '' }}
+          CSC_KEY_PASSWORD: ${{ github.event_name == 'workflow_dispatch' && runner.os == 'macOS' && secrets.DESKTOP_CSC_KEY_PASSWORD || '' }}
+          WIN_CSC_LINK: ${{ github.event_name == 'workflow_dispatch' && runner.os == 'Windows' && secrets.DESKTOP_WIN_CSC_LINK || '' }}
+          WIN_CSC_KEY_PASSWORD: ${{ github.event_name == 'workflow_dispatch' && runner.os == 'Windows' && secrets.DESKTOP_WIN_CSC_KEY_PASSWORD || '' }}
+          APPLE_ID: ${{ github.event_name == 'workflow_dispatch' && runner.os == 'macOS' && secrets.DESKTOP_APPLE_ID || '' }}
+          APPLE_APP_SPECIFIC_PASSWORD: ${{ github.event_name == 'workflow_dispatch' && runner.os == 'macOS' && secrets.DESKTOP_APPLE_APP_SPECIFIC_PASSWORD || '' }}
+          APPLE_TEAM_ID: ${{ github.event_name == 'workflow_dispatch' && runner.os == 'macOS' && secrets.DESKTOP_APPLE_TEAM_ID || '' }}
+      - name: Smoke test the actual packaged runtime (macOS)
+        if: runner.os == 'macOS'
+        run: node scripts/smoke.mjs "dist/${{ matrix.package }}/Mock Interview.app/Contents/Resources/runtime"
+      - name: Smoke test the actual packaged runtime (Windows/Linux)
+        if: runner.os != 'macOS'
+        run: node scripts/smoke.mjs "dist/${{ matrix.package }}/resources/runtime"
+      - run: npm run checksums
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: desktop-${{ matrix.name }}
+          retention-days: 14
+          if-no-files-found: error
+          path: |
+            desktop/dist/*.dmg
+            desktop/dist/*.zip
+            desktop/dist/*.exe
+            desktop/dist/*.AppImage
+            desktop/dist/*.deb
+            desktop/dist/SHA256SUMS.txt
+
+  draft:
+    name: Prepare GitHub draft downloads
+    if: github.event_name == 'workflow_dispatch' && inputs.publish_draft
+    needs: packages
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          pattern: desktop-*
+          path: desktop/dist
+          merge-multiple: true
+      - name: Combine checksums and create a private draft
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          node desktop/scripts/checksums.mjs desktop/dist
+          version=$(node -p 'JSON.parse(require("fs").readFileSync("desktop/package.json")).version')
+          gh release create "desktop-v${version}" desktop/dist/* --target "$GITHUB_SHA" --draft --prerelease --title "Mock Interview Desktop ${version}" --notes-file desktop/RELEASE-NOTES.md

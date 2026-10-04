@@ -11,6 +11,7 @@ import (
 	"log/slog"
 	"net/url"
 	"os"
+	"path/filepath"
 	"strconv"
 	"strings"
 	"time"
@@ -35,9 +36,13 @@ type Config struct {
 	ReleaseSHA            string
 
 	// Database
-	LocalMemory bool
-	DatabaseURL string
-	DBMaxConns  int32
+	LocalMemory        bool
+	LocalDesktop       bool
+	DesktopDBPath      string
+	DesktopWebDir      string
+	DesktopBridgeToken string
+	DatabaseURL        string
+	DBMaxConns         int32
 
 	// Auth
 	JWTSecret string
@@ -67,7 +72,10 @@ type Config struct {
 }
 
 func Load() (*Config, error) {
-	loadDotEnv() // best-effort: populate env from .env (repo root) if present
+	// Packaged apps must never pick up a developer's or another app's .env.
+	if !envBool("LOCAL_DESKTOP", false) {
+		loadDotEnv()
+	}
 
 	environment := strings.ToLower(env("APP_ENV", "development"))
 	if environment != "development" && environment != "production" {
@@ -97,6 +105,10 @@ func Load() (*Config, error) {
 		Mode:                  env("MODE", "api"),
 		CORSAllow:             splitCSV(env("CORS_ALLOW", "http://localhost:3000")),
 		LocalMemory:           envBool("LOCAL_MEMORY", false),
+		LocalDesktop:          envBool("LOCAL_DESKTOP", false),
+		DesktopDBPath:         env("DESKTOP_DB_PATH", ""),
+		DesktopWebDir:         env("DESKTOP_WEB_DIR", ""),
+		DesktopBridgeToken:    env("DESKTOP_BRIDGE_TOKEN", ""),
 		DatabaseURL:           env("DATABASE_URL", "postgres://mockinterview:mockinterview@localhost:5432/mockinterview?sslmode=disable"),
 		DBMaxConns:            int32(dbMaxConns),
 		JWTSecret:             env("JWT_SECRET", "dev-insecure-change-me"),
@@ -139,6 +151,26 @@ func Load() (*Config, error) {
 	// Force the stub when the selected provider has no key OR when explicitly
 	// requested. This lets the entire backend run/test without spending tokens.
 	c.UseStubLLM = c.LLMAPIKey == "" || envBool("USE_STUB_LLM", false)
+	if c.LocalDesktop {
+		if production || c.LocalMemory {
+			return nil, fmt.Errorf("desktop mode requires local durable storage and cannot run as a hosted deployment")
+		}
+		if !filepath.IsAbs(c.DesktopDBPath) || !filepath.IsAbs(c.DesktopWebDir) {
+			return nil, fmt.Errorf("desktop database and web paths must be absolute")
+		}
+		if len(c.DesktopBridgeToken) < 32 || len(c.JWTSecret) < 32 {
+			return nil, fmt.Errorf("desktop bridge and session secrets must be at least 32 characters")
+		}
+		key, err := base64.StdEncoding.DecodeString(c.SessionEncryptionKey)
+		if err != nil || len(key) != 32 {
+			return nil, fmt.Errorf("desktop session encryption key must encode 32 random bytes")
+		}
+		// Desktop is personal-key-only even if its parent process inherited
+		// development credentials. No platform, mail or stub provider is used.
+		c.Hosted, c.UseStubLLM = false, false
+		c.GeminiAPIKey, c.LLMAPIKey, c.LLMBaseURL = "", "", ""
+		c.ResendAPIKey, c.SMTPAddress, c.SMTPPassword = "", "", ""
+	}
 
 	if c.Mode != "api" {
 		return nil, fmt.Errorf("unsupported MODE %q", c.Mode)

@@ -5,6 +5,16 @@ import SetupPage from "../app/setup/page";
 import { api } from "./api";
 import { DEFAULT_CONFIG } from "./features/profile";
 
+const desktopMode = vi.hoisted(() => ({ enabled: false }));
+vi.mock("./desktop", () => ({
+  get IS_DESKTOP() {
+    return desktopMode.enabled;
+  },
+  desktopPreferences: () => ({
+    shareInterviewResults: false,
+    analyticsSince: 0,
+  }),
+}));
 const navigation = vi.hoisted(() => ({ push: vi.fn(), replace: vi.fn() }));
 const route = vi.hoisted(() => ({ query: "q=access-scenario" }));
 vi.mock("./api", () => ({
@@ -48,6 +58,7 @@ const user = {
 };
 let root: Root;
 beforeEach(() => {
+  desktopMode.enabled = false;
   route.query = "q=access-scenario";
   vi.stubGlobal("IS_REACT_ACT_ENVIRONMENT", true);
   document.body.innerHTML = '<div id="test-root"></div>';
@@ -142,6 +153,41 @@ function field(label: string) {
   return document.getElementById(el.htmlFor) as HTMLInputElement;
 }
 describe("hosted tester setup access", () => {
+  it("desktop requires a validated personal key and offers no hosted funding", async () => {
+    desktopMode.enabled = true;
+    sessionStorage.setItem(
+      "mi_setup_draft_access-scenario",
+      JSON.stringify({
+        funding: "platform",
+        provider: "openai",
+        model: "",
+        mode: "text",
+        minutes: 15,
+        config: DEFAULT_CONFIG,
+      }),
+    );
+    await act(async () => root.render(<SetupPage />));
+    expect(document.body.textContent).toContain(
+      "No free interviews are included",
+    );
+    expect(document.querySelector('option[value="platform"]')).toBeNull();
+    expect(document.body.textContent).not.toContain("Tester access");
+    expect(document.querySelector('a[href="/beta"]')).toBeNull();
+    await change(field("Provider"), "openai");
+    await checkDevices();
+    expect(button("Start interview").disabled).toBe(true);
+    await change(field("API key"), "desktop-test-key");
+    await act(async () => button("Check model connection").click());
+    expect(button("Start interview").disabled).toBe(false);
+    await act(async () => button("Start interview").click());
+    expect(api.createSession).toHaveBeenCalledWith(
+      expect.any(String),
+      expect.any(Object),
+      undefined,
+      expect.objectContaining({ funding: "byok", api_key: "desktop-test-key" }),
+    );
+  });
+
   it("requires a custom brief and sends free-text goals and seniority", async () => {
     route.query = "custom=1";
     await act(async () => root.render(<SetupPage />));

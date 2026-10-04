@@ -1,10 +1,12 @@
 "use client";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { IS_DESKTOP, saveDesktopPreferences } from "@/lib/desktop";
+import { DesktopModelSettings } from "@/components/DesktopModelSettings";
 import { api } from "@/lib/api";
 import { account, type User } from "@/lib/features/auth";
 import {
-  BASE,
+  apiBase,
   authHeader,
   clearPrivateBrowserData,
   errorMessage,
@@ -53,7 +55,7 @@ export default function Settings() {
     }
   }
   async function exportAccount() {
-    const response = await fetch(BASE + "/api/v1/account/export", {
+    const response = await fetch(apiBase() + "/api/v1/account/export", {
       headers: authHeader(),
     });
     if (!response.ok)
@@ -70,7 +72,9 @@ export default function Settings() {
   return (
     <AppShell active="settings">
       <p className="eyebrow">Make yourself at home</p>
-      <h1 className="page-title mt-3">Account & preferences</h1>
+      <h1 className="page-title mt-3">
+        {IS_DESKTOP ? "App & preferences" : "Account & preferences"}
+      </h1>
       {error && (
         <div className="mt-6">
           <ErrorNotice message={error} />
@@ -82,6 +86,11 @@ export default function Settings() {
         </p>
       )}
       <div className="mt-7 grid gap-5 lg:grid-cols-2">
+        {IS_DESKTOP && (
+          <Panel className="p-6">
+            <DesktopModelSettings />
+          </Panel>
+        )}
         <Panel className="p-6">
           <h2 className="mb-4 text-lg font-semibold">
             Help improve the project
@@ -89,16 +98,22 @@ export default function Settings() {
           <AnalyticsSettings userId={user?.id} />
         </Panel>
         <Panel className="p-6">
-          <h2 className="text-lg font-semibold">Your account</h2>
-          <p className="mt-3 text-sm">{user?.email ?? "Loading account…"}</p>
+          <h2 className="text-lg font-semibold">
+            {IS_DESKTOP ? "Your local profile" : "Your account"}
+          </h2>
+          <p className="mt-3 text-sm">
+            {IS_DESKTOP
+              ? "Saved on this computer. No online account is needed for practice."
+              : (user?.email ?? "Loading account…")}
+          </p>
           <p className="mt-2 text-xs text-[var(--color-muted)]">
-            {user?.email_verified === false
+            {!IS_DESKTOP && user?.email_verified === false
               ? "Email verification needed for hosted practice."
               : user
                 ? "Account ready."
                 : ""}
           </p>
-          {user?.email_verified === false && (
+          {!IS_DESKTOP && user?.email_verified === false && (
             <Button
               className="mt-4"
               variant="ghost"
@@ -149,47 +164,49 @@ export default function Settings() {
             </Button>
           </form>
         </Panel>
-        <Panel className="p-6">
-          <h2 className="text-lg font-semibold">Change your password</h2>
-          <p className="mt-2 text-sm text-[var(--color-muted)]">
-            Other signed-in sessions will be invalidated.
-          </p>
-          <form
-            className="mt-5 space-y-4"
-            onSubmit={(e) => {
-              e.preventDefault();
-              void action(async () => {
-                await account.change(oldPassword, password);
-                setOldPassword("");
-                setPassword("");
-                setNotice("Your password was changed.");
-              });
-            }}
-          >
-            <Field label="Current password">
-              <Input
-                type="password"
-                autoComplete="current-password"
-                value={oldPassword}
-                onChange={(e) => setOldPassword(e.target.value)}
-                required
-              />
-            </Field>
-            <Field label="New password · at least 12 characters">
-              <Input
-                type="password"
-                autoComplete="new-password"
-                minLength={12}
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-              />
-            </Field>
-            <Button type="submit" variant="ghost" disabled={busy}>
-              Change password
-            </Button>
-          </form>
-        </Panel>
+        {!IS_DESKTOP && (
+          <Panel className="p-6">
+            <h2 className="text-lg font-semibold">Change your password</h2>
+            <p className="mt-2 text-sm text-[var(--color-muted)]">
+              Other signed-in sessions will be invalidated.
+            </p>
+            <form
+              className="mt-5 space-y-4"
+              onSubmit={(e) => {
+                e.preventDefault();
+                void action(async () => {
+                  await account.change(oldPassword, password);
+                  setOldPassword("");
+                  setPassword("");
+                  setNotice("Your password was changed.");
+                });
+              }}
+            >
+              <Field label="Current password">
+                <Input
+                  type="password"
+                  autoComplete="current-password"
+                  value={oldPassword}
+                  onChange={(e) => setOldPassword(e.target.value)}
+                  required
+                />
+              </Field>
+              <Field label="New password · at least 12 characters">
+                <Input
+                  type="password"
+                  autoComplete="new-password"
+                  minLength={12}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                />
+              </Field>
+              <Button type="submit" variant="ghost" disabled={busy}>
+                Change password
+              </Button>
+            </form>
+          </Panel>
+        )}
         <Panel className="p-6">
           <h2 className="text-lg font-semibold">Your data</h2>
           <p className="mt-3 text-sm text-[var(--color-muted)]">
@@ -214,6 +231,10 @@ export default function Settings() {
                 onClick={() => {
                   document.documentElement.dataset.theme = theme;
                   localStorage.setItem("mi_theme", theme);
+                  if (IS_DESKTOP)
+                    void saveDesktopPreferences({
+                      theme: theme as "light" | "dark",
+                    }).catch((e) => setError(errorMessage(e)));
                 }}
               >
                 {theme === "light" ? "Light" : "Dark"}
@@ -221,46 +242,58 @@ export default function Settings() {
             ))}
           </div>
         </Panel>
-        <Panel className="p-6">
-          <h2 className="text-lg font-semibold">Delete your account</h2>
-          <p className="mt-3 text-sm text-[var(--color-muted)]">
-            Permanently delete your account, resumes, interview content and
-            feedback. This cannot be undone. Export anything you want to keep
-            first. A minimal record of interview starts is retained for the
-            seven-day allowance window; deleting an account does not reset it.
-          </p>
-          {confirm ? (
-            <div className="mt-5 space-y-3">
-              <p role="alert" className="text-sm font-semibold">
-                Delete your account and interview content?
-              </p>
+        {IS_DESKTOP ? (
+          <Panel className="p-6">
+            <h2 className="text-lg font-semibold">Local storage</h2>
+            <p className="mt-3 text-sm text-[var(--color-muted)]">
+              Your interviews, reports and settings are saved in this app’s
+              local database. Use History to delete individual interviews or
+              export your records above. Optional shared copies have a separate
+              delete control.
+            </p>
+          </Panel>
+        ) : (
+          <Panel className="p-6">
+            <h2 className="text-lg font-semibold">Delete your account</h2>
+            <p className="mt-3 text-sm text-[var(--color-muted)]">
+              Permanently delete your account, resumes, interview content and
+              feedback. This cannot be undone. Export anything you want to keep
+              first. A minimal record of interview starts is retained for the
+              seven-day allowance window; deleting an account does not reset it.
+            </p>
+            {confirm ? (
+              <div className="mt-5 space-y-3">
+                <p role="alert" className="text-sm font-semibold">
+                  Delete your account and interview content?
+                </p>
+                <Button
+                  variant="danger"
+                  disabled={busy}
+                  onClick={() =>
+                    void action(async () => {
+                      await api.deleteAccount();
+                      clearPrivateBrowserData();
+                      router.replace("/");
+                    })
+                  }
+                >
+                  Yes, delete my account
+                </Button>
+                <Button variant="ghost" onClick={() => setConfirm(false)}>
+                  Keep my account
+                </Button>
+              </div>
+            ) : (
               <Button
                 variant="danger"
-                disabled={busy}
-                onClick={() =>
-                  void action(async () => {
-                    await api.deleteAccount();
-                    clearPrivateBrowserData();
-                    router.replace("/");
-                  })
-                }
+                className="mt-5"
+                onClick={() => setConfirm(true)}
               >
-                Yes, delete my account
+                Delete account…
               </Button>
-              <Button variant="ghost" onClick={() => setConfirm(false)}>
-                Keep my account
-              </Button>
-            </div>
-          ) : (
-            <Button
-              variant="danger"
-              className="mt-5"
-              onClick={() => setConfirm(true)}
-            >
-              Delete account…
-            </Button>
-          )}
-        </Panel>
+            )}
+          </Panel>
+        )}
       </div>
     </AppShell>
   );

@@ -20,8 +20,8 @@ export default function GetStarted() {
         eyebrow="Get started"
         title="Your next practice starts here."
       >
-        Use the hosted app, or run your own copy. Start with a free text demo on
-        your computer and add the pieces you need.
+        Practice in your browser, use the desktop app with your own AI key, or
+        build a local copy from source.
       </ProjectHeading>
       <div className={styles.docsGrid}>
         <article className={styles.card}>
@@ -53,10 +53,20 @@ export default function GetStarted() {
         </article>
       </div>
       <section className={styles.section}>
+        <div className={styles.callout}>
+          <h2>Prefer a desktop app?</h2>See the available macOS, Windows and
+          Linux packages on our download page. The desktop app saves history
+          locally and requires your own AI key.
+          <div className={styles.actions}>
+            <Button href="/downloads">Desktop downloads →</Button>
+          </div>
+        </div>
+      </section>
+      <section className={styles.section}>
         <div className={styles.sectionHead}>
           <div>
             <p className="eyebrow">03 / On your computer</p>
-            <h2>Local setup, without the guesswork.</h2>
+            <h2>For contributors: run from source.</h2>
           </div>
         </div>
         <LocalSetup />
@@ -101,10 +111,10 @@ export default function GetStarted() {
       <div className={styles.section}>
         <div className={styles.callout}>
           <h2>A local web app, on every platform.</h2>These instructions run the
-          app in your browser. Signed macOS, Windows and Linux desktop
-          installers are not available yet. Local demo data is temporary; choose
-          PostgreSQL for durable history. Optional analytics sharing is separate
-          from your local history.
+          app in your browser. Desktop package availability is listed on the
+          Downloads page. Local demo data is temporary; choose PostgreSQL for
+          durable history. Optional analytics sharing is separate from your
+          local history.
         </div>
       </div>
       <ProjectResources />

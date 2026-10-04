@@ -8,6 +8,7 @@ import {
 } from "@/lib/features/catalog";
 import type { Profession } from "@/lib/features/profile";
 import { errorMessage } from "@/lib/http";
+import { IS_DESKTOP } from "@/lib/desktop";
 import { AppShell } from "@/components/AppShell";
 import { Badge, Button, ErrorNotice, Field, Panel } from "@/components/ui";
 const pretty = (s: string) =>
@@ -116,8 +117,8 @@ export default function Catalog() {
           <p className="mt-3 max-w-3xl text-[var(--color-muted)]">
             Explore career families, find your profession, and practice with a
             specialist AI interviewer. Prepare for your first job, a career
-            change, or your next step. Hosted practice is for adults 18 and
-            older.
+            change, or your next step.{" "}
+            {!IS_DESKTOP && "Hosted practice is for adults 18 and older."}
           </p>
         </div>
         <div className="flex flex-wrap gap-3">
@@ -280,7 +281,7 @@ export default function Catalog() {
             ? "Loading interviews…"
             : error
               ? "The interview bank could not load."
-              : `${filtered.length} ${filtered.length === 1 ? "scenario" : "scenarios"} · open to explore before signing in`}
+              : `${filtered.length} ${filtered.length === 1 ? "scenario" : "scenarios"} · ${IS_DESKTOP ? "practice with your own AI key" : "open to explore before signing in"}`}
           {IS_MOCK &&
             !loading &&
             !error &&

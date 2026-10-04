@@ -1,17 +1,25 @@
-import { BASE, getToken } from "./http";
+import { apiBase, getToken } from "./http";
+import {
+  IS_DESKTOP,
+  desktopPreferences,
+  saveDesktopPreferences,
+} from "./desktop";
 import type { Report } from "./features/interview";
 import { api, IS_MOCK } from "./api";
 
 export const ANALYTICS_VERSION = "2026-10-04";
-export const REMOTE_ANALYTICS_BASE =
-  process.env.NEXT_PUBLIC_ANALYTICS_API_BASE || "";
+export const REMOTE_ANALYTICS_BASE = IS_DESKTOP
+  ? "/desktop/remote"
+  : process.env.NEXT_PUBLIC_ANALYTICS_API_BASE || "";
 let remoteToken = "";
 let remoteLocalToken = "";
+let remoteAccount = "";
 let generation = 0;
 const inFlight = new Set<string>();
 const pendingUploads = new Set<Promise<Response>>();
 const preferenceKey = (uid: string) => "mi_analytics_" + uid;
 export function analyticsSince(uid: string): number {
+  if (IS_DESKTOP) return desktopPreferences().analyticsSince;
   try {
     return Number(localStorage.getItem(preferenceKey(uid))) || 0;
   } catch {
@@ -20,6 +28,7 @@ export function analyticsSince(uid: string): number {
 }
 export function setAnalyticsConsent(uid: string, enabled: boolean) {
   generation++;
+  if (IS_DESKTOP) return saveDesktopPreferences({ shareAnalytics: enabled });
   try {
     if (enabled) localStorage.setItem(preferenceKey(uid), String(Date.now()));
     else localStorage.removeItem(preferenceKey(uid));
@@ -29,7 +38,8 @@ export function setAnalyticsConsent(uid: string, enabled: boolean) {
   window.dispatchEvent(new Event("mi-analytics-change"));
 }
 export function analyticsTarget() {
-  const base = REMOTE_ANALYTICS_BASE || BASE;
+  if (IS_DESKTOP) return apiBase() + "/desktop/remote";
+  const base = REMOTE_ANALYTICS_BASE || (IS_DESKTOP ? "" : apiBase());
   try {
     const url = new URL(base);
     if (
@@ -48,7 +58,8 @@ export function analyticsTarget() {
 }
 export function analyticsConnected() {
   return (
-    !REMOTE_ANALYTICS_BASE || (!!remoteToken && remoteLocalToken === getToken())
+    (!REMOTE_ANALYTICS_BASE && !IS_DESKTOP) ||
+    (!!remoteToken && remoteLocalToken === getToken())
   );
 }
 export async function connectAnalytics(email: string, password: string) {
@@ -67,6 +78,8 @@ export async function connectAnalytics(email: string, password: string) {
     );
   const result = await response.json();
   if (!result.token) throw new Error("The server did not return a session.");
+  generation++;
+  remoteAccount = result.user?.id || email.toLowerCase();
   remoteToken = result.token;
   remoteLocalToken = getToken();
   window.dispatchEvent(new Event("mi-analytics-change"));
@@ -94,6 +107,7 @@ export async function deleteSharedAnalytics() {
 }
 export function disconnectAnalytics() {
   remoteToken = "";
+  remoteAccount = "";
   remoteLocalToken = "";
   generation++;
   window.dispatchEvent(new Event("mi-analytics-change"));
@@ -164,13 +178,19 @@ export async function syncAnalytics(uid: string) {
         ].includes(item.status)
       )
         continue;
-      const key = `mi_analytics_sent_${uid}_${item.id}_${item.status}`;
+      const key = `mi_analytics_sent_${uid}_${remoteAccount}_${item.id}_${item.status}`;
       try {
         if (localStorage.getItem(key)) continue;
       } catch {}
       const session = await api.getSession(item.id);
+      const includeReport =
+        !IS_DESKTOP ||
+        (desktopPreferences().shareInterviewResults &&
+          created >= desktopPreferences().resultsSince);
       const report =
-        item.status === "complete" ? await api.getReport(item.id) : undefined;
+        item.status === "complete" && includeReport
+          ? await api.getReport(item.id)
+          : undefined;
       const metrics = session.runtime_metrics;
       // Old server versions cannot supply accurate operational metrics.
       // Leave this upload eligible for a later visit after the API update.
@@ -186,7 +206,7 @@ export async function syncAnalytics(uid: string) {
           consent: true,
           consent_version: ANALYTICS_VERSION,
           client_session_id: item.id,
-          source: REMOTE_ANALYTICS_BASE ? "local" : "web",
+          source: IS_DESKTOP || REMOTE_ANALYTICS_BASE ? "local" : "web",
           status:
             item.status === "feedback_failed"
               ? "failed"
@@ -225,4 +245,35 @@ export async function syncAnalytics(uid: string) {
   } finally {
     inFlight.delete(uid);
   }
+}
+
+export function analyticsIdentity() {
+  return remoteAccount;
+}
+export async function setResultsConsent(enabled: boolean) {
+  generation++;
+  await saveDesktopPreferences({ shareInterviewResults: enabled });
+}
+/** Only an explicit action sends a message copy. Analytics consent is unrelated. */
+export async function sendProjectCopy(
+  path: "/api/v1/feedback" | "/api/v1/community/templates",
+  payload: unknown,
+) {
+  if (!IS_DESKTOP || !REMOTE_ANALYTICS_BASE || !analyticsConnected())
+    throw new Error(
+      "Connect your hosted account in Settings to send a project copy.",
+    );
+  const response = await fetch(analyticsTarget() + path, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: "Bearer " + remoteToken,
+    },
+    body: JSON.stringify(payload),
+    signal: AbortSignal.timeout(8000),
+  });
+  if (!response.ok)
+    throw new Error(
+      "The project service did not confirm delivery. Your local copy is saved.",
+    );
 }

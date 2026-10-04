@@ -1,4 +1,5 @@
 "use client";
+import Link from "next/link";
 import { Suspense, useCallback, useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { api, IS_MOCK } from "@/lib/api";
@@ -15,7 +16,13 @@ import {
   RequiredFeedbackNotice,
   useRequiredFeedback,
 } from "@/components/RequiredFeedbackNotice";
-import { ApiError, errorMessage } from "@/lib/http";
+import { IS_DESKTOP } from "@/lib/desktop";
+import {
+  ApiError,
+  errorMessage,
+  getDesktopModel,
+  setDesktopModel,
+} from "@/lib/http";
 import { AnalyticsSettings } from "@/components/AnalyticsSettings";
 import { AppShell } from "@/components/AppShell";
 import {
@@ -80,7 +87,9 @@ function Setup() {
   const [mode, setMode] = useState<"voice" | "text">(
     IS_MOCK ? "text" : "voice",
   );
-  const [funding, setFunding] = useState<"platform" | "byok">("platform");
+  const [funding, setFunding] = useState<"platform" | "byok">(
+    IS_DESKTOP ? "byok" : "platform",
+  );
   const [provider, setProvider] = useState("gemini");
   const [model, setModel] = useState("");
   const [key, setKey] = useState("");
@@ -101,6 +110,13 @@ function Setup() {
     (async () => {
       try {
         const draft = readSetupDraft(draftKey);
+        const savedModel = getDesktopModel();
+        if (savedModel) {
+          setProvider(savedModel.provider);
+          setModel(savedModel.model);
+          setKey(savedModel.apiKey);
+          if (savedModel.provider !== "gemini") setMode("text");
+        }
         if (isCustom && draft?.custom) setCustom(draft.custom);
         const q: QuestionSummary = await (async () => {
           if (isCustom)
@@ -157,7 +173,7 @@ function Setup() {
         );
         if (draft) {
           setMode(draft.mode);
-          setFunding(draft.funding);
+          setFunding(IS_DESKTOP ? "byok" : draft.funding);
           setProvider(draft.provider);
           setModel(draft.model);
           if (draft.funding === "byok")
@@ -315,6 +331,8 @@ function Setup() {
       });
       setKeyValid(r.valid);
       if (r.valid && r.model) setModel(r.model);
+      if (r.valid)
+        setDesktopModel({ provider, model: r.model || model, apiKey: key });
       setNotice(
         r.valid
           ? mode === "voice"
@@ -337,7 +355,7 @@ function Setup() {
       const options: SessionOptions = {
         minutes,
         mode,
-        funding,
+        funding: IS_DESKTOP ? "byok" : funding,
         custom: isCustom ? custom : undefined,
         voice_processing_acknowledged: mode === "voice" && voiceAcknowledged,
         ...(funding === "byok"
@@ -386,9 +404,9 @@ function Setup() {
     );
   return (
     <AppShell active="interview">
-      <a href="/interviews" className="text-sm text-[var(--color-muted)]">
+      <Link href="/interviews" className="text-sm text-[var(--color-muted)]">
         ← All interviews
-      </a>
+      </Link>
       {pending && (
         <RequiredFeedbackNotice
           pending={pending}
@@ -762,19 +780,19 @@ function Setup() {
                       onChange={(e) => setVoiceAcknowledged(e.target.checked)}
                     />
                     <span>
-                      When I start, my microphone audio will stream to
-                      mockinterview and Google Gemini for this AI conversation,
-                      and my transcript will be saved. I will speak in a private
-                      space without recording other people. I can choose text
-                      above instead.{" "}
-                      <a
+                      {IS_DESKTOP
+                        ? "When I start, my microphone audio will stream through this local app to Google Gemini, and my transcript will be saved on this computer."
+                        : "When I start, my microphone audio will stream to mockinterview and Google Gemini for this AI conversation, and my transcript will be saved."}{" "}
+                      I will speak in a private space without recording other
+                      people. I can choose text above instead.{" "}
+                      <Link
                         href="/privacy"
                         className="underline"
                         target="_blank"
                         rel="noopener"
                       >
                         Privacy details
-                      </a>
+                      </Link>
                     </span>
                   </label>
                 )}
@@ -791,15 +809,15 @@ function Setup() {
           {error && <ErrorNotice message={error} />}
           {user && stage === "setup" && (
             <Panel className="p-6">
-              <AnalyticsSettings userId={user.id} />
+              <AnalyticsSettings userId={user.id} compact={IS_DESKTOP} />
             </Panel>
           )}
           <p className="text-xs text-[var(--color-muted)]">
             This is AI practice, not a hiring decision or professional
             certification.{" "}
-            <a href="/privacy" className="underline">
+            <Link href="/privacy" className="underline">
               How your data is used
-            </a>
+            </Link>
           </p>
         </div>
         <aside className="space-y-5">
@@ -831,23 +849,31 @@ function Setup() {
               </div>
             )}
             <div className="mt-6 space-y-4 border-t border-[var(--color-line)] pt-5">
-              <Field label="Practice access">
-                <select
-                  value={funding}
-                  onChange={(e) => {
-                    setFunding(e.target.value as "platform" | "byok");
-                    setKeyValid(false);
-                  }}
-                  className="field-select"
-                >
-                  <option value="platform">
-                    {usage?.local_unlimited
-                      ? "Local model / demo"
-                      : "Free · Gemini 2.5 Flash"}
-                  </option>
-                  <option value="byok">Use my model & API key</option>
-                </select>
-              </Field>
+              {IS_DESKTOP ? (
+                <div className="notice text-sm">
+                  Your API key is required. Interviews and reports save on this
+                  computer; cloud AI needs internet. No free interviews are
+                  included in the desktop app.
+                </div>
+              ) : (
+                <Field label="Practice access">
+                  <select
+                    value={funding}
+                    onChange={(e) => {
+                      setFunding(e.target.value as "platform" | "byok");
+                      setKeyValid(false);
+                    }}
+                    className="field-select"
+                  >
+                    <option value="platform">
+                      {usage?.local_unlimited
+                        ? "Local model / demo"
+                        : "Free · Gemini 2.5 Flash"}
+                    </option>
+                    <option value="byok">Use my model & API key</option>
+                  </select>
+                </Field>
+              )}
               {funding === "byok" && (
                 <div className="space-y-4">
                   <Field label="Provider">
@@ -881,7 +907,7 @@ function Setup() {
                         setPaidBilling(false);
                         setKeyValid(false);
                       }}
-                      placeholder="Used only for this attempt"
+                      placeholder="Your provider API key"
                     />
                   </Field>
                   <Field label="Model ID · optional">
@@ -953,46 +979,50 @@ function Setup() {
                 </div>
               )}
               <div className="notice">
-                {!user
-                  ? "Sign in to see your practice allowance."
-                  : !usage
-                    ? "Checking your practice allowance…"
-                    : usage?.local_unlimited
-                      ? "Local installation · no product practice limit."
-                      : usage?.tester_unlimited
-                        ? "Tester access · unlimited interviews."
-                        : blocked
-                          ? "Next available: " +
-                            date(
-                              availableAt
-                                ? new Date(availableAt).toISOString()
-                                : undefined,
-                            )
-                          : funding === "platform"
-                            ? "Your daily free interview is available."
-                            : "Your key · unlimited interviews."}
+                {IS_DESKTOP
+                  ? "Your key · no app interview limit. Provider charges apply."
+                  : !user
+                    ? "Sign in to see your practice allowance."
+                    : !usage
+                      ? "Checking your practice allowance…"
+                      : usage?.local_unlimited
+                        ? "Local installation · no product practice limit."
+                        : usage?.tester_unlimited
+                          ? "Tester access · unlimited interviews."
+                          : blocked
+                            ? "Next available: " +
+                              date(
+                                availableAt
+                                  ? new Date(availableAt).toISOString()
+                                  : undefined,
+                              )
+                            : funding === "platform"
+                              ? "Your daily free interview is available."
+                              : "Your key · unlimited interviews."}
               </div>
-              {user?.email_verified === false && !usage?.local_unlimited && (
-                <div className="notice">
-                  <p>Verify your email before starting.</p>
-                  <Button
-                    variant="ghost"
-                    className="mt-3"
-                    onClick={() => {
-                      void account
-                        .resend()
-                        .then(() =>
-                          setNotice(
-                            "Verification requested. Check your inbox.",
-                          ),
-                        )
-                        .catch((e) => setError(errorMessage(e)));
-                    }}
-                  >
-                    Resend verification
-                  </Button>
-                </div>
-              )}
+              {!IS_DESKTOP &&
+                user?.email_verified === false &&
+                !usage?.local_unlimited && (
+                  <div className="notice">
+                    <p>Verify your email before starting.</p>
+                    <Button
+                      variant="ghost"
+                      className="mt-3"
+                      onClick={() => {
+                        void account
+                          .resend()
+                          .then(() =>
+                            setNotice(
+                              "Verification requested. Check your inbox.",
+                            ),
+                          )
+                          .catch((e) => setError(errorMessage(e)));
+                      }}
+                    >
+                      Resend verification
+                    </Button>
+                  </div>
+                )}
               {stage === "setup" ? (
                 <Button
                   className="w-full"
@@ -1018,23 +1048,29 @@ function Setup() {
                     user?.policies_required ||
                     (mode === "voice" && !voiceAcknowledged) ||
                     (funding === "byok" && !keyValid) ||
-                    (user?.email_verified === false && !usage?.local_unlimited)
+                    (!IS_DESKTOP &&
+                      user?.email_verified === false &&
+                      !usage?.local_unlimited)
                   }
                 >
                   {busy ? "Preparing interview…" : "Start interview →"}
                 </Button>
               )}
               <p className="text-center text-xs text-[var(--color-muted)]">
-                Checks do not consume your allowance.
+                {IS_DESKTOP
+                  ? "Connection checks may make a small billable request."
+                  : "Checks do not consume your allowance."}
               </p>
               {blocked && (
                 <Button href="/contribute" variant="ghost" className="w-full">
                   Run locally for more practice
                 </Button>
               )}
-              <a className="block text-center text-sm underline" href="/beta">
-                Join the beta · help improve practice
-              </a>
+              {!IS_DESKTOP && (
+                <a className="block text-center text-sm underline" href="/beta">
+                  Join the beta · help improve practice
+                </a>
+              )}
               {usage?.active_session_id && (
                 <Button
                   href={"/interview?s=" + usage.active_session_id}

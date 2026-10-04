@@ -24,7 +24,7 @@ if not isinstance(hosting,dict) or hosting.get('site') != sys.argv[2] or hosting
 PY
   cd "$BUILD_DIR/web"
   npm ci
-  APP_ENV=production NEXT_PUBLIC_MOCK=0 NEXT_PUBLIC_API_BASE="$WEB_API_BASE" NEXT_PUBLIC_RELEASE_SHA="$RELEASE_SHA" npm run build
+  APP_ENV=production NEXT_PUBLIC_DESKTOP=0 NEXT_PUBLIC_MOCK=0 NEXT_PUBLIC_API_BASE="$WEB_API_BASE" NEXT_PUBLIC_RELEASE_SHA="$RELEASE_SHA" npm run build
   cd "$BUILD_DIR"
   # Do not catch arbitrary site-create errors or touch another application's site.
   firebase hosting:channel:deploy "$CHANNEL" --no-authorized-domains --expires 7d --project "$FIREBASE_PROJECT"
