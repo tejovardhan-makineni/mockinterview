@@ -19,13 +19,13 @@ export default function Updates() {
       <article className={styles.release}>
         <div>
           <span className={styles.releaseState}>
-            Unreleased · source update
+            October 4, 2026 · project release
           </span>
         </div>
         <div>
           <h3>A more open, more personal practice experience</h3>
           <p>
-            The next project update makes it easier to discover, run and
+            This project update makes it easier to discover, run and
             contribute to mockinterview.
           </p>
           <ul>
@@ -54,8 +54,8 @@ export default function Updates() {
             </li>
           </ul>
           <p className="mt-4">
-            This entry describes source changes. It does not claim a production
-            deployment or native desktop release.
+            Available in the hosted web app and source checkout. Local setup
+            uses Node.js and Go; signed desktop installers are not included.
           </p>
           <a
             href={PROJECT.github + "/blob/main/CHANGELOG.md"}

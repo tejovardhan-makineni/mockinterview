@@ -32,7 +32,7 @@ async function fixture(t) {
   );
   await writeFile(
     resolve(root, "node_modules/example/LICENSE"),
-    "Actual fixture copyright and permission text.\n",
+    "Actual fixture copyright and permission text. \t\r\nSecond license line. \n",
   );
   await mkdir(resolve(root, "node_modules/example/dist/compiled/component"), {
     recursive: true,
@@ -51,6 +51,8 @@ test("deterministic notices preserve text, compiled notices and missing-text war
   assert.equal(first.text, second.text);
   assert.equal(first.packageCount, 2);
   assert.match(first.text, /Actual fixture copyright and permission text\./);
+  assert.match(first.text, /permission text\.\nSecond license line\./);
+  assert.doesNotMatch(first.text, /[\t ]+$/m);
   assert.match(first.text, /Preserve bundled component attribution\./);
   assert.match(first.text, /LICENSE TEXTS REQUIRING MAINTAINER REVIEW/);
   assert.match(first.warnings[0], /missing-text@1\.0\.0/);

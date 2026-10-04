@@ -33,7 +33,8 @@ jobs:
         working-directory: web
         run: |
           npm ci --no-audit --no-fund
-          npm audit --audit-level=high
+          node --test scripts/security-audit.test.mjs
+          node scripts/security-audit.mjs
   secrets:
     name: Secret scan
     runs-on: ubuntu-latest

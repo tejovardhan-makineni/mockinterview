@@ -4,7 +4,7 @@ Source changes are recorded separately from verified deployments. Dates on older
 release records describe the deployments verified by those records, not a claim
 that the current source has been deployed.
 
-## Unreleased
+## 2026-10-04 — Open source practice and community
 
 ### Project and community
 
@@ -30,8 +30,8 @@ that the current source has been deployed.
   authenticated remote API is configured. Failed optional uploads do not block
   practice. This is not automatic backup or cross-device history sync.
 
-No hosted deployment or signed desktop installer is included in this source
-update. Validate and stage the exact revision before publishing it.
+The web app and API are released together after staged validation. Local setup
+uses the source launcher; signed desktop installers are not included.
 
 ## 2026-09-14 — Interview bank expansion
 
