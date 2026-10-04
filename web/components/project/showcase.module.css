@@ -1,0 +1,269 @@
+.showcase {
+  position: relative;
+  min-width: 0;
+  overflow: hidden;
+  border: 1px solid #ffffff20;
+  border-radius: 24px;
+  background:
+    radial-gradient(ellipse at 100% 5%, #42674f80, transparent 65%),
+    linear-gradient(150deg, #244a35, #183a2b 65%);
+  color: #f0f5eb;
+  box-shadow:
+    0 28px 55px -35px #193d2c90,
+    0 2px 3px #193d2c0a;
+}
+.topline {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 19px 24px;
+  border-bottom: 1px solid #ffffff14;
+  font-size: 10px;
+  color: #c3d6c7;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.roomLabel {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+.roomMark {
+  width: 9px;
+  height: 9px;
+  border-radius: 3px;
+  border: 1px solid #d4e5c5;
+  box-shadow: 3px 3px 0 #d4e5c53d;
+}
+.selectorRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 18px 24px 0;
+}
+.selectorRow select {
+  width: auto;
+  max-width: 100%;
+  min-width: 0;
+  min-height: 36px;
+  padding: 6px 9px;
+  border: 1px solid #ffffff2b;
+  border-radius: 8px;
+  background: #193c2b;
+  color: #e3eedf;
+  font-size: 12px;
+  cursor: pointer;
+}
+.selectorRow select option {
+  color: #e3eedf;
+  background: #193c2b;
+}
+.coverage {
+  font-size: 10px;
+  color: #b7cfbc;
+  white-space: nowrap;
+}
+.stage {
+  padding: 24px 26px 20px;
+  animation: enter 0.4s ease-out;
+}
+.profession {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  min-height: 57px;
+}
+.professionIcon {
+  width: 47px;
+  height: 47px;
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  border-radius: 14px;
+  background: #d9e8cf12;
+  border: 1px solid #d9e8cf25;
+  color: #d8ebc9;
+}
+.family {
+  color: #bfd2c1;
+  font-size: 10px;
+  line-height: 1.4;
+  margin-bottom: 5px;
+}
+.profession h2 {
+  font-size: clamp(18px, 1.9vw, 23px);
+  font-weight: 530;
+  letter-spacing: -0.03em;
+  line-height: 1.15;
+}
+.scenario {
+  margin-top: 26px;
+}
+.scenarioLabel {
+  color: #b9cebb;
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+.scenario h3 {
+  min-height: 2.8em;
+  margin: 10px 0 10px;
+  font-size: 21px;
+  line-height: 1.35;
+  font-weight: 480;
+  letter-spacing: -0.025em;
+}
+.scenario p {
+  min-height: 5.1em;
+  color: #d5e2d2;
+  font-size: 13px;
+  line-height: 1.7;
+}
+.details {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 7px;
+  margin-top: 18px;
+  min-height: 27px;
+}
+.details span {
+  border: 1px solid #ffffff24;
+  background: #ffffff08;
+  color: #e1eade;
+  padding: 4px 8px;
+  border-radius: 5px;
+  font-size: 10px;
+  line-height: 1.5;
+}
+.activity {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin-top: 17px;
+  color: #d8ebc9;
+  font-size: 12px;
+}
+.activity svg {
+  flex-shrink: 0;
+}
+.bottomline {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 13px 19px 13px 26px;
+  background: #071e121c;
+  border-top: 1px solid #ffffff17;
+}
+.tryLink {
+  color: #e7f0df;
+  font-size: 12px;
+  font-weight: 600;
+  text-decoration: none;
+  padding-block: 12px;
+}
+.tryLink:hover {
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+.tryLink span {
+  margin-left: 8px;
+  color: #bad4a8;
+}
+.controls {
+  display: flex;
+  gap: 2px;
+}
+.controls button {
+  width: 40px;
+  min-height: 44px;
+  display: grid;
+  place-items: center;
+  border-radius: 9px;
+  color: #d7e4d0;
+  transition: background 0.15s;
+}
+.controls button:hover {
+  background: #ffffff10;
+}
+.controls button:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+.showcase :is(select, button, a):focus-visible {
+  outline: 2px solid #dcf3c5;
+  outline-offset: 3px;
+}
+.progress {
+  height: 3px;
+  background: #ffffff0c;
+}
+.progress span {
+  display: block;
+  height: 100%;
+  width: 0;
+  background: #a4c28d;
+}
+.progress span[data-running="true"] {
+  animation: progress 7s linear forwards;
+}
+@keyframes enter {
+  from {
+    opacity: 0;
+    transform: translateY(7px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@keyframes progress {
+  from {
+    width: 0;
+  }
+  to {
+    width: 100%;
+  }
+}
+@media (max-width: 700px) {
+  .stage {
+    padding: 22px;
+  }
+  .topline {
+    padding: 17px 22px;
+  }
+  .selectorRow {
+    padding-inline: 22px;
+  }
+  .selectorRow select {
+    font-size: 16px;
+    min-height: 44px;
+  }
+  .scenario h3 {
+    font-size: 20px;
+    min-height: 4.05em;
+  }
+  .scenario p {
+    min-height: 6.8em;
+  }
+  .coverage {
+    display: none;
+  }
+  .profession h2 {
+    font-size: 22px;
+  }
+  .bottomline {
+    padding-left: 22px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .stage,
+  .progress span {
+    animation: none;
+  }
+}

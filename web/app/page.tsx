@@ -3,6 +3,7 @@ import { Button } from "@/components/ui";
 import { ProjectPage } from "@/components/project/Project";
 import { CommunityIcons } from "@/components/project/CommunityIcons";
 import { Testimonials } from "@/components/project/Testimonials";
+import { InterviewShowcase } from "@/components/project/InterviewShowcase";
 import styles from "@/components/project/project.module.css";
 
 export default function Home() {
@@ -30,37 +31,7 @@ export default function Home() {
           </div>
           <CommunityIcons className="mt-5" />
         </div>
-        <div
-          className={styles.preview}
-          aria-label="Illustrative interview conversation"
-        >
-          <div className={styles.previewTop}>
-            <span>mockinterview / practice room</span>
-            <span>Example</span>
-          </div>
-          <div className={styles.previewBody}>
-            <span className={styles.previewLabel}>Your AI interviewer</span>
-            <h2>
-              “What did you consider, and why did you choose that approach?”
-            </h2>
-            <div className={styles.answer}>
-              A space to explain your thinking.
-              <br />A follow-up that goes a little deeper.
-              <br />
-              Feedback you can put into practice.
-            </div>
-            <div className={styles.previewTools}>
-              <span>Speak or type</span>
-              <span>Sketch an idea</span>
-              <span>Review your code</span>
-            </div>
-          </div>
-          <div className={styles.previewNote}>
-            Your profession. Your level. Your learning goal.
-            <br />
-            Choose a template, or create a practice interview of your own.
-          </div>
-        </div>
+        <InterviewShowcase />
       </section>
       <section className={styles.section}>
         <div className={styles.sectionHead}>
