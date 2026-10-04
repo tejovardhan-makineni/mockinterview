@@ -31,8 +31,14 @@ updates:
       codeql-actions:
         patterns: ["github/codeql-action/*"]
         update-types: [major, minor, patch]
+      artifact-actions:
+        patterns: ["actions/upload-artifact", "actions/download-artifact"]
+        update-types: [major, minor, patch]
       compatible-updates:
-        exclude-patterns: ["github/codeql-action/*"]
+        exclude-patterns:
+          - "github/codeql-action/*"
+          - "actions/upload-artifact"
+          - "actions/download-artifact"
         update-types: [minor, patch]
   - package-ecosystem: npm
     directory: /desktop
