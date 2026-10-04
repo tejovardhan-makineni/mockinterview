@@ -6,6 +6,8 @@ import { api, IS_MOCK } from "@/lib/api";
 import { Button } from "./ui";
 import { syncAnalytics, disconnectAnalytics } from "@/lib/analytics";
 import { FeedbackWidget } from "./FeedbackWidget";
+import { CommunityIconLink } from "./project/CommunityIcons";
+export { SOURCE_URL } from "@/lib/project";
 export type NavKey =
   | "dashboard"
   | "interview"
@@ -15,21 +17,16 @@ export type NavKey =
   | "settings"
   | "contribute"
   | "public";
-export const SOURCE_URL =
-  "https://github.com/tejovardhan-makineni/mockinterview";
 export function Footer() {
   return (
-    <footer className="no-print mx-auto flex max-w-[1160px] flex-wrap items-center justify-between gap-4 border-t border-[var(--color-line)] px-6 py-6 text-xs text-[var(--color-muted)]">
-      <span>MIT licensed. Practice, improve, contribute.</span>
+    <footer className="no-print mx-auto flex max-w-[1160px] flex-wrap items-center justify-end gap-4 border-t border-[var(--color-line)] px-6 py-6 text-xs text-[var(--color-muted)]">
       <nav aria-label="Information" className="flex flex-wrap gap-5">
         <Link href="/privacy">Privacy</Link>
         <Link href="/terms">Terms</Link>
         <Link href="/docs">Docs</Link>
         <Link href="/get-started">Get started</Link>
         <Link href="/updates">Updates</Link>
-        <Link href="/about">About</Link>
         <Link href="/beta">Join beta</Link>
-        <a href={SOURCE_URL}>Source</a>
         <a href="/third-party-notices.txt">Licenses</a>
       </nav>
     </footer>
@@ -106,7 +103,7 @@ export function AppShell({
             <nav aria-label="Main" className="flex gap-1">
               {[
                 { label: "Practice", href: "/interviews" },
-                { label: "History", href: "/results" },
+                ...(signedIn ? [{ label: "History", href: "/results" }] : []),
                 { label: "Docs", href: "/docs" },
                 { label: "Contribute", href: "/contribute" },
               ].map((n) => (
@@ -126,6 +123,7 @@ export function AppShell({
               ))}
             </nav>
           </div>
+          <CommunityIconLink community="github" />
           {signedIn ? (
             <details className="relative">
               <summary className="px-2 py-2 text-sm">Account</summary>
