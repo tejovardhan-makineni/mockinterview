@@ -1,21 +1,22 @@
 name: Desktop packages
 
 on:
+  push:
+    branches: [main]
   pull_request:
-    paths:
-      ["desktop/**", "web/**", "api/**", ".gitattributes", ".github/workflows/desktop-build.yml"]
   workflow_dispatch:
+  workflow_call:
     inputs:
-      publish_draft:
-        description: "Upload tested installers to a draft prerelease (never publishes publicly)"
-        type: boolean
-        default: false
+      release_version:
+        description: "Validated version from the protected desktop release workflow"
+        type: string
+        default: ""
 
 permissions:
   contents: read
 
 concurrency:
-  group: desktop-${{ github.ref }}
+  group: desktop-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
@@ -58,6 +59,12 @@ jobs:
               package: linux-unpacked,
             }
     runs-on: ${{ matrix.runner }}
+    environment: ${{ inputs.release_version != '' && 'desktop-release' || 'desktop-preview' }}
+    env:
+      RELEASE_VERSION: ${{ inputs.release_version }}
+      RELEASE_SHA: ${{ github.sha }}
+      DESKTOP_ARTIFACT_NAME: desktop-${{ matrix.name }}
+      DESKTOP_PACKAGE_DIR: ${{ matrix.package }}
     defaults:
       run:
         working-directory: desktop
@@ -78,6 +85,32 @@ jobs:
       - run: npm ci --prefix ../web --no-audit --no-fund
       - run: npm test
       - run: npm audit --audit-level=high
+      - name: Set explicit release version in this disposable checkout
+        if: inputs.release_version != ''
+        shell: bash
+        run: |
+          test "$GITHUB_REPOSITORY" = tejovardhan-makineni/mockinterview
+          test "$GITHUB_REF" = refs/heads/main
+          node --input-type=module -e 'import {parseVersion} from "../scripts/release-policy.mjs"; parseVersion(process.env.RELEASE_VERSION)'
+          npm version "$RELEASE_VERSION" --no-git-tag-version --ignore-scripts
+      - name: Require signing configuration for public builds
+        if: inputs.release_version != ''
+        shell: bash
+        env:
+          MAC_CERT: ${{ secrets.DESKTOP_CSC_LINK }}
+          MAC_PASSWORD: ${{ secrets.DESKTOP_CSC_KEY_PASSWORD }}
+          APPLE_ID: ${{ secrets.DESKTOP_APPLE_ID }}
+          APPLE_PASSWORD: ${{ secrets.DESKTOP_APPLE_APP_SPECIFIC_PASSWORD }}
+          APPLE_TEAM: ${{ secrets.DESKTOP_APPLE_TEAM_ID }}
+          WIN_CERT: ${{ secrets.DESKTOP_WIN_CSC_LINK }}
+          WIN_PASSWORD: ${{ secrets.DESKTOP_WIN_CSC_KEY_PASSWORD }}
+          WIN_PUBLISHER: ${{ vars.DESKTOP_WINDOWS_PUBLISHER }}
+        run: |
+          if [ "$RUNNER_OS" = macOS ]; then
+            test -n "$MAC_CERT" && test -n "$MAC_PASSWORD" && test -n "$APPLE_ID" && test -n "$APPLE_PASSWORD" && test -n "$APPLE_TEAM"
+          elif [ "$RUNNER_OS" = Windows ]; then
+            test -n "$WIN_CERT" && test -n "$WIN_PASSWORD" && test -n "$WIN_PUBLISHER"
+          fi
       - run: npm run build:runtime
         env:
           DESKTOP_TARGET_OS: ${{ matrix.target }}
@@ -86,23 +119,42 @@ jobs:
       - name: Package installers (sign when configured)
         run: npm run dist -- --${{ matrix.electron_arch }}
         env:
-          CSC_LINK: ${{ github.event_name == 'workflow_dispatch' && runner.os == 'macOS' && secrets.DESKTOP_CSC_LINK || '' }}
-          CSC_KEY_PASSWORD: ${{ github.event_name == 'workflow_dispatch' && runner.os == 'macOS' && secrets.DESKTOP_CSC_KEY_PASSWORD || '' }}
-          WIN_CSC_LINK: ${{ github.event_name == 'workflow_dispatch' && runner.os == 'Windows' && secrets.DESKTOP_WIN_CSC_LINK || '' }}
-          WIN_CSC_KEY_PASSWORD: ${{ github.event_name == 'workflow_dispatch' && runner.os == 'Windows' && secrets.DESKTOP_WIN_CSC_KEY_PASSWORD || '' }}
-          APPLE_ID: ${{ github.event_name == 'workflow_dispatch' && runner.os == 'macOS' && secrets.DESKTOP_APPLE_ID || '' }}
-          APPLE_APP_SPECIFIC_PASSWORD: ${{ github.event_name == 'workflow_dispatch' && runner.os == 'macOS' && secrets.DESKTOP_APPLE_APP_SPECIFIC_PASSWORD || '' }}
-          APPLE_TEAM_ID: ${{ github.event_name == 'workflow_dispatch' && runner.os == 'macOS' && secrets.DESKTOP_APPLE_TEAM_ID || '' }}
+          CSC_LINK: ${{ inputs.release_version != '' && github.ref == 'refs/heads/main' && runner.os == 'macOS' && secrets.DESKTOP_CSC_LINK || '' }}
+          CSC_KEY_PASSWORD: ${{ inputs.release_version != '' && github.ref == 'refs/heads/main' && runner.os == 'macOS' && secrets.DESKTOP_CSC_KEY_PASSWORD || '' }}
+          WIN_CSC_LINK: ${{ inputs.release_version != '' && github.ref == 'refs/heads/main' && runner.os == 'Windows' && secrets.DESKTOP_WIN_CSC_LINK || '' }}
+          WIN_CSC_KEY_PASSWORD: ${{ inputs.release_version != '' && github.ref == 'refs/heads/main' && runner.os == 'Windows' && secrets.DESKTOP_WIN_CSC_KEY_PASSWORD || '' }}
+          APPLE_ID: ${{ inputs.release_version != '' && github.ref == 'refs/heads/main' && runner.os == 'macOS' && secrets.DESKTOP_APPLE_ID || '' }}
+          APPLE_APP_SPECIFIC_PASSWORD: ${{ inputs.release_version != '' && github.ref == 'refs/heads/main' && runner.os == 'macOS' && secrets.DESKTOP_APPLE_APP_SPECIFIC_PASSWORD || '' }}
+          APPLE_TEAM_ID: ${{ inputs.release_version != '' && github.ref == 'refs/heads/main' && runner.os == 'macOS' && secrets.DESKTOP_APPLE_TEAM_ID || '' }}
       - name: Smoke test the actual packaged runtime (macOS)
         if: runner.os == 'macOS'
         run: node scripts/smoke.mjs "dist/${{ matrix.package }}/Mock Interview.app/Contents/Resources/runtime"
       - name: Smoke test the actual packaged runtime (Windows/Linux)
         if: runner.os != 'macOS'
         run: node scripts/smoke.mjs "dist/${{ matrix.package }}/resources/runtime"
+      - name: Notarize and staple public macOS disk images
+        if: inputs.release_version != '' && runner.os == 'macOS'
+        shell: bash
+        env:
+          APPLE_ID: ${{ secrets.DESKTOP_APPLE_ID }}
+          APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.DESKTOP_APPLE_APP_SPECIFIC_PASSWORD }}
+          APPLE_TEAM_ID: ${{ secrets.DESKTOP_APPLE_TEAM_ID }}
+        run: |
+          for image in dist/*.dmg; do
+            xcrun notarytool submit "$image" --apple-id "$APPLE_ID" --password "$APPLE_APP_SPECIFIC_PASSWORD" --team-id "$APPLE_TEAM_ID" --wait
+            xcrun stapler staple "$image"
+          done
+      - name: Verify platform signatures and record release evidence
+        if: inputs.release_version != ''
+        run: node scripts/verify-signing.mjs
+        env:
+          DESKTOP_WINDOWS_PUBLISHER: ${{ vars.DESKTOP_WINDOWS_PUBLISHER }}
+          APPLE_TEAM_ID: ${{ secrets.DESKTOP_APPLE_TEAM_ID }}
       - run: npm run checksums
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: desktop-${{ matrix.name }}
+          overwrite: true
           retention-days: 14
           if-no-files-found: error
           path: |
@@ -112,25 +164,4 @@ jobs:
             desktop/dist/*.AppImage
             desktop/dist/*.deb
             desktop/dist/SHA256SUMS.txt
-
-  draft:
-    name: Prepare GitHub draft downloads
-    if: github.event_name == 'workflow_dispatch' && inputs.publish_draft
-    needs: packages
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write
-    steps:
-      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
-      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
-        with:
-          pattern: desktop-*
-          path: desktop/dist
-          merge-multiple: true
-      - name: Combine checksums and create a private draft
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          node desktop/scripts/checksums.mjs desktop/dist
-          version=$(node -p 'JSON.parse(require("fs").readFileSync("desktop/package.json")).version')
-          gh release create "desktop-v${version}" desktop/dist/* --target "$GITHUB_SHA" --draft --prerelease --title "Mock Interview Desktop ${version}" --notes-file desktop/RELEASE-NOTES.md
+            desktop/dist/SIGNING-VERIFICATION.json

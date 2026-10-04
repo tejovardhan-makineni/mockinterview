@@ -1,0 +1,83 @@
+name: Release desktop
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "New desktop version, e.g. 0.1.0-beta.2 or 1.0.0"
+        type: string
+        required: true
+permissions:
+  contents: read
+concurrency:
+  group: mockinterview-desktop-release
+  cancel-in-progress: false
+jobs:
+  validate:
+    if: github.repository == 'tejovardhan-makineni/mockinterview' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      actions: read
+      security-events: read
+    env:
+      GH_TOKEN: ${{ github.token }}
+      RELEASE_SHA: ${{ github.sha }}
+      RELEASE_COMPONENT: desktop
+      RELEASE_VERSION: ${{ inputs.version }}
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: "22"
+      - run: node scripts/github-release.mjs gate
+      - run: node scripts/github-release.mjs version
+  packages:
+    needs: validate
+    uses: ./.github/workflows/desktop-build.yml
+    with:
+      release_version: ${{ inputs.version }}
+    secrets: inherit
+  publish:
+    needs: [validate, packages]
+    runs-on: ubuntu-latest
+    environment: desktop-release
+    permissions:
+      contents: write
+      actions: write
+      security-events: read
+    env:
+      GH_TOKEN: ${{ github.token }}
+      RELEASE_VERSION: ${{ inputs.version }}
+      RELEASE_SHA: ${{ github.sha }}
+      RELEASE_COMPONENT: desktop
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: "22"
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          pattern: desktop-*
+          path: release-input
+      - name: Verify native signing receipts and installer hashes
+        run: node desktop/scripts/release-assets.mjs release-input release-assets
+      - name: Stage release before making it public
+        run: |
+          node scripts/github-release.mjs current
+          node scripts/github-release.mjs create-tag
+          gh release create "desktop-v$RELEASE_VERSION" release-assets/* --verify-tag --draft --title "Desktop $RELEASE_VERSION" --generate-notes
+          node scripts/github-release.mjs verify-assets
+      - name: Publish verified release
+        shell: bash
+        run: |
+          node scripts/github-release.mjs gate --required
+          node scripts/github-release.mjs verify-tag
+          args=(--draft=false --latest=false)
+          if [[ "$RELEASE_VERSION" == *-* ]]; then args+=(--prerelease); fi
+          gh release edit "desktop-v$RELEASE_VERSION" "${args[@]}"
+      - name: Refresh website download links without changing its version
+        run: gh workflow run deploy.yml --ref main

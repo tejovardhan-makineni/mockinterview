@@ -1,2 +1,3 @@
 # License supplements are verified byte-for-byte during every platform build.
+# Preserve pinned LF bytes even when Windows checks out with core.autocrlf=true.
 web/licenses/**/*.txt text eol=lf

@@ -13,6 +13,7 @@ import {
 } from "@/lib/http";
 import { AnalyticsSettings } from "@/components/AnalyticsSettings";
 import { AppShell } from "@/components/AppShell";
+import { AppVersion } from "@/components/AppVersion";
 import { Button, Field, Input, Panel, ErrorNotice } from "@/components/ui";
 export default function Settings() {
   const router = useRouter();
@@ -75,6 +76,9 @@ export default function Settings() {
       <h1 className="page-title mt-3">
         {IS_DESKTOP ? "App & preferences" : "Account & preferences"}
       </h1>
+      <p className="mt-3 text-xs text-[var(--color-muted)]">
+        <AppVersion showBuild />
+      </p>
       {error && (
         <div className="mt-6">
           <ErrorNotice message={error} />

@@ -7,6 +7,7 @@
     "node": ">=22.13.0"
   },
   "scripts": {
+    "audit:security": "node ../scripts/security-audit.mjs mobile",
     "start": "expo start --go",
     "android": "expo start --go --android",
     "ios": "expo start --go --ios",

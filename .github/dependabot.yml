@@ -9,7 +9,7 @@ updates:
       compatible-updates:
         update-types: [minor, patch]
     ignore:
-      - dependency-name: '*'
+      - dependency-name: "*"
         update-types: [version-update:semver-major]
   - package-ecosystem: npm
     directory: /web
@@ -20,7 +20,7 @@ updates:
       compatible-updates:
         update-types: [minor, patch]
     ignore:
-      - dependency-name: '*'
+      - dependency-name: "*"
         update-types: [version-update:semver-major]
   - package-ecosystem: github-actions
     directory: /
@@ -30,3 +30,25 @@ updates:
     groups:
       compatible-updates:
         update-types: [minor, patch]
+  - package-ecosystem: npm
+    directory: /mobile
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 3
+    groups:
+      compatible-updates:
+        update-types: [minor, patch]
+    ignore:
+      - dependency-name: "*"
+        update-types: [version-update:semver-major]
+  - package-ecosystem: npm
+    directory: /desktop
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 3
+    groups:
+      compatible-updates:
+        update-types: [minor, patch]
+    ignore:
+      - dependency-name: "*"
+        update-types: [version-update:semver-major]

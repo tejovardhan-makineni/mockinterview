@@ -10,6 +10,7 @@
   "main": "src/main.mjs",
   "repository": "https://github.com/tejovardhan-makineni/mockinterview",
   "scripts": {
+    "audit:security": "node ../scripts/security-audit.mjs desktop",
     "start": "electron .",
     "build:runtime": "node scripts/prepare.mjs",
     "test": "node --test test/*.test.mjs",

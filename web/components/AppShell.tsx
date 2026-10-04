@@ -8,6 +8,8 @@ import { Button } from "./ui";
 import { syncAnalytics, disconnectAnalytics } from "@/lib/analytics";
 import { FeedbackWidget } from "./FeedbackWidget";
 import { CommunityIconLink, CommunityIcons } from "./project/CommunityIcons";
+import { ProfileMenu } from "./ProfileMenu";
+import { AppVersion } from "./AppVersion";
 export { SOURCE_URL } from "@/lib/project";
 export type NavKey =
   | "dashboard"
@@ -21,7 +23,10 @@ export type NavKey =
 export function Footer() {
   return (
     <footer className="no-print mx-auto flex max-w-[1160px] flex-wrap items-center justify-end gap-4 border-t border-[var(--color-line)] px-6 py-6 text-xs text-[var(--color-muted)]">
-      {IS_DESKTOP && <CommunityIcons className="mr-auto" />}
+      <div className="mr-auto flex flex-wrap items-center gap-4">
+        <AppVersion />
+        {IS_DESKTOP && <CommunityIcons />}
+      </div>
       <nav aria-label="Information" className="flex flex-wrap gap-5">
         <Link href="/privacy">Privacy</Link>
         <Link href="/terms">Terms</Link>
@@ -128,43 +133,25 @@ export function AppShell({
           </div>
           <CommunityIconLink community="github" />
           {signedIn ? (
-            <details className="relative">
-              <summary className="px-2 py-2 text-sm">
-                {IS_DESKTOP ? "Settings" : "Account"}
-              </summary>
-              <div className="absolute right-0 z-50 mt-2 w-44 rounded-xl border border-[var(--color-line)] bg-[var(--color-panel)] p-2 shadow-lg">
-                <Link href="/settings" className="block rounded-lg p-3 text-sm">
-                  Settings
-                </Link>
-                <Link
-                  href="/resume-review"
-                  className="block rounded-lg p-3 text-sm"
-                >
-                  Resume review
-                </Link>
-                {admin && (
-                  <Link href="/admin" className="block rounded-lg p-3 text-sm">
-                    Admin portal
-                  </Link>
-                )}
-                {!IS_DESKTOP && (
-                  <button
-                    className="w-full rounded-lg p-3 text-left text-sm"
-                    onClick={() => {
-                      void Promise.resolve(api.logout())
-                        .catch(() => {})
-                        .finally(() => {
-                          disconnectAnalytics();
-                          setSignedIn(false);
-                          router.replace("/");
-                        });
-                    }}
-                  >
-                    Sign out
-                  </button>
-                )}
-              </div>
-            </details>
+            <ProfileMenu
+              admin={admin}
+              settingsActive={active === "settings"}
+              onLogout={
+                IS_DESKTOP
+                  ? undefined
+                  : async () => {
+                      try {
+                        await api.logout();
+                      } catch {
+                        // Local credentials are cleared even when offline.
+                      } finally {
+                        disconnectAnalytics();
+                        setSignedIn(false);
+                        router.replace("/");
+                      }
+                    }
+              }
+            />
           ) : IS_DESKTOP ? (
             <span className="text-xs" role="status">
               Opening local profile…

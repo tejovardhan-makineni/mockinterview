@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"crypto/subtle"
 	"io"
+	"io/fs"
 	"net/http"
 	"os"
 	"path"
@@ -96,9 +97,8 @@ func desktopAssets(root string) http.Handler {
 			http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 			return
 		}
-		name := path.Clean("/" + r.URL.Path)
-		// Unknown API paths must never turn into an HTML page.
-		if strings.HasPrefix(name, "/api/") || strings.ContainsRune(name, '\\') {
+		name, valid := desktopAssetName(r.URL.Path)
+		if !valid {
 			http.NotFound(w, r)
 			return
 		}
@@ -110,10 +110,6 @@ func desktopAssets(root string) http.Handler {
 			return
 		}
 		defer files.Close()
-		name = strings.TrimPrefix(name, "/")
-		if name == "" {
-			name = "."
-		}
 		info, err := files.Stat(name)
 		if err == nil && info.IsDir() {
 			name = path.Join(name, "index.html")
@@ -129,6 +125,42 @@ func desktopAssets(root string) http.Handler {
 			return
 		}
 		defer file.Close()
+		// A file can change between Stat and Open. Confinement is enforced by
+		// Root.Open; type and response metadata must describe the opened file.
+		info, err = file.Stat()
+		if err != nil || !info.Mode().IsRegular() {
+			http.NotFound(w, r)
+			return
+		}
 		http.ServeContent(w, r, info.Name(), info.ModTime(), file)
 	})
+}
+
+// URL.Path is already percent-decoded by net/http. Reject traversal rather than
+// cleaning it into a different public resource. The same names must be safe on
+// Unix and Windows; colons, backslashes and trailing dots/spaces otherwise have
+// platform-specific drive, alternate-stream or normalization meanings.
+func desktopAssetName(urlPath string) (string, bool) {
+	if urlPath == "/" {
+		return ".", true
+	}
+	if !strings.HasPrefix(urlPath, "/") || strings.ContainsAny(urlPath, "\\:\x00") {
+		return "", false
+	}
+	name := strings.TrimSuffix(strings.TrimPrefix(urlPath, "/"), "/")
+	if !fs.ValidPath(name) {
+		return "", false
+	}
+	segments := strings.Split(name, "/")
+	// A missing API/proxy endpoint must never fall back to static HTML,
+	// including on Windows where a differently-cased name may resolve.
+	if strings.EqualFold(segments[0], "api") || strings.EqualFold(segments[0], "desktop") {
+		return "", false
+	}
+	for _, segment := range segments {
+		if strings.HasSuffix(segment, ".") || strings.HasSuffix(segment, " ") {
+			return "", false
+		}
+	}
+	return name, true
 }

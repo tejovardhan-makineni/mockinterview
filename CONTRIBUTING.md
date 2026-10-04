@@ -11,7 +11,8 @@ Start with `node scripts/local.mjs`, the Docker-free temporary demo, or follow
 [the persistent local setup guide](docs/LOCAL-SETUP.md) to keep your history. The development demo needs no API key or mail account. Real-provider
 checks are optional and billable; never put keys or real candidate records in a PR.
 
-Choose a focused change and open a branch or fork. A small fix does not need an
+Choose a focused change and open a short-lived branch or fork. Target `main`
+(the primary branch; there is no `master`). A small fix does not need an
 issue first. For a new workspace or broad format, use the format proposal issue
 to explain the candidate task, interviewer role and feedback you intend to support.
 
@@ -77,6 +78,10 @@ and screenshots when useful. Explain migrations and recovery for durable-state
 changes. Never use real resumes, transcripts, provider keys or customer data in
 fixtures. Contributor submissions use the project's MIT license unless an
 explicit compatible exception is documented and approved.
+
+Routine PRs do not bump web or desktop versions. Maintainers select versions
+explicitly through the release workflows; see [branching and releases](docs/BRANCHING-AND-RELEASES.md).
+Required checks and unresolved security findings must be addressed before merge.
 
 ## Audience and privacy boundaries
 

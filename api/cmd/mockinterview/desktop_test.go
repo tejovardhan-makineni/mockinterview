@@ -104,32 +104,117 @@ func TestDesktopBootstrapAndPersonalKeyOnly(t *testing.T) {
 
 func TestDesktopAssetsServeExportWithoutDirectoryListing(t *testing.T) {
 	root := t.TempDir()
-	outside := filepath.Join(t.TempDir(), "outside.txt")
-	if err := os.WriteFile(outside, []byte("private data"), 0600); err != nil {
-		t.Fatal(err)
+	for name, content := range map[string]string{
+		"index.html":            "home page",
+		"setup/index.html":      "interview setup",
+		"_next/static/chunk.js": "export const interview = true;",
+		"api/index.html":        "must not serve API fallback",
+		"desktop/index.html":    "must not serve proxy fallback",
+		"empty/.keep":           "directory entries must not be listed",
+	} {
+		file := filepath.Join(root, filepath.FromSlash(name))
+		if err := os.MkdirAll(filepath.Dir(file), 0700); err != nil {
+			t.Fatal(err)
+		}
+		if err := os.WriteFile(file, []byte(content), 0600); err != nil {
+			t.Fatal(err)
+		}
 	}
-	if err := os.MkdirAll(filepath.Join(root, "setup"), 0700); err != nil {
-		t.Fatal(err)
-	}
-	if err := os.WriteFile(filepath.Join(root, "setup", "index.html"), []byte("interview setup"), 0600); err != nil {
-		t.Fatal(err)
-	}
+	handler := desktopAssets(root)
 	for _, tc := range []struct {
-		path   string
-		status int
-	}{{"/setup/", 200}, {"/api/v1/missing", 404}, {"/", 404}, {"/missing", 404}, {"/../../outside", 404}} {
-		w := httptest.NewRecorder()
-		desktopAssets(root).ServeHTTP(w, httptest.NewRequest("GET", tc.path, nil))
-		if w.Code != tc.status {
-			t.Fatalf("%s: %d", tc.path, w.Code)
+		method, target, rangeHeader, body string
+		status                            int
+	}{
+		{"GET", "/", "", "home page", 200},
+		{"GET", "/setup/", "", "interview setup", 200},
+		{"GET", "/setup", "", "interview setup", 200},
+		{"GET", "/_next/static/chunk.js?v=123", "", "export const interview = true;", 200},
+		{"HEAD", "/setup/", "", "", 200},
+		{"GET", "/setup/", "bytes=0-8", "interview", 206},
+		{"POST", "/setup/", "", "", 405},
+		{"GET", "/empty/", "", "", 404},
+		{"GET", "/missing", "", "", 404},
+		{"GET", "/api", "", "", 404},
+		{"GET", "/api/", "", "", 404},
+		{"GET", "/API/index.html", "", "", 404},
+		{"GET", "/api/v1/missing", "", "", 404},
+		{"GET", "/desktop/remote/missing", "", "", 404},
+		{"GET", "/desktop/index.html", "", "", 404},
+		{"GET", "/../../index.html", "", "", 404},
+		{"GET", "/setup/../index.html", "", "", 404},
+		{"GET", "/setup/%2e%2e/index.html", "", "", 404},
+		{"GET", "/setup/%2E%2E%2findex.html", "", "", 404},
+		{"GET", "/setup/%2e/index.html", "", "", 404},
+		{"GET", "/setup%5c..%5cindex.html", "", "", 404},
+		{"GET", "/C:%5cWindows%5cwin.ini", "", "", 404},
+		{"GET", "/index.html::$DATA", "", "", 404},
+		{"GET", "/setup./index.html", "", "", 404},
+		{"GET", "/setup%20/index.html", "", "", 404},
+		{"GET", "/%00index.html", "", "", 404},
+		{"GET", "/setup//index.html", "", "", 404},
+	} {
+		t.Run(tc.method+" "+tc.target+" "+tc.rangeHeader, func(t *testing.T) {
+			r := httptest.NewRequest(tc.method, tc.target, nil)
+			r.Header.Set("Range", tc.rangeHeader)
+			w := httptest.NewRecorder()
+			handler.ServeHTTP(w, r)
+			if w.Code != tc.status {
+				t.Fatalf("status %d, want %d: %s", w.Code, tc.status, w.Body.String())
+			}
+			if tc.status < 300 && w.Body.String() != tc.body {
+				t.Fatalf("body %q, want %q", w.Body.String(), tc.body)
+			}
+		})
+	}
+}
+
+func TestDesktopAssetsConfineSymlinksAndDirectoryIndexes(t *testing.T) {
+	root, outside := t.TempDir(), t.TempDir()
+	if err := os.WriteFile(filepath.Join(outside, "index.html"), []byte("private data"), 0600); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(root, "public.txt"), []byte("bundled data"), 0600); err != nil {
+		t.Fatal(err)
+	}
+	for _, link := range []struct{ name, target string }{
+		{"external.txt", filepath.Join(outside, "index.html")},
+		{"external-directory", outside},
+		{"safe-alias.txt", "public.txt"},
+		{"loop", "loop"},
+	} {
+		if err := os.Symlink(link.target, filepath.Join(root, link.name)); err != nil {
+			t.Skipf("symlink creation unavailable on this runner: %v", err)
 		}
 	}
-	if err := os.Symlink(outside, filepath.Join(root, "linked.txt")); err == nil {
+	if err := os.Mkdir(filepath.Join(root, "linked-index"), 0700); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.Symlink(filepath.Join(outside, "index.html"), filepath.Join(root, "linked-index", "index.html")); err != nil {
+		t.Fatal(err)
+	}
+	handler := desktopAssets(root)
+	for _, tc := range []struct {
+		target string
+		status int
+	}{
+		{"/external.txt", 404}, {"/external-directory/", 404},
+		{"/external-directory/index.html", 404}, {"/linked-index/", 404},
+		{"/loop", 404}, {"/safe-alias.txt", 200},
+	} {
 		w := httptest.NewRecorder()
-		desktopAssets(root).ServeHTTP(w, httptest.NewRequest("GET", "/linked.txt", nil))
-		if w.Code != 404 || strings.Contains(w.Body.String(), "private data") {
-			t.Fatal("static handler followed a symlink outside packaged assets")
+		handler.ServeHTTP(w, httptest.NewRequest("GET", tc.target, nil))
+		if w.Code != tc.status || strings.Contains(w.Body.String(), "private data") {
+			t.Fatalf("%s: %d %s", tc.target, w.Code, w.Body.String())
 		}
+	}
+}
+
+func TestDesktopAssetsFailClosedWhenRootIsUnavailable(t *testing.T) {
+	root := filepath.Join(t.TempDir(), "missing-root")
+	w := httptest.NewRecorder()
+	desktopAssets(root).ServeHTTP(w, httptest.NewRequest("GET", "/", nil))
+	if w.Code != 503 {
+		t.Fatalf("status %d", w.Code)
 	}
 }
 
