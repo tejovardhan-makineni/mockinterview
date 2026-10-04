@@ -3,7 +3,7 @@ name: Desktop packages
 on:
   pull_request:
     paths:
-      ["desktop/**", "web/**", "api/**", ".github/workflows/desktop-build.yml"]
+      ["desktop/**", "web/**", "api/**", ".gitattributes", ".github/workflows/desktop-build.yml"]
   workflow_dispatch:
     inputs:
       publish_draft:
@@ -86,13 +86,13 @@ jobs:
       - name: Package installers (sign when configured)
         run: npm run dist -- --${{ matrix.electron_arch }}
         env:
-          CSC_LINK: ${{ github.event_name == 'workflow_dispatch' && secrets.DESKTOP_CSC_LINK || '' }}
-          CSC_KEY_PASSWORD: ${{ github.event_name == 'workflow_dispatch' && secrets.DESKTOP_CSC_KEY_PASSWORD || '' }}
-          WIN_CSC_LINK: ${{ github.event_name == 'workflow_dispatch' && secrets.DESKTOP_WIN_CSC_LINK || '' }}
-          WIN_CSC_KEY_PASSWORD: ${{ github.event_name == 'workflow_dispatch' && secrets.DESKTOP_WIN_CSC_KEY_PASSWORD || '' }}
-          APPLE_ID: ${{ github.event_name == 'workflow_dispatch' && secrets.DESKTOP_APPLE_ID || '' }}
-          APPLE_APP_SPECIFIC_PASSWORD: ${{ github.event_name == 'workflow_dispatch' && secrets.DESKTOP_APPLE_APP_SPECIFIC_PASSWORD || '' }}
-          APPLE_TEAM_ID: ${{ github.event_name == 'workflow_dispatch' && secrets.DESKTOP_APPLE_TEAM_ID || '' }}
+          CSC_LINK: ${{ github.event_name == 'workflow_dispatch' && runner.os == 'macOS' && secrets.DESKTOP_CSC_LINK || '' }}
+          CSC_KEY_PASSWORD: ${{ github.event_name == 'workflow_dispatch' && runner.os == 'macOS' && secrets.DESKTOP_CSC_KEY_PASSWORD || '' }}
+          WIN_CSC_LINK: ${{ github.event_name == 'workflow_dispatch' && runner.os == 'Windows' && secrets.DESKTOP_WIN_CSC_LINK || '' }}
+          WIN_CSC_KEY_PASSWORD: ${{ github.event_name == 'workflow_dispatch' && runner.os == 'Windows' && secrets.DESKTOP_WIN_CSC_KEY_PASSWORD || '' }}
+          APPLE_ID: ${{ github.event_name == 'workflow_dispatch' && runner.os == 'macOS' && secrets.DESKTOP_APPLE_ID || '' }}
+          APPLE_APP_SPECIFIC_PASSWORD: ${{ github.event_name == 'workflow_dispatch' && runner.os == 'macOS' && secrets.DESKTOP_APPLE_APP_SPECIFIC_PASSWORD || '' }}
+          APPLE_TEAM_ID: ${{ github.event_name == 'workflow_dispatch' && runner.os == 'macOS' && secrets.DESKTOP_APPLE_TEAM_ID || '' }}
       - name: Smoke test the actual packaged runtime (macOS)
         if: runner.os == 'macOS'
         run: node scripts/smoke.mjs "dist/${{ matrix.package }}/Mock Interview.app/Contents/Resources/runtime"
