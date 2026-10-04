@@ -13,7 +13,7 @@ flowchart LR
   API --> DB[(PostgreSQL)]
   API --> Provider[Selected text and feedback model]
   API --> Gemini[Gemini native live audio]
-  Local[Local web or mobile practice] -->|explicit consent + separate sign-in| Analytics[Private analytics endpoint]
+  Local[Desktop or local web practice] -->|explicit consent + separate sign-in| Analytics[Private analytics endpoint]
   Analytics --> DB
   Owner[Verified owner + stored admin role] --> Admin[Private admin portal]
   Admin --> API
@@ -28,7 +28,9 @@ Production uses PostgreSQL and real model providers. A development-only
 `LOCAL_MEMORY=true` runtime implements the same store contract in memory and
 binds to loopback; accounts and results disappear when the process exits. The
 cross-platform launcher makes this temporary mode explicit. Native PostgreSQL and
-Docker provide persistent local alternatives. Neither is a signed desktop app.
+Docker provide persistent local web alternatives. The packaged desktop app uses
+the same practice UI and Go API with a bundled SQLite database and requires a
+personal model key. See [desktop architecture and packaging](DESKTOP.md).
 
 ## Low-level feature boundaries
 
@@ -113,7 +115,7 @@ results:
 |---|---|---|
 | `beta_applications` | UUID primary key; unique `user_id` FK; bounded motivation; required true feedback commitment; commitment timestamp; pending/approved/rejected; reviewer and review time | One application per account, explicit commitment and review trail |
 | `template_requests` | UUID primary key; user FK; bounded profession, goal, free-text level and description; new/planned/shipped/closed; reviewer/time; recent index | Private product requests without adding unreviewed catalog entries |
-| `shared_interview_results` | UUID primary key; user FK; unique `(user_id, source, client_session_id)`; web/local/mobile; consent version/time; bounded JSON payload; created/updated times; recent index | Idempotent consented result snapshots, separate from hosted session records |
+| `shared_interview_results` | UUID primary key; user FK; unique `(user_id, source, client_session_id)`; web/local client sources; consent version/time; bounded JSON payload; created/updated times; recent index | Idempotent consented result snapshots, separate from hosted session records |
 
 Each account FK cascades on account deletion. Reviewer FKs become null when a
 reviewer is deleted. Export includes the user's participation and shared records;
@@ -176,12 +178,15 @@ separate from the AI assessment. See [metric definitions](FEEDBACK-METRICS.md) f
 response versions, non-response and score interpretation. Do not treat a missing
 survey answer as a favorable experience or a failed assessment as a zero score.
 
-Optional central sharing from local web/mobile apps requires an explicitly
+Optional central sharing from local web installations requires an explicitly
 configured HTTPS API, a separate sign-in, and the default-off **Share analytics**
-choice. User-facing copy stays short; details belong in Privacy. Remote sharing credentials stay in memory. Mobile consent resets when the app
-closes; web consent is stored per local account in that browser until disabled.
-Local web clients must reconnect their remote account after the page closes. The client
-sends best-effort uploads and catches network failures so local practice continues.
+choice. Desktop sharing uses the bundled local API bridge and separate default-off
+analytics and result-sharing preferences. User-facing copy stays short; details
+belong in Privacy. Remote sharing credentials stay in memory. Web consent is
+stored per local account in that browser; desktop consent is saved on the computer.
+Both remain off until enabled and can be withdrawn. Clients must reconnect their
+remote account after closing or reloading. Uploads are best-effort; network
+failures do not block local practice.
 There is no guaranteed upload queue, backup or cross-device history sync.
 
 The analytics schema accepts terminal status (`complete`, `failed`, `interrupted`,
@@ -230,9 +235,11 @@ Before hosting, follow [the release runbook](RELEASE-RUNBOOK.md):
   documented billable connectivity check with the deployment credentials. If
   unavailable, make an explicit operator model decision and update UI/docs;
   do not silently claim or substitute a different free model.
-- Configure CORS with the real app origins. Central analytics additionally needs
-  its intended local/mobile browser origins and an HTTPS endpoint. Native apps
-  do not rely on browser CORS, but still require authenticated verified users.
+- Configure CORS with the real app origins. Central analytics from self-hosted web
+  clients additionally needs its intended browser origins and an HTTPS endpoint.
+  Desktop sharing uses its same-origin local proxy with a fixed HTTPS destination;
+  it does not require opening hosted CORS to arbitrary loopback origins. Shared
+  uploads still require an authenticated verified account.
 - Allocate CPU/minimum instances for the scoring/retention worker, configure
   health checks, backups and alerting, and use app-scoped database credentials.
 - Test a funded, a personal-key, and a custom interview, feedback failure/retry,
@@ -244,5 +251,5 @@ Before hosting, follow [the release runbook](RELEASE-RUNBOOK.md):
 
 The maintainer still supplies live credentials, chooses the actual deployment
 revision, verifies email ownership and securely provisions their private password. Signed
-native desktop installers, app-store distribution and a model-provider account
+desktop installers and a model-provider account
 are not manufactured by this source change.

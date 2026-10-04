@@ -26,7 +26,7 @@ that the current source has been deployed.
 - Add free-text custom profession, goal, level, questions and interview structure.
 - Add beta applications with a feedback commitment and administrator approval.
 - Add private template requests and owner administration.
-- Add explicit optional analytics sharing for local web/mobile practice when an
+- Add explicit optional analytics sharing for local web practice when an
   authenticated remote API is configured. Failed optional uploads do not block
   practice. This is not automatic backup or cross-device history sync.
 

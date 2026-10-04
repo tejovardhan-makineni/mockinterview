@@ -3,6 +3,10 @@
 Date: October 4, 2026. These changes are implemented and checked locally; this is
 **not a production deployment record**. Existing user changes were preserved.
 
+The maintained client scope is hosted web, desktop, and local web. This record
+covers the web/API source update; [desktop documentation](DESKTOP.md) describes
+the packaged local runtime and its separate validation requirements.
+
 ## Delivered
 
 - Project-first responsive home page, GitHub/Reddit/Discord links, contribution
@@ -21,13 +25,13 @@ Date: October 4, 2026. These changes are implemented and checked locally; this i
   owner-only admin portal for approval, feedback and consented result review.
 - Durable runtime error counts, turns and elapsed time; safe planning/live/scoring
   failure records; recovery of failed preparation without charging an allowance.
-- Default-off optional result sharing for web and mobile. No keys, recordings or
-  raw transcripts are uploaded by this analytics path. Mobile sends reflections
-  and checklist results without answer text. Remote outages do not block practice.
+- Default-off optional result sharing for web installations. No keys, recordings
+  or raw transcripts are uploaded by this analytics path. Remote outages do not
+  block practice.
   Shared reports are bounded; full interview records remain in private history.
 - Schema migrations 0013 and 0014, export/deletion handling, architecture/low-level
-  design, deployment instructions, and CI checks including the mobile companion
-  and cross-platform launcher prerequisites.
+  design, deployment instructions, and CI checks for cross-platform launcher
+  prerequisites.
 
 ## Verification completed
 
@@ -38,7 +42,6 @@ Date: October 4, 2026. These changes are implemented and checked locally; this i
   export and deletion/cascade tests pass. Temporary database stopped and removed.
 - Web: 167 tests across 22 files; ESLint; production static export with Node 22,
   npm 10, production mode and the configured HTTPS API origin: pass.
-- Mobile: TypeScript and 12 tests pass.
 - Content: all 185 scenarios validate; four content-tool and six deployment
   fixture tests pass. Five third-party notice packaging tests pass.
 - Docker-free launcher: successful API + web startup and clean shutdown on macOS.
@@ -66,12 +69,12 @@ stored role. The optional `-owner-password-file` accepts a private local file an
 sets the bcrypt password while revoking existing login sessions. No production
 account, role or password was changed by this task.
 
-Configure the remote analytics API build values and CORS if local/mobile clients
-should send optional results to the hosted admin. Default installations have no
-central upload destination. Web sharing preferences remain per browser account;
-remote login credentials last only for the current page session. Mobile consent
-and sharing credentials reset when the app closes.
+Configure the remote analytics API build values and CORS if local web clients
+should send optional results to the hosted admin. The source launcher does not
+configure a central upload destination. Web sharing preferences remain per browser
+account; remote login credentials last only for the current page session. Desktop
+sharing is configured separately through the local API bridge and defaults off.
 
-Windows/Linux execution and signed desktop installers/store distribution were
+Windows/Linux execution and signed desktop installers were
 not tested or produced here. Source setup instructions and CI prerequisite checks
 are included. Real testimonials require actual contributors' publication permission.

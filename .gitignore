@@ -26,6 +26,16 @@ npm-debug.log*
 *.log
 scratch/
 
+# Short-lived Google Actions credentials and CI release artifacts
+gha-creds-*.json
+deployment-inputs/
+deployment-receipt.json
+hosting-candidate.json
+release-input/
+release-assets/
+verified-release.json
+audit-results/
+
 # Local Python/build tooling
 __pycache__/
 *.pyc

@@ -1,0 +1,189 @@
+name: Deploy production / Release web
+
+on:
+  workflow_run:
+    workflows: [CI, Security, Desktop packages]
+    branches: [main]
+    types: [completed]
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "New web version (X.Y.Z); leave blank to redeploy without a version bump"
+        type: string
+        default: ""
+
+permissions:
+  contents: read
+
+# Never interrupt a deployment between API and Hosting promotion.
+concurrency:
+  group: mockinterview-production
+  cancel-in-progress: false
+
+jobs:
+  configuration:
+    if: github.repository == 'tejovardhan-makineni/mockinterview' && github.ref == 'refs/heads/main' && (github.event_name != 'workflow_run' || (github.event.workflow_run.event == 'push' && github.event.workflow_run.conclusion == 'success'))
+    runs-on: ubuntu-latest
+    outputs:
+      enabled: ${{ steps.setup.outputs.enabled }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: "22"
+          package-manager-cache: false
+      - id: setup
+        name: Check deployment setup
+        run: node scripts/deployment-readiness.mjs
+        env:
+          PRODUCTION_DEPLOY_ENABLED: ${{ vars.PRODUCTION_DEPLOY_ENABLED }}
+
+  eligible:
+    needs: configuration
+    if: needs.configuration.outputs.enabled == 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      actions: read
+      security-events: read
+    outputs:
+      ready: ${{ steps.gate.outputs.ready }}
+      sha: ${{ steps.source.outputs.sha }}
+      version: ${{ steps.version.outputs.version }}
+      desktop_manifest: ${{ steps.version.outputs.desktop_manifest }}
+    env:
+      GH_TOKEN: ${{ github.token }}
+      RELEASE_SHA: ${{ github.event.workflow_run.head_sha || github.sha }}
+      RELEASE_COMPONENT: web
+      RELEASE_VERSION: ${{ inputs.version }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: "22"
+          package-manager-cache: false
+      - id: source
+        run: echo "sha=$RELEASE_SHA" >> "$GITHUB_OUTPUT"
+      - id: gate
+        name: Require successful checks on current main
+        run: node scripts/github-release.mjs gate
+      - id: version
+        if: steps.gate.outputs.ready == 'true'
+        run: node scripts/github-release.mjs version
+
+  build:
+    needs: eligible
+    if: needs.eligible.outputs.ready == 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ needs.eligible.outputs.sha }}
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: "22"
+          package-manager-cache: false
+      - name: Build hosted web (version changes only on an explicit release)
+        working-directory: web
+        run: npm ci --no-audit --no-fund && npm run build
+        env:
+          APP_ENV: production
+          NEXT_PUBLIC_DESKTOP: "0"
+          NEXT_PUBLIC_MOCK: "0"
+          NEXT_PUBLIC_API_BASE: ${{ vars.WEB_API_BASE }}
+          NEXT_PUBLIC_APP_VERSION: ${{ needs.eligible.outputs.version }}
+          NEXT_PUBLIC_BUILD_SHA: ${{ needs.eligible.outputs.sha }}
+          NEXT_PUBLIC_DESKTOP_RELEASE: ${{ needs.eligible.outputs.desktop_manifest }}
+      - name: Build API image before acquiring cloud credentials
+        run: docker build --tag mockinterview-api:release api
+      - name: Stage immutable deployment inputs
+        run: |
+          mkdir -p deployment-inputs
+          bash deploy/install-firebase-cli.sh deployment-inputs/firebase
+          docker save mockinterview-api:release -o deployment-inputs/api-image.tar
+          cp -R web/out deployment-inputs/web
+          sha256sum deployment-inputs/api-image.tar > deployment-inputs/image.sha256
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: deployment-inputs-${{ github.run_id }}
+          path: deployment-inputs
+          retention-days: 7
+          if-no-files-found: error
+
+  deploy:
+    needs: [eligible, build]
+    if: needs.eligible.outputs.ready == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    environment: production
+    permissions:
+      contents: write
+      id-token: write
+      actions: read
+      security-events: read
+    env:
+      GH_TOKEN: ${{ github.token }}
+      RELEASE_SHA: ${{ needs.eligible.outputs.sha }}
+      RELEASE_VERSION: ${{ needs.eligible.outputs.version }}
+      RELEASE_COMPONENT: web
+      GCP_PROJECT: ${{ vars.GCP_PROJECT }}
+      GCP_REGION: ${{ vars.GCP_REGION }}
+      GCP_API_SERVICE: ${{ vars.GCP_API_SERVICE }}
+      GCP_IMAGE_REPOSITORY: ${{ vars.GCP_IMAGE_REPOSITORY }}
+      FIREBASE_SITE: ${{ vars.FIREBASE_SITE }}
+      FIREBASE_PROJECT: ${{ vars.FIREBASE_PROJECT || vars.GCP_PROJECT }}
+      WEB_API_BASE: ${{ vars.WEB_API_BASE }}
+      WEB_PUBLIC_URL: https://mockinterview.live
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ needs.eligible.outputs.sha }}
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: "22"
+          package-manager-cache: false
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          name: deployment-inputs-${{ github.run_id }}
+          path: deployment-inputs
+      - name: Load this run's tested deployment inputs
+        run: |
+          sha256sum --check deployment-inputs/image.sha256
+          bash deploy/install-firebase-cli.sh --verify deployment-inputs/firebase
+          chmod 0755 deployment-inputs/firebase
+          docker load --input deployment-inputs/api-image.tar
+          mkdir -p web
+          cp -R deployment-inputs/web web/out
+      - name: Authenticate with short-lived GitHub identity
+        uses: google-github-actions/auth@7c6bc770dae815cd3e89ee6cdf493a5fab2cc093 # v3
+        with:
+          workload_identity_provider: ${{ vars.WIF_PROVIDER }}
+          service_account: ${{ vars.GCP_DEPLOY_SA }}
+          project_id: ${{ vars.GCP_PROJECT }}
+      - uses: google-github-actions/setup-gcloud@aa5489c8933f4cc7a4f7d45035b3b1440c9c10db # v3
+      - name: Deploy candidates, check readiness, promote or roll back
+        run: bash deploy/ci-deploy.sh
+      - name: Publish explicit web release after successful deployment
+        if: inputs.version != ''
+        run: |
+          node scripts/github-release.mjs gate --required
+          node scripts/github-release.mjs create-tag
+          gh release create "web-v$RELEASE_VERSION" web/out/build-info.json --verify-tag --draft --title "Web $RELEASE_VERSION" --generate-notes
+          node scripts/github-release.mjs verify-tag
+          gh release edit "web-v$RELEASE_VERSION" --draft=false --latest=false
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        if: always()
+        with:
+          name: deployment-receipt-${{ github.run_id }}
+          path: deployment-receipt.json
+          if-no-files-found: ignore

@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
+import { execFileSync } from "node:child_process";
 import { cp, mkdtemp, mkdir, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { resolve } from "node:path";
@@ -90,6 +91,82 @@ test("upstream supplements are exact-version and hash checked", async (t) => {
     "Unexpected replacement",
   );
   await assert.rejects(generateNotices(root), /hash mismatch/);
+});
+
+test("Windows-style Git checkouts preserve every pinned supplement without weakening hashes", async (t) => {
+  const sourceRoot = fileURLToPath(new URL("../", import.meta.url));
+  const checkout = await mkdtemp(
+    resolve(tmpdir(), "mockinterview-license-checkout-"),
+  );
+  t.after(() => rm(checkout, { recursive: true, force: true }));
+  await cp(
+    resolve(sourceRoot, "../.gitattributes"),
+    resolve(checkout, ".gitattributes"),
+  );
+  await mkdir(resolve(checkout, "web"));
+  await cp(resolve(sourceRoot, "licenses"), resolve(checkout, "web/licenses"), {
+    recursive: true,
+  });
+  await writeFile(
+    resolve(checkout, "windows-control.txt"),
+    "Git checkout control.\nSecond line.\n",
+  );
+  const git = (...args) =>
+    execFileSync(
+      "git",
+      ["-c", "core.autocrlf=true", "-c", "core.safecrlf=false", ...args],
+      { cwd: checkout, encoding: "utf8", stdio: ["ignore", "pipe", "pipe"] },
+    );
+  git("init", "--quiet");
+  git("add", "--", ".gitattributes", "web/licenses", "windows-control.txt");
+  await rm(resolve(checkout, "web/licenses"), { recursive: true });
+  await rm(resolve(checkout, "windows-control.txt"));
+  git("checkout-index", "--all", "--force");
+  assert.match(
+    await readFile(resolve(checkout, "windows-control.txt"), "utf8"),
+    /\r\n/,
+    "the control must exercise Windows CRLF checkout conversion on every runner",
+  );
+
+  const licenses = resolve(checkout, "web/licenses");
+  const manifest = JSON.parse(
+    await readFile(resolve(licenses, "manifest.json"), "utf8"),
+  );
+  for (const supplement of manifest.supplements) {
+    for (const file of supplement.files) {
+      const raw = await readFile(resolve(licenses, file.path));
+      assert.equal(
+        createHash("sha256").update(raw).digest("hex"),
+        file.sha256,
+        `Git checkout changed the pinned bytes for ${file.path}`,
+      );
+    }
+  }
+  // Exercise generation with every restored supplement, even supplements for
+  // packages that are absent on the current build platform.
+  const root = await fixture(t);
+  await cp(licenses, resolve(root, "licenses"), { recursive: true });
+  await writeFile(
+    resolve(root, "licenses/manifest.json"),
+    JSON.stringify({
+      supplements: manifest.supplements.map((item) => ({
+        ...item,
+        packages: ["missing-text@1.0.0"],
+      })),
+    }),
+  );
+  assert.equal((await generateNotices(root)).warnings.length, 0);
+  // Hash validation must remain byte-exact. The repository checkout fixes the
+  // line endings; the generator must not silently normalize a modified source.
+  const changedPath = resolve(
+    root,
+    "licenses",
+    manifest.supplements[0].files[0].path,
+  );
+  const original = await readFile(changedPath, "utf8");
+  assert.ok(original.includes("\n"));
+  await writeFile(changedPath, original.replace(/\n/g, "\r\n"));
+  await assert.rejects(generateNotices(root), /Supplement hash mismatch/);
 });
 
 test("incomplete or version-mismatched production installs fail clearly", async (t) => {

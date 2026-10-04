@@ -10,6 +10,14 @@ const desktop = path.resolve(
   "..",
 );
 const root = path.dirname(desktop);
+const desktopPackage = JSON.parse(
+  await readFile(path.join(desktop, "package.json"), "utf8"),
+);
+const sha =
+  spawnSync("git", ["rev-parse", "HEAD"], {
+    cwd: root,
+    encoding: "utf8",
+  }).stdout?.trim() || "";
 const resources = path.join(desktop, "resources");
 const targetOS =
   process.env.DESKTOP_TARGET_OS ||
@@ -44,6 +52,8 @@ for (const key of Object.keys(webEnvironment))
 Object.assign(webEnvironment, {
   APP_ENV: "desktop",
   NEXT_PUBLIC_DESKTOP: "1",
+  NEXT_PUBLIC_APP_VERSION: desktopPackage.version,
+  NEXT_PUBLIC_BUILD_SHA: sha,
   NEXT_PUBLIC_MOCK: "0",
   NEXT_PUBLIC_ANALYTICS_API_BASE:
     "https://mockinterview-api-661893776515.us-west1.run.app",
@@ -91,15 +101,12 @@ run(
   [path.join(desktop, "scripts", "notices.mjs"), resources],
   root,
 );
-const sha = spawnSync("git", ["rev-parse", "HEAD"], {
-  cwd: root,
-  encoding: "utf8",
-}).stdout.trim();
 await writeFile(
   path.join(resources, "build.json"),
   JSON.stringify(
     {
       source: sha,
+      version: desktopPackage.version,
       platform: targetOS,
       arch: targetArch,
       builtAt: new Date().toISOString(),

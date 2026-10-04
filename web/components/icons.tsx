@@ -46,6 +46,15 @@ export const IconSettings = (p: IconProps) => (
 export const IconSignOut = (p: IconProps) => (
   <Svg {...p}><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" /><path d="M16 17l5-5-5-5" /><path d="M21 12H9" /></Svg>
 );
+export const IconProfile = (p: IconProps) => (
+  <Svg {...p}><circle cx="12" cy="8" r="4" /><path d="M5 21v-2a7 7 0 0 1 14 0v2" /></Svg>
+);
+export const IconChevronDown = (p: IconProps) => (
+  <Svg {...p}><path d="m6 9 6 6 6-6" /></Svg>
+);
+export const IconShield = (p: IconProps) => (
+  <Svg {...p}><path d="m12 3 8 3v6c0 5-8 9-8 9s-8-4-8-9V6l8-3Z" /><path d="m9 12 2 2 4-4" /></Svg>
+);
 
 // ---- Studio / status ----
 export const IconMic = (p: IconProps) => (

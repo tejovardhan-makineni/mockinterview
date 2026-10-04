@@ -260,8 +260,11 @@ func (s *Service) ShareAnalytics(w http.ResponseWriter, r *http.Request) {
 		httpx.WriteProblem(w, 400, "Invalid interview metrics")
 		return
 	}
+	// Accept uploads only from supported clients. The historical database
+	// constraint in 0014 remains unchanged so retired-client records stay
+	// readable, exportable and deletable without rewriting released migrations.
 	switch req.Source {
-	case "web", "local", "mobile":
+	case "web", "local":
 	default:
 		httpx.WriteProblem(w, 400, "Invalid client source")
 		return
