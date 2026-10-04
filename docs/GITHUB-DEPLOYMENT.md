@@ -22,6 +22,13 @@ bash deploy/setup-github.sh --apply
 
 This default apply configures **API deployment only**. The Hosting variables are recorded for the workflow, but recording a site name does not authorize a web deploy. The script is additive and repeatable: it preserves existing reviewers, does not revoke earlier Hosting grants when rerun without the optional flag, and stops on failures. After a partial failure, inspect the error and rerun with the same reviewed settings. It does not automatically roll back IAM changes that succeeded.
 
+Production deployment stays inactive until the operator sets the repository
+variable `PRODUCTION_DEPLOY_ENABLED=true`. An unset or false value lets automatic
+post-merge runs finish with a setup notice before any build, cloud authentication
+or deployment. Explicit manual release attempts fail clearly while inactive.
+CI, security scans and desktop package checks continue to run for every PR and
+merge. This switch does not bypass any release or current-main checks.
+
 ## Trust and permissions
 
 The dedicated provider accepts only the exact immutable repository/owner IDs, `refs/heads/main`, `.github/workflows/deploy.yml@refs/heads/main`, `workflow_run` or `workflow_dispatch` events, and the explicit `production` environment claim. This supports GitHub’s legacy and newer immutable-ID subject formats without weakening the immutable repository/owner checks. The pool may contain only this expected provider. Its repository-specific principal set may impersonate only `mockinterview-deploy@storybytes-495010.iam.gserviceaccount.com` through `roles/iam.workloadIdentityUser`.
@@ -69,6 +76,21 @@ Bootstrap writes ordinary repository variables, never credentials:
 | `GCP_IMAGE_REPOSITORY` | `mockinterview` (repository name, not a full image URL) |
 | `FIREBASE_SITE` | `mockinterview-web` |
 | `WEB_API_BASE` | `https://mockinterview-api-661893776515.us-west1.run.app` |
+
+Bootstrap does not enable deployment automatically. After configuring the Hosting
+permission choice, checking the variables and production environment, and reviewing
+the deployment workflow, activate it with:
+
+```sh
+gh variable set PRODUCTION_DEPLOY_ENABLED --repo tejovardhan-makineni/mockinterview --body true
+```
+
+Run **Deploy production / Release web** manually with an empty version to verify
+the first deployment; no semantic version is created. Later checked merges deploy
+automatically. To stop new deployments, set the same variable to `false`; this
+does not cancel an in-progress deployment or interrupt its rollback handling.
+The first authenticated deployment must still verify the real cloud permissions
+and readiness checks; setting the variable is not evidence of a successful deploy.
 
 Local validation needs no cloud credentials:
 

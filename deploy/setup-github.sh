@@ -200,3 +200,4 @@ gh variable set FIREBASE_SITE --repo "$REPOSITORY" --body "$SITE"
 gh variable set WEB_API_BASE --repo "$REPOSITORY" --body "$WEB_API_BASE"
 echo 'API trust configured. No deploy has run. Verify CI with the reviewed main workflow.'
 if ! $HOSTING; then echo 'Hosting is not provisioned by this run; configure its isolation/permission choice separately.'; fi
+echo 'After Hosting setup and workflow review, enable PRODUCTION_DEPLOY_ENABLED in GitHub; see docs/GITHUB-DEPLOYMENT.md.'

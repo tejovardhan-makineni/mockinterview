@@ -26,6 +26,12 @@ exception to publish a release.
 
 ## Every merged PR: deploy without a version bump
 
+Production automation is activated once Hosting setup is complete by setting
+`PRODUCTION_DEPLOY_ENABLED=true`; see [deployment setup](GITHUB-DEPLOYMENT.md).
+Before activation, automatic runs report that deployment is inactive without
+building or obtaining cloud credentials. Manual release attempts fail clearly.
+Required PR checks remain active, so reviewed source changes can merge during setup.
+
 CI, Security and Desktop packages run on the resulting `main` commit. The
 **Deploy production / Release web** workflow waits for all three successful runs
 for that exact commit. Superseded commits are skipped. It also checks for open
@@ -118,5 +124,6 @@ quality.
 Firebase Hosting cannot currently be scoped by IAM to one site in a shared
 project. Decide between a dedicated Hosting project or explicitly granting the
 documented project-wide Hosting role. Bootstrap does not grant that broader role
-by default. Until Hosting permissions and signing credentials are configured and
-the required audits pass, the release workflow is prepared, not production-ready.
+by default. Web deployment remains inactive until Hosting permissions are configured
+and the setup switch is enabled. Public desktop releases separately require signing
+credentials. Both release paths always require successful source and security checks.

@@ -21,8 +21,29 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  eligible:
+  configuration:
     if: github.repository == 'tejovardhan-makineni/mockinterview' && github.ref == 'refs/heads/main' && (github.event_name != 'workflow_run' || (github.event.workflow_run.event == 'push' && github.event.workflow_run.conclusion == 'success'))
+    runs-on: ubuntu-latest
+    outputs:
+      enabled: ${{ steps.setup.outputs.enabled }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: "22"
+          package-manager-cache: false
+      - id: setup
+        name: Check deployment setup
+        run: node scripts/deployment-readiness.mjs
+        env:
+          PRODUCTION_DEPLOY_ENABLED: ${{ vars.PRODUCTION_DEPLOY_ENABLED }}
+
+  eligible:
+    needs: configuration
+    if: needs.configuration.outputs.enabled == 'true'
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -39,13 +60,14 @@ jobs:
       RELEASE_COMPONENT: web
       RELEASE_VERSION: ${{ inputs.version }}
     steps:
-      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           ref: ${{ github.event.workflow_run.head_sha || github.sha }}
           persist-credentials: false
-      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version: "22"
+          package-manager-cache: false
       - id: source
         run: echo "sha=$RELEASE_SHA" >> "$GITHUB_OUTPUT"
       - id: gate
@@ -62,13 +84,14 @@ jobs:
     permissions:
       contents: read
     steps:
-      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           ref: ${{ needs.eligible.outputs.sha }}
           persist-credentials: false
-      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version: "22"
+          package-manager-cache: false
       - name: Build hosted web (version changes only on an explicit release)
         working-directory: web
         run: npm ci --no-audit --no-fund && npm run build
@@ -121,13 +144,14 @@ jobs:
       WEB_API_BASE: ${{ vars.WEB_API_BASE }}
       WEB_PUBLIC_URL: https://mockinterview.live
     steps:
-      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           ref: ${{ needs.eligible.outputs.sha }}
           persist-credentials: false
-      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version: "22"
+          package-manager-cache: false
       - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
         with:
           name: deployment-inputs-${{ github.run_id }}
