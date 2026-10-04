@@ -3,6 +3,7 @@ export const COMMUNITY = Object.freeze({
   releases: "https://github.com/tejovardhan-makineni/mockinterview/releases",
   discord: "https://discord.gg/KvGunFKZwS",
   reddit: "https://www.reddit.com/r/mockinterview_live/",
+  x: "https://x.com/mockinterviewlv?s=11",
   website: "https://mockinterview.live",
 });
 

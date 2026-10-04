@@ -16,6 +16,8 @@ test("community links allow only exact HTTPS owners, with no protocol or host sp
     "https://github.com/tejovardhan-makineni/mockinterview/releases",
     "https://discord.gg/KvGunFKZwS",
     "https://www.reddit.com/r/mockinterview_live/",
+    "https://x.com/mockinterviewlv?s=11",
+    "https://x.com/mockinterviewlv/status/123",
     "https://mockinterview.live/docs/",
   ])
     assert.equal(isAllowedExternal(url), true, url);
@@ -27,6 +29,9 @@ test("community links allow only exact HTTPS owners, with no protocol or host sp
     "https://github.com.evil.test/tejovardhan-makineni/mockinterview",
     "https://user@github.com/tejovardhan-makineni/mockinterview",
     "https://discord.gg/other",
+    "https://x.com/other-account",
+    "https://x.com/mockinterviewlv-evil",
+    "https://x.com.evil.test/mockinterviewlv?s=11",
     "https://mockinterview.live:8443",
   ])
     assert.equal(isAllowedExternal(url), false, url);
