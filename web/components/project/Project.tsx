@@ -50,6 +50,11 @@ export function CommunityLinks() {
         <small>Share ideas and practice stories</small>
         <b aria-hidden="true">↗</b>
       </a>
+      <a href={PROJECT.x}>
+        <span>X / Twitter</span>
+        <small>Follow project news and updates</small>
+        <b aria-hidden="true">↗</b>
+      </a>
     </div>
   );
 }

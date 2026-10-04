@@ -109,6 +109,10 @@ function installMenu() {
           label: "Join Reddit",
           click: () => void openCommunity(COMMUNITY.reddit),
         },
+        {
+          label: "Follow on X",
+          click: () => void openCommunity(COMMUNITY.x),
+        },
         { type: "separator" },
         {
           label: "Download updates on GitHub…",
