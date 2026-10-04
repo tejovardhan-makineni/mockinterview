@@ -42,6 +42,9 @@ func liveQuestion(q corpus.Question) corpus.Question {
 }
 
 func firstQuestionFocus(q corpus.Question) string {
+	if q.Domain == "custom" {
+		return "Choose the first relevant question from the candidate's supplied questions and requested structure. If none were supplied, choose one useful opening question for their profession and practice goal. Ask only that question and wait."
+	}
 	if opening, ok := storyOpenings[q.ID]; ok {
 		return opening
 	}
@@ -100,6 +103,9 @@ func firstQuestionFocus(q corpus.Question) string {
 // particular, "one question" must not turn into asking about a problem the
 // voice candidate has not yet heard. Later variants remain in the full brief.
 func firstQuestionSetup(q corpus.Question) string {
+	if q.Domain == "custom" {
+		return "Briefly explain the format you selected for the candidate's profession and goal. Treat their free-text level as the target seniority. Do not read the full brief, all planned stages, the rubric, or the whole question list aloud. Introduce only the context needed for the first question."
+	}
 	if _, ok := storyOpenings[q.ID]; ok {
 		return "The first situation invitation below establishes the behavioral topic; no separate scenario or STAR checklist is needed."
 	}

@@ -9,7 +9,7 @@ export default function Privacy() {
         <p className="eyebrow">Your practice is personal</p>
         <h1 className="page-title mt-3">Privacy & your data</h1>
         <p className="mt-5">
-          Effective September 10, 2026 · notice version 2026-09-10.1
+          Effective October 4, 2026 · notice version 2026-10-04.1
         </p>
         <p>
           This notice describes the hosted mockinterview.live service,
@@ -165,6 +165,43 @@ export default function Privacy() {
           completion. Personal Gemini keys require your declaration that their
           Google project has paid billing enabled. We cannot independently
           verify that declaration through a normal connection check.
+        </p>
+        <h2>Optional analytics and community requests</h2>
+        <p>
+          “Share analytics” starts off. When enabled, new interview results,
+          assessment feedback and reliability metrics may be sent to the
+          configured project server for product improvement. These records are
+          associated with your account and accessible only through the private
+          administrator portal; they are not published or sold. Model providers
+          still process the content needed to deliver an interview as described
+          above.
+        </p>
+        <p>
+          Sharing includes the report, model and provider, completion or failure
+          status, turn count and timing. It does not upload API keys, passwords,
+          recordings, camera images or the interview transcript. Pocket practice
+          shares reflections and self-review checklists, with no answer text or
+          AI score. The mobile sharing choice and server login last for the
+          current app session. Local web sharing requires a configured server
+          and a separate hosted login; otherwise data stays with your local
+          installation.
+        </p>
+        <p>
+          Unavailable servers are skipped quietly so practice continues. Web
+          clients can retry eligible results on a later visit; mobile uploads
+          are attempted once at completion. Turning sharing off stops future
+          uploads. “Delete shared analytics” deletes previous uploads from the
+          connected account; if the server is offline, retry deletion when
+          available. This does not delete your private interview history, which
+          has its own controls. Shared records remain until deleted or the
+          account is deleted.
+        </p>
+        <p>
+          Beta applications store your motivation, feedback commitment and
+          approval status. Template requests store the role, goal, level and
+          description you submit. These and product feedback are private to the
+          administrator. They do not become public testimonials; any public
+          quote needs separate permission.
         </p>
         <h2>Feedback and service operation</h2>
         <p>

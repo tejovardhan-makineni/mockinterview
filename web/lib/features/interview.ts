@@ -8,6 +8,7 @@
 import { req, wsBase } from "../http";
 import type { Modality, Phase } from "../domain";
 import type { InterviewConfig } from "./profile";
+import type { QuestionSummary } from "./catalog";
 import { MOCK_QUESTIONS } from "./catalog";
 
 export interface WorkspaceSnapshot {
@@ -16,7 +17,15 @@ export interface WorkspaceSnapshot {
   revision: number;
   data?: Record<string, unknown>;
 }
+export interface CustomInterview {
+  profession: string;
+  goal: string;
+  level: string;
+  questions: string;
+  structure: string;
+}
 export interface SessionOptions {
+  custom?: CustomInterview;
   minutes?: number;
   funding?: "platform" | "byok";
   provider?: string;
@@ -39,6 +48,12 @@ export interface ProcessingReport {
   error?: string;
 }
 export interface Session {
+  question?: QuestionSummary;
+  runtime_metrics?: {
+    error_count: number;
+    turn_count: number;
+    duration_seconds: number;
+  };
   id: string;
   question_id: string;
   modality: Modality;
@@ -46,6 +61,7 @@ export interface Session {
   status:
     | "created"
     | "reserved"
+    | "preparing"
     | "active"
     | "interrupted"
     | "scoring"
@@ -477,11 +493,22 @@ export const interviewMock: InterviewSlice = {
         MOCK_QUESTIONS[0];
     }
     q ??= MOCK_QUESTIONS[0];
+    if (options?.custom)
+      q = {
+        ...q,
+        id: "custom-demo",
+        title: options.custom.profession + " practice",
+        modality: "conversational",
+        track: "general",
+        prompt: options.custom.goal + "\n\n" + options.custom.questions,
+        blurb: "Simulated custom interview preview",
+      };
     const started = new Date();
     const minutes = options?.minutes ?? 30;
     const session: Session & { created_at: string } = {
       id: crypto.randomUUID(),
       question_id: q.id,
+      question: options?.custom ? q : undefined,
       modality: q.modality,
       track: q.track,
       status: "active",
@@ -541,6 +568,7 @@ export const interviewMock: InterviewSlice = {
       ...MOCK_REPORT,
       session_id: sessionId,
       question_title:
+        session?.question?.title ??
         MOCK_QUESTIONS.find((q) => q.id === session?.question_id)?.title ??
         "Simulated feedback",
       overall: 0,
@@ -574,6 +602,7 @@ export const interviewMock: InterviewSlice = {
       .map((s) => ({
         id: s.id,
         title:
+          s.question?.title ??
           MOCK_QUESTIONS.find((q) => q.id === s.question_id)?.title ??
           "Practice interview",
         question_id: s.question_id,

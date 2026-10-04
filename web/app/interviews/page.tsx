@@ -120,9 +120,15 @@ export default function Catalog() {
             older.
           </p>
         </div>
-        <Button href="/packs" variant="ghost">
-          Explore practice paths
-        </Button>
+        <div className="flex flex-wrap gap-3">
+          <Button href="/setup?custom=1">Create a custom interview</Button>
+          <Button href="/requests" variant="ghost">
+            Request a template
+          </Button>
+          <Button href="/packs" variant="ghost">
+            Practice paths
+          </Button>
+        </div>
       </div>
       <Panel className="mt-8 p-5 sm:p-6">
         <Field label="Search interviews">

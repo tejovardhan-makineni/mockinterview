@@ -55,6 +55,7 @@ type Service struct {
 	store    Repo
 	corpus   *corpus.Catalog
 	scorer   *scoring.Engine
+	planner  llm.Client
 	packs    PackResolver // may be nil
 }
 
@@ -80,6 +81,9 @@ func (s *Service) List(w http.ResponseWriter, r *http.Request) {
 	out := make([]row, 0, len(items))
 	for _, it := range items {
 		title := it.QuestionID
+		if it.QuestionTitle != "" {
+			title = it.QuestionTitle
+		}
 		if q, ok := s.corpus.Get(it.QuestionID); ok {
 			title = q.Title
 		}
@@ -89,6 +93,7 @@ func (s *Service) List(w http.ResponseWriter, r *http.Request) {
 }
 
 type createReq struct {
+	Custom                      *CustomBrief    `json:"custom,omitempty"`
 	Minutes                     int             `json:"minutes"`
 	Funding                     string          `json:"funding"`
 	Provider                    string          `json:"provider"`
@@ -119,6 +124,16 @@ func (s *Service) Create(w http.ResponseWriter, r *http.Request) {
 	var req createReq
 	if !httpx.DecodeJSON(w, r, &req) {
 		return
+	}
+	if req.Custom != nil {
+		if req.QuestionID != "" || req.PackID != "" || req.RoundID != "" {
+			httpx.WriteProblem(w, 400, "choose a custom interview or a template")
+			return
+		}
+		if err := req.Custom.validate(); err != nil {
+			httpx.WriteProblem(w, 400, err.Error())
+			return
+		}
 	}
 	// Pack round: resolve to a concrete question + interviewer focus, and stamp
 	// the focus into the session config so the live director can specialize.
@@ -152,7 +167,7 @@ func (s *Service) Create(w http.ResponseWriter, r *http.Request) {
 	}
 
 	q, ok := s.corpus.Get(req.QuestionID)
-	if !ok {
+	if !ok && req.Custom == nil {
 		httpx.WriteProblem(w, http.StatusBadRequest, "unknown question_id")
 		return
 	}
@@ -230,6 +245,7 @@ func (s *Service) Create(w http.ResponseWriter, r *http.Request) {
 	req.Config, _ = json.Marshal(settings)
 	id := store.NewID()
 	var encrypted []byte
+	planner := s.planner
 	if req.Funding == "byok" {
 		ctx, cancel := context.WithTimeout(r.Context(), 20*time.Second)
 		defer cancel()
@@ -239,6 +255,7 @@ func (s *Service) Create(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		req.Model = client.Info().Model
+		planner = client
 		encrypted, e = llm.SealKey(s.options.EncryptionKey, uid, id, req.APIKey)
 		if e != nil {
 			httpx.WriteProblem(w, 503, "personal key storage is unavailable")
@@ -256,8 +273,22 @@ func (s *Service) Create(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
+	if req.Custom != nil {
+		// Draft metadata is local only. The preparing status prevents a socket
+		// or scorer from using it while the real planner runs after admission.
+		q, e = s.customQuestion(r.Context(), llm.NewStub(), *req.Custom, req.Minutes)
+		if e != nil {
+			httpx.WriteProblem(w, 503, e.Error()+". No interview allowance was used.")
+			return
+		}
+		_ = json.Unmarshal(req.Config, &settings)
+		settings["custom"] = req.Custom
+		settings["target_level"] = req.Custom.Level
+		settings["question_fingerprint"] = corpus.Fingerprint(q)
+		req.Config, _ = json.Marshal(settings)
+	}
 	snapshot, _ := json.Marshal(q)
-	sess, err := s.store.ReserveSession(r.Context(), store.Reservation{GlobalDailyLimit: s.options.GlobalDailyLimit, Session: store.Session{FeedbackVersion: store.InterviewFeedbackVersion, ID: id, UserID: uid, QuestionID: q.ID, Modality: q.Modality, Track: q.Track, PackID: req.PackID, PackRoundID: req.RoundID, Config: req.Config, DurationMinutes: req.Minutes, Funding: req.Funding, Mode: req.Mode, Provider: req.Provider, Model: req.Model, LiveModel: s.options.LiveModel, QuestionSnapshot: snapshot}, Identity: llm.UsageIdentity(s.options.EncryptionKey, u.Email), Unlimited: !s.options.Hosted, Credential: encrypted, CredentialExpires: time.Now().Add(3 * time.Hour)})
+	sess, err := s.store.ReserveSession(r.Context(), store.Reservation{Preparing: req.Custom != nil, GlobalDailyLimit: s.options.GlobalDailyLimit, Session: store.Session{FeedbackVersion: store.InterviewFeedbackVersion, ID: id, UserID: uid, QuestionID: q.ID, Modality: q.Modality, Track: q.Track, PackID: req.PackID, PackRoundID: req.RoundID, Config: req.Config, DurationMinutes: req.Minutes, Funding: req.Funding, Mode: req.Mode, Provider: req.Provider, Model: req.Model, LiveModel: s.options.LiveModel, QuestionSnapshot: snapshot}, Identity: llm.UsageIdentity(s.options.EncryptionKey, u.Email), Unlimited: !s.options.Hosted, Credential: encrypted, CredentialExpires: time.Now().Add(3 * time.Hour)})
 	if err != nil {
 		switch {
 		case errors.Is(err, store.ErrInterviewFeedbackRequired):
@@ -271,8 +302,33 @@ func (s *Service) Create(w http.ResponseWriter, r *http.Request) {
 		}
 		return
 	}
+	if req.Custom != nil {
+		prepared := false
+		defer func() {
+			if !prepared {
+				cleanup, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+				defer cancel()
+				_ = s.store.FailPreparation(cleanup, sess.ID)
+				_ = s.store.AddEvent(cleanup, sess.ID, 0, "interview_error", json.RawMessage(`{"code":"planning_failed","stage":"preparation"}`))
+			}
+		}()
+		q, e = s.customQuestion(r.Context(), planner, *req.Custom, req.Minutes)
+		if e != nil {
+			httpx.WriteProblem(w, 503, e.Error()+". No interview allowance was used.")
+			return
+		}
+		settings["question_fingerprint"] = corpus.Fingerprint(q)
+		sess.Config, _ = json.Marshal(settings)
+		sess.QuestionSnapshot, _ = json.Marshal(q)
+		sess.QuestionID, sess.Status = q.ID, "reserved"
+		if e = s.store.CompletePreparation(r.Context(), sess.ID, q.ID, sess.QuestionSnapshot, sess.Config); e != nil {
+			httpx.WriteProblem(w, 503, "Could not save the interview plan. No interview allowance was used.")
+			return
+		}
+		prepared = true
+	}
 
-	httpx.WriteJSON(w, http.StatusOK, sess)
+	s.writeSession(w, r, sess)
 }
 
 // withRoundFocus merges a `round_focus` string into the session config JSON so
@@ -302,7 +358,29 @@ func (s *Service) Get(w http.ResponseWriter, r *http.Request) {
 		httpx.WriteProblem(w, 503, "Saved workspace temporarily unavailable")
 		return
 	}
-	httpx.WriteJSON(w, http.StatusOK, sess)
+	s.writeSession(w, r, sess)
+}
+
+func (s *Service) writeSession(w http.ResponseWriter, r *http.Request, sess store.Session) {
+	metrics, err := s.store.SessionMetrics(r.Context(), sess.ID)
+	if err != nil {
+		httpx.WriteProblem(w, 503, "Saved interview metrics temporarily unavailable")
+		return
+	}
+	q, found := s.corpus.Get(sess.QuestionID)
+	if len(sess.QuestionSnapshot) > 2 && json.Unmarshal(sess.QuestionSnapshot, &q) == nil {
+		found = true
+	}
+	var summary *corpus.Summary
+	if found {
+		v := q.Summary()
+		summary = &v
+	}
+	httpx.WriteJSON(w, http.StatusOK, struct {
+		store.Session
+		Question       *corpus.Summary      `json:"question,omitempty"`
+		RuntimeMetrics store.SessionMetrics `json:"runtime_metrics"`
+	}{Session: sess, Question: summary, RuntimeMetrics: metrics})
 }
 
 type turnReq struct {
@@ -472,6 +550,10 @@ func (s *Service) Report(w http.ResponseWriter, r *http.Request) {
 	_ = json.Unmarshal(rep.Radar, &radar)
 
 	title := sess.QuestionID
+	var frozen corpus.Question
+	if json.Unmarshal(sess.QuestionSnapshot, &frozen) == nil && frozen.Title != "" {
+		title = frozen.Title
+	}
 	if q, found := s.corpus.Get(sess.QuestionID); found {
 		title = q.Title
 	}

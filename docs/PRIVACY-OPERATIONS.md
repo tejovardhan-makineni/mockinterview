@@ -57,7 +57,7 @@ The following combines source behavior with read-only production configuration c
 | General/support feedback | Account-linked; separate from the session lifecycle. Optional diagnostic/transcript flags do not make it anonymous. |
 | Verification/reset actions | One-use tokens stored hashed; verification validity 24 hours, reset 30 minutes; expired rows cleaned periodically. Never log action links. |
 | BYOK credentials | Encrypted server-side session credentials expire after three hours and are removed following terminal processing/maintenance. Do not claim this controls vendor logs. |
-| Usage ledger | Purpose-specific HMAC of normalized email plus activation/funding; retained for rolling seven-day enforcement with hourly cleanup. Pseudonymous, not anonymous; survives account deletion for that limited purpose. |
+| Usage ledger | Purpose-specific HMAC of normalized email plus activation/funding; retained for seven days with hourly cleanup; current funded allowance is a rolling 24-hour window. Pseudonymous, not anonymous; survives account deletion for that limited purpose. |
 | Legacy behavior | Raw behavior samples/events have a 30-day purge; aggregates can remain with reports. New ingestion closure does not itself delete all historical data. |
 | Cloud Logging | `_Default` retention verified at 30 days; `_Required` is locked at 400 days. Content differs by bucket; do not claim all logs disappear after 30 days or assume every request URL excludes a query string. |
 | Cloud SQL | `us-west1`; automated backups enabled with retention of **seven backups by count**, not a guaranteed seven-day period. Transaction-log retention is seven days. |
@@ -106,3 +106,13 @@ readers select only the version and categorical answers. Clearing with explicit
 `comparison: null` removes the comparison from the active record; backup copies
 follow the separately documented retention process. Existing clients that omit
 this field preserve it. No provider call is needed to collect these responses.
+
+## Participation and optional local sharing
+
+The current source adds private beta applications, template requests and opt-in
+shared result snapshots. Their schema, export/deletion behavior, consent contract
+and owner authorization are documented in [the feature design](OPEN-SOURCE-DESIGN.md).
+The user-facing control is **Share analytics**; local source does not automatically
+upload data. Remote sharing requires a configured HTTPS server, separate sign-in
+and consent, and excludes raw transcripts, resumes and audio/video recordings.
+Local uploads are best-effort and can fail without interrupting practice.

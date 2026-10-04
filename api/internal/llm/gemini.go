@@ -67,20 +67,12 @@ func (g *Gemini) Generate(ctx context.Context, req GenerateRequest) (string, err
 		system = strings.TrimSpace(system) + "\n\nReturn ONLY valid JSON conforming to this JSON schema. Do not wrap it in markdown fences:\n" + string(schemaJSON)
 	}
 
-	cfg := &genai.GenerateContentConfig{
-		// Disable "thinking" for these structured/extraction/director tasks —
-		// otherwise 2.5-flash spends the output-token budget on hidden thoughts
-		// and can return empty text. Lower latency + cost, deterministic JSON.
-		ThinkingConfig: &genai.ThinkingConfig{ThinkingBudget: genai.Ptr(int32(0))},
-	}
+	cfg := geminiGenerationConfig(model, req.MaxTokens)
 	if system != "" {
 		cfg.SystemInstruction = genai.NewContentFromText(system, genai.RoleUser)
 	}
 	if req.Temperature > 0 {
 		cfg.Temperature = genai.Ptr(req.Temperature)
-	}
-	if req.MaxTokens > 0 {
-		cfg.MaxOutputTokens = int32(req.MaxTokens)
 	}
 	if req.JSONSchema != nil {
 		cfg.ResponseMIMEType = "application/json"
@@ -91,10 +83,39 @@ func (g *Gemini) Generate(ctx context.Context, req GenerateRequest) (string, err
 		return "", fmt.Errorf("gemini generate: %w", err)
 	}
 	out := resp.Text()
+	if strings.TrimSpace(out) == "" {
+		return "", fmt.Errorf("gemini: model returned no text; choose a compatible text model")
+	}
 	if req.JSONSchema != nil {
 		out = stripFences(out)
 	}
 	return out, nil
+}
+
+// Thinking controls differ across model families. In particular 2.5 Pro and
+// Gemini 3 reject disabling thinking, so the free Flash setting cannot be
+// applied to advanced personal-key selections.
+func geminiGenerationConfig(model string, maxTokens int) *genai.GenerateContentConfig {
+	config := &genai.GenerateContentConfig{}
+	model = strings.TrimPrefix(model, "models/")
+	switch {
+	case strings.HasPrefix(model, "gemini-2.5-flash"):
+		config.ThinkingConfig = &genai.ThinkingConfig{ThinkingBudget: genai.Ptr(int32(0))}
+	case strings.HasPrefix(model, "gemini-2.5-pro"):
+		config.ThinkingConfig = &genai.ThinkingConfig{ThinkingBudget: genai.Ptr(int32(1024))}
+		if maxTokens > 0 {
+			maxTokens += 1024
+		}
+	case strings.HasPrefix(model, "gemini-3"):
+		config.ThinkingConfig = &genai.ThinkingConfig{ThinkingLevel: genai.ThinkingLevelLow}
+		if maxTokens > 0 {
+			maxTokens = max(2048, maxTokens+1024)
+		}
+	}
+	if maxTokens > 0 {
+		config.MaxOutputTokens = int32(maxTokens)
+	}
+	return config
 }
 
 // stripFences removes accidental ```json ... ``` wrappers some responses include.

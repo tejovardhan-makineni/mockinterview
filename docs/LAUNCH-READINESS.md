@@ -1,6 +1,6 @@
 # Launch readiness and additional product concepts
 
-> **Historical readiness assessment.** This checklist predates the current implementation; its 137-scenario baseline and unresolved-code findings are historical. Read [implementation validation](RELEASE-VALIDATION-2026-09-09.md) and the [release runbook](RELEASE-RUNBOOK.md) for completed checks, limitations and remaining launch actions.
+> **Historical readiness assessment.** This checklist predates the current implementation; its 137-scenario baseline and unresolved-code findings are historical. Read [implementation validation](RELEASE-VALIDATION-2026-09-09.md) and the [release runbook](RELEASE-RUNBOOK.md) for completed checks, limitations and remaining launch actions. Current source decisions (MIT, daily funded access and unlimited personal keys) are recorded in [the open source design](OPEN-SOURCE-DESIGN.md); older license and allowance references below are historical.
 
 Reviewed 2026-09-09. This supplements [IMPROVEMENT-PLAN.md](IMPROVEMENT-PLAN.md), [the code audit](AUDIT-2026-09-09.md), and [the deployment procedure](DEPLOYMENT-UPDATE-PLAN.md). It is a readiness assessment and proposed checklist, not a statement that the work is implemented. No repository visibility, cloud configuration, accounts or deployment were changed.
 

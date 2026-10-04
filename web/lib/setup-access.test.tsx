@@ -18,6 +18,7 @@ vi.mock("./api", () => ({
     getResume: vi.fn(),
     getRequiredFeedback: vi.fn(),
     createSession: vi.fn(),
+    validateProvider: vi.fn(),
   },
 }));
 vi.mock("next/navigation", () => ({
@@ -75,6 +76,11 @@ beforeEach(() => {
     next_start_at: new Date(Date.now() + 86400000).toISOString(),
     tester_unlimited: true,
   });
+  vi.mocked(api.validateProvider).mockResolvedValue({
+    valid: true,
+    provider: "openai",
+    model: "test-advanced-model",
+  });
   vi.mocked(api.createSession).mockResolvedValue({
     id: "new-interview",
     question_id: "access-scenario",
@@ -110,7 +116,86 @@ async function acknowledgeVoice() {
   await act(async () => label.querySelector("input")!.click());
 }
 
+async function change(
+  element: HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement,
+  value: string,
+) {
+  const proto =
+    element instanceof HTMLSelectElement
+      ? HTMLSelectElement.prototype
+      : element instanceof HTMLTextAreaElement
+        ? HTMLTextAreaElement.prototype
+        : HTMLInputElement.prototype;
+  await act(async () => {
+    Object.getOwnPropertyDescriptor(proto, "value")!.set!.call(element, value);
+    element.dispatchEvent(
+      new Event(element instanceof HTMLSelectElement ? "change" : "input", {
+        bubbles: true,
+      }),
+    );
+  });
+}
+function field(label: string) {
+  const el = Array.from(document.querySelectorAll("label")).find((element) =>
+    element.textContent?.includes(label),
+  )!;
+  return document.getElementById(el.htmlFor) as HTMLInputElement;
+}
 describe("hosted tester setup access", () => {
+  it("requires a custom brief and sends free-text goals and seniority", async () => {
+    route.query = "custom=1";
+    await act(async () => root.render(<SetupPage />));
+    await act(async () => button("Check devices").click());
+    expect(document.body.textContent).toContain("Add your profession");
+    await change(field("Profession"), "Marine biologist");
+    await change(field("Experience level"), "Senior research lead");
+    await change(field("What would you like"), "Defend a field study design");
+    await change(
+      field("Your questions"),
+      "How would you handle sampling bias?",
+    );
+    await checkDevices();
+    await acknowledgeVoice();
+    await act(async () => button("Start interview").click());
+    expect(api.createSession).toHaveBeenCalledWith(
+      "",
+      expect.any(Object),
+      undefined,
+      expect.objectContaining({
+        custom: expect.objectContaining({
+          profession: "Marine biologist",
+          level: "Senior research lead",
+          goal: "Defend a field study design",
+          questions: "How would you handle sampling bias?",
+        }),
+      }),
+    );
+  });
+  it("lets a validated personal key start while the free allowance is exhausted", async () => {
+    vi.mocked(api.getUsage).mockResolvedValue({
+      funded_available: false,
+      next_start_at: new Date(Date.now() + 86400000).toISOString(),
+    });
+    await act(async () => root.render(<SetupPage />));
+    await change(field("Practice access"), "byok");
+    await change(field("Provider"), "openai");
+    await change(field("API key"), "synthetic-personal-key");
+    await act(async () => button("Check model connection").click());
+    await checkDevices();
+    expect(button("Start interview").disabled).toBe(false);
+    await act(async () => button("Start interview").click());
+    expect(api.createSession).toHaveBeenCalledWith(
+      expect.any(String),
+      expect.any(Object),
+      undefined,
+      expect.objectContaining({
+        funding: "byok",
+        provider: "openai",
+        model: "test-advanced-model",
+        mode: "text",
+      }),
+    );
+  });
   it("shows the pinned scenario specialist and brief while starting through its pack", async () => {
     route.query = "pack=security-practice&round=triage";
     vi.mocked(api.getPack).mockResolvedValue({

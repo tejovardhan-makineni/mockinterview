@@ -44,7 +44,11 @@ func TestHostedAllowanceAppliesToAdminsAndLocalRemainsUnlimited(t *testing.T) {
 			t.Run(name, func(t *testing.T) {
 				ctx := context.Background()
 				repo := &quotaRepo{Mem: memstore.New(), role: role}
-				u, err := repo.CreateUser(ctx, "quota@example.test", "unused-password-hash")
+				email := "quota@example.test"
+				if role == "admin" {
+					email = "makinenitejovardhan@gmail.com"
+				}
+				u, err := repo.CreateUser(ctx, email, "unused-password-hash")
 				if err != nil {
 					t.Fatal(err)
 				}
@@ -125,7 +129,7 @@ func TestHostedAllowanceAppliesToAdminsAndLocalRemainsUnlimited(t *testing.T) {
 					t.Fatalf("unexpected allowance: %+v", usage)
 				}
 				if hosted {
-					if usage.NextStartAt == nil || usage.NextFundedAt == nil || usage.NextStartAt.Sub(*active.StartedAt) != 24*time.Hour || usage.NextFundedAt.Sub(*active.StartedAt) != 7*24*time.Hour {
+					if usage.NextStartAt == nil || usage.NextFundedAt == nil || usage.NextStartAt.Sub(*active.StartedAt) != 24*time.Hour || usage.NextFundedAt.Sub(*active.StartedAt) != 24*time.Hour {
 						t.Fatalf("hosted quota windows were not enforced: %+v", usage)
 					}
 					request("POST", "/sessions", body, 429)

@@ -1,8 +1,8 @@
 // Package scoring turns a finished interview (transcript + workspace) into a
 // corpus-driven rubric evaluation. The rubric dimensions come from the question
 // itself, so the same engine scores a system-design, coding, or professional
-// interview. With the LLM stub it produces deterministic scores derived from the
-// rubric, so the whole flow is testable with no API key.
+// interview. With the LLM stub it produces an explicitly unscored demo report,
+// so the whole flow is testable with no API key.
 package scoring
 
 import (
@@ -59,6 +59,12 @@ func New(ai llm.Client, reasonModel string) *Engine {
 // Evaluate scores a transcript (+ optional workspace text like code or a written
 // answer) against the question's rubric and reference material.
 func (e *Engine) Evaluate(ctx context.Context, q corpus.Question, transcript []store.Turn, workspace string) (Result, error) {
+	if e.llm.Stubbed() {
+		result := e.stubResult(q)
+		result.Version = ScoringVersion
+		result.LearningDrills = learningDrills(q)
+		return result, nil
+	}
 	// Don't fabricate a score when the candidate barely engaged. Count real
 	// candidate words across the transcript + any workspace artifact.
 	var substance strings.Builder
@@ -81,13 +87,7 @@ func (e *Engine) Evaluate(ctx context.Context, q corpus.Question, transcript []s
 			Note:   "There wasn't enough here to score fairly. Give a fuller attempt next time — really engage with the question and talk through your reasoning out loud — and we'll score it.",
 		}, nil
 	}
-	var result Result
-	var err error
-	if e.llm.Stubbed() {
-		result = e.stubResult(q)
-	} else {
-		result, err = e.llmResult(ctx, q, transcript, workspace)
-	}
+	result, err := e.llmResult(ctx, q, transcript, workspace)
 	result.Version = ScoringVersion
 	result.LearningDrills = learningDrills(q)
 	return result, err
@@ -164,39 +164,29 @@ func isProductionEnv() bool {
 	return strings.EqualFold(strings.TrimSpace(os.Getenv("APP_ENV")), "production")
 }
 
-// stubResult deterministically derives scores from the rubric so the pipeline
-// works offline and tests are stable.
+// stubResult preserves rubric and practice materials without pretending that
+// deterministic offline output measures a candidate's performance.
 func (e *Engine) stubResult(q corpus.Question) Result {
-	// HR-9: the stub fabricates plausible-looking strengths/gaps/scores — perfect
-	// for offline dev + tests, but a candidate on a REAL deployment must never be
-	// shown invented feedback as if it were an authoritative evaluation. If we
-	// reach the stub in production (no scoring provider configured), fail closed:
-	// return a clearly non-authoritative, not-scored result instead of fabricating.
+	// Production additionally explains that real assessment is unavailable.
 	if isProductionEnv() {
 		return Result{
 			Scored: false,
 			Note:   "Automated scoring isn't available on this deployment, so we can't give you an authoritative evaluation right now (a stub score here would be a non-authoritative demo only, not real feedback). Your transcript and workspace are saved below.",
 		}
 	}
-	r := Result{Scored: true, Note: "Demonstration only: these deterministic example scores are not an assessment of your answers."}
-	for i, d := range q.Rubric {
-		score := 2.0 + 0.5*float64((i%5)-2) // 1.0 .. 3.0, deterministic
-		if score < 0 {
-			score = 0
-		}
+	r := Result{Scored: false, Note: "Demo feedback: these are example practice materials, not a measure of your performance. Connect a model to receive an assessment of your answers."}
+	for _, d := range q.Rubric {
 		r.Scores = append(r.Scores, DimScore{
 			Dimension:   d.Key,
-			Score:       score,
+			Score:       0,
 			Weight:      d.Weight,
-			Evidence:    "Stub evaluation based on rubric dimension.",
+			Evidence:    "No model assessment was run in demo mode.",
 			Expected:    d.Description,
-			Actual:      fmt.Sprintf("Candidate partially addressed %q.", d.Label),
-			CoveragePct: 40 + (i%4)*15,
-			Assessed:    true,
+			Actual:      "Not assessed in demo mode.",
+			CoveragePct: 0,
+			Assessed:    false,
 		})
 	}
-	r.Strengths = []string{"Example feedback: cite a specific decision from the answer"}
-	r.Gaps = []string{"Example next step: explain one tradeoff more clearly"}
 	r.CoachingMD = "Demonstration feedback only. Connect a supported model for an assessment. You can use the offline learning exercises without a model."
 	e.applyWeightsAndOverall(q, &r)
 	return r

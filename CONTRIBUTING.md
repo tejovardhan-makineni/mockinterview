@@ -7,8 +7,8 @@ using [SECURITY.md](SECURITY.md).
 
 ## Start locally
 
-Follow the [README setup](README.md#run-locally), including `make install` before
-`make dev`. The development demo needs no API key or mail account. Real-provider
+Start with `node scripts/local.mjs`, the Docker-free temporary demo, or follow
+[the persistent local setup guide](docs/LOCAL-SETUP.md) to keep your history. The development demo needs no API key or mail account. Real-provider
 checks are optional and billable; never put keys or real candidate records in a PR.
 
 Choose a focused change and open a branch or fork. A small fix does not need an
@@ -75,7 +75,7 @@ make validate-content
 CI must pass. Describe the concrete before/after behavior, validation, limitations
 and screenshots when useful. Explain migrations and recovery for durable-state
 changes. Never use real resumes, transcripts, provider keys or customer data in
-fixtures. Contributor submissions use the project's AGPL v3 license unless an
+fixtures. Contributor submissions use the project's MIT license unless an
 explicit compatible exception is documented and approved.
 
 ## Audience and privacy boundaries

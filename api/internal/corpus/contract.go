@@ -37,6 +37,16 @@ func ApplySessionConfig(q Question, config json.RawMessage) Question {
 	if !validDifficulty[s.TargetLevel] {
 		s.TargetLevel = q.Difficulty
 	}
+	if q.Domain == "custom" {
+		var custom struct {
+			Brief struct {
+				Level string `json:"level"`
+			} `json:"custom"`
+		}
+		if json.Unmarshal(config, &custom) == nil && strings.TrimSpace(custom.Brief.Level) != "" && len(custom.Brief.Level) <= 480 {
+			s.TargetLevel = strings.TrimSpace(custom.Brief.Level)
+		}
+	}
 	if s.Challenge != "foundation" && s.Challenge != "stretch" {
 		s.Challenge = "standard"
 	}

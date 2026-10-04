@@ -1,6 +1,7 @@
 "use client";
 import { Suspense, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { syncAnalytics } from "@/lib/analytics";
 import { api } from "@/lib/api";
 import type {
   Report,
@@ -71,6 +72,15 @@ function ReportView({ sid }: { sid: string }) {
       if (timer) clearTimeout(timer);
     };
   }, [sid, router, retry]);
+  useEffect(() => {
+    if (report || processing?.status === "feedback_failed")
+      void api
+        .me()
+        .then((user) => {
+          if (user) void syncAnalytics(user.id);
+        })
+        .catch(() => {});
+  }, [report, processing?.status]);
   async function retryScoring() {
     setBusy(true);
     setError("");
@@ -97,7 +107,7 @@ function ReportView({ sid }: { sid: string }) {
     URL.revokeObjectURL(url);
   }
   return (
-    <AppShell active="results">
+    <AppShell active="results" feedbackSessionId={session?.id}>
       <a href="/results" className="text-sm text-[var(--color-muted)]">
         ← Your history
       </a>

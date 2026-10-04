@@ -1,8 +1,16 @@
 # mockinterview.live
 
-Practice interviews with a clearly identified AI interviewer, keep your work and
-feedback, and contribute new interview formats. The hosted application is at
+An MIT-licensed open source project for making thoughtful interview practice
+available to everyone. Practice with a clearly identified AI interviewer, keep
+your work and feedback, and contribute new interview formats. The hosted application is at
 [mockinterview.live](https://mockinterview.live).
+
+**Community:** [GitHub](https://github.com/tejovardhan-makineni/mockinterview) ·
+[Reddit](https://www.reddit.com/r/mockinterview_live/) ·
+[Discord](https://discord.gg/KvGunFKZwS)
+
+**Current source:** see [the changelog](CHANGELOG.md) for the project-home, MIT,
+local setup and practice updates. These changes are not a deployment claim.
 
 **The public beta is live.** The interview bank expansion was deployed and
 verified on September 14, 2026. See the
@@ -36,18 +44,22 @@ questions. Code and SQL are reviewed as text; there is no execution sandbox.
 
 ## Run locally
 
-Install **Go 1.26.8+**, **Node.js 22 with npm 10**, **Python 3** (content tools),
-and **Docker with Compose v2** (Postgres 16). No paid service is needed for the
-demo.
+Install **Git, Node.js 22 with npm 10, and Go 1.26.8+**. Docker and a model key
+are not required for the local demo. These commands work in macOS/Linux terminals
+and Windows PowerShell:
 
-```bash
+```sh
 git clone https://github.com/tejovardhan-makineni/mockinterview.git
 cd mockinterview
-cp .env.example .env
-make install
-make up
-make dev
+node scripts/local.mjs
 ```
+
+**Default demo accounts and history are temporary and reset on exit.** For lasting
+history, install native PostgreSQL, copy `.env.example` to `.env`, configure
+`DATABASE_URL`, then run `node scripts/local.mjs --persistent`. See the
+[OS setup, storage and Docker guide](docs/LOCAL-SETUP.md). There are no signed
+desktop installers in this release. Python 3 is only needed for content tools and
+some checks.
 
 Open `http://localhost:3000`; the API is at `http://localhost:8080`. Register a
 local account. Development auth responses provide a verification/recovery link
@@ -91,22 +103,50 @@ Two alternatives after copying `.env.example`:
 - **UI preview:** after `make install`, run
   `cd web && NEXT_PUBLIC_MOCK=1 npm run dev`. This uses example data without an API.
 
+## Mobile pocket practice (iOS and Android)
+
+The native [mobile companion](mobile/README.md) provides a smaller practice space
+with the same sage and forest theme. Its Today, Practice, and Saved tabs offer
+one- or three-question sessions, twelve prompts across behavioral, career, and
+technical topics, typed answers, native voice recording/playback, bookmarks,
+guided self-review, and resumable drafts. The latest 30 completed practices stay
+on the device. Native recordings are limited to 90 seconds per answer.
+
+```bash
+cd mobile
+npm ci
+npm start
+```
+
+Open with a compatible Expo Go installation on iOS or Android, or follow the
+[local native build instructions](mobile/README.md#create-your-own-local-native-build).
+`npm run web` previews the interface and typed flow in a browser.
+
+Pocket practice works offline once installed as a native app. It uses local
+self-review, without automated scoring, transcription, or account/history sync.
+Optional configured hosted sign-in enables private feedback and consented metrics,
+reflection and self-review sharing; it does not upload raw answers or recordings.
+The app links to the website for full AI interviews. This is an initial mobile
+implementation; store distribution is not configured.
+
 ## Hosted usage and continued practice
 
-The standard free allowance is one interview start per rolling seven days.
-Hosted accounts, including maintainers, use the same allowance unless separately
-granted tester access. Standard hosted starts, including your own provider key,
-share a one-start-per-rolling-24-hours limit.
-Resume and report retries do not consume another start. Your own-key
-option still uses the hosted service; self-hosting is the route to unrestricted
-local practice.
+The standard free allowance is **one funded interview every rolling 24 hours**,
+using Gemini 2.5 Flash for text and feedback. The project must have access to that
+provider model; deployment validation checks this rather than silently replacing
+it. **Validated personal-key interviews have no daily start limit**. Your model
+provider's charges and rate limits still apply. Resume and report retries do not
+consume another start; only one active interview per account is allowed.
 
-Approved testers have unlimited hosted interview starts and optional post-interview
-check-ins. Tester access is an email-based entitlement, separate from the
-administrator role, and still requires verified email and the normal policy and
-voice acknowledgments. Authorized administrators can list, add and remove testers
-through `GET`, `POST` and `DELETE /api/v1/admin/testers`; operators can use the admin
-CLI. See [tester access operations and API examples](docs/TESTER-ACCESS.md).
+Approved beta testers get unlimited starts and agree to provide useful feedback.
+Apply through `/beta`; the owner reviews applications in `/admin`. Feedback and
+analytics consent are separate. Tester access does not grant administrator
+access. See [tester operations](docs/TESTER-ACCESS.md).
+
+Describe a custom interview in your own words: profession, goal, seniority/level,
+questions and preferred structure. The interviewer uses this context to guide
+practice when no existing template fits. Request a future template through
+`/requests`; requests are private administrator notes.
 
 Hosted accounts verify their email before starting or using hosted resume AI.
 Existing accounts can still read history and export data before verification;
@@ -126,7 +166,7 @@ identity document is collected by this acknowledgment flow.
 
 API clients can read `GET /api/v1/legal-policy` for `terms_version`,
 `privacy_version`, `minimum_age` and `required`. The current document versions are
-`2026-09-10.1`. Hosted registration includes `adult_confirmed: true` and both exact
+`2026-10-04.1`. Hosted registration includes `adult_confirmed: true` and both exact
 version strings alongside email/password; existing users submit the same three
 fields to authenticated `POST /api/v1/auth/policies`. That endpoint returns the
 user directly, including `policies_required`, `adult_confirmed`, accepted versions,
@@ -225,5 +265,25 @@ of silently shortening the transcript. See [architecture](docs/ARCHITECTURE.md),
 See [support](SUPPORT.md), [security reporting](SECURITY.md), the
 [Code of Conduct](CODE_OF_CONDUCT.md) and [third-party notices](NOTICE.md).
 Source and original contributed scenarios are licensed under
-[GNU AGPL v3](LICENSE). If you offer a modified version over a network, provide
-users access to the corresponding source as required by that license.
+[MIT](LICENSE). Keep the copyright and permission notice with redistributed
+copies. Third-party dependencies retain their own licenses.
+
+
+## Private feedback, analytics and administration
+
+Hosted account history is stored by the API. Local PostgreSQL history belongs to
+that installation; the temporary demo resets on exit. Optional **Share analytics**
+sends consented results to a separately configured, authenticated server for
+administrator review. Without consent it sends nothing; if that API is offline,
+optional sharing fails quietly and local practice continues. This is not a backup
+or automatic cross-device sync. Private feedback is not a public testimonial.
+See [local sharing setup](docs/LOCAL-SETUP.md#optional-analytics-sharing), the
+[design and data contracts](docs/OPEN-SOURCE-DESIGN.md), and the app's privacy page.
+
+The owner portal is `/admin`, protected by the persisted admin role **and** the
+verified owner account `makinenitejovardhan@gmail.com`. There is no seeded/shared
+password. Register or recover that account, set a unique strong password, verify
+email, then run `go run ./cmd/admin -grant-owner` from `api/` against the intended
+database. An optional `-owner-password-file` provisions a new strong password
+from an owner-only file outside the repository; it never bypasses verification.
+Sign in again after promotion. See [owner setup and deployment](docs/OPEN-SOURCE-DESIGN.md#owner-bootstrap-and-deployment).

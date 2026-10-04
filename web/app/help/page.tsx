@@ -37,11 +37,12 @@ export default function Help() {
         </p>
         <h2>Tester access</h2>
         <p>
-          Approved testers have unlimited interview starts and optional product
-          check-ins. Verify the email added to the tester list and refresh setup
-          to see your access. Finish or resume an active interview before
-          starting another. Email verification, policy review and voice
-          acknowledgment still apply.
+          Apply at /beta and agree to share product feedback. Approved testers
+          have unlimited interview starts and optional product check-ins. Verify
+          the email added to the tester list and refresh setup to see your
+          access. Finish or resume an active interview before starting another.
+          Email verification, policy review and voice acknowledgment still
+          apply.
         </p>
         <h2>Browsers and accessibility</h2>
         <p>

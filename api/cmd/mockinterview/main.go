@@ -26,6 +26,7 @@ import (
 	"github.com/tejo/mockinterview-api/internal/llm"
 	"github.com/tejo/mockinterview-api/internal/pack"
 	"github.com/tejo/mockinterview-api/internal/store"
+	"github.com/tejo/mockinterview-api/internal/store/memstore"
 )
 
 func main() {
@@ -60,15 +61,29 @@ func main() {
 
 	ctx, stopWorkers := context.WithCancel(context.Background())
 	defer stopWorkers()
-	st, err := store.Open(ctx, cfg.DatabaseURL, cfg.DBMaxConns)
-	if err != nil {
-		slog.Error("store", "err", err)
-		os.Exit(1)
-	}
-	defer st.Close()
-	if *migrateOnly {
-		slog.Info("migrations complete")
-		return
+	var st store.Datastore
+	pingStore := func(context.Context) error { return nil }
+	if cfg.LocalMemory {
+		if *migrateOnly {
+			slog.Error("migrations require PostgreSQL; disable LOCAL_MEMORY")
+			os.Exit(1)
+		}
+		st = memstore.New()
+		slog.Warn("local demo storage is temporary; accounts and interviews reset when the API stops")
+	} else {
+		database, openErr := store.Open(ctx, cfg.DatabaseURL, cfg.DBMaxConns)
+		if openErr != nil {
+			slog.Error("store", "err", openErr)
+			os.Exit(1)
+		}
+		defer database.Close()
+		st = database
+		pingStore = database.Pool.Ping
+		if *migrateOnly {
+			slog.Info("migrations complete")
+			return
+		}
+		go database.Maintenance(ctx)
 	}
 
 	ai, err := llm.New(ctx, llm.Settings{
@@ -96,7 +111,6 @@ func main() {
 	}
 	slog.Info("startup", "mode", cfg.Mode, "llm_provider", info.Provider, "llm_model", info.Model, "llm_stub", ai.Stubbed(), "model_live", cfg.ModelLive, "questions", cat.Count(), "packs", packs.Count())
 
-	go st.Maintenance(ctx)
 	app := &App{Background: ctx, Cfg: cfg, Store: st, LLM: ai, Corpus: cat, Packs: packs}
 
 	r := chi.NewRouter()
@@ -114,11 +128,15 @@ func main() {
 		MaxAge:           300,
 	}))
 
-	registerHealthRoutes(r, cfg, ai, st.Pool.Ping)
+	registerHealthRoutes(r, cfg, ai, pingStore)
 	r.Route("/api/v1", app.Routes)
 
+	listenHost := os.Getenv("LISTEN_HOST")
+	if cfg.LocalMemory || (listenHost == "" && cfg.Environment != "production") {
+		listenHost = "127.0.0.1"
+	}
 	srv := &http.Server{
-		Addr:              ":" + cfg.Port,
+		Addr:              listenHost + ":" + cfg.Port,
 		Handler:           r,
 		ReadHeaderTimeout: 10 * time.Second,
 	}

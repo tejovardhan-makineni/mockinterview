@@ -9,7 +9,7 @@ export default function Terms() {
         <p className="eyebrow">Before you practice</p>
         <h1 className="page-title mt-3">Using mockinterview</h1>
         <p className="mt-5">
-          Effective September 10, 2026 · terms version 2026-09-10.1
+          Effective October 4, 2026 · terms version 2026-10-04.1
         </p>
         <p>
           These terms cover the hosted mockinterview.live service provided by
@@ -65,13 +65,13 @@ export default function Terms() {
         </p>
         <h2>Hosted access and model costs</h2>
         <p>
-          Standard access includes one platform-funded attempt per rolling seven
-          days, with a shared limit of one hosted attempt per rolling 24 hours
-          across funding modes. Approved testers are exempt from these
-          allowances while tester access is enabled; one active interview per
-          account still applies. Availability also depends on service capacity.
-          Setup shows eligibility and next-start times. Reconnecting or retrying
-          a report stays with the original attempt. Deletion does not reset the
+          Standard access includes one free Gemini 2.5 Flash interview per
+          rolling 24 hours. Validated personal model keys have no product
+          interview allowance. Approved testers are exempt from these allowances
+          while tester access is enabled; one active interview per account still
+          applies. Availability also depends on service capacity. Setup shows
+          eligibility and next-start times. Reconnecting or retrying a report
+          stays with the original attempt. Deletion does not reset the
           allowance. You can run the open-source project locally for more
           practice, subject to provider costs and terms.
         </p>
@@ -83,6 +83,13 @@ export default function Terms() {
           successful connection does not verify this. Do not bypass quotas,
           probe other users’ records, submit malware or use the service
           unlawfully.
+        </p>
+        <p>
+          Beta applicants agree to provide constructive product feedback.
+          Approval is manual and can be withdrawn. Optional analytics sharing is
+          separate from beta access. Custom interviews are AI-generated practice
+          based on your brief, not reviewed templates or exact employer
+          interviews.
         </p>
         <h2>A short check-in after practice</h2>
         <p>

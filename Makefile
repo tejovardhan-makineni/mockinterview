@@ -1,13 +1,20 @@
-.PHONY: help install up down dev api web build test lint fmt tidy validate-content preview-format new-scenario new-format local-stack check-llm
+.PHONY: help local local-persistent install up down dev api web build test lint fmt tidy validate-content preview-format new-scenario new-format local-stack check-llm
 ID ?= work-sample-reservation-review
 
 help:
+	@echo "make local: Docker-free demo (temporary history); make local-persistent: native PostgreSQL"
 	@echo "make install: install Go and web dependencies"
 	@echo "make up / down: start or stop local services (preserves database)"
 	@echo "make dev: run API and web; make local-stack: run both in Docker"
 	@echo "make test / lint / build / validate-content: local checks"
 	@echo "make new-scenario ID=my-scenario / new-format ID=my-format: draft content"
 	@echo "make preview-format ID=work-sample-reservation-review: private author preview"
+
+local:
+	node scripts/local.mjs
+
+local-persistent:
+	node scripts/local.mjs --persistent
 
 install:
 	cd api && go mod download

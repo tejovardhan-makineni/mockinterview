@@ -60,8 +60,9 @@ func (s *Service) Submit(w http.ResponseWriter, r *http.Request) {
 		httpx.WriteProblem(w, http.StatusBadRequest, "Add a rating or a comment")
 		return
 	}
-	if len(msg) > maxMessage {
-		msg = clip(msg, maxMessage)
+	if utf8.RuneCountInString(msg) > maxMessage {
+		httpx.WriteProblem(w, http.StatusBadRequest, "Feedback must be 5,000 characters or fewer")
+		return
 	}
 	kind := req.Kind
 	if kind == "" {
@@ -116,7 +117,7 @@ func (s *Service) Submit(w http.ResponseWriter, r *http.Request) {
 	}
 	safe["tags"] = tags
 	if req.IncludeDiagnostics {
-		for _, key := range []string{"connection", "mode", "ai_state", "status", "release", "format_version", "prompt_version", "page"} {
+		for _, key := range []string{"connection", "mode", "ai_state", "status", "release", "format_version", "prompt_version", "page", "section", "browser", "viewport", "language", "timezone", "online"} {
 			var value string
 			if json.Unmarshal(raw[key], &value) == nil && value != "" {
 				safe[key] = redact(clip(value, 160))
@@ -155,7 +156,7 @@ func (s *Service) Submit(w http.ResponseWriter, r *http.Request) {
 func (s *Service) List(w http.ResponseWriter, r *http.Request) {
 	uid := auth.UserID(r.Context())
 	u, err := s.store.UserByID(r.Context(), uid)
-	if err != nil || u.Role != "admin" {
+	if err != nil || !store.IsAdministrator(u) {
 		httpx.WriteProblem(w, http.StatusForbidden, "admins only")
 		return
 	}
@@ -188,7 +189,7 @@ func redact(v string) string { return secretPattern.ReplaceAllString(v, "[redact
 // Triage records the maintainer's review state; it never changes submitted text.
 func (s *Service) Triage(w http.ResponseWriter, r *http.Request) {
 	u, err := s.store.UserByID(r.Context(), auth.UserID(r.Context()))
-	if err != nil || u.Role != "admin" {
+	if err != nil || !store.IsAdministrator(u) {
 		httpx.WriteProblem(w, 403, "admins only")
 		return
 	}

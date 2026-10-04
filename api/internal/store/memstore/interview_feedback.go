@@ -141,7 +141,23 @@ func (m *Mem) ExportAccount(_ context.Context, uid string) (json.RawMessage, err
 		item := m.testers[strings.ToLower(strings.TrimSpace(u.Email))]
 		tester = &item
 	}
-	return json.Marshal(map[string]any{"export_version": 1, "account": map[string]any{"id": u.ID, "email": u.Email, "role": u.Role, "email_verified": u.EmailVerified, "adult_confirmed_at": u.AdultConfirmedAt, "terms_version": u.TermsVersion, "privacy_version": u.PrivacyVersion, "policies_accepted_at": u.PoliciesAcceptedAt}, "tester_access": tester, "sessions": sessions, "interview_feedback": responses})
+	applications := []store.BetaApplication{}
+	if a, ok := m.betaApplications[uid]; ok {
+		applications = append(applications, a)
+	}
+	requests := []store.TemplateRequest{}
+	for _, a := range m.templateRequests {
+		if a.UserID == uid {
+			requests = append(requests, a)
+		}
+	}
+	uploads := []store.SharedInterviewResult{}
+	for _, a := range m.sharedResults {
+		if a.UserID == uid {
+			uploads = append(uploads, a)
+		}
+	}
+	return json.Marshal(map[string]any{"beta_applications": applications, "template_requests": requests, "shared_interview_results": uploads, "export_version": 1, "account": map[string]any{"id": u.ID, "email": u.Email, "role": u.Role, "email_verified": u.EmailVerified, "adult_confirmed_at": u.AdultConfirmedAt, "terms_version": u.TermsVersion, "privacy_version": u.PrivacyVersion, "policies_accepted_at": u.PoliciesAcceptedAt}, "tester_access": tester, "sessions": sessions, "interview_feedback": responses})
 }
 
 func (m *Mem) InterviewFeedbackComments(_ context.Context, limit int, before *store.FeedbackCursor) ([]store.InterviewFeedbackRow, bool, error) {

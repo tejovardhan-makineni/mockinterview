@@ -20,23 +20,28 @@ func sampleQuestion() corpus.Question {
 	}
 }
 
-// A substantive transcript is scored by the stub, and only assessed dimensions
-// count toward a weighted overall on a 0..4 scale.
-func TestEvaluateStubScoresSubstantive(t *testing.T) {
+// Offline practice must never invent performance scores, even with substantive
+// answers. Rubric and drills can still demonstrate the report structure.
+func TestEvaluateStubIsClearlyUnscored(t *testing.T) {
 	e := New(llm.NewStub(), "")
 	transcript := []store.Turn{{Role: "candidate", Text: strings.Repeat("design cache shard replica ", 20)}}
 	res, err := e.Evaluate(context.Background(), sampleQuestion(), transcript, "")
 	if err != nil {
 		t.Fatal(err)
 	}
-	if !res.Scored {
-		t.Fatal("substantive transcript should be scored")
+	if res.Scored || !strings.Contains(res.Note, "Demo feedback") {
+		t.Fatal("demo must be clearly marked unscored")
 	}
 	if len(res.Scores) != 2 {
 		t.Fatalf("expected 2 rubric dims, got %d", len(res.Scores))
 	}
-	if res.Overall < 0 || res.Overall > 4 {
-		t.Errorf("overall %v out of 0..4 range", res.Overall)
+	if res.Overall != 0 {
+		t.Errorf("demo must not fabricate an overall score: %v", res.Overall)
+	}
+	for _, dimension := range res.Scores {
+		if dimension.Assessed || dimension.Score != 0 || dimension.CoveragePct != 0 {
+			t.Fatal("demo fabricated a dimension assessment")
+		}
 	}
 }
 

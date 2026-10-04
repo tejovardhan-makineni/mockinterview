@@ -5,7 +5,7 @@
   "review_status": "preview",
   "provenance": {
     "authorship": "Original project scenario, AI-assisted draft. Practitioner review and calibration pending.",
-    "license": "AGPL-3.0-only"
+    "license": "MIT"
   },
   "minutes": 30,
   "id": "hr-interview-scorecard-review",

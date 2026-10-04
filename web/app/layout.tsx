@@ -3,7 +3,7 @@ import "./globals.css";
 import { LanguageProvider } from "@/lib/i18n";
 
 export const metadata: Metadata = {
-  title: "mockinterview.live — A clearer next interview",
+  title: "MockInterview — Open source interview practice",
   description:
     "Practice interviews for your role, review evidence-based feedback, and contribute new formats to an open-source platform.",
 };

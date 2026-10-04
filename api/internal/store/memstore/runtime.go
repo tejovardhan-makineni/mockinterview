@@ -2,6 +2,7 @@ package memstore
 
 import (
 	"context"
+	"encoding/json"
 	"github.com/tejo/mockinterview-api/internal/store"
 	"time"
 )
@@ -21,7 +22,7 @@ func (m *Mem) globalStarts(exclude string) int {
 		}
 	}
 	for id, v := range m.sessions {
-		if id != exclude && v.sess.Funding == "platform" && v.sess.Status == "reserved" && v.sess.ReservedUntil != nil && v.sess.ReservedUntil.After(now) && !m.isTester(v.sess.UserID) {
+		if id != exclude && v.sess.Funding == "platform" && (v.sess.Status == "reserved" || v.sess.Status == "preparing") && v.sess.ReservedUntil != nil && v.sess.ReservedUntil.After(now) && !m.isTester(v.sess.UserID) {
 			n++
 		}
 	}
@@ -33,25 +34,28 @@ func (m *Mem) usage(uid, identity string, unlimited bool) store.Usage {
 	unlimited = unlimited || u.TesterUnlimited
 	now := time.Now()
 	for _, v := range m.runtimeUsage {
-		if unlimited || v.identity != identity {
+		if unlimited || v.identity != identity || v.funding != "platform" {
 			continue
 		}
 		d := v.at.Add(24 * time.Hour)
-		w := v.at.Add(7 * 24 * time.Hour)
 		if d.After(now) && (u.NextStartAt == nil || d.After(*u.NextStartAt)) {
 			u.NextStartAt = &d
 		}
-		if v.funding == "platform" && w.After(now) && (u.NextFundedAt == nil || w.After(*u.NextFundedAt)) {
-			u.NextFundedAt = &w
+		if d.After(now) && (u.NextFundedAt == nil || d.After(*u.NextFundedAt)) {
+			u.NextFundedAt = &d
 		}
 	}
 	u.FundedAvailable = unlimited || (u.NextStartAt == nil && u.NextFundedAt == nil)
 	for _, v := range m.sessions {
+		if (v.sess.Status == "preparing" || v.sess.Status == "reserved" || v.sess.Status == "created") && v.sess.ReservedUntil != nil && !v.sess.ReservedUntil.After(now) {
+			v.sess.Status = "expired"
+			v.credential = nil
+		}
 		if v.sess.UserID != uid && v.sess.UsageIdentity != identity {
 			continue
 		}
 		st := v.sess.Status
-		if (st == "reserved" || st == "created") && v.sess.ReservedUntil != nil && v.sess.ReservedUntil.After(now) || (st == "active" || st == "interrupted" || st == "ending") && (v.sess.StartedAt != nil || v.sess.DeadlineAt != nil && v.sess.DeadlineAt.After(now)) {
+		if (st == "preparing" || st == "reserved" || st == "created") && v.sess.ReservedUntil != nil && v.sess.ReservedUntil.After(now) || (st == "active" || st == "interrupted" || st == "ending") && (v.sess.StartedAt != nil || v.sess.DeadlineAt != nil && v.sess.DeadlineAt.After(now)) {
 			u.ActiveSessionID = v.sess.ID
 		}
 	}
@@ -72,7 +76,7 @@ func (m *Mem) ReserveSession(_ context.Context, r store.Reservation) (store.Sess
 	if u.ActiveSessionID != "" {
 		return store.Session{}, store.ErrSessionConflict
 	}
-	if !r.Unlimited && !u.TesterUnlimited && (u.NextStartAt != nil || (r.Session.Funding == "platform" && u.NextFundedAt != nil)) {
+	if !r.Unlimited && !u.TesterUnlimited && r.Session.Funding == "platform" && u.NextFundedAt != nil {
 		return store.Session{}, store.ErrQuota
 	}
 	if !u.TesterUnlimited && r.Session.Funding == "platform" && r.GlobalDailyLimit > 0 {
@@ -85,6 +89,9 @@ func (m *Mem) ReserveSession(_ context.Context, r store.Reservation) (store.Sess
 		a.ID = store.NewID()
 	}
 	a.Status = "reserved"
+	if r.Preparing {
+		a.Status = "preparing"
+	}
 	a.Phase = "lobby"
 	a.UsageIdentity = r.Identity
 	now := time.Now().UTC()
@@ -94,6 +101,27 @@ func (m *Mem) ReserveSession(_ context.Context, r store.Reservation) (store.Sess
 	m.seq++
 	m.sessions[a.ID] = &sessionRec{sess: a, created: now, seq: m.seq, credential: append([]byte(nil), r.Credential...), credentialExpires: r.CredentialExpires, localUnlimited: r.Unlimited, globalDailyLimit: r.GlobalDailyLimit}
 	return a, nil
+}
+
+func (m *Mem) CompletePreparation(_ context.Context, id, questionID string, snapshot, config json.RawMessage) error {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	v, ok := m.sessions[id]
+	if !ok || v.sess.Status != "preparing" || v.sess.ReservedUntil == nil || !v.sess.ReservedUntil.After(time.Now()) {
+		return store.ErrSessionConflict
+	}
+	v.sess.Status, v.sess.QuestionID, v.sess.QuestionSnapshot, v.sess.Config = "reserved", questionID, snapshot, config
+	return nil
+}
+
+func (m *Mem) FailPreparation(_ context.Context, id string) error {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	if v, ok := m.sessions[id]; ok && v.sess.Status == "preparing" {
+		v.sess.Status = "expired"
+		v.credential = nil
+	}
+	return nil
 }
 func (m *Mem) AcquireLive(_ context.Context, id, owner string) (store.Session, error) {
 	m.mu.Lock()
@@ -135,7 +163,7 @@ func (m *Mem) ActivateLive(_ context.Context, id, owner string) (store.Session, 
 		if len(m.pendingSurvey(v.sess.UserID)) > 0 {
 			return store.Session{}, store.ErrInterviewFeedbackRequired
 		}
-		if !v.localUnlimited && !usage.TesterUnlimited && (usage.NextStartAt != nil || (v.sess.Funding == "platform" && usage.NextFundedAt != nil)) {
+		if !v.localUnlimited && !usage.TesterUnlimited && v.sess.Funding == "platform" && usage.NextFundedAt != nil {
 			return store.Session{}, store.ErrQuota
 		}
 		now := time.Now().UTC()
@@ -213,7 +241,14 @@ func (m *Mem) beginFinish(id string, grace time.Duration) error {
 	if v.sess.Status == "complete" || v.sess.Status == "scoring" || v.sess.Status == "ending" {
 		return nil
 	}
+	if v.sess.Status == "preparing" {
+		return store.ErrSessionConflict
+	}
 	v.sess.Status = "ending"
+	if v.endedAt == nil {
+		now := time.Now()
+		v.endedAt = &now
+	}
 	if v.job == nil {
 		v.job = &store.ScoringJob{SessionID: id}
 	}
@@ -227,6 +262,7 @@ func (m *Mem) ClaimScoring(_ context.Context) (store.ScoringJob, error) {
 	for _, v := range m.sessions {
 		if (v.sess.Status == "active" || v.sess.Status == "interrupted") && v.sess.DeadlineAt != nil && !v.sess.DeadlineAt.After(time.Now()) && !v.lease.After(time.Now()) {
 			v.sess.Status = "ending"
+			v.endedAt = v.sess.DeadlineAt
 			v.jobState = "pending"
 			v.job = &store.ScoringJob{SessionID: v.sess.ID}
 		}
@@ -266,6 +302,7 @@ func (m *Mem) FailScoring(_ context.Context, id string, attempt int, msg string)
 	if v, ok := m.sessions[id]; ok {
 		v.jobState = "failed"
 		v.sess.Status = "feedback_failed"
+		v.events = append(v.events, "scoring_error")
 	}
 	return nil
 }
@@ -283,6 +320,10 @@ func (m *Mem) CompleteScoring(_ context.Context, id string, attempt int, r store
 	}
 	m.reports[id] = &reportRec{report: r, scores: append([]store.ScoreRow(nil), rows...)}
 	v.sess.Status = "complete"
+	if v.endedAt == nil {
+		now := time.Now()
+		v.endedAt = &now
+	}
 	v.jobState = "complete"
 	v.credential = nil
 	return nil

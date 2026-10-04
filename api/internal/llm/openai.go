@@ -76,7 +76,8 @@ func (o *OpenAI) Generate(ctx context.Context, req GenerateRequest) (string, err
 	}
 
 	body := map[string]any{"model": model, "messages": msgs}
-	if req.Temperature > 0 {
+	reasoning := o.provider == "openai" && (strings.HasPrefix(model, "gpt-5") || strings.HasPrefix(model, "gpt-6") || strings.HasPrefix(model, "o1") || strings.HasPrefix(model, "o3") || strings.HasPrefix(model, "o4"))
+	if req.Temperature > 0 && !reasoning {
 		body["temperature"] = req.Temperature
 	}
 	maxTok := req.MaxTokens
@@ -86,7 +87,16 @@ func (o *OpenAI) Generate(ctx context.Context, req GenerateRequest) (string, err
 		maxTok = 2048
 	}
 	if maxTok > 0 {
-		body["max_tokens"] = maxTok
+		if o.provider == "openai" {
+			// The completion budget includes internal reasoning. A tiny visible
+			// answer budget (especially key validation) otherwise yields no text.
+			if reasoning {
+				maxTok = max(2048, maxTok+1024)
+			}
+			body["max_completion_tokens"] = maxTok
+		} else {
+			body["max_tokens"] = maxTok
+		}
 	}
 	if req.JSONSchema != nil {
 		body["response_format"] = map[string]string{"type": "json_object"}
@@ -123,6 +133,9 @@ func (o *OpenAI) Generate(ctx context.Context, req GenerateRequest) (string, err
 		return "", fmt.Errorf("%s: empty response", o.provider)
 	}
 	text := out.Choices[0].Message.Content
+	if strings.TrimSpace(text) == "" {
+		return "", fmt.Errorf("%s: model returned no text; choose a compatible text model", o.provider)
+	}
 	if req.JSONSchema != nil {
 		text = stripFences(text)
 	}

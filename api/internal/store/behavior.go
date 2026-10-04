@@ -42,7 +42,8 @@ func (s *Store) AddEvent(ctx context.Context, sessionID string, tsMs int64, kind
 		data = json.RawMessage(`{}`)
 	}
 	_, err := s.Pool.Exec(ctx,
-		`INSERT INTO events (id, session_id, ts_ms, kind, data) VALUES ($1,$2,$3,$4,$5)`,
+		`WITH recorded AS (INSERT INTO events (id, session_id, ts_ms, kind, data) VALUES ($1,$2,$3,$4,$5) RETURNING session_id,kind)
+ UPDATE sessions SET runtime_error_count=runtime_error_count+1 WHERE id IN (SELECT session_id FROM recorded WHERE kind IN ('interview_error','scoring_error'))`,
 		NewID(), sessionID, tsMs, kind, data)
 	return err
 }

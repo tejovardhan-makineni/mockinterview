@@ -61,16 +61,17 @@ func (s *Store) CountSessionsToday(ctx context.Context, userID string) (int, err
 }
 
 type SessionSummary struct {
-	ID          string   `json:"id"`
-	QuestionID  string   `json:"question_id"`
-	Modality    string   `json:"modality"`
-	Track       string   `json:"track"`
-	Status      string   `json:"status"`
-	CreatedAt   string   `json:"created_at"`
-	Overall     *float64 `json:"overall,omitempty"`
-	Scored      *bool    `json:"scored,omitempty"`
-	PackID      string   `json:"pack_id,omitempty"`
-	PackRoundID string   `json:"pack_round_id,omitempty"`
+	QuestionTitle string   `json:"-"`
+	ID            string   `json:"id"`
+	QuestionID    string   `json:"question_id"`
+	Modality      string   `json:"modality"`
+	Track         string   `json:"track"`
+	Status        string   `json:"status"`
+	CreatedAt     string   `json:"created_at"`
+	Overall       *float64 `json:"overall,omitempty"`
+	Scored        *bool    `json:"scored,omitempty"`
+	PackID        string   `json:"pack_id,omitempty"`
+	PackRoundID   string   `json:"pack_round_id,omitempty"`
 }
 
 // ListUserSessions returns the user's past sessions (newest first) with the
@@ -82,7 +83,7 @@ func (s *Store) ListUserSessions(ctx context.Context, userID string, limit int) 
 	rows, err := s.Pool.Query(ctx, `
 		SELECT s.id, s.question_id, s.modality, s.track, s.status,
 		       to_char(s.created_at AT TIME ZONE 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS.US"Z"'), r.overall, r.scored,
-		       s.pack_id, s.pack_round_id
+		       s.pack_id, s.pack_round_id, COALESCE(s.question_snapshot->>'title','')
 		FROM sessions s LEFT JOIN reports r ON r.session_id = s.id
 		WHERE s.user_id=$1 ORDER BY s.created_at DESC LIMIT $2`, userID, limit)
 	if err != nil {
@@ -92,7 +93,7 @@ func (s *Store) ListUserSessions(ctx context.Context, userID string, limit int) 
 	var out []SessionSummary
 	for rows.Next() {
 		var ss SessionSummary
-		if err := rows.Scan(&ss.ID, &ss.QuestionID, &ss.Modality, &ss.Track, &ss.Status, &ss.CreatedAt, &ss.Overall, &ss.Scored, &ss.PackID, &ss.PackRoundID); err != nil {
+		if err := rows.Scan(&ss.ID, &ss.QuestionID, &ss.Modality, &ss.Track, &ss.Status, &ss.CreatedAt, &ss.Overall, &ss.Scored, &ss.PackID, &ss.PackRoundID, &ss.QuestionTitle); err != nil {
 			return nil, err
 		}
 		out = append(out, ss)

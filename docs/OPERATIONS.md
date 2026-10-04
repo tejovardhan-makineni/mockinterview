@@ -1,6 +1,15 @@
 # Operations — mockinterview.live
 
-## Release status
+## Current source and recorded releases
+
+The [changelog](../CHANGELOG.md) and [feature design](OPEN-SOURCE-DESIGN.md) describe
+the current, not-yet-deployed source update: daily funded access, unlimited personal
+keys, owner-only administration, consented analytics and MIT licensing. The older
+release snapshot below is preserved as operational history; it is not the current
+source policy. The [September 14 bank release](INTERVIEW-BANK-RELEASE-2026-09-14.md)
+is a newer recorded deployment than this snapshot.
+
+## September 13 release snapshot
 
 The public beta is **live** with **143 preview scenarios**. The microphone and
 unlimited-tester update was **deployed and verified** on 13 September 2026 at
@@ -124,8 +133,8 @@ fixtures, original content and format review.
 The host-run API/web path and real PostgreSQL checks were exercised. Compose
 configuration validates, but the complete container profile has not been booted
 in the release validation environment. Local practice remains unlimited; hosted
-administrators use the same seven-day funded and 24-hour overall start allowance
-as other users unless separately granted tester access. Resuming and retrying
+administrators use the same one-funded-start-per-24-hours allowance as other users
+unless separately granted tester access. Validated personal-key starts are unlimited. Resuming and retrying
 feedback preserve the original attempt. The [tester registry and management API](TESTER-ACCESS.md)
 provide unlimited hosted interview starts by verified email without granting an
 administrator role. Tester check-ins are optional.

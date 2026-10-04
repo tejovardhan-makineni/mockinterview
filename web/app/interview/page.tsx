@@ -86,11 +86,15 @@ function Room() {
             "This attempt can no longer be resumed. Your saved record is available in History.",
           );
         if (user.policies_required) {
-          router.replace("/consent?next=" + encodeURIComponent("/interview?s=" + sid));
+          router.replace(
+            "/consent?next=" + encodeURIComponent("/interview?s=" + sid),
+          );
           return;
         }
         const [q, prior] = await Promise.all([
-          api.getQuestion(s.question_id),
+          s.question
+            ? Promise.resolve(s.question)
+            : api.getQuestion(s.question_id),
           api.getTranscript(sid),
         ]);
         if (cancelled) return;
@@ -329,6 +333,8 @@ function Room() {
                 connection: conn,
                 section: section?.title,
                 mode: effectiveMode,
+                ai_state: aiState,
+                status: session.status,
               })}
             />
           </div>

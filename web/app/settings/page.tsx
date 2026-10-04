@@ -9,6 +9,7 @@ import {
   clearPrivateBrowserData,
   errorMessage,
 } from "@/lib/http";
+import { AnalyticsSettings } from "@/components/AnalyticsSettings";
 import { AppShell } from "@/components/AppShell";
 import { Button, Field, Input, Panel, ErrorNotice } from "@/components/ui";
 export default function Settings() {
@@ -81,6 +82,12 @@ export default function Settings() {
         </p>
       )}
       <div className="mt-7 grid gap-5 lg:grid-cols-2">
+        <Panel className="p-6">
+          <h2 className="mb-4 text-lg font-semibold">
+            Help improve the project
+          </h2>
+          <AnalyticsSettings userId={user?.id} />
+        </Panel>
         <Panel className="p-6">
           <h2 className="text-lg font-semibold">Your account</h2>
           <p className="mt-3 text-sm">{user?.email ?? "Loading account…"}</p>
