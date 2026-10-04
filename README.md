@@ -42,7 +42,30 @@ practitioner review and scoring calibration remain pending. Employer-named packs
 are practice approximations, with no employer affiliation or claim of exact
 questions. Code and SQL are reviewed as text; there is no execution sandbox.
 
-## Run locally
+## Desktop app
+
+The Electron app uses the same interview room, custom questions, model options,
+feedback and reports as the website. It bundles the local Go service and SQLite:
+no terminal, Docker, PostgreSQL installation or online account is needed to
+practice. **Desktop interviews always require your own AI provider key.** There
+are no free desktop interviews. The hosted website still provides one funded
+interview every rolling 24 hours for standard accounts; personal-key practice and
+approved tester access retain their separate rules.
+
+Published packages and their current availability are listed on the
+[Downloads page](https://mockinterview.live/downloads/) and
+[GitHub Releases](https://github.com/tejovardhan-makineni/mockinterview/releases).
+GitHub hosts the installer files. Only verified assets appear as download buttons;
+build support in this repository is not a claim that every platform is signed or
+published yet. See [desktop setup and storage](docs/LOCAL-SETUP.md#desktop-app).
+
+Interviews and reports save locally. Cloud AI still needs internet and incurs your
+provider's charges. Keys stay in memory for the app session. Optional analytics
+and optional result sharing start off, are private to the project administrator,
+and never block practice when the sharing service is unavailable. GitHub, Discord
+and Reddit remain available inside the app.
+
+## Run locally from source
 
 Install **Git, Node.js 22 with npm 10, and Go 1.26.8+**. Docker and a model key
 are not required for the local demo. These commands work in macOS/Linux terminals
@@ -57,8 +80,7 @@ node scripts/local.mjs
 **Default demo accounts and history are temporary and reset on exit.** For lasting
 history, install native PostgreSQL, copy `.env.example` to `.env`, configure
 `DATABASE_URL`, then run `node scripts/local.mjs --persistent`. See the
-[OS setup, storage and Docker guide](docs/LOCAL-SETUP.md). There are no signed
-desktop installers in this release. Python 3 is only needed for content tools and
+[OS setup, storage and Docker guide](docs/LOCAL-SETUP.md). Desktop package availability is listed separately on the Downloads page. Python 3 is only needed for content tools and
 some checks.
 
 Open `http://localhost:3000`; the API is at `http://localhost:8080`. Register a
@@ -89,7 +111,7 @@ python3 -c 'import base64,secrets; print(base64.b64encode(secrets.token_bytes(32
 ```
 
 Save the output as `SESSION_ENCRYPTION_KEY` in your local `.env`; do not commit
-it. Without a stable key, re-enter your provider key after restarting. Provider
+it. Without a stable key, re-enter your provider key after restarting or reloading. Provider
 credentials expire after three hours, so later feedback retries can also request
 re-entry. Unlimited local practice does not remove provider charges.
 

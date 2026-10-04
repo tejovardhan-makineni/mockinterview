@@ -1,7 +1,57 @@
 # Run mockinterview on your computer
 
-The source runs as a local web app on macOS, Windows and Linux. There are no
-signed desktop installers in this release. The simplest path needs **Git,
+## Desktop app
+
+The Electron desktop app bundles the interface, Go interview service, interview
+catalog and SQLite database. Package availability is listed on the
+[Downloads page](https://mockinterview.live/downloads/); installers are hosted as
+[GitHub Release assets](https://github.com/tejovardhan-makineni/mockinterview/releases).
+Only links to verified published assets are displayed. Source support for a
+platform does not mean its signed installer has been published.
+
+1. Download the package matching your operating system and processor, install it,
+   and open mockinterview.
+2. Add your own AI key in Settings or interview setup and validate the connection.
+3. Choose a template or custom interview. The interview room and saved reports
+   work the same way as the hosted app.
+
+**All desktop AI practice requires your own provider key. No free interviews are
+included.** The website provides standard verified accounts one platform-funded
+interview every rolling 24 hours; approved beta testers and personal keys retain
+their separate access rules. Cloud models require internet, and provider charges
+and rate limits apply. Gemini supports native voice; other configured providers
+support text interviews. A connection check can make a small billable request.
+
+The desktop app creates a local profile automatically. Interviews, transcripts,
+workspaces, reports, resumes, preferences and feedback survive ordinary app
+restarts in the bundled database. Export records in Settings and delete individual
+interviews in History. Uninstalling an app is not a guaranteed deletion of its
+operating-system data directory. Back up important exports separately.
+
+Provider keys remain in memory for the current app session and are not stored in
+browser preferences. The API can store an encrypted short-lived session copy to
+support reconnection and scoring; expired credentials require re-entry. Add your
+key again after restarting or reloading. The local database is not fully encrypted; protect
+your operating-system account and backups.
+
+### Desktop sharing
+
+**Share analytics** starts off and sends new interview usage/error metrics only
+when a hosted account is connected. **Include interview results** is a separate
+choice for new scores and written feedback, which may contain personal details.
+Consent choices survive restarts; the hosted login is memory-only and must be
+reconnected each app session. The saved local history supplies retry candidates
+when the project API is reachable. Upload failures are quiet and never block
+practice; this is not a backup or cross-device synchronization service.
+
+Feedback and template requests are saved locally. A separate unchecked **Send to
+the project admin** choice sends the submitted message only when sharing is
+connected; the app confirms whether that copy was delivered. GitHub, Discord and
+Reddit are available from the app navigation/footer and Help menu.
+
+## Developer launcher
+
+The source also runs as a local web app on macOS, Windows and Linux. This path needs **Git,
 Node.js 22 with npm 10, and Go 1.26.8 or newer**; Docker is optional. Python 3 is
 only needed for content-authoring and some repository checks.
 
@@ -138,7 +188,7 @@ analytics API origin before starting/building the web app. The mobile equivalent
 is `EXPO_PUBLIC_ANALYTICS_API_BASE` when building the mobile companion.
 
 The user must separately sign in to that API and enable **Share analytics**.
-Shared practice results and feedback are visible to its administrator. Remote sharing credentials remain in memory and require sign-in after restarting.
+Shared practice results and feedback are visible to its administrator. Remote sharing credentials remain in memory and require sign-in after restarting or reloading.
 Mobile consent also resets; web consent remains a per-account browser preference
 until disabled. Optional uploads fail quietly if the server is unavailable and do not block
 local practice. They are best-effort, not a guaranteed backup or cross-device

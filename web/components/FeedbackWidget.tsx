@@ -1,5 +1,8 @@
 "use client";
+import Link from "next/link";
 import { useId, useRef, useState } from "react";
+import { IS_DESKTOP } from "@/lib/desktop";
+import { sendProjectCopy } from "@/lib/analytics";
 import { api, IS_MOCK } from "@/lib/api";
 import { errorMessage } from "@/lib/http";
 import type { FeedbackContext, FeedbackPayload } from "@/lib/features/feedback";
@@ -40,6 +43,8 @@ export function FeedbackWidget({
   const [kind, setKind] = useState<FeedbackPayload["kind"]>(
     target ?? (variant === "studio" ? "interview" : "product"),
   );
+  const [projectCopy, setProjectCopy] = useState(false);
+  const [delivery, setDelivery] = useState("");
   const [diagnostics, setDiagnostics] = useState(false);
   const [transcript, setTranscript] = useState(false);
   const [error, setError] = useState("");
@@ -98,6 +103,33 @@ export function FeedbackWidget({
         );
       }
       setReference(result.id);
+      if (IS_DESKTOP && projectCopy) {
+        try {
+          await sendProjectCopy("/api/v1/feedback", {
+            kind,
+            message: message.trim() || undefined,
+            rating: rating ? Number(rating) : undefined,
+            tags: ["source:desktop"],
+            include_diagnostics: diagnostics,
+            share_transcript: false,
+            context: diagnostics
+              ? Object.fromEntries(
+                  Object.entries(context).filter(
+                    ([key]) => key !== "transcript_tail",
+                  ),
+                )
+              : undefined,
+          });
+          setDelivery(
+            "Saved locally and delivered privately to the project admin.",
+          );
+        } catch {
+          setDelivery(
+            "Saved locally. The project copy was not delivered; connect sharing in Settings and try sending again when online.",
+          );
+        }
+      } else if (IS_DESKTOP)
+        setDelivery("Saved on this computer. No copy was sent to the project.");
       setSent(true);
     } catch (e) {
       setError(errorMessage(e));
@@ -127,6 +159,8 @@ export function FeedbackWidget({
             setError("");
             setDiagnostics(false);
             setTranscript(false);
+            setProjectCopy(false);
+            setDelivery("");
           }
           dialog.current?.showModal();
         }}
@@ -158,7 +192,9 @@ export function FeedbackWidget({
             <p role="status" className="my-5 text-sm">
               {IS_MOCK
                 ? "This is demo mode. No feedback was sent or stored."
-                : "Your feedback has been saved for the maintainers."}
+                : IS_DESKTOP
+                  ? delivery
+                  : "Your feedback has been saved for the maintainers."}
             </p>
             {reference && (
               <p className="mb-5 break-all text-xs text-[var(--color-muted)]">
@@ -209,9 +245,9 @@ export function FeedbackWidget({
                 </select>
               </Field>
               <p className="text-xs text-[var(--color-muted)]">
-                Feedback is private to the operator and associated with your
-                account email. Do not include sensitive personal information.
-                Optional sharing controls below start off.
+                {IS_DESKTOP
+                  ? "Feedback saves on this computer. Sending a project copy is optional and uses the hosted account connected in Settings."
+                  : "Feedback is private to the operator and associated with your account email. Do not include sensitive personal information. Optional sharing controls below start off."}
               </p>
               <Field label="Anything you would like us to know? · optional">
                 <textarea
@@ -253,7 +289,7 @@ export function FeedbackWidget({
                   </span>
                 </span>
               </label>
-              {(sessionId || variant === "studio") && (
+              {!IS_DESKTOP && (sessionId || variant === "studio") && (
                 <label className="flex items-start gap-2 text-xs">
                   <input
                     type="checkbox"
@@ -265,6 +301,23 @@ export function FeedbackWidget({
                   this report
                 </label>
               )}
+              {IS_DESKTOP && (
+                <label className="flex items-start gap-3 text-sm">
+                  <input
+                    type="checkbox"
+                    checked={projectCopy}
+                    onChange={(e) => setProjectCopy(e.target.checked)}
+                    className="mt-1"
+                  />
+                  <span>
+                    Send this feedback to the project admin.{" "}
+                    <Link href="/settings" className="underline">
+                      Connect sharing
+                    </Link>{" "}
+                    first.
+                  </span>
+                </label>
+              )}
               {error && (
                 <p role="alert" className="text-sm text-[var(--color-bad)]">
                   {error} Your unsent feedback is still here.
@@ -274,7 +327,13 @@ export function FeedbackWidget({
                 type="submit"
                 disabled={busy || tooLong || (!rating && !message.trim())}
               >
-                {busy ? "Sending…" : "Send feedback"}
+                {busy
+                  ? IS_DESKTOP
+                    ? "Saving…"
+                    : "Sending…"
+                  : IS_DESKTOP
+                    ? "Save feedback"
+                    : "Send feedback"}
               </Button>
             </fieldset>
           </form>

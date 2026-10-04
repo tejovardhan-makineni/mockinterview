@@ -21,6 +21,38 @@ export default function Privacy() {
           , including without an account. Other installations have their own
           operators, providers and policies.
         </p>
+        <h2>Desktop app</h2>
+        <p>
+          The desktop app runs the interview service on your computer and saves
+          your profile, interviews, transcripts, resumes, reports and feedback
+          in a local database. It requires your own AI provider key; there are
+          no platform-funded desktop interviews. Your selected cloud provider
+          receives the content needed for AI processing, so local storage does
+          not mean offline AI. Keys are held in app memory; an encrypted,
+          expiring local session copy can support interview reconnection.
+        </p>
+        <p>
+          Desktop sharing starts off. “Share analytics” sends usage and error
+          metrics for new interviews to the project admin under a separately
+          connected hosted account. “Include interview results” separately
+          permits new scores and written feedback, which may contain personal
+          details. Consent is saved on this computer; the hosted login lasts
+          only for the current app session (until close or reload). Eligible
+          saved interviews are retried on later visits while consent and a
+          connected account remain active. No upload failure prevents local
+          practice.
+        </p>
+        <p>
+          Desktop feedback and template requests stay local unless you
+          explicitly choose to send a project copy. This choice is separate from
+          analytics. Use Settings to delete shared analytics, and History to
+          delete local interviews. Local files and exported copies are protected
+          by your operating-system account; the app does not claim that the
+          entire local database is encrypted. GitHub, Discord and Reddit links
+          open external services with their own privacy policies. The sections
+          below describe the hosted service and any copies you choose to share
+          with it.
+        </p>
         <h2>Accounts and eligibility</h2>
         <p>
           We store your email, a password hash, email-verification status,
@@ -182,9 +214,9 @@ export default function Privacy() {
           recordings, camera images or the interview transcript. Pocket practice
           shares reflections and self-review checklists, with no answer text or
           AI score. The mobile sharing choice and server login last for the
-          current app session. Local web sharing requires a configured server
-          and a separate hosted login; otherwise data stays with your local
-          installation.
+          current app session (until close or reload). Local web sharing
+          requires a configured server and a separate hosted login; otherwise
+          data stays with your local installation.
         </p>
         <p>
           Unavailable servers are skipped quietly so practice continues. Web

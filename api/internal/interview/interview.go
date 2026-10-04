@@ -125,6 +125,10 @@ func (s *Service) Create(w http.ResponseWriter, r *http.Request) {
 	if !httpx.DecodeJSON(w, r, &req) {
 		return
 	}
+	if s.options.PersonalKeysOnly && req.Funding != "byok" {
+		httpx.WriteJSON(w, http.StatusBadRequest, map[string]string{"code": "personal_key_required", "detail": "Desktop interviews require your own AI provider key. Free interviews are available on the website."})
+		return
+	}
 	if req.Custom != nil {
 		if req.QuestionID != "" || req.PackID != "" || req.RoundID != "" {
 			httpx.WriteProblem(w, 400, "choose a custom interview or a template")

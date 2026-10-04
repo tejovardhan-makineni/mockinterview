@@ -1,5 +1,9 @@
 "use client";
+import Link from "next/link";
 import { useState } from "react";
+import { api } from "@/lib/api";
+import { IS_DESKTOP } from "@/lib/desktop";
+import { sendProjectCopy } from "@/lib/analytics";
 import { AppShell } from "@/components/AppShell";
 import { Button, ErrorNotice, Field, Input, Panel } from "@/components/ui";
 import { communityApi } from "@/lib/features/community";
@@ -11,6 +15,8 @@ export default function TemplateRequestPage() {
     level: "",
     description: "",
   });
+  const [projectCopy, setProjectCopy] = useState(false);
+  const [delivery, setDelivery] = useState("");
   const [busy, setBusy] = useState(false);
   const [sent, setSent] = useState(false);
   const [error, setError] = useState("");
@@ -21,16 +27,18 @@ export default function TemplateRequestPage() {
         <p className="eyebrow">A practice library for everyone</p>
         <h1 className="page-title mt-3">Request a template</h1>
         <p className="mt-4 text-[var(--color-muted)]">
-          Tell us which interview is missing. Your request goes privately to the
-          maintainer. You can also build a custom interview today.
+          {IS_DESKTOP
+            ? "Keep an idea for a new template locally, or choose to send it privately to the project. You can also build a custom interview today."
+            : "Tell us which interview is missing. Your request goes privately to the maintainer. You can also build a custom interview today."}
         </p>
         <Panel className="mt-8 p-6 sm:p-8">
           {sent ? (
             <>
               <h2 className="text-xl font-semibold">Request received</h2>
               <p className="mt-3 text-sm">
-                Thank you. We’ll use your request to help prioritize new
-                templates.
+                {IS_DESKTOP
+                  ? delivery
+                  : "Thank you. We’ll use your request to help prioritize new templates."}
               </p>
               <Button href="/setup?custom=1" className="mt-5">
                 Create a custom interview
@@ -45,7 +53,26 @@ export default function TemplateRequestPage() {
                 setError("");
                 setSignIn(false);
                 try {
+                  if (IS_DESKTOP) await api.me();
                   await communityApi.requestTemplate(form);
+                  if (IS_DESKTOP && projectCopy) {
+                    try {
+                      await sendProjectCopy(
+                        "/api/v1/community/templates",
+                        form,
+                      );
+                      setDelivery(
+                        "Saved locally and delivered privately to the project admin.",
+                      );
+                    } catch {
+                      setDelivery(
+                        "Saved locally. The project copy was not delivered. Connect sharing in Settings and try again when online.",
+                      );
+                    }
+                  } else if (IS_DESKTOP)
+                    setDelivery(
+                      "Saved on this computer. No copy was sent to the project.",
+                    );
                   setSent(true);
                 } catch (e) {
                   setError(errorMessage(e));
@@ -103,11 +130,33 @@ export default function TemplateRequestPage() {
                 />
               </Field>
               <p className="text-xs text-[var(--color-muted)]">
-                A verified account is required. Please leave out confidential
-                employer or client information.
+                {IS_DESKTOP
+                  ? "Please leave out confidential employer or client information."
+                  : "A verified account is required. Please leave out confidential employer or client information."}
               </p>
+              {IS_DESKTOP && (
+                <label className="flex items-start gap-3 text-sm">
+                  <input
+                    type="checkbox"
+                    checked={projectCopy}
+                    onChange={(e) => setProjectCopy(e.target.checked)}
+                    className="mt-1"
+                  />
+                  <span>
+                    Send this request to the project admin.{" "}
+                    <Link href="/settings" className="underline">
+                      Connect sharing
+                    </Link>{" "}
+                    first.
+                  </span>
+                </label>
+              )}
               <Button type="submit" disabled={busy}>
-                {busy ? "Sending…" : "Send template request"}
+                {busy
+                  ? "Saving…"
+                  : IS_DESKTOP
+                    ? "Save template request"
+                    : "Send template request"}
               </Button>
             </form>
           )}

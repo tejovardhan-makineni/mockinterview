@@ -2,11 +2,12 @@
 import { useEffect, useState, type ReactNode } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { IS_DESKTOP } from "@/lib/desktop";
 import { api, IS_MOCK } from "@/lib/api";
 import { Button } from "./ui";
 import { syncAnalytics, disconnectAnalytics } from "@/lib/analytics";
 import { FeedbackWidget } from "./FeedbackWidget";
-import { CommunityIconLink } from "./project/CommunityIcons";
+import { CommunityIconLink, CommunityIcons } from "./project/CommunityIcons";
 export { SOURCE_URL } from "@/lib/project";
 export type NavKey =
   | "dashboard"
@@ -20,13 +21,15 @@ export type NavKey =
 export function Footer() {
   return (
     <footer className="no-print mx-auto flex max-w-[1160px] flex-wrap items-center justify-end gap-4 border-t border-[var(--color-line)] px-6 py-6 text-xs text-[var(--color-muted)]">
+      {IS_DESKTOP && <CommunityIcons className="mr-auto" />}
       <nav aria-label="Information" className="flex flex-wrap gap-5">
         <Link href="/privacy">Privacy</Link>
         <Link href="/terms">Terms</Link>
         <Link href="/docs">Docs</Link>
         <Link href="/get-started">Get started</Link>
+        {!IS_DESKTOP && <Link href="/downloads">Downloads</Link>}
         <Link href="/updates">Updates</Link>
-        <Link href="/beta">Join beta</Link>
+        {!IS_DESKTOP && <Link href="/beta">Join beta</Link>}
         <a href="/third-party-notices.txt">Licenses</a>
       </nav>
     </footer>
@@ -89,7 +92,7 @@ export function AppShell({
             </span>
             mockinterview
             <span className="hidden text-xs font-normal text-[var(--color-muted)] sm:inline">
-              .live
+              {IS_DESKTOP ? "Desktop" : ".live"}
             </span>
           </Link>
           <div className="order-last flex w-full flex-wrap items-center gap-x-4 gap-y-2 lg:order-none lg:w-auto">
@@ -126,7 +129,9 @@ export function AppShell({
           <CommunityIconLink community="github" />
           {signedIn ? (
             <details className="relative">
-              <summary className="px-2 py-2 text-sm">Account</summary>
+              <summary className="px-2 py-2 text-sm">
+                {IS_DESKTOP ? "Settings" : "Account"}
+              </summary>
               <div className="absolute right-0 z-50 mt-2 w-44 rounded-xl border border-[var(--color-line)] bg-[var(--color-panel)] p-2 shadow-lg">
                 <Link href="/settings" className="block rounded-lg p-3 text-sm">
                   Settings
@@ -142,22 +147,28 @@ export function AppShell({
                     Admin portal
                   </Link>
                 )}
-                <button
-                  className="w-full rounded-lg p-3 text-left text-sm"
-                  onClick={() => {
-                    void Promise.resolve(api.logout())
-                      .catch(() => {})
-                      .finally(() => {
-                        disconnectAnalytics();
-                        setSignedIn(false);
-                        router.replace("/");
-                      });
-                  }}
-                >
-                  Sign out
-                </button>
+                {!IS_DESKTOP && (
+                  <button
+                    className="w-full rounded-lg p-3 text-left text-sm"
+                    onClick={() => {
+                      void Promise.resolve(api.logout())
+                        .catch(() => {})
+                        .finally(() => {
+                          disconnectAnalytics();
+                          setSignedIn(false);
+                          router.replace("/");
+                        });
+                    }}
+                  >
+                    Sign out
+                  </button>
+                )}
               </div>
             </details>
+          ) : IS_DESKTOP ? (
+            <span className="text-xs" role="status">
+              Opening local profile…
+            </span>
           ) : (
             <Button href="/login" variant="ghost">
               Sign in

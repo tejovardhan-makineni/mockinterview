@@ -9,7 +9,11 @@ import {
   getToken,
   ApiError,
   clearPrivateBrowserData,
+  setDesktopToken,
+  setDesktopModel,
 } from "../http";
+
+import { IS_DESKTOP, loadDesktopPreferences } from "../desktop";
 
 export interface User {
   id: string;
@@ -61,6 +65,24 @@ function persist(r: AuthResult) {
   window.localStorage.setItem(USER_KEY, JSON.stringify(r.user));
 }
 
+let desktopBootstrap: Promise<User> | undefined;
+async function localProfile(): Promise<User> {
+  if (!desktopBootstrap) {
+    desktopBootstrap = (async () => {
+      const result = await req<AuthResult>("/api/v1/desktop/bootstrap");
+      if (!result.token || !result.user?.id)
+        throw new Error("The local app could not open your profile.");
+      setDesktopToken(result.token);
+      await loadDesktopPreferences().catch(() => {});
+      return result.user;
+    })().catch((error) => {
+      desktopBootstrap = undefined;
+      throw error;
+    });
+  }
+  return desktopBootstrap;
+}
+
 export const authHttp: AuthSlice = {
   legalPolicy: () => req<LegalPolicy>("/api/v1/legal-policy"),
   async acceptPolicies(acceptance) {
@@ -68,7 +90,8 @@ export const authHttp: AuthSlice = {
       method: "POST",
       body: JSON.stringify(acceptance),
     });
-    window.localStorage.setItem(USER_KEY, JSON.stringify(user));
+    if (IS_DESKTOP) desktopBootstrap = Promise.resolve(user);
+    else window.localStorage.setItem(USER_KEY, JSON.stringify(user));
     return user;
   },
   async register(email, password, acceptance) {
@@ -88,6 +111,7 @@ export const authHttp: AuthSlice = {
     return r;
   },
   async me() {
+    if (IS_DESKTOP) return localProfile();
     if (!getToken()) return null;
     try {
       return await req<User>("/api/v1/auth/me");
@@ -100,6 +124,12 @@ export const authHttp: AuthSlice = {
     }
   },
   async logout() {
+    if (IS_DESKTOP) {
+      desktopBootstrap = undefined;
+      setDesktopToken("");
+      setDesktopModel();
+      return;
+    }
     try {
       await req<void>("/api/v1/auth/logout", { method: "POST" });
     } finally {

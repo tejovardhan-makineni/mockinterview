@@ -1,7 +1,15 @@
 import type { NextConfig } from "next";
 
 // Deployment must opt into this guard; a local static demo remains possible.
-if (process.env.APP_ENV === "production") {
+if (
+  process.env.NEXT_PUBLIC_DESKTOP === "1" &&
+  process.env.NEXT_PUBLIC_MOCK === "1"
+)
+  throw new Error("Desktop packages require the real local API.");
+if (
+  process.env.APP_ENV === "production" &&
+  process.env.NEXT_PUBLIC_DESKTOP !== "1"
+) {
   if (process.env.NEXT_PUBLIC_MOCK === "1")
     throw new Error("Production cannot use simulated interviews.");
   const origin = new URL(

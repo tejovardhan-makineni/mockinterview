@@ -19,6 +19,7 @@ import (
 
 type Options struct {
 	Hosted                          bool
+	PersonalKeysOnly                bool
 	EncryptionKey                   []byte
 	PlatformProvider, PlatformModel string
 	LiveModel                       string
@@ -90,6 +91,9 @@ func (s *Service) scoreJob(ctx context.Context, job store.ScoringJob) error {
 	sess, e := s.store.GetSession(ctx, job.SessionID)
 	if e != nil {
 		return e
+	}
+	if s.options.PersonalKeysOnly && sess.Funding != "byok" {
+		return errors.New("desktop interviews require a personal API key")
 	}
 	if s.options.Hosted {
 		u, err := s.store.UserByID(ctx, sess.UserID)
@@ -205,6 +209,10 @@ func (s *Service) Usage(w http.ResponseWriter, r *http.Request) {
 	if e != nil {
 		httpx.WriteProblem(w, 503, "Allowance temporarily unavailable")
 		return
+	}
+	if s.options.PersonalKeysOnly {
+		usage.FundedAvailable = false
+		usage.TesterUnlimited = false
 	}
 	httpx.WriteJSON(w, 200, usage)
 }

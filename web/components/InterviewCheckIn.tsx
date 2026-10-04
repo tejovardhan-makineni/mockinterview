@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useId, useRef, useState } from "react";
 import Link from "next/link";
+import { IS_DESKTOP } from "@/lib/desktop";
 import { api, IS_MOCK } from "@/lib/api";
 import {
   COMPARISON_VERSION,
@@ -191,7 +192,9 @@ export function InterviewCheckIn({
             : envelope.response
               ? "Your check-in is saved. Editing it is optional."
               : "This check-in is optional. You can start another interview without completing it."}{" "}
-          Your responses are saved to your account for product improvement.
+          {IS_DESKTOP
+            ? "Your responses are saved on this computer."
+            : "Your responses are saved to your account for product improvement."}
           Choose “Unable to judge” when you cannot rate an item.
         </p>
         <p className="mt-2 text-sm">
@@ -215,8 +218,9 @@ export function InterviewCheckIn({
         </p>
         {saved && (
           <p className="notice mt-4" role="status">
-            Check-in saved to your account. Thank you. Your usual interview
-            allowance still applies.
+            {IS_DESKTOP
+              ? "Check-in saved on this computer. Thank you."
+              : "Check-in saved to your account. Thank you. Your usual interview allowance still applies."}
           </p>
         )}
         {!editing ? (
@@ -344,25 +348,27 @@ export function InterviewCheckIn({
               comment, diagnostics, research participation or transcript access
               is required.
             </p>
-            <label className="flex items-start gap-3 text-sm">
-              <input
-                type="checkbox"
-                className="mt-1"
-                checked={share}
-                disabled={busy}
-                onChange={(e) => {
-                  setShare(e.target.checked);
-                  setDirty(true);
-                }}
-              />
-              <span>
-                Allow maintainers to inspect this interview’s transcript to
-                investigate my feedback (optional).{" "}
-                <Link href="/privacy" className="underline">
-                  Privacy details
-                </Link>
-              </span>
-            </label>
+            {!IS_DESKTOP && (
+              <label className="flex items-start gap-3 text-sm">
+                <input
+                  type="checkbox"
+                  className="mt-1"
+                  checked={share}
+                  disabled={busy}
+                  onChange={(e) => {
+                    setShare(e.target.checked);
+                    setDirty(true);
+                  }}
+                />
+                <span>
+                  Allow maintainers to inspect this interview’s transcript to
+                  investigate my feedback (optional).{" "}
+                  <Link href="/privacy" className="underline">
+                    Privacy details
+                  </Link>
+                </span>
+              </label>
+            )}
             {error && (
               <ErrorNotice
                 message={

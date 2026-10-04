@@ -155,3 +155,24 @@ activation to ending/current time, bounded by the session deadline; unstarted
 preparation has zero interview duration. Safe preparation errors are recorded
 without copying provider response bodies or private brief text into diagnostics.
 These metrics are operational evidence, not scores or proof of learning gains.
+
+## Desktop copies and consent
+
+Desktop operational metrics and questionnaires persist in local SQLite. They do
+not automatically enter the hosted administrator’s dataset. Desktop **Share
+analytics** starts off and permits new usage/error metrics; **Include interview
+results** separately permits new scores and bounded written feedback. Consent
+activation times are owned by the desktop shell and survive random loopback
+ports and app restarts. A separately connected hosted account identifies uploaded
+copies; the login token remains in memory.
+
+The client rechecks consent generation before each upload and retries eligible
+saved terminal sessions on subsequent app visits. The hosted endpoint deduplicates
+by account and client session ID. Upload failure never changes local completion
+or storage. Turning either choice off cancels future eligible work; in-flight
+uploads may already have reached the server. Deleting shared analytics waits for
+outstanding uploads and deletes hosted copies without deleting local history.
+
+Local product feedback and template requests have a separate explicit project-copy
+choice. Analytics consent does not authorize these free-text messages or transcript
+sharing. The UI distinguishes local persistence from confirmed hosted delivery.

@@ -17,6 +17,7 @@ const groups = [
     text: "Choose a template or describe your own interview, then practice with voice or text.",
     links: [
       ["Get started", "/get-started"],
+      ["Desktop downloads", "/downloads"],
       ["Explore interview templates", "/interviews"],
       ["Microphone, connection and account help", "/help"],
       ["Request a new template", "/requests"],

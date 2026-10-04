@@ -1,0 +1,31 @@
+{
+  "name": "mockinterview-desktop",
+  "productName": "Mock Interview",
+  "version": "0.1.0-beta.1",
+  "description": "Open source interview practice with your own AI key",
+  "author": "Mock Interview contributors",
+  "license": "MIT",
+  "private": true,
+  "type": "module",
+  "main": "src/main.mjs",
+  "repository": "https://github.com/tejovardhan-makineni/mockinterview",
+  "scripts": {
+    "start": "electron .",
+    "build:runtime": "node scripts/prepare.mjs",
+    "test": "node --test test/*.test.mjs",
+    "smoke": "node scripts/smoke.mjs",
+    "pack": "electron-builder --dir --publish never",
+    "dist": "electron-builder --publish never",
+    "checksums": "node scripts/checksums.mjs"
+  },
+  "devDependencies": {
+    "@electron/fuses": "2.1.3",
+    "electron": "44.5.1",
+    "electron-builder": "26.15.3"
+  },
+  "engines": {
+    "node": "22.x",
+    "npm": "10.x"
+  },
+  "packageManager": "npm@10.9.8"
+}

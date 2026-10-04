@@ -4,7 +4,7 @@
 // store/resumes.go. This is the "improve resume review in isolation" example —
 // change it here and in those two backend files only.
 
-import { req, BASE, authHeader, ApiError } from "../http";
+import { req, apiBase, authHeader, ApiError } from "../http";
 
 // ---- whitespace-tolerant matching ----
 // PDF extraction sometimes drops the spaces between words, so an AI edit's
@@ -150,7 +150,7 @@ export const resumeHttp: ResumeSlice = {
   async uploadResume(file) {
     const fd = new FormData();
     fd.append("file", file);
-    const res = await fetch(BASE + "/api/v1/resume", {
+    const res = await fetch(apiBase() + "/api/v1/resume", {
       method: "POST",
       headers: authHeader(),
       body: fd,

@@ -29,3 +29,10 @@ scratch/
 # Local Python/build tooling
 __pycache__/
 *.pyc
+
+# Electron generated resources and installers
+desktop/node_modules/
+desktop/resources/
+desktop/dist/
+desktop/LICENSE
+desktop/build/icon.png
