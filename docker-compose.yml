@@ -26,6 +26,8 @@ services:
       APP_ENV: development
       LOCAL_UNLIMITED: "true"
       PORT: "8080"
+      LISTEN_HOST: "0.0.0.0"
+      LOCAL_MEMORY: "false"
       DATABASE_URL: postgres://mockinterview:mockinterview@postgres:5432/mockinterview?sslmode=disable
       CORS_ALLOW: http://localhost:3000
       PUBLIC_URL: http://localhost:3000

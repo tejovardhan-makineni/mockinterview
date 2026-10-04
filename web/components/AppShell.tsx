@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { api, IS_MOCK } from "@/lib/api";
 import { Button } from "./ui";
+import { syncAnalytics, disconnectAnalytics } from "@/lib/analytics";
 import { FeedbackWidget } from "./FeedbackWidget";
 export type NavKey =
   | "dashboard"
@@ -16,15 +17,18 @@ export type NavKey =
   | "public";
 export const SOURCE_URL =
   "https://github.com/tejovardhan-makineni/mockinterview";
-export function Footer({ feedback = false }: { feedback?: boolean }) {
+export function Footer() {
   return (
     <footer className="no-print mx-auto flex max-w-[1160px] flex-wrap items-center justify-between gap-4 border-t border-[var(--color-line)] px-6 py-6 text-xs text-[var(--color-muted)]">
-      <span>Open source. Room to improve, together.</span>
-      {feedback && <FeedbackWidget target="product" />}
+      <span>MIT licensed. Practice, improve, contribute.</span>
       <nav aria-label="Information" className="flex flex-wrap gap-5">
         <Link href="/privacy">Privacy</Link>
         <Link href="/terms">Terms</Link>
-        <Link href="/help">Help</Link>
+        <Link href="/docs">Docs</Link>
+        <Link href="/get-started">Get started</Link>
+        <Link href="/updates">Updates</Link>
+        <Link href="/about">About</Link>
+        <Link href="/beta">Join beta</Link>
         <a href={SOURCE_URL}>Source</a>
         <a href="/third-party-notices.txt">Licenses</a>
       </nav>
@@ -34,9 +38,11 @@ export function Footer({ feedback = false }: { feedback?: boolean }) {
 export function AppShell({
   active,
   children,
+  feedbackSessionId,
 }: {
   active: NavKey;
   children: ReactNode;
+  feedbackSessionId?: string;
 }) {
   const [admin, setAdmin] = useState(false);
   const [signedIn, setSignedIn] = useState(false);
@@ -49,6 +55,7 @@ export function AppShell({
       .then((u) => {
         if (alive) {
           setSignedIn(!!u);
+          if (u) void syncAnalytics(u.id);
           setAdmin(u?.role === "admin");
           setPoliciesRequired(!!u?.policies_required);
         }
@@ -72,7 +79,7 @@ export function AppShell({
         Skip to content
       </a>
       <header className="no-print border-b border-[var(--color-line)] bg-[var(--color-panel)]">
-        <div className="mx-auto flex max-w-[1160px] flex-wrap items-center gap-x-8 gap-y-3 px-6 py-4">
+        <div className="mx-auto flex max-w-[1160px] flex-wrap items-center gap-x-5 gap-y-3 px-4 py-4 sm:px-6">
           <Link
             href="/"
             className="mr-auto flex items-center gap-2.5 text-lg font-semibold tracking-tight no-underline"
@@ -88,27 +95,37 @@ export function AppShell({
               .live
             </span>
           </Link>
-          <nav aria-label="Main" className="flex gap-1">
-            {[
-              { label: "Practice", href: "/interviews" },
-              { label: "History", href: "/results" },
-              { label: "Contribute", href: "/contribute" },
-            ].map((n) => (
-              <Link
-                key={n.href}
-                href={n.href}
-                aria-current={current === n.label ? "page" : undefined}
-                className={
-                  "rounded-lg px-3 py-2.5 text-sm no-underline " +
-                  (current === n.label
-                    ? "bg-[var(--color-panel-2)] font-semibold"
-                    : "text-[var(--color-muted)]")
-                }
-              >
-                {n.label}
-              </Link>
-            ))}
-          </nav>
+          <div className="order-last flex w-full flex-wrap items-center gap-x-4 gap-y-2 lg:order-none lg:w-auto">
+            {signedIn && (
+              <FeedbackWidget
+                target="product"
+                sessionId={feedbackSessionId}
+                getContext={() => ({ section: active })}
+              />
+            )}
+            <nav aria-label="Main" className="flex gap-1">
+              {[
+                { label: "Practice", href: "/interviews" },
+                { label: "History", href: "/results" },
+                { label: "Docs", href: "/docs" },
+                { label: "Contribute", href: "/contribute" },
+              ].map((n) => (
+                <Link
+                  key={n.href}
+                  href={n.href}
+                  aria-current={current === n.label ? "page" : undefined}
+                  className={
+                    "rounded-lg px-3 py-2.5 text-sm no-underline " +
+                    (current === n.label
+                      ? "bg-[var(--color-panel-2)] font-semibold"
+                      : "text-[var(--color-muted)]")
+                  }
+                >
+                  {n.label}
+                </Link>
+              ))}
+            </nav>
+          </div>
           {signedIn ? (
             <details className="relative">
               <summary className="px-2 py-2 text-sm">Account</summary>
@@ -123,11 +140,8 @@ export function AppShell({
                   Resume review
                 </Link>
                 {admin && (
-                  <Link
-                    href="/admin/feedback"
-                    className="block rounded-lg p-3 text-sm"
-                  >
-                    Interview feedback metrics
+                  <Link href="/admin" className="block rounded-lg p-3 text-sm">
+                    Admin portal
                   </Link>
                 )}
                 <button
@@ -136,6 +150,7 @@ export function AppShell({
                     void Promise.resolve(api.logout())
                       .catch(() => {})
                       .finally(() => {
+                        disconnectAnalytics();
                         setSignedIn(false);
                         router.replace("/");
                       });
@@ -174,7 +189,7 @@ export function AppShell({
         )}
         {children}
       </main>
-      <Footer feedback={signedIn} />
+      <Footer />
     </>
   );
 }

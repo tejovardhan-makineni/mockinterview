@@ -9,7 +9,7 @@ The hosted application uses Cloud Run, PostgreSQL and Firebase Hosting. Keep pro
 3. Use a separate staging service, database, database user and secret prefix. Never point destructive tests at production. Bind database users to their own database and verify a restore into the staging database before launch.
 4. Configure uptime checks for `/ready` on the API and `/` on the web domain. Configure alert notification channels and verify actual delivery. `/health` is process liveness; `/ready` checks the database and model configuration, not a paid provider request.
 5. Keep Cloud Run CPU allocated outside requests: the portable scoring/retention worker runs within the API process. Production uses one minimum instance. A stopped worker leaves durable scoring jobs to be reclaimed after the lease expires.
-6. Grant feedback administration by **verified user UUID**, not by an email allowlist: from `api/`, `go run ./cmd/admin -grant-admin-user USER_UUID`. Use operator credentials and the intended database. This revokes old login sessions.
+6. Grant administration to the **verified project owner account**: from `api/`, `go run ./cmd/admin -grant-owner`. Use operator credentials and the intended database. The stored role, verified email and exact owner identity are all required. This revokes old login sessions.
 
 Use `/health` and `/ready` for probes and external checks. Cloud Run reserves
 some paths ending in `z`; the live service's `/healthz` request returned a Google
@@ -32,7 +32,7 @@ Build the API and web from the same reviewed source, or record and verify exact
 matching API/web trees when their build SHAs differ. Match the published policy
 documents and forms to the API versions; do not release one side independently.
 `GET /api/v1/legal-policy` currently returns `terms_version` and `privacy_version`
-of `2026-09-10.1` in this source, `minimum_age: 18`, and `required` for the hosted configuration.
+of `2026-10-04.1` in this source, `minimum_age: 18`, and `required` for the hosted configuration.
 Hosted registration requires `adult_confirmed: true` plus both current version
 strings. Existing authenticated users submit those fields to
 `POST /api/v1/auth/policies`, which returns the user directly with
@@ -111,4 +111,20 @@ Existing WebSockets can remain attached to their original revision during a traf
 
 Review failed interview starts, input/persistence failures, feedback jobs, provider errors and latency. Keep application diagnostics free of request bodies, action links, keys and provider output; verify infrastructure access-log fields separately, including query strings. The hourly maintenance worker removes expired email actions and personal keys, the expired seven-day eligibility ledger, and raw legacy behavioral telemetry older than thirty days. Completed interview history remains until the user deletes it or the account. Automated backups age out under the database's configured backup policy; manual backups need a separate retention decision. Do not claim immediate deletion from backups. See the actual retention inventory in [privacy operations](PRIVACY-OPERATIONS.md).
 
-The global platform-funded daily start limit complements the per-user weekly/daily admission limits. Cloud billing alerts provide notifications; they do not cap usage. Personal-key requests must remain on that user's selected provider, including scoring, and must not silently fall back to platform billing.
+The global platform-funded daily start limit complements the per-user daily funded allowance; validated personal-key sessions and approved testers have no daily interview count limit. Cloud billing alerts provide notifications; they do not cap usage. Personal-key requests must remain on that user's selected provider, including scoring, and must not silently fall back to platform billing.
+
+
+## Open source participation update
+
+The current source adds MIT licensing, a Docker-free temporary demo, daily funded
+access, unlimited validated personal-key starts, custom interviews, beta
+applications, private template requests and consented analytics. Follow the
+[feature deployment checklist](OPEN-SOURCE-DESIGN.md#owner-bootstrap-and-deployment)
+in addition to this runbook. Migrations `0013_runtime_metrics.sql` and `0014_community.sql` are additive. Do not
+promote a source change until its staged API and web artifacts are verified.
+
+Verify Gemini 2.5 Flash access in the actual deployment project with the optional
+billable provider check; availability is not guaranteed for a new provider project.
+If it is unavailable, choose a model explicitly and update the displayed default
+before release. Production must reject LOCAL_MEMORY and stub mode. Provision the
+verified owner through the operator CLI; never seed a shared administrator password.

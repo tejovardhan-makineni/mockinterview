@@ -1,7 +1,7 @@
 # Tester access
 
 Approved testers can start hosted interviews without the daily start cooldown or
-weekly platform-funded allowance. Their post-interview product check-in is
+daily platform-funded allowance. Their post-interview product check-in is
 optional, and the shared 30-request/hour ancillary AI allowance does not apply
 (for example, resume AI and provider connection checks). The setup page shows
 **Tester access · unlimited interviews** after the
@@ -28,10 +28,18 @@ the standard hosted allowance and required check-in rules. Removal does not dele
 the account, existing interviews or saved responses. Recent tester starts count
 toward that account's standard cooldowns after access is removed.
 
+## Apply and review in the app
+
+Verified users can apply at `/beta` and explicitly agree to provide product
+feedback. The owner reviews applications at `/admin`. Approval and tester
+membership commit atomically; rejection revokes membership. Analytics sharing
+is a separate, optional consent. See [the participation design](OPEN-SOURCE-DESIGN.md).
+
 ## Management API
 
 All routes require `Authorization: Bearer <token>` from a signed-in, email-verified
-account with the current stored `admin` role. A tester without this role cannot
+account with the current stored `admin` role and exact owner email
+`makinenitejovardhan@gmail.com`. A tester without this role cannot
 manage the registry. Use the `token` returned by `POST /api/v1/auth/login` for the
 administrator account. Keep credentials and tokens outside source control.
 

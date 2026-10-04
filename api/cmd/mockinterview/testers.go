@@ -12,7 +12,7 @@ import (
 // nor caller-supplied token roles may grant administrative privileges.
 func (a *App) testerAdmin(w http.ResponseWriter, r *http.Request) bool {
 	u, err := a.Store.UserByID(r.Context(), auth.UserID(r.Context()))
-	if err != nil || !u.EmailVerified || u.Role != "admin" {
+	if err != nil || !store.IsAdministrator(u) {
 		httpx.WriteProblem(w, http.StatusForbidden, "verified administrators only")
 		return false
 	}

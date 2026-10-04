@@ -7,7 +7,10 @@ const defaultRoot = fileURLToPath(new URL("../", import.meta.url));
 const noticeName =
   /(^|[._ -])(licen[sc]e|copying|notice|copyright|ofl)([._ -]|$)|^third[-_ ]?party[-_ ]?notices?/i;
 const sha256 = (value) => createHash("sha256").update(value).digest("hex");
-const normalize = (value) => value.replace(/\r\n?/g, "\n").trimEnd();
+// Preserve license words and layout while avoiding platform line endings and
+// insignificant trailing spaces in the generated, checked-in notice bundle.
+const normalize = (value) =>
+  value.replace(/\r\n?/g, "\n").replace(/[\t ]+$/gm, "").trimEnd();
 const compare = (a, b) => (a < b ? -1 : a > b ? 1 : 0);
 
 async function optionalJSON(path) {

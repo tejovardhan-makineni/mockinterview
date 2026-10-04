@@ -117,7 +117,7 @@ The following are useful future or supplementary measures **only when the necess
 
 - Report-production failures and retry recovery, distinguished from a survey response that the report was unavailable at the time.
 - Recorded connection errors and reconnect events, distinguished from perceived interruption. Low turn counts do not prove a dropped connection.
-- Next-attempt return after 7 or 30 days, using cohorts with enough follow-up time and accounting for weekly funded/daily personal-key limits.
+- Next-attempt return after 7 or 30 days, using cohorts with enough follow-up time and accounting for daily funded access and unlimited personal-key/tester access.
 - Survey-form completion time or drop-off, only with appropriate disclosed instrumentation. Server submission time alone does not reveal when a person started answering.
 
 Do not imply these are implemented dashboard metrics without inspecting the code and validating the underlying records. Never infer camera attention, emotion, identity, or competence from ordinary survey/session metadata.
@@ -142,3 +142,16 @@ Administrator access to account-associated feedback does not authorize publicati
 6. Review small-group and free-text disclosure risk before external sharing. Never publish raw comments or account-linked exports merely to substantiate an aggregate.
 
 See [privacy operations](PRIVACY-OPERATIONS.md) for data-rights and retention limits. Final release validation must confirm the documented endpoint/window behavior and add evidence, while preserving unresolved research and legal decisions.
+
+
+## Durable session metrics
+
+The current source adds `runtime_metrics` to authenticated session responses:
+`error_count`, `turn_count`, and `duration_seconds`. Error count uses the persisted
+nonnegative session counter added by `0013_runtime_metrics.sql`; it includes
+recovered interview/scoring failure episodes and outlives raw diagnostic-event
+retention. Turn count derives from saved transcript rows. Duration derives from
+activation to ending/current time, bounded by the session deadline; unstarted
+preparation has zero interview duration. Safe preparation errors are recorded
+without copying provider response bodies or private brief text into diagnostics.
+These metrics are operational evidence, not scores or proof of learning gains.

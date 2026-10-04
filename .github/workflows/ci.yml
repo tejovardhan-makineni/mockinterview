@@ -23,7 +23,7 @@ jobs:
           POSTGRES_USER: mockinterview
           POSTGRES_PASSWORD: local-ci-only
           POSTGRES_DB: mockinterview_ci
-        ports: [5432:5432]
+        ports: ["5432:5432"]
         options: >-
           --health-cmd "pg_isready -U mockinterview -d mockinterview_ci"
           --health-interval 5s --health-timeout 5s --health-retries 10
@@ -79,3 +79,38 @@ jobs:
           APP_ENV: production
           NEXT_PUBLIC_MOCK: "0"
           NEXT_PUBLIC_API_BASE: https://mockinterview-api-661893776515.us-west1.run.app
+
+  mobile:
+    name: Mobile companion
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: mobile
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: mobile/package-lock.json
+      - run: npm ci --no-audit --no-fund
+      - run: npm run typecheck
+      - run: npm test
+
+  local-setup:
+    name: Local prerequisites (${{ matrix.os }})
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: "22"
+      - uses: actions/setup-go@40f1582b2485089dde7abd97c1529aa768e1baff # v5
+        with:
+          go-version-file: api/go.mod
+          cache-dependency-path: api/go.sum
+      - run: node scripts/local.mjs --check

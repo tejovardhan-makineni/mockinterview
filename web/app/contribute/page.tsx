@@ -1,78 +1,93 @@
-import { AppShell, SOURCE_URL } from "@/components/AppShell";
-import { Button, Panel } from "@/components/ui";
+import Link from "next/link";
+import { Button } from "@/components/ui";
+import {
+  CommunityLinks,
+  PROJECT,
+  ProjectHeading,
+  ProjectPage,
+  ProjectResources,
+} from "@/components/project/Project";
+import styles from "@/components/project/project.module.css";
+export const metadata = { title: "Contribute · mockinterview.live" };
 export default function Contribute() {
   return (
-    <AppShell active="contribute">
-      <p className="eyebrow">Built together</p>
-      <h1 className="page-title mt-3">Help someone practice.</h1>
-      <p className="mt-4 max-w-2xl text-[var(--color-muted)]">
-        Your experience can make the next interview more useful. Add a scenario,
-        improve an interviewer format, or make the product easier to use.
-      </p>
-      <div className="mt-9 grid gap-5 md:grid-cols-3">
+    <ProjectPage>
+      <ProjectHeading eyebrow="Built together" title="Help someone practice.">
+        Your experience can make the next interview more useful. You don’t need
+        to write code to contribute to this MIT-licensed project.
+      </ProjectHeading>
+      <div className={styles.cardGrid}>
         {[
           {
+            title: "Share your experience",
+            body: "Try an interview, complete the short check-in, and tell us what helped or got in your way. Private feedback reaches the administrator; it does not become a public testimonial.",
+            href: "/feedback",
+            label: "Share feedback",
+          },
+          {
             title: "Add a scenario",
-            body: "Start with a clear task, known facts, thoughtful follow-ups and a rubric. Include strong, mixed and incomplete example responses.",
-            link: "/blob/main/docs/CORPUS.md",
-            label: "Scenario guide",
+            body: "Turn your professional knowledge into an original task with useful follow-ups and a fair rubric. Review existing scenarios or request a template you wish we had.",
+            href: PROJECT.github + "/blob/main/docs/CORPUS.md",
+            label: "Read the scenario guide",
           },
           {
-            title: "Improve a format",
-            body: "Define how the conversation works: pacing, what to reveal, when to probe and how to assess evidence. Preview it without a paid model key.",
-            link: "/blob/main/CONTRIBUTING.md",
-            label: "Contributor guide",
-          },
-          {
-            title: "Fix the experience",
-            body: "Reproduce a bug, improve accessibility or contribute a focused change. Keep personal interview content out of public issues.",
-            link: "/issues",
-            label: "Find an issue",
+            title: "Improve the experience",
+            body: "Fix a bug, simplify the docs, test keyboard access, or contribute a focused change. Keep personal interview content and keys out of public issues.",
+            href: PROJECT.github + "/blob/main/CONTRIBUTING.md",
+            label: "Read the contributor guide",
           },
         ].map((x) => (
-          <Panel key={x.title} className="flex flex-col p-6">
-            <h2 className="text-lg font-semibold">{x.title}</h2>
-            <p className="my-4 flex-1 text-sm text-[var(--color-muted)]">
-              {x.body}
-            </p>
-            <Button href={SOURCE_URL + x.link} variant="ghost">
-              {x.label} ↗
-            </Button>
-          </Panel>
+          <article className={styles.card} key={x.title}>
+            <h3 className="!mt-0">{x.title}</h3>
+            <p>{x.body}</p>
+            <Link className={styles.textLink} href={x.href}>
+              {x.label} →
+            </Link>
+          </article>
         ))}
       </div>
-      <Panel className="mt-6 grid gap-6 p-7 md:grid-cols-[1.3fr_1fr]">
-        <div>
-          <h2 className="text-2xl font-medium">Make room for more practice.</h2>
-          <p className="mt-3 text-sm text-[var(--color-muted)]">
-            Standard hosted access includes one funded interview every seven
-            days and one hosted start per 24 hours across funding modes.
-            Approved testers have unlimited interview starts. Run your own copy
-            for more practice, subject to your model provider’s limits and
-            charges.
-          </p>
-          <Button href={SOURCE_URL + "#run-locally"} className="mt-5">
-            Follow the local setup guide ↗
-          </Button>
+      <section className={styles.section}>
+        <div className={styles.runPanel}>
+          <div>
+            <p className="eyebrow">Help shape the beta</p>
+            <h2>
+              More practice.
+              <br />A closer feedback loop.
+            </h2>
+            <p className={styles.sectionIntro}>
+              Apply to become a beta tester and agree to share useful product
+              feedback. Approved testers get unlimited interview starts.
+              Approval is reviewed by the administrator.
+            </p>
+            <div className={styles.actions}>
+              <Button href="/beta">Apply for beta testing →</Button>
+            </div>
+          </div>
+          <div>
+            <p className="eyebrow">Something missing?</p>
+            <h3 className="mt-3 text-xl font-semibold">
+              Ask for the practice you need.
+            </h3>
+            <p className={styles.sectionIntro}>
+              Tell us the profession, level and kind of interview you want to
+              practice. Template requests are private notes to the
+              administrator, and help guide what the community builds next.
+            </p>
+            <Link href="/requests" className={styles.textLink}>
+              Request a template →
+            </Link>
+            <p className={styles.fine}>
+              You can also create a custom interview now from your own questions
+              and goals.
+            </p>
+          </div>
         </div>
-        <ol className="space-y-4 text-sm text-[var(--color-muted)]">
-          <li>
-            1. Clone the repository and install the documented dependencies.
-          </li>
-          <li>2. Copy the environment example and start the local database.</li>
-          <li>
-            3. Try the simulated mode, or configure your model credentials.
-          </li>
-          <li>
-            4. Run the web app and API. Your local data stays in your own
-            installation.
-          </li>
-        </ol>
-      </Panel>
-      <p className="mt-6 text-xs text-[var(--color-muted)]">
-        AGPL open source. Review the license and contribution guidelines before
-        distributing changes.
-      </p>
-    </AppShell>
+      </section>
+      <section className={styles.section}>
+        <h2>Find your place in the community.</h2>
+        <CommunityLinks />
+      </section>
+      <ProjectResources />
+    </ProjectPage>
   );
 }

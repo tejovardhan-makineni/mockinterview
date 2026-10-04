@@ -20,7 +20,7 @@ func (s *Store) Maintenance(ctx context.Context) {
 			`DELETE FROM auth_actions WHERE expires_at<now()`,
 			`DELETE FROM session_credentials WHERE expires_at<now() OR session_id IN (SELECT id FROM sessions WHERE status IN ('complete','abandoned','failed'))`,
 			`DELETE FROM interview_usage WHERE activated_at<now()-interval '7 days'`,
-			`UPDATE sessions SET status='abandoned' WHERE status IN ('created','reserved') AND COALESCE(reserved_until,created_at+interval '10 minutes')<now()`,
+			`UPDATE sessions SET status='abandoned' WHERE status IN ('preparing','created','reserved') AND COALESCE(reserved_until,created_at+interval '10 minutes')<now()`,
 		} {
 			if _, err := s.Pool.Exec(work, stmt); err != nil {
 				slog.Error("retention_failed", "table", "ephemeral")

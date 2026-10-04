@@ -13,6 +13,8 @@ import (
 )
 
 func main() {
+	ownerPasswordFile := flag.String("owner-password-file", "", "private file containing a new password; use only with -grant-owner")
+	grantOwner := flag.Bool("grant-owner", false, "grant administration to the verified project owner account")
 	uid := flag.String("grant-admin-user", "", "verified account UUID to grant feedback administration")
 	addTester := flag.String("add-tester", "", "email to grant unlimited tester access (registration may follow)")
 	removeTester := flag.String("remove-tester", "", "email whose tester access should be removed")
@@ -24,11 +26,14 @@ func main() {
 			actions++
 		}
 	}
+	if *grantOwner {
+		actions++
+	}
 	if *listTesters {
 		actions++
 	}
-	if actions != 1 || flag.NArg() != 0 {
-		fmt.Fprintln(os.Stderr, "usage: admin -grant-admin-user UUID | -add-tester EMAIL | -remove-tester EMAIL | -list-testers")
+	if actions != 1 || flag.NArg() != 0 || (*ownerPasswordFile != "" && !*grantOwner) {
+		fmt.Fprintln(os.Stderr, "usage: admin -grant-owner [-owner-password-file PATH] | -grant-admin-user UUID | -add-tester EMAIL | -remove-tester EMAIL | -list-testers")
 		os.Exit(2)
 	}
 	for _, email := range []string{*addTester, *removeTester} {
@@ -37,6 +42,15 @@ func main() {
 				fmt.Fprintln(os.Stderr, err)
 				os.Exit(2)
 			}
+		}
+	}
+	passwordHash := ""
+	if *ownerPasswordFile != "" {
+		var passwordErr error
+		passwordHash, passwordErr = ownerPasswordHash(*ownerPasswordFile)
+		if passwordErr != nil {
+			fmt.Fprintln(os.Stderr, passwordErr)
+			os.Exit(2)
 		}
 	}
 	cfg, err := config.Load()
@@ -82,7 +96,15 @@ func main() {
 		fmt.Println("Tester access removed.")
 		return
 	}
-	tag, err := st.Pool.Exec(ctx, `UPDATE users SET role='admin',token_version=token_version+1 WHERE id=$1 AND email_verified=true`, *uid)
+	if *grantOwner {
+		owner, lookupErr := st.UserByEmail(ctx, store.OwnerEmail)
+		if lookupErr != nil || !owner.EmailVerified {
+			fmt.Fprintln(os.Stderr, "Register and verify the owner account before granting access.")
+			os.Exit(1)
+		}
+		*uid = owner.ID
+	}
+	tag, err := st.Pool.Exec(ctx, `UPDATE users SET role='admin',password_hash=CASE WHEN $3='' THEN password_hash ELSE $3 END,token_version=token_version+1 WHERE id=$1 AND email_verified=true AND lower(btrim(email))=$2`, *uid, store.OwnerEmail, passwordHash)
 	if err != nil || tag.RowsAffected() != 1 {
 		fmt.Fprintln(os.Stderr, "no verified account matched; no role changed")
 		os.Exit(1)

@@ -177,18 +177,28 @@ func TestPostgresAtomicAttemptsAndDurableFinish(t *testing.T) {
 	if e != nil || usage.NextStartAt == nil || usage.NextFundedAt == nil || usage.FundedAvailable {
 		t.Fatalf("deletion reset quota=%+v %v", usage, e)
 	}
-	if _, e = s.ReserveSession(ctx, reserveFor(u.ID, "same-verified-identity", "byok")); !errors.Is(e, ErrQuota) {
-		t.Fatalf("funding switch bypass=%v", e)
+	personal, e := s.ReserveSession(ctx, reserveFor(u.ID, "same-verified-identity", "byok"))
+	if e != nil {
+		t.Fatalf("own-key practice should be unlimited: %v", e)
 	}
-	// After 25h BYOK is eligible while platform remains on the 7d window.
+	if _, e = s.AcquireLive(ctx, personal.ID, "personal"); e != nil {
+		t.Fatal(e)
+	}
+	if _, e = s.ActivateLive(ctx, personal.ID, "personal"); e != nil {
+		t.Fatalf("own-key activation blocked by funded quota: %v", e)
+	}
+	if e = s.ReleaseLive(ctx, personal.ID, "personal"); e != nil {
+		t.Fatal(e)
+	}
+	if e = s.DeleteSession(ctx, personal.ID); e != nil {
+		t.Fatal(e)
+	}
+	// The hosted allowance resets on a rolling day; there is no weekly limit.
 	if _, e = s.Pool.Exec(ctx, `UPDATE interview_usage SET activated_at=now()-interval '25 hours'`); e != nil {
 		t.Fatal(e)
 	}
-	if _, e = s.ReserveSession(ctx, reserveFor(u.ID, "same-verified-identity", "platform")); !errors.Is(e, ErrQuota) {
-		t.Fatalf("weekly bypass=%v", e)
-	}
-	if _, e = s.ReserveSession(ctx, reserveFor(u.ID, "same-verified-identity", "byok")); e != nil {
-		t.Fatalf("BYOK after daily reset=%v", e)
+	if _, e = s.ReserveSession(ctx, reserveFor(u.ID, "same-verified-identity", "platform")); e != nil {
+		t.Fatalf("funded daily reset=%v", e)
 	}
 }
 func TestPostgresPreReadyRefundCredentialsAndGlobalCap(t *testing.T) {
@@ -441,5 +451,78 @@ func TestTimedEndAcceptsFinalWorkspaceBeforeFrozenScoring(t *testing.T) {
 	w, e := s.GetArtifact(ctx, a.ID)
 	if e != nil || w.Content != "last edit" {
 		t.Fatalf("final work=%+v %v", w, e)
+	}
+}
+
+func TestPostgresPreparationAdmissionAndDurableMetrics(t *testing.T) {
+	s := postgresRuntime(t)
+	ctx := context.Background()
+	u, err := s.CreateUser(ctx, "preparation@example.test", "hash")
+	if err != nil {
+		t.Fatal(err)
+	}
+	r := reserveFor(u.ID, "preparation", "platform")
+	r.Preparing = true
+	r.Credential, r.CredentialExpires = []byte("encrypted"), time.Now().Add(time.Hour)
+	a, err := s.ReserveSession(ctx, r)
+	if err != nil || a.Status != "preparing" {
+		t.Fatalf("preparation: %+v %v", a, err)
+	}
+	if _, err := s.ReserveSession(ctx, r); !errors.Is(err, ErrSessionConflict) {
+		t.Fatalf("duplicate planner admitted: %v", err)
+	}
+	if _, err := s.AcquireLive(ctx, a.ID, "premature"); !errors.Is(err, ErrSessionConflict) {
+		t.Fatalf("incomplete plan went live: %v", err)
+	}
+	if err := s.BeginFinish(ctx, a.ID); !errors.Is(err, ErrSessionConflict) {
+		t.Fatalf("incomplete plan queued for scoring: %v", err)
+	}
+	if err := s.FailPreparation(ctx, a.ID); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := s.SessionCredential(ctx, a.ID); !errors.Is(err, ErrCredentialExpired) {
+		t.Fatalf("failed planner kept key: %v", err)
+	}
+	if err := s.AddEvent(ctx, a.ID, 0, "interview_error", json.RawMessage(`{"code":"planning_failed"}`)); err != nil {
+		t.Fatal(err)
+	}
+	metrics, err := s.SessionMetrics(ctx, a.ID)
+	if err != nil || metrics.ErrorCount != 1 || metrics.TurnCount != 0 || metrics.DurationSeconds != 0 {
+		t.Fatalf("failed preparation metrics: %+v %v", metrics, err)
+	}
+	if _, err := s.Pool.Exec(ctx, `DELETE FROM events WHERE session_id=$1`, a.ID); err != nil {
+		t.Fatal(err)
+	}
+	metrics, err = s.SessionMetrics(ctx, a.ID)
+	if err != nil || metrics.ErrorCount != 1 {
+		t.Fatalf("event retention erased durable count: %+v %v", metrics, err)
+	}
+	usage, err := s.Usage(ctx, u.ID, r.Identity, false)
+	if err != nil || !usage.FundedAvailable || usage.ActiveSessionID != "" {
+		t.Fatalf("failed plan consumed allowance or locked account: %+v %v", usage, err)
+	}
+	a, err = s.ReserveSession(ctx, r)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := s.CompletePreparation(ctx, a.ID, "custom-ready", json.RawMessage(`{"title":"My practice"}`), json.RawMessage(`{"custom":{"level":"Senior lead"}}`)); err != nil {
+		t.Fatal(err)
+	}
+	if err := s.CompletePreparation(ctx, a.ID, "mutated", json.RawMessage(`{}`), json.RawMessage(`{}`)); !errors.Is(err, ErrSessionConflict) {
+		t.Fatalf("finalized plan was overwritten: %v", err)
+	}
+	ready, err := s.AcquireLive(ctx, a.ID, "ready")
+	if err != nil || ready.QuestionID != "custom-ready" {
+		t.Fatalf("finalized plan unavailable: %+v %v", ready, err)
+	}
+	if _, err = s.ActivateLive(ctx, a.ID, "ready"); err != nil {
+		t.Fatal(err)
+	}
+	if err = s.AddTurn(ctx, a.ID, "candidate", "my answer", 0, nil); err != nil {
+		t.Fatal(err)
+	}
+	metrics, err = s.SessionMetrics(ctx, a.ID)
+	if err != nil || metrics.TurnCount != 1 {
+		t.Fatalf("live counts: %+v %v", metrics, err)
 	}
 }

@@ -96,8 +96,8 @@ func ValidatePersonalKey(ctx context.Context, provider, model, mode, key string)
 	if e != nil {
 		return nil, errors.New("could not configure provider")
 	}
-	_, e = c.Generate(ctx, GenerateRequest{Purpose: PurposeGeneric, Messages: []Message{{Role: "user", Text: "Reply with OK."}}, MaxTokens: 32})
-	if e != nil {
+	output, e := c.Generate(ctx, GenerateRequest{Purpose: PurposeGeneric, Messages: []Message{{Role: "user", Text: "Reply with OK."}}, MaxTokens: 32})
+	if e != nil || strings.TrimSpace(output) == "" {
 		return nil, errors.New("provider rejected the key or model; verify access and try again")
 	}
 	return c, nil

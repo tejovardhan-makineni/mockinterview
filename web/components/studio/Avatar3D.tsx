@@ -1,7 +1,7 @@
 "use client";
 
 // Original vector character artwork created for this project. No third-party
-// avatar assets, likenesses, textures or fonts are used. AGPL-3.0, same as project.
+// avatar assets, likenesses, textures or fonts are used. MIT, same as project.
 import { memo, useEffect, useId, useRef, type MutableRefObject } from "react";
 export type AvatarDrive = {
   speaking: boolean;

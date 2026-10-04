@@ -5,13 +5,18 @@ import { api, IS_MOCK } from "@/lib/api";
 import { readSetupDraft, writeSetupDraft } from "@/lib/setupDraft";
 import type { QuestionSummary } from "@/lib/features/catalog";
 import { DEFAULT_CONFIG, type InterviewConfig } from "@/lib/features/profile";
-import type { SessionOptions, Usage } from "@/lib/features/interview";
+import type {
+  CustomInterview,
+  SessionOptions,
+  Usage,
+} from "@/lib/features/interview";
 import { account, type User } from "@/lib/features/auth";
 import {
   RequiredFeedbackNotice,
   useRequiredFeedback,
 } from "@/components/RequiredFeedbackNotice";
 import { ApiError, errorMessage } from "@/lib/http";
+import { AnalyticsSettings } from "@/components/AnalyticsSettings";
 import { AppShell } from "@/components/AppShell";
 import {
   Badge,
@@ -43,9 +48,19 @@ function Setup() {
   const router = useRouter();
   const params = useSearchParams();
   const qid = params.get("q") ?? "";
+  const isCustom = params.get("custom") === "1";
+  const [custom, setCustom] = useState<CustomInterview>({
+    profession: "",
+    goal: "",
+    level: "Senior",
+    questions: "",
+    structure: "",
+  });
   const packId = params.get("pack") ?? "";
   const roundId = params.get("round") ?? "";
-  const draftKey = "mi_setup_draft_" + (packId ? packId + "/" + roundId : qid);
+  const draftKey =
+    "mi_setup_draft_" +
+    (isCustom ? "custom" : packId ? packId + "/" + roundId : qid);
   const [question, setQuestion] = useState<QuestionSummary | null>(null);
   const [cfg, setCfg] = useState<InterviewConfig>(DEFAULT_CONFIG);
   const [minutes, setMinutes] = useState(30);
@@ -86,7 +101,24 @@ function Setup() {
     (async () => {
       try {
         const draft = readSetupDraft(draftKey);
+        if (isCustom && draft?.custom) setCustom(draft.custom);
         const q: QuestionSummary = await (async () => {
+          if (isCustom)
+            return {
+              id: "",
+              title: "Your custom interview",
+              track: "general",
+              domain: "custom",
+              modality: "conversational",
+              difficulty: "senior",
+              minutes: 20,
+              tags: [],
+              areas: [],
+              prompt:
+                "Describe the role and what you want to practice. Your AI interviewer will plan a format, questions, and follow-ups around your brief.",
+              blurb: "Your brief, your practice.",
+              review_status: "preview",
+            };
           if (!packId) return api.getQuestion(qid);
           const pack = await api.getPack(packId);
           const round = pack.rounds.find((r) => r.id === roundId);
@@ -175,7 +207,7 @@ function Setup() {
     return () => {
       alive = false;
     };
-  }, [qid, packId, roundId, draftKey]);
+  }, [qid, packId, roundId, draftKey, isCustom]);
   useEffect(() => {
     if (!usage?.next_start_at && !usage?.next_funded_at) return;
     let cancelled = false;
@@ -211,6 +243,7 @@ function Setup() {
   const blocked =
     !usage?.local_unlimited &&
     !usage?.tester_unlimited &&
+    funding === "platform" &&
     (dailyBlocked ||
       (funding === "platform" && usage?.funded_available === false));
   const availableAt = Math.max(
@@ -219,12 +252,14 @@ function Setup() {
       ? new Date(usage?.next_funded_at ?? 0).getTime() || 0
       : 0,
   );
-  const returnTo = packId
-    ? "/setup?pack=" +
-      encodeURIComponent(packId) +
-      "&round=" +
-      encodeURIComponent(roundId)
-    : "/setup?q=" + encodeURIComponent(qid);
+  const returnTo = isCustom
+    ? "/setup?custom=1"
+    : packId
+      ? "/setup?pack=" +
+        encodeURIComponent(packId) +
+        "&round=" +
+        encodeURIComponent(roundId)
+      : "/setup?q=" + encodeURIComponent(qid);
   function preserveOptions() {
     writeSetupDraft(draftKey, {
       config: cfg,
@@ -233,30 +268,23 @@ function Setup() {
       funding,
       provider,
       model,
+      custom: isCustom ? custom : undefined,
     });
   }
   async function check() {
+    if (
+      isCustom &&
+      (!custom.profession.trim() || !custom.goal.trim() || !custom.level.trim())
+    ) {
+      setError("Add your profession, practice goal, and experience level.");
+      return;
+    }
     if (!user || user.policies_required) {
-      writeSetupDraft(draftKey, {
-        config: cfg,
-        minutes,
-        mode,
-        funding,
-        provider,
-        model,
-      });
-      const returnTo = packId
-        ? "/setup?pack=" + packId + "&round=" + roundId
-        : "/setup?q=" + qid;
+      preserveOptions();
       router.push(
         user?.policies_required
           ? policyDestination(returnTo)
-          : "/login?next=" +
-              encodeURIComponent(
-                packId
-                  ? "/setup?pack=" + packId + "&round=" + roundId
-                  : "/setup?q=" + qid,
-              ),
+          : "/login?next=" + encodeURIComponent(returnTo),
       );
       return;
     }
@@ -286,6 +314,7 @@ function Setup() {
         paid_billing_confirmed: paidBilling,
       });
       setKeyValid(r.valid);
+      if (r.valid && r.model) setModel(r.model);
       setNotice(
         r.valid
           ? mode === "voice"
@@ -309,6 +338,7 @@ function Setup() {
         minutes,
         mode,
         funding,
+        custom: isCustom ? custom : undefined,
         voice_processing_acknowledged: mode === "voice" && voiceAcknowledged,
         ...(funding === "byok"
           ? {
@@ -412,28 +442,96 @@ function Setup() {
             )}
             {stage === "setup" ? (
               <>
+                {isCustom && (
+                  <div className="mt-6 space-y-5">
+                    <div className="grid gap-5 sm:grid-cols-2">
+                      <Field label="Profession">
+                        <Input
+                          required
+                          maxLength={160}
+                          value={custom.profession}
+                          placeholder="e.g. Staff product designer"
+                          onChange={(e) =>
+                            setCustom({ ...custom, profession: e.target.value })
+                          }
+                        />
+                      </Field>
+                      <Field label="Experience level">
+                        <Input
+                          required
+                          maxLength={120}
+                          value={custom.level}
+                          placeholder="e.g. Senior, 8 years"
+                          onChange={(e) =>
+                            setCustom({ ...custom, level: e.target.value })
+                          }
+                        />
+                      </Field>
+                    </div>
+                    <Field label="What would you like to achieve?">
+                      <textarea
+                        className="field-select min-h-24"
+                        required
+                        maxLength={2000}
+                        value={custom.goal}
+                        placeholder="Practice explaining design decisions to an engineering panel."
+                        onChange={(e) =>
+                          setCustom({ ...custom, goal: e.target.value })
+                        }
+                      />
+                    </Field>
+                    <Field label="Your questions · optional">
+                      <textarea
+                        className="field-select min-h-32"
+                        maxLength={12000}
+                        value={custom.questions}
+                        placeholder="Add questions you want to rehearse, one per line."
+                        onChange={(e) =>
+                          setCustom({ ...custom, questions: e.target.value })
+                        }
+                      />
+                    </Field>
+                    <Field label="Structure & instructions · optional">
+                      <textarea
+                        className="field-select min-h-24"
+                        maxLength={4000}
+                        value={custom.structure}
+                        placeholder="Start with a project walkthrough, challenge my tradeoffs, then discuss leadership."
+                        onChange={(e) =>
+                          setCustom({ ...custom, structure: e.target.value })
+                        }
+                      />
+                    </Field>
+                    <p className="text-xs text-[var(--color-muted)]">
+                      Original practice from your brief. The AI chooses a
+                      suitable interview format; it is not a reviewed template.
+                    </p>
+                  </div>
+                )}
                 <div className="mt-7 grid gap-5 sm:grid-cols-2">
-                  <Field label="Target level">
-                    <select
-                      className="field-select"
-                      value={cfg.target_level}
-                      onChange={(e) =>
-                        setCfg({
-                          ...cfg,
-                          target_level: e.target
-                            .value as InterviewConfig["target_level"],
-                        })
-                      }
-                    >
-                      {["entry", "junior", "mid", "senior", "staff"].map(
-                        (l) => (
-                          <option key={l} value={l}>
-                            {pretty(l)}
-                          </option>
-                        ),
-                      )}
-                    </select>
-                  </Field>
+                  {!isCustom && (
+                    <Field label="Target level">
+                      <select
+                        className="field-select"
+                        value={cfg.target_level}
+                        onChange={(e) =>
+                          setCfg({
+                            ...cfg,
+                            target_level: e.target
+                              .value as InterviewConfig["target_level"],
+                          })
+                        }
+                      >
+                        {["entry", "junior", "mid", "senior", "staff"].map(
+                          (l) => (
+                            <option key={l} value={l}>
+                              {pretty(l)}
+                            </option>
+                          ),
+                        )}
+                      </select>
+                    </Field>
+                  )}
                   <Field label="Time available">
                     <select
                       className="field-select"
@@ -691,6 +789,11 @@ function Setup() {
             )}
           </Panel>
           {error && <ErrorNotice message={error} />}
+          {user && stage === "setup" && (
+            <Panel className="p-6">
+              <AnalyticsSettings userId={user.id} />
+            </Panel>
+          )}
           <p className="text-xs text-[var(--color-muted)]">
             This is AI practice, not a hiring decision or professional
             certification.{" "}
@@ -737,7 +840,11 @@ function Setup() {
                   }}
                   className="field-select"
                 >
-                  <option value="platform">Platform-funded interview</option>
+                  <option value="platform">
+                    {usage?.local_unlimited
+                      ? "Local model / demo"
+                      : "Free · Gemini 2.5 Flash"}
+                  </option>
                   <option value="byok">Use my model & API key</option>
                 </select>
               </Field>
@@ -748,6 +855,7 @@ function Setup() {
                       value={provider}
                       onChange={(e) => {
                         setProvider(e.target.value);
+                        setModel("");
                         setPaidBilling(false);
                         setKeyValid(false);
                         if (e.target.value !== "gemini") setMode("text");
@@ -776,7 +884,7 @@ function Setup() {
                       placeholder="Used only for this attempt"
                     />
                   </Field>
-                  <Field label="Text / feedback model · optional">
+                  <Field label="Model ID · optional">
                     <Input
                       value={model}
                       onChange={(e) => {
@@ -790,11 +898,10 @@ function Setup() {
                     {provider !== "gemini"
                       ? "This provider supports text interviews in this release. "
                       : ""}
-                    Gemini voice uses the service’s configured Live model. Your
-                    provider may charge for use.
-                    {!usage?.local_unlimited &&
-                      !usage?.tester_unlimited &&
-                      " Standard hosted allowance: one attempt per 24 hours."}
+                    Choose a model available to your key, including advanced
+                    models. Connection checks validate access before you start.
+                    Gemini voice uses the configured Live model. Unlimited
+                    interviews with your key; provider charges apply.
                   </p>
                   {provider === "gemini" && (
                     <label className="flex items-start gap-3 text-xs">
@@ -862,8 +969,8 @@ function Setup() {
                                 : undefined,
                             )
                           : funding === "platform"
-                            ? "Your weekly interview is available."
-                            : "Your daily personal-key interview is available."}
+                            ? "Your daily free interview is available."
+                            : "Your key · unlimited interviews."}
               </div>
               {user?.email_verified === false && !usage?.local_unlimited && (
                 <div className="notice">
@@ -925,6 +1032,9 @@ function Setup() {
                   Run locally for more practice
                 </Button>
               )}
+              <a className="block text-center text-sm underline" href="/beta">
+                Join the beta · help improve practice
+              </a>
               {usage?.active_session_id && (
                 <Button
                   href={"/interview?s=" + usage.active_session_id}

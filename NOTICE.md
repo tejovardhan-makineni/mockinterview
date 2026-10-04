@@ -1,7 +1,9 @@
 # Source and content provenance
 
-The project source and original interview content use the GNU AGPL v3 license in
-`LICENSE`. Package dependencies retain their respective licenses.
+The project source and original interview content use the MIT license in
+`LICENSE`. Package dependencies and attributed third-party material retain their
+respective licenses. Historical release records describe the license at the time
+of those releases; the current MIT grant does not remove third-party notices.
 
 Browser dependency and vendored editor/font license text is published at
 `/third-party-notices.txt`, generated in `web/public/third-party-notices.txt` by

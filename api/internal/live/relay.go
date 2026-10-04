@@ -54,13 +54,17 @@ type wsWriter interface {
 // can't block a writer forever, and the error is returned so a dead socket
 // triggers teardown instead of being silently swallowed.
 type wsConn struct {
-	mu   sync.Mutex
-	conn wsWriter
+	mu      sync.Mutex
+	conn    wsWriter
+	onError func(serverMsg)
 }
 
 func (c *wsConn) writeServerMsg(m serverMsg) error {
 	c.mu.Lock()
 	defer c.mu.Unlock()
+	if m.Type == "error" && c.onError != nil {
+		c.onError(m)
+	}
 	_ = c.conn.SetWriteDeadline(time.Now().Add(writeWait))
 	return c.conn.WriteJSON(m)
 }
@@ -99,6 +103,7 @@ type Store interface {
 	GetSession(ctx context.Context, id string) (store.Session, error)
 	UpdateSessionStatus(ctx context.Context, id, status string) error
 	AddTurn(ctx context.Context, sessionID, role, text string, tsMs int64, meta json.RawMessage) error
+	AddEvent(context.Context, string, int64, string, json.RawMessage) error
 	Transcript(ctx context.Context, sessionID string) ([]store.Turn, error)
 	LatestResume(ctx context.Context, userID string) (store.Resume, error)
 }
@@ -246,7 +251,6 @@ func (r *Relay) Handle(w http.ResponseWriter, req *http.Request) {
 	conn.SetReadLimit(1 << 20)
 	_ = conn.SetReadDeadline(time.Now().Add(pongWait))
 	conn.SetPongHandler(func(string) error { return conn.SetReadDeadline(time.Now().Add(pongWait)) })
-	wc := &wsConn{conn: conn}
 	local := *r
 	if sess.LiveModel != "" {
 		local.liveModel = sess.LiveModel
@@ -254,6 +258,7 @@ func (r *Relay) Handle(w http.ResponseWriter, req *http.Request) {
 	local.attempt = sess
 	local.owner = owner
 	local.tokenVersion = user.TokenVersion
+	wc := local.socket(conn, id)
 	if sess.Funding == "byok" {
 		sealed, e := r.store.SessionCredential(req.Context(), id)
 		if e != nil {
@@ -315,7 +320,7 @@ func (r *Relay) Handle(w http.ResponseWriter, req *http.Request) {
 func (r *Relay) runText(conn *websocket.Conn, sessionID, system string, sections []Section) {
 	ctx, cancel := context.WithDeadline(r.parentContext(), r.deadline())
 	defer cancel()
-	wc := &wsConn{conn: conn}
+	wc := r.socket(conn, sessionID)
 	var once sync.Once
 	stop := func() { once.Do(func() { cancel(); _ = conn.Close() }) }
 	defer stop()
@@ -414,7 +419,7 @@ func (r *Relay) runGemini(conn *websocket.Conn, sessionID string, q corpus.Quest
 	ctx, cancel := context.WithDeadline(r.parentContext(), r.deadline())
 	defer cancel()
 
-	wc := &wsConn{conn: conn}
+	wc := r.socket(conn, sessionID)
 
 	prior, loadErr := r.store.Transcript(ctx, sessionID)
 	if loadErr != nil {

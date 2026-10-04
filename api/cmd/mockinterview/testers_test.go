@@ -65,9 +65,9 @@ func TestTesterAdminAPIAndHostedAccess(t *testing.T) {
 		}
 		return u, token
 	}
-	admin, adminToken := newUser("admin@example.test", "admin", true)
+	admin, adminToken := newUser("makinenitejovardhan@gmail.com", "admin", true)
 	_, ordinaryToken := newUser("regular@example.test", "user", true)
-	_, unverifiedAdminToken := newUser("unverified-admin@example.test", "admin", false)
+	_, unverifiedAdminToken := newUser("unverified-makinenitejovardhan@gmail.com", "admin", false)
 	cat, err := corpus.Load("../../data/corpus")
 	if err != nil {
 		t.Fatal(err)

@@ -35,6 +35,7 @@ type Config struct {
 	ReleaseSHA            string
 
 	// Database
+	LocalMemory bool
 	DatabaseURL string
 	DBMaxConns  int32
 
@@ -95,6 +96,7 @@ func Load() (*Config, error) {
 		Port:                  env("PORT", "8080"),
 		Mode:                  env("MODE", "api"),
 		CORSAllow:             splitCSV(env("CORS_ALLOW", "http://localhost:3000")),
+		LocalMemory:           envBool("LOCAL_MEMORY", false),
 		DatabaseURL:           env("DATABASE_URL", "postgres://mockinterview:mockinterview@localhost:5432/mockinterview?sslmode=disable"),
 		DBMaxConns:            int32(dbMaxConns),
 		JWTSecret:             env("JWT_SECRET", "dev-insecure-change-me"),
@@ -109,7 +111,7 @@ func Load() (*Config, error) {
 		CorpusDir:             env("CORPUS_DIR", "data/corpus"),
 		PacksDir:              env("PACKS_DIR", "data/packs"),
 		AdminEmails:           nil,
-		FreeDailyLimit:        envInt("FREE_DAILY_LIMIT", 2),
+		FreeDailyLimit:        envInt("FREE_DAILY_LIMIT", 1),
 	}
 
 	// Resolve the API key + default model for the selected reasoning provider.
@@ -146,6 +148,9 @@ func Load() (*Config, error) {
 	// reader of the repo could forge tokens. In production also require length.
 	insecure := c.JWTSecret == "" || c.JWTSecret == "dev-insecure-change-me"
 	if production {
+		if c.LocalMemory {
+			return nil, fmt.Errorf("LOCAL_MEMORY is forbidden in production; configure durable PostgreSQL storage")
+		}
 		if !c.Hosted {
 			return nil, fmt.Errorf("LOCAL_UNLIMITED is forbidden in production")
 		}

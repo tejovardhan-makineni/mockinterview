@@ -55,7 +55,7 @@ Paths below are relative to `api/internal/` unless stated otherwise.
 | `config` | Environment loading, provider settings, production validation and hosted admission settings |
 | `auth` | Password authentication, JWT/token-version revocation, verification/recovery actions, mail and WebSocket tickets |
 | `store` | PostgreSQL queries, embedded migrations, transactions, leases, usage ledger, scoring jobs, export and retention |
-| `store/memstore` | Repository implementation for deterministic tests |
+| `store/memstore` | Repository implementation for deterministic tests and explicitly temporary local demo |
 | `corpus` | Scenario/format validation, session configuration and candidate-safe catalog projections |
 | `pack` | Multi-round packs, scenario selection and progress |
 | `persona` | Voice, face, personality, delivery and language catalogs |
@@ -65,6 +65,7 @@ Paths below are relative to `api/internal/` unless stated otherwise.
 | `scoring` | Canonical rubric weights, evidence validation, not-assessed dimensions and learning exercises |
 | `profile` | Interviewer settings, profile, account export/deletion and voice preview |
 | `resume` | Resume extraction, review and matching |
+| `community` | Private beta applications, template requests, consented result uploads and owner review |
 | `feedback` | Versioned six-item interview check-in, next-attempt admission gate, private aggregate metrics and paginated suggestions; separate voluntary feedback/context and administrator triage |
 | `tts`, `i18n` | Voice previews and application-string translation |
 | `httpx` | HTTP errors, bounded JSON decoding, safe logging and shared middleware |
@@ -74,9 +75,10 @@ updates to the consuming feature interface and `store.Datastore`. Memory tests
 cover deterministic behavior; concurrency and durable recovery require the real
 PostgreSQL integration tests using an isolated `TEST_DATABASE_URL`.
 
-Administration uses the stored user role, not an email allowlist. The operator
-command `api/cmd/admin` grants the role to an explicitly selected, verified user
-UUID and revokes earlier login tokens. Verification/recovery actions are
+Administration requires the current stored admin role, verified email and the
+exact project owner identity together. The operator command `api/cmd/admin`
+provisions the verified owner and revokes earlier login tokens. Matching an email
+never grants a role on signup. See [owner bootstrap](OPEN-SOURCE-DESIGN.md#owner-bootstrap-and-deployment). Verification/recovery actions are
 single-use and stored as hashes. Production requires configured mail delivery.
 
 ## Interview lifecycle
@@ -111,9 +113,9 @@ sequenceDiagram
   C->>A: Retrieve report or retry failed feedback
 ```
 
-Hosted admission allows one platform-funded start per rolling seven days and
-one total start per rolling 24 hours, including personal-key starts. A separate
-global budget limits platform-funded starts. Reservations and failures before
+Hosted admission allows one platform-funded start per rolling 24 hours. Validated
+personal-key sessions and approved testers have no daily interview count limit. A
+separate global budget limits ordinary platform-funded starts. Reservations and failures before
 provider readiness do not consume an allowance. Resuming or retrying a report
 does not create another start. Local unlimited mode disables hosted admission
 limits; provider charges still apply.
@@ -174,8 +176,8 @@ historical compatibility; the current UI does not collect camera-derived signals
 Account export includes saved user records and excludes credentials, auth actions,
 private interviewer references and internal usage/lease fields. Deletion removes
 account-linked records. The independent usage ledger contains an HMAC of verified
-email and remains for the rolling seven-day window so deletion cannot reset
-hosted eligibility. Database backups follow their separate retention policy.
+email; retention of recent starts prevents account deletion from resetting hosted
+eligibility. The current allowance window is 24 hours. Database backups follow their separate retention policy.
 
 Maintenance runs on startup and hourly. It removes expired auth actions and
 personal keys, credentials for completed/abandoned/failed sessions, usage entries
@@ -203,3 +205,12 @@ For content changes, follow [the corpus contract](CORPUS.md) and
 `gemini_socket.go` and `relay.go`, assessment in `api/internal/scoring`, and durable
 lifecycle in `api/internal/interview` and `store`. Update portraits in
 `web/components/studio/Avatar3D.tsx` alongside `api/internal/persona/faces.go`.
+
+## Open source participation and local clients
+
+The public project website documents setup, releases, community and contribution.
+Beta commitments/reviews, private template requests and opt-in analytics use the
+new private participation tables and server-enforced owner authorization. The
+[feature design and schema](OPEN-SOURCE-DESIGN.md) records their API contracts,
+transaction boundaries, consent and deployment checks. [Local setup](LOCAL-SETUP.md)
+covers the temporary memory demo, durable PostgreSQL and optional Docker.

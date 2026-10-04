@@ -11,6 +11,7 @@ import (
 	"github.com/go-chi/httprate"
 
 	"github.com/tejo/mockinterview-api/internal/auth"
+	"github.com/tejo/mockinterview-api/internal/community"
 	"github.com/tejo/mockinterview-api/internal/config"
 	"github.com/tejo/mockinterview-api/internal/corpus"
 	"github.com/tejo/mockinterview-api/internal/feedback"
@@ -85,6 +86,7 @@ func (a *App) Routes(r chi.Router) {
 	profileSvc := profile.New(a.Store, a.Cfg.GeminiAPIKey, a.Cfg.ModelTTS)
 	corpusSvc := corpus.NewService(a.Corpus)
 	feedbackSvc := feedback.New(a.Store, a.Cfg.AdminEmails)
+	communitySvc := community.New(a.Store)
 	i18nSvc := i18n.New(a.LLM, a.Cfg.LLMModel)
 	scorer := scoring.New(a.LLM, a.Cfg.LLMModel)
 	interviewSvc := interview.New(a.Store, a.Corpus, scorer, a.Cfg.AdminEmails, a.Cfg.FreeDailyLimit)
@@ -95,6 +97,7 @@ func (a *App) Routes(r chi.Router) {
 			panic("session encryption initialization failed")
 		}
 	}
+	interviewSvc.SetPlanner(a.LLM)
 	interviewSvc.SetOptions(interview.Options{Hosted: a.Cfg.Hosted, EncryptionKey: encryptionKey, PlatformProvider: a.Cfg.LLMProvider, PlatformModel: a.Cfg.LLMModel, GlobalDailyLimit: a.Cfg.HostedDailyStartLimit, LiveModel: a.Cfg.ModelLive})
 	relay.SetOptions(a.Cfg.Hosted, encryptionKey)
 	if a.Background != nil {
@@ -166,6 +169,14 @@ func (a *App) Routes(r chi.Router) {
 		r.Put("/sessions/{id}/feedback", feedbackSvc.PutInterview)
 		r.Get("/admin/interview-feedback/metrics", feedbackSvc.InterviewMetrics)
 		r.Get("/admin/interview-feedback/comments", feedbackSvc.InterviewComments)
+		r.Get("/community/beta", communitySvc.BetaStatus)
+		r.With(perUser).Post("/community/beta", communitySvc.ApplyBeta)
+		r.With(perUser).Post("/community/templates", communitySvc.RequestTemplate)
+		r.With(perUser).Post("/community/analytics", communitySvc.ShareAnalytics)
+		r.Delete("/community/analytics", communitySvc.DeleteAnalytics)
+		r.Get("/admin/community", communitySvc.AdminOverview)
+		r.Patch("/admin/community/beta/{id}", communitySvc.ReviewBeta)
+		r.Patch("/admin/community/templates/{id}", communitySvc.ReviewTemplate)
 		r.Get("/admin/testers", a.listTesters)
 		r.Post("/admin/testers", a.updateTester)
 		r.Delete("/admin/testers", a.updateTester)
@@ -183,7 +194,7 @@ func (a *App) Routes(r chi.Router) {
 		r.With(authSvc.Verified, authSvc.Eligible, perUser).Put("/sessions/{id}/credentials", interviewSvc.Credentials)
 		r.Delete("/sessions/{id}", interviewSvc.Delete)
 		r.Get("/sessions", interviewSvc.List)
-		r.With(authSvc.Verified, authSvc.Eligible).Post("/sessions", interviewSvc.Create)
+		r.With(authSvc.Verified, authSvc.Eligible, perUser).Post("/sessions", interviewSvc.Create)
 		r.Get("/sessions/{id}", interviewSvc.Get)
 		r.Post("/sessions/{id}/turns", interviewSvc.AddTurn)
 		r.Post("/sessions/{id}/workspace", interviewSvc.SaveWorkspace)

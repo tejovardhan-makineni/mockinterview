@@ -25,6 +25,8 @@ func (r *roleRepo) UserByID(ctx context.Context, id string) (store.User, error) 
 	u, e := r.Mem.UserByID(ctx, id)
 	if r.admin {
 		u.Role = "admin"
+		u.Email = store.OwnerEmail
+		u.EmailVerified = true
 	}
 	return u, e
 }

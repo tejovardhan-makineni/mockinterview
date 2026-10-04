@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"strings"
 	"time"
 )
 
@@ -109,6 +110,9 @@ func (a *Anthropic) Generate(ctx context.Context, req GenerateRequest) (string, 
 		}
 	}
 	text := sb.String()
+	if strings.TrimSpace(text) == "" {
+		return "", fmt.Errorf("anthropic: model returned no text; choose a compatible text model")
+	}
 	if req.JSONSchema != nil {
 		text = stripFences(text)
 	}

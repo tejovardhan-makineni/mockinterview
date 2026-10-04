@@ -1,5 +1,7 @@
 import type { InterviewConfig } from "./features/profile";
+import type { CustomInterview } from "./features/interview";
 export interface SetupDraft {
+  custom?: CustomInterview;
   config: Partial<InterviewConfig>;
   minutes: number;
   mode: "voice" | "text";
@@ -19,6 +21,15 @@ export function writeSetupDraft(key: string, draft: SetupDraft) {
     language,
   } = draft.config;
   const safe = {
+    custom: draft.custom
+      ? {
+          profession: draft.custom.profession,
+          goal: draft.custom.goal,
+          level: draft.custom.level,
+          questions: draft.custom.questions,
+          structure: draft.custom.structure,
+        }
+      : undefined,
     minutes: draft.minutes,
     mode: draft.mode,
     funding: draft.funding,

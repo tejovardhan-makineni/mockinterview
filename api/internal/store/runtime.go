@@ -30,6 +30,7 @@ type Usage struct {
 	TesterUnlimited bool       `json:"tester_unlimited"`
 }
 type Reservation struct {
+	Preparing         bool
 	Session           Session
 	Identity          string
 	Unlimited         bool
@@ -51,7 +52,10 @@ type ScoringJob struct {
 }
 
 type SessionRuntime interface {
+	SessionMetrics(context.Context, string) (SessionMetrics, error)
 	ReserveSession(context.Context, Reservation) (Session, error)
+	CompletePreparation(context.Context, string, string, json.RawMessage, json.RawMessage) error
+	FailPreparation(context.Context, string) error
 	Usage(context.Context, string, string, bool) (Usage, error)
 	AcquireLive(context.Context, string, string) (Session, error)
 	ActivateLive(context.Context, string, string) (Session, error)
@@ -93,18 +97,18 @@ func readUsage(ctx context.Context, q queryer, uid, identity string, unlimited b
 	}
 	u.TesterUnlimited = tester
 	if !unlimited && !tester {
-		var daily, weekly *time.Time
-		e := q.QueryRow(ctx, `SELECT max(activated_at) FILTER (WHERE activated_at>now()-interval '24 hours')+interval '24 hours', max(activated_at) FILTER (WHERE funding='platform' AND activated_at>now()-interval '7 days')+interval '7 days' FROM interview_usage WHERE identity=$1`, identity).Scan(&daily, &weekly)
+		var daily *time.Time
+		e := q.QueryRow(ctx, `SELECT max(activated_at)+interval '24 hours' FROM interview_usage WHERE identity=$1 AND funding='platform' AND activated_at>now()-interval '24 hours'`, identity).Scan(&daily)
 		if e != nil {
 			return u, e
 		}
 		u.NextStartAt = daily
-		u.NextFundedAt = weekly
-		u.FundedAvailable = weekly == nil && daily == nil
+		u.NextFundedAt = daily
+		u.FundedAvailable = daily == nil
 	}
 	// Active and pending states share one MVCC statement snapshot. A scoring
 	// worker may transition ending -> scoring without the admission lock.
-	err = q.QueryRow(ctx, `SELECT COALESCE((SELECT id::text FROM sessions WHERE (user_id=$1 OR usage_identity=$2) AND (status IN ('reserved','created') AND COALESCE(reserved_until,created_at+interval '10 minutes')>now() OR status IN ('active','interrupted','ending') AND (started_at IS NOT NULL OR COALESCE(deadline_at,created_at+interval '70 minutes')>now())) ORDER BY created_at DESC LIMIT 1),''),
+	err = q.QueryRow(ctx, `SELECT COALESCE((SELECT id::text FROM sessions WHERE (user_id=$1 OR usage_identity=$2) AND (status IN ('preparing','reserved','created') AND COALESCE(reserved_until,created_at+interval '10 minutes')>now() OR status IN ('active','interrupted','ending') AND (started_at IS NOT NULL OR COALESCE(deadline_at,created_at+interval '70 minutes')>now())) ORDER BY created_at DESC LIMIT 1),''),
  EXISTS(SELECT 1 FROM sessions WHERE user_id=$1 AND `+feedbackEligibleSQL+` AND NOT EXISTS(SELECT 1 FROM interview_feedback f WHERE f.session_id=sessions.id))`, uid, identity).Scan(&u.ActiveSessionID, &u.PendingFeedback)
 	if err != nil {
 		return u, err
@@ -140,7 +144,7 @@ func (s *Store) ReserveSession(ctx context.Context, r Reservation) (Session, err
 	if u.ActiveSessionID != "" {
 		return Session{}, ErrSessionConflict
 	}
-	if !r.Unlimited && !u.TesterUnlimited && (u.NextStartAt != nil || (r.Session.Funding == "platform" && u.NextFundedAt != nil)) {
+	if !r.Unlimited && !u.TesterUnlimited && r.Session.Funding == "platform" && u.NextFundedAt != nil {
 		return Session{}, ErrQuota
 	}
 	if !u.TesterUnlimited && r.Session.Funding == "platform" && r.GlobalDailyLimit > 0 {
@@ -158,7 +162,11 @@ func (s *Store) ReserveSession(ctx context.Context, r Reservation) (Session, err
 	if len(a.QuestionSnapshot) == 0 {
 		a.QuestionSnapshot = json.RawMessage(`{}`)
 	}
-	_, e = tx.Exec(ctx, `INSERT INTO sessions(id,user_id,question_id,modality,track,status,phase,config,pack_id,pack_round_id,duration_minutes,reserved_until,funding,provider,model,mode,question_snapshot,usage_identity,quota_exempt,global_daily_limit,live_model,feedback_version) VALUES($1,$2,$3,$4,$5,'reserved','lobby',$6,$7,$8,$9,now()+interval '10 minutes',$10,$11,$12,$13,$14,$15,$16,$17,$18,$19)`, a.ID, uid, a.QuestionID, a.Modality, a.Track, a.Config, a.PackID, a.PackRoundID, a.DurationMinutes, a.Funding, a.Provider, a.Model, a.Mode, a.QuestionSnapshot, r.Identity, r.Unlimited, r.GlobalDailyLimit, a.LiveModel, a.FeedbackVersion)
+	status := "reserved"
+	if r.Preparing {
+		status = "preparing"
+	}
+	_, e = tx.Exec(ctx, `INSERT INTO sessions(id,user_id,question_id,modality,track,status,phase,config,pack_id,pack_round_id,duration_minutes,reserved_until,funding,provider,model,mode,question_snapshot,usage_identity,quota_exempt,global_daily_limit,live_model,feedback_version) VALUES($1,$2,$3,$4,$5,$20,'lobby',$6,$7,$8,$9,now()+interval '10 minutes',$10,$11,$12,$13,$14,$15,$16,$17,$18,$19)`, a.ID, uid, a.QuestionID, a.Modality, a.Track, a.Config, a.PackID, a.PackRoundID, a.DurationMinutes, a.Funding, a.Provider, a.Model, a.Mode, a.QuestionSnapshot, r.Identity, r.Unlimited, r.GlobalDailyLimit, a.LiveModel, a.FeedbackVersion, status)
 	if e != nil {
 		return Session{}, e
 	}
@@ -172,6 +180,21 @@ func (s *Store) ReserveSession(ctx context.Context, r Reservation) (Session, err
 		return Session{}, e
 	}
 	return s.GetSession(ctx, a.ID)
+}
+
+// Preparation is a durable admission lease: concurrent requests cannot spend
+// platform tokens on multiple plans, and incomplete plans cannot go live.
+func (s *Store) CompletePreparation(ctx context.Context, id, questionID string, snapshot, config json.RawMessage) error {
+	tag, err := s.Pool.Exec(ctx, `UPDATE sessions SET status='reserved',question_id=$2,question_snapshot=$3,config=$4 WHERE id=$1 AND status='preparing' AND reserved_until>now()`, id, questionID, snapshot, config)
+	if err == nil && tag.RowsAffected() != 1 {
+		return ErrSessionConflict
+	}
+	return err
+}
+
+func (s *Store) FailPreparation(ctx context.Context, id string) error {
+	_, err := s.Pool.Exec(ctx, `WITH expired AS (UPDATE sessions SET status='expired',ended_at=now() WHERE id=$1 AND status='preparing' RETURNING id) DELETE FROM session_credentials WHERE session_id IN (SELECT id FROM expired)`, id)
+	return err
 }
 func (s *Store) AcquireLive(ctx context.Context, id, owner string) (Session, error) {
 	tag, e := s.Pool.Exec(ctx, `UPDATE sessions SET lease_owner=$2,lease_until=now()+interval '30 seconds' WHERE id=$1 AND (lease_until IS NULL OR lease_until<now()) AND (status IN ('reserved','created') AND COALESCE(reserved_until,created_at+interval '10 minutes')>now() OR status IN ('active','interrupted') AND deadline_at>now())`, id, owner)
@@ -214,7 +237,7 @@ func (s *Store) ActivateLive(ctx context.Context, id, owner string) (Session, er
 		if usage.PendingFeedback {
 			return Session{}, ErrInterviewFeedbackRequired
 		}
-		if !exempt && !usage.TesterUnlimited && (usage.NextStartAt != nil || (a.Funding == "platform" && usage.NextFundedAt != nil)) {
+		if !exempt && !usage.TesterUnlimited && a.Funding == "platform" && usage.NextFundedAt != nil {
 			return Session{}, ErrQuota
 		}
 
@@ -315,6 +338,9 @@ func (s *Store) beginFinish(ctx context.Context, id string, graceSeconds int) er
 	if status == "complete" || status == "scoring" || status == "ending" {
 		return nil
 	}
+	if status == "preparing" {
+		return ErrSessionConflict
+	}
 	_, e = tx.Exec(ctx, `UPDATE sessions SET status='ending',ended_at=now() WHERE id=$1`, id)
 	if e != nil {
 		return e
@@ -392,7 +418,11 @@ func (s *Store) FailScoring(ctx context.Context, id string, attempt int, msg str
 	if e != nil {
 		return e
 	}
-	_, e = tx.Exec(ctx, `UPDATE sessions SET status='feedback_failed' WHERE id=$1`, id)
+	_, e = tx.Exec(ctx, `UPDATE sessions SET status='feedback_failed',runtime_error_count=runtime_error_count+1 WHERE id=$1`, id)
+	if e != nil {
+		return e
+	}
+	_, e = tx.Exec(ctx, `INSERT INTO events(id,session_id,ts_ms,kind,data) VALUES($1,$2,0,'scoring_error','{"stage":"scoring"}')`, NewID(), id)
 	if e != nil {
 		return e
 	}
@@ -461,7 +491,7 @@ func checkGlobal(ctx context.Context, tx pgx.Tx, limit int, exclude string) erro
 		return e
 	}
 	var n int
-	e := tx.QueryRow(ctx, `SELECT (SELECT count(*) FROM interview_usage WHERE funding='platform' AND NOT tester_exempt AND activated_at>now()-interval '24 hours')+(SELECT count(*) FROM sessions s WHERE funding='platform' AND status='reserved' AND reserved_until>now() AND id::text<>$1 AND NOT EXISTS(SELECT 1 FROM users u JOIN tester_emails t ON t.email=lower(btrim(u.email)) WHERE u.id=s.user_id AND u.email_verified=true))`, exclude).Scan(&n)
+	e := tx.QueryRow(ctx, `SELECT (SELECT count(*) FROM interview_usage WHERE funding='platform' AND NOT tester_exempt AND activated_at>now()-interval '24 hours')+(SELECT count(*) FROM sessions s WHERE funding='platform' AND status IN ('preparing','reserved') AND reserved_until>now() AND id::text<>$1 AND NOT EXISTS(SELECT 1 FROM users u JOIN tester_emails t ON t.email=lower(btrim(u.email)) WHERE u.id=s.user_id AND u.email_verified=true))`, exclude).Scan(&n)
 	if e != nil {
 		return e
 	}

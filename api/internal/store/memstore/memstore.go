@@ -18,6 +18,7 @@ import (
 )
 
 type sessionRec struct {
+	endedAt           *time.Time
 	localUnlimited    bool
 	globalDailyLimit  int
 	artifact          store.Workspace
@@ -51,6 +52,9 @@ var _ store.Datastore = (*Mem)(nil)
 
 // Mem is a thread-safe in-memory Repo. Construct with New().
 type Mem struct {
+	betaApplications  map[string]store.BetaApplication
+	templateRequests  map[string]store.TemplateRequest
+	sharedResults     map[string]store.SharedInterviewResult
 	testers           map[string]store.Tester
 	interviewFeedback map[string]store.InterviewFeedback
 	runtimeUsage      []usageRec
@@ -180,6 +184,17 @@ func (m *Mem) DeleteUser(_ context.Context, userID string) error {
 		}
 	}
 	m.feedback = retained
+	delete(m.betaApplications, userID)
+	for id, item := range m.templateRequests {
+		if item.UserID == userID {
+			delete(m.templateRequests, id)
+		}
+	}
+	for id, item := range m.sharedResults {
+		if item.UserID == userID {
+			delete(m.sharedResults, id)
+		}
+	}
 	delete(m.users, userID)
 	delete(m.settings, userID)
 	delete(m.configs, userID)
@@ -274,6 +289,12 @@ func (m *Mem) SessionsForPack(_ context.Context, userID, packID string) ([]store
 			PackID:      rec.sess.PackID,
 			PackRoundID: rec.sess.PackRoundID,
 		}
+		var question struct {
+			Title string `json:"title"`
+		}
+		if json.Unmarshal(rec.sess.QuestionSnapshot, &question) == nil {
+			ss.QuestionTitle = question.Title
+		}
 		if rep, ok := m.reports[rec.sess.ID]; ok {
 			overall := rep.report.Overall
 			scored := rep.report.Scored
@@ -326,6 +347,12 @@ func (m *Mem) ListUserSessions(_ context.Context, userID string, limit int) ([]s
 			PackID:      rec.sess.PackID,
 			PackRoundID: rec.sess.PackRoundID,
 		}
+		var question struct {
+			Title string `json:"title"`
+		}
+		if json.Unmarshal(rec.sess.QuestionSnapshot, &question) == nil {
+			ss.QuestionTitle = question.Title
+		}
 		if rep, ok := m.reports[rec.sess.ID]; ok {
 			overall := rep.report.Overall
 			scored := rep.report.Scored
@@ -361,6 +388,10 @@ func (m *Mem) UpdateSessionStatus(_ context.Context, id, status string) error {
 	defer m.mu.Unlock()
 	if rec, ok := m.sessions[id]; ok {
 		rec.sess.Status = status
+		if (status == "complete" || status == "abandoned") && rec.endedAt == nil {
+			now := time.Now()
+			rec.endedAt = &now
+		}
 	}
 	return nil
 }

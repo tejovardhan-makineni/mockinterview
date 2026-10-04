@@ -205,7 +205,7 @@ func aggregateMetrics(rows []store.InterviewFeedbackRow, days int, by string, no
 }
 func (s *Service) InterviewMetrics(w http.ResponseWriter, r *http.Request) {
 	u, e := s.store.UserByID(r.Context(), auth.UserID(r.Context()))
-	if e != nil || u.Role != "admin" {
+	if e != nil || !store.IsAdministrator(u) {
 		httpx.WriteProblem(w, 403, "admins only")
 		return
 	}
