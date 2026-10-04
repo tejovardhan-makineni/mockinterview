@@ -500,3 +500,83 @@ func TestResumeReplacementRetainsReviewsUntilExplicitDeletion(t *testing.T) {
 		t.Fatalf("delete retained %d reviews", count)
 	}
 }
+
+func TestInterruptedDeadlineRecoveryAndTelemetryRetention(t *testing.T) {
+	ctx := testContext
+	s := openTest(t, filepath.Join(t.TempDir(), "local.sqlite"))
+	u := testUser(t, s)
+	a := reserveTest(t, s, u.ID)
+	_, e := s.AcquireLive(ctx, a.ID, "owner")
+	must(t, e)
+	_, e = s.ActivateLive(ctx, a.ID, "owner")
+	must(t, e)
+	must(t, s.ReleaseLive(ctx, a.ID, "owner"))
+	must(t, s.AddTurn(ctx, a.ID, "user", "Keep this practice history", 0, nil))
+	must(t, s.AddBehaviorSample(ctx, a.ID, 1000, nil, nil, nil, nil, nil, nil, nil))
+	must(t, s.AddEvent(ctx, a.ID, 1000, "interview_error", json.RawMessage(`{"stage":"connection"}`)))
+	// Simulate returning after the device was asleep beyond the interview deadline.
+	must(t, s.changeSession(ctx, a.ID, func(d *sessionDocument) error {
+		start := time.Now().Add(-3 * time.Minute)
+		deadline := start.Add(time.Minute)
+		d.Session.StartedAt = &start
+		d.Session.DeadlineAt = &deadline
+		return nil
+	}))
+	job, e := s.ClaimScoring(ctx)
+	must(t, e)
+	if job.SessionID != a.ID || job.Attempts != 1 {
+		t.Fatal(job)
+	}
+	recovered, e := s.GetSession(ctx, a.ID)
+	must(t, e)
+	if recovered.Status != "scoring" {
+		t.Fatal(recovered.Status)
+	}
+	metrics, e := s.SessionMetrics(ctx, a.ID)
+	must(t, e)
+	if metrics.DurationSeconds != 60 || metrics.ErrorCount != 1 {
+		t.Fatal(metrics)
+	}
+	old := time.Now().Add(-31 * 24 * time.Hour).UnixMilli()
+	_, e = s.db.Exec(`UPDATE behavior_samples SET created_at=?`, old)
+	must(t, e)
+	_, e = s.db.Exec(`UPDATE events SET created_at=?`, old)
+	must(t, e)
+	must(t, s.maintain(ctx))
+	summary, e := s.BehavioralSummary(ctx, a.ID)
+	must(t, e)
+	if string(summary) != "{}" {
+		t.Fatal(string(summary))
+	}
+	metrics, e = s.SessionMetrics(ctx, a.ID)
+	must(t, e)
+	if metrics.ErrorCount != 1 || metrics.TurnCount != 1 {
+		t.Fatal("retention erased operational counts or saved transcript", metrics)
+	}
+}
+
+func TestFailedInitialMigrationPreservesExistingFile(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "existing.sqlite")
+	db, e := sql.Open("sqlite", path)
+	must(t, e)
+	_, e = db.Exec(`CREATE TABLE users(marker TEXT); INSERT INTO users(marker) VALUES('preserve-existing-content')`)
+	must(t, e)
+	must(t, db.Close())
+	if s, e := Open(testContext, path); e == nil {
+		s.Close()
+		t.Fatal("incompatible existing database unexpectedly migrated")
+	}
+	db, e = sql.Open("sqlite", path)
+	must(t, e)
+	defer db.Close()
+	var marker string
+	must(t, db.QueryRow(`SELECT marker FROM users`).Scan(&marker))
+	if marker != "preserve-existing-content" {
+		t.Fatal(marker)
+	}
+	var migrations int
+	must(t, db.QueryRow(`SELECT count(*) FROM sqlite_master WHERE name='schema_migrations'`).Scan(&migrations))
+	if migrations != 0 {
+		t.Fatal("failed migration left a partial migration ledger")
+	}
+}

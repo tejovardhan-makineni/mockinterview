@@ -6,11 +6,37 @@ export const COMMUNITY = Object.freeze({
   website: "https://mockinterview.live",
 });
 
+const SUPPORT_DOCUMENTS = Object.freeze([
+  "https://ai.google.dev/gemini-api/docs/billing",
+  "https://ai.google.dev/gemini-api/terms",
+  "https://cloud.google.com/terms/cloud-privacy-notice",
+  "https://cloud.google.com/terms/data-processing-addendum",
+  "https://business.safety.google/processorterms/",
+  "https://resend.com/legal/privacy-policy",
+  "https://resend.com/legal/dpa",
+  "https://openai.com/business-data/",
+  "https://www.anthropic.com/legal/commercial-terms",
+  "https://cdn.deepseek.com/policies/en-US/deepseek-open-platform-terms-of-service.html",
+  "https://x.ai/legal/data-processing-addendum",
+]);
+
 export function isAllowedExternal(value) {
+  if (value === "mailto:makinenitejovardhan@gmail.com") return true;
   try {
     const url = new URL(value);
     if (url.protocol !== "https:" || url.username || url.password || url.port)
       return false;
+    if (
+      SUPPORT_DOCUMENTS.some((value) => {
+        const allowed = new URL(value);
+        return (
+          url.origin === allowed.origin &&
+          url.pathname.replace(/\/$/, "") ===
+            allowed.pathname.replace(/\/$/, "")
+        );
+      })
+    )
+      return true;
     return Object.values(COMMUNITY).some((base) => {
       const allowed = new URL(base);
       const prefix = allowed.pathname.replace(/\/$/, "");

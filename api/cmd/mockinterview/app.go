@@ -90,6 +90,9 @@ func (a *App) Routes(r chi.Router) {
 	corpusSvc := corpus.NewService(a.Corpus)
 	feedbackSvc := feedback.New(a.Store, a.Cfg.AdminEmails)
 	communitySvc := community.New(a.Store)
+	if a.Cfg.LocalDesktop {
+		communitySvc = community.NewDesktop(a.Store)
+	}
 	i18nSvc := i18n.New(a.LLM, a.Cfg.LLMModel)
 	scorer := scoring.New(a.LLM, a.Cfg.LLMModel)
 	interviewSvc := interview.New(a.Store, a.Corpus, scorer, a.Cfg.AdminEmails, a.Cfg.FreeDailyLimit)

@@ -48,8 +48,8 @@ export function DesktopModelSettings() {
     >
       <h2 className="text-lg font-semibold">Your AI connection</h2>
       <p className="text-sm text-[var(--color-muted)]">
-        Add your own key each time you open or reload the app. It stays in
-        memory; provider charges apply. Cloud AI requires internet.
+        Add your own key each time you open or reload the app. Active-session
+        keys are encrypted locally. Provider charges and internet access apply.
       </p>
       <Field label="Provider">
         <select

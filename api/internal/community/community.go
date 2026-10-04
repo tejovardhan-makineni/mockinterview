@@ -25,9 +25,17 @@ type Repo interface {
 	IsTester(context.Context, string) (bool, error)
 	ListFeedback(context.Context, int) ([]store.Feedback, error)
 }
-type Service struct{ store Repo }
+type Service struct {
+	store         Repo
+	localRequests bool
+}
 
 func New(st Repo) *Service { return &Service{store: st} }
+
+// NewDesktop allows the bridge-authenticated local profile to save template
+// ideas without an email account. Hosted sharing and beta access still require
+// verification; the desktop sharing proxy authenticates them separately.
+func NewDesktop(st Repo) *Service { return &Service{store: st, localRequests: true} }
 func (s *Service) admin(w http.ResponseWriter, r *http.Request) bool {
 	u, err := s.store.UserByID(r.Context(), auth.UserID(r.Context()))
 	if err != nil || !store.IsAdministrator(u) {
@@ -88,9 +96,18 @@ func (s *Service) ApplyBeta(w http.ResponseWriter, r *http.Request) {
 	httpx.WriteJSON(w, 200, a)
 }
 func (s *Service) RequestTemplate(w http.ResponseWriter, r *http.Request) {
-	uid, ok := s.verified(w, r)
-	if !ok {
-		return
+	uid := auth.UserID(r.Context())
+	if s.localRequests {
+		if _, err := s.store.UserByID(r.Context(), uid); err != nil {
+			httpx.WriteProblem(w, 401, "Local profile required")
+			return
+		}
+	} else {
+		var ok bool
+		uid, ok = s.verified(w, r)
+		if !ok {
+			return
+		}
 	}
 	var req struct {
 		Profession  string `json:"profession"`

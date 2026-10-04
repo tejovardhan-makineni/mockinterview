@@ -15,7 +15,13 @@ import {
 import { IS_DESKTOP, desktopPreferences } from "@/lib/desktop";
 import { setResultsConsent, disconnectAnalytics } from "@/lib/analytics";
 import { Button, Field, Input } from "./ui";
-export function AnalyticsSettings({ userId }: { userId?: string }) {
+export function AnalyticsSettings({
+  userId,
+  compact = false,
+}: {
+  userId?: string;
+  compact?: boolean;
+}) {
   const enabled = useSyncExternalStore(
     subscribeAnalytics,
     () => !!userId && !!analyticsSince(userId),
@@ -62,8 +68,12 @@ export function AnalyticsSettings({ userId }: { userId?: string }) {
             if (checked) void syncAnalytics(userId);
             setMessage(
               checked
-                ? "Sharing is on for new interviews."
-                : "Sharing is off. You can also delete previously shared data below.",
+                ? REMOTE_ANALYTICS_BASE && !analyticsConnected()
+                  ? "Consent saved. Connect in Settings to share."
+                  : "Sharing is on for new interviews."
+                : compact
+                  ? "Sharing is off."
+                  : "Sharing is off. You can also delete previously shared data below.",
             );
           }}
         />
@@ -72,7 +82,9 @@ export function AnalyticsSettings({ userId }: { userId?: string }) {
           <br />
           <span className="text-[var(--color-muted)]">
             {IS_DESKTOP
-              ? "Share usage and error counts privately with the admin. Optional; retries when connected."
+              ? compact
+                ? "Optional usage and error counts, private to the admin."
+                : "Share usage and error counts privately with the admin. Optional; retries when connected."
               : "Share new interview results and error metrics privately with the admin to improve practice. Optional; skips uploads when offline."}{" "}
             <Link href="/privacy" className="underline">
               Details
@@ -91,7 +103,11 @@ export function AnalyticsSettings({ userId }: { userId?: string }) {
               setBusy(true);
               try {
                 await setResultsConsent(e.target.checked);
-                setMessage("Interview result sharing preference saved.");
+                setMessage(
+                  REMOTE_ANALYTICS_BASE && !analyticsConnected()
+                    ? "Consent saved. Connect in Settings to share."
+                    : "Interview result sharing preference saved.",
+                );
               } catch (error) {
                 setMessage(
                   error instanceof Error
@@ -107,13 +123,23 @@ export function AnalyticsSettings({ userId }: { userId?: string }) {
             <strong>Include interview results</strong>
             <br />
             <span className="text-[var(--color-muted)]">
-              Include new scores and written feedback with analytics. Reports
-              can contain personal details.
+              {compact
+                ? "Scores and written feedback may contain personal details."
+                : "Include new scores and written feedback with analytics. Reports can contain personal details."}
             </span>
           </span>
         </label>
       )}
-      {REMOTE_ANALYTICS_BASE && !connected && (
+      {compact && REMOTE_ANALYTICS_BASE && !connected && (
+        <p className="text-xs text-[var(--color-muted)]">
+          Connect sharing in{" "}
+          <Link href="/settings" className="underline">
+            Settings
+          </Link>
+          . Your consent is saved on this device.
+        </p>
+      )}
+      {!compact && REMOTE_ANALYTICS_BASE && !connected && (
         <div className="space-y-3 rounded-lg border border-[var(--color-line)] p-4">
           <p className="text-xs">
             Connect your hosted account to share from this installation. Session
@@ -162,7 +188,7 @@ export function AnalyticsSettings({ userId }: { userId?: string }) {
           </Button>
         </div>
       )}
-      {REMOTE_ANALYTICS_BASE && connected && (
+      {!compact && REMOTE_ANALYTICS_BASE && connected && (
         <Button
           variant="ghost"
           onClick={() => {
@@ -173,24 +199,26 @@ export function AnalyticsSettings({ userId }: { userId?: string }) {
           Disconnect sharing account
         </Button>
       )}
-      <Button
-        variant="ghost"
-        disabled={busy || !userId}
-        onClick={async () => {
-          setBusy(true);
-          try {
-            if (userId) await setAnalyticsConsent(userId, false);
-            await deleteSharedAnalytics();
-            setMessage("Shared interview analytics deleted. Sharing is off.");
-          } catch (e) {
-            setMessage(e instanceof Error ? e.message : "Deletion failed.");
-          } finally {
-            setBusy(false);
-          }
-        }}
-      >
-        Delete shared analytics
-      </Button>
+      {!compact && (
+        <Button
+          variant="ghost"
+          disabled={busy || !userId}
+          onClick={async () => {
+            setBusy(true);
+            try {
+              if (userId) await setAnalyticsConsent(userId, false);
+              await deleteSharedAnalytics();
+              setMessage("Shared interview analytics deleted. Sharing is off.");
+            } catch (e) {
+              setMessage(e instanceof Error ? e.message : "Deletion failed.");
+            } finally {
+              setBusy(false);
+            }
+          }}
+        >
+          Delete shared analytics
+        </Button>
+      )}
       {message && (
         <p role="status" className="text-xs">
           {message}

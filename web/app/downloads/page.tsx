@@ -98,9 +98,9 @@ export default function Downloads() {
               local practice.
             </p>
             <p>
-              Keys are kept in memory for the current app session (until close
-              or reload). Reopen the app, add your key, and pick up your saved
-              work.
+              Your model connection resets when you close or reload the app.
+              Saved interviews remain available; add your key to start new
+              practice.
             </p>
             <Link href="/privacy" className={styles.textLink}>
               Privacy and data controls →

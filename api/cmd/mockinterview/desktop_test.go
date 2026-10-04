@@ -104,6 +104,10 @@ func TestDesktopBootstrapAndPersonalKeyOnly(t *testing.T) {
 
 func TestDesktopAssetsServeExportWithoutDirectoryListing(t *testing.T) {
 	root := t.TempDir()
+	outside := filepath.Join(t.TempDir(), "outside.txt")
+	if err := os.WriteFile(outside, []byte("private data"), 0600); err != nil {
+		t.Fatal(err)
+	}
 	if err := os.MkdirAll(filepath.Join(root, "setup"), 0700); err != nil {
 		t.Fatal(err)
 	}
@@ -118,6 +122,13 @@ func TestDesktopAssetsServeExportWithoutDirectoryListing(t *testing.T) {
 		desktopAssets(root).ServeHTTP(w, httptest.NewRequest("GET", tc.path, nil))
 		if w.Code != tc.status {
 			t.Fatalf("%s: %d", tc.path, w.Code)
+		}
+	}
+	if err := os.Symlink(outside, filepath.Join(root, "linked.txt")); err == nil {
+		w := httptest.NewRecorder()
+		desktopAssets(root).ServeHTTP(w, httptest.NewRequest("GET", "/linked.txt", nil))
+		if w.Code != 404 || strings.Contains(w.Body.String(), "private data") {
+			t.Fatal("static handler followed a symlink outside packaged assets")
 		}
 	}
 }

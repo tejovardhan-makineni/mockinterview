@@ -7,7 +7,6 @@ import (
 	"net/http"
 	"os"
 	"path"
-	"path/filepath"
 	"strings"
 	"time"
 )
@@ -103,16 +102,33 @@ func desktopAssets(root string) http.Handler {
 			http.NotFound(w, r)
 			return
 		}
-		file := filepath.Join(root, filepath.FromSlash(name))
-		info, err := os.Stat(file)
+		// Root confines resolution even when a packaged directory contains a
+		// symlink. Never pass a request-derived path to unrestricted file I/O.
+		files, err := os.OpenRoot(root)
+		if err != nil {
+			http.Error(w, "Desktop assets unavailable", http.StatusServiceUnavailable)
+			return
+		}
+		defer files.Close()
+		name = strings.TrimPrefix(name, "/")
+		if name == "" {
+			name = "."
+		}
+		info, err := files.Stat(name)
 		if err == nil && info.IsDir() {
-			file = filepath.Join(file, "index.html")
-			info, err = os.Stat(file)
+			name = path.Join(name, "index.html")
+			info, err = files.Stat(name)
 		}
 		if err != nil || !info.Mode().IsRegular() {
 			http.NotFound(w, r)
 			return
 		}
-		http.ServeFile(w, r, file)
+		file, err := files.Open(name)
+		if err != nil {
+			http.NotFound(w, r)
+			return
+		}
+		defer file.Close()
+		http.ServeContent(w, r, info.Name(), info.ModTime(), file)
 	})
 }

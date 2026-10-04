@@ -809,7 +809,7 @@ function Setup() {
           {error && <ErrorNotice message={error} />}
           {user && stage === "setup" && (
             <Panel className="p-6">
-              <AnalyticsSettings userId={user.id} />
+              <AnalyticsSettings userId={user.id} compact={IS_DESKTOP} />
             </Panel>
           )}
           <p className="text-xs text-[var(--color-muted)]">
@@ -907,11 +907,7 @@ function Setup() {
                         setPaidBilling(false);
                         setKeyValid(false);
                       }}
-                      placeholder={
-                        IS_DESKTOP
-                          ? "Kept in memory until close or reload"
-                          : "Used only for this attempt"
-                      }
+                      placeholder="Your provider API key"
                     />
                   </Field>
                   <Field label="Model ID · optional">

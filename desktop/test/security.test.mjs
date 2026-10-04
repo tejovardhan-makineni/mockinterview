@@ -32,6 +32,31 @@ test("community links allow only exact HTTPS owners, with no protocol or host sp
     assert.equal(isAllowedExternal(url), false, url);
 });
 
+test("provider billing and legal documents are narrowly allowed", () => {
+  assert.equal(isAllowedExternal("mailto:makinenitejovardhan@gmail.com"), true);
+  assert.equal(isAllowedExternal("mailto:other@example.com"), false);
+  assert.equal(
+    isAllowedExternal("mailto:makinenitejovardhan@gmail.com?body=secret"),
+    false,
+  );
+  assert.equal(
+    isAllowedExternal("https://ai.google.dev/gemini-api/docs/billing"),
+    true,
+  );
+  assert.equal(isAllowedExternal("https://openai.com/business-data/"), true);
+  assert.equal(isAllowedExternal("https://ai.google.dev/arbitrary"), false);
+  assert.equal(
+    isAllowedExternal(
+      "https://ai.google.dev.evil.test/gemini-api/docs/billing",
+    ),
+    false,
+  );
+  assert.equal(
+    isAllowedExternal("https://openai.com/business-data/other"),
+    false,
+  );
+});
+
 test("bridge token is inserted for exact HTTP and WebSocket origins and stripped everywhere else", () => {
   const origin = "http://127.0.0.1:38101";
   const headers = { "x-desktop-token": "attacker", Accept: "application/json" };

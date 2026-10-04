@@ -15,6 +15,7 @@ import { randomBytes } from "node:crypto";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { readFile, access } from "node:fs/promises";
+import { appendFileSync, existsSync } from "node:fs";
 import {
   COMMUNITY,
   isAllowedExternal,
@@ -34,6 +35,43 @@ let quitting = false;
 let origin;
 app.enableSandbox();
 app.setName("Mock Interview");
+
+const diagnostics =
+  process.argv.includes("--diagnostics") ||
+  existsSync(path.join(app.getPath("userData"), "diagnostics.enabled"));
+function diagnostic(event, fields = {}) {
+  if (!diagnostics) return;
+  // Local troubleshooting metadata only: never record messages, page content,
+  // full URLs, query strings, request headers, payloads or credentials.
+  try {
+    appendFileSync(
+      path.join(app.getPath("userData"), "desktop-diagnostics.jsonl"),
+      `${JSON.stringify({ time: new Date().toISOString(), event, ...fields })}\n`,
+      { mode: 0o600 },
+    );
+  } catch {
+    /* Diagnostics must not block practice. */
+  }
+}
+function diagnosticPath(value) {
+  try {
+    const url = new URL(value);
+    if (url.pathname.startsWith("/_next/")) return "next-asset";
+    if (
+      [
+        "/",
+        "/api/v1/desktop/bootstrap",
+        "/api/v1/questions",
+        "/api/v1/professions",
+      ].includes(url.pathname)
+    )
+      return url.pathname;
+    return "app-resource";
+  } catch {
+    return "unavailable";
+  }
+}
+diagnostic("main-loaded");
 
 async function openCommunity(url) {
   if (isAllowedExternal(url)) await shell.openExternal(url);
@@ -109,6 +147,20 @@ function assertSender(event) {
 }
 
 function installSecurity(appSession, bridgeToken, preferences) {
+  if (diagnostics) {
+    appSession.webRequest.onCompleted((details) =>
+      diagnostic("http-complete", {
+        path: diagnosticPath(details.url),
+        status: details.statusCode,
+      }),
+    );
+    appSession.webRequest.onErrorOccurred((details) =>
+      diagnostic("http-error", {
+        path: diagnosticPath(details.url),
+        error: details.error,
+      }),
+    );
+  }
   appSession.webRequest.onBeforeRequest((details, callback) => {
     const allowed =
       isBackendRequest(details.url, origin) ||
@@ -331,9 +383,35 @@ function createWindow(appSession) {
     event.preventDefault(),
   );
   mainWindow.webContents.setWindowOpenHandler(({ url }) => {
-    void openCommunity(url);
+    if (sameAppOrigin(url, origin)) void mainWindow.loadURL(url);
+    else void openCommunity(url);
     return { action: "deny" };
   });
+  mainWindow.webContents.on("did-finish-load", () =>
+    diagnostic("window-loaded"),
+  );
+  mainWindow.webContents.on(
+    "did-fail-load",
+    (_event, errorCode, _description, url) =>
+      diagnostic("window-failed", { errorCode, path: diagnosticPath(url) }),
+  );
+  mainWindow.webContents.on("console-message", (details) => {
+    if (details.level === "error" || details.level === "warning")
+      diagnostic("renderer-console", {
+        level: details.level,
+        path: diagnosticPath(details.sourceId),
+        line: details.lineNumber,
+      });
+  });
+  mainWindow.webContents.on("preload-error", () =>
+    diagnostic("preload-failed"),
+  );
+  mainWindow.webContents.on("render-process-gone", (_event, details) =>
+    diagnostic("renderer-exited", {
+      reason: details.reason,
+      exitCode: details.exitCode,
+    }),
+  );
   mainWindow.once("ready-to-show", () => mainWindow.show());
   mainWindow.on("closed", () => {
     mainWindow = undefined;
@@ -353,13 +431,19 @@ else {
   app
     .whenReady()
     .then(async () => {
+      diagnostic("app-ready");
+      if (diagnostics && process.platform !== "linux")
+        app.setAccessibilitySupportEnabled(true);
+      diagnostic("accessibility-ready");
       const directory = app.getPath("userData");
       const secrets = await installSecrets(directory, safeStorage);
+      diagnostic("keychain-unlocked");
       const resources = app.isPackaged
         ? path.join(process.resourcesPath, "runtime")
         : path.resolve(here, "../resources");
       const bridgeToken = randomBytes(32).toString("hex");
       origin = await launchBackend(resources, directory, secrets, bridgeToken);
+      diagnostic("backend-ready");
       const appSession = session.fromPartition("persist:mockinterview", {
         cache: false,
       });
@@ -371,6 +455,7 @@ else {
       });
     })
     .catch((error) => {
+      diagnostic("startup-failed", { name: error.name });
       dialog.showErrorBox("Could not open Mock Interview", error.message);
       app.quit();
     });
