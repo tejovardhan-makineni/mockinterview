@@ -279,11 +279,11 @@ export function InterviewCheckIn({
                 <div className="mt-3 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
                   {q.options.map((o) => (
                     <label
-                      className="flex min-h-11 cursor-pointer items-start gap-3 rounded-lg border border-[var(--color-line)] p-3 text-sm has-[:checked]:border-[var(--color-accent)] has-[:checked]:bg-[var(--color-panel-2)]"
+                      className="grid min-h-11 cursor-pointer grid-cols-[1rem_minmax(0,1fr)] items-start gap-3 rounded-lg border border-[var(--color-line)] p-3 text-sm leading-5 has-[:checked]:border-[var(--color-accent)] has-[:checked]:bg-[var(--color-panel-2)]"
                       key={o.value}
                     >
                       <input
-                        className="mt-1 shrink-0"
+                        className="mt-0.5"
                         type="radio"
                         required
                         name={prefix + q.id}
@@ -295,7 +295,7 @@ export function InterviewCheckIn({
                           setSaved(false);
                         }}
                       />
-                      {o.label}
+                      <span className="min-w-0">{o.label}</span>
                     </label>
                   ))}
                 </div>
@@ -349,10 +349,10 @@ export function InterviewCheckIn({
               is required.
             </p>
             {!IS_DESKTOP && (
-              <label className="flex items-start gap-3 text-sm">
+              <label className="grid grid-cols-[1rem_minmax(0,1fr)] items-start gap-3 text-sm leading-5">
                 <input
                   type="checkbox"
-                  className="mt-1"
+                  className="mt-0.5"
                   checked={share}
                   disabled={busy}
                   onChange={(e) => {
@@ -360,7 +360,7 @@ export function InterviewCheckIn({
                     setDirty(true);
                   }}
                 />
-                <span>
+                <span className="min-w-0">
                   Allow maintainers to inspect this interview’s transcript to
                   investigate my feedback (optional).{" "}
                   <Link href="/privacy" className="underline">
