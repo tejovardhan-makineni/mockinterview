@@ -1,0 +1,137 @@
+{
+  "schema_version": 1,
+  "revision": 1,
+  "format_id": "stakeholder-simulation",
+  "review_status": "preview",
+  "provenance": {
+    "authorship": "Original project scenario, AI-assisted draft. Practitioner review and calibration pending.",
+    "license": "MIT"
+  },
+  "minutes": 30,
+  "id": "social-work-consent-boundary-review",
+  "title": "Senior Social Worker: Coordinate a Referral With Limited Consent",
+  "track": "professional",
+  "domain": "case_coordination",
+  "areas": [
+    "social_work"
+  ],
+  "modality": "conversational",
+  "difficulty": "senior",
+  "role_track": "individual_contributor",
+  "tags": [
+    "social-work",
+    "senior-specialist",
+    "evidence-based-practice",
+    "community-preview"
+  ],
+  "prompt": "You are a senior social worker in a fictional adult community-support service. A person requests help arranging an accessible housing appointment tomorrow. They consent to sharing their name, callback phone number, contact preference and access requirements with the housing team, but not their full case history. A partner asks for the full file “to speed things up.” The supplied referral policy permits sharing only information necessary for the agreed purpose, records the person’s consent and provides a supervisor review route for any claimed exception. Lead the coordination conversation and preserve a workable appointment plan. No immediate danger or legal exception is supplied.",
+  "blurb": "Balance timely coordination, purpose-limited information sharing and the person’s control over their referral.",
+  "rubric": [
+    {
+      "key": "consent",
+      "label": "Apply purpose-limited consent",
+      "description": "Distinguishes requested information from necessary authorized information.",
+      "weight": 1,
+      "anchors": {
+        "0": "Sends the whole file because the partner requested it.",
+        "2": "Limits the referral to the consented fields.",
+        "4": "Confirms the actual booking need, checks the short wording with the person and treats any later information request as a new purpose requiring appropriate consent or documented review."
+      }
+    },
+    {
+      "key": "coordination",
+      "label": "Build a timely supported referral",
+      "description": "Connects the person to an authorized recipient without unnecessary intermediaries.",
+      "weight": 1,
+      "anchors": {
+        "0": "Refuses all coordination or promises an appointment that is not confirmed.",
+        "2": "Contacts the booking officer using the limited referral.",
+        "4": "Uses the available afternoon window and phone preference, verifies receipt and appointment details and sets a fallback update if booking cannot be confirmed before 16:00."
+      }
+    },
+    {
+      "key": "record",
+      "label": "Document boundaries and unresolved claims",
+      "description": "Creates a factual record without inventing an exception.",
+      "weight": 1,
+      "anchors": {
+        "0": "Claims an automatic legal right to disclose or records the person as uncooperative.",
+        "2": "Records consent and the partner’s request.",
+        "4": "Documents purpose, fields shared, recipient and confirmation, separates the unsupported full-file demand from facts and routes any claimed exception to the specified supervisor process."
+      }
+    }
+  ],
+  "reference": {
+    "scenario": "You are a senior social worker in a fictional adult community-support service. A person requests help arranging an accessible housing appointment tomorrow. They consent to sharing their name, callback phone number, contact preference and access requirements with the housing team, but not their full case history. A partner asks for the full file “to speed things up.” The supplied referral policy permits sharing only information necessary for the agreed purpose, records the person’s consent and provides a supervisor review route for any claimed exception. Lead the coordination conversation and preserve a workable appointment plan. No immediate danger or legal exception is supplied.",
+    "facts": [
+      {
+        "id": "requirements",
+        "value": "The housing team confirms it needs contact details and access requirements to book the appointment. A full case history is not required for booking. A later assessment may ask for additional information directly from the person.",
+        "reveal_when": "candidate asks what information is actually needed"
+      },
+      {
+        "id": "preference",
+        "value": "The person prefers a phone call and asks to review the short referral wording before it is sent. They can take a call this afternoon and want confirmation of the appointment time.",
+        "reveal_when": "candidate asks about communication preference or consent confirmation"
+      },
+      {
+        "id": "handoff",
+        "value": "The current partner contact is not the booking officer. The booking officer is available until 16:00 today; the service can make a direct referral. The partner has not identified any policy exception.",
+        "reveal_when": "candidate asks about the operational handoff, deadline or basis for an exception"
+      }
+    ],
+    "model_points": [
+      "The supplied facts support a direct limited referral. A broad information demand is not itself an exception to consent.",
+      "Respecting the boundary need not mean abandoning the appointment; clarify the real booking need and recipient.",
+      "Do not infer a diagnosis, lack of capacity or danger from a limited-consent preference, and do not invent jurisdiction-specific obligations."
+    ],
+    "probes": [
+      {
+        "trigger": "candidate says full disclosure is necessary to help",
+        "question": "Which booking requirement cannot be met using the already consented information?"
+      },
+      {
+        "trigger": "candidate proposes asking the person to call the housing team directly",
+        "question": "How would you respect that choice while offering support and verifying the agreed next step?"
+      },
+      {
+        "trigger": "candidate retracts an assumption that the partner has an exception",
+        "question": "How will you correct the referral plan and record while keeping the appointment work moving?"
+      }
+    ],
+    "fair_alternatives": [
+      "Supporting a direct call led by the person is acceptable if they choose it and access needs are addressed.",
+      "A supervisor consultation can occur in parallel without unnecessarily delaying an already authorized limited referral."
+    ],
+    "red_flags": [
+      "Sends the whole file because the partner requested it.",
+      "Refuses all coordination or promises an appointment that is not confirmed.",
+      "Claims an automatic legal right to disclose or records the person as uncooperative."
+    ],
+    "follow_ups": [
+      "Draft a purpose-limited referral"
+    ],
+    "assessment_limits": [
+      "Assess only reasoning and communication demonstrated in this fictional task, not real-world professional competence, licensure or hiring readiness. No real action, external verification or tool execution has occurred.",
+      "Credit relevant plain-language reasoning and valid alternatives without requiring experience at a particular employer. Examples from education, volunteering, community work or paid work are equally acceptable when relevant.",
+      "A missing or unasked dimension is not assessed, not automatically a failure. In simulation, use neutral probes and reveal facts only when triggered; in coaching, label assistance and distinguish assisted performance from independent evidence.",
+      "Credit an explicit late correction using the final demonstrated reasoning while retaining the evidence of the earlier mistake; do not force agreement with one exemplar.",
+      "Do not penalize the candidate for a conditional fact that was never revealed. Credit an appropriate request for missing information and a conditional plan; distinguish the candidate’s assumptions from interviewer-supplied facts."
+    ]
+  },
+  "interviewer_notes": "Play the relevant reviewing colleague or stakeholder using the supplied facts only. Start with one focused question, not the full rubric. Ask for clarification before treating an ambiguous answer as wrong. Reveal conditional facts when their stated triggers are met, permit equivalent valid approaches and never invent organizational rules, laws, clinical findings, ratings or missing outcomes. Do not require a polished artifact or specialist software. In a short session prioritize the main decision and one material follow-up; allow silence for thinking, check in neutrally, and leave time for the candidate to correct their recommendation and ask a final question. Distinguish simulation from coaching and record any help given. Assess job-relevant evidence, not accent, confidence, speed, credentials or prestige. This is independent practice for adults 18+ and is not a real professional workflow.",
+  "learning_drills": [
+    {
+      "id": "decision-review",
+      "title": "Draft a purpose-limited referral",
+      "minutes": 5,
+      "prompt": "Draft a purpose-limited referral. Use the fictional facts from this exercise. This is self-guided practice; no model assessment is performed.",
+      "checklist": [
+        "Name the agreed purpose",
+        "Include only needed consented fields",
+        "Confirm the recipient and appointment",
+        "Record any claimed exception separately"
+      ]
+    }
+  ]
+}

@@ -11,7 +11,8 @@ describe("sign-in preserves non-secret interview choices", () => {
       model: "test-model",
       api_key: "top-secret",
       config: {
-        target_level: "senior",
+        target_level: "director",
+        role_track: "management",
         challenge: "stretch",
         face_id: "sam",
         include_resume: true,
@@ -24,7 +25,12 @@ describe("sign-in preserves non-secret interview choices", () => {
     );
     expect(readSetupDraft("mi_setup_draft_question")).toMatchObject({
       minutes: 8,
-      config: { target_level: "senior", challenge: "stretch", face_id: "sam" },
+      config: {
+        target_level: "director",
+        role_track: "management",
+        challenge: "stretch",
+        face_id: "sam",
+      },
     });
     // React Strict Mode may read twice before the surviving effect applies it.
     expect(readSetupDraft("mi_setup_draft_question")?.minutes).toBe(8);

@@ -1,0 +1,137 @@
+{
+  "schema_version": 1,
+  "revision": 1,
+  "format_id": "work-sample-defense",
+  "review_status": "preview",
+  "provenance": {
+    "authorship": "Original project scenario, AI-assisted draft. Practitioner review and calibration pending.",
+    "license": "MIT"
+  },
+  "minutes": 30,
+  "id": "medicine-results-ownership-review",
+  "title": "Senior Physician: Close a Gap in Diagnostic Follow-Up",
+  "track": "professional",
+  "domain": "clinical_reasoning",
+  "areas": [
+    "medicine"
+  ],
+  "modality": "written",
+  "difficulty": "senior",
+  "role_track": "individual_contributor",
+  "tags": [
+    "medicine",
+    "senior-specialist",
+    "evidence-based-practice",
+    "community-preview"
+  ],
+  "prompt": "In this fictional educational exercise, you are a senior physician reviewing a clinic’s unresolved-results list. Record A has a report marked by the reporting service as requiring clinician review today, but no clinician acknowledgment. Record B has a documented clinician review and an agreed routine follow-up appointment. Record C has a report labeled amended; the earlier report was acknowledged, the amendment was not. The clinic’s supplied process requires a named clinician to acknowledge each actionable or amended report and record the next step. Explain how you would establish ownership and verify closure. No diagnosis or treatment decision is requested.",
+  "blurb": "Prioritize a follow-up ownership failure while distinguishing a sent message from completed clinical review.",
+  "rubric": [
+    {
+      "key": "priority",
+      "label": "Prioritize unclosed clinical work",
+      "description": "Uses supplied urgency and changed information without inventing clinical facts.",
+      "weight": 1,
+      "anchors": {
+        "0": "Treats portal delivery as clinical review or invents a diagnosis.",
+        "2": "Escalates A today and identifies C’s amendment as unreviewed.",
+        "4": "Separates A’s explicit same-day review flag, C’s changed recommendation and B’s documented plan; routes clinical interpretation to the responsible clinicians."
+      }
+    },
+    {
+      "key": "ownership",
+      "label": "Establish a closed handoff",
+      "description": "Specifies recipient acknowledgment and a recorded next step.",
+      "weight": 1,
+      "anchors": {
+        "0": "Assigns interpretation to the coordinator or leaves A with the absent clinician.",
+        "2": "Contacts the covering clinician for A and the original clinician for C.",
+        "4": "Confirms acceptance of each handoff, tracks the clinician’s documented plan and sets an escalation time if acknowledgment does not arrive."
+      }
+    },
+    {
+      "key": "learning",
+      "label": "Repair the workflow from evidence",
+      "description": "Distinguishes process failure from assumed individual fault.",
+      "weight": 1,
+      "anchors": {
+        "0": "Declares the system safe after sending another message.",
+        "2": "Suggests tracking amended reports and backup coverage.",
+        "4": "Proposes testing the queue with original and amended reports, unavailable owners and overdue acknowledgments; checks actual closure rather than message counts."
+      }
+    }
+  ],
+  "reference": {
+    "scenario": "In this fictional educational exercise, you are a senior physician reviewing a clinic’s unresolved-results list. Record A has a report marked by the reporting service as requiring clinician review today, but no clinician acknowledgment. Record B has a documented clinician review and an agreed routine follow-up appointment. Record C has a report labeled amended; the earlier report was acknowledged, the amendment was not. The clinic’s supplied process requires a named clinician to acknowledge each actionable or amended report and record the next step. Explain how you would establish ownership and verify closure. No diagnosis or treatment decision is requested.",
+    "facts": [
+      {
+        "id": "contact",
+        "value": "A’s listed clinician is away. The covering clinician is available by phone. The patient portal records that a message was sent, but not that a clinician reviewed the result or that the patient received an agreed plan.",
+        "reveal_when": "candidate asks about coverage, contact or acknowledgment"
+      },
+      {
+        "id": "amendment",
+        "value": "C’s amendment changes the reporting service’s follow-up recommendation; no clinical details are provided. The original clinician is in clinic and can review it now.",
+        "reveal_when": "candidate asks whether the amendment changes the recommendation"
+      },
+      {
+        "id": "closure",
+        "value": "The clinic coordinator can track acknowledgments and agreed next-contact times but cannot interpret reports. The covering clinician determines any clinical action using the actual report and applicable local guidance.",
+        "reveal_when": "candidate asks about task delegation, authority or clinical next steps"
+      }
+    ],
+    "model_points": [
+      "A needs same-day clinician review according to the supplied flag; C needs review of changed information rather than reliance on the original acknowledgment.",
+      "B’s known plan may be verified without allowing it to displace the unresolved items. Clinical treatment and timing beyond the supplied flags remain unspecified.",
+      "Administrative tracking can support a closed clinical handoff but cannot replace clinical interpretation, consent or the responsible clinician’s communication plan."
+    ],
+    "probes": [
+      {
+        "trigger": "candidate says the portal message closes A",
+        "question": "What evidence establishes clinician acceptance and a documented next step?"
+      },
+      {
+        "trigger": "candidate escalates both A and C to the same covering clinician",
+        "question": "How will you confirm capacity and avoid leaving either report ambiguously owned?"
+      },
+      {
+        "trigger": "candidate recognizes late that C is amended",
+        "question": "What changes in your queue and handoff record once you recognize that the original acknowledgment is insufficient?"
+      }
+    ],
+    "fair_alternatives": [
+      "One covering clinician may accept both cases if capacity and explicit ownership are confirmed.",
+      "A clinician may use another authorized contact route; evaluate documented ownership and closure, not a preferred communications tool."
+    ],
+    "red_flags": [
+      "Treats portal delivery as clinical review or invents a diagnosis.",
+      "Assigns interpretation to the coordinator or leaves A with the absent clinician.",
+      "Declares the system safe after sending another message."
+    ],
+    "follow_ups": [
+      "Draft a result-closure checklist"
+    ],
+    "assessment_limits": [
+      "Assess only reasoning and communication demonstrated in this fictional task, not real-world professional competence, licensure or hiring readiness. No real action, external verification or tool execution has occurred.",
+      "Credit relevant plain-language reasoning and valid alternatives without requiring experience at a particular employer. Examples from education, volunteering, community work or paid work are equally acceptable when relevant.",
+      "A missing or unasked dimension is not assessed, not automatically a failure. In simulation, use neutral probes and reveal facts only when triggered; in coaching, label assistance and distinguish assisted performance from independent evidence.",
+      "Credit an explicit late correction using the final demonstrated reasoning while retaining the evidence of the earlier mistake; do not force agreement with one exemplar.",
+      "Do not penalize the candidate for a conditional fact that was never revealed. Credit an appropriate request for missing information and a conditional plan; distinguish the candidate’s assumptions from interviewer-supplied facts."
+    ]
+  },
+  "interviewer_notes": "Play the relevant reviewing colleague or stakeholder using the supplied facts only. Start with one focused question, not the full rubric. Ask for clarification before treating an ambiguous answer as wrong. Reveal conditional facts when their stated triggers are met, permit equivalent valid approaches and never invent organizational rules, laws, clinical findings, ratings or missing outcomes. Do not require a polished artifact or specialist software. In a short session prioritize the main decision and one material follow-up; allow silence for thinking, check in neutrally, and leave time for the candidate to correct their recommendation and ask a final question. Distinguish simulation from coaching and record any help given. Assess job-relevant evidence, not accent, confidence, speed, credentials or prestige. This is independent practice for adults 18+ and is not a real professional workflow.",
+  "learning_drills": [
+    {
+      "id": "decision-review",
+      "title": "Draft a result-closure checklist",
+      "minutes": 5,
+      "prompt": "Draft a result-closure checklist. Use the fictional facts from this exercise. This is self-guided practice; no model assessment is performed.",
+      "checklist": [
+        "Separate urgency from missing acknowledgment",
+        "Name the accepting clinician",
+        "Track the documented next step",
+        "Test amended-report routing"
+      ]
+    }
+  ]
+}

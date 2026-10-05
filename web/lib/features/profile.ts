@@ -5,6 +5,7 @@
 // store/users.go + store/config.go.
 
 import { req, apiBase, authHeader } from "../http";
+import type { InterviewLevel, RoleTrack } from "../roleScope";
 import type { Personality } from "../domain";
 import preview from "./catalog-preview.json";
 
@@ -28,6 +29,8 @@ export interface Profession {
   key: string;
   label: string;
   count: number;
+  primary_count?: number; // authored with this profession first
+  shared_count?: number; // discoverable here, authored primarily for another area
   tracks: string[];
   family?: string;
   family_label?: string;
@@ -49,7 +52,8 @@ export interface InterviewConfig {
   face_id: string;
   personality: Personality;
   intensity: number; // 1..5
-  target_level?: "entry" | "junior" | "mid" | "senior" | "staff";
+  target_level?: InterviewLevel;
+  role_track?: RoleTrack;
   challenge?: "foundation" | "standard" | "stretch";
   practice_mode?: "simulation" | "coaching";
   language?: string; // interview language code (interviewer speaks it); set from the app language at start

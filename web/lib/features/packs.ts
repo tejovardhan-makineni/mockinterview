@@ -8,6 +8,9 @@
 // pack_id / pack_round_id (see features/interview.ts).
 
 import { req } from "../http";
+import preview from "./catalog-preview.json";
+import type { QuestionSummary } from "./catalog";
+import type { InterviewLevel, RoleTrack } from "../roleScope";
 import type { Modality } from "../domain";
 import type { InterviewConfig } from "./profile";
 import { interviewHttp, interviewMock, type Session } from "./interview";
@@ -16,7 +19,7 @@ import { interviewHttp, interviewMock, type Session } from "./interview";
 export interface PackRoundSummary {
   id: string;
   title: string;
-  kind: string;    // free text: behavioral | coding | lld | system_design | bar_raiser | case | ...
+  kind: string; // free text: behavioral | coding | lld | system_design | bar_raiser | case | ...
   minutes: number;
 }
 
@@ -24,7 +27,7 @@ export interface PackRoundSummary {
 export interface Pack {
   id: string;
   name: string;
-  company: string;
+  company?: string;
   blurb: string;
   areas: string[]; // professions this pack is for (= corpus areas); gates visibility
   track: string;
@@ -38,7 +41,8 @@ export interface PackDetailRound {
   kind: string;
   domain: string;
   modality: Modality;
-  difficulty: string;
+  difficulty: InterviewLevel | "";
+  role_track?: RoleTrack;
   minutes: number;
   focus: string; // becomes the director's round_focus for the session
   question_id?: string; // authored scenario for a pinned round; absent for pooled rounds
@@ -48,7 +52,7 @@ export interface PackDetailRound {
 export interface PackDetail {
   id: string;
   name: string;
-  company: string;
+  company?: string;
   blurb: string;
   areas: string[];
   track: string;
@@ -79,16 +83,26 @@ export interface PacksSlice {
   packProgress(id: string): Promise<PackProgress>;
   // Start a pack round = create a session with pack context; the server resolves
   // the round's concrete question. Returns the created Session (carries pack ids).
-  startRound(packId: string, roundId: string, cfg: InterviewConfig): Promise<Session>;
+  startRound(
+    packId: string,
+    roundId: string,
+    cfg: InterviewConfig,
+  ): Promise<Session>;
 }
 
 export const packsHttp: PacksSlice = {
   listPacks(profession) {
-    const qs = profession ? `?profession=${encodeURIComponent(profession)}` : "";
+    const qs = profession
+      ? `?profession=${encodeURIComponent(profession)}`
+      : "";
     return req<Pack[]>(`/api/v1/packs${qs}`);
   },
-  getPack(id) { return req<PackDetail>(`/api/v1/packs/${id}`); },
-  packProgress(id) { return req<PackProgress>(`/api/v1/packs/${id}/progress`); },
+  getPack(id) {
+    return req<PackDetail>(`/api/v1/packs/${id}`);
+  },
+  packProgress(id) {
+    return req<PackProgress>(`/api/v1/packs/${id}/progress`);
+  },
   startRound(packId, roundId, cfg) {
     // Reuse the interview slice's session creation so the /sessions contract
     // stays in one place; the pack context rides in the body.
@@ -97,60 +111,74 @@ export const packsHttp: PacksSlice = {
 };
 
 // ---- mock ----
-// A few static packs so the /packs page works fully offline (NEXT_PUBLIC_MOCK=1).
-// The "amazon" pack mirrors the seed loop from the feature contract.
-const MOCK_PACK_DETAILS: PackDetail[] = [
-  {
-    id: "amazon", name: "Amazon SDE Loop", company: "Amazon",
-    blurb: "The full Amazon on-site: Leadership Principles behavioral, two coding rounds, LLD, system design, and a Bar Raiser.",
-    areas: ["software_engineering"], track: "engineering",
-    rounds: [
-      { id: "intro-behavioral", title: "Intro + Behavioral (Leadership Principles)", kind: "behavioral", domain: "behavioral", modality: "conversational", difficulty: "mid", minutes: 45, focus: "Amazon Leadership Principles: probe Ownership, Dive Deep, and Bias for Action with STAR structure and real impact." },
-      { id: "coding-1", title: "Coding I", kind: "coding", domain: "coding", modality: "coding", difficulty: "mid", minutes: 45, focus: "Data structures & algorithms: clean, correct code and honest complexity analysis." },
-      { id: "coding-2", title: "Coding II", kind: "coding", domain: "coding", modality: "coding", difficulty: "senior", minutes: 45, focus: "A harder algorithmic problem: edge cases, optimization, and testing." },
-      { id: "lld", title: "Low-Level Design", kind: "lld", domain: "low_level_design", modality: "system_design", difficulty: "senior", minutes: 45, focus: "Object-oriented design: classes, responsibilities, patterns, and extensibility." },
-      { id: "system-design", title: "System Design", kind: "system_design", domain: "system_design", modality: "system_design", difficulty: "senior", minutes: 60, focus: "A scalable distributed system: requirements, tradeoffs, and bottlenecks." },
-      { id: "bar-raiser", title: "Bar Raiser", kind: "bar_raiser", domain: "behavioral", modality: "conversational", difficulty: "staff", minutes: 60, focus: "Amazon bar-raiser: raise the bar, probe Leadership Principles depth and consistency." },
-    ],
-  },
-  {
-    id: "meta", name: "Meta E5 Loop", company: "Meta",
-    blurb: "Behavioral, two coding rounds, and a system design round — the standard Meta software loop.",
-    areas: ["software_engineering"], track: "engineering",
-    rounds: [
-      { id: "behavioral", title: "Behavioral", kind: "behavioral", domain: "behavioral", modality: "conversational", difficulty: "mid", minutes: 45, focus: "Impact, collaboration, and conflict — concrete examples with your individual contribution." },
-      { id: "coding-1", title: "Coding I", kind: "coding", domain: "coding", modality: "coding", difficulty: "mid", minutes: 45, focus: "Two medium problems: speed, correctness, and clear communication." },
-      { id: "coding-2", title: "Coding II", kind: "coding", domain: "coding", modality: "coding", difficulty: "senior", minutes: 45, focus: "Harder problems under time pressure; talk through tradeoffs." },
-      { id: "system-design", title: "System Design", kind: "system_design", domain: "system_design", modality: "system_design", difficulty: "senior", minutes: 45, focus: "Design at scale; drive the conversation and justify choices." },
-    ],
-  },
-  {
-    id: "mbb-consulting", name: "MBB Consulting", company: "McKinsey / Bain / BCG",
-    blurb: "A PEI (personal experience interview) followed by two case interviews — the classic MBB loop.",
-    areas: ["consulting"], track: "professional",
-    rounds: [
-      { id: "pei", title: "Personal Experience (PEI)", kind: "behavioral", domain: "behavioral", modality: "conversational", difficulty: "mid", minutes: 30, focus: "PEI: leadership, drive, and personal impact — one story, deep." },
-      { id: "case-1", title: "Case I", kind: "case", domain: "case", modality: "conversational", difficulty: "senior", minutes: 40, focus: "MECE structure, hypothesis-driven, crisp back-of-envelope math." },
-      { id: "case-2", title: "Case II", kind: "case", domain: "case", modality: "conversational", difficulty: "senior", minutes: 40, focus: "A second case with a different shape; synthesize a clear recommendation." },
-    ],
-  },
-];
+// Public paths are exported with the complete safe bank so demo and hosted
+// practice resolve the same authored question IDs and scope.
+const MOCK_PACK_DETAILS = preview.packs as PackDetail[];
+
+export function resolveMockRound(
+  pack: PackDetail,
+  round: PackDetailRound,
+  questions: readonly QuestionSummary[],
+): QuestionSummary | undefined {
+  const compatible = (q: QuestionSummary) =>
+    q.domain === round.domain &&
+    q.modality === round.modality &&
+    q.areas.some((area) => pack.areas.includes(area)) &&
+    (!round.role_track || !q.role_track || q.role_track === round.role_track);
+  if (round.question_id) {
+    const pinned = questions.find((q) => q.id === round.question_id);
+    return pinned && compatible(pinned) ? pinned : undefined;
+  }
+  const candidates = questions
+    .filter(compatible)
+    .sort((a, b) => a.id.localeCompare(b.id));
+  return (
+    candidates.find((q) => q.difficulty === round.difficulty) ?? candidates[0]
+  );
+}
 
 const toSummary = (p: PackDetail): Pack => ({
-  id: p.id, name: p.name, company: p.company, blurb: p.blurb, areas: p.areas, track: p.track,
-  rounds: p.rounds.map((r) => ({ id: r.id, title: r.title, kind: r.kind, minutes: r.minutes })),
+  id: p.id,
+  name: p.name,
+  company: p.company,
+  blurb: p.blurb,
+  areas: p.areas,
+  track: p.track,
+  rounds: p.rounds.map((r) => ({
+    id: r.id,
+    title: r.title,
+    kind: r.kind,
+    minutes: r.minutes,
+  })),
 });
 
 // Mock progress: the first round is done + scored, the rest not started.
 function mockProgress(p: PackDetail): PackProgress {
-  const rounds: PackProgressRound[] = p.rounds.map((r, i) => (
+  const rounds: PackProgressRound[] = p.rounds.map((r, i) =>
     i === 0
-      ? { round: { id: r.id, title: r.title, kind: r.kind }, session_id: "mock-session", status: "done", overall: 3.2, scored: true }
-      : { round: { id: r.id, title: r.title, kind: r.kind }, status: "not_started" }
-  ));
-  const done = rounds.filter((r) => r.status === "done" && r.overall !== undefined);
-  const readiness = rounds.length ? done.reduce((s, r) => s + (r.overall! / 5), 0) / rounds.length : 0;
-  return { pack: toSummary(p), rounds, overall_readiness: Number(readiness.toFixed(2)) };
+      ? {
+          round: { id: r.id, title: r.title, kind: r.kind },
+          session_id: "mock-session",
+          status: "done",
+          overall: 3.2,
+          scored: true,
+        }
+      : {
+          round: { id: r.id, title: r.title, kind: r.kind },
+          status: "not_started",
+        },
+  );
+  const done = rounds.filter(
+    (r) => r.status === "done" && r.overall !== undefined,
+  );
+  const readiness = rounds.length
+    ? done.reduce((s, r) => s + r.overall! / 5, 0) / rounds.length
+    : 0;
+  return {
+    pack: toSummary(p),
+    rounds,
+    overall_readiness: Number(readiness.toFixed(2)),
+  };
 }
 
 export const packsMock: PacksSlice = {
@@ -159,10 +187,13 @@ export const packsMock: PacksSlice = {
     return profession ? all.filter((p) => p.areas.includes(profession)) : all;
   },
   async getPack(id) {
-    return MOCK_PACK_DETAILS.find((p) => p.id === id) ?? MOCK_PACK_DETAILS[0];
+    const pack = MOCK_PACK_DETAILS.find((p) => p.id === id);
+    if (!pack)
+      throw new Error("This practice path was not found in the bundled demo.");
+    return pack;
   },
   async packProgress(id) {
-    return mockProgress(MOCK_PACK_DETAILS.find((p) => p.id === id) ?? MOCK_PACK_DETAILS[0]);
+    return mockProgress(await packsMock.getPack(id));
   },
   startRound(packId, roundId, cfg) {
     return interviewMock.createSession("", cfg, { packId, roundId });

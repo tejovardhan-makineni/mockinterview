@@ -1,0 +1,121 @@
+{
+  "schema_version": 1,
+  "revision": 1,
+  "format_id": "stakeholder-simulation",
+  "review_status": "preview",
+  "provenance": {
+    "authorship": "Original project scenario, AI-assisted draft. Practitioner review and scoring calibration pending.",
+    "license": "MIT"
+  },
+  "minutes": 30,
+  "id": "engineering-manager-delivery-risk",
+  "title": "Engineering Manager: Negotiate Scope Without Hiding Reliability Work",
+  "track": "engineering",
+  "domain": "engineering_delivery",
+  "areas": [
+    "engineering_management",
+    "software_engineering",
+    "management"
+  ],
+  "role_track": "management",
+  "modality": "conversational",
+  "difficulty": "manager",
+  "tags": [
+    "engineering-management",
+    "manager",
+    "engineering-delivery",
+    "leadership",
+    "community-preview"
+  ],
+  "prompt": "Your six-engineer team has 24 engineer-weeks available before a promised launch. Current estimates are 16 for core workflow, 8 for advanced reporting and 6 for reliability work. The product lead (the AI) asks you to omit reliability work and commit to both features. The current service has recurring retry-related failures; their exact cause is still under investigation. Negotiate a credible plan.",
+  "blurb": "Write a delivery decision note",
+  "rubric": [
+    {
+      "key": "planning",
+      "label": "Expose the commitment gap",
+      "description": "Uses estimates without treating them as certainty.",
+      "weight": 1,
+      "anchors": {
+        "0": "Commits to 30 weeks within 24 or silently removes risk work.",
+        "2": "Identifies the six-week gap and offers a scope reduction.",
+        "4": "Explains the 30-versus-24 gap, protects investigation/verification or explicitly negotiates the risk decision, and offers a feasible staged scope with uncertainty and contingency visible."
+      }
+    },
+    {
+      "key": "leadership",
+      "label": "Lead through accountable owners",
+      "description": "Makes a management decision without taking over every technical choice.",
+      "weight": 1,
+      "anchors": {
+        "0": "Tells engineers to work harder or promises a technical fix before investigation.",
+        "2": "Involves engineering and product in sequencing.",
+        "4": "Delegates technical options to accountable engineers, clarifies product/account decision rights and communicates what evidence is required before committing to the fix or launch."
+      }
+    },
+    {
+      "key": "outcomes",
+      "label": "Define launch readiness",
+      "description": "Balances delivery with a measurable reliability check.",
+      "weight": 1,
+      "anchors": {
+        "0": "Calls the deadline the only success measure.",
+        "2": "Adds reliability checks before launch.",
+        "4": "Defines pilot scope, verification and rollback/escalation criteria tied to the actual failure, plus customer and team impact checks; does not claim that completing six weeks of work proves safety."
+      }
+    }
+  ],
+  "reference": {
+    "scenario": "Your six-engineer team has 24 engineer-weeks available before a promised launch. Current estimates are 16 for core workflow, 8 for advanced reporting and 6 for reliability work. The product lead (the AI) asks you to omit reliability work and commit to both features. The current service has recurring retry-related failures; their exact cause is still under investigation. Negotiate a credible plan.",
+    "facts": [
+      {
+        "id": "fact-1",
+        "value": "Core workflow can serve the pilot customer without advanced reporting. The reporting commitment was internal, while the pilot date is an external expectation that can be renegotiated by the account owner.",
+        "reveal_when": "candidate asks what is essential or who can renegotiate commitments"
+      },
+      {
+        "id": "fact-2",
+        "value": "The reliability estimate includes two weeks to establish a reproduction and four for a likely fix and verification. Estimates are not guarantees. The team has no approved overtime capacity.",
+        "reveal_when": "candidate asks about uncertainty or what reliability work contains"
+      }
+    ],
+    "model_points": [
+      "Explains the 30-versus-24 gap, protects investigation/verification or explicitly negotiates the risk decision, and offers a feasible staged scope with uncertainty and contingency visible.",
+      "Delegates technical options to accountable engineers, clarifies product/account decision rights and communicates what evidence is required before committing to the fix or launch.",
+      "Defines pilot scope, verification and rollback/escalation criteria tied to the actual failure, plus customer and team impact checks; does not claim that completing six weeks of work proves safety."
+    ],
+    "probes": [
+      {
+        "trigger": "candidate says reporting can simply be canceled",
+        "question": "Who needs to agree, and what customer need would remain unmet?"
+      },
+      {
+        "trigger": "candidate treats reliability as a fixed six-week guarantee",
+        "question": "What will you decide after the reproduction step?"
+      },
+      {
+        "trigger": "candidate changes the launch recommendation",
+        "question": "What information changed your recommendation and which commitments must be updated?"
+      }
+    ],
+    "fair_alternatives": [
+      "A later full launch is valid if the account owner and customer implications are addressed.",
+      "A limited pilot can be valid with explicit readiness and rollback conditions; no particular architecture is required."
+    ],
+    "assessment_limits": "Assess only the decisions and reasoning demonstrated in this fictional exercise. No hiring-readiness, personality, legal compliance or workplace performance claim follows from this score. A valid alternative can earn full credit. Unrevealed conditional facts must not be assumed known or required for credit; credit asking for needed information and a conditional plan."
+  },
+  "interviewer_notes": "You are the counterpart named in the prompt. If this is a written review, remain the hiring interviewer while the candidate reads and writes. Let the candidate finish, including thinking and self-correction. Answer only supplied facts when their reveal condition is met; otherwise say the information is unknown. Use neutral probes after a completed answer, one at a time. Do not prescribe the rubric as a spoken checklist. Accept relevant examples from work, education and community leadership. Do not request private employee records, infer protected traits, invent employment rules or promise a real organizational outcome. Simulation gives no answer before assessment; coaching may offer labeled assistance.",
+  "learning_drills": [
+    {
+      "id": "decision-practice",
+      "title": "Write a delivery decision note",
+      "prompt": "Write a short note with feasible scope, uncertainty, decision owners and the next evidence checkpoint. This is self-guided practice with no automated assessment.",
+      "minutes": 7,
+      "checklist": [
+        "Reconcile capacity",
+        "Preserve verification",
+        "Name decision rights",
+        "State a contingency"
+      ]
+    }
+  ]
+}

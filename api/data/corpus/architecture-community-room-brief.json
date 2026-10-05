@@ -1,0 +1,117 @@
+{
+  "schema_version": 1,
+  "revision": 1,
+  "id": "architecture-community-room-brief",
+  "title": "Architectural Designer: Reconcile a Community Room Brief",
+  "track": "professional",
+  "domain": "architectural_briefing",
+  "areas": [
+    "architecture"
+  ],
+  "modality": "written",
+  "difficulty": "mid",
+  "role_track": "individual_contributor",
+  "format_id": "written-response",
+  "minutes": 30,
+  "review_status": "preview",
+  "tags": [
+    "architecture",
+    "community-preview"
+  ],
+  "prompt": "You are designing an early concept for fictional Maple Community Hub. The client sets a fixed 120 square-metre internal planning budget for this exercise, including all listed spaces: workshop 50, meeting room 30, storage 15, reception 15, and circulation 20. Their total is 130. The written brief also requires a quiet meeting room away from workshop noise, step-free routes between all listed spaces, and storage directly accessible from the workshop. These are supplied client requirements, not a building-code test. Produce two coherent area-allocation options within 120, describe the adjacency trade-offs in words, and state what must be confirmed before design development. Do not invent a site plan or certify feasibility.",
+  "blurb": "Turn an overfull brief into two transparent concept options while preserving access and functional relationships.",
+  "rubric": [
+    {
+      "key": "area_consistency",
+      "label": "Reconcile the planning arithmetic",
+      "description": "Uses a complete allocation rather than hiding missing space.",
+      "weight": 1,
+      "anchors": {
+        "0": "Repeats the 130 total as fitting 120 or drops circulation silently.",
+        "2": "Identifies the 10 square-metre excess and supplies one complete allocation at or below 120.",
+        "4": "Provides two correctly totaled, complete allocations within 120, labels changed areas, and keeps the supplied minimum reception and circulation constraints after clarification."
+      }
+    },
+    {
+      "key": "spatial_reasoning",
+      "label": "Relate area choices to use",
+      "description": "Explains adjacency and acoustic tensions within the brief.",
+      "weight": 1,
+      "anchors": {
+        "0": "Places meeting next to workshop without addressing noise or removes step-free routes to save area.",
+        "2": "Protects workshop-storage adjacency and mentions meeting-room separation.",
+        "4": "Explains how each option preserves a connected step-free route and workshop storage access, buffers the quiet use conceptually, and identifies what a measured plan must verify rather than claiming a text list proves feasibility."
+      }
+    },
+    {
+      "key": "client_decision",
+      "label": "Expose the actual trade-off",
+      "description": "Makes a clear recommendation and asks focused confirmation questions.",
+      "weight": 1,
+      "anchors": {
+        "0": "Chooses areas without explaining changed capacity or claims client approval.",
+        "2": "Explains one space/capacity compromise and asks the client to choose.",
+        "4": "Connects the two options to simultaneous-use priorities, recommends a direction conditionally, and asks the client to confirm reduced capacities and separate-use scheduling before further design."
+      }
+    }
+  ],
+  "reference": {
+    "scenario": "You are designing an early concept for fictional Maple Community Hub. The client sets a fixed 120 square-metre internal planning budget for this exercise, including all listed spaces: workshop 50, meeting room 30, storage 15, reception 15, and circulation 20. Their total is 130. The written brief also requires a quiet meeting room away from workshop noise, step-free routes between all listed spaces, and storage directly accessible from the workshop. These are supplied client requirements, not a building-code test. Produce two coherent area-allocation options within 120, describe the adjacency trade-offs in words, and state what must be confirmed before design development. Do not invent a site plan or certify feasibility.",
+    "facts": [
+      {
+        "id": "fact-1",
+        "value": "For this exercise, reception must remain at least 10 and circulation at least 20 square metres. The client can reduce workshop, meeting, or storage area but must agree the resulting capacity; no required minimum for those three is supplied.",
+        "reveal_when": "candidate asks about fixed versus negotiable areas"
+      },
+      {
+        "id": "fact-2",
+        "value": "The workshop and meeting room often run simultaneously. The client would consider scheduling some larger meetings separately if the main room is smaller. There is no measured geometry or wall-thickness allowance beyond the stated planning budget.",
+        "reveal_when": "candidate asks about concurrent use or physical constraints"
+      }
+    ],
+    "model_points": [
+      "The initial schedule is 130. A defensible option is 45/25/15/15/20 = 120; another is 50/25/15/10/20 = 120. These are examples, not a required solution; many allocations can meet the supplied constraints.",
+      "Area numbers alone do not establish geometry, acoustic performance, or accessibility. Explain the workshop-storage adjacency, quiet-space separation, and connected routes as concept requirements for a later measured test.",
+      "Use the client's actual trade-offs: capacity and simultaneous use. Ask for agreement where capacities shrink and keep assumptions visible rather than inventing occupancy or regulatory standards."
+    ],
+    "probes": [
+      {
+        "trigger": "candidate supplies an area table without addressing noise or storage access",
+        "question": "How would the relationships between the rooms affect either option?"
+      },
+      {
+        "trigger": "candidate proposes a shared flexible room instead of two fixed rooms",
+        "question": "How would that option meet the stated simultaneous-use need, and which change would require client agreement?"
+      },
+      {
+        "trigger": "candidate notices that an initial option totals more than 120 and corrects it",
+        "question": "Which space and capacity assumption changes in your revised option?"
+      }
+    ],
+    "fair_alternatives": [
+      "Different allocations are valid if complete, within the fixed budget, and consistent with clarified constraints.",
+      "A flexible-space concept can be discussed as a brief change if simultaneous use and explicit client approval are addressed; it must not be presented as already meeting the original brief.",
+      "Assess the work demonstrated here. Accept relevant examples from education, volunteering, caregiving, placements, or paid work; professional vocabulary and employer pedigree are not evidence of a stronger answer."
+    ],
+    "assessment_limits": "Assess early briefing, arithmetic, and conceptual relationships. No building-code compliance, dimensional accessibility certification, structural feasibility, or final architectural design is assessed. Unobserved dimensions are not failures. Credit a reasoned correction and distinguish independently demonstrated reasoning from coached assistance. Do not penalize a candidate for an unrevealed conditional fact; credit appropriate requests and conditional plans, and distinguish candidate assumptions from interviewer-supplied evidence."
+  },
+  "interviewer_notes": "Assess early briefing, arithmetic, and conceptual relationships. No building-code compliance, dimensional accessibility certification, structural feasibility, or final architectural design is assessed. Use only the supplied fictional facts and policies; acknowledge unknowns. Ask one triggered probe at a time after the candidate has finished. Accept plain language and accessible written or spoken explanations. Do not score accent, typing speed, confidence, credentials, or experience with a named employer. Credit revisions and record assistance. All participants are fictional adults; no real patient, client, operational, or confidential data is needed. Allow silence for thinking without treating it as failure. In short sessions prioritize the core decision and one material follow-up, leaving room for a correction and wrap-up.",
+  "learning_drills": [
+    {
+      "id": "focused-practice",
+      "title": "Compare two honest concept options",
+      "prompt": "Create two five-row area schedules and add one sentence on capacity, one on adjacency, and one unresolved geometric check for each. This is self-guided practice; no model assessment is performed.",
+      "minutes": 7,
+      "checklist": [
+        "Total every listed space",
+        "Retain the clarified reception/circulation minima",
+        "Acknowledge concurrent quiet/noisy uses",
+        "Label assumptions that require client agreement"
+      ]
+    }
+  ],
+  "provenance": {
+    "authorship": "Original project scenario, AI-assisted draft using fictional organizations, records, and exercise policies. Practitioner review and scoring calibration pending.",
+    "license": "MIT"
+  }
+}

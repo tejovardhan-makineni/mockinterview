@@ -10,7 +10,7 @@ import (
 	"github.com/tejo/mockinterview-api/internal/store"
 )
 
-const ScoringVersion = "2026-09-10.1"
+const ScoringVersion = "2026-10-05.1"
 const maxEvidenceBytes = 512 * 1024
 
 type EvidenceRef struct {

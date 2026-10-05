@@ -1,0 +1,308 @@
+[
+  {
+    "scenario_id": "new-manager-delegation",
+    "expected_format": "stakeholder-simulation",
+    "context_contains": [
+      "Alex has observed one reconciliation but has never done one. A worked example and checklist exist.",
+      "candidate asks about experience or available support",
+      "candidate says only \"let me know\""
+    ],
+    "candidate_examples": {
+      "clarification": "What parts has Alex already tried, and who must approve adjustments?",
+      "partial": "I would hand over the checklist and set a Thursday checkpoint.",
+      "alternative": "A smaller first assignment is valid if Alex retains meaningful ownership and the remaining work has an owner.",
+      "correction": "Five available hours may not be enough for a first attempt; I would free time or narrow the first handoff before committing.",
+      "silence": "",
+      "wrap": "My recommendation is conditional on the evidence described; I would assign an owner and a review checkpoint."
+    }
+  },
+  {
+    "scenario_id": "new-manager-feedback",
+    "expected_format": "stakeholder-simulation",
+    "context_contains": [
+      "For the two late handoffs, the venue confirmed details at 11:50 and 12:20. Jordan did not alert the receiving colleague while waiting.",
+      "candidate asks Jordan what happened or checks the dependency",
+      "candidate gives feedback without inquiry"
+    ],
+    "candidate_examples": {
+      "clarification": "Jordan, can you walk me through what happened before the two late handoffs?",
+      "partial": "I want a noon update so the next person knows whether the details are confirmed.",
+      "alternative": "A private written summary after the conversation is useful if Jordan can correct misunderstandings.",
+      "correction": "I initially treated confirmation as entirely within Jordan’s control. I would change the expectation to confirmed-or-pending and check the venue dependency.",
+      "silence": "",
+      "wrap": "My recommendation is conditional on the evidence described; I would assign an owner and a review checkpoint."
+    }
+  },
+  {
+    "scenario_id": "new-manager-team-priorities",
+    "expected_format": "stakeholder-simulation",
+    "context_contains": [
+      "The dashboard can move one week without affecting an external commitment. Training has a 10-hour required onboarding component; the other 20 hours can be rescheduled.",
+      "candidate asks about deadlines, obligations or movable scope",
+      "candidate presents an allocation above 120 hours"
+    ],
+    "candidate_examples": {
+      "clarification": "Which deadlines are fixed, and what do we know about the customer issue’s impact?",
+      "partial": "We have a 50-hour gap, so at least one request needs to move.",
+      "alternative": "A different feasible allocation can score fully if obligations and the uncertainty about customer impact are handled.",
+      "correction": "I should not defer an issue whose severity is unknown; I would allocate four hours to triage and then revisit the plan.",
+      "silence": "",
+      "wrap": "My recommendation is conditional on the evidence described; I would assign an owner and a review checkpoint."
+    }
+  },
+  {
+    "scenario_id": "manager-underperformance-support",
+    "expected_format": "stakeholder-simulation",
+    "context_contains": [
+      "Casey handled six escalated cases, while most peers handled one or two. A tooling problem also blocked three assigned cases for two days.",
+      "candidate asks about case mix, obstacles or comparable evidence",
+      "candidate uses team median as a quota"
+    ],
+    "candidate_examples": {
+      "clarification": "Are the review assignments comparable in complexity and time blocked?",
+      "partial": "I would discuss the gap privately with Casey and check what support is needed.",
+      "alternative": "A workload adjustment can be an evidence-gathering and support step without assuming there is no performance issue.",
+      "correction": "I should not equate 12 reviews with low effort without checking escalations and blocked cases; I would correct that conclusion.",
+      "silence": "",
+      "wrap": "My recommendation is conditional on the evidence described; I would assign an owner and a review checkpoint."
+    }
+  },
+  {
+    "scenario_id": "manager-structured-hiring",
+    "expected_format": "work-sample-defense",
+    "context_contains": [
+      "The panel agreed before interviews to weight scheduling and coaching equally, but did not define a minimum score. One assessor’s coaching notes for A contain no quoted or described behavior.",
+      "candidate asks about agreed criteria or evidence quality",
+      "candidate selects B immediately from averages"
+    ],
+    "candidate_examples": {
+      "clarification": "What criteria and weights were agreed before the interviews, and what behavior supports each rating?",
+      "partial": "I would stop the similarity discussion and ask for coaching and scheduling evidence.",
+      "alternative": "The panel may decide on existing evidence if its limits are acknowledged and the authorized hiring owner accepts them.",
+      "correction": "The averages rely on an unsupported coaching score, so I would not treat my initial ranking as conclusive.",
+      "silence": "",
+      "wrap": "My recommendation is conditional on the evidence described; I would assign an owner and a review checkpoint."
+    }
+  },
+  {
+    "scenario_id": "manager-conflict-ownership",
+    "expected_format": "stakeholder-simulation",
+    "context_contains": [
+      "Six cases are missing source files, four have a reproducible import error and two have not been diagnosed. Both teams can use a shared case record, but customer contact remains with Support.",
+      "candidate asks about case categories or available tools",
+      "candidate assigns the same treatment to all cases"
+    ],
+    "candidate_examples": {
+      "clarification": "Which of the twelve cases have files and a reproducible error, and what can each team do today?",
+      "partial": "Support should keep customer contact while Operations owns an authorized rerun.",
+      "alternative": "A short daily triage session is valid if it ends in named ownership rather than repeated discussion.",
+      "correction": "I assumed all twelve needed a rerun. I would first separate missing files, confirmed errors and undiagnosed cases.",
+      "silence": "",
+      "wrap": "My recommendation is conditional on the evidence described; I would assign an owner and a review checkpoint."
+    }
+  },
+  {
+    "scenario_id": "engineering-manager-delivery-risk",
+    "expected_format": "stakeholder-simulation",
+    "context_contains": [
+      "Core workflow can serve the pilot customer without advanced reporting. The reporting commitment was internal, while the pilot date is an external expectation that can be renegotiated by the account owner.",
+      "candidate asks what is essential or who can renegotiate commitments",
+      "candidate says reporting can simply be canceled"
+    ],
+    "candidate_examples": {
+      "clarification": "Which scope is essential to the pilot, and who owns commitments to the customer?",
+      "partial": "We need 30 engineer-weeks against 24 available, so the plan needs an explicit tradeoff.",
+      "alternative": "A later full launch is valid if the account owner and customer implications are addressed.",
+      "correction": "I treated the reliability estimate as guaranteed; I would put a decision checkpoint after reproduction and update the commitment.",
+      "silence": "",
+      "wrap": "My recommendation is conditional on the evidence described; I would assign an owner and a review checkpoint."
+    }
+  },
+  {
+    "scenario_id": "engineering-manager-incident-ownership",
+    "expected_format": "work-sample-defense",
+    "context_contains": [
+      "The responder escalated after ten minutes. The backup was handling another alert. No single owner is assigned to runbook links or alert usefulness.",
+      "candidate asks about the timeline, escalation or ownership",
+      "candidate recommends retraining only"
+    ],
+    "candidate_examples": {
+      "clarification": "What happened during the 25 minutes, and who owns runbook and alert quality?",
+      "partial": "The broken runbook and noisy alerts need assigned owners and verification.",
+      "alternative": "Additional training is valid if it addresses demonstrated knowledge gaps alongside the broken system.",
+      "correction": "I would withdraw my initial suggestion to disable the alerts outright and require a reviewed change with a detection-coverage check.",
+      "silence": "",
+      "wrap": "My recommendation is conditional on the evidence described; I would assign an owner and a review checkpoint."
+    }
+  },
+  {
+    "scenario_id": "engineering-manager-growth",
+    "expected_format": "stakeholder-simulation",
+    "context_contains": [
+      "Morgan wants more ownership and visibility, and is willing to pair on coordination. The approved role expectations are available but have not been reviewed together.",
+      "candidate asks what growth means or checks role expectations",
+      "candidate says Morgan is not ready without explanation"
+    ],
+    "candidate_examples": {
+      "clarification": "Which role expectations are we working toward, and what does Morgan want to learn?",
+      "partial": "I would offer a supported coordination assignment and regular feedback.",
+      "alternative": "A bounded leadership component of the larger project can be valid with sufficient support and delivery safeguards.",
+      "correction": "I cannot promise promotion for completing one project; I would correct that promise and separate development from the promotion decision.",
+      "silence": "",
+      "wrap": "My recommendation is conditional on the evidence described; I would assign an owner and a review checkpoint."
+    }
+  },
+  {
+    "scenario_id": "senior-manager-manager-coaching",
+    "expected_format": "stakeholder-simulation",
+    "context_contains": [
+      "Riley reports redoing a poorly specified handoff last quarter. There is no current written decision-rights agreement. The team has experienced members who have not been given bounded approval authority.",
+      "candidate asks about the origin of the behavior or existing authority",
+      "candidate proposes immediate full delegation"
+    ],
+    "candidate_examples": {
+      "clarification": "What happened in the earlier delegation, and what decision authority is written down today?",
+      "partial": "I would ask Riley to try a bounded delegation with an early checkpoint.",
+      "alternative": "A different routine decision category works if authority and risk are explicit.",
+      "correction": "I was about to assign tasks directly to Riley’s reports; I would instead coach Riley to agree the authority and support with them.",
+      "silence": "",
+      "wrap": "My recommendation is conditional on the evidence described; I would assign an owner and a review checkpoint."
+    }
+  },
+  {
+    "scenario_id": "senior-manager-capacity-allocation",
+    "expected_format": "panel-simulation",
+    "context_contains": [
+      "A needs two specialists for the first four weeks and one thereafter. B can run a smaller learning pilot with one. C needs one diagnostic specialist before the second specialist’s work can be scoped.",
+      "candidate asks about sequencing or minimum useful staffing",
+      "candidate proposes an equal split"
+    ],
+    "candidate_examples": {
+      "clarification": "Which skills and timing constraints make these requests different?",
+      "partial": "I would compare minimum useful staffing and sequence the work.",
+      "alternative": "Prioritizing either A or C first can be valid if consequences and decision authority are explicit.",
+      "correction": "An equal split double-books the unique skill; I would revise the sequencing or negotiate scope with the affected managers.",
+      "silence": "",
+      "wrap": "My recommendation is conditional on the evidence described; I would assign an owner and a review checkpoint."
+    }
+  },
+  {
+    "scenario_id": "director-organizational-design",
+    "expected_format": "work-sample-defense",
+    "context_contains": [
+      "Specialist escalations require credentials held by only four people. Renewals have a predictable month-end peak; onboarding has variable missing-information delays.",
+      "candidate asks about work differences or skills",
+      "candidate divides total cases by total people"
+    ],
+    "candidate_examples": {
+      "clarification": "How do handling times, specialist credentials and coordinator responsibilities differ?",
+      "partial": "I would pilot a shared intake before changing the whole organization.",
+      "alternative": "A shared intake with specialist teams can be valid.",
+      "correction": "I should not call two removed coordinator posts net savings before identifying who will perform their handoff work and what transition costs arise.",
+      "silence": "",
+      "wrap": "My recommendation is conditional on the evidence described; I would assign an owner and a review checkpoint."
+    }
+  },
+  {
+    "scenario_id": "director-strategy-execution",
+    "expected_format": "stakeholder-simulation",
+    "context_contains": [
+      "The new-segment estimate assumes a partner agreement that is not signed. Onboarding has a measured abandonment problem, but its revenue estimate assumes all recovered customers convert. Reporting is needed for reliable operational measures, though a $0.3m limited repair may cover the first quarter.",
+      "candidate asks about evidence, dependencies or smaller options",
+      "candidate adds projected benefits without caveats"
+    ],
+    "candidate_examples": {
+      "clarification": "Which outcomes matter most, and which benefits depend on unconfirmed assumptions?",
+      "partial": "The full proposals exceed the budget, so I would compare staged options.",
+      "alternative": "Different portfolios can score fully if budget, evidence and dependencies are explicit.",
+      "correction": "I treated the unsigned partner agreement as confirmed; I would make that investment conditional and update the first-quarter decision gate.",
+      "silence": "",
+      "wrap": "My recommendation is conditional on the evidence described; I would assign an owner and a review checkpoint."
+    }
+  },
+  {
+    "scenario_id": "vp-investment-tradeoffs",
+    "expected_format": "stakeholder-simulation",
+    "context_contains": [
+      "Platform renewal has a $0.7m non-cancellable supplier commitment; service expansion can pause after a $0.3m customer handoff. Quality recovery addresses a documented recurring defect; automation benefits have not yet been demonstrated in a pilot.",
+      "candidate asks about sunk costs, commitments or evidence",
+      "candidate proposes uniform cuts"
+    ],
+    "candidate_examples": {
+      "clarification": "Which remaining costs are committed, avoidable or required to pause a project?",
+      "partial": "We need to reduce the remaining six million by one and a half million.",
+      "alternative": "Multiple allocations are acceptable; no preferred project is an answer key.",
+      "correction": "Canceling platform renewal cannot save the full two million because 0.7 million is committed; I would reconcile the allocation again.",
+      "silence": "",
+      "wrap": "My recommendation is conditional on the evidence described; I would assign an owner and a review checkpoint."
+    }
+  },
+  {
+    "scenario_id": "vp-leadership-alignment",
+    "expected_format": "panel-simulation",
+    "context_contains": [
+      "Acquisition’s reported growth includes accounts that never completed onboarding. Service’s cost measure excludes repeat contacts handled by another team. Neither director designed these definitions alone.",
+      "candidate asks about metric definitions or attribution",
+      "candidate keeps both original targets unchanged"
+    ],
+    "candidate_examples": {
+      "clarification": "Do new accounts include incomplete onboarding, and where are repeat contacts counted?",
+      "partial": "I would establish a shared completion outcome and clarify local owners.",
+      "alternative": "A balanced set of shared and local measures is valid; one metric need not carry all accountability.",
+      "correction": "A single completion metric could still hide service cost or poor quality; I would add balancing measures and change the conflicting incentives.",
+      "silence": "",
+      "wrap": "My recommendation is conditional on the evidence described; I would assign an owner and a review checkpoint."
+    }
+  },
+  {
+    "scenario_id": "executive-board-uncertainty",
+    "expected_format": "stakeholder-simulation",
+    "context_contains": [
+      "The later cohort contains more small customers and a price change. Support delays increased during the same period, but customer-level linkage has not been analyzed.",
+      "candidate asks about confounders or causal evidence",
+      "candidate promises a return to 86%"
+    ],
+    "candidate_examples": {
+      "clarification": "What changed between the cohorts, and what evidence links delays to renewal?",
+      "partial": "I would describe the decline as observed and the cause as uncertain.",
+      "alternative": "A staged analysis before a pilot can be valid if the delay, budget and decision value are explained.",
+      "correction": "I should not promise 86 percent renewal in 90 days; I would correct the slide and request a bounded pilot with a separate rollout gate.",
+      "silence": "",
+      "wrap": "My recommendation is conditional on the evidence described; I would assign an owner and a review checkpoint."
+    }
+  },
+  {
+    "scenario_id": "executive-crisis-governance",
+    "expected_format": "panel-simulation",
+    "context_contains": [
+      "The incident commander owns technical recovery and has requested a 30-minute protected investigation window. Support can offer a documented manual route for a limited set of urgent requests.",
+      "candidate asks about existing authority or customer contingencies",
+      "candidate promises restoration to calm customers"
+    ],
+    "candidate_examples": {
+      "clarification": "Who commands recovery, what customer alternatives exist, and what facts can we confirm?",
+      "partial": "I would publish confirmed impact and a time for the next update.",
+      "alternative": "A shorter or longer update cadence is valid if feasible, explicit and owned.",
+      "correction": "I cannot support an hour-to-restoration promise; I would correct that message and protect the technical commander’s investigation.",
+      "silence": "",
+      "wrap": "My recommendation is conditional on the evidence described; I would assign an owner and a review checkpoint."
+    }
+  },
+  {
+    "scenario_id": "executive-succession-resilience",
+    "expected_format": "work-sample-defense",
+    "context_contains": [
+      "The deputy has led one operational improvement but has not managed the region’s budget. Another manager has budget experience but limited partner exposure. Both can undertake supported development assignments.",
+      "candidate asks about role evidence or development opportunities",
+      "candidate names the deputy immediately"
+    ],
+    "candidate_examples": {
+      "clarification": "Which responsibilities need backup, and what role evidence do the two managers have?",
+      "partial": "I would identify authorized backups and schedule handover time.",
+      "alternative": "Splitting backup responsibilities among several people can be more practical than naming one immediate replacement.",
+      "correction": "Popularity does not establish readiness; I would separate immediate coverage from succession and offer evidence-building assignments without promising appointment.",
+      "silence": "",
+      "wrap": "My recommendation is conditional on the evidence described; I would assign an owner and a review checkpoint."
+    }
+  }
+]

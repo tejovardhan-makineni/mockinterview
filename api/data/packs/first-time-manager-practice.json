@@ -1,0 +1,50 @@
+{
+  "id": "first-time-manager-practice",
+  "revision": 1,
+  "review_status": "preview",
+  "source_note": "Original AI-assisted management practice path. Each round is a separate attempt. Practitioner review and scoring calibration are pending; this does not certify leadership or hiring readiness.",
+  "name": "First-Time Manager",
+  "areas": [
+    "management"
+  ],
+  "track": "professional",
+  "blurb": "Practice delegation, performance feedback, capacity planning.",
+  "rounds": [
+    {
+      "id": "round-1",
+      "title": "First-Time Manager: Delegate Without Taking the Work Back",
+      "kind": "stakeholder-simulation",
+      "domain": "delegation",
+      "modality": "conversational",
+      "difficulty": "manager",
+      "role_track": "management",
+      "minutes": 30,
+      "question_id": "new-manager-delegation",
+      "focus": "Write a delegation agreement"
+    },
+    {
+      "id": "round-2",
+      "title": "First-Time Manager: Give Specific Feedback and Hear the Explanation",
+      "kind": "stakeholder-simulation",
+      "domain": "performance_feedback",
+      "modality": "conversational",
+      "difficulty": "manager",
+      "role_track": "management",
+      "minutes": 30,
+      "question_id": "new-manager-feedback",
+      "focus": "Practice a feedback opening"
+    },
+    {
+      "id": "round-3",
+      "title": "First-Time Manager: Reset an Overcommitted Week",
+      "kind": "stakeholder-simulation",
+      "domain": "capacity_planning",
+      "modality": "conversational",
+      "difficulty": "manager",
+      "role_track": "management",
+      "minutes": 30,
+      "question_id": "new-manager-team-priorities",
+      "focus": "Make the tradeoff visible"
+    }
+  ]
+}

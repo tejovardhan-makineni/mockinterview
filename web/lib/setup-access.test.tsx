@@ -153,6 +153,98 @@ function field(label: string) {
   return document.getElementById(el.htmlFor) as HTMLInputElement;
 }
 describe("hosted tester setup access", () => {
+  it("keeps a manager pack's exact scope, independent of saved IC preferences", async () => {
+    route.query = "pack=manager-path&round=leadership";
+    const scenario = await api.getQuestion("access-scenario");
+    vi.mocked(api.getQuestion).mockResolvedValue({
+      ...scenario,
+      role_track: "management",
+      difficulty: "manager",
+    });
+    vi.mocked(api.getConfig).mockResolvedValue({
+      ...DEFAULT_CONFIG,
+      role_track: "individual_contributor",
+      target_level: "principal",
+    });
+    vi.mocked(api.getPack).mockResolvedValue({
+      id: "manager-path",
+      name: "Manager practice",
+      company: "",
+      blurb: "Practice leading a team",
+      areas: ["management"],
+      track: "professional",
+      rounds: [
+        {
+          id: "leadership",
+          title: "Leadership decision",
+          kind: "leadership",
+          domain: "general",
+          modality: "conversational",
+          difficulty: "senior_manager",
+          minutes: 20,
+          focus: "Delegation",
+          question_id: "access-scenario",
+        },
+      ],
+    });
+    await act(async () => root.render(<SetupPage />));
+    const role = document.querySelector(
+      'select[aria-label="Role track"]',
+    ) as HTMLSelectElement;
+    const level = document.querySelector(
+      'select[aria-label="Target level"]',
+    ) as HTMLSelectElement;
+    expect(role.value).toBe("management");
+    expect(level.value).toBe("senior_manager");
+    expect(Array.from(level.options).map((o) => o.value)).toEqual([
+      "manager",
+      "senior_manager",
+      "director",
+    ]);
+    await checkDevices();
+    await acknowledgeVoice();
+    await act(async () => button("Start interview").click());
+    expect(api.createSession).toHaveBeenCalledWith(
+      "",
+      expect.objectContaining({
+        role_track: "management",
+        target_level: "senior_manager",
+      }),
+      { packId: "manager-path", roundId: "leadership" },
+      expect.objectContaining({ minutes: 20 }),
+    );
+  });
+  it("restores an executive draft and keeps an unspecified scenario unlabeled", async () => {
+    sessionStorage.setItem(
+      "mi_setup_draft_access-scenario",
+      JSON.stringify({
+        expires: Date.now() + 60000,
+        mode: "text",
+        funding: "platform",
+        provider: "gemini",
+        model: "",
+        minutes: 20,
+        config: { role_track: "executive", target_level: "vp" },
+      }),
+    );
+    await act(async () => root.render(<SetupPage />));
+    const role = document.querySelector(
+      'select[aria-label="Role track"]',
+    ) as HTMLSelectElement;
+    const level = document.querySelector(
+      'select[aria-label="Target level"]',
+    ) as HTMLSelectElement;
+    expect(role.value).toBe("executive");
+    expect(level.value).toBe("vp");
+    await change(role, "");
+    expect(role.value).toBe("");
+    expect(level.value).toBe("vp");
+    await change(role, "individual_contributor");
+    expect(level.value).toBe("mid");
+    expect(Array.from(level.options).map((o) => o.value)).toContain(
+      "principal",
+    );
+  });
   it("desktop requires a validated personal key and offers no hosted funding", async () => {
     desktopMode.enabled = true;
     sessionStorage.setItem(

@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "revision": 1,
+  "revision": 2,
   "format_id": "stakeholder-simulation",
   "review_status": "preview",
   "provenance": {
@@ -25,7 +25,7 @@
     "community-preview"
   ],
   "prompt": "A client expects three promised features this month, but your team can safely deliver only two. I am the client lead. Open the conversation, understand my priorities, and work toward an honest delivery agreement without promising capacity you do not have.",
-  "blurb": "Negotiate a Release Scope \u2014 original practice scenario, awaiting practitioner review.",
+  "blurb": "Negotiate a Release Scope — original practice scenario, awaiting practitioner review.",
   "rubric": [
     {
       "key": "discovery",
@@ -63,7 +63,7 @@
     {
       "key": "listening",
       "label": "Responsive listening",
-      "description": "Responds to the client\u2019s actual concern rather than reciting a negotiation framework.",
+      "description": "Responds to the client’s actual concern rather than reciting a negotiation framework.",
       "weight": 1,
       "anchors": {
         "0": "No demonstrated evidence of this skill.",
@@ -117,14 +117,14 @@
       "Asks which business outcomes matter and what deadlines are genuinely fixed.",
       "Makes the capacity constraint explicit without blaming colleagues or inventing promises.",
       "Offers concrete sequencing or scope choices tied to customer value.",
-      "Responds to the client\u2019s actual concern rather than reciting a negotiation framework.",
+      "Responds to the client’s actual concern rather than reciting a negotiation framework.",
       "Confirms deliverables, unresolved questions, owners and next communication.",
       "Acknowledges the impact without becoming defensive or coercive."
     ],
     "probes": [
       {
         "trigger": "candidate promises all three",
-        "question": "What has changed about your team\u2019s capacity?"
+        "question": "What has changed about your team’s capacity?"
       },
       {
         "trigger": "candidate picks features without asking",
@@ -155,5 +155,6 @@
         "State what would change your mind"
       ]
     }
-  ]
+  ],
+  "role_track": "individual_contributor"
 }

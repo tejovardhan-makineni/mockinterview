@@ -1,0 +1,119 @@
+{
+  "schema_version": 1,
+  "revision": 1,
+  "format_id": "panel-simulation",
+  "review_status": "preview",
+  "provenance": {
+    "authorship": "Original project scenario, AI-assisted draft. Practitioner review and scoring calibration pending.",
+    "license": "MIT"
+  },
+  "minutes": 30,
+  "id": "senior-manager-capacity-allocation",
+  "title": "Senior Manager: Allocate Scarce Capacity Across Teams",
+  "track": "professional",
+  "domain": "portfolio_capacity",
+  "areas": [
+    "management"
+  ],
+  "role_track": "management",
+  "modality": "conversational",
+  "difficulty": "senior_manager",
+  "tags": [
+    "management",
+    "senior-manager",
+    "portfolio-capacity",
+    "leadership",
+    "community-preview"
+  ],
+  "prompt": "Three teams request six temporary specialists for the quarter, but you have three. Team A wants two for a committed migration; Team B wants two for a promising growth pilot; Team C wants two to address recurring service defects. Each team manager calls their request essential. Present an allocation approach to the three managers, represented by one AI using labeled perspectives.",
+  "blurb": "Write an allocation decision",
+  "rubric": [
+    {
+      "key": "prioritization",
+      "label": "Compare needs consistently",
+      "description": "Defines outcomes and dependencies before splitting headcount.",
+      "weight": 1,
+      "anchors": {
+        "0": "Allocates by who argues loudest or gives one person to each without checking skills.",
+        "2": "Asks about deadlines and minimum useful staffing.",
+        "4": "Compares committed outcomes, uncertainty, minimum viable staffing and dependency timing with consistent criteria; avoids treating people as interchangeable units."
+      }
+    },
+    {
+      "key": "sequencing",
+      "label": "Build a feasible allocation",
+      "description": "Respects time and skill constraints.",
+      "weight": 1,
+      "anchors": {
+        "0": "Promises six people or double-books the unique specialist.",
+        "2": "Identifies the specialist conflict and seeks sequencing.",
+        "4": "Offers a feasible staged plan or explicit scope/date negotiation that resolves the unique-skill conflict, showing what each team receives and what remains deferred."
+      }
+    },
+    {
+      "key": "governance",
+      "label": "Create a fair reallocation process",
+      "description": "Makes uncertainty and review rights explicit.",
+      "weight": 1,
+      "anchors": {
+        "0": "Declares a permanent allocation without review or hides losers.",
+        "2": "Explains the decision and schedules a checkpoint.",
+        "4": "Names the decision owner, records assumptions and deferred outcomes, and agrees evidence-based reallocation triggers after diagnosis or pilot results with affected managers."
+      }
+    }
+  ],
+  "reference": {
+    "scenario": "Three teams request six temporary specialists for the quarter, but you have three. Team A wants two for a committed migration; Team B wants two for a promising growth pilot; Team C wants two to address recurring service defects. Each team manager calls their request essential. Present an allocation approach to the three managers, represented by one AI using labeled perspectives.",
+    "facts": [
+      {
+        "id": "fact-1",
+        "value": "A needs two specialists for the first four weeks and one thereafter. B can run a smaller learning pilot with one. C needs one diagnostic specialist before the second specialist’s work can be scoped.",
+        "reveal_when": "candidate asks about sequencing or minimum useful staffing"
+      },
+      {
+        "id": "fact-2",
+        "value": "The three specialists have different skills. Only one can perform the initial C diagnosis; that person is also requested by A. No additional contractor budget is approved.",
+        "reveal_when": "candidate asks about skills, dependencies or alternatives"
+      }
+    ],
+    "model_points": [
+      "Compares committed outcomes, uncertainty, minimum viable staffing and dependency timing with consistent criteria; avoids treating people as interchangeable units.",
+      "Offers a feasible staged plan or explicit scope/date negotiation that resolves the unique-skill conflict, showing what each team receives and what remains deferred.",
+      "Names the decision owner, records assumptions and deferred outcomes, and agrees evidence-based reallocation triggers after diagnosis or pilot results with affected managers."
+    ],
+    "probes": [
+      {
+        "trigger": "candidate proposes an equal split",
+        "question": "How does that handle the specialist needed by both A and C?"
+      },
+      {
+        "trigger": "candidate funds B from hoped-for contractors",
+        "question": "Which approved capacity supports that commitment?"
+      },
+      {
+        "trigger": "candidate changes the plan after diagnosis",
+        "question": "What commitments and decision record change?"
+      }
+    ],
+    "fair_alternatives": [
+      "Prioritizing either A or C first can be valid if consequences and decision authority are explicit.",
+      "A reduced pilot or delayed work can be justified without pretending every request is fulfilled."
+    ],
+    "assessment_limits": "Assess only the decisions and reasoning demonstrated in this fictional exercise. No hiring-readiness, personality, legal compliance or workplace performance claim follows from this score. A valid alternative can earn full credit. Unrevealed conditional facts must not be assumed known or required for credit; credit asking for needed information and a conditional plan."
+  },
+  "interviewer_notes": "You are the counterpart named in the prompt. If this is a written review, remain the hiring interviewer while the candidate reads and writes. Let the candidate finish, including thinking and self-correction. Answer only supplied facts when their reveal condition is met; otherwise say the information is unknown. Use neutral probes after a completed answer, one at a time. Do not prescribe the rubric as a spoken checklist. Accept relevant examples from work, education and community leadership. Do not request private employee records, infer protected traits, invent employment rules or promise a real organizational outcome. Simulation gives no answer before assessment; coaching may offer labeled assistance.",
+  "learning_drills": [
+    {
+      "id": "decision-practice",
+      "title": "Write an allocation decision",
+      "prompt": "Create a four-week allocation table and list two events that would require replanning. This is self-guided practice with no automated assessment.",
+      "minutes": 7,
+      "checklist": [
+        "Check skill constraints",
+        "Avoid double-booking",
+        "Name deferred work",
+        "Set evidence checkpoints"
+      ]
+    }
+  ]
+}

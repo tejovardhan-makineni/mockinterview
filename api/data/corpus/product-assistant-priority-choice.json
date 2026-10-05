@@ -1,0 +1,137 @@
+{
+  "schema_version": 1,
+  "revision": 1,
+  "format_id": "work-sample-defense",
+  "review_status": "preview",
+  "provenance": {
+    "authorship": "Original project scenario, AI-assisted draft. Practitioner review and calibration pending.",
+    "license": "MIT"
+  },
+  "minutes": 20,
+  "id": "product-assistant-priority-choice",
+  "title": "Associate Product Specialist: Choose a First Improvement From User Evidence",
+  "track": "professional",
+  "domain": "product_sense",
+  "areas": [
+    "product_management"
+  ],
+  "modality": "written",
+  "difficulty": "junior",
+  "role_track": "individual_contributor",
+  "tags": [
+    "product-management",
+    "junior-specialist",
+    "evidence-based-practice",
+    "community-preview"
+  ],
+  "prompt": "You are an associate product specialist for a fictional community-class booking service. In 20 support contacts last week, 12 people could not tell whether a booking was confirmed, five asked for a dark theme and three asked to export a calendar event. The team has five development days. Estimates are two days for a clearer confirmation page, four for dark theme and three for calendar export. A draft roadmap selects dark theme because “it feels more modern.” Recommend a first step and a way to learn whether it solves a real problem.",
+  "blurb": "Link a small product decision to a user task, a feasible scope and a measurable outcome without treating support counts as a population survey.",
+  "rubric": [
+    {
+      "key": "problem",
+      "label": "Use evidence without overgeneralizing",
+      "description": "Defines the user uncertainty and limits of the contact sample.",
+      "weight": 1,
+      "anchors": {
+        "0": "Assumes 60% of all users have the problem from 12 of 20 contacts.",
+        "2": "Connects the confirmation issue to the stated user task.",
+        "4": "Uses observed behavior as supporting evidence, notes unknown volume and repeat contacts, and distinguishes this goal from aesthetic preference."
+      }
+    },
+    {
+      "key": "scope",
+      "label": "Choose a feasible first change",
+      "description": "Accounts for development and verification capacity.",
+      "weight": 1,
+      "anchors": {
+        "0": "Commits to all features or spends all five days without verification.",
+        "2": "Selects the two-day confirmation improvement with a check afterward.",
+        "4": "Preserves success and failure distinctions, includes the verification day and compares alternatives against the agreed goal rather than rewarding the largest feature bundle."
+      }
+    },
+    {
+      "key": "learning",
+      "label": "Define a useful outcome check",
+      "description": "Measures task understanding and failure clarity.",
+      "weight": 1,
+      "anchors": {
+        "0": "Measures only page views or calls the change successful at release.",
+        "2": "Checks whether people recognize successful bookings.",
+        "4": "Tests successful and failed booking paths, observes whether users can explain their status and monitors confirmation-related contacts with a suitable volume denominator once available."
+      }
+    }
+  ],
+  "reference": {
+    "scenario": "You are an associate product specialist for a fictional community-class booking service. In 20 support contacts last week, 12 people could not tell whether a booking was confirmed, five asked for a dark theme and three asked to export a calendar event. The team has five development days. Estimates are two days for a clearer confirmation page, four for dark theme and three for calendar export. A draft roadmap selects dark theme because “it feels more modern.” Recommend a first step and a way to learn whether it solves a real problem.",
+    "facts": [
+      {
+        "id": "source",
+        "value": "The 20 contacts are from people who chose to contact support; total booking volume and repeat callers are unknown. Three observed sessions show users checking email because the confirmation page never states whether their booking succeeded.",
+        "reveal_when": "candidate asks how representative the counts are or what behavior was observed"
+      },
+      {
+        "id": "goal",
+        "value": "The agreed goal is to reduce uncertainty after a completed booking. The service must preserve clear failure messages when a booking has not completed.",
+        "reveal_when": "candidate asks about the product goal or risks"
+      },
+      {
+        "id": "capacity",
+        "value": "The five days include one day for verification and release checks. Development estimates exclude that day. No parallel work is available.",
+        "reveal_when": "candidate asks whether estimates include verification or how much usable capacity remains"
+      }
+    ],
+    "model_points": [
+      "Support counts suggest a problem to investigate but do not estimate its prevalence among all users.",
+      "The confirmation change fits the goal and leaves time for verification; one day must be reserved for checks.",
+      "A minimum scope should prevent false success messages as well as reduce uncertainty after actual success."
+    ],
+    "probes": [
+      {
+        "trigger": "candidate reports 60% of users cannot confirm bookings",
+        "question": "What population do the 20 support contacts actually represent?"
+      },
+      {
+        "trigger": "candidate prefers calendar export",
+        "question": "How would you show that it addresses the agreed uncertainty goal within the available time?"
+      },
+      {
+        "trigger": "candidate removes a promised second feature after recognizing the verification day",
+        "question": "How would you explain the revised scope and what evidence determines the next feature?"
+      }
+    ],
+    "fair_alternatives": [
+      "A short additional discovery session is acceptable if it targets a material uncertainty and preserves time for a useful decision.",
+      "Another feature can be justified with evidence linked to the stated goal; do not require the confirmation page as a memorized answer."
+    ],
+    "red_flags": [
+      "Assumes 60% of all users have the problem from 12 of 20 contacts.",
+      "Commits to all features or spends all five days without verification.",
+      "Measures only page views or calls the change successful at release."
+    ],
+    "follow_ups": [
+      "Write a one-change product brief"
+    ],
+    "assessment_limits": [
+      "Assess only reasoning and communication demonstrated in this fictional task, not real-world professional competence, licensure or hiring readiness. No real action, external verification or tool execution has occurred.",
+      "Credit relevant plain-language reasoning and valid alternatives without requiring experience at a particular employer. Examples from education, volunteering, community work or paid work are equally acceptable when relevant.",
+      "A missing or unasked dimension is not assessed, not automatically a failure. In simulation, use neutral probes and reveal facts only when triggered; in coaching, label assistance and distinguish assisted performance from independent evidence.",
+      "Credit an explicit late correction using the final demonstrated reasoning while retaining the evidence of the earlier mistake; do not force agreement with one exemplar.",
+      "Do not penalize the candidate for a conditional fact that was never revealed. Credit an appropriate request for missing information and a conditional plan; distinguish the candidate’s assumptions from interviewer-supplied facts."
+    ]
+  },
+  "interviewer_notes": "Play the relevant reviewing colleague or stakeholder using the supplied facts only. Start with one focused question, not the full rubric. Ask for clarification before treating an ambiguous answer as wrong. Reveal conditional facts when their stated triggers are met, permit equivalent valid approaches and never invent organizational rules, laws, clinical findings, ratings or missing outcomes. Do not require a polished artifact or specialist software. In a short session prioritize the main decision and one material follow-up; allow silence for thinking, check in neutrally, and leave time for the candidate to correct their recommendation and ask a final question. Distinguish simulation from coaching and record any help given. Assess job-relevant evidence, not accent, confidence, speed, credentials or prestige. This is independent practice for adults 18+ and is not a real professional workflow.",
+  "learning_drills": [
+    {
+      "id": "decision-review",
+      "title": "Write a one-change product brief",
+      "minutes": 5,
+      "prompt": "Write a one-change product brief. Use the fictional facts from this exercise. This is self-guided practice; no model assessment is performed.",
+      "checklist": [
+        "State the user task",
+        "Separate sample evidence from prevalence",
+        "Reserve verification time",
+        "Measure status understanding and false success"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,119 @@
+{
+  "schema_version": 1,
+  "revision": 1,
+  "format_id": "stakeholder-simulation",
+  "review_status": "preview",
+  "provenance": {
+    "authorship": "Original project scenario, AI-assisted draft. Practitioner review and scoring calibration pending.",
+    "license": "MIT"
+  },
+  "minutes": 45,
+  "id": "executive-board-uncertainty",
+  "title": "Executive: Present an Uncertain Recovery Plan to the Board",
+  "track": "professional",
+  "domain": "board_communication",
+  "areas": [
+    "management"
+  ],
+  "role_track": "executive",
+  "modality": "conversational",
+  "difficulty": "executive",
+  "tags": [
+    "management",
+    "executive",
+    "board-communication",
+    "leadership",
+    "community-preview"
+  ],
+  "prompt": "You are the incoming chief operating officer of a fictional subscription service. Renewal fell from 86% to 79% in one quarter. A board slide says, \"Support delays caused the decline; automation will restore 86% in 90 days.\" The two cohorts differ in customer mix, and the automation pilot has not started. Present a corrected board update to the chair (the AI) with a decision you need from the board.",
+  "blurb": "Write a candid board update",
+  "rubric": [
+    {
+      "key": "candor",
+      "label": "Communicate evidence and uncertainty",
+      "description": "Separates observation, hypothesis and commitment.",
+      "weight": 1,
+      "anchors": {
+        "0": "Repeats the causal claim and guaranteed recovery.",
+        "2": "States that the cause and timeline are uncertain.",
+        "4": "Reports the observed change accurately, identifies cohort/price differences and support as a hypothesis, and corrects the unsupported promise without hiding accountability."
+      }
+    },
+    {
+      "key": "decision",
+      "label": "Request a bounded authorization",
+      "description": "Links the request to evidence and authority.",
+      "weight": 1,
+      "anchors": {
+        "0": "Treats pilot approval as full-rollout permission or proposes an uncosted transformation.",
+        "2": "Requests the pilot with a stated cost.",
+        "4": "Requests a specific affordable pilot authorization, separates rollout approval, defines decision-relevant evidence and states what result would justify stopping or another explanation."
+      }
+    },
+    {
+      "key": "oversight",
+      "label": "Support useful board scrutiny",
+      "description": "Sets transparent follow-up and risk visibility.",
+      "weight": 1,
+      "anchors": {
+        "0": "Uses activity milestones as proof of recovery or suppresses bad results.",
+        "2": "Offers periodic progress reports.",
+        "4": "Commits to comparable customer outcomes, operational and cost guardrails, responsible ownership and a dated board gate; makes adverse evidence and alternative paths explicit."
+      }
+    }
+  ],
+  "reference": {
+    "scenario": "You are the incoming chief operating officer of a fictional subscription service. Renewal fell from 86% to 79% in one quarter. A board slide says, \"Support delays caused the decline; automation will restore 86% in 90 days.\" The two cohorts differ in customer mix, and the automation pilot has not started. Present a corrected board update to the chair (the AI) with a decision you need from the board.",
+    "facts": [
+      {
+        "id": "fact-1",
+        "value": "The later cohort contains more small customers and a price change. Support delays increased during the same period, but customer-level linkage has not been analyzed.",
+        "reveal_when": "candidate asks about confounders or causal evidence"
+      },
+      {
+        "id": "fact-2",
+        "value": "A six-week pilot costs $180,000 within an available $250,000 test budget. A full rollout would require a separate $1.4m approval. The board can authorize the pilot with defined reporting gates.",
+        "reveal_when": "candidate asks about options, budget or approval scope"
+      }
+    ],
+    "model_points": [
+      "Reports the observed change accurately, identifies cohort/price differences and support as a hypothesis, and corrects the unsupported promise without hiding accountability.",
+      "Requests a specific affordable pilot authorization, separates rollout approval, defines decision-relevant evidence and states what result would justify stopping or another explanation.",
+      "Commits to comparable customer outcomes, operational and cost guardrails, responsible ownership and a dated board gate; makes adverse evidence and alternative paths explicit."
+    ],
+    "probes": [
+      {
+        "trigger": "candidate promises a return to 86%",
+        "question": "What evidence supports that number and deadline?"
+      },
+      {
+        "trigger": "candidate proposes only further analysis",
+        "question": "What bounded decision can the board make now?"
+      },
+      {
+        "trigger": "candidate corrects the prior board statement",
+        "question": "How will the correction appear in the written record?"
+      }
+    ],
+    "fair_alternatives": [
+      "A staged analysis before a pilot can be valid if the delay, budget and decision value are explained.",
+      "A different recovery hypothesis may be investigated; none should be treated as established causality."
+    ],
+    "assessment_limits": "Assess only the decisions and reasoning demonstrated in this fictional exercise. No hiring-readiness, personality, legal compliance or workplace performance claim follows from this score. A valid alternative can earn full credit. Unrevealed conditional facts must not be assumed known or required for credit; credit asking for needed information and a conditional plan."
+  },
+  "interviewer_notes": "You are the counterpart named in the prompt. If this is a written review, remain the hiring interviewer while the candidate reads and writes. Let the candidate finish, including thinking and self-correction. Answer only supplied facts when their reveal condition is met; otherwise say the information is unknown. Use neutral probes after a completed answer, one at a time. Do not prescribe the rubric as a spoken checklist. Accept relevant examples from work, education and community leadership. Do not request private employee records, infer protected traits, invent employment rules or promise a real organizational outcome. Simulation gives no answer before assessment; coaching may offer labeled assistance.",
+  "learning_drills": [
+    {
+      "id": "decision-practice",
+      "title": "Write a candid board update",
+      "prompt": "Write five sentences: observation, uncertainty, proposed decision, guardrails and next board checkpoint. This is self-guided practice with no automated assessment.",
+      "minutes": 7,
+      "checklist": [
+        "Avoid causal overclaim",
+        "Separate pilot and rollout approval",
+        "Name a falsifying result",
+        "Own the next update"
+      ]
+    }
+  ]
+}

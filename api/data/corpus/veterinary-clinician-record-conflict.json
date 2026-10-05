@@ -1,0 +1,117 @@
+{
+  "schema_version": 1,
+  "revision": 1,
+  "id": "veterinary-clinician-record-conflict",
+  "title": "Veterinary Clinician: Resolve a Conflicting Follow-Up Record",
+  "track": "professional",
+  "domain": "veterinary_handoff",
+  "areas": [
+    "veterinary"
+  ],
+  "modality": "written",
+  "difficulty": "mid",
+  "role_track": "individual_contributor",
+  "format_id": "work-sample-defense",
+  "minutes": 30,
+  "review_status": "preview",
+  "tags": [
+    "veterinary",
+    "community-preview"
+  ],
+  "prompt": "You are a veterinary clinician reviewing a fictional follow-up record. Supplied artifacts: discharge note R17 says \"clinician to discuss follow-up before booking\"; reception task says \"routine review booked Thursday\"; client email says \"I was told no further contact was needed.\" The record has no documented follow-up discussion. Exercise policy says the responsible clinician verifies the intended plan; booking staff do not interpret conflicting instructions. Review the records, write a pending handoff, and explain the correction to the adult client. No animal diagnosis, treatment, or clinical interval is provided.",
+  "blurb": "Reconcile conflicting follow-up messages without treating a booking as an agreed clinical plan.",
+  "rubric": [
+    {
+      "key": "record_reconciliation",
+      "label": "Preserve the conflicting evidence",
+      "description": "Identifies which claims are documented and unresolved.",
+      "weight": 1,
+      "anchors": {
+        "0": "Treats the Thursday booking as proof of the intended plan.",
+        "2": "Lists the three conflicting messages and marks the plan unresolved.",
+        "4": "Separates clinician discussion required, booking created, and client-reported reassurance; identifies the missing documented discussion without assuming which message is correct."
+      }
+    },
+    {
+      "key": "verification_and_booking",
+      "label": "Keep plan authority and logistics distinct",
+      "description": "Obtains clinical verification before making clinical assurances.",
+      "weight": 1,
+      "anchors": {
+        "0": "Cancels or confirms follow-up as clinically unnecessary without verification.",
+        "2": "Asks the responsible clinician to verify the intended plan.",
+        "4": "Obtains an acknowledged clinician review, flags the booking for coordinated handling, and assigns a client update while avoiding an invented appointment interval or treatment plan."
+      }
+    },
+    {
+      "key": "client_repair",
+      "label": "Repair trust with an accurate explanation",
+      "description": "Acknowledges inconsistent messages and offers a clear next contact.",
+      "weight": 1,
+      "anchors": {
+        "0": "Blames the client for misunderstanding or hides the contradiction.",
+        "2": "Explains that messages conflict and says the clinician will clarify.",
+        "4": "Owns the inconsistency, asks the client's contact preference, distinguishes a pending plan from the booking, and checks understanding of who will confirm the next step."
+      }
+    }
+  ],
+  "reference": {
+    "scenario": "You are a veterinary clinician reviewing a fictional follow-up record. Supplied artifacts: discharge note R17 says \"clinician to discuss follow-up before booking\"; reception task says \"routine review booked Thursday\"; client email says \"I was told no further contact was needed.\" The record has no documented follow-up discussion. Exercise policy says the responsible clinician verifies the intended plan; booking staff do not interpret conflicting instructions. Review the records, write a pending handoff, and explain the correction to the adult client. No animal diagnosis, treatment, or clinical interval is provided.",
+    "facts": [
+      {
+        "id": "fact-1",
+        "value": "The responsible clinician is available this afternoon. The appointment coordinator can hold the Thursday booking pending clarification without representing it as clinically agreed.",
+        "reveal_when": "candidate asks who can resolve the plan or booking"
+      },
+      {
+        "id": "fact-2",
+        "value": "The client prefers an email summary after a phone conversation. No reason for the conflicting earlier message is documented.",
+        "reveal_when": "candidate asks about client preference or cause"
+      }
+    ],
+    "model_points": [
+      "All three artifacts should remain visible; a booking proves logistics, not the rationale or consent for the plan. Do not erase the client's report because it is inconvenient.",
+      "The responsible clinician verifies intent, while the coordinator manages the pending slot. Avoid changing a clinical plan based on administrative conflict alone.",
+      "Explain the inconsistency and the next accountable contact. Acknowledge the uncertainty without blaming staff or client or inventing why it occurred."
+    ],
+    "probes": [
+      {
+        "trigger": "candidate corrects the note but does not address the client's expectation",
+        "question": "What does the client currently believe, and who will correct that understanding?"
+      },
+      {
+        "trigger": "candidate proposes holding the booking rather than canceling",
+        "question": "How will you label it so nobody mistakes the hold for a confirmed clinical plan?"
+      },
+      {
+        "trigger": "candidate initially relies on the discharge note alone then revises",
+        "question": "What new status and correction would you record after recognizing the missing discussion?"
+      }
+    ],
+    "fair_alternatives": [
+      "Holding or reviewing the slot is acceptable if the clinical decision remains pending and the client is updated.",
+      "A structured table or a concise handoff narrative can preserve all three sources.",
+      "Assess the work demonstrated here. Accept relevant examples from education, volunteering, caregiving, placements, or paid work; professional vocabulary and employer pedigree are not evidence of a stronger answer."
+    ],
+    "assessment_limits": "Assess evidence reconciliation and client communication. Do not determine veterinary treatment, appointment urgency, or clinical necessity. Unobserved dimensions are not failures. Credit a reasoned correction and distinguish independently demonstrated reasoning from coached assistance. Do not penalize a candidate for an unrevealed conditional fact; credit appropriate requests and conditional plans, and distinguish candidate assumptions from interviewer-supplied evidence."
+  },
+  "interviewer_notes": "Assess evidence reconciliation and client communication. Do not determine veterinary treatment, appointment urgency, or clinical necessity. Use only the supplied fictional facts and policies; acknowledge unknowns. Ask one triggered probe at a time after the candidate has finished. Accept plain language and accessible written or spoken explanations. Do not score accent, typing speed, confidence, credentials, or experience with a named employer. Credit revisions and record assistance. All participants are fictional adults; no real patient, client, operational, or confidential data is needed. Allow silence for thinking without treating it as failure. In short sessions prioritize the core decision and one material follow-up, leaving room for a correction and wrap-up.",
+  "learning_drills": [
+    {
+      "id": "focused-practice",
+      "title": "Write a conflict-preserving note",
+      "prompt": "Write one sentence for each source, one unresolved question, and one accountable follow-up step. This is self-guided practice; no model assessment is performed.",
+      "minutes": 7,
+      "checklist": [
+        "Keep the client report visible",
+        "Separate booking from clinical agreement",
+        "Name the responsible clinician",
+        "Do not infer a treatment interval"
+      ]
+    }
+  ],
+  "provenance": {
+    "authorship": "Original project scenario, AI-assisted draft using fictional organizations, records, and exercise policies. Practitioner review and scoring calibration pending.",
+    "license": "MIT"
+  }
+}

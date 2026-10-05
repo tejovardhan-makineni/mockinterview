@@ -67,6 +67,7 @@ jobs:
         run: |
           go run ./cmd/mockinterview -validate-corpus data/corpus
           python3 ../scripts/test_content.py
+          python3 ../scripts/test_content_coverage.py
           python3 ../scripts/test_deploy.py
       # Real database tests use isolated schemas; providers remain stubbed.
 

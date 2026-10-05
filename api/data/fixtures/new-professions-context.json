@@ -1,0 +1,410 @@
+[
+  {
+    "scenario_id": "pharmacy-assistant-collection-mismatch",
+    "expected_format": "stakeholder-simulation",
+    "context_contains": [
+      "The pharmacist can speak privately in five minutes. The person has ten minutes before work and agrees to wait if the process is clear.",
+      "candidate asks about availability or the person's time constraints",
+      "candidate says only that the pharmacist will deal with it"
+    ],
+    "candidate_examples": {
+      "clarification": "Is the pharmacist available, and how long can the person wait?",
+      "partial": "I would pause collection and send the person to the pharmacist.",
+      "alternative": "If waiting does not work for them, I would agree on a callback and keep J41 pending with an acknowledged pharmacist owner.",
+      "correction": "I said the ready text verified the order; that was too strong. It only confirms a readiness message, so I would withdraw the release promise and ask the pharmacist to resolve the identity conflict.",
+      "silence": "",
+      "wrap": "My handoff would preserve the mismatch, pending status, and the person's agreed next contact."
+    }
+  },
+  {
+    "scenario_id": "pharmacy-transition-record-review",
+    "expected_format": "work-sample-defense",
+    "context_contains": [
+      "The discharge summary is dated today; the clinic list is dated three weeks earlier. A newer date does not itself prove the intended plan.",
+      "candidate asks about record dates or authority",
+      "candidate marks pending but omits the reported use"
+    ],
+    "candidate_examples": {
+      "clarification": "What are the dates of the two source records, and is a duty clinician available?",
+      "partial": "I would replace reconciled with pending because the records disagree.",
+      "alternative": "I would ask the duty clinician to assess the reported use while the sending team verifies intent, keeping both requests linked in the pending note.",
+      "correction": "I initially chose the discharge summary because it was newer. Recency alone does not verify intent; I would restore both source statements and remove my treatment assumption.",
+      "silence": "",
+      "wrap": "The next note would show source dates, the person's report, two unresolved requests, and the acknowledged owner."
+    }
+  },
+  {
+    "scenario_id": "pharmacy-senior-near-miss-learning",
+    "expected_format": "work-sample-defense",
+    "context_contains": [
+      "The simpler form reduced completion time from about six minutes to two, measured on five test entries; this small usability observation is not a safety outcome.",
+      "candidate asks how reporting changed",
+      "candidate calculates percentages but concludes the intervention caused harm"
+    ],
+    "candidate_examples": {
+      "clarification": "Does the after period measure reporting completeness or independently reviewed severity?",
+      "partial": "A went from 1% to 2% reports per collection while B stayed at 1%.",
+      "alternative": "I would pause expansion but retain A's easier reporting form and protected time while the clinical lead reviews concerns and we study reporting completeness.",
+      "correction": "I called the increase a harm increase. It is an increase in reports under changed reporting conditions, so I would correct the slide and leave the safety conclusion open.",
+      "silence": "",
+      "wrap": "The six-week decision needs independent case review, consistent exposure counts, and an immediate separate route for clinical concerns."
+    }
+  },
+  {
+    "scenario_id": "dentistry-assistant-consent-pause",
+    "expected_format": "stakeholder-simulation",
+    "context_contains": [
+      "The person wants a slower plain-language explanation and time to ask two questions. They do not request an interpreter or a companion.",
+      "candidate asks about preferred support",
+      "candidate says only \"Do not worry\""
+    ],
+    "candidate_examples": {
+      "clarification": "What kind of explanation would help the person, and is the treating clinician available?",
+      "partial": "I would say that it is fine to pause and call the clinician.",
+      "alternative": "If the person wants to explain their own questions directly, I would facilitate that conversation instead of summarizing on their behalf.",
+      "correction": "I treated the earlier nod as enough. I would correct that: you have asked to pause, and we need to support your understanding and choice before anything resumes.",
+      "silence": "",
+      "wrap": "My handoff would use the person's words, keep the pause clear, and leave the explanation with the clinician."
+    }
+  },
+  {
+    "scenario_id": "dentistry-referral-loop-review",
+    "expected_format": "work-sample-defense",
+    "context_contains": [
+      "The referral coordinator is available today and can contact the receiving service. If the service cannot confirm handling, the coordinator and responsible clinician choose the next route; no clinical priority is supplied.",
+      "candidate asks about escalation or urgency",
+      "candidate resends but closes the task again"
+    ],
+    "candidate_examples": {
+      "clarification": "Does the receipt show only upload success or actual acceptance, and who can contact the service?",
+      "partial": "I would reopen D28 because no receiving-service acknowledgement is recorded.",
+      "alternative": "I would ask the referral coordinator to verify ownership, with a specific acknowledgement request and a client update even if the answer is still pending.",
+      "correction": "I called the referral accepted because the upload succeeded. That is unsupported; I would correct the person's expectation and keep acceptance pending until the receiving service confirms it.",
+      "silence": "",
+      "wrap": "I would retain transmission evidence, remove acceptance and closure claims, and assign the verification and communication steps."
+    }
+  },
+  {
+    "scenario_id": "dentistry-senior-access-audit",
+    "expected_format": "work-sample-defense",
+    "context_contains": [
+      "The service can sustain both phone and text for the next six weeks. It has no evidence that the 12 missing preferences mean a preferred channel.",
+      "candidate asks about capacity or missing data",
+      "candidate fixes the percentage but immediately calls the redesign harmful"
+    ],
+    "candidate_examples": {
+      "clarification": "Can both reminder channels continue during the evaluation, and what does missing preference mean?",
+      "partial": "The missed rate is 15% before and 20% after, although the count fell.",
+      "alternative": "I would use a preference-first pilot, recording delivery and rescheduling by chosen channel and being explicit that channel selection limits causal comparisons.",
+      "correction": "I supported text-only using the lower missed count. The denominators and unknown preferences do not support that; I would retain both channels and revise the recommendation.",
+      "silence": "",
+      "wrap": "My six-week review would combine contact evidence, accessible choice, denominators, and a named decision owner."
+    }
+  },
+  {
+    "scenario_id": "allied-health-assistant-goal-handoff",
+    "expected_format": "stakeholder-simulation",
+    "context_contains": [
+      "The person wants to attend a weekly rehearsal with friends but has not explained access barriers. Do not invent a mobility, communication, or swallowing impairment.",
+      "candidate asks what choir participation involves",
+      "candidate acknowledges the goal but starts the planned activity"
+    ],
+    "candidate_examples": {
+      "clarification": "What matters to the person about choir, and when can the supervising therapist discuss the plan?",
+      "partial": "I would pause and tell the therapist that the person wants to discuss choir.",
+      "alternative": "I could help the person write their two questions if they prefer that, while letting them speak directly and keeping plan changes with the therapist.",
+      "correction": "I called the person unmotivated. Their concern is that the plan does not make sense to them; I would remove that label and record the stated goal and request to pause.",
+      "silence": "",
+      "wrap": "The handoff would separate the listed task, the person's goal, and the requested therapist conversation."
+    }
+  },
+  {
+    "scenario_id": "allied-health-community-handoff-review",
+    "expected_format": "work-sample-defense",
+    "context_contains": [
+      "The community intake desk is open today. Friday was an internal target, not a date offered by the receiving team.",
+      "candidate asks where Friday came from",
+      "candidate changes wording to pending but gives no follow-up owner"
+    ],
+    "candidate_examples": {
+      "clarification": "Where did the Friday date come from, and has any receiving team accepted the referral?",
+      "partial": "I would mark the visit and transport as pending because the records only show a referral and quote.",
+      "alternative": "With the person's agreement, a joint call could confirm receiving-team ownership and a suitable visit before the coordinator books linked transport.",
+      "correction": "I repeated that Friday was booked. It was only an internal target; I would correct the message and arrange an update without inventing another date.",
+      "silence": "",
+      "wrap": "The revised note would list the three confirmation gaps, the pre-visit call preference, and an owner for each action."
+    }
+  },
+  {
+    "scenario_id": "allied-health-senior-summary-tool-review",
+    "expected_format": "work-sample-defense",
+    "context_contains": [
+      "The 30% estimate measures drafting time only; it excludes review and corrections. No accuracy study or subgroup analysis was supplied.",
+      "candidate asks what the vendor measured",
+      "candidate says a clinician should proofread but gives no comparison method"
+    ],
+    "candidate_examples": {
+      "clarification": "Does the reported time saving include source checking and corrections, and can the pilot block external delivery?",
+      "partial": "The summary invents cooking independence and daily partner support.",
+      "alternative": "I would reject automatic sharing now, then consider a fictional sandbox evaluation only after a clinician verification gate and clear error categories are defined.",
+      "correction": "I repeated that the person was independent. The source only states a goal, so I would correct the summary and classify that as an unsupported observation in the error log.",
+      "silence": "",
+      "wrap": "The decision should depend on claim accuracy, total verified completion time, and whether every shared handoff has an accountable reviewer."
+    }
+  },
+  {
+    "scenario_id": "veterinary-reception-concern-escalation",
+    "expected_format": "stakeholder-simulation",
+    "context_contains": [
+      "The animal is recorded as Moss in this fictional clinic. No clinical signs or findings are supplied.",
+      "candidate asks for the description or record identifier",
+      "candidate reassures the caller because the description sounds mild"
+    ],
+    "candidate_examples": {
+      "clarification": "Is the duty clinician available now, and can I confirm a callback number if the transfer drops?",
+      "partial": "I would say a clinician needs to assess the concern and connect the caller.",
+      "alternative": "An acknowledged callback could work if the clinician accepts it and the caller agrees to the contact route; a voicemail request alone would not finish my handoff.",
+      "correction": "I suggested waiting was fine without an assessment. I would explicitly withdraw that reassurance and explain that the clinician must assess the concern.",
+      "silence": "",
+      "wrap": "I would pass the caller's exact description, the unknowns, callback agreement, and the requested clinical assessment."
+    }
+  },
+  {
+    "scenario_id": "veterinary-clinician-record-conflict",
+    "expected_format": "work-sample-defense",
+    "context_contains": [
+      "The responsible clinician is available this afternoon. The appointment coordinator can hold the Thursday booking pending clarification without representing it as clinically agreed.",
+      "candidate asks who can resolve the plan or booking",
+      "candidate corrects the note but does not address the client's expectation"
+    ],
+    "candidate_examples": {
+      "clarification": "Can the responsible clinician review the plan today, and is the Thursday slot only a booking?",
+      "partial": "I would list the three conflicting records and mark follow-up intent unresolved.",
+      "alternative": "The coordinator could hold the slot while the clinician verifies the plan, provided it is labeled pending and the client understands it is not yet agreed.",
+      "correction": "I treated the booking as a confirmed clinical plan. I would remove that inference, retain the booking fact, and correct the client message after clinician review.",
+      "silence": "",
+      "wrap": "My final note would preserve all three sources and identify who will verify intent and update the client."
+    }
+  },
+  {
+    "scenario_id": "veterinary-senior-callback-audit",
+    "expected_format": "work-sample-defense",
+    "context_contains": [
+      "The audit team can inspect all 50 tasks for contact-state evidence this week. No individual clinical detail is included in the exercise.",
+      "candidate asks about review capacity",
+      "candidate concludes only 40% of all callbacks succeeded"
+    ],
+    "candidate_examples": {
+      "clarification": "Were the ten tasks sampled across shifts, and do any contain an agreed alternative contact method?",
+      "partial": "Only four sampled tasks clearly show a two-way conversation; closure is not the same as contact.",
+      "alternative": "A written summary may count if the exercise policy's agreed alternative is documented; I would check that before classifying it as either success or failure.",
+      "correction": "I said 40% of all callbacks succeeded. That overgeneralizes a one-shift sample; I would limit the claim to the reviewed records and inspect the remaining tasks.",
+      "silence": "",
+      "wrap": "I would separate attempted, acknowledged, agreed-alternative, unresolved, and clinically escalated states before the re-audit."
+    }
+  },
+  {
+    "scenario_id": "architecture-assistant-revision-check",
+    "expected_format": "work-sample-defense",
+    "context_contains": [
+      "The project architect can resolve numbering. The document controller issues revised sets and can update the cover status after the architect's decision.",
+      "candidate asks who owns numbering or publication",
+      "candidate says only \"the files are inconsistent\""
+    ],
+    "candidate_examples": {
+      "clarification": "Is there an approved room-number decision, and who can resolve this discrepancy before issue?",
+      "partial": "The plan uses 104 for storage while the schedule uses 103.",
+      "alternative": "I could create an annotated issue extract with both document IDs and revisions, provided it includes the unresolved decision and architect owner.",
+      "correction": "I chose 104 because its drawing was newer. That is not evidence of intent; I would remove the proposed correction and flag the set as pending coordination.",
+      "silence": "",
+      "wrap": "The issue should identify both sources, the sign-off impact, and the decision and cross-check needed for release."
+    }
+  },
+  {
+    "scenario_id": "architecture-community-room-brief",
+    "expected_format": "written-response",
+    "context_contains": [
+      "For this exercise, reception must remain at least 10 and circulation at least 20 square metres. The client can reduce workshop, meeting, or storage area but must agree the resulting capacity; no required minimum for those three is supplied.",
+      "candidate asks about fixed versus negotiable areas",
+      "candidate supplies an area table without addressing noise or storage access"
+    ],
+    "candidate_examples": {
+      "clarification": "Which areas are fixed minima, and do the workshop and meeting room need to run at the same time?",
+      "partial": "The requested areas total 130, so we need to remove 10 from the planning schedule.",
+      "alternative": "A shared flexible room could be an alternative brief, but I would explain the simultaneous-use compromise and ask for client agreement before treating it as compliant.",
+      "correction": "My second option totaled 125. I would reduce reception from 15 to the allowed 10, recalculate the total, and explain the reception-capacity trade-off.",
+      "silence": "",
+      "wrap": "I would present two complete allocations, their quiet/noisy relationships, and the geometric and capacity questions still needing confirmation."
+    }
+  },
+  {
+    "scenario_id": "architecture-senior-change-review",
+    "expected_format": "work-sample-defense",
+    "context_contains": [
+      "The client can review alternatives in two working days. The acoustics consultant can perform an initial desk review tomorrow but cannot certify performance from the current sketch.",
+      "candidate asks about review timing",
+      "candidate asks for more cost information but omits the quiet-use conflict"
+    ],
+    "candidate_examples": {
+      "clarification": "Who controls the delivery schedule, and when could the acoustics consultant review the changed adjacency?",
+      "partial": "The partition-only sheet does not establish cost neutrality.",
+      "alternative": "We could keep the quiet room in place and study the storage alternative, comparing access impacts rather than assuming the larger event space is the only acceptable choice.",
+      "correction": "I agreed to issue the set as approved tomorrow. Without the required client decision that status is wrong; I would label any discussion set unapproved and explain the review timetable.",
+      "silence": "",
+      "wrap": "The client decision should show the quiet-use requirement, unpriced work, alternative concepts, and named review owners."
+    }
+  },
+  {
+    "scenario_id": "manufacturing-trainee-lot-traceability",
+    "expected_format": "incident-simulation",
+    "context_contains": [
+      "The traveler has the prior station's initials and a time of 10:20; the trolley is in bay 4. No verified link to either lot is otherwise supplied.",
+      "candidate asks what traceability evidence exists",
+      "candidate says the batch is defective rather than unidentified"
+    ],
+    "candidate_examples": {
+      "clarification": "What prior station or time is on the traveler, and is the quality-hold area available?",
+      "partial": "I would not sign dispatch while L62 and L26 disagree.",
+      "alternative": "I could record the tag and traveler images if permitted, but the trolley would still need a quality hold and an acknowledged lead before release.",
+      "correction": "I described the components as defective. The evidence establishes uncertain identity, not a product defect; I would correct the hold note while retaining the mismatch.",
+      "silence": "",
+      "wrap": "I would leave both source labels intact, record 24 components in bay 4, and require the quality lead's release."
+    }
+  },
+  {
+    "scenario_id": "manufacturing-engineer-capacity-review",
+    "expected_format": "work-sample-defense",
+    "context_contains": [
+      "The proposed packing improvement costs 12 fictional budget units. A time study at inspection costs 1 and can be completed within a week. No second inspection station, labor, or floor space has been approved.",
+      "candidate asks about cost or alternative capacity",
+      "candidate identifies inspection but offers no numerical comparison to demand"
+    ],
+    "candidate_examples": {
+      "clarification": "Are these observed cycle-time distributions or planning averages, and who owns any inspection-method change?",
+      "partial": "Inspection appears to be the constraint at 420 divided by 7, or 60 units.",
+      "alternative": "A parallel inspection option could be investigated, but I would first verify labor, space, approved inspection method, and cost against the 70-unit demand.",
+      "correction": "I used the 16-minute sum as the line's steady-state output interval. That is a unit's nominal processing time; sustainable flow is limited by the 7-minute stage under this model.",
+      "silence": "",
+      "wrap": "I would prioritize a time study at inspection and compare actual demand attainment and quality before spending on packing."
+    }
+  },
+  {
+    "scenario_id": "manufacturing-senior-supplier-change",
+    "expected_format": "work-sample-defense",
+    "context_contains": [
+      "The new supplier price is 5% lower per unit before rework labor and extra review cost; those costs have not been measured. The existing supplier can supply the next two months at current volume.",
+      "candidate asks about commercial context or fallback",
+      "candidate calculates final nonconformance but omits rework"
+    ],
+    "candidate_examples": {
+      "clarification": "Can reworked units also be final nonconforming units, and was the pilot inspected differently?",
+      "partial": "The final nonconformance rates are 3% and 1%, but pilot rework is much higher.",
+      "alternative": "Keeping the current supplier while running a quality-approved three-lot extension would preserve a fallback while gathering first-pass and rework cost evidence.",
+      "correction": "I added 18 and 1 as 19 unique pilot failures. The categories may overlap, so I would report them separately and request unit-level dispositions.",
+      "silence": "",
+      "wrap": "The next gate needs comparable inspection, multiple lots, full rework and review effort, and a decision owned by quality."
+    }
+  },
+  {
+    "scenario_id": "aviation-operations-briefing-version",
+    "expected_format": "stakeholder-simulation",
+    "context_contains": [
+      "The training coordinator is available now and maintains the approved exercise set. There is no revision-difference summary in the candidate's packet.",
+      "candidate asks who owns the version or what changed",
+      "candidate says the older page is probably harmless"
+    ],
+    "candidate_examples": {
+      "clarification": "Who holds the approved E7 set, and is a revision-difference summary available?",
+      "partial": "The cover says revision 4 while the attached page says revision 3.",
+      "alternative": "The facilitator could begin an unrelated discussion while the coordinator supplies the approved set; the affected packet would remain unverified.",
+      "correction": "I marked the pack checked because the pages looked similar. I would correct that status, preserve the mismatch, and inform anyone who received my earlier check.",
+      "silence": "",
+      "wrap": "Even after replacement, my completion note would state document consistency only and make no flight-readiness claim."
+    }
+  },
+  {
+    "scenario_id": "aviation-ground-support-handoff",
+    "expected_format": "stakeholder-simulation",
+    "context_contains": [
+      "The assistance desk can assign an available worker but has not yet done so. The passenger prefers to wait in A until the worker confirms where they will meet.",
+      "candidate asks about availability or preferences",
+      "candidate promises a worker will arrive but has not obtained acceptance"
+    ],
+    "candidate_examples": {
+      "clarification": "Has an assistance worker accepted, and where would the passenger prefer to wait for them?",
+      "partial": "I would keep the task pending because request sent is not an accepted assignment.",
+      "alternative": "A different meeting point could work if the passenger agrees and the assigned worker confirms it; I would not override the preference to wait in A.",
+      "correction": "I marked transferred too early. I would restore pending status and tell colleagues the assistance handoff has not yet been acknowledged.",
+      "silence": "",
+      "wrap": "The next record would distinguish worker acceptance, passenger agreement, and completed handoff, with a clear contact in between."
+    }
+  },
+  {
+    "scenario_id": "aviation-senior-simulation-debrief",
+    "expected_format": "work-sample-defense",
+    "context_contains": [
+      "A calibration note shows the trainee tablet was exactly 60 seconds slow relative to the reference clock during the exercise. This corrects the displayed timestamp but does not validate the manually entered event time.",
+      "candidate asks about clock calibration or timestamp sources",
+      "candidate normalizes the clock but treats 14:02:55 as a verified acknowledgement time"
+    ],
+    "candidate_examples": {
+      "clarification": "Were the tablet and recorder synchronized, and how were the logged times produced?",
+      "partial": "The timestamps are not yet comparable, so the blame conclusion is unsupported.",
+      "alternative": "I would present a source table with an uncertain acknowledgement event rather than force an exact timeline unsupported by manual entries.",
+      "correction": "I repeated that the trainee acknowledged before the prompt. The slow clock shifts its nominal time to 14:02:55, and manual-entry uncertainty still remains; I would revise the conclusion and retain both times.",
+      "silence": "",
+      "wrap": "I would use neutral questions about message understanding and improve event capture in a future exercise without judging operational competence."
+    }
+  },
+  {
+    "scenario_id": "agriculture-field-assistant-sample-label",
+    "expected_format": "incident-simulation",
+    "context_contains": [
+      "The collection sheet lists collector M and time 09:40. The original field notebook is with the trial coordinator; no photograph or map link is present at the desk.",
+      "candidate asks about additional evidence",
+      "candidate assumes the bag labeled Plot 9 resolves the duplicate"
+    ],
+    "candidate_examples": {
+      "clarification": "Who has the original field notebook, and what collector and time information can link these bags?",
+      "partial": "I would hold the two bags because the sheet repeats Plot 8.",
+      "alternative": "Excluding the samples may eventually be appropriate if identity cannot be established, but I would preserve them and ask the coordinator to document that disposition.",
+      "correction": "I changed the second row to Plot 9 by assumption. I would disclose that change, restore a trace of the original entry, and keep the identity link unresolved.",
+      "silence": "",
+      "wrap": "The hold note would retain both labels, the duplicate entry, collector M at 09:40, and the coordinator's decision request."
+    }
+  },
+  {
+    "scenario_id": "agriculture-trial-water-allocation",
+    "expected_format": "written-response",
+    "context_contains": [
+      "No relationship between allocation tokens and crop response is supplied, and no uniquely optimal allocation is established. The trial lead can clarify the intended comparison before approving the plan.",
+      "candidate asks whether a unique optimal allocation or crop-response relationship is known",
+      "candidate gives a feasible allocation but says it is proven optimal"
+    ],
+    "candidate_examples": {
+      "clarification": "Can the trial lead approve changes before execution, and does the design specify a unique allocation relationship?",
+      "partial": "The minima total 75, leaving 15 tokens to allocate beyond them.",
+      "alternative": "I could split the extra tokens across A, B, and C, but I would explain the primary-comparison compromise and get the trial lead's approval.",
+      "correction": "My first allocation totaled 95. I would revise to A 35, B 35, C 20, record the changed priorities, and avoid claiming that this proves an optimal crop outcome.",
+      "silence": "",
+      "wrap": "I would distinguish request, approved allocation, and actual delivery by plot so later comparisons retain the deviation evidence."
+    }
+  },
+  {
+    "scenario_id": "agriculture-senior-variety-trial",
+    "expected_format": "work-sample-defense",
+    "context_contains": [
+      "Each of the two fields can hold six equal-size plots. Assignment may be randomized within each field; no physical restrictions require grouping one variety in a separate field.",
+      "candidate asks about plot layout or randomization",
+      "candidate calculates the 60-credit difference and endorses full replacement"
+    ],
+    "candidate_examples": {
+      "clarification": "Can both varieties be assigned within each field, and which input and quality records are feasible?",
+      "partial": "After seed only, the observed figures are 1,060 for A and 1,120 for B.",
+      "alternative": "I would use three paired A/B comparisons in each field, with assignment within pairs and all 12 plot outcomes retained, instead of putting a variety in only one field.",
+      "correction": "I called the 60-credit difference profit and recommended replacement. It excludes other costs and is confounded by plot conditions; I would relabel the calculation and defer broad adoption.",
+      "silence": "",
+      "wrap": "The next trial should compare both varieties across both fields, record costs and quality consistently, and use a pre-agreed adoption review."
+    }
+  }
+]

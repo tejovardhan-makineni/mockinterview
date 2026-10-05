@@ -1,4 +1,4 @@
-.PHONY: help local local-persistent install up down dev api web build test lint fmt tidy validate-content preview-format new-scenario new-format local-stack check-llm
+.PHONY: help local local-persistent install up down dev api web build test lint fmt tidy validate-content content-audit preview-format new-scenario new-format local-stack check-llm
 ID ?= work-sample-reservation-review
 
 help:
@@ -46,6 +46,7 @@ test:
 	cd api && go test ./...
 	cd web && npm test
 	python3 scripts/test_content.py
+	python3 scripts/test_content_coverage.py
 	python3 scripts/test_deploy.py
 
 lint:
@@ -56,6 +57,10 @@ validate-content:
 	cd api && go run ./cmd/mockinterview -validate-corpus data/corpus
 	cd api && go test ./internal/corpus ./internal/pack ./internal/live ./internal/scoring
 	python3 scripts/test_content.py
+	python3 scripts/test_content_coverage.py
+
+content-audit:
+	python3 scripts/content_coverage.py
 
 preview-format:
 	cd api && go run ./cmd/previewformat -id "$(ID)"

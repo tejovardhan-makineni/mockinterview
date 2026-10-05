@@ -1,0 +1,119 @@
+{
+  "schema_version": 1,
+  "revision": 1,
+  "format_id": "work-sample-defense",
+  "review_status": "preview",
+  "provenance": {
+    "authorship": "Original project scenario, AI-assisted draft. Practitioner review and scoring calibration pending.",
+    "license": "MIT"
+  },
+  "minutes": 30,
+  "id": "manager-structured-hiring",
+  "title": "Experienced Manager: Repair a Hiring Debrief",
+  "track": "professional",
+  "domain": "management_hiring",
+  "areas": [
+    "management"
+  ],
+  "role_track": "management",
+  "modality": "written",
+  "difficulty": "manager",
+  "tags": [
+    "management",
+    "manager",
+    "structured-hiring",
+    "leadership",
+    "community-preview"
+  ],
+  "prompt": "Review this fictional hiring debrief for a team supervisor: Candidate A scored 4/5 on a scheduling exercise and 2/5 on a coaching exercise; Candidate B scored 3/5 and 4/5. The role requires both. One panelist says, \"A feels like us; I want someone I could have a drink with.\" Another proposes adding a surprise unpaid assignment only for B. No final decision has been made. Explain how you would lead the debrief.",
+  "blurb": "Rewrite a hiring debrief",
+  "rubric": [
+    {
+      "key": "criteria",
+      "label": "Keep criteria job-relevant",
+      "description": "Uses agreed criteria instead of similarity.",
+      "weight": 1,
+      "anchors": {
+        "0": "Uses social similarity or presumed background as the selection reason.",
+        "2": "Rejects the similarity comment and returns to the two skills.",
+        "4": "Uses the pre-agreed equal weighting, avoids inventing a retrospective threshold and distinguishes evidence for scheduling from evidence for coaching."
+      }
+    },
+    {
+      "key": "evidence",
+      "label": "Examine rating support",
+      "description": "Handles missing evidence before treating scores as facts.",
+      "weight": 1,
+      "anchors": {
+        "0": "Treats unsupported scores or confidence as sufficient proof.",
+        "2": "Requests concrete evidence behind ratings.",
+        "4": "Checks the unsupported coaching score, records uncertainty and seeks comparable clarification where justified instead of selectively adding burdens to one candidate."
+      }
+    },
+    {
+      "key": "decision_process",
+      "label": "Lead a consistent debrief",
+      "description": "Establishes an accountable and fair next step.",
+      "weight": 1,
+      "anchors": {
+        "0": "Allows different unplanned tasks for one candidate or claims the arithmetic alone proves who must be hired.",
+        "2": "Proposes a consistent follow-up and documented decision.",
+        "4": "Separates discussion of each criterion, invites dissenting evidence, follows the authorized same-standard clarification route and documents the final reasoning and limits."
+      }
+    }
+  ],
+  "reference": {
+    "scenario": "Review this fictional hiring debrief for a team supervisor: Candidate A scored 4/5 on a scheduling exercise and 2/5 on a coaching exercise; Candidate B scored 3/5 and 4/5. The role requires both. One panelist says, \"A feels like us; I want someone I could have a drink with.\" Another proposes adding a surprise unpaid assignment only for B. No final decision has been made. Explain how you would lead the debrief.",
+    "facts": [
+      {
+        "id": "fact-1",
+        "value": "The panel agreed before interviews to weight scheduling and coaching equally, but did not define a minimum score. One assessor’s coaching notes for A contain no quoted or described behavior.",
+        "reveal_when": "candidate asks about agreed criteria or evidence quality"
+      },
+      {
+        "id": "fact-2",
+        "value": "Both candidates completed the same tasks. A comparable short clarification can be offered to both if the hiring owner approves; the panel must not invent a new criterion after seeing candidates.",
+        "reveal_when": "candidate asks about a fair way to resolve missing evidence"
+      }
+    ],
+    "model_points": [
+      "Uses the pre-agreed equal weighting, avoids inventing a retrospective threshold and distinguishes evidence for scheduling from evidence for coaching.",
+      "Checks the unsupported coaching score, records uncertainty and seeks comparable clarification where justified instead of selectively adding burdens to one candidate.",
+      "Separates discussion of each criterion, invites dissenting evidence, follows the authorized same-standard clarification route and documents the final reasoning and limits."
+    ],
+    "probes": [
+      {
+        "trigger": "candidate selects B immediately from averages",
+        "question": "Which rating lacks evidence, and how does that affect your confidence?"
+      },
+      {
+        "trigger": "candidate proposes another test for just one candidate",
+        "question": "How would you keep the comparison consistent?"
+      },
+      {
+        "trigger": "candidate revises the initial selection",
+        "question": "What changed in your evidence rather than your preference?"
+      }
+    ],
+    "fair_alternatives": [
+      "The panel may decide on existing evidence if its limits are acknowledged and the authorized hiring owner accepts them.",
+      "A structured clarification is not automatically required; it must be proportionate and comparable."
+    ],
+    "assessment_limits": "Assess only the decisions and reasoning demonstrated in this fictional exercise. No hiring-readiness, personality, legal compliance or workplace performance claim follows from this score. A valid alternative can earn full credit. Unrevealed conditional facts must not be assumed known or required for credit; credit asking for needed information and a conditional plan."
+  },
+  "interviewer_notes": "You are the counterpart named in the prompt. If this is a written review, remain the hiring interviewer while the candidate reads and writes. Let the candidate finish, including thinking and self-correction. Answer only supplied facts when their reveal condition is met; otherwise say the information is unknown. Use neutral probes after a completed answer, one at a time. Do not prescribe the rubric as a spoken checklist. Accept relevant examples from work, education and community leadership. Do not request private employee records, infer protected traits, invent employment rules or promise a real organizational outcome. Simulation gives no answer before assessment; coaching may offer labeled assistance.",
+  "learning_drills": [
+    {
+      "id": "decision-practice",
+      "title": "Rewrite a hiring debrief",
+      "prompt": "Rewrite the two panel comments as requests for observable evidence and a consistent next step. This is self-guided practice with no automated assessment.",
+      "minutes": 7,
+      "checklist": [
+        "Use job criteria",
+        "Reject similarity judgments",
+        "Mark unsupported scores",
+        "Avoid unequal extra work"
+      ]
+    }
+  ]
+}

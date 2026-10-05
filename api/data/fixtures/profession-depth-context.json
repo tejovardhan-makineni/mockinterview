@@ -1,0 +1,596 @@
+[
+  {
+    "scenario_id": "accounting-revenue-cutoff-review",
+    "expected_format": "work-sample-defense",
+    "context_contains": [
+      "B has an email from the customer dated January 3 accepting the equipment after a January 2 repair. There is no earlier acceptance or separate performance obligation in this exercise.",
+      "candidate asks about B’s acceptance, dispute or contract terms",
+      "candidate identifies only C as late",
+      "Explain which new evidence changed the adjustment and how you would preserve that correction in the review record."
+    ],
+    "candidate_examples": {
+      "clarification": "Do we have evidence of when B was accepted and whether the dispute was resolved?",
+      "partial": "I would remove C’s 50,000 from December and leave the other orders as recorded.",
+      "alternative": "I would delay the whole report until the controller approves the corrections.",
+      "correction": "I initially removed only C. B was accepted in January too, so I revise the December reduction to 130,000 and retain A’s 120,000.",
+      "silence": "",
+      "wrap": "I have no further questions."
+    }
+  },
+  {
+    "scenario_id": "medicine-results-ownership-review",
+    "expected_format": "work-sample-defense",
+    "context_contains": [
+      "A’s listed clinician is away. The covering clinician is available by phone. The patient portal records that a message was sent, but not that a clinician reviewed the result or that the patient received an agreed plan.",
+      "candidate asks about coverage, contact or acknowledgment",
+      "candidate says the portal message closes A",
+      "What changes in your queue and handoff record once you recognize that the original acknowledgment is insufficient?"
+    ],
+    "candidate_examples": {
+      "clarification": "Who is covering the absent clinician, and does the portal record any clinician acknowledgment?",
+      "partial": "The message was sent through the portal, so A appears to be closed.",
+      "alternative": "I would ask the covering clinician to accept both A and C, provided they have capacity.",
+      "correction": "I treated C as acknowledged, but that applied to the earlier version. I will obtain acknowledgment of the amendment and document who owns its next step.",
+      "silence": "",
+      "wrap": "I have no further questions."
+    }
+  },
+  {
+    "scenario_id": "communications-correction-channel-review",
+    "expected_format": "work-sample-defense",
+    "context_contains": [
+      "The social post is scheduled for this afternoon and can be paused. Two hundred flyers have been distributed; the service desk can display a replacement notice and contact partner venues holding remaining flyers.",
+      "candidate asks about reach, timing or recoverable channels",
+      "candidate changes only the opening date",
+      "How would you remove that unsupported date from all drafted versions and explain what is still unknown?"
+    ],
+    "candidate_examples": {
+      "clarification": "Which notices have already reached people, and can the scheduled post still be stopped?",
+      "partial": "I would change the website to say two locations reopen Monday.",
+      "alternative": "I would try to contact everyone who received a flyer with the correction.",
+      "correction": "I added a date for the other three locations without evidence. I will remove it, state that their dates are unconfirmed and seek an operations update.",
+      "silence": "",
+      "wrap": "I have no further questions."
+    }
+  },
+  {
+    "scenario_id": "customer-support-entitlement-recovery",
+    "expected_format": "work-sample-defense",
+    "context_contains": [
+      "The customer’s admin audit shows no seat-removal action. A renewal integration wrote the 12-seat update. Eight affected users can be matched to the verified pre-renewal roster.",
+      "candidate asks about actor attribution or which users are affected",
+      "candidate restores seats without an expiry plan",
+      "How would you correct the customer expectation and preserve the billing request without promising its outcome?"
+    ],
+    "candidate_examples": {
+      "clarification": "Can we see who changed the seat count and which users were verified before renewal?",
+      "partial": "I would restore the eight seats and then close the ticket.",
+      "alternative": "I would wait for engineering to fix the mapping before making any access change.",
+      "correction": "I promised a refund outside my authority. I will correct that statement, send the request to billing and provide a decision update time without guaranteeing approval.",
+      "silence": "",
+      "wrap": "I have no further questions."
+    }
+  },
+  {
+    "scenario_id": "cybersecurity-session-revocation",
+    "expected_format": "incident-simulation",
+    "context_contains": [
+      "Password reset alone does not revoke existing sessions in this fictional service. Session revocation invalidates them immediately; disabling new links does not disable an existing link.",
+      "candidate asks how session or sharing controls work",
+      "candidate only proposes a password reset",
+      "How will you update the incident record to distinguish missing telemetry from evidence of no access?"
+    ],
+    "candidate_examples": {
+      "clarification": "Does changing the password revoke current sessions, and does blocking new links disable existing ones?",
+      "partial": "I would reset the password to remove the attacker’s access.",
+      "alternative": "I would request approval to temporarily suspend the account while preserving the logs.",
+      "correction": "I called the folder unaccessed too early. The logging delay means access is unknown; I will revise the incident note and schedule the delayed-log review.",
+      "silence": "",
+      "wrap": "I have no further questions."
+    }
+  },
+  {
+    "scenario_id": "education-assessment-moderation",
+    "expected_format": "work-sample-defense",
+    "context_contains": [
+      "The practical task used an unfamiliar screen layout and a six-minute limit. Eight learners asked what two interface labels meant. The written quiz tested recognition of steps, not explanation or transfer.",
+      "candidate asks how the assessments differed",
+      "candidate interprets 18 versus 10 as a simple decline",
+      "Which learners or skill gaps would you reassess before assigning support?"
+    ],
+    "candidate_examples": {
+      "clarification": "Were the two tasks testing the same behavior under similar conditions?",
+      "partial": "The drop from 18 passing to ten shows the learners are doing worse.",
+      "alternative": "I would offer everyone a spoken explanation task for the same procedure-choice goal.",
+      "correction": "I assumed all 14 needed the full course again. The four oral explanations show a different pattern, so I will compare individual evidence and target support before deciding.",
+      "silence": "",
+      "wrap": "I have no further questions."
+    }
+  },
+  {
+    "scenario_id": "hospitality-accessible-room-recovery",
+    "expected_format": "stakeholder-simulation",
+    "context_contains": [
+      "No room with a roll-in shower is available here tonight. One may become available tomorrow, but checkout is unconfirmed. The partner hotel reports one such room available; its full route has not yet been checked.",
+      "candidate asks about available rooms or certainty",
+      "candidate offers a discount before clarifying requirements",
+      "How will you explain the remaining check while keeping the guest informed within the hold period?"
+    ],
+    "candidate_examples": {
+      "clarification": "What rooms are actually available tonight, and which partner-room features have been verified?",
+      "partial": "I would offer a discount to make up for the different room.",
+      "alternative": "I would suggest staying here tonight and moving to the room expected tomorrow.",
+      "correction": "I said the partner room was confirmed too soon. I will explain that its route still needs checking and update the guest before the 20-minute hold expires.",
+      "silence": "",
+      "wrap": "I have no further questions."
+    }
+  },
+  {
+    "scenario_id": "hr-hiring-evidence-calibration",
+    "expected_format": "work-sample-defense",
+    "context_contains": [
+      "The same three criteria apply to all candidates. Examples from study, volunteering or paid work are equally acceptable. A missing answer is not an observed failure.",
+      "candidate asks about scoring rules or acceptable experience",
+      "candidate rejects the applicant for missing recordkeeping evidence",
+      "What criterion-linked evidence remains, and how should the rating change be recorded?"
+    ],
+    "candidate_examples": {
+      "clarification": "What do the rubric and source notes say about missing evidence and acceptable examples?",
+      "partial": "We have no recordkeeping example, so I would score that criterion as a failure.",
+      "alternative": "I would let the chair decide from the current evidence, with the missing criterion explicitly marked.",
+      "correction": "I treated a famous employer as evidence of competence. I will remove that basis and score only the described billing decisions, with recordkeeping still unassessed.",
+      "silence": "",
+      "wrap": "I have no further questions."
+    }
+  },
+  {
+    "scenario_id": "it-support-certificate-outage",
+    "expected_format": "incident-simulation",
+    "context_contains": [
+      "Managed laptops on the office network and corporate VPN show the warning; a managed laptop disconnected from both reaches the public sign-in page normally. No credentials have been entered during these tests.",
+      "candidate asks about network cohorts or safe diagnostic comparisons",
+      "candidate jumps from guest success to a device fault",
+      "How does the supplied valid-certificate observation change your hypothesis and next diagnostic?"
+    ],
+    "candidate_examples": {
+      "clarification": "Do managed laptops work when off the corporate network, and is the portal certificate itself valid?",
+      "partial": "Since guest devices work, I think the managed laptops are broken.",
+      "alternative": "I would ask payroll for a deadline exception while we investigate.",
+      "correction": "I assumed the portal certificate expired. The supplied certificate check is valid, so I will investigate the proxy’s issuer chain and the recent inspection change.",
+      "silence": "",
+      "wrap": "I have no further questions."
+    }
+  },
+  {
+    "scenario_id": "nursing-handoff-reconciliation",
+    "expected_format": "work-sample-defense",
+    "context_contains": [
+      "The sending nurse confirms the unresolved item remains open; the verbal phrase “all complete” referred only to transport paperwork. The receiving clinician is reachable through the team contact.",
+      "candidate asks to clarify the handoff or contact the responsible clinician",
+      "candidate asks for clarification but allows transport to proceed",
+      "How will you correct the handoff record and update people relying on the earlier summary?"
+    ],
+    "candidate_examples": {
+      "clarification": "Can the sending nurse clarify what was complete and who can acknowledge the open item?",
+      "partial": "I will contact the clinician, but let transport proceed while I wait.",
+      "alternative": "I would cancel the slot now so no one feels pressured to skip the readiness check.",
+      "correction": "I interpreted “all complete” too broadly. I will retain the unresolved clinical item, obtain receiving-clinician acknowledgment and update transport before proceeding.",
+      "silence": "",
+      "wrap": "I have no further questions."
+    }
+  },
+  {
+    "scenario_id": "electrical-power-budget-review",
+    "expected_format": "work-sample-defense",
+    "context_contains": [
+      "At the cabinet’s expected maximum temperature the supplied manufacturer table rates this supply at 8 A continuous. The 10 A figure applies at a lower temperature.",
+      "candidate asks about environment or derating",
+      "candidate calculates only the steady 9 A load",
+      "How would you revise the design note and distinguish the two unresolved requirements?"
+    ],
+    "candidate_examples": {
+      "clarification": "Does the supply rating apply at the cabinet’s expected temperature?",
+      "partial": "The loads add to nine amps, which is below the ten-amp supply rating.",
+      "alternative": "I would stagger the actuator starts rather than immediately change the supply.",
+      "correction": "I used the 10 A headline rating. At the cabinet temperature it is 8 A, so the 9 A continuous load already fails; startup remains a separate 13 A verification question.",
+      "silence": "",
+      "wrap": "I have no further questions."
+    }
+  },
+  {
+    "scenario_id": "operations-capacity-mix-review",
+    "expected_format": "work-sample-defense",
+    "context_contains": [
+      "The 40 expected new cases are estimated to include 30 simple and 10 complex cases. The estimate is uncertain by plus or minus ten cases; no type mix is available for that uncertainty.",
+      "candidate asks about incoming work or forecast uncertainty",
+      "candidate accepts the 15-minute average without considering arrivals",
+      "How does the corrected 70-minute benefit change your commitment and customer communication?"
+    ],
+    "candidate_examples": {
+      "clarification": "What case mix is expected among tomorrow’s arrivals, and how uncertain is that forecast?",
+      "partial": "The average is 15 minutes, so 160 cases fit in the 2,400 minutes.",
+      "alternative": "I would send ten simple cases to the partner team to gain capacity.",
+      "correction": "I counted the transfer as 100 minutes gained. The handoff costs 30, so the net gain is 70 and the baseline shortfall remains 530 minutes.",
+      "silence": "",
+      "wrap": "I have no further questions."
+    }
+  },
+  {
+    "scenario_id": "project-dependency-confidence-review",
+    "expected_format": "work-sample-defense",
+    "context_contains": [
+      "The supplier can deliver one self-contained module on day 4. It needs three days of integration and two days of rehearsal. A staged launch is technically possible but requires the service owner to accept temporary dual operation.",
+      "candidate asks about partial delivery or a smaller scope",
+      "candidate treats 90% confidence as schedule float",
+      "How does that correction change the status and the decision you ask the sponsor to make?"
+    ],
+    "candidate_examples": {
+      "clarification": "Could the supplier deliver a self-contained module earlier, and what work would that scope require?",
+      "partial": "If the supplier is 90% confident, I would keep the launch status green.",
+      "alternative": "I would recommend a staged launch of the early module.",
+      "correction": "I omitted one rehearsal day. The full path ends on day 13, so I will change the status and present the staged option or a delay before the notice deadline.",
+      "silence": "",
+      "wrap": "I have no further questions."
+    }
+  },
+  {
+    "scenario_id": "public-service-eligibility-quality-review",
+    "expected_format": "work-sample-defense",
+    "context_contains": [
+      "Of the 80 open applications, 50 await clarification letters that have not been sent. Thirty are under ordinary review. Forty applicants requested assisted completion; their outcomes have not been separately checked.",
+      "candidate asks about exclusions, waiting reasons or access needs",
+      "candidate compares ten and six as a 40% service improvement",
+      "What evidence is actually available about their outcomes, and how would you collect a fair comparison?"
+    ],
+    "candidate_examples": {
+      "clarification": "Why are the 80 applications still open, and what happened to people who requested assisted completion?",
+      "partial": "The median fell from ten to six days, so the service improved by 40%.",
+      "alternative": "I would stop the pilot immediately until the evidence is corrected.",
+      "correction": "I claimed the assisted route was causing delay, but its outcomes were not checked. I will withdraw that claim and investigate the recorded process stages before attributing cause.",
+      "silence": "",
+      "wrap": "I have no further questions."
+    }
+  },
+  {
+    "scenario_id": "research-preregistration-deviation-review",
+    "expected_format": "work-sample-defense",
+    "context_contains": [
+      "Participants chose whether to join the program; there was no randomized assignment. The comparison group comes from an earlier cohort, and its baseline task-completion score was higher.",
+      "candidate asks about assignment, comparison or baseline balance",
+      "candidate focuses only on the 62 observed outcomes",
+      "What language and analysis in the report must change, and what evidence remains useful?"
+    ],
+    "candidate_examples": {
+      "clarification": "How were participants assigned, and were the comparison cohorts similar at baseline?",
+      "partial": "I would analyze the 62 completed outcomes and report their average.",
+      "alternative": "I would lead with satisfaction because that outcome is available.",
+      "correction": "I described the program as causing improvement. Since assignment was voluntary and the comparison cohort differs, I will revise that to an uncertain association and separate the exploratory outcome.",
+      "silence": "",
+      "wrap": "I have no further questions."
+    }
+  },
+  {
+    "scenario_id": "sales-renewal-value-discovery",
+    "expected_format": "stakeholder-simulation",
+    "context_contains": [
+      "The buyer says the 200 events include repeated retries; only 80 distinct appointments were completed. Staff still manually corrected 20 of those. The customer has not measured time saved per appointment.",
+      "candidate asks how the claimed savings were calculated or what users experienced",
+      "candidate offers a discount before examining the claim",
+      "How will you correct the slide and agree a measurable replacement without moving the goalposts?"
+    ],
+    "candidate_examples": {
+      "clarification": "Can we check how many of the 200 events were distinct completed appointments and what work users still did?",
+      "partial": "I would offer a discount so the buyer stays with us.",
+      "alternative": "If the customer sees no value, I would discuss a respectful non-renewal rather than pushing a sale.",
+      "correction": "I repeated the 400-hour estimate without checking it. I will withdraw it, correct the slide and agree how to measure completed appointments and actual staff time.",
+      "silence": "",
+      "wrap": "I have no further questions."
+    }
+  },
+  {
+    "scenario_id": "civil-foundation-assumption-review",
+    "expected_format": "work-sample-defense",
+    "context_contains": [
+      "A recent site observation records groundwater at footing level after prolonged rain. The note’s dry-ground assumption has not been reconfirmed. No revised bearing or settlement recommendation is available.",
+      "candidate asks whether site conditions still match the note",
+      "candidate proposes a larger footing using only 1,300 divided by 120",
+      "What pressure comparison should replace the earlier calculation, and does the review decision change?"
+    ],
+    "candidate_examples": {
+      "clarification": "Do current ground observations still match the note’s dry-ground assumptions?",
+      "partial": "I would divide 1,300 by 120 and specify a larger footing area.",
+      "alternative": "I would ask the owner to consider relocating the equipment.",
+      "correction": "I treated 1,300 kN as additional load. It is the total, so pressure is 130 kPa; it still exceeds the conditional figure and the groundwater assumption remains unresolved.",
+      "silence": "",
+      "wrap": "I have no further questions."
+    }
+  },
+  {
+    "scenario_id": "social-work-consent-boundary-review",
+    "expected_format": "stakeholder-simulation",
+    "context_contains": [
+      "The housing team confirms it needs contact details and access requirements to book the appointment. A full case history is not required for booking. A later assessment may ask for additional information directly from the person.",
+      "candidate asks what information is actually needed",
+      "candidate says full disclosure is necessary to help",
+      "How will you correct the referral plan and record while keeping the appointment work moving?"
+    ],
+    "candidate_examples": {
+      "clarification": "Which information does the booking officer actually need to arrange this appointment?",
+      "partial": "I would send the full file because the partner says that is necessary to help.",
+      "alternative": "I would offer to support the person in calling the housing team directly.",
+      "correction": "I assumed the partner could require the whole file. No exception is supplied, so I will use the consented booking details and route any new exception claim for review.",
+      "silence": "",
+      "wrap": "I have no further questions."
+    }
+  },
+  {
+    "scenario_id": "supply-chain-confirmed-stock-allocation",
+    "expected_format": "work-sample-defense",
+    "context_contains": [
+      "Every inbound shipment needs one working day of receiving inspection before its units become usable. The existing 170 units have already passed inspection.",
+      "candidate asks when inbound stock becomes usable",
+      "candidate counts day 3 inbound as immediately usable",
+      "Which allocations and customer statements need correction, even if final due dates might still be met?"
+    ],
+    "candidate_examples": {
+      "clarification": "When do inbound units become usable, and is receiving inspection included in the arrival estimate?",
+      "partial": "The incoming 80 units can cover orders as soon as they arrive on day three.",
+      "alternative": "I would decline the alternate’s extra cost and keep the original shipment plan, with explicit approval of C’s risk.",
+      "correction": "I treated the day 3 receipt as usable that day. Inspection moves availability to day 4, so I will correct the timeline and keep C’s coverage conditional until inspection passes.",
+      "silence": "",
+      "wrap": "I have no further questions."
+    }
+  },
+  {
+    "scenario_id": "trades-recurring-alarm-diagnosis",
+    "expected_format": "work-sample-defense",
+    "context_contains": [
+      "An existing authorized check with an independent calibrated instrument recorded pressure within the supplied normal band while the installed sensor reported above the alarm threshold. Both readings were taken under the same operating condition. Exact values are not needed for this exercise.",
+      "candidate asks for independent measurements or operating conditions",
+      "candidate replaces the filter without examining measurement evidence",
+      "How would you distinguish a configuration mismatch from a failed sensor before specifying replacement?"
+    ],
+    "candidate_examples": {
+      "clarification": "Do we have an independent pressure reading from the same operating conditions?",
+      "partial": "I would replace the filter again because the high-pressure alarm returned.",
+      "alternative": "I would request authorization for the documented temporary ventilation arrangement while qualified diagnostics proceed.",
+      "correction": "I called the sensor broken too soon. The mismatch could be configuration or installation, so I will request the approved checks before specifying replacement.",
+      "silence": "",
+      "wrap": "I have no further questions."
+    }
+  },
+  {
+    "scenario_id": "ux-completion-metric-accessibility-review",
+    "expected_format": "work-sample-defense",
+    "context_contains": [
+      "Different participants tested the two versions, and the task wording changed. Neither study included keyboard-only completion. Three of the nine new-version submissions lacked a usable contact method.",
+      "candidate asks about comparability, participant methods or outcome quality",
+      "candidate uses nine out of ten as the success metric",
+      "What can the two small, different studies actually support, and what comparison is still needed?"
+    ],
+    "candidate_examples": {
+      "clarification": "Were the study tasks comparable, and how many submitted bookings had usable contact details?",
+      "partial": "Nine of ten reached confirmation, so the redesign improved completion.",
+      "alternative": "I would test inline validation rather than wait until final submission to explain missing information.",
+      "correction": "I said both designs were equally effective because each had six usable outcomes. The samples and tasks differ, so that conclusion is unsupported; we need a comparable test.",
+      "silence": "",
+      "wrap": "I have no further questions."
+    }
+  },
+  {
+    "scenario_id": "data-analysis-denominator-check",
+    "expected_format": "work-sample-defense",
+    "context_contains": [
+      "A went to a general mailing list; B went to people who previously attended a workshop. The messages were sent on different days.",
+      "candidate asks how recipients were assigned or whether groups are comparable",
+      "candidate uses clicks as the denominator without labeling it",
+      "Which denominator changed, and how would you correct the report label so the mistake is not repeated?"
+    ],
+    "candidate_examples": {
+      "clarification": "Were the audiences assigned in the same way, and were the sends on comparable days?",
+      "partial": "A converted 30% and B 50%, so B seems much better.",
+      "alternative": "I would use B for a small next send while treating the result as uncertain.",
+      "correction": "I used ten clicks as B’s denominator. For delivered-message conversion it is five sign-ups out of 20 deliveries, or 25%.",
+      "silence": "",
+      "wrap": "I have no further questions."
+    }
+  },
+  {
+    "scenario_id": "ux-first-usability-observation",
+    "expected_format": "work-sample-defense",
+    "context_contains": [
+      "The date field is below the initial viewport on a small screen. Its label says “When,” and there is no required-field text. The Continue button is visible above it.",
+      "candidate asks what participants could see or how the field was labeled",
+      "candidate changes the color but not the workflow",
+      "Which expectation was actually observed and which remains unknown?"
+    ],
+    "candidate_examples": {
+      "clarification": "Where is the date field on the screen, and what label do participants see?",
+      "partial": "I would make Continue red so people notice it.",
+      "alternative": "I would consider disabling Continue until the required date is entered, with a clear explanation.",
+      "correction": "I said both people expected a later date screen, but only one said that. I will keep the other person’s reason unknown and test the field-order hypothesis.",
+      "silence": "",
+      "wrap": "I have no further questions."
+    }
+  },
+  {
+    "scenario_id": "hr-first-interview-scheduling",
+    "expected_format": "work-sample-defense",
+    "context_contains": [
+      "The panel’s approved slot is Tuesday, November 10, 2026, at 10:00 Pacific time. The calendar system can display local time for recipients; no manual conversion is required.",
+      "candidate asks for the actual date or time zone",
+      "candidate supplies a local time without knowing the candidate’s location",
+      "What wording and recipient handling would you change before sending?"
+    ],
+    "candidate_examples": {
+      "clarification": "What are the approved date, time zone and interview duration?",
+      "partial": "I would write the candidate’s local time myself even though their location is not confirmed.",
+      "alternative": "I might invite a portfolio as an optional extra so the candidate can show more evidence.",
+      "correction": "I left reply-all as the support route. I will replace it with the approved private HR mailbox and keep any personal reason out of the panel invitation.",
+      "silence": "",
+      "wrap": "I have no further questions."
+    }
+  },
+  {
+    "scenario_id": "law-contract-version-comparison",
+    "expected_format": "work-sample-defense",
+    "context_contains": [
+      "The file contains no signed amendment or customer reply agreeing to the new terms. There is no evidence yet about whether another authorized agreement exists outside this file.",
+      "candidate asks whether the change was agreed or whether the file is complete",
+      "candidate compares only the two notice periods",
+      "What question should replace that conclusion in the supervising lawyer’s note?"
+    ],
+    "candidate_examples": {
+      "clarification": "Is there an agreed amendment or any missing correspondence outside this file?",
+      "partial": "The key difference is that notice changed from 30 days to seven.",
+      "alternative": "I would ask the customer for the complete email chain before the supervisor concludes anything.",
+      "correction": "I dismissed the email as irrelevant without enough context. I will instead flag its authority and reliance implications for the supervisor and request the full exchange.",
+      "silence": "",
+      "wrap": "I have no further questions."
+    }
+  },
+  {
+    "scenario_id": "consulting-promotion-unit-economics",
+    "expected_format": "work-sample-defense",
+    "context_contains": [
+      "The operations team can ship at most 1,500 boxes this month with current capacity. No reliable forecast of promotional demand is available.",
+      "candidate asks about capacity or expected volume",
+      "candidate calculates only revenue after discount",
+      "Which assumption produced the first number, and how does the corrected value change the recommendation?"
+    ],
+    "candidate_examples": {
+      "clarification": "How many boxes can operations ship, and is there a reliable promotional demand forecast?",
+      "partial": "At a price of 16, higher sales should make up for the lower revenue per box.",
+      "alternative": "I would consider a small deliberately loss-making pilot if we can fund a specific learning objective.",
+      "correction": "I assumed 20% more sales offsets a 20% price cut. The contribution falls from five to one, so break-even is 4,000 boxes, beyond the 1,500 capacity.",
+      "silence": "",
+      "wrap": "I have no further questions."
+    }
+  },
+  {
+    "scenario_id": "product-assistant-priority-choice",
+    "expected_format": "work-sample-defense",
+    "context_contains": [
+      "The 20 contacts are from people who chose to contact support; total booking volume and repeat callers are unknown. Three observed sessions show users checking email because the confirmation page never states whether their booking succeeded.",
+      "candidate asks how representative the counts are or what behavior was observed",
+      "candidate reports 60% of users cannot confirm bookings",
+      "How would you explain the revised scope and what evidence determines the next feature?"
+    ],
+    "candidate_examples": {
+      "clarification": "How representative are these support contacts, and have we observed anyone use the confirmation page?",
+      "partial": "Sixty percent of users cannot tell whether their booking worked.",
+      "alternative": "I would consider calendar export first if it also gives people a reliable booking record.",
+      "correction": "I promised confirmation plus calendar export in five days, but that leaves no verification day. I will narrow the scope and use the result to choose the next improvement.",
+      "silence": "",
+      "wrap": "I have no further questions."
+    }
+  },
+  {
+    "scenario_id": "finance-cash-profit-bridge",
+    "expected_format": "work-sample-defense",
+    "context_contains": [
+      "The 40,000 difference between recognized revenue and customer receipts is an increase in receivables. There were no write-offs or opening-balance collections to complicate the supplied bridge.",
+      "candidate asks about the revenue-to-collection difference",
+      "candidate says profit equals cash generated",
+      "Which part belongs outside operating cash flow, and what is the revised total movement?"
+    ],
+    "candidate_examples": {
+      "clarification": "Does the uncollected 40,000 represent a receivables increase, or are other adjustments involved?",
+      "partial": "Profit was 30,000, so that is how much cash the month generated.",
+      "alternative": "I would explain operating cash directly as 60,000 received less 65,000 paid.",
+      "correction": "I called negative 5,000 the total cash change. That is operating cash only; the separate 20,000 equipment payment makes the supplied total movement negative 25,000.",
+      "silence": "",
+      "wrap": "I have no further questions."
+    }
+  },
+  {
+    "scenario_id": "civil-drainage-level-check",
+    "expected_format": "work-sample-defense",
+    "context_contains": [
+      "The levels are proposed design levels, not verified survey measurements. The receiving connection level is shown from an old drawing and has not been checked on site.",
+      "candidate asks about the source or verification of levels",
+      "candidate reports 0.40% as the gradient",
+      "Which level comparison establishes that direction, and what part remains unverified in the field?"
+    ],
+    "candidate_examples": {
+      "clarification": "Are these surveyed levels or proposed levels, and has the receiving connection been checked?",
+      "partial": "The fall is 0.40, so I would label the gradient 0.40%.",
+      "alternative": "I would request a survey of the whole site before proceeding with the drainage design.",
+      "correction": "I reversed the direction. A is higher than B by 0.40 m, so the proposed fall is toward B; the receiving connection still needs verification.",
+      "silence": "",
+      "wrap": "I have no further questions."
+    }
+  },
+  {
+    "scenario_id": "electrical-divider-input-review",
+    "expected_format": "work-sample-defense",
+    "context_contains": [
+      "An alternative uses 3 kΩ above 1 kΩ. For this exercise those are nominal values, and the source could be as high as 13 V. Resistor tolerances are not supplied.",
+      "candidate asks about another ratio or source range",
+      "candidate accepts the original one-third ratio as safe",
+      "What calculation remains valid, and what evidence is needed to turn it into a worst-case conclusion?"
+    ],
+    "candidate_examples": {
+      "clarification": "Could we change the resistor ratio, and what is the source’s maximum voltage?",
+      "partial": "The output is one third of the supply, so it should be safe for the input.",
+      "alternative": "I would propose a different divider ratio and calculate its output.",
+      "correction": "I approved the alternative from its nominal 3.25 V maximum-source calculation. Resistor tolerances are missing, so that is not yet a worst-case approval.",
+      "silence": "",
+      "wrap": "I have no further questions."
+    }
+  },
+  {
+    "scenario_id": "mechanical-fit-tolerance-check",
+    "expected_format": "work-sample-defense",
+    "context_contains": [
+      "The supplier proposes changing only the hole nominal diameter while retaining both ±0.10 mm tolerances. No verified tighter process capability has been provided.",
+      "candidate asks about possible drawing changes or supplier capability",
+      "candidate checks only the tightest fit",
+      "What minimum does the supplied requirement actually permit, and how does that change the drawing note?"
+    ],
+    "candidate_examples": {
+      "clarification": "Can the drawing tolerances change, and what process capability has the supplier confirmed?",
+      "partial": "The minimum clearance is zero, so I have checked the tightest fit.",
+      "alternative": "I would shift the nominal hole diameter upward to increase clearance.",
+      "correction": "I treated zero clearance as acceptable, but the requirement starts at 0.05 mm. The original drawing fails at both the tightest and loosest combinations.",
+      "silence": "",
+      "wrap": "I have no further questions."
+    }
+  },
+  {
+    "scenario_id": "marketing-campaign-measurement-basics",
+    "expected_format": "work-sample-defense",
+    "context_contains": [
+      "After the event, A has 20 verified attendees and B has 20. Those counts use the same check-in process. No attendee-quality or repeat-attendance measure is available.",
+      "candidate asks about attendance or the campaign goal",
+      "candidate declares A the winner from 60 registrations",
+      "How would you rewrite the slide so readers see why the recommendation changed?"
+    ],
+    "candidate_examples": {
+      "clarification": "How many people from each attributed source actually attended?",
+      "partial": "A is the winner because it produced 60 registrations at lower cost.",
+      "alternative": "I would put all of next month’s budget into B because its attendee cost was lower.",
+      "correction": "I called A the winner from registration cost alone. The goal is attendance, where B cost ten per attendee versus fifteen for A; I will report both stages and the uncertainty.",
+      "silence": "",
+      "wrap": "I have no further questions."
+    }
+  },
+  {
+    "scenario_id": "qa-retry-idempotency-review",
+    "expected_format": "work-sample-defense",
+    "context_contains": [
+      "In the synthetic trace, checkout key K7 has two submit events, one order O41 and two accepted payment records P90 and P91. The UI shows one confirmation. The two payment records are not reversals or authorizations for different orders.",
+      "candidate asks for backend evidence or the observed retry behavior",
+      "candidate tests only the number of orders",
+      "Which evidence changes the result, and how would you revise the defect report without claiming unrun tests?"
+    ],
+    "candidate_examples": {
+      "clarification": "Can we inspect the synthetic order and accepted-payment records for the same checkout key?",
+      "partial": "The trace has one order, so the retry test passes.",
+      "alternative": "I would reject every second submit event to prevent duplicate payment attempts.",
+      "correction": "I passed the case after seeing one order. P90 and P91 are both accepted payments for K7, so I will mark the trace failed and propose tests for both timeout positions.",
+      "silence": "",
+      "wrap": "I have no further questions."
+    }
+  }
+]

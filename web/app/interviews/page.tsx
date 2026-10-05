@@ -6,6 +6,12 @@ import {
   type CatalogFilters,
   type QuestionSummary,
 } from "@/lib/features/catalog";
+import {
+  INTERVIEW_LEVELS,
+  ROLE_TRACKS,
+  levelLabel,
+  roleTrackLabel,
+} from "@/lib/roleScope";
 import type { Profession } from "@/lib/features/profile";
 import { errorMessage } from "@/lib/http";
 import { IS_DESKTOP } from "@/lib/desktop";
@@ -107,6 +113,16 @@ export default function Catalog() {
   const selectedProfession = professions.find(
     (p) => p.key === filters.profession,
   );
+  // Fall back to the loaded safe summaries when an older API lacks breakdowns.
+  const primaryCount = selectedProfession
+    ? (selectedProfession.primary_count ??
+      questions.filter((q) => q.areas[0] === selectedProfession.key).length)
+    : 0;
+  const sharedCount = selectedProfession
+    ? (selectedProfession.shared_count ??
+      questions.filter((q) => q.areas.slice(1).includes(selectedProfession.key))
+        .length)
+    : 0;
   const hasFilters = Object.values(filters).some(Boolean);
   return (
     <AppShell active="interview">
@@ -204,12 +220,39 @@ export default function Catalog() {
         </div>
         <details className="mt-5 border-t border-[var(--color-line)] pt-4">
           <summary className="cursor-pointer text-sm font-medium">
-            Refine by skill, level, and workspace
-            {[filters.topic, filters.level, filters.workspace].filter(Boolean)
-              .length > 0 &&
-              ` · ${[filters.topic, filters.level, filters.workspace].filter(Boolean).length} active`}
+            Refine by role, skill, level, and workspace
+            {[
+              filters.role_track,
+              filters.topic,
+              filters.level,
+              filters.workspace,
+            ].filter(Boolean).length > 0 &&
+              ` · ${[filters.role_track, filters.topic, filters.level, filters.workspace].filter(Boolean).length} active`}
           </summary>
-          <div className="mt-4 grid gap-4 sm:grid-cols-3">
+          <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            <Field
+              label="Role track"
+              hint="Matches authored role scope. Shared or unspecified scenarios have their own option."
+            >
+              <select
+                aria-label="Role track"
+                value={filters.role_track ?? ""}
+                onChange={(e) =>
+                  updateFilters({
+                    role_track: e.target.value as CatalogFilters["role_track"],
+                  })
+                }
+                className="field-select"
+              >
+                <option value="">All role tracks</option>
+                {ROLE_TRACKS.map((track) => (
+                  <option key={track} value={track}>
+                    {roleTrackLabel(track)}
+                  </option>
+                ))}
+                <option value="unspecified">Across roles / unspecified</option>
+              </select>
+            </Field>
             <Field label="Skill / topic">
               <select
                 aria-label="Skill / topic"
@@ -236,9 +279,9 @@ export default function Catalog() {
                 className="field-select"
               >
                 <option value="">All levels</option>
-                {["entry", "junior", "mid", "senior", "staff"].map((level) => (
+                {INTERVIEW_LEVELS.map((level) => (
                   <option key={level} value={level}>
-                    {pretty(level)}
+                    {levelLabel(level)}
                   </option>
                 ))}
               </select>
@@ -261,17 +304,29 @@ export default function Catalog() {
           </div>
         </details>
       </Panel>
-      {selectedProfession?.agent && (
+      {selectedProfession && (
         <Panel className="mt-5 p-5">
-          <p className="eyebrow">Specialist AI interviewer</p>
-          <h2 className="mt-2 font-semibold">
-            {selectedProfession.agent.name}
-          </h2>
-          <p className="mt-2 text-sm text-[var(--color-muted)]">
-            {selectedProfession.agent.summary}
+          {selectedProfession.agent && (
+            <>
+              <p className="eyebrow">Specialist AI interviewer</p>
+              <h2 className="mt-2 font-semibold">
+                {selectedProfession.agent.name}
+              </h2>
+              <p className="mt-2 text-sm text-[var(--color-muted)]">
+                {selectedProfession.agent.summary}
+              </p>
+            </>
+          )}
+          <p className="mt-3 text-sm">
+            {primaryCount} primary{" "}
+            {primaryCount === 1 ? "scenario" : "scenarios"} · {sharedCount}{" "}
+            shared {sharedCount === 1 ? "scenario" : "scenarios"} in this
+            catalog.
           </p>
           <p className="mt-2 text-xs text-[var(--color-muted)]">
-            Each scenario shows the specialist assigned to that practice.
+            Primary scenarios are authored for this profession. Shared scenarios
+            also apply here, but retain their original interviewer and task.
+            These counts do not establish coverage of every role or level.
           </p>
         </Panel>
       )}
@@ -285,7 +340,7 @@ export default function Catalog() {
           {IS_MOCK &&
             !loading &&
             !error &&
-            " · Demo preview: a small sample of the full bank"}
+            " · Demo preview: bundled interview bank"}
         </p>
         {hasFilters && (
           <Button variant="ghost" onClick={reset}>
@@ -325,7 +380,8 @@ export default function Catalog() {
               )}
               <div className="mt-5 flex items-center justify-between gap-3">
                 <span className="text-xs text-[var(--color-muted)]">
-                  {pretty(q.difficulty)} ·{" "}
+                  {q.role_track && <>{roleTrackLabel(q.role_track)} · </>}
+                  {levelLabel(q.difficulty)} ·{" "}
                   {q.review_status === "reviewed"
                     ? "Reviewed"
                     : "Community preview"}
@@ -357,8 +413,10 @@ export default function Catalog() {
           <h2 className="font-semibold">A different search may help.</h2>
           <p className="my-3 text-sm text-[var(--color-muted)]">
             Explore all professions, or help the community add the practice you
-            need.
+            need. Custom interviews can use any profession and level you
+            describe; they use an AI-generated conversation and rubric.
           </p>
+          <Button href="/setup?custom=1">Create a custom interview</Button>
           {!hasFilters && (
             <Button href="/contribute" variant="ghost">
               Suggest an interview

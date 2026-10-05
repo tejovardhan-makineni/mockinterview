@@ -1,0 +1,119 @@
+{
+  "schema_version": 1,
+  "revision": 1,
+  "format_id": "work-sample-defense",
+  "review_status": "preview",
+  "provenance": {
+    "authorship": "Original project scenario, AI-assisted draft. Practitioner review and scoring calibration pending.",
+    "license": "MIT"
+  },
+  "minutes": 45,
+  "id": "principal-data-scientist-measurement-governance",
+  "title": "Principal Data Scientist: Reconcile Conflicting Experiment Claims",
+  "track": "engineering",
+  "domain": "measurement_governance",
+  "areas": [
+    "data_science"
+  ],
+  "role_track": "individual_contributor",
+  "modality": "written",
+  "difficulty": "principal",
+  "tags": [
+    "data-science",
+    "principal",
+    "measurement-governance",
+    "leadership",
+    "community-preview"
+  ],
+  "prompt": "Two product teams report apparently conflicting experiment results. Team A says conversion rose from 10% to 12% among visitors who reached checkout; Team B says total paid orders per assigned visitor did not improve. The experiment changed how many visitors reached checkout. The draft leadership note recommends rollout based only on A’s relative lift. As a principal data-science individual contributor, review the evidence and propose a measurement decision with the product VP (the AI).",
+  "blurb": "Repair an experiment decision note",
+  "rubric": [
+    {
+      "key": "causal_reasoning",
+      "label": "Align the estimand and denominator",
+      "description": "Distinguishes conditional conversion from the assigned-population effect.",
+      "weight": 1,
+      "anchors": {
+        "0": "Treats the 20% relative conditional lift as proof of overall benefit.",
+        "2": "Notices the changed checkout population and asks for an assigned-visitor outcome.",
+        "4": "Explains post-assignment selection, preserves the visitor-level comparison for the rollout question and treats checkout conversion as diagnostic evidence rather than the same causal estimand."
+      }
+    },
+    {
+      "key": "evidence",
+      "label": "Resolve uncertainty before a claim",
+      "description": "Checks data and guardrails without inventing results.",
+      "weight": 1,
+      "anchors": {
+        "0": "Invents significance or dismisses support contacts without evidence.",
+        "2": "Requests reconciliation and uncertainty estimates.",
+        "4": "Checks assignment/data integrity, duplicates, uncertainty and the predeclared guardrail; distinguishes a lack of demonstrated benefit from proof of no effect and avoids inventing a success threshold after results."
+      }
+    },
+    {
+      "key": "influence",
+      "label": "Create a reusable measurement decision",
+      "description": "Coordinates technical governance and product authority.",
+      "weight": 1,
+      "anchors": {
+        "0": "Unilaterally orders rollout or creates new criteria tailored to this result.",
+        "2": "Explains the disagreement and advises the product owner.",
+        "4": "Presents a conditional recommendation to the authorized decision owner, documents shared definitions and independent reconciliation ownership, and proposes prospectively agreed metrics for future tests while preserving this test’s original commitments."
+      }
+    }
+  ],
+  "reference": {
+    "scenario": "Two product teams report apparently conflicting experiment results. Team A says conversion rose from 10% to 12% among visitors who reached checkout; Team B says total paid orders per assigned visitor did not improve. The experiment changed how many visitors reached checkout. The draft leadership note recommends rollout based only on A’s relative lift. As a principal data-science individual contributor, review the evidence and propose a measurement decision with the product VP (the AI).",
+    "facts": [
+      {
+        "id": "fact-1",
+        "value": "Random assignment was at visitor level before checkout. Team A excluded assigned visitors who never reached checkout. Both teams used the same two-week assignment window, but a final data reconciliation is still pending.",
+        "reveal_when": "candidate asks about assignment, denominators or data lineage"
+      },
+      {
+        "id": "fact-2",
+        "value": "A predeclared guardrail tracks support contacts per assigned visitor. It increased, but uncertainty intervals and duplicate-contact handling are not yet available. No approved rule says that one statistically significant metric automatically triggers rollout.",
+        "reveal_when": "candidate asks about guardrails, uncertainty or the decision rule"
+      }
+    ],
+    "model_points": [
+      "Explains post-assignment selection, preserves the visitor-level comparison for the rollout question and treats checkout conversion as diagnostic evidence rather than the same causal estimand.",
+      "Checks assignment/data integrity, duplicates, uncertainty and the predeclared guardrail; distinguishes a lack of demonstrated benefit from proof of no effect and avoids inventing a success threshold after results.",
+      "Presents a conditional recommendation to the authorized decision owner, documents shared definitions and independent reconciliation ownership, and proposes prospectively agreed metrics for future tests while preserving this test’s original commitments."
+    ],
+    "probes": [
+      {
+        "trigger": "candidate calculates a 20% lift and recommends rollout",
+        "question": "Does that denominator still represent everyone assigned to the experiment?"
+      },
+      {
+        "trigger": "candidate decides the experiment definitely had no effect",
+        "question": "What uncertainty and data checks remain?"
+      },
+      {
+        "trigger": "candidate corrects the initial causal interpretation",
+        "question": "How would you revise the leadership note without concealing the earlier claim?"
+      }
+    ],
+    "fair_alternatives": [
+      "Pausing for reconciliation, extending a pre-specified design where permitted, or declining rollout can each be defensible when the uncertainty and decision cost are explicit.",
+      "Conditional funnel metrics remain useful for diagnosis; they need not be discarded."
+    ],
+    "assessment_limits": "Assess only the decisions and reasoning demonstrated in this fictional exercise. No hiring-readiness, personality, legal compliance or workplace performance claim follows from this score. A valid alternative can earn full credit. Unrevealed conditional facts must not be assumed known or required for credit; credit asking for needed information and a conditional plan."
+  },
+  "interviewer_notes": "You are the counterpart named in the prompt. If this is a written review, remain the hiring interviewer while the candidate reads and writes. Let the candidate finish, including thinking and self-correction. Answer only supplied facts when their reveal condition is met; otherwise say the information is unknown. Use neutral probes after a completed answer, one at a time. Do not prescribe the rubric as a spoken checklist. Accept relevant examples from work, education and community leadership. Do not request private employee records, infer protected traits, invent employment rules or promise a real organizational outcome. Simulation gives no answer before assessment; coaching may offer labeled assistance.",
+  "learning_drills": [
+    {
+      "id": "decision-practice",
+      "title": "Repair an experiment decision note",
+      "prompt": "Rewrite the leadership note with the estimand, observed result, unresolved uncertainty and authorized next decision. This is self-guided practice with no automated assessment.",
+      "minutes": 7,
+      "checklist": [
+        "Use assigned-visitor denominators",
+        "Keep conditional metrics diagnostic",
+        "Preserve original criteria",
+        "Name data and decision owners"
+      ]
+    }
+  ]
+}

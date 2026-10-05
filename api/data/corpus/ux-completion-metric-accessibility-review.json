@@ -1,0 +1,137 @@
+{
+  "schema_version": 1,
+  "revision": 1,
+  "format_id": "work-sample-defense",
+  "review_status": "preview",
+  "provenance": {
+    "authorship": "Original project scenario, AI-assisted draft. Practitioner review and calibration pending.",
+    "license": "MIT"
+  },
+  "minutes": 30,
+  "id": "ux-completion-metric-accessibility-review",
+  "title": "Senior Product Designer: Review a Form’s Apparent Completion Gain",
+  "track": "professional",
+  "domain": "design_critique",
+  "areas": [
+    "ux_design"
+  ],
+  "modality": "written",
+  "difficulty": "senior",
+  "role_track": "individual_contributor",
+  "tags": [
+    "ux-design",
+    "senior-specialist",
+    "evidence-based-practice",
+    "community-preview"
+  ],
+  "prompt": "You are a senior product designer reviewing a fictional appointment form redesign. A small usability report says completion improved from six of ten participants to nine of ten. The old form reported missing required fields inline; the new form hides those messages until the final submit. The new study counted reaching the confirmation screen as success. Operations reports that some submitted appointments lack a required contact method. Review the evidence and propose a design and validation decision before wider rollout.",
+  "blurb": "Connect a success metric to usable downstream outcomes and test error recovery across interaction methods.",
+  "rubric": [
+    {
+      "key": "outcome",
+      "label": "Evaluate the claimed completion improvement",
+      "description": "Distinguishes submission, usable outcome and a comparable experiment.",
+      "weight": 1,
+      "anchors": {
+        "0": "Treats nine of ten confirmations as proof of improved usability.",
+        "2": "Recognizes missing contact methods and noncomparable studies.",
+        "4": "Separates screen completion from six usable-contact submissions, notes the small different samples and changed tasks and avoids claiming the versions are equal or different from these counts alone."
+      }
+    },
+    {
+      "key": "interaction",
+      "label": "Repair observable error-recovery barriers",
+      "description": "Addresses navigation, meaning and access using supplied behavior.",
+      "weight": 1,
+      "anchors": {
+        "0": "Keeps color as the only requirement cue or hides errors to improve completion.",
+        "2": "Adds clear required-field text and an accessible error summary.",
+        "4": "Connects summary items to fields, plans understandable focus and error recovery and preserves entered data while checking actual behavior with relevant interaction methods."
+      }
+    },
+    {
+      "key": "validation",
+      "label": "Test the revised task and decision threshold",
+      "description": "Defines evidence of usable accessible completion.",
+      "weight": 1,
+      "anchors": {
+        "0": "Approves rollout after a visual review alone.",
+        "2": "Tests a consistent task with keyboard users and verifies contact data.",
+        "4": "Uses comparable task conditions, checks assistive interaction needs without claiming full coverage from one tester, records valid submissions and recovery effort, and sets a bounded rollout decision with operations."
+      }
+    }
+  ],
+  "reference": {
+    "scenario": "You are a senior product designer reviewing a fictional appointment form redesign. A small usability report says completion improved from six of ten participants to nine of ten. The old form reported missing required fields inline; the new form hides those messages until the final submit. The new study counted reaching the confirmation screen as success. Operations reports that some submitted appointments lack a required contact method. Review the evidence and propose a design and validation decision before wider rollout.",
+    "facts": [
+      {
+        "id": "comparison",
+        "value": "Different participants tested the two versions, and the task wording changed. Neither study included keyboard-only completion. Three of the nine new-version submissions lacked a usable contact method.",
+        "reveal_when": "candidate asks about comparability, participant methods or outcome quality"
+      },
+      {
+        "id": "behavior",
+        "value": "In the supplied prototype, final validation shows an error summary but focus remains on the submit button; the summary items are not linked to their fields. Requiredness is shown by color alone.",
+        "reveal_when": "candidate asks how errors are exposed or navigated"
+      },
+      {
+        "id": "constraints",
+        "value": "The team can revise labels, required-field text, summary links and focus behavior before a limited test. The contact method is operationally necessary; its specific allowed formats are supplied by operations, not decided by the designer.",
+        "reveal_when": "candidate asks about feasible changes or who defines validation requirements"
+      }
+    ],
+    "model_points": [
+      "Nine confirmations minus three unusable-contact submissions leaves six usable submissions in that sample, but small noncomparable studies cannot establish a causal comparison.",
+      "The design should communicate required information and support error recovery, not trade data integrity against an optimistic funnel metric.",
+      "No named accessibility standard is required to identify the observed barriers; any formal conformance claim needs separate appropriate testing."
+    ],
+    "probes": [
+      {
+        "trigger": "candidate uses nine out of ten as the success metric",
+        "question": "How many submissions produced a usable contact method, and why does that change the task definition?"
+      },
+      {
+        "trigger": "candidate prefers inline rather than submit-time validation",
+        "question": "How would you test timing, clarity and recovery without repeatedly interrupting users?"
+      },
+      {
+        "trigger": "candidate corrects a claim that both designs are equally effective",
+        "question": "What can the two small, different studies actually support, and what comparison is still needed?"
+      }
+    ],
+    "fair_alternatives": [
+      "Inline, submit-time or combined validation can be acceptable if errors are understandable, discoverable and recoverable.",
+      "A limited rollout or holding the redesign are both defensible depending on the revised test evidence; no preferred visual style is scored."
+    ],
+    "red_flags": [
+      "Treats nine of ten confirmations as proof of improved usability.",
+      "Keeps color as the only requirement cue or hides errors to improve completion.",
+      "Approves rollout after a visual review alone."
+    ],
+    "follow_ups": [
+      "Define a usable-completion test"
+    ],
+    "assessment_limits": [
+      "Assess only reasoning and communication demonstrated in this fictional task, not real-world professional competence, licensure or hiring readiness. No real action, external verification or tool execution has occurred.",
+      "Credit relevant plain-language reasoning and valid alternatives without requiring experience at a particular employer. Examples from education, volunteering, community work or paid work are equally acceptable when relevant.",
+      "A missing or unasked dimension is not assessed, not automatically a failure. In simulation, use neutral probes and reveal facts only when triggered; in coaching, label assistance and distinguish assisted performance from independent evidence.",
+      "Credit an explicit late correction using the final demonstrated reasoning while retaining the evidence of the earlier mistake; do not force agreement with one exemplar.",
+      "Do not penalize the candidate for a conditional fact that was never revealed. Credit an appropriate request for missing information and a conditional plan; distinguish the candidate’s assumptions from interviewer-supplied facts."
+    ]
+  },
+  "interviewer_notes": "Play the relevant reviewing colleague or stakeholder using the supplied facts only. Start with one focused question, not the full rubric. Ask for clarification before treating an ambiguous answer as wrong. Reveal conditional facts when their stated triggers are met, permit equivalent valid approaches and never invent organizational rules, laws, clinical findings, ratings or missing outcomes. Do not require a polished artifact or specialist software. In a short session prioritize the main decision and one material follow-up; allow silence for thinking, check in neutrally, and leave time for the candidate to correct their recommendation and ask a final question. Distinguish simulation from coaching and record any help given. Assess job-relevant evidence, not accent, confidence, speed, credentials or prestige. This is independent practice for adults 18+ and is not a real professional workflow.",
+  "learning_drills": [
+    {
+      "id": "decision-review",
+      "title": "Define a usable-completion test",
+      "minutes": 5,
+      "prompt": "Define a usable-completion test. Use the fictional facts from this exercise. This is self-guided practice; no model assessment is performed.",
+      "checklist": [
+        "Count valid operational outcomes",
+        "Use comparable task wording",
+        "Test keyboard error recovery",
+        "Record what the sample cannot establish"
+      ]
+    }
+  ]
+}

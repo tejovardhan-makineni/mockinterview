@@ -1,0 +1,137 @@
+{
+  "schema_version": 1,
+  "revision": 1,
+  "format_id": "work-sample-defense",
+  "review_status": "preview",
+  "provenance": {
+    "authorship": "Original project scenario, AI-assisted draft. Practitioner review and calibration pending.",
+    "license": "MIT"
+  },
+  "minutes": 20,
+  "id": "mechanical-fit-tolerance-check",
+  "title": "Junior Mechanical Engineer: Check a Pin-and-Hole Fit",
+  "track": "engineering",
+  "domain": "mechanical_design",
+  "areas": [
+    "mechanical_engineering"
+  ],
+  "modality": "written",
+  "difficulty": "junior",
+  "role_track": "individual_contributor",
+  "tags": [
+    "mechanical-engineering",
+    "junior-specialist",
+    "evidence-based-practice",
+    "community-preview"
+  ],
+  "prompt": "You are a junior mechanical engineer reviewing a fictional locating-pin drawing. Pin diameter is 10.00 ± 0.10 mm. Hole diameter is 10.20 ± 0.10 mm. The supplied functional requirement is diametral clearance between 0.05 and 0.30 mm across the stated worst-case size limits. A note approves the fit because nominal clearance is 0.20 mm. Calculate the minimum and maximum clearance, assess the note and explain what you would ask the designer to change or verify. This is a paper inspection exercise, not a manufacturing authorization.",
+  "blurb": "Use worst-case tolerance arithmetic to distinguish nominal fit from guaranteed assembly clearance.",
+  "rubric": [
+    {
+      "key": "limits",
+      "label": "Calculate worst-case clearance",
+      "description": "Combines minimum hole with maximum pin and the reverse.",
+      "weight": 1,
+      "anchors": {
+        "0": "Uses only the nominal 0.20 mm clearance.",
+        "2": "Finds minimum clearance 0.00 mm.",
+        "4": "Calculates pin limits 9.90–10.10 and hole limits 10.10–10.30, giving clearance 0.00–0.40 mm; both ends violate the supplied range."
+      }
+    },
+    {
+      "key": "revision",
+      "label": "Relate tolerance width to the requirement",
+      "description": "Avoids treating a nominal shift as a complete fix.",
+      "weight": 1,
+      "anchors": {
+        "0": "Claims changing the hole nominal alone solves both limits.",
+        "2": "Suggests tighter tolerances or a design review.",
+        "4": "Recognizes the existing 0.40 mm clearance span exceeds the allowed 0.25 mm span; checks that ±0.05 mm on both with unchanged nominals gives 0.10–0.30 mm, conditional on capability."
+      }
+    },
+    {
+      "key": "verification",
+      "label": "Connect a drawing change to production evidence",
+      "description": "Separates a mathematical option from a verified process.",
+      "weight": 1,
+      "anchors": {
+        "0": "Claims parts will fit without supplier or measurement evidence.",
+        "2": "Requests supplier confirmation of tighter tolerances.",
+        "4": "Records the proposed limits, checks capability and inspection cost with the responsible team and avoids inventing measured sample results or approving production."
+      }
+    }
+  ],
+  "reference": {
+    "scenario": "You are a junior mechanical engineer reviewing a fictional locating-pin drawing. Pin diameter is 10.00 ± 0.10 mm. Hole diameter is 10.20 ± 0.10 mm. The supplied functional requirement is diametral clearance between 0.05 and 0.30 mm across the stated worst-case size limits. A note approves the fit because nominal clearance is 0.20 mm. Calculate the minimum and maximum clearance, assess the note and explain what you would ask the designer to change or verify. This is a paper inspection exercise, not a manufacturing authorization.",
+    "facts": [
+      {
+        "id": "proposal",
+        "value": "The supplier proposes changing only the hole nominal diameter while retaining both ±0.10 mm tolerances. No verified tighter process capability has been provided.",
+        "reveal_when": "candidate asks about possible drawing changes or supplier capability"
+      },
+      {
+        "id": "capability",
+        "value": "The design team may request ±0.05 mm on both features, but the supplier must confirm capability and inspection cost. The functional clearance requirement is fixed for this exercise.",
+        "reveal_when": "candidate asks about tighter tolerances or tradeoffs"
+      },
+      {
+        "id": "inspection",
+        "value": "No measured production samples are supplied. The calculation must use drawing limits; an inspection plan would need suitable measurement capability and sampling decisions from the responsible team.",
+        "reveal_when": "candidate asks about sample data or verification"
+      }
+    ],
+    "model_points": [
+      "Minimum clearance is 10.10−10.10=0.00 mm; maximum is 10.30−9.90=0.40 mm.",
+      "A nominal shift moves the range but cannot shrink its width. The original 0.40 mm width cannot fit within a permitted 0.25 mm window.",
+      "Tighter ±0.05 mm limits on both produce 0.10–0.30 mm at the existing nominals, but the supplier has not established capability."
+    ],
+    "probes": [
+      {
+        "trigger": "candidate checks only the tightest fit",
+        "question": "What is the loosest permitted pin-and-hole combination, and does it meet the maximum clearance?"
+      },
+      {
+        "trigger": "candidate proposes shifting the nominal hole size",
+        "question": "Does that reduce the width of the clearance range or only move it?"
+      },
+      {
+        "trigger": "candidate corrects a conclusion that zero clearance meets the requirement",
+        "question": "What minimum does the supplied requirement actually permit, and how does that change the drawing note?"
+      }
+    ],
+    "fair_alternatives": [
+      "Another tolerance allocation is acceptable if both clearance limits and feasible manufacturing are checked.",
+      "A simple limit table is enough; no statistical distribution, machining process or specialized tolerance software is assumed."
+    ],
+    "red_flags": [
+      "Uses only the nominal 0.20 mm clearance.",
+      "Claims changing the hole nominal alone solves both limits.",
+      "Claims parts will fit without supplier or measurement evidence."
+    ],
+    "follow_ups": [
+      "Build a worst-case fit table"
+    ],
+    "assessment_limits": [
+      "Assess only reasoning and communication demonstrated in this fictional task, not real-world professional competence, licensure or hiring readiness. No real action, external verification or tool execution has occurred.",
+      "Credit relevant plain-language reasoning and valid alternatives without requiring experience at a particular employer. Examples from education, volunteering, community work or paid work are equally acceptable when relevant.",
+      "A missing or unasked dimension is not assessed, not automatically a failure. In simulation, use neutral probes and reveal facts only when triggered; in coaching, label assistance and distinguish assisted performance from independent evidence.",
+      "Credit an explicit late correction using the final demonstrated reasoning while retaining the evidence of the earlier mistake; do not force agreement with one exemplar.",
+      "Do not penalize the candidate for a conditional fact that was never revealed. Credit an appropriate request for missing information and a conditional plan; distinguish the candidate’s assumptions from interviewer-supplied facts."
+    ]
+  },
+  "interviewer_notes": "Play the relevant reviewing colleague or stakeholder using the supplied facts only. Start with one focused question, not the full rubric. Ask for clarification before treating an ambiguous answer as wrong. Reveal conditional facts when their stated triggers are met, permit equivalent valid approaches and never invent organizational rules, laws, clinical findings, ratings or missing outcomes. Do not require a polished artifact or specialist software. In a short session prioritize the main decision and one material follow-up; allow silence for thinking, check in neutrally, and leave time for the candidate to correct their recommendation and ask a final question. Distinguish simulation from coaching and record any help given. Assess job-relevant evidence, not accent, confidence, speed, credentials or prestige. This is independent practice for adults 18+ and is not a real professional workflow.",
+  "learning_drills": [
+    {
+      "id": "decision-review",
+      "title": "Build a worst-case fit table",
+      "minutes": 5,
+      "prompt": "Build a worst-case fit table. Use the fictional facts from this exercise. This is self-guided practice; no model assessment is performed.",
+      "checklist": [
+        "List both feature limits",
+        "Calculate tightest and loosest clearance",
+        "Compare range width with the requirement",
+        "Keep supplier capability unverified until evidenced"
+      ]
+    }
+  ]
+}

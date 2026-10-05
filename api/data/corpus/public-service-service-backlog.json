@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "revision": 1,
+  "revision": 2,
   "format_id": "work-sample-defense",
   "review_status": "preview",
   "provenance": {
@@ -16,7 +16,7 @@
     "public_service"
   ],
   "modality": "written",
-  "difficulty": "mid",
+  "difficulty": "manager",
   "tags": [
     "public-service-manager",
     "local-government",
@@ -119,5 +119,6 @@
         "Explain the supervisor review route"
       ]
     }
-  ]
+  ],
+  "role_track": "management"
 }

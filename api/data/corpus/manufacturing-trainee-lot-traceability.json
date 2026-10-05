@@ -1,0 +1,117 @@
+{
+  "schema_version": 1,
+  "revision": 1,
+  "id": "manufacturing-trainee-lot-traceability",
+  "title": "Manufacturing Quality Trainee: Protect Lot Traceability",
+  "track": "professional",
+  "domain": "manufacturing_traceability",
+  "areas": [
+    "manufacturing"
+  ],
+  "modality": "conversational",
+  "difficulty": "entry",
+  "role_track": "individual_contributor",
+  "format_id": "incident-simulation",
+  "minutes": 20,
+  "review_status": "preview",
+  "tags": [
+    "manufacturing",
+    "community-preview"
+  ],
+  "prompt": "You are a quality trainee at fictional Rivet Works. A trolley contains 24 finished components. Its traveler says lot L62; the outer tag says L26. A colleague says the numbers were probably transposed and asks you to sign the dispatch check. Exercise policy says mismatched lot identifiers go to the designated quality-hold area, cannot be relabeled by a trainee, and require the quality lead's release before dispatch. Explain your response and handoff. No machine operation or physical product safety judgment is required.",
+  "blurb": "Hold an uncertain lot identity and preserve evidence instead of turning a plausible guess into a dispatch record.",
+  "rubric": [
+    {
+      "key": "identity_evidence",
+      "label": "Distinguish plausible explanation from verification",
+      "description": "Recognizes that the transpose explanation is unverified.",
+      "weight": 1,
+      "anchors": {
+        "0": "Signs the check because L62 and L26 look like a typing error.",
+        "2": "Identifies the mismatch and declines to sign it as verified.",
+        "4": "Records both identifiers and the count of 24 without choosing one, preserves the traveler and tag, and states that origin remains unverified."
+      }
+    },
+    {
+      "key": "containment_scope",
+      "label": "Apply the supplied hold boundary",
+      "description": "Keeps dispatch and relabeling within the authorized process.",
+      "weight": 1,
+      "anchors": {
+        "0": "Relabels or allows dispatch before quality release.",
+        "2": "Places the trolley on quality hold and contacts the lead.",
+        "4": "Uses the designated hold process, marks the dispatch status pending without altering source labels, and communicates the restriction to the dispatch colleague."
+      }
+    },
+    {
+      "key": "release_handoff",
+      "label": "Make the quality investigation actionable",
+      "description": "Provides context and a clear release owner.",
+      "weight": 1,
+      "anchors": {
+        "0": "Leaves the trolley without telling the lead or treats a reply as release.",
+        "2": "Gives the lead the mismatched IDs and quantity.",
+        "4": "Adds location and the last known handoff evidence, asks the lead to confirm ownership, and requires explicit release evidence before the dispatch check can be completed."
+      }
+    }
+  ],
+  "reference": {
+    "scenario": "You are a quality trainee at fictional Rivet Works. A trolley contains 24 finished components. Its traveler says lot L62; the outer tag says L26. A colleague says the numbers were probably transposed and asks you to sign the dispatch check. Exercise policy says mismatched lot identifiers go to the designated quality-hold area, cannot be relabeled by a trainee, and require the quality lead's release before dispatch. Explain your response and handoff. No machine operation or physical product safety judgment is required.",
+    "facts": [
+      {
+        "id": "fact-1",
+        "value": "The traveler has the prior station's initials and a time of 10:20; the trolley is in bay 4. No verified link to either lot is otherwise supplied.",
+        "reveal_when": "candidate asks what traceability evidence exists"
+      },
+      {
+        "id": "fact-2",
+        "value": "The designated quality-hold area has space. The quality lead is reachable now and can investigate the prior station record.",
+        "reveal_when": "candidate asks about containment or investigation resources"
+      }
+    ],
+    "model_points": [
+      "A transpose is one possible explanation, not verified identity. Preserve both labels and the count rather than making the evidence agree artificially.",
+      "Use the supplied quality-hold process and no trainee relabeling. This exercise does not establish whether the components themselves are defective.",
+      "Give the quality lead useful traceability facts and an explicit dispatch boundary; only the authorized release permits completion of the check."
+    ],
+    "probes": [
+      {
+        "trigger": "candidate says the batch is defective rather than unidentified",
+        "question": "What does the label mismatch actually establish about these components?"
+      },
+      {
+        "trigger": "candidate proposes photographing the records before holding the trolley",
+        "question": "What status and authorized owner still prevent dispatch while the evidence is reviewed?"
+      },
+      {
+        "trigger": "candidate initially corrects one label then realizes this was unsupported",
+        "question": "How would you preserve the original discrepancy and disclose the change to the quality lead?"
+      }
+    ],
+    "fair_alternatives": [
+      "A written hold note or a direct handoff with a traceable record is acceptable.",
+      "Photographs or copied labels may support evidence if the fictional site permits them; they do not replace the hold and release process.",
+      "Assess the work demonstrated here. Accept relevant examples from education, volunteering, caregiving, placements, or paid work; professional vocabulary and employer pedigree are not evidence of a stronger answer."
+    ],
+    "assessment_limits": "Assess traceability, evidence preservation, and the supplied quality-hold boundary. Do not request machinery procedures, real quality regulations, or product-safety certification. Unobserved dimensions are not failures. Credit a reasoned correction and distinguish independently demonstrated reasoning from coached assistance. Do not penalize a candidate for an unrevealed conditional fact; credit appropriate requests and conditional plans, and distinguish candidate assumptions from interviewer-supplied evidence."
+  },
+  "interviewer_notes": "Assess traceability, evidence preservation, and the supplied quality-hold boundary. Do not request machinery procedures, real quality regulations, or product-safety certification. Use only the supplied fictional facts and policies; acknowledge unknowns. Ask one triggered probe at a time after the candidate has finished. Accept plain language and accessible written or spoken explanations. Do not score accent, typing speed, confidence, credentials, or experience with a named employer. Credit revisions and record assistance. All participants are fictional adults; no real patient, client, operational, or confidential data is needed. Allow silence for thinking without treating it as failure. In short sessions prioritize the core decision and one material follow-up, leaving room for a correction and wrap-up.",
+  "learning_drills": [
+    {
+      "id": "focused-practice",
+      "title": "Write a lot-hold record",
+      "prompt": "Write a concise hold record with both IDs, quantity, location, evidence, and the requested release owner. This is self-guided practice; no model assessment is performed.",
+      "minutes": 7,
+      "checklist": [
+        "Do not choose an ID by appearance",
+        "Preserve original labels",
+        "Keep dispatch pending",
+        "Do not claim product defect from identity uncertainty"
+      ]
+    }
+  ],
+  "provenance": {
+    "authorship": "Original project scenario, AI-assisted draft using fictional organizations, records, and exercise policies. Practitioner review and scoring calibration pending.",
+    "license": "MIT"
+  }
+}

@@ -1,0 +1,47 @@
+{
+  "id": "pharmacy-practice",
+  "revision": 1,
+  "review_status": "preview",
+  "source_note": "Original AI-assisted community practice path spanning entry, mid, and senior individual-contributor tasks. Each pinned round is a separate practice attempt, not a hiring sequence. Practitioner review and scoring calibration are pending; these exercises do not certify professional or operational competence.",
+  "name": "Pharmacy Practice",
+  "areas": [
+    "pharmacy"
+  ],
+  "track": "professional",
+  "blurb": "Practice a collection discrepancy, transition-record review, and near-miss learning decision.",
+  "rounds": [
+    {
+      "id": "round-1",
+      "title": "Pharmacy Assistant: Resolve a Collection Record Mismatch",
+      "kind": "stakeholder-simulation",
+      "domain": "pharmacy_intake",
+      "modality": "conversational",
+      "difficulty": "entry",
+      "minutes": 20,
+      "question_id": "pharmacy-assistant-collection-mismatch",
+      "focus": "Handle an identity mismatch with privacy, a clear pause, and an accountable pharmacist handoff."
+    },
+    {
+      "id": "round-2",
+      "title": "Pharmacist: Review an Incomplete Care Transition Record",
+      "kind": "work-sample-defense",
+      "domain": "pharmacy_handoff",
+      "modality": "written",
+      "difficulty": "mid",
+      "minutes": 30,
+      "question_id": "pharmacy-transition-record-review",
+      "focus": "Find an unsupported reconciliation claim and preserve uncertainty through a clinical-team handoff."
+    },
+    {
+      "id": "round-3",
+      "title": "Senior Pharmacist: Interpret a Near-Miss Reporting Pilot",
+      "kind": "work-sample-defense",
+      "domain": "pharmacy_service_quality",
+      "modality": "written",
+      "difficulty": "senior",
+      "minutes": 35,
+      "question_id": "pharmacy-senior-near-miss-learning",
+      "focus": "Separate reporting changes from safety outcomes and design a modest, auditable learning plan."
+    }
+  ]
+}

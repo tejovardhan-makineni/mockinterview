@@ -1,0 +1,119 @@
+{
+  "schema_version": 1,
+  "revision": 1,
+  "format_id": "stakeholder-simulation",
+  "review_status": "preview",
+  "provenance": {
+    "authorship": "Original project scenario, AI-assisted draft. Practitioner review and scoring calibration pending.",
+    "license": "MIT"
+  },
+  "minutes": 30,
+  "id": "senior-manager-manager-coaching",
+  "title": "Senior Manager: Coach a Manager Who Solves Everything Personally",
+  "track": "professional",
+  "domain": "manager_development",
+  "areas": [
+    "management"
+  ],
+  "role_track": "management",
+  "modality": "conversational",
+  "difficulty": "senior_manager",
+  "tags": [
+    "management",
+    "senior-manager",
+    "manager-development",
+    "leadership",
+    "community-preview"
+  ],
+  "prompt": "You manage three team managers. Riley’s team meets deadlines, but Riley approves every routine decision and works late four nights a week. Two team members say decisions stall when Riley is away. Riley (the AI) says, \"Delegation is too risky; I am protecting delivery.\" Coach Riley and agree an experiment without taking over their team.",
+  "blurb": "Design a management experiment",
+  "rubric": [
+    {
+      "key": "diagnosis",
+      "label": "Understand the management pattern",
+      "description": "Checks why the behavior persists.",
+      "weight": 1,
+      "anchors": {
+        "0": "Labels Riley controlling or ignores delivery success.",
+        "2": "Acknowledges the risk concern and asks about prior handoffs.",
+        "4": "Distinguishes unclear authority and support from proven inability, explores the past failure and names the current delay and workload costs without diagnosing personality."
+      }
+    },
+    {
+      "key": "leverage",
+      "label": "Develop the manager",
+      "description": "Builds Riley’s delegation practice rather than bypassing them.",
+      "weight": 1,
+      "anchors": {
+        "0": "Personally assigns decisions to Riley’s reports and removes Riley’s ownership without discussion.",
+        "2": "Asks Riley to create a delegation plan.",
+        "4": "Coaches Riley to choose a bounded decision class, define outcomes and exception rules with the team, and retain accountability while others exercise authority."
+      }
+    },
+    {
+      "key": "evaluation",
+      "label": "Test the change",
+      "description": "Balances decision speed, quality and manager load.",
+      "weight": 1,
+      "anchors": {
+        "0": "Declares success from delegation count alone.",
+        "2": "Sets a review date for the trial.",
+        "4": "Tracks turnaround, rework and exceptions alongside after-hours load and team feedback; defines when to expand, adjust or stop the trial without treating every mistake as failure."
+      }
+    }
+  ],
+  "reference": {
+    "scenario": "You manage three team managers. Riley’s team meets deadlines, but Riley approves every routine decision and works late four nights a week. Two team members say decisions stall when Riley is away. Riley (the AI) says, \"Delegation is too risky; I am protecting delivery.\" Coach Riley and agree an experiment without taking over their team.",
+    "facts": [
+      {
+        "id": "fact-1",
+        "value": "Riley reports redoing a poorly specified handoff last quarter. There is no current written decision-rights agreement. The team has experienced members who have not been given bounded approval authority.",
+        "reveal_when": "candidate asks about the origin of the behavior or existing authority"
+      },
+      {
+        "id": "fact-2",
+        "value": "Routine requests under a fictional $500 team limit can be delegated after manager approval of the process; exceptions still require Riley’s sign-off.",
+        "reveal_when": "candidate asks for a low-risk decision boundary"
+      }
+    ],
+    "model_points": [
+      "Distinguishes unclear authority and support from proven inability, explores the past failure and names the current delay and workload costs without diagnosing personality.",
+      "Coaches Riley to choose a bounded decision class, define outcomes and exception rules with the team, and retain accountability while others exercise authority.",
+      "Tracks turnaround, rework and exceptions alongside after-hours load and team feedback; defines when to expand, adjust or stop the trial without treating every mistake as failure."
+    ],
+    "probes": [
+      {
+        "trigger": "candidate proposes immediate full delegation",
+        "question": "Which boundary makes the first experiment proportionate?"
+      },
+      {
+        "trigger": "candidate wants to coach Riley’s reports directly",
+        "question": "How will Riley learn to manage the next delegation?"
+      },
+      {
+        "trigger": "candidate revises the risk assessment",
+        "question": "How will you communicate the changed boundary?"
+      }
+    ],
+    "fair_alternatives": [
+      "A different routine decision category works if authority and risk are explicit.",
+      "Direct intervention may be warranted by a separate serious issue, but none is established here."
+    ],
+    "assessment_limits": "Assess only the decisions and reasoning demonstrated in this fictional exercise. No hiring-readiness, personality, legal compliance or workplace performance claim follows from this score. A valid alternative can earn full credit. Unrevealed conditional facts must not be assumed known or required for credit; credit asking for needed information and a conditional plan."
+  },
+  "interviewer_notes": "You are the counterpart named in the prompt. If this is a written review, remain the hiring interviewer while the candidate reads and writes. Let the candidate finish, including thinking and self-correction. Answer only supplied facts when their reveal condition is met; otherwise say the information is unknown. Use neutral probes after a completed answer, one at a time. Do not prescribe the rubric as a spoken checklist. Accept relevant examples from work, education and community leadership. Do not request private employee records, infer protected traits, invent employment rules or promise a real organizational outcome. Simulation gives no answer before assessment; coaching may offer labeled assistance.",
+  "learning_drills": [
+    {
+      "id": "decision-practice",
+      "title": "Design a management experiment",
+      "prompt": "Write Riley’s two-week delegation experiment with authority, support and balancing measures. This is self-guided practice with no automated assessment.",
+      "minutes": 7,
+      "checklist": [
+        "Coach through Riley",
+        "Define exceptions",
+        "Track rework and delay",
+        "Review workload"
+      ]
+    }
+  ]
+}

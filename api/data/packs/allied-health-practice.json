@@ -1,0 +1,47 @@
+{
+  "id": "allied-health-practice",
+  "revision": 1,
+  "review_status": "preview",
+  "source_note": "Original AI-assisted community practice path spanning entry, mid, and senior individual-contributor tasks. Each pinned round is a separate practice attempt, not a hiring sequence. Practitioner review and scoring calibration are pending; these exercises do not certify professional or operational competence.",
+  "name": "Allied Health Practice",
+  "areas": [
+    "allied_health"
+  ],
+  "track": "professional",
+  "blurb": "Practice person-centered goals, community handoffs, and automated-summary review.",
+  "rounds": [
+    {
+      "id": "round-1",
+      "title": "Therapy Assistant: Hand Over a Changed Participation Goal",
+      "kind": "stakeholder-simulation",
+      "domain": "therapy_communication",
+      "modality": "conversational",
+      "difficulty": "entry",
+      "minutes": 20,
+      "question_id": "allied-health-assistant-goal-handoff",
+      "focus": "Listen to a person's participation goal and seek a therapist discussion without improvising treatment."
+    },
+    {
+      "id": "round-2",
+      "title": "Allied Health Clinician: Review a Community Handoff Gap",
+      "kind": "work-sample-defense",
+      "domain": "rehabilitation_handoff",
+      "modality": "written",
+      "difficulty": "mid",
+      "minutes": 30,
+      "question_id": "allied-health-community-handoff-review",
+      "focus": "Expose assumed visits and bookings, preserve the person's preferences, and assign the missing confirmations."
+    },
+    {
+      "id": "round-3",
+      "title": "Senior Allied Health Clinician: Review an Automated Summary Pilot",
+      "kind": "work-sample-defense",
+      "domain": "allied_health_quality",
+      "modality": "written",
+      "difficulty": "senior",
+      "minutes": 35,
+      "question_id": "allied-health-senior-summary-tool-review",
+      "focus": "Catch invented functional and support claims and design an evidence-based review of a documentation aid."
+    }
+  ]
+}

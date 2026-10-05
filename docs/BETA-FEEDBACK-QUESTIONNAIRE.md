@@ -111,6 +111,18 @@ Use the attempt's server-owned scenario domain to select the subject group and f
 
 Unknown future domains use group `general` with focus **your reasoning about this scenario**. The fallback keeps a valid new format usable; contributors should add a more appropriate mapping and update coverage tests when introducing a domain. Modality and profession can be shared across domains, so neither the first listed profession nor a browser navigation category is a reliable substitute for this mapping.
 
+The October 5 source expansion adds subject groups for newly introduced people
+management, engineering management, organizational leadership, pharmacy, dentistry,
+allied health, veterinary, architecture, manufacturing, aviation operations and
+agriculture domains. Exact domain lists and wording live in
+`api/internal/feedback/questionnaire.go`; `coverage_test.go` checks every scenario
+primarily assigned to those new areas. The six question IDs, options, favorable
+thresholds and instrument version are unchanged. Earlier domain mappings and the
+unknown-domain fallback retain their wording; in particular, the new management
+hiring exercise uses `management_hiring`, leaving older `structured_hiring`
+attempts in their original general group. These additional groups provide product
+feedback about practice, not measures of clinical or operational competence.
+
 ## Data contract and trust boundaries
 
 The deployed routes below require authentication; ownership checks apply to session routes.

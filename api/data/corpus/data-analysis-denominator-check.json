@@ -1,0 +1,137 @@
+{
+  "schema_version": 1,
+  "revision": 1,
+  "format_id": "work-sample-defense",
+  "review_status": "preview",
+  "provenance": {
+    "authorship": "Original project scenario, AI-assisted draft. Practitioner review and calibration pending.",
+    "license": "MIT"
+  },
+  "minutes": 20,
+  "id": "data-analysis-denominator-check",
+  "title": "Junior Data Analyst: Reconcile a Conversion Report",
+  "track": "professional",
+  "domain": "experimentation",
+  "areas": [
+    "data_science"
+  ],
+  "modality": "written",
+  "difficulty": "junior",
+  "role_track": "individual_contributor",
+  "tags": [
+    "data-science",
+    "junior-specialist",
+    "evidence-based-practice",
+    "community-preview"
+  ],
+  "prompt": "You are a junior data analyst reviewing a fictional workshop sign-up report. It says: “Email A converted 30% and Email B converted 50%, so send B to everyone.” The attached table shows A: 100 delivered messages, 40 link clicks, 12 sign-ups; B: 20 delivered messages, 10 link clicks, 5 sign-ups. Explain the reported rates, calculate sign-ups per delivered message and recommend what can reasonably be said from this table. No coding or statistical test is required.",
+  "blurb": "Check denominators, distinguish sample rates from proof and explain a useful next comparison.",
+  "rubric": [
+    {
+      "key": "arithmetic",
+      "label": "Use the intended denominator",
+      "description": "Calculates and labels rates from supplied counts.",
+      "weight": 1,
+      "anchors": {
+        "0": "Repeats 30% and 50% as delivered-message conversion.",
+        "2": "Calculates A as 12% and B as 25% per delivered message.",
+        "4": "Explains 12/40 and 5/10 generated the draft rates, labels both denominators and notes that nondeduplicated clicks complicate a click-to-sign-up interpretation."
+      }
+    },
+    {
+      "key": "interpretation",
+      "label": "Separate observation from explanation",
+      "description": "Recognizes cohort and sample limitations without inventing significance.",
+      "weight": 1,
+      "anchors": {
+        "0": "Claims B is proven better for all future recipients.",
+        "2": "States B’s observed rate is higher but the samples are small.",
+        "4": "Explains prior-attendee selection and different send dates as alternative explanations and does not infer causation or statistical certainty from the table."
+      }
+    },
+    {
+      "key": "communication",
+      "label": "Offer an understandable next step",
+      "description": "Gives a corrected summary and feasible comparison.",
+      "weight": 1,
+      "anchors": {
+        "0": "Hides uncertainty or refuses to report any useful result.",
+        "2": "Provides the two corrected rates with a limitation.",
+        "4": "Proposes the available same-day randomized comparison, a fixed outcome window and a clearly labeled metric while accepting that the business decision also needs missing cost or attendance information."
+      }
+    }
+  ],
+  "reference": {
+    "scenario": "You are a junior data analyst reviewing a fictional workshop sign-up report. It says: “Email A converted 30% and Email B converted 50%, so send B to everyone.” The attached table shows A: 100 delivered messages, 40 link clicks, 12 sign-ups; B: 20 delivered messages, 10 link clicks, 5 sign-ups. Explain the reported rates, calculate sign-ups per delivered message and recommend what can reasonably be said from this table. No coding or statistical test is required.",
+    "facts": [
+      {
+        "id": "assignment",
+        "value": "A went to a general mailing list; B went to people who previously attended a workshop. The messages were sent on different days.",
+        "reveal_when": "candidate asks how recipients were assigned or whether groups are comparable"
+      },
+      {
+        "id": "definitions",
+        "value": "Delivered messages exclude known bounces. Sign-ups are unique people, but clicks are not deduplicated in this extract. No cost or attendance outcome is available.",
+        "reveal_when": "candidate asks what each count represents or what outcomes are missing"
+      },
+      {
+        "id": "next-test",
+        "value": "A future send can randomly assign consenting list members to A or B on the same day. The team can track unique sign-ups per delivered message with a predefined observation window.",
+        "reveal_when": "candidate asks how to improve the comparison"
+      }
+    ],
+    "model_points": [
+      "A has 12/100=12% sign-ups per delivered message; B has 5/20=25%. The report’s 30% and 50% use clicks as the denominator.",
+      "The groups are selected differently, so the observed difference cannot be attributed solely to message content.",
+      "Plain arithmetic and a clear explanation are sufficient; do not require statistical software, a power calculation or prior paid-work experience."
+    ],
+    "probes": [
+      {
+        "trigger": "candidate uses clicks as the denominator without labeling it",
+        "question": "What fraction of delivered messages led to a sign-up for each version?"
+      },
+      {
+        "trigger": "candidate recommends using B immediately",
+        "question": "What uncertainty should accompany that practical choice, and how could the next send test it?"
+      },
+      {
+        "trigger": "candidate corrects B from 50% to 25%",
+        "question": "Which denominator changed, and how would you correct the report label so the mistake is not repeated?"
+      }
+    ],
+    "fair_alternatives": [
+      "A cautious small use of B can be defensible if the uncertainty is explicit and future outcomes are monitored.",
+      "A count-and-rate table or a short spoken explanation is equally acceptable; jargon earns no extra credit."
+    ],
+    "red_flags": [
+      "Repeats 30% and 50% as delivered-message conversion.",
+      "Claims B is proven better for all future recipients.",
+      "Hides uncertainty or refuses to report any useful result."
+    ],
+    "follow_ups": [
+      "Write a two-sentence data correction"
+    ],
+    "assessment_limits": [
+      "Assess only reasoning and communication demonstrated in this fictional task, not real-world professional competence, licensure or hiring readiness. No real action, external verification or tool execution has occurred.",
+      "Credit relevant plain-language reasoning and valid alternatives without requiring experience at a particular employer. Examples from education, volunteering, community work or paid work are equally acceptable when relevant.",
+      "A missing or unasked dimension is not assessed, not automatically a failure. In simulation, use neutral probes and reveal facts only when triggered; in coaching, label assistance and distinguish assisted performance from independent evidence.",
+      "Credit an explicit late correction using the final demonstrated reasoning while retaining the evidence of the earlier mistake; do not force agreement with one exemplar.",
+      "Do not penalize the candidate for a conditional fact that was never revealed. Credit an appropriate request for missing information and a conditional plan; distinguish the candidate’s assumptions from interviewer-supplied facts."
+    ]
+  },
+  "interviewer_notes": "Play the relevant reviewing colleague or stakeholder using the supplied facts only. Start with one focused question, not the full rubric. Ask for clarification before treating an ambiguous answer as wrong. Reveal conditional facts when their stated triggers are met, permit equivalent valid approaches and never invent organizational rules, laws, clinical findings, ratings or missing outcomes. Do not require a polished artifact or specialist software. In a short session prioritize the main decision and one material follow-up; allow silence for thinking, check in neutrally, and leave time for the candidate to correct their recommendation and ask a final question. Distinguish simulation from coaching and record any help given. Assess job-relevant evidence, not accent, confidence, speed, credentials or prestige. This is independent practice for adults 18+ and is not a real professional workflow.",
+  "learning_drills": [
+    {
+      "id": "decision-review",
+      "title": "Write a two-sentence data correction",
+      "minutes": 5,
+      "prompt": "Write a two-sentence data correction. Use the fictional facts from this exercise. This is self-guided practice; no model assessment is performed.",
+      "checklist": [
+        "Name numerator and denominator",
+        "Calculate 12% and 25%",
+        "State why audiences differ",
+        "Propose a comparable next test"
+      ]
+    }
+  ]
+}

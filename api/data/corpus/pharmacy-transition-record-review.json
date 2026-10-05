@@ -1,0 +1,122 @@
+{
+  "schema_version": 1,
+  "revision": 1,
+  "id": "pharmacy-transition-record-review",
+  "title": "Pharmacist: Review an Incomplete Care Transition Record",
+  "track": "professional",
+  "domain": "pharmacy_handoff",
+  "areas": [
+    "pharmacy"
+  ],
+  "modality": "written",
+  "difficulty": "mid",
+  "role_track": "individual_contributor",
+  "format_id": "work-sample-defense",
+  "minutes": 30,
+  "review_status": "preview",
+  "tags": [
+    "pharmacy",
+    "community-preview"
+  ],
+  "prompt": "You are a pharmacist reviewing a fictional transition note before a care-team handoff. Supplied artifact: \"Record Q12: item Blue marked stopped in the discharge summary; item Blue remains active in the older clinic list. Person says they have followed the older list. Call to sending team attempted, no reply. Plan: mark reconciled and send routine follow-up.\" Blue is a placeholder, not a real medicine. Exercise policy says conflicting status must stay unresolved until the responsible clinical team verifies it; a clinician must assess any concern about what the person has already taken. Review the note, rewrite its handoff, and explain how you would keep the person informed while verification is pending. Do not choose a treatment, dose, or real clinical urgency threshold.",
+  "blurb": "Find an unsupported reconciliation claim and preserve uncertainty through a clinical-team handoff.",
+  "rubric": [
+    {
+      "key": "reconciliation_evidence",
+      "label": "Distinguish conflict from resolution",
+      "description": "Identifies the incompatible records and the unsupported completion label.",
+      "weight": 1,
+      "anchors": {
+        "0": "Accepts reconciled because someone attempted a call.",
+        "2": "Identifies the conflicting Blue status and leaves reconciliation pending.",
+        "4": "Separates the dated record sources, the person's reported behavior, and the failed contact; removes the unsupported resolution while preserving each fact."
+      }
+    },
+    {
+      "key": "verification_path",
+      "label": "Make verification accountable",
+      "description": "Defines ownership and a fallback without selecting treatment.",
+      "weight": 1,
+      "anchors": {
+        "0": "Chooses one list or tells the person to start or stop Blue.",
+        "2": "Asks the responsible team to verify and seeks clinical assessment of reported use.",
+        "4": "Names a responsible clinician/team, requests acknowledgement and an update time, and uses the supplied duty-clinician fallback if the sending team remains unavailable."
+      }
+    },
+    {
+      "key": "person_and_handoff",
+      "label": "Write a usable pending handoff",
+      "description": "Communicates knowns, unknowns, and follow-through.",
+      "weight": 1,
+      "anchors": {
+        "0": "Deletes the reported use or writes that there is no risk without assessment.",
+        "2": "Rewrites the note with pending status and contact attempted.",
+        "4": "Includes source dates, reported use, the clinical assessment request, contact/fallback owner, and agreed update; explains the uncertainty plainly without giving treatment instructions."
+      }
+    }
+  ],
+  "reference": {
+    "scenario": "You are a pharmacist reviewing a fictional transition note before a care-team handoff. Supplied artifact: \"Record Q12: item Blue marked stopped in the discharge summary; item Blue remains active in the older clinic list. Person says they have followed the older list. Call to sending team attempted, no reply. Plan: mark reconciled and send routine follow-up.\" Blue is a placeholder, not a real medicine. Exercise policy says conflicting status must stay unresolved until the responsible clinical team verifies it; a clinician must assess any concern about what the person has already taken. Review the note, rewrite its handoff, and explain how you would keep the person informed while verification is pending. Do not choose a treatment, dose, or real clinical urgency threshold.",
+    "facts": [
+      {
+        "id": "fact-1",
+        "value": "The discharge summary is dated today; the clinic list is dated three weeks earlier. A newer date does not itself prove the intended plan.",
+        "reveal_when": "candidate asks about record dates or authority"
+      },
+      {
+        "id": "fact-2",
+        "value": "A duty clinician is available for unresolved transition concerns now. The responsible sending team can be reached through its duty line; no callback time has been promised.",
+        "reveal_when": "candidate asks for escalation routes"
+      },
+      {
+        "id": "fact-3",
+        "value": "The person agrees to a call from the care team and wants a clear explanation of who will contact them. No symptoms or clinical assessment findings are supplied.",
+        "reveal_when": "candidate asks about the person's preferences or clinical status"
+      }
+    ],
+    "model_points": [
+      "The artifact contains three distinct evidence types: incompatible records, the person's report, and an unsuccessful contact. None demonstrates reconciliation.",
+      "Use the exercise policy to request verification and clinical assessment; no candidate should infer a correct regimen from the placeholder or dates alone.",
+      "Rewrite the note as pending with acknowledged ownership, a fallback route, and a person-facing update. Preserve the original reported facts and document later corrections transparently."
+    ],
+    "probes": [
+      {
+        "trigger": "candidate marks pending but omits the reported use",
+        "question": "What information does the receiving clinician need to assess the concern?"
+      },
+      {
+        "trigger": "candidate routes directly to the duty clinician rather than waiting for the sending team",
+        "question": "How will the record-verification question still reach an accountable owner?"
+      },
+      {
+        "trigger": "candidate first relies on the newest document then corrects their conclusion",
+        "question": "How would you revise the note so the earlier assumption is not passed on as fact?"
+      }
+    ],
+    "fair_alternatives": [
+      "Contacting the duty clinician and sending team in parallel is acceptable; sequential contact is acceptable if it does not leave the concern without an owner.",
+      "A table of sources, conflicts, and actions or a narrative note can both preserve the required uncertainty.",
+      "Assess the work demonstrated here. Accept relevant examples from education, volunteering, caregiving, placements, or paid work; professional vocabulary and employer pedigree are not evidence of a stronger answer."
+    ],
+    "assessment_limits": "Assess record reasoning, verification, and communication only. This is not a treatment-planning or medication-safety certification; do not introduce drugs, doses, symptoms, or prescribing advice. Unobserved dimensions are not failures. Credit a reasoned correction and distinguish independently demonstrated reasoning from coached assistance. Do not penalize a candidate for an unrevealed conditional fact; credit appropriate requests and conditional plans, and distinguish candidate assumptions from interviewer-supplied evidence."
+  },
+  "interviewer_notes": "Assess record reasoning, verification, and communication only. This is not a treatment-planning or medication-safety certification; do not introduce drugs, doses, symptoms, or prescribing advice. Use only the supplied fictional facts and policies; acknowledge unknowns. Ask one triggered probe at a time after the candidate has finished. Accept plain language and accessible written or spoken explanations. Do not score accent, typing speed, confidence, credentials, or experience with a named employer. Credit revisions and record assistance. All participants are fictional adults; no real patient, client, operational, or confidential data is needed. Allow silence for thinking without treating it as failure. In short sessions prioritize the core decision and one material follow-up, leaving room for a correction and wrap-up.",
+  "learning_drills": [
+    {
+      "id": "focused-practice",
+      "title": "Rewrite a pending reconciliation",
+      "prompt": "Rewrite the quoted note in six lines, separating documented facts from verification and assessment requests. This is self-guided practice; no model assessment is performed.",
+      "minutes": 7,
+      "checklist": [
+        "Keep both source records visible",
+        "Preserve reported use without interpreting it",
+        "Remove the unsupported reconciled claim",
+        "Name an acknowledged owner and fallback"
+      ]
+    }
+  ],
+  "provenance": {
+    "authorship": "Original project scenario, AI-assisted draft using fictional organizations, records, and exercise policies. Practitioner review and scoring calibration pending.",
+    "license": "MIT"
+  }
+}

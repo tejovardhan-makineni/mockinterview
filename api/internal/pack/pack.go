@@ -27,6 +27,7 @@ type Round struct {
 	Domain     string `json:"domain"`   // corpus domain (coding, system_design, low_level_design, case, ...)
 	Modality   string `json:"modality"` // corpus modality (coding, system_design, conversational, ...)
 	Difficulty string `json:"difficulty"`
+	RoleTrack  string `json:"role_track,omitempty"`
 	Minutes    int    `json:"minutes"`
 	QuestionID string `json:"question_id,omitempty"` // if set, pins this exact corpus question
 	Focus      string `json:"focus,omitempty"`       // becomes the director round_focus
@@ -72,8 +73,11 @@ func Validate(p Pack, cat *corpus.Catalog) error {
 		if rd.Minutes < 3 || rd.Minutes > 90 {
 			return fmt.Errorf("%s: round %q minutes must be 3..90", p.ID, rd.ID)
 		}
-		if rd.Difficulty != "" && rd.Difficulty != "entry" && rd.Difficulty != "junior" && rd.Difficulty != "mid" && rd.Difficulty != "senior" && rd.Difficulty != "staff" {
+		if rd.Difficulty != "" && !corpus.ValidDifficulty(rd.Difficulty) {
 			return fmt.Errorf("%s: invalid round difficulty", p.ID)
+		}
+		if rd.RoleTrack != "" && !corpus.ValidRoleTrack(rd.RoleTrack) {
+			return fmt.Errorf("%s: invalid round role_track", p.ID)
 		}
 		if strings.TrimSpace(rd.ID) == "" {
 			return fmt.Errorf("%s: round %d: id required", p.ID, i)
@@ -95,6 +99,9 @@ func Validate(p Pack, cat *corpus.Catalog) error {
 			q, ok := cat.Get(rd.QuestionID)
 			if !ok {
 				return fmt.Errorf("%s: round %q: question_id %q not found in corpus", p.ID, rd.ID, rd.QuestionID)
+			}
+			if rd.RoleTrack != "" && q.RoleTrack != "" && rd.RoleTrack != q.RoleTrack {
+				return fmt.Errorf("%s: round %q: role_track differs from pinned scenario", p.ID, rd.ID)
 			}
 			if q.Domain != rd.Domain || q.Modality != rd.Modality {
 				return fmt.Errorf("%s: round %q: question %q is (%s,%s), round is (%s,%s)",
@@ -130,7 +137,7 @@ func candidates(cat *corpus.Catalog, p Pack, round Round) []string {
 	var ids []string
 	// List filters by (modality, track, domain); track is left empty.
 	for _, s := range cat.List(round.Modality, "", round.Domain) {
-		if !intersects(s.Areas, packAreas) {
+		if !intersects(s.Areas, packAreas) || (round.RoleTrack != "" && s.RoleTrack != "" && s.RoleTrack != round.RoleTrack) {
 			continue
 		}
 		ids = append(ids, s.ID)

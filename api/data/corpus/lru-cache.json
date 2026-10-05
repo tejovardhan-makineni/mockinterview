@@ -141,5 +141,7 @@
       "Omitting dummy head/tail and drowning in null checks for first/last node."
     ]
   },
-  "interviewer_notes": "Let the candidate finish their reasoning and any workspace changes before a focused follow-up. Ask only about a material unresolved issue, then return the floor. Present the plain LRU contract and let the candidate propose and implement a structure. A language builtin can satisfy the contract; if the exercise needs implementation depth, discuss that once after the initial approach is complete. Assess constant-time operations, eviction, updates and the candidate's own tests, including keys stored with nodes and recency changes on both get and put-update when relevant. Stay silent while pointers or other state are being written and corrected. Do not supply linked-list hints after a pause. Thread safety or LFU is an optional later extension after the base task is complete."
+  "interviewer_notes": "Let the candidate finish their reasoning and any workspace changes before a focused follow-up. Ask only about a material unresolved issue, then return the floor. Present the plain LRU contract and let the candidate propose and implement a structure. A language builtin can satisfy the contract; if the exercise needs implementation depth, discuss that once after the initial approach is complete. Assess constant-time operations, eviction, updates and the candidate's own tests, including keys stored with nodes and recency changes on both get and put-update when relevant. Stay silent while pointers or other state are being written and corrected. Do not supply linked-list hints after a pause. Thread safety or LFU is an optional later extension after the base task is complete.",
+  "role_track": "individual_contributor",
+  "revision": 2
 }

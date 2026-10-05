@@ -27,7 +27,16 @@ var validModalities = map[string]bool{
 	"system_design": true, "coding": true, "written": true, "conversational": true,
 }
 var validDifficulty = map[string]bool{
-	"junior": true, "mid": true, "senior": true, "staff": true, "entry": true,
+	"entry": true, "junior": true, "mid": true, "senior": true, "staff": true, "principal": true,
+	"manager": true, "senior_manager": true, "director": true, "vp": true, "executive": true,
+}
+
+// ValidDifficulty is shared by scenario, pack and session validation.
+func ValidDifficulty(level string) bool { return validDifficulty[level] }
+
+// ValidRoleTrack excludes an omitted track: absence means unspecified, never IC.
+func ValidRoleTrack(track string) bool {
+	return track == "individual_contributor" || track == "management" || track == "executive"
 }
 
 type RubricDim struct {
@@ -56,6 +65,7 @@ type Question struct {
 	Areas                 []string            `json:"areas"`  // professions this interview is valid for (shared): engineering, medicine, ...
 	Modality              string              `json:"modality"`
 	Difficulty            string              `json:"difficulty"`
+	RoleTrack             string              `json:"role_track,omitempty"`
 	Tags                  []string            `json:"tags"`
 	Prompt                string              `json:"prompt"`
 	Blurb                 string              `json:"blurb"`
@@ -80,6 +90,7 @@ type Summary struct {
 	Areas         []string         `json:"areas"`
 	Modality      string           `json:"modality"`
 	Difficulty    string           `json:"difficulty"`
+	RoleTrack     string           `json:"role_track,omitempty"`
 	Tags          []string         `json:"tags"`
 	Prompt        string           `json:"prompt"`
 	Blurb         string           `json:"blurb"`
@@ -91,7 +102,7 @@ func (q Question) Summary() Summary {
 		SchemaVersion: q.SchemaVersion, Revision: q.Revision, FormatID: q.FormatID, ReviewStatus: q.ReviewStatus, Minutes: q.Minutes,
 		FormatName: FormatName(q), Agent: InterviewerFor(q).Agent(),
 		ID: q.ID, Title: q.Title, Track: q.Track, Domain: q.Domain, Areas: q.Areas, Modality: q.Modality,
-		Difficulty: q.Difficulty, Tags: q.Tags, Prompt: q.Prompt, Blurb: q.Blurb,
+		Difficulty: q.Difficulty, RoleTrack: q.RoleTrack, Tags: q.Tags, Prompt: q.Prompt, Blurb: q.Blurb,
 	}
 }
 
@@ -149,7 +160,10 @@ func Validate(q Question) error {
 			return fmt.Errorf("%s: unknown area %q", q.ID, a)
 		}
 	}
-	if !validDifficulty[q.Difficulty] {
+	if q.RoleTrack != "" && !ValidRoleTrack(q.RoleTrack) {
+		return fmt.Errorf("%s: invalid role_track %q", q.ID, q.RoleTrack)
+	}
+	if !ValidDifficulty(q.Difficulty) {
 		return fmt.Errorf("%s: invalid difficulty %q", q.ID, q.Difficulty)
 	}
 	if strings.TrimSpace(q.Prompt) == "" {
@@ -276,6 +290,19 @@ func Load(dir string) (*Catalog, error) {
 func Fingerprint(q Question) string {
 	b, _ := json.Marshal(q)
 	return fmt.Sprintf("%x", sha256.Sum256(b))
+}
+
+// ResolveSnapshot loads a saved attempt into a fresh value. Decoding into the
+// current catalog question would silently inherit new optional fields that did
+// not exist when a legacy snapshot was recorded (including role_track).
+func (c *Catalog) ResolveSnapshot(id string, snapshot json.RawMessage) (Question, bool) {
+	if len(snapshot) > 2 {
+		var frozen Question
+		if json.Unmarshal(snapshot, &frozen) == nil {
+			return frozen, true
+		}
+	}
+	return c.Get(id)
 }
 
 func (c *Catalog) Count() int { return len(c.order) }
