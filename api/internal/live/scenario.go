@@ -38,55 +38,7 @@ func liveQuestion(q corpus.Question) corpus.Question {
 			q.Rubric[i].Description = ""
 		}
 	}
-	if q.ID == "mmi-ethical-dilemma" {
-		q.Reference = withoutLegacyMMIScripts(q.Reference)
-	}
 	return q
-}
-
-// These reviewed, unconditional questions contain no unique scenario facts.
-// Keeping them next to a complete candidate answer caused the director to copy
-// an already answered escalation question. Preserve conditional probes, all
-// other reference fields and unrecognized future entries; scoring and saved
-// attempts retain the original reference. Do not generalize this to arbitrary
-// follow_ups, which can contain the only copy of a numerical/clinical variant.
-func withoutLegacyMMIScripts(reference json.RawMessage) json.RawMessage {
-	var material map[string]json.RawMessage
-	if json.Unmarshal(reference, &material) != nil {
-		return reference
-	}
-	var followups []json.RawMessage
-	if json.Unmarshal(material["follow_ups"], &followups) != nil {
-		return reference
-	}
-	known := map[string]bool{
-		"How would you word the opening of your conversation with Sam?":                         true,
-		"Who exactly would you escalate to, and why that person?":                               true,
-		"How would you handle it if Sam became angry or denied everything?":                     true,
-		"If you were unsure whether what you smelled was alcohol, would that change your plan?": true,
-		"How do you weigh your friendship against your professional duty when they conflict?":   true,
-	}
-	kept := make([]json.RawMessage, 0, len(followups))
-	for _, entry := range followups {
-		var script string
-		if json.Unmarshal(entry, &script) == nil && known[script] {
-			continue
-		}
-		kept = append(kept, entry)
-	}
-	if len(kept) == len(followups) {
-		return reference
-	}
-	if len(kept) == 0 {
-		delete(material, "follow_ups")
-	} else {
-		material["follow_ups"], _ = json.Marshal(kept)
-	}
-	projected, err := json.Marshal(material)
-	if err != nil {
-		return reference
-	}
-	return projected
 }
 
 const workOpeningFocus = "WAIT SILENTLY after stating the task. Give the candidate the floor to decide how to begin and produce a coherent response. Do not ask them to clarify, outline steps, name a framework or suggest requirements; observe whether they do so independently."

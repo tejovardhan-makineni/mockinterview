@@ -5,12 +5,14 @@ package live
 // not a quality verdict: review the saved responses against each criterion.
 // RUN_DIRECTOR_PROVIDER_EVAL=1 GEMINI_API_KEY=... DIRECTOR_EVAL_OUTPUT=/private/results.json
 // go test ./internal/live -run TestDirectorProviderEvaluation -count=1 -timeout=12m
+// DIRECTOR_EVAL_MODES=text restricts the run to text; unset runs text and voice.
 
 import (
 	"context"
 	"crypto/sha256"
 	"encoding/hex"
 	"encoding/json"
+	"fmt"
 	"os"
 	"strings"
 	"testing"
@@ -105,9 +107,66 @@ func TestConversationEvaluationFixtures(t *testing.T) {
 	}
 }
 
+func directorEvaluationModes(value string, configured bool) ([]string, error) {
+	if !configured {
+		return []string{"text", "voice"}, nil
+	}
+	modes := strings.Split(value, ",")
+	seen := map[string]bool{}
+	for i, raw := range modes {
+		mode := strings.TrimSpace(raw)
+		if mode != "text" && mode != "voice" {
+			return nil, fmt.Errorf("DIRECTOR_EVAL_MODES contains invalid mode %q; use text, voice, or text,voice", mode)
+		}
+		if seen[mode] {
+			return nil, fmt.Errorf("DIRECTOR_EVAL_MODES repeats mode %q", mode)
+		}
+		seen[mode] = true
+		modes[i] = mode
+	}
+	return modes, nil
+}
+
+func TestDirectorEvaluationModes(t *testing.T) {
+	for _, tc := range []struct {
+		name       string
+		value      string
+		configured bool
+		want       string
+	}{
+		{name: "unset defaults to both", want: "text,voice"},
+		{name: "text only", value: "text", configured: true, want: "text"},
+		{name: "voice only", value: "voice", configured: true, want: "voice"},
+		{name: "explicit ordered selection", value: " voice, text ", configured: true, want: "voice,text"},
+		{name: "explicit empty", configured: true},
+		{name: "whitespace only", value: " ", configured: true},
+		{name: "unknown mode", value: "text,audio", configured: true},
+		{name: "empty member", value: "text,", configured: true},
+		{name: "duplicate would repeat a billable call", value: "text,text", configured: true},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			got, err := directorEvaluationModes(tc.value, tc.configured)
+			if tc.want == "" {
+				if err == nil {
+					t.Fatal("invalid mode selection could make unintended billable calls")
+				}
+				return
+			}
+			if err != nil || strings.Join(got, ",") != tc.want {
+				t.Fatalf("got modes %v and error %v, want %s", got, err, tc.want)
+			}
+		})
+	}
+}
+
 func TestDirectorProviderEvaluation(t *testing.T) {
 	if os.Getenv("RUN_DIRECTOR_PROVIDER_EVAL") != "1" {
 		t.Skip("explicit opt-in required: billable provider evaluation")
+	}
+	modesValue, modesConfigured := os.LookupEnv("DIRECTOR_EVAL_MODES")
+	modes, err := directorEvaluationModes(modesValue, modesConfigured)
+	if err != nil {
+		t.Fatal(err)
 	}
 	key := os.Getenv("GEMINI_API_KEY")
 	output := os.Getenv("DIRECTOR_EVAL_OUTPUT")
@@ -122,6 +181,7 @@ func TestDirectorProviderEvaluation(t *testing.T) {
 		PromptSHA256 string `json:"prompt_sha256"`
 		Response     string `json:"response"`
 		AudioBytes   int    `json:"audio_bytes,omitempty"`
+		ElapsedMS    int64  `json:"elapsed_ms"`
 	}
 	results := []sample{}
 	defer func() {
@@ -138,11 +198,12 @@ func TestDirectorProviderEvaluation(t *testing.T) {
 		q, sections, section := example.scenario(t, cat)
 		system := SystemPrompt(q, "neutral", 3, "main", "", example.Workspace, 15, "aoede", "en", sections, "") + "\n" + activeStageInstruction(section, 12*time.Minute)
 		promptDigest := sha256.Sum256([]byte(system))
-		for _, mode := range []string{"text", "voice"} {
+		for _, mode := range modes {
 			t.Run(example.ID+"/"+mode, func(t *testing.T) {
 				ctx, cancel := context.WithTimeout(context.Background(), 45*time.Second)
 				defer cancel()
 				s := sample{conversationExample: example, Mode: mode, Model: "gemini-2.5-flash", PromptSHA256: hex.EncodeToString(promptDigest[:])}
+				started := time.Now()
 				if mode == "text" {
 					client, err := llm.NewGemini(ctx, key, s.Model)
 					if err != nil {
@@ -208,6 +269,7 @@ func TestDirectorProviderEvaluation(t *testing.T) {
 						t.Error("no native audio received")
 					}
 				}
+				s.ElapsedMS = time.Since(started).Milliseconds()
 				results = append(results, s)
 				if strings.TrimSpace(s.Response) == "" {
 					t.Error("empty response")

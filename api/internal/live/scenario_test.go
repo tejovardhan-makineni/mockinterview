@@ -41,12 +41,10 @@ func TestLiveProjectionPreservesScoringAndConditionalScenarioMaterial(t *testing
 					}
 				}
 			} else {
-				// Conditional clinical findings, numerical variants, disclosure
-				// rules and unknown future fields remain in the live reference.
-				// Only reviewed unconditional MMI scripts may be removed; the
-				// original snapshot and scoring reference remain unchanged above.
-				expectedRef := liveQuestion(q).Reference
-				if strings.Count(p, string(expectedRef)) != 1 {
+				// Legacy probes can contain the only copy of conditional clinical
+				// findings, numerical variants and disclosure rules. Preserve the
+				// entire reference once, including unknown future field types.
+				if strings.Count(p, string(q.Reference)) != 1 {
 					t.Fatal("conditional scenario reference lost or duplicated")
 				}
 				if q.InterviewerNotes != "" && !strings.Contains(p, q.InterviewerNotes) {

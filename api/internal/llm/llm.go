@@ -7,10 +7,10 @@ package llm
 
 import "context"
 
-// Purpose is a coarse hint about what a generation is for. The real client
-// ignores it; the Stub uses it to return appropriately-shaped canned output so
-// downstream code (scoring, resume parsing, the director) works end-to-end
-// without a network call.
+// Purpose is a coarse hint about what a generation is for. Providers can use it
+// to tune generation settings, such as the interview director's reasoning
+// budget. The Stub uses it to return appropriately-shaped canned output so
+// downstream code works end-to-end without a network call.
 type Purpose string
 
 const (
