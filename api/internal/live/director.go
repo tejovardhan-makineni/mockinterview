@@ -45,7 +45,7 @@ var phaseObjective = map[string]string{
 // engineeringGuidance is one shared professional-engineering blurb used for the
 // discipline-specific engineering domains (mechanical/electrical/civil), which
 // all share the same rigor expectations. Keyed to each such domain below.
-const engineeringGuidance = "Professional engineering interview: have the candidate state assumptions and the governing principles/equations FIRST, set the problem up with a clear sketch (free-body / circuit / system diagram) before computing, then work it QUANTITATIVELY with correct units and sanity-checked magnitudes. Probe where each number comes from, the design constraints and safety factors, and the trade-offs behind their choices. Don't accept a plugged-in formula without the assumptions behind it; let them reason out loud."
+const engineeringGuidance = "Professional engineering interview: present the engineering task and allow uninterrupted reasoning, sketching and calculation. Privately assess assumptions, governing principles, units, magnitudes, constraints and safety factors without prescribing their order or naming the desired equation. Read their latest working and credit valid methods and corrections. After a coherent solution, select one consequential uncertainty or tradeoff to discuss; do not quiz them at every calculation step."
 
 const behavioralGuidance = "Conversational behavioral interview: invite one specific situation related to the selected topic, then listen to the story. STAR is a private evidence guide, never a checklist to read aloud or a required answer order. Concrete personal actions satisfy ownership; do not ask for those actions again merely to seek more detail. An outcome satisfies the result dimension, including a meaningful qualitative outcome. Follow up only on a material missing element. When the story is complete, a useful new question explores a distinct judgment or competency rather than requesting actions, results or reflection already supplied. Completing one story does not end the interview while there is useful time for a new question. Do not demand invented numbers, a replacement example after an exhausted gap, or particular pronouns. Apply the DELIVERY DECISION to choose the next turn."
 
@@ -59,26 +59,26 @@ const mbaGuidance = "MBA admissions conversation about career motivation, goals 
 var domainGuidance = map[string]string{
 	// Software / technical.
 	"system_design":    "Let them drive: requirements → back-of-envelope estimates → high-level design → data model/API → deep dives (bottlenecks, scaling, failure, CDC, caching) → tradeoffs. State the problem without asking what they would clarify. Answer only the facts they request and wait. Let them finish a coherent proposal, including long stretches to draw on the whiteboard. Do not treat an unfinished sketch or a named component as permission to probe. Don't rush; go deep on one or two areas rather than skimming everything.",
-	"ml_system_design": "As system design, but center it on ML infra: data/feature pipeline, training vs serving, evaluation, drift/monitoring, feedback loops. Probe eval and drift specifically.",
-	"low_level_design": "Object-oriented design: expect classes, responsibilities, relationships, and design patterns. Probe SOLID and extensibility ('how would you add feature X?'). Let them sketch a class diagram.",
-	"coding":           "Pace: clarify the problem → discuss approach → implement → verify correctness and complexity. These are separate conversation steps, not a checklist to ask at once. Let the candidate work and self-correct. Review the current code for real correctness or complexity issues, then choose one significant uncertainty to probe with a neutral request to trace or test their code. Do not reveal the bug, its location, the fix, or a better algorithm in simulation mode. If the code has changed, reassess it before asking; never repeat a stale bug probe after a valid correction. If they remain stuck, apply the shared follow-up limit and move to another useful assessment area.",
+	"ml_system_design": "Candidate-led ML design: let them develop the data, training and serving system before discussing it. Privately assess evaluation, drift and feedback alongside the actual requirements; do not announce this checklist or require every topic as a separate question. Review the current diagram and select only a consequential unresolved choice after their proposal is complete.",
+	"low_level_design": "Let the candidate develop classes, responsibilities and interactions at their own pace. Evaluate whether the design meets the requirements and can evolve; do not demand a named pattern or recite SOLID. Discuss one concrete change or unresolved responsibility only after their initial design is complete, crediting explanations already given.",
+	"coding":           "Let the candidate independently clarify, choose an approach, implement and verify their solution. These are private assessment priorities, not required conversation steps or a checklist to ask. Give them time to work and self-correct. Review the current code for real correctness or complexity issues, then choose one significant uncertainty to probe with a neutral request to trace or test their code. Do not reveal the bug, its location, the fix, or a better algorithm in simulation mode. If the code has changed, reassess it before asking; never repeat a stale bug probe after a valid correction. If they remain stuck, apply the shared follow-up limit and move to another useful assessment area.",
 	"behavioral":       behavioralGuidance,
 	// Medicine.
-	"clinical_reasoning": "Clinical reasoning: structured history → differential (life-threatening causes FIRST) → targeted investigations → management → safety-netting. Do not accept jumping to treatment without a differential.",
-	"medical_residency":  "MMI-style: assess ethical reasoning, empathy, communication, and structure. Present the station scenario and probe how they'd act and why; look for balanced perspectives.",
+	"clinical_reasoning": "Present the fictional clinical problem and the candidate's role, then let them give a coherent clinical response. Privately assess history, differential, investigations, management and safety without coaching that sequence or revealing a diagnosis. Provide only requested findings that exist in the scenario. Credit reasoning already supplied; a follow-up should explore one material uncertainty, not walk through every rubric item.",
+	"medical_residency":  "Run the authored MMI station in its assigned role. Listen to the candidate's complete response and assess judgment, empathy and communication privately. Do not dictate an ethics framework, prompt every perspective, or turn a patient interaction into an oral examination. Follow up selectively on a consequential gap after they finish.",
 	// Nursing.
-	"prioritization": "Prioritization + patient safety (ABCs), escalation, and delegation. Probe what they'd do first and why.",
+	"prioritization": "Present the fictional nursing situation and let the candidate prioritize and explain their response. Privately assess patient safety, escalation and delegation without suggesting ABCs or a diagnosis. Wait through their reasoning and ask about one material unresolved risk only after the response is complete.",
 	// Law.
-	"legal_practice": "IRAC discipline: issue-spotting → rule → application → conclusion, and press for counterarguments. For written, expect a structured memo.",
-	"issue_spotting": "IRAC discipline: issue-spotting → rule → application → conclusion, and press for counterarguments. For written, expect a structured memo.",
+	"legal_practice": "Let the candidate analyze the supplied legal scenario or complete the written memo. Privately assess issue identification, applicable supplied rules, reasoning and conclusions without requiring IRAC wording or order. In an advocacy roleplay, remain in the assigned role and ask occasional focused questions at natural pauses; do not interrupt every point or invent law.",
+	"issue_spotting": "Allow time to read, analyze and write a coherent response to the supplied legal scenario. Privately assess issues, rules, application and conclusions without teaching an answer framework. Review the current draft before selecting one material unresolved issue or counterargument; do not re-ask matters already addressed.",
 	// Consulting.
-	"case": "Expect an upfront STRUCTURE/framework before diving in, a hypothesis, and QUANTITATIVE reasoning. Provide case data (numbers) when asked. Push back on 'bigger is better' with 'how would you structure this?'.",
+	"case": "Present the business problem and let the candidate structure and investigate it independently. Answer only requested case facts, then return the floor for analysis and calculations. Privately assess structure, hypotheses and quantitative reasoning without prompting them. Wait for a coherent recommendation before selecting a consequential uncertainty; do not ask for a framework or calculation merely because it appears in the rubric.",
 	// Product.
-	"product_sense": "Product sense: user + problem + prioritization + metrics + tradeoffs. Push for a crisp target user and how they'd measure success.",
+	"product_sense": "Let the candidate develop a coherent product proposal. Privately assess users, problem definition, priorities, metrics and tradeoffs without prescribing that checklist. Follow up on one significant unresolved decision after the proposal is complete, crediting evidence already volunteered.",
 	// Finance.
-	"valuation": "Expect a clear framework (e.g. DCF steps), explicit assumptions, quantitative rigor, and sensible judgment. Ask for sensitivities.",
+	"valuation": "Give the candidate room to choose and execute a valuation approach, including calculations. Assess assumptions, quantitative rigor and judgment privately without naming a preferred method. After their recommendation, discuss one consequential uncertainty or sensitivity if it has not already been addressed.",
 	// Data science.
-	"experimentation": "Experiment/statistical rigor: problem framing, experiment design, validity threats, interpretation. Probe metrics and confounders.",
+	"experimentation": "Let the candidate frame and develop the experimental analysis before probing. Privately assess design, metrics, validity and interpretation without listing desired methods or confounders. Ask at most one consequential unresolved question after their explanation, and credit revisions to calculations or written work.",
 	// Professional-engineering disciplines (mechanical/electrical/civil) — shared blurb.
 	"thermodynamics":    engineeringGuidance,
 	"mechanics":         engineeringGuidance,
@@ -101,6 +101,9 @@ type Section struct {
 	Title    string
 	Kind     string
 	Guidance string
+	// CandidateLed marks substantive code, design and written workspace stages,
+	// including authored/custom stages whose generic kind is "core".
+	CandidateLed bool
 }
 
 // sectionTitle is the human-facing title shown per section kind (surfaced to the
@@ -124,13 +127,13 @@ var sectionTitle = map[string]string{
 // and SystemPrompt lists them all so the model knows the arc up front.
 var sectionGuidance = map[string]string{
 	"intro":      "Open warmly: greet the candidate, say your name, ONE bit of genuine small talk, and let them give a short self-introduction. Keep it light and human — no interview question yet. React naturally to what they say.",
-	"resume":     "Deep-dive ONE project they're genuinely proud of. Probe their INDIVIDUAL contribution ('what was YOUR part, specifically?'), the key decisions they made and why, and the tradeoffs they weighed. Ask 1-2 varied, specific follow-ups drawn from THEIR answer. VARY your questions every run — do not fall back on the same stock resume questions; make each one fit what they actually said. If their answer is thin, evasive, or a joke, ask ONE genuine follow-up to draw out the real story before moving on.",
+	"resume":     "Invite one relevant project or experience from the candidate's background, then listen to the complete account. Treat contribution, decisions, tradeoffs and outcomes as private evidence priorities, not a checklist or a required narrative order. Credit evidence already supplied regardless of pronouns. Follow up only on one consequential missing detail when needed; a complete account does not require extra probes. Respect requests to move on and do not infer evasiveness or poor competence from a brief answer.",
 	"coding":     "Let the candidate explain their approach and work in the editor. Review their latest code, allowing self-correction before selecting one significant correctness or complexity issue. Ask one neutral testing or reasoning question without disclosing a bug or fix in simulation mode. Credit a valid correction immediately; do not repeat resolved probes. Respect the shared follow-up limit if progress stops.",
 	"lld":        "Let the candidate explain classes, interfaces and relationships. Select one or two important design choices for depth; a newly mentioned component is not automatically a reason to interrupt or start another probe sequence. Ask about one unresolved aspect of a specific choice at a time, such as responsibility or extensibility. Credit explanations already given and move on when there is enough evidence or the gap's follow-ups are exhausted.",
 	"design":     "State the problem and give the candidate the floor, without prompting requirements gathering. Let them independently drive requirements → estimates → high-level design → data model/API → deep dives. Wait while they build and explain a coherent proposal; a snapshot or named component is not a finished answer. Answer only each clarification asked and wait. Select one or two important choices for depth from what they actually propose. If they mention a queue, cache and database together, choose one high-value unresolved aspect rather than probing every component. Ask one neutral focused question only after they finish or invite feedback, credit reasoning already given, then return the floor. Use at most one or two areas for depth, not a continuous oral quiz.",
 	"behavioral": behavioralGuidance,
-	"clinical":   "Structured clinical reasoning: history → differential (life-threatening causes FIRST) → targeted investigations → management → safety-netting, or MMI-style ethical/communication probing for a station scenario. Do not accept jumping to treatment without a differential; probe the 'why' behind each step.",
-	"case":       "Expect an upfront STRUCTURE/framework before diving in, a clear hypothesis, and QUANTITATIVE reasoning. Provide case data (numbers) when they ask. Push back on hand-waving with 'how would you structure this?' and make them show the math.",
+	"clinical":   "Present the clinical or MMI station and allow a complete response in the assigned role. Privately assess reasoning, communication and safety; do not reveal a diagnosis or prescribe an answer sequence. Supply requested scenario findings and wait. After the response, clarify only a consequential unresolved point rather than examining every step.",
+	"case":       "Let the candidate lead the case analysis and calculations. Answer only the case facts they ask for, then wait. Observe how they structure the problem independently; do not prompt a framework. Discuss one consequential unresolved point after a coherent proposal rather than asking for each analysis step.",
 	"core":       "Run the main question in a domain-appropriate, structured way. Let the candidate drive; probe their reasoning, choices, and tradeoffs one question at a time, and go deep on the highest-signal areas rather than skimming.",
 	"wrap":       "Wind down: ask 'Before we wrap up, do you have any questions for me?' and STOP. WAIT for their reply and answer each question briefly and naturally (silently note the quality of what they ask). Only once they clearly have no more questions, thank them warmly and wish them well, THEN call the end_interview function.",
 }
@@ -169,12 +172,12 @@ func SectionPlan(q corpus.Question, hasResume bool, roundFocus string) []Section
 			if stage.Kind != "intro" && stage.Kind != "wrap" && roundFocus != "" {
 				guidance += " Round focus: " + roundFocus
 			}
-			plan = append(plan, Section{ID: stage.ID, Title: stage.Title, Kind: stage.Kind, Guidance: guidance, Share: stage.Share})
+			plan = append(plan, Section{ID: stage.ID, Title: stage.Title, Kind: stage.Kind, Guidance: guidance, Share: stage.Share, CandidateLed: candidateLedWork(q, stage.Kind)})
 		}
 		return plan
 	}
 	mk := func(id, kind string) Section {
-		return Section{ID: id, Title: sectionTitle[kind], Kind: kind, Guidance: sectionGuidance[kind]}
+		return Section{ID: id, Title: sectionTitle[kind], Kind: kind, Guidance: sectionGuidance[kind], CandidateLed: candidateLedWork(q, kind)}
 	}
 	plan := []Section{mk("intro", "intro")}
 	if hasResume && q.Domain != "medical_residency" && (q.Settings.Minutes == 0 || q.Settings.Minutes >= 15) {
@@ -191,6 +194,13 @@ func SectionPlan(q corpus.Question, hasResume bool, roundFocus string) []Section
 	plan = append(plan, core)
 	plan = append(plan, mk("wrap", "wrap"))
 	return plan
+}
+
+func candidateLedWork(q corpus.Question, kind string) bool {
+	if kind == "intro" || kind == "resume" || kind == "wrap" {
+		return false
+	}
+	return q.Modality == "coding" || q.Modality == "system_design" || q.Modality == "written"
 }
 
 // personaTone combines the persona's directive (owned by the persona catalog)

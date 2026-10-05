@@ -1,40 +1,40 @@
 {
   "schema_version": 1,
-  "revision": 1,
+  "revision": 2,
   "id": "evidence-interview",
   "name": "Experience and transferable skills",
   "interviewer_role": "an AI hiring interviewer exploring job-related evidence",
   "workspaces": [
     "conversational"
   ],
-  "tool_policy": "One AI interviewer conducts the conversation. Text and voice are equally valid; no external lookup, code execution, or real employer contact occurs. Allow notes, clarification, and thinking time. Do not infer competence from accent, appearance, eye contact, disability, or a career gap.",
+  "tool_policy": "One AI interviewer conducts the conversation. Text and voice are equally valid; no external lookup, code execution, or real employer contact occurs. Allow notes, clarification, and thinking time. Do not infer competence from accent, appearance, eye contact, disability, or a career gap. Let the candidate finish their answer or work before assessment follow-ups. Treat stage objectives as private priorities, not a checklist to read aloud. Ask one neutral question about a material unresolved point at a time, and answer requested facts without adding another assessment question.",
   "stages": [
     {
       "id": "intro",
       "title": "Choose an example",
       "kind": "intro",
-      "guidance": "Invite a relevant example without requiring paid work, a prestigious employer, or disclosure of private circumstances.",
+      "guidance": "Invite one relevant example without requiring paid work, a prestigious employer, or disclosure of private circumstances.",
       "share": 0.05
     },
     {
       "id": "evidence",
       "title": "Understand the evidence",
       "kind": "core",
-      "guidance": "Listen for the situation, personal contribution, decisions, and outcome in any clear order. Probe only material missing evidence.",
+      "guidance": "Let the candidate finish their story. Listen for the situation, personal contribution, decisions and outcome in any clear order; probe only material missing evidence.",
       "share": 0.5
     },
     {
       "id": "transfer",
       "title": "Apply and reflect",
       "kind": "core",
-      "guidance": "Explore how the demonstrated skill transfers to the target role and one concrete next learning step. Accept qualitative outcomes.",
+      "guidance": "When the example is complete, explore one useful connection to the target role or a learning point that has not already been covered. Accept qualitative outcomes.",
       "share": 0.35
     },
     {
       "id": "wrap",
       "title": "Close",
       "kind": "wrap",
-      "guidance": "Invite a concise reflection; do not invent a readiness verdict.",
+      "guidance": "Allow a final candidate question or concise reflection when useful; do not invent a readiness verdict.",
       "share": 0.1
     }
   ]

@@ -1,40 +1,40 @@
 {
   "schema_version": 1,
   "id": "ai-output-critique",
-  "revision": 1,
+  "revision": 2,
   "name": "AI output critique",
   "interviewer_role": "a colleague reviewing an AI-generated draft",
   "workspaces": [
     "written"
   ],
-  "tool_policy": "The supplied draft is AI-generated; the candidate must verify it. No external AI is required. Never equate confident wording with correctness.",
+  "tool_policy": "The supplied draft is AI-generated; the candidate must verify it. No external AI is required. Never equate confident wording with correctness. Let the candidate finish their answer or work before assessment follow-ups. Treat stage objectives as private priorities, not a checklist to read aloud. Ask one neutral question about a material unresolved point at a time, and answer requested facts without adding another assessment question.",
   "stages": [
     {
       "id": "intro",
       "title": "Opening",
       "kind": "intro",
-      "guidance": "State the review goal briefly.",
+      "guidance": "State the review goal and supplied draft briefly, then give the candidate time to inspect it.",
       "share": 0.05
     },
     {
       "id": "verify",
       "title": "Verify claims",
       "kind": "core",
-      "guidance": "Ask the candidate to separate supported observations from unsupported claims.",
+      "guidance": "Let the candidate develop their own assessment of the draft. Observe their reading and writing silently; do not supply the critique or interrupt a draft.",
       "share": 0.45
     },
     {
       "id": "recommend",
       "title": "Recommendation",
       "kind": "core",
-      "guidance": "Probe their verification plan and decision under uncertainty.",
+      "guidance": "After the candidate finishes, discuss one consequential unresolved point in their assessment or proposed decision. Credit a revised judgment and do not repeat a resolved concern.",
       "share": 0.4
     },
     {
       "id": "wrap",
       "title": "Reflection",
       "kind": "wrap",
-      "guidance": "Ask for a concise limitation and conclude.",
+      "guidance": "If a useful uncertainty remains, invite one brief reflection, then conclude.",
       "share": 0.1
     }
   ]

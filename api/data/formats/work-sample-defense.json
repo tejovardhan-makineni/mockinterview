@@ -1,41 +1,41 @@
 {
   "schema_version": 1,
   "id": "work-sample-defense",
-  "revision": 1,
+  "revision": 2,
   "name": "Work-sample review and defense",
   "interviewer_role": "a colleague reviewing a small fictional work sample",
   "workspaces": [
     "written",
     "coding"
   ],
-  "tool_policy": "Review the supplied artifact. Do not claim code or SQL was executed. The candidate may use notes and explain pseudocode.",
+  "tool_policy": "Review the supplied artifact. Do not claim code or SQL was executed. The candidate may use notes and explain pseudocode. Let the candidate finish their answer or work before assessment follow-ups. Treat stage objectives as private priorities, not a checklist to read aloud. Ask one neutral question about a material unresolved point at a time, and answer requested facts without adding another assessment question.",
   "stages": [
     {
       "id": "intro",
       "title": "Opening",
       "kind": "intro",
-      "guidance": "Briefly explain the artifact and ask whether the candidate has a clarification.",
+      "guidance": "Briefly explain the artifact and its purpose, then give the candidate time to inspect it. Let them initiate clarifications independently.",
       "share": 0.05
     },
     {
       "id": "review",
       "title": "Review",
       "kind": "core",
-      "guidance": "Let the candidate inspect and critique the artifact. Probe one concrete risk at a time.",
+      "guidance": "Let the candidate inspect and develop a first-pass review without interruptions. Answer only requested facts and observe the draft silently.",
       "share": 0.4
     },
     {
       "id": "defense",
       "title": "Defend and revise",
       "kind": "core",
-      "guidance": "Ask for an alternative, a verification plan and a focused improvement. Revisit a correction fairly.",
+      "guidance": "After the candidate finishes the review, select one material unresolved risk or decision in the actual artifact. Ask a neutral question, allow a revision, and credit a correction instead of demanding an alternative, tests and improvements at once.",
       "share": 0.45
     },
     {
       "id": "wrap",
       "title": "Reflection",
       "kind": "wrap",
-      "guidance": "Ask what remains uncertain, then thank the candidate and end.",
+      "guidance": "If useful, invite one remaining uncertainty, then thank the candidate and end.",
       "share": 0.1
     }
   ]

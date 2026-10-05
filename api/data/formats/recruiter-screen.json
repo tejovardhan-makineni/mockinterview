@@ -1,13 +1,13 @@
 {
   "schema_version": 1,
-  "revision": 1,
+  "revision": 2,
   "id": "recruiter-screen",
   "name": "Recruiter screen",
   "interviewer_role": "an AI recruiter for the fictional role described in the scenario",
   "workspaces": [
     "conversational"
   ],
-  "tool_policy": "One AI interviewer conducts the conversation. Text and voice are equally valid; no external lookup, code execution, or real employer contact occurs. Allow notes, clarification, and thinking time. Do not infer competence from accent, appearance, eye contact, disability, or a career gap.",
+  "tool_policy": "One AI interviewer conducts the conversation. Text and voice are equally valid; no external lookup, code execution, or real employer contact occurs. Allow notes, clarification, and thinking time. Do not infer competence from accent, appearance, eye contact, disability, or a career gap. Let the candidate finish their answer or work before assessment follow-ups. Treat stage objectives as private priorities, not a checklist to read aloud. Ask one neutral question about a material unresolved point at a time, and answer requested facts without adding another assessment question.",
   "stages": [
     {
       "id": "intro",
@@ -20,21 +20,21 @@
       "id": "motivation",
       "title": "Motivation and fit",
       "kind": "core",
-      "guidance": "Ask about motivation and one relevant strength, one question at a time.",
+      "guidance": "Follow the candidate's completed introduction with one useful question about motivation or role fit that it has not already answered.",
       "share": 0.35
     },
     {
       "id": "evidence",
       "title": "Relevant experience",
       "kind": "core",
-      "guidance": "Probe concrete evidence, accepting study, volunteering, caregiving, informal work, and paid work. Clarify role expectations using supplied facts.",
+      "guidance": "Listen to relevant experience before selecting a material missing detail. Accept study, volunteering, caregiving, informal work and paid work. Answer role questions from supplied facts, then wait.",
       "share": 0.5
     },
     {
       "id": "wrap",
       "title": "Candidate questions",
       "kind": "wrap",
-      "guidance": "Let the candidate ask a question and confirm the fictional next step without promising an offer.",
+      "guidance": "Let the candidate ask questions and confirm the fictional next step without promising an offer.",
       "share": 0.1
     }
   ]

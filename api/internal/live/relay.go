@@ -110,6 +110,7 @@ type Store interface {
 
 type Relay struct {
 	background    context.Context
+	activityClock func() time.Time // defaults to time.Now; independent of persisted session deadlines
 	hosted        bool
 	encryptionKey []byte
 	attempt       store.Session
@@ -318,6 +319,12 @@ func (r *Relay) Handle(w http.ResponseWriter, req *http.Request) {
 // ---- text director (stub / no key): browser speaks via Web Speech API ----
 
 func (r *Relay) runText(conn *websocket.Conn, sessionID, system string, sections []Section) {
+	now := time.Now
+	if r.activityClock != nil {
+		now = r.activityClock
+	}
+	activity := newConversationActivity(sections, now())
+	candidateWorking := false
 	ctx, cancel := context.WithDeadline(r.parentContext(), r.deadline())
 	defer cancel()
 	wc := r.socket(conn, sessionID)
@@ -327,6 +334,9 @@ func (r *Relay) runText(conn *websocket.Conn, sessionID, system string, sections
 	prior, e := r.store.Transcript(ctx, sessionID)
 	if e != nil {
 		return
+	}
+	if len(prior) > 0 && prior[len(prior)-1].Role == "candidate" {
+		candidateWorking = requestsWorkingTime(prior[len(prior)-1].Text)
 	}
 	history := []llm.Message{}
 	workspace := ""
@@ -365,23 +375,88 @@ func (r *Relay) runText(conn *websocket.Conn, sessionID, system string, sections
 			return e
 		}
 		history = append(history, llm.Message{Role: "model", Text: text})
+		activity.observe(now(), false, false)
 		return wc.writeServerMsg(serverMsg{Type: "say", Role: "interviewer", Text: text})
 	}
 	if first != "" && say(first) != nil {
 		return
 	}
+	type idleCompletion struct {
+		id    uint64
+		reply string
+		err   error
+	}
+	type textEvent struct {
+		message    *clientMsg
+		idle       *idleCompletion
+		readFailed bool
+	}
+	// A single event queue keeps already received input ahead of later provider
+	// results. Optional check-ins must never stop us reading candidate activity.
+	events := make(chan textEvent, 32)
+	go func() {
+		for {
+			mt, data, err := conn.ReadMessage()
+			if err != nil {
+				select {
+				case events <- textEvent{readFailed: true}:
+				case <-ctx.Done():
+				}
+				return
+			}
+			if mt != websocket.TextMessage {
+				continue
+			}
+			var message clientMsg
+			if json.Unmarshal(data, &message) != nil {
+				continue
+			}
+			select {
+			case events <- textEvent{message: &message}:
+			case <-ctx.Done():
+				return
+			}
+		}
+	}()
+	var nextIdleID, pendingIdleID uint64
+	var idleCancel context.CancelFunc
+	cancelIdle := func() {
+		if idleCancel != nil {
+			idleCancel()
+			idleCancel = nil
+		}
+		pendingIdleID = 0
+	}
+	defer cancelIdle()
 	for {
-		mt, data, e := conn.ReadMessage()
-		if e != nil {
+		var event textEvent
+		select {
+		case <-ctx.Done():
+			return
+		case event = <-events:
+		}
+		if event.readFailed {
 			return
 		}
-		if mt != websocket.TextMessage {
+		if result := event.idle; result != nil {
+			if result.id != pendingIdleID {
+				continue
+			} // candidate already resumed
+			cancelIdle()
+			if result.err != nil {
+				// Do not terminate a healthy interview for an optional courtesy.
+				// Provider errors can contain credentials: log no raw error.
+				slog.Warn("optional interview check-in unavailable", "session", sessionID)
+				activity.deferNudge(now())
+				_ = wc.writeServerMsg(serverMsg{Type: "nudge_deferred"})
+				continue
+			}
+			if !strings.Contains(result.reply, textIdleSilence) && say(result.reply) != nil {
+				return
+			}
 			continue
 		}
-		var m clientMsg
-		if json.Unmarshal(data, &m) != nil {
-			continue
-		}
+		m := *event.message
 		switch m.Type {
 		case "user_text":
 			if strings.TrimSpace(m.Text) == "" || len(m.Text) > 24000 || len(m.EventID) > 128 {
@@ -397,8 +472,11 @@ func (r *Relay) runText(conn *websocket.Conn, sessionID, system string, sections
 			if m.EventID != "" {
 				_ = wc.writeServerMsg(serverMsg{Type: "ack", EventID: m.EventID})
 			}
+			cancelIdle()
 			history = append(history, llm.Message{Role: "user", Text: m.Text})
-			if requestsWorkingTime(m.Text) {
+			candidateWorking = requestsWorkingTime(m.Text)
+			activity.observe(now(), true, candidateWorking)
+			if candidateWorking {
 				// Preserve their request in history but do not generate a follow-up.
 				continue
 			}
@@ -415,9 +493,43 @@ func (r *Relay) runText(conn *websocket.Conn, sessionID, system string, sections
 		case "canvas":
 			// Retain only the latest snapshot. Five-second observations must not
 			// expand conversation history or become apparent candidate answers.
-			workspace = workspaceObservation(m.Text)
+			latest := workspaceObservation(m.Text)
+			if latest != workspace {
+				cancelIdle()
+			}
+			workspace = latest
 		case "workspace_activity":
-			// Text mode already waits for an explicitly submitted candidate turn.
+			cancelIdle()
+			activity.observe(now(), true, true)
+		case "nudge":
+			// The offline demo does not interpret the semantic idle policy.
+			// Keep it silent rather than advancing its assessment probe bank.
+			if r.llm.Stubbed() {
+				continue
+			}
+			if candidateWorking {
+				continue // an explicit request for the floor outlasts an idle timer
+			}
+			if idleCancel != nil || !activity.allowNudge(now()) {
+				_ = wc.writeServerMsg(serverMsg{Type: "nudge_deferred"})
+				continue
+			}
+			// This is transient context, never a fabricated candidate turn. Use
+			// the configured interviewer language and permit genuine silence.
+			idleHistory := append(append([]llm.Message{}, history...), llm.Message{Role: "user", Text: idleCheckInstruction})
+			idleSystem := system + "\n" + workspace + r.stageContext(sections, wc) + "\n" + textIdleInstruction
+			call, done := context.WithTimeout(ctx, 30*time.Second)
+			idleCancel = done
+			nextIdleID++
+			pendingIdleID = nextIdleID
+			go func(id uint64) {
+				defer done()
+				reply, err := NextTurn(call, r.llm, r.reasonModel, idleSystem, idleHistory)
+				select {
+				case events <- textEvent{idle: &idleCompletion{id: id, reply: reply, err: err}}:
+				case <-ctx.Done():
+				}
+			}(pendingIdleID)
 		case "end":
 			_ = wc.writeServerMsg(serverMsg{Type: "saved"})
 			return

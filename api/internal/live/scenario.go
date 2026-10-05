@@ -41,9 +41,11 @@ func liveQuestion(q corpus.Question) corpus.Question {
 	return q
 }
 
+const workOpeningFocus = "WAIT SILENTLY after stating the task. Give the candidate the floor to decide how to begin and produce a coherent response. Do not ask them to clarify, outline steps, name a framework or suggest requirements; observe whether they do so independently."
+
 func firstQuestionFocus(q corpus.Question) string {
 	if q.Domain == "custom" {
-		return "Choose the first relevant question from the candidate's supplied questions and requested structure. If none were supplied, choose one useful opening question for their profession and practice goal. Ask only that question and wait."
+		return "Choose the first relevant task or question from the candidate's supplied questions and requested structure. Infer the interaction from the actual practice goal, not the generic custom label: for coding, design, calculations, case analysis or written work, present the task and WAIT SILENTLY without prompting a process or clarification. For a conversation, invite one coherent response and listen; for roleplay, begin in the assigned role. If no questions were supplied, choose one useful task for their profession and goal. Never recite the whole question list."
 	}
 	if opening, ok := storyOpenings[q.ID]; ok {
 		return opening
@@ -57,7 +59,7 @@ func firstQuestionFocus(q corpus.Question) string {
 	case "written_screen":
 		return "Write your response to the screening prompt shown in the workspace."
 	case "application_review":
-		return "Which duty would you match to your strongest evidence first?"
+		return workOpeningFocus
 	case "panel_interview":
 		return "I am speaking from the team lead's perspective. What would you prioritize first?"
 	}
@@ -65,13 +67,16 @@ func firstQuestionFocus(q corpus.Question) string {
 	case "ai-output-critique":
 		return "What is your assessment of the AI's main claim?"
 	case "work-sample-defense":
-		return "What is the first concern you notice in the supplied artifact?"
+		return "Invite the candidate to explain or review the supplied work against its stated goal, without implying that it must contain an error. Give them time to read and form a coherent assessment before a follow-up; do not ask for each defect, fix and test as separate compulsory steps."
 	case "incident-simulation":
 		return "What would you do first in this incident?"
 	case "stakeholder-simulation":
 		return "Invite the candidate to open the stakeholder conversation, then respond in character and wait."
 	case "reverse-interview":
 		return "What would you like to know about the role?"
+	}
+	if candidateLedWork(q, "core") {
+		return workOpeningFocus
 	}
 	switch q.Domain {
 	case "first_job":
@@ -89,13 +94,15 @@ func firstQuestionFocus(q corpus.Question) string {
 	case "learning_from_feedback":
 		return "How would you respond to this feedback?"
 	case "coding", "system_design", "ml_system_design", "low_level_design":
-		return "WAIT SILENTLY after stating the problem. Give the candidate the floor to decide how to begin. Do not ask them to clarify, outline steps, or suggest requirements; observe whether they do so independently."
-	case "clinical_reasoning", "prioritization":
-		return "What would you assess first?"
-	case "case":
-		return "Where would you start investigating this problem?"
+		return workOpeningFocus
+	case "clinical_reasoning", "prioritization", "medical_residency":
+		return "Invite one complete response to the station in the candidate's assigned role, then listen. Do not name a diagnosis, ethics framework or preferred action sequence. If the station is a patient interaction, respond in that assigned role instead of asking how the candidate would handle your replies."
+	case "case", "product_sense", "valuation", "experimentation":
+		return workOpeningFocus
+	case "behavioral":
+		return "Invite one specific real experience relevant to the selected topic, then listen to the complete story. Do not prompt the STAR framework or ask separately for situation, actions and results in the opening."
 	default:
-		return "What is your first step in approaching this scenario?"
+		return "Invite one coherent, role-appropriate response to the actual task in the candidate brief. Do not replace it with a generic first-step/next-step quiz or prescribe an answer framework. Listen to the response before choosing a material follow-up."
 	}
 }
 
@@ -124,6 +131,8 @@ func firstQuestionSetup(q corpus.Question) string {
 		return "The candidate is on call. Checkout errors rose after a deployment, and support reports failed purchases. Further incident observations are available when requested."
 	case "stakeholder-scope-negotiation":
 		return "The client expects three promised features this month, but the team can safely deliver only two. You play the client lead; the candidate opens the conversation."
+	case "career-job-description-evidence":
+		return "A fictional coordinator role has three duties: maintain an accurate task list, explain updates clearly, and learn a shared scheduling tool. A degree and prior coordinator title are not required. State all three duties so the task is understandable without reading a screen. The task is to create a small evidence table using real experience or explicitly labeled hypothetical examples, marking gaps honestly. Present that task and wait; discussing one row comes after the candidate drafts it."
 	case "candidate-questions-role-fit":
 		return "This is the final part of a fictional interview with the hiring manager of a small service team. The candidate asks questions to understand role fit."
 	default:

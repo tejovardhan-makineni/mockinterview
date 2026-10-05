@@ -22,11 +22,29 @@ import (
 // draw must not speak over the candidate, and snapshots must not elicit speech.
 func TestNativeWorkingRequestWithholdsFollowupAndResumesOnCandidateTurn(t *testing.T) {
 	for _, boundary := range []string{"provider ignored working request", "input transcription finished", "waiting for input"} {
-		t.Run(boundary, func(t *testing.T) { testNativeWorkingRequest(t, boundary) })
+		t.Run(boundary, func(t *testing.T) {
+			testNativeWorkingRequest(t, boundary, Section{ID: "core", Kind: "design", Title: "System design"}, "Why don't you let me draw the system design?", "client → queue → stream processor → analytics store")
+		})
 	}
 }
 
-func testNativeWorkingRequest(t *testing.T, boundary string) {
+func TestNativeWorkingRequestsAcrossModalities(t *testing.T) {
+	for _, tc := range []struct {
+		name, boundary, request, workspace string
+		section                            Section
+	}{
+		{"coding", "input transcription finished", "Let me code the solution.", "return result;", Section{Kind: "coding", Title: "Coding"}},
+		{"written response", "waiting for input", "Let me draft the response.", "Draft recommendation with supporting evidence", Section{Kind: "core", Title: "Written response", CandidateLed: true}},
+		{"case calculation", "input transcription finished", "Let me calculate the numbers.", "Revenue = volume × price", Section{Kind: "case", Title: "Case"}},
+		{"clinical notes", "provider ignored working request", "Let me review the case.", "History and differential notes", Section{Kind: "clinical", Title: "Clinical reasoning"}},
+		{"behavioral notes", "waiting for input", "Let me think about it.", "Situation, choices, result", Section{Kind: "behavioral", Title: "Behavioral"}},
+		{"custom task", "input transcription finished", "Let me read the prompt.", "Custom task notes", Section{Kind: "core", Title: "Custom practice"}},
+	} {
+		t.Run(tc.name, func(t *testing.T) { testNativeWorkingRequest(t, tc.boundary, tc.section, tc.request, tc.workspace) })
+	}
+}
+
+func testNativeWorkingRequest(t *testing.T, boundary string, section Section, workingRequest, workspace string) {
 	providerDone := make(chan struct{})
 	provider := httptest.NewTLSServer(http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
 		defer close(providerDone)
@@ -66,7 +84,7 @@ func testNativeWorkingRequest(t *testing.T, boundary string) {
 					if kickoffs > 1 {
 						t.Error("activity or premature nudge elicited another provider turn")
 					}
-					_ = conn.WriteJSON(map[string]any{"serverContent": map[string]any{"inputTranscription": map[string]any{"text": "Why don't you let me draw the system design?", "finished": boundary == "input transcription finished"}}})
+					_ = conn.WriteJSON(map[string]any{"serverContent": map[string]any{"inputTranscription": map[string]any{"text": workingRequest, "finished": boundary == "input transcription finished"}}})
 					if boundary == "provider ignored working request" {
 						_ = conn.WriteJSON(map[string]any{"serverContent": map[string]any{
 							"outputTranscription": map[string]any{"text": "How do you handle watermarks?"},
@@ -132,7 +150,7 @@ func testNativeWorkingRequest(t *testing.T, boundary string) {
 		}
 		defer conn.Close()
 		relay := &Relay{store: memory, attempt: sess, owner: owner, apiKey: "synthetic-key", liveModel: "synthetic-model"}
-		relay.runGemini(conn, sess.ID, corpus.Question{}, "Synthetic interview", "aoede", []Section{{ID: "core", Kind: "design", Title: "System design"}}, 5)
+		relay.runGemini(conn, sess.ID, corpus.Question{}, "Synthetic interview", "aoede", []Section{section}, 5)
 	}))
 	defer server.Close()
 	client, _, err := websocket.DefaultDialer.Dial("ws"+strings.TrimPrefix(server.URL, "http"), nil)
@@ -166,7 +184,7 @@ func testNativeWorkingRequest(t *testing.T, boundary string) {
 		if !resumed && (msg.Type == "turn_complete" || boundary != "provider ignored working request" && msg.Type == "transcript" && msg.Role == "candidate" && !msg.Streaming) {
 			for _, frame := range []clientMsg{
 				{Type: "workspace_activity"},
-				{Type: "canvas", Text: "client → queue → stream processor → analytics store"},
+				{Type: "canvas", Text: workspace},
 				{Type: "nudge"},
 			} {
 				if err = client.WriteJSON(frame); err != nil {
@@ -209,7 +227,7 @@ func testNativeWorkingRequest(t *testing.T, boundary string) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if len(turns) != 3 || turns[0].Text != "Why don't you let me draw the system design?" || turns[1].Text != "I am ready to discuss my design." {
+	if len(turns) != 3 || turns[0].Text != workingRequest || turns[1].Text != "I am ready to discuss my design." {
 		t.Fatalf("utterance boundaries lost: %+v", turns)
 	}
 	for _, turn := range turns {

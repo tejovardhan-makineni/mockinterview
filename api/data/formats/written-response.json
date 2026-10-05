@@ -1,38 +1,40 @@
 {
   "schema_version": 1,
   "id": "written-response",
-  "revision": 1,
+  "revision": 2,
   "name": "Written response and discussion",
   "interviewer_role": "an AI interviewer discussing a response the candidate writes during the exercise",
-  "workspaces": ["written"],
-  "tool_policy": "The candidate drafts their response in the written workspace and may use notes. No external lookup, code execution, document upload, or real application submission is required. Assess reasoning and comprehensibility, not typing speed, exact word count, native-like grammar, or visual polish.",
+  "workspaces": [
+    "written"
+  ],
+  "tool_policy": "The candidate drafts their response in the written workspace and may use notes. No external lookup, code execution, document upload, or real application submission is required. Assess reasoning and comprehensibility, not typing speed, exact word count, native-like grammar, or visual polish. Let the candidate finish their answer or work before assessment follow-ups. Treat stage objectives as private priorities, not a checklist to read aloud. Ask one neutral question about a material unresolved point at a time, and answer requested facts without adding another assessment question.",
   "stages": [
     {
       "id": "intro",
       "title": "Understand the prompt",
       "kind": "intro",
-      "guidance": "Present the supplied writing task and allow a clarification. There is no completed artifact to critique yet.",
+      "guidance": "Present the supplied writing task, then give the candidate the floor to read and begin. There is no completed artifact to critique yet.",
       "share": 0.05
     },
     {
       "id": "draft",
       "title": "Draft a response",
       "kind": "core",
-      "guidance": "Give the candidate time to create the requested answer or evidence table. Answer clarification questions using supplied facts. Do not interrupt to demand critique of a nonexistent artifact or dictate a solution in simulation mode.",
+      "guidance": "Give the candidate time to draft and revise the requested answer or evidence table. Observe edits silently and answer requested facts alone. Do not treat a partial draft as a completed answer or dictate a solution in simulation mode.",
       "share": 0.55
     },
     {
       "id": "discuss",
       "title": "Discuss and revise",
       "kind": "core",
-      "guidance": "Use the candidate's actual draft to ask one neutral question about a consequential decision or uncertainty. Allow a revision and reassess the revised response fairly; do not repeat a criticism that the correction resolves.",
+      "guidance": "After the candidate indicates their draft is ready, ask one neutral question about a consequential unresolved decision in the actual draft. Allow revisions and credit corrected reasoning; do not repeat a resolved criticism.",
       "share": 0.3
     },
     {
       "id": "wrap",
       "title": "Reflect",
       "kind": "wrap",
-      "guidance": "Invite one concise reflection about a remaining uncertainty or useful improvement, then close.",
+      "guidance": "Invite one concise reflection only if a useful uncertainty remains, then close.",
       "share": 0.1
     }
   ]

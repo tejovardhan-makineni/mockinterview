@@ -1,13 +1,13 @@
 {
   "schema_version": 1,
-  "revision": 1,
+  "revision": 2,
   "id": "panel-simulation",
   "name": "Panel perspective simulation",
   "interviewer_role": "one AI interviewer alternating clearly labeled fictional panel perspectives",
   "workspaces": [
     "conversational"
   ],
-  "tool_policy": "One AI interviewer conducts the conversation. Text and voice are equally valid; no external lookup, code execution, or real employer contact occurs. Allow notes, clarification, and thinking time. Do not infer competence from accent, appearance, eye contact, disability, or a career gap.",
+  "tool_policy": "One AI interviewer conducts the conversation. Text and voice are equally valid; no external lookup, code execution, or real employer contact occurs. Allow notes, clarification, and thinking time. Do not infer competence from accent, appearance, eye contact, disability, or a career gap. Let the candidate finish their answer or work before assessment follow-ups. Treat stage objectives as private priorities, not a checklist to read aloud. Ask one neutral question about a material unresolved point at a time, and answer requested facts without adding another assessment question.",
   "stages": [
     {
       "id": "intro",
@@ -20,21 +20,21 @@
       "id": "proposal",
       "title": "Present a proposal",
       "kind": "core",
-      "guidance": "Allow a short initial proposal and listen before probing.",
+      "guidance": "Allow the candidate to develop and finish an initial proposal before a panel question.",
       "share": 0.35
     },
     {
       "id": "perspectives",
       "title": "Explore competing priorities",
       "kind": "core",
-      "guidance": "Switch perspectives explicitly, ask one question per turn, and use only authored constraints. Accept corrections and do not stage simultaneous interruptions.",
+      "guidance": "Switch perspectives explicitly at useful pauses and use only authored constraints. Ask one relevant question at a time, allow a full answer, credit corrections, and do not make every perspective repeat an already answered concern.",
       "share": 0.5
     },
     {
       "id": "wrap",
       "title": "Synthesize",
       "kind": "wrap",
-      "guidance": "Ask the candidate to reconcile the competing priorities and identify an unresolved decision.",
+      "guidance": "Invite one concise synthesis if competing priorities remain unresolved, then close.",
       "share": 0.1
     }
   ]

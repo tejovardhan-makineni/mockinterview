@@ -59,6 +59,11 @@ func TestExplicitRequestsForWorkingTime(t *testing.T) {
 		"Can I draw the diagram first?",
 		"I'm just figuring out my answer.",
 		"Please stop asking questions and let me finish.",
+		"Let me read the prompt.",
+		"Let me review the case first.",
+		"Let me calculate the numbers.",
+		"Let me draft the response.",
+		"I am still reviewing.",
 	} {
 		if !requestsWorkingTime(text) {
 			t.Errorf("did not preserve candidate's floor for %q", text)
@@ -70,6 +75,9 @@ func TestExplicitRequestsForWorkingTime(t *testing.T) {
 		"Let me draw the diagram, then I will explain my partitioning choice.",
 		"Let me think. Actually, I am ready.",
 		"I finished the diagram. Let me explain it.",
+		"Let me calculate. The result is 45 dollars.",
+		"Let me review the case, the patient is stable.",
+		"Let me draft the response and explain my recommendation.",
 	} {
 		if requestsWorkingTime(text) {
 			t.Errorf("blocked a substantive candidate turn %q", text)

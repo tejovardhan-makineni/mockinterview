@@ -8,6 +8,8 @@ package live
 
 import (
 	"context"
+	"crypto/sha256"
+	"encoding/hex"
 	"encoding/json"
 	"os"
 	"strings"
@@ -20,21 +22,17 @@ import (
 )
 
 type conversationExample struct {
-	ID       string        `json:"id"`
-	Question string        `json:"question"`
-	Review   string        `json:"review"`
-	History  []llm.Message `json:"history"`
+	ID             string           `json:"id"`
+	Question       string           `json:"question,omitempty"`
+	CustomQuestion *corpus.Question `json:"custom_question,omitempty"`
+	Stage          string           `json:"stage,omitempty"`
+	Workspace      string           `json:"workspace,omitempty"`
+	Review         string           `json:"review"`
+	History        []llm.Message    `json:"history"`
 }
 
-func TestDirectorProviderEvaluation(t *testing.T) {
-	if os.Getenv("RUN_DIRECTOR_PROVIDER_EVAL") != "1" {
-		t.Skip("explicit opt-in required: billable provider evaluation")
-	}
-	key := os.Getenv("GEMINI_API_KEY")
-	output := os.Getenv("DIRECTOR_EVAL_OUTPUT")
-	if key == "" || output == "" {
-		t.Fatal("GEMINI_API_KEY and DIRECTOR_EVAL_OUTPUT are required")
-	}
+func loadConversationExamples(t *testing.T) ([]conversationExample, *corpus.Catalog) {
+	t.Helper()
 	data, err := os.ReadFile("../../data/fixtures/conversation-pacing.json")
 	if err != nil {
 		t.Fatal(err)
@@ -47,12 +45,83 @@ func TestDirectorProviderEvaluation(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	return examples, cat
+}
+
+func (example conversationExample) scenario(t *testing.T, cat *corpus.Catalog) (corpus.Question, []Section, Section) {
+	t.Helper()
+	var q corpus.Question
+	if example.CustomQuestion != nil {
+		if example.Question != "" || example.CustomQuestion.Domain != "custom" {
+			t.Fatalf("%s: custom fixture must replace the catalog question and use custom domain", example.ID)
+		}
+		q = *example.CustomQuestion
+		if err := corpus.Validate(q); err != nil {
+			t.Fatal(err)
+		}
+		if q.FormatDefinition == nil {
+			t.Fatalf("%s: custom fixture needs the private planned format", example.ID)
+		}
+		if err := corpus.ValidateFormat(*q.FormatDefinition); err != nil {
+			t.Fatal(err)
+		}
+		q = corpus.Normalize(q)
+	} else {
+		var ok bool
+		q, ok = cat.Get(example.Question)
+		if !ok {
+			t.Fatalf("unknown fixture question %s", example.Question)
+		}
+	}
+	sections := SectionPlan(q, false, "")
+	for _, candidate := range sections {
+		if example.Stage != "" && candidate.ID == example.Stage || example.Stage == "" && candidate.Kind != "intro" && candidate.Kind != "wrap" {
+			return q, sections, candidate
+		}
+	}
+	t.Fatalf("%s: no matching working stage %q", example.ID, example.Stage)
+	return q, sections, Section{}
+}
+
+// Keep fixtures executable in normal CI so an opt-in provider run cannot spend
+// calls before discovering a missing scenario or stale stage ID. This validates
+// the harness, not interview quality; generated turns still require review.
+func TestConversationEvaluationFixtures(t *testing.T) {
+	examples, cat := loadConversationExamples(t)
+	seen := map[string]bool{}
+	for _, example := range examples {
+		t.Run(example.ID, func(t *testing.T) {
+			if example.ID == "" || seen[example.ID] || strings.TrimSpace(example.Review) == "" {
+				t.Fatal("fixture needs a unique ID and a concrete behavioral review criterion")
+			}
+			seen[example.ID] = true
+			for _, turn := range example.History {
+				if (turn.Role != "user" && turn.Role != "model") || strings.TrimSpace(turn.Text) == "" {
+					t.Fatal("fixture contains an invalid synthetic interview turn")
+				}
+			}
+			example.scenario(t, cat)
+		})
+	}
+}
+
+func TestDirectorProviderEvaluation(t *testing.T) {
+	if os.Getenv("RUN_DIRECTOR_PROVIDER_EVAL") != "1" {
+		t.Skip("explicit opt-in required: billable provider evaluation")
+	}
+	key := os.Getenv("GEMINI_API_KEY")
+	output := os.Getenv("DIRECTOR_EVAL_OUTPUT")
+	if key == "" || output == "" {
+		t.Fatal("GEMINI_API_KEY and DIRECTOR_EVAL_OUTPUT are required")
+	}
+	examples, cat := loadConversationExamples(t)
 	type sample struct {
 		conversationExample
-		Mode       string `json:"mode"`
-		Model      string `json:"model"`
-		Response   string `json:"response"`
-		AudioBytes int    `json:"audio_bytes,omitempty"`
+		Mode         string `json:"mode"`
+		Model        string `json:"model"`
+		PromptSHA256 string `json:"prompt_sha256"`
+		Response     string `json:"response"`
+		AudioBytes   int    `json:"audio_bytes,omitempty"`
 	}
 	results := []sample{}
 	defer func() {
@@ -66,25 +135,14 @@ func TestDirectorProviderEvaluation(t *testing.T) {
 		if selectedCases != ",," && !strings.Contains(selectedCases, ","+example.ID+",") {
 			continue
 		}
-		q, ok := cat.Get(example.Question)
-		if !ok {
-			t.Fatalf("unknown fixture question %s", example.Question)
-		}
-		sections := SectionPlan(q, false, "")
-		// Exercise the scenario itself, independently of the short rapport stage.
-		section := sections[0]
-		for _, candidate := range sections {
-			if candidate.Kind != "intro" && candidate.Kind != "wrap" {
-				section = candidate
-				break
-			}
-		}
-		system := SystemPrompt(q, "neutral", 3, "main", "", "", 15, "aoede", "en", sections, "") + "\n" + activeStageInstruction(section, 12*time.Minute)
+		q, sections, section := example.scenario(t, cat)
+		system := SystemPrompt(q, "neutral", 3, "main", "", example.Workspace, 15, "aoede", "en", sections, "") + "\n" + activeStageInstruction(section, 12*time.Minute)
+		promptDigest := sha256.Sum256([]byte(system))
 		for _, mode := range []string{"text", "voice"} {
 			t.Run(example.ID+"/"+mode, func(t *testing.T) {
 				ctx, cancel := context.WithTimeout(context.Background(), 45*time.Second)
 				defer cancel()
-				s := sample{conversationExample: example, Mode: mode, Model: "gemini-2.5-flash"}
+				s := sample{conversationExample: example, Mode: mode, Model: "gemini-2.5-flash", PromptSHA256: hex.EncodeToString(promptDigest[:])}
 				if mode == "text" {
 					client, err := llm.NewGemini(ctx, key, s.Model)
 					if err != nil {

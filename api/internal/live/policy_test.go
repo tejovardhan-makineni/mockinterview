@@ -135,3 +135,56 @@ func TestSimulationDoesNotInheritSupportiveHints(t *testing.T) {
 		t.Fatal("coaching assistance missing")
 	}
 }
+
+func TestSavedSpecialistAndFormatKeepFactsUnderCurrentPacing(t *testing.T) {
+	// A resumed attempt retains its saved specialist and format for audit and
+	// scoring. New pacing must override their old procedural instructions
+	// without silently replacing the snapshot or dropping its private facts.
+	q := corpus.Question{
+		ID: "saved-case", Title: "Saved written case", Domain: "case", Modality: "written", FormatID: "saved-case",
+		Prompt:           "Use the supplied store figures to write a recommendation.",
+		InterviewerNotes: "Only reveal labor cost when the candidate asks about labor.",
+		Reference:        json.RawMessage(`{"facts":[{"id":"labor","value":"120000","reveal_when":"asked about labor cost"}]}`),
+		InterviewerDefinition: &corpus.InterviewerProfile{
+			ID: "saved-specialist", Role: "a case interviewer", Guidance: "Ask the candidate to clarify constraints before choosing an implementation.",
+		},
+		FormatDefinition: &corpus.Format{
+			ID: "saved-case", Revision: 1, InterviewerRole: "a fictional client", Workspaces: []string{"written"},
+			ToolPolicy: "Use only the supplied figures; no real financial decisions are made.",
+			Stages: []corpus.FormatStage{
+				{ID: "intro", Kind: "intro", Title: "Opening", Guidance: "Present the case.", Share: .1},
+				{ID: "analysis", Kind: "core", Title: "Analysis", Guidance: "Ask for a framework, a calculation and a recommendation.", Share: .8},
+				{ID: "wrap", Kind: "wrap", Title: "Close", Guidance: "Close the exercise.", Share: .1},
+			},
+		},
+	}
+	before, err := json.Marshal(q)
+	if err != nil {
+		t.Fatal(err)
+	}
+	fingerprint := corpus.Fingerprint(q)
+	plan := SectionPlan(q, false, "")
+	p := SystemPrompt(q, "annoying", 5, "core", "", "Draft recommendation", 15, "aoede", "en", plan, "")
+	after, _ := json.Marshal(q)
+	if string(before) != string(after) || corpus.Fingerprint(q) != fingerprint {
+		t.Fatal("current pacing rewrote the saved assignment, format or specialist")
+	}
+	for _, preserved := range []string{q.Prompt, q.InterviewerNotes, string(q.Reference), q.InterviewerDefinition.Guidance, q.FormatDefinition.ToolPolicy, q.FormatDefinition.Stages[1].Guidance, "a fictional client"} {
+		if !strings.Contains(p, preserved) {
+			t.Errorf("saved scenario context lost: %q", preserved)
+		}
+	}
+	if strings.Count(p, string(q.Reference)) != 1 {
+		t.Fatal("saved conditional facts duplicated or omitted")
+	}
+	_, priority, ok := strings.Cut(conversationPolicy, "These pacing rules")
+	if !ok || !strings.Contains(priority, "specialist") || !strings.Contains(priority, "format") || !strings.Contains(priority, "saved") {
+		t.Fatal("pacing priority must explicitly cover saved specialist and format instructions")
+	}
+	if !strings.Contains(p, conversationPolicy) || !strings.HasSuffix(p, deliveryDecision) {
+		t.Fatal("current pacing and final delivery decision missing from the resumed prompt")
+	}
+	if !plan[1].CandidateLed {
+		t.Fatal("saved written format lost its candidate-led working stage")
+	}
+}

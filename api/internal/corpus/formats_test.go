@@ -2,6 +2,7 @@ package corpus
 
 import (
 	"encoding/json"
+	"strings"
 	"testing"
 )
 
@@ -44,5 +45,40 @@ func TestFactRevealContract(t *testing.T) {
 	q.Reference, _ = json.Marshal(ref)
 	if Validate(q) == nil {
 		t.Fatal("fact without stable id accepted")
+	}
+}
+
+func TestEveryAuthoredFormatAllowsUninterruptedWork(t *testing.T) {
+	formats, err := loadFormats("../../data/formats")
+	if err != nil {
+		t.Fatal(err)
+	}
+	for id, format := range formats {
+		for _, rule := range []string{
+			"Let the candidate finish their answer or work before assessment follow-ups",
+			"private priorities, not a checklist",
+			"answer requested facts without adding another assessment question",
+		} {
+			if !strings.Contains(format.ToolPolicy, rule) {
+				t.Errorf("format %s lost pacing rule %q", id, rule)
+			}
+		}
+	}
+	// These were active stage commands that prompted the assessment criteria
+	// before the candidate could inspect the material or complete a response.
+	for _, tc := range []struct{ id, directive string }{
+		{"work-sample-defense", "ask whether the candidate has a clarification"},
+		{"work-sample-defense", "Ask for an alternative, a verification plan and a focused improvement"},
+		{"incident-simulation", "Ask how they will mitigate, verify recovery and communicate"},
+	} {
+		format, ok := formats[tc.id]
+		if !ok {
+			t.Fatalf("missing interview format %s", tc.id)
+		}
+		for _, stage := range format.Stages {
+			if strings.Contains(stage.Guidance, tc.directive) {
+				t.Errorf("%s reinstated a leading or compound stage directive: %s", tc.id, tc.directive)
+			}
+		}
 	}
 }
