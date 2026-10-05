@@ -6,6 +6,7 @@ import {
   mkdir,
   readFile,
   readdir,
+  rename,
   rm,
   symlink,
   writeFile,
@@ -313,6 +314,70 @@ test("Linux publication is independent of unavailable macOS and Windows certific
       "RELEASE-MANIFEST.json",
     ].sort(),
   );
+});
+
+async function flattenArtifacts(input) {
+  for (const artifact of await readdir(input)) {
+    const directory = path.join(input, artifact);
+    for (const name of await readdir(directory))
+      await rename(path.join(directory, name), path.join(input, name));
+    await rm(directory, { recursive: true });
+  }
+}
+
+test("single-artifact downloads may be flat but retain exact files and receipt verification", async (t) => {
+  for (const target of ["linux", "windows"]) {
+    const f = await fixture(t, target);
+    await flattenArtifacts(f.input);
+    const manifest = await stageReleaseAssets(f.input, f.output, {
+      ...env,
+      RELEASE_TARGET: target,
+    });
+    assert.deepEqual(
+      manifest.files.map((file) => file.name).sort(),
+      installerNames(env.RELEASE_VERSION, target).sort(),
+    );
+    assert.equal(manifest.platformVerification.length, 1);
+  }
+  for (const mutation of [
+    async (input) => writeFile(path.join(input, "extra.exe"), "unverified"),
+    async (input) => {
+      const receipt = JSON.parse(
+        await readFile(path.join(input, RECEIPT_NAME)),
+      );
+      receipt.artifact = "desktop-windows-x64";
+      await writeFile(path.join(input, RECEIPT_NAME), JSON.stringify(receipt));
+    },
+    async (input) =>
+      writeFile(
+        path.join(input, installerNames(env.RELEASE_VERSION, "linux")[0]),
+        "tampered",
+      ),
+  ]) {
+    const f = await fixture(t, "linux");
+    await flattenArtifacts(f.input);
+    await mutation(f.input);
+    await assert.rejects(
+      stageReleaseAssets(f.input, f.output, {
+        ...env,
+        RELEASE_TARGET: "linux",
+      }),
+      /Unexpected or missing|receipt identity|checksum mismatch/,
+    );
+    await expectUnpublished(f.output);
+  }
+});
+
+test("flattened multi-artifact releases remain ambiguous and are rejected", async (t) => {
+  for (const target of ["all", "macos"]) {
+    const f = await fixture(t, target);
+    await flattenArtifacts(f.input);
+    await assert.rejects(
+      stageReleaseAssets(f.input, f.output, { ...env, RELEASE_TARGET: target }),
+      /selected desktop artifact directories/,
+    );
+    await expectUnpublished(f.output);
+  }
 });
 
 test("selected platforms must be complete and cannot include unselected artifacts", async (t) => {

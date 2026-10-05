@@ -329,22 +329,33 @@ export async function stageReleaseAssets(
   }
   const entries = await readdir(root, { withFileTypes: true });
   const expectedArtifacts = releaseArtifacts(context.target);
+  // download-artifact v8 extracts a single pattern match directly into its
+  // destination, even with merge-multiple:false. Accept that layout only for
+  // exactly one selected artifact; its complete file set and native receipt
+  // below still establish the artifact identity before any output is created.
+  const flatArtifact =
+    expectedArtifacts.length === 1 &&
+    entries.length > 0 &&
+    entries.every((entry) => entry.isFile() && !entry.isSymbolicLink());
   assert(
-    entries.length === expectedArtifacts.length &&
-      entries.every(
-        (entry) =>
-          expectedArtifacts.includes(entry.name) &&
-          entry.isDirectory() &&
-          !entry.isSymbolicLink(),
-      ),
+    flatArtifact ||
+      (entries.length === expectedArtifacts.length &&
+        entries.every(
+          (entry) =>
+            expectedArtifacts.includes(entry.name) &&
+            entry.isDirectory() &&
+            !entry.isSymbolicLink(),
+        )),
     "Expected exactly the selected desktop artifact directories",
   );
+  const artifactDirectory = (artifact) =>
+    flatArtifact ? root : path.join(root, artifact);
   const files = [],
     receipts = [];
   // Validate every platform's complete file set, original checksums and native
   // verification receipt before creating any publishable output.
   for (const artifact of expectedArtifacts) {
-    const directory = path.join(root, artifact),
+    const directory = artifactDirectory(artifact),
       expected = artifactInstallers(context.version, artifact);
     const permitted = new Set([...expected, CHECKSUM_NAME, RECEIPT_NAME]);
     const members = await readdir(directory, { withFileTypes: true });
@@ -397,7 +408,7 @@ export async function stageReleaseAssets(
   try {
     for (const file of files)
       await copyVerified(
-        path.join(root, file.artifact, file.name),
+        path.join(artifactDirectory(file.artifact), file.name),
         path.join(temporary, file.name),
         file,
       );
