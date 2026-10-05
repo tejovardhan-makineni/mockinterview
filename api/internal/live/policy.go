@@ -115,9 +115,12 @@ func buildSystemPrompt(q corpus.Question, personality string, intensity int, pha
 		fmt.Fprintf(&b, "- %s: %s\n", d.Label, d.Description)
 	}
 	if len(sections) > 0 {
-		b.WriteString("STAGES: use the authored order and server section-change cues as pacing guidance, with natural transitions. A main stage can contain several distinct substantive questions; completing one answer does not advance directly to wrap-up. Never reopen completed work just because its timing cue arrives. Never repeat the opening after reconnect.\n")
+		// Future stage commands can prime premature wrap-up or restart an
+		// earlier task. Keep only the ordered plan here; each transport sends
+		// the complete current guidance through activeStageInstruction.
+		b.WriteString("STAGES (ordered plan only): follow the latest ACTIVE STAGE cue for the current task and timing. Completing one answer does not advance directly to wrap-up. Never reopen completed work or repeat the opening after reconnect.\n")
 		for _, s := range sections {
-			fmt.Fprintf(&b, "- %s: %s\n", s.ID, s.Guidance)
+			fmt.Fprintf(&b, "- %s: %s (kind: %s)\n", s.ID, s.Title, s.Kind)
 		}
 	}
 	if focus != "" {
