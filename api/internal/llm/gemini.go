@@ -67,7 +67,7 @@ func (g *Gemini) Generate(ctx context.Context, req GenerateRequest) (string, err
 		system = strings.TrimSpace(system) + "\n\nReturn ONLY valid JSON conforming to this JSON schema. Do not wrap it in markdown fences:\n" + string(schemaJSON)
 	}
 
-	cfg := geminiGenerationConfig(model, req.MaxTokens)
+	cfg := geminiGenerationConfig(model, req.MaxTokens, req.Purpose)
 	if system != "" {
 		cfg.SystemInstruction = genai.NewContentFromText(system, genai.RoleUser)
 	}
@@ -95,12 +95,25 @@ func (g *Gemini) Generate(ctx context.Context, req GenerateRequest) (string, err
 // Thinking controls differ across model families. In particular 2.5 Pro and
 // Gemini 3 reject disabling thinking, so the free Flash setting cannot be
 // applied to advanced personal-key selections.
-func geminiGenerationConfig(model string, maxTokens int) *genai.GenerateContentConfig {
+func geminiGenerationConfig(model string, maxTokens int, purpose Purpose) *genai.GenerateContentConfig {
 	config := &genai.GenerateContentConfig{}
 	model = strings.TrimPrefix(model, "models/")
 	switch {
 	case strings.HasPrefix(model, "gemini-2.5-flash"):
-		config.ThinkingConfig = &genai.ThinkingConfig{ThinkingBudget: genai.Ptr(int32(0))}
+		var thinkingBudget int32
+		if purpose == PurposeDirector {
+			// The interviewer must assess what the candidate already covered and
+			// whether a follow-up is warranted. Reserve reasoning tokens without
+			// consuming the caller's spoken-answer budget.
+			thinkingBudget = 512
+			if maxTokens > 0 {
+				maxTokens += int(thinkingBudget)
+			}
+		}
+		config.ThinkingConfig = &genai.ThinkingConfig{
+			ThinkingBudget:  genai.Ptr(thinkingBudget),
+			IncludeThoughts: false,
+		}
 	case strings.HasPrefix(model, "gemini-2.5-pro"):
 		config.ThinkingConfig = &genai.ThinkingConfig{ThinkingBudget: genai.Ptr(int32(1024))}
 		if maxTokens > 0 {

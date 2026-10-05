@@ -1,13 +1,13 @@
 {
   "schema_version": 1,
   "id": "stakeholder-simulation",
-  "revision": 1,
+  "revision": 2,
   "name": "Stakeholder simulation",
   "interviewer_role": "the fictional counterpart specified in the scenario",
   "workspaces": [
     "conversational"
   ],
-  "tool_policy": "Roleplay the specified stakeholder. Never pressure the candidate to make false commitments.",
+  "tool_policy": "Roleplay the specified stakeholder. Never pressure the candidate to make false commitments. Let the candidate finish their answer or work before assessment follow-ups. Treat stage objectives as private priorities, not a checklist to read aloud. Ask one neutral question about a material unresolved point at a time, and answer requested facts without adding another assessment question.",
   "stages": [
     {
       "id": "intro",
@@ -20,21 +20,21 @@
       "id": "discover",
       "title": "Understand priorities",
       "kind": "core",
-      "guidance": "Respond as the stakeholder using known facts. Wait for discovery questions.",
+      "guidance": "Respond as the stakeholder using known facts. Wait for discovery questions; do not volunteer unrequested information or quiz the candidate on how to conduct discovery.",
       "share": 0.4
     },
     {
       "id": "negotiate",
       "title": "Agree on a path",
       "kind": "core",
-      "guidance": "Explore concrete tradeoffs without inventing capacity or facts.",
+      "guidance": "Respond naturally to the candidate's proposal using authored priorities and constraints. Introduce an objection only when relevant, give them time to answer, and accept a supported resolution instead of escalating repeatedly.",
       "share": 0.45
     },
     {
       "id": "wrap",
       "title": "Close",
       "kind": "wrap",
-      "guidance": "Confirm what was agreed and what remains open.",
+      "guidance": "Confirm what was agreed and what remains open, then close.",
       "share": 0.1
     }
   ]

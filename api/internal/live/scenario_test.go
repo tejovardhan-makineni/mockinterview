@@ -65,6 +65,7 @@ func TestOpeningIntroducesFactsBeforeTheFocusedAsk(t *testing.T) {
 	}{
 		{"two-sum-variants", []string{"indices", "integer target", "exactly one solution", "same element may not be used twice", "Introduce only Two Sum now"}},
 		{"ai-output-critique-forecast", []string{"20% revenue increase", "100 conversions from 1,000", "120 from 1,000", "new advertising channel"}},
+		{"career-job-description-evidence", []string{"maintain an accurate task list", "explain updates clearly", "learn a shared scheduling tool", "degree and prior coordinator title are not required", "marking gaps honestly"}},
 	} {
 		t.Run(tc.id, func(t *testing.T) {
 			setup := firstQuestionSetup(corpus.Question{ID: tc.id})
@@ -135,7 +136,7 @@ func TestCareerOpeningsMatchTheExercise(t *testing.T) {
 	}
 	for _, tc := range []struct{ id, focus string }{
 		{"career-written-screen", "Write your response to the screening prompt shown in the workspace."},
-		{"career-job-description-evidence", "Which duty would you match to your strongest evidence first?"},
+		{"career-job-description-evidence", workOpeningFocus},
 		{"career-first-job-introduction", "How would you introduce yourself for this role?"},
 		{"career-return-to-work", "How would you describe what you are ready to contribute in this role?"},
 		{"career-feedback-recovery", "How would you respond to this feedback?"},
@@ -147,5 +148,53 @@ func TestCareerOpeningsMatchTheExercise(t *testing.T) {
 		if got := firstQuestionFocus(q); got != tc.focus {
 			t.Errorf("%s opens with %q, want %q", tc.id, got, tc.focus)
 		}
+	}
+}
+
+func TestResumeStageListensBeforeChoosingAMissingDetail(t *testing.T) {
+	q := corpus.Question{Domain: "coding", Modality: "coding"}
+	plan := SectionPlan(q, true, "")
+	var resume Section
+	for _, section := range plan {
+		if section.Kind == "resume" {
+			resume = section
+		}
+	}
+	if resume.ID == "" {
+		t.Fatal("resume stage missing")
+	}
+	for _, want := range []string{
+		"listen to the complete account",
+		"private evidence priorities, not a checklist",
+		"Credit evidence already supplied regardless of pronouns",
+		"a complete account does not require extra probes",
+		"Respect requests to move on",
+	} {
+		if !strings.Contains(resume.Guidance, want) {
+			t.Errorf("resume guidance lost %q", want)
+		}
+	}
+	for _, old := range []string{"Ask 1-2", "what was YOUR part", "thin, evasive, or a joke"} {
+		if strings.Contains(resume.Guidance, old) {
+			t.Errorf("resume reinstated mandatory or unsupported probing: %q", old)
+		}
+	}
+}
+
+func TestEvidenceTableOpeningAllowsIndependentDrafting(t *testing.T) {
+	cat, err := corpus.Load("../../data/corpus")
+	if err != nil {
+		t.Fatal(err)
+	}
+	q, ok := cat.Get("career-job-description-evidence")
+	if !ok {
+		t.Fatal("missing written evidence exercise")
+	}
+	if firstQuestionFocus(q) != workOpeningFocus {
+		t.Fatal("written response starts by demanding a first row instead of allowing the candidate to draft")
+	}
+	prompt := SystemPrompt(q, "neutral", 3, "intro", "", "", 15, "aoede", "en", SectionPlan(q, false, ""), "")
+	if !strings.Contains(prompt, q.Prompt) || !strings.Contains(prompt, "Write a small table matching each duty") {
+		t.Fatal("independent opening discarded the actual writing assignment")
 	}
 }

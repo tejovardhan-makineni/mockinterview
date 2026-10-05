@@ -1,13 +1,13 @@
 {
   "schema_version": 1,
   "id": "incident-simulation",
-  "revision": 1,
+  "revision": 2,
   "name": "Incident simulation",
   "interviewer_role": "a fictional incident partner",
   "workspaces": [
     "conversational"
   ],
-  "tool_policy": "This is a tabletop exercise. No infrastructure actions run. Reveal only supplied observations.",
+  "tool_policy": "This is a tabletop exercise. No infrastructure actions run. Reveal only supplied observations. Let the candidate finish their answer or work before assessment follow-ups. Treat stage objectives as private priorities, not a checklist to read aloud. Ask one neutral question about a material unresolved point at a time, and answer requested facts without adding another assessment question.",
   "stages": [
     {
       "id": "intro",
@@ -20,21 +20,21 @@
       "id": "triage",
       "title": "Triage",
       "kind": "core",
-      "guidance": "Reveal requested observations and probe safe prioritization.",
+      "guidance": "Respond as the incident partner with only the observations requested. Let the candidate work through triage without appending an assessment question to each disclosure.",
       "share": 0.4
     },
     {
       "id": "mitigate",
       "title": "Mitigation and verification",
       "kind": "core",
-      "guidance": "Ask how they will mitigate, verify recovery and communicate.",
+      "guidance": "Let the candidate complete a mitigation and recovery proposal. At a useful pause, explore one consequential unresolved risk in their actual response; do not recite mitigation, verification and communication as mandatory questions.",
       "share": 0.45
     },
     {
       "id": "wrap",
       "title": "Handoff",
       "kind": "wrap",
-      "guidance": "Request a short handoff and conclude.",
+      "guidance": "Invite a short handoff if one has not already been given, then conclude.",
       "share": 0.1
     }
   ]

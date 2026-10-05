@@ -179,3 +179,46 @@ func TestFormatNameUsesAuthoredNameAndLegacyFallback(t *testing.T) {
 		}
 	}
 }
+
+// Profiles are snapshotted into every new attempt, including authored formats
+// that supply a role of their own. A specialist must not reinstate coaching or
+// a fixed answer order after the shared live director grants working time.
+func TestEveryCatalogProfilePreservesIndependentCandidateWork(t *testing.T) {
+	cat, err := Load("../../data/corpus")
+	if err != nil {
+		t.Fatal(err)
+	}
+	seen := map[string]bool{}
+	for _, summary := range cat.List("", "", "") {
+		q, _ := cat.Get(summary.ID)
+		profile := InterviewerFor(q)
+		seen[profile.ID] = true
+		for _, rule := range []string{
+			"Let the candidate finish a coherent answer",
+			"not a spoken checklist or a required answer order",
+			"Answer requested facts alone, then return the floor",
+		} {
+			if !strings.Contains(profile.Guidance, rule) {
+				t.Errorf("%s (%s) lost independent-work rule %q", q.ID, profile.ID, rule)
+			}
+		}
+		for _, directive := range []string{
+			"Ask the candidate to clarify constraints before",
+			"Have the candidate state assumptions",
+			"Ask for a problem-specific structure and an initial hypothesis",
+			"Ask for impact and scope before a troubleshooting step",
+		} {
+			if strings.Contains(profile.Guidance, directive) {
+				t.Errorf("%s prompts an independently assessed behavior: %q", profile.ID, directive)
+			}
+		}
+	}
+	for _, definition := range professionRegistry {
+		if !seen[definition.Profile.ID] {
+			t.Errorf("profession %s lacks a catalog exercise in the coverage check", definition.Profile.ID)
+		}
+	}
+	if !strings.Contains(InterviewerFor(Question{Domain: "legacy"}).Guidance, "Answer requested facts alone") {
+		t.Fatal("legacy fallback lost candidate-led pacing")
+	}
+}

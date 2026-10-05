@@ -135,3 +135,110 @@ func TestSimulationDoesNotInheritSupportiveHints(t *testing.T) {
 		t.Fatal("coaching assistance missing")
 	}
 }
+
+func TestSavedSpecialistAndFormatKeepFactsUnderCurrentPacing(t *testing.T) {
+	// A resumed attempt retains its saved specialist and format for audit and
+	// scoring. New pacing must override their old procedural instructions
+	// without silently replacing the snapshot or dropping its private facts.
+	q := corpus.Question{
+		ID: "saved-case", Title: "Saved written case", Domain: "case", Modality: "written", FormatID: "saved-case",
+		Prompt:           "Use the supplied store figures to write a recommendation.",
+		InterviewerNotes: "Only reveal labor cost when the candidate asks about labor.",
+		Reference:        json.RawMessage(`{"facts":[{"id":"labor","value":"120000","reveal_when":"asked about labor cost"}]}`),
+		InterviewerDefinition: &corpus.InterviewerProfile{
+			ID: "saved-specialist", Role: "a case interviewer", Guidance: "Ask the candidate to clarify constraints before choosing an implementation.",
+		},
+		FormatDefinition: &corpus.Format{
+			ID: "saved-case", Revision: 1, InterviewerRole: "a fictional client", Workspaces: []string{"written"},
+			ToolPolicy: "Use only the supplied figures; no real financial decisions are made.",
+			Stages: []corpus.FormatStage{
+				{ID: "intro", Kind: "intro", Title: "Opening", Guidance: "Present the case.", Share: .1},
+				{ID: "analysis", Kind: "core", Title: "Analysis", Guidance: "Ask for a framework, a calculation and a recommendation.", Share: .8},
+				{ID: "wrap", Kind: "wrap", Title: "Close", Guidance: "Close the exercise.", Share: .1},
+			},
+		},
+	}
+	before, err := json.Marshal(q)
+	if err != nil {
+		t.Fatal(err)
+	}
+	fingerprint := corpus.Fingerprint(q)
+	plan := SectionPlan(q, false, "")
+	p := SystemPrompt(q, "annoying", 5, "core", "", "Draft recommendation", 15, "aoede", "en", plan, "")
+	after, _ := json.Marshal(q)
+	if string(before) != string(after) || corpus.Fingerprint(q) != fingerprint {
+		t.Fatal("current pacing rewrote the saved assignment, format or specialist")
+	}
+	for _, preserved := range []string{q.Prompt, q.InterviewerNotes, string(q.Reference), q.InterviewerDefinition.Guidance, q.FormatDefinition.ToolPolicy, "a fictional client"} {
+		if !strings.Contains(p, preserved) {
+			t.Errorf("saved scenario context lost: %q", preserved)
+		}
+	}
+	if strings.Count(p, string(q.Reference)) != 1 {
+		t.Fatal("saved conditional facts duplicated or omitted")
+	}
+	_, priority, ok := strings.Cut(conversationPolicy, "These pacing rules")
+	if !ok || !strings.Contains(priority, "specialist") || !strings.Contains(priority, "format") || !strings.Contains(priority, "saved") {
+		t.Fatal("pacing priority must explicitly cover saved specialist and format instructions")
+	}
+	if !strings.Contains(p, conversationPolicy) || !strings.HasSuffix(p, deliveryDecision) {
+		t.Fatal("current pacing and final delivery decision missing from the resumed prompt")
+	}
+	if !plan[1].CandidateLed {
+		t.Fatal("saved written format lost its candidate-led working stage")
+	}
+	for i, stage := range q.FormatDefinition.Stages {
+		if strings.Contains(p, stage.Guidance) {
+			t.Errorf("saved stage %s instructions leaked into the permanent plan", stage.ID)
+		}
+		if !strings.Contains(activeStageInstruction(plan[i]), stage.Guidance) {
+			t.Errorf("saved stage %s guidance was lost when that stage became active", stage.ID)
+		}
+	}
+}
+
+func TestStageInstructionsAreScopedToTheActiveTask(t *testing.T) {
+	q := corpus.Question{
+		ID: "stage-scope", Title: "Written plan", Domain: "written_screen", Modality: "written", FormatID: "written-response",
+		Prompt:    "Write a plan for the supplied requests.",
+		Reference: json.RawMessage(`{"facts":[{"id":"deadline","value":"4 pm","reveal_when":"asked about deadline"}]}`),
+		FormatDefinition: &corpus.Format{
+			ID: "written-response", Revision: 1, InterviewerRole: "a fictional reviewer", Workspaces: []string{"written"},
+			Stages: []corpus.FormatStage{
+				{ID: "intro", Title: "Opening", Kind: "intro", Guidance: "The initial contact is Morgan. Introduce the assignment.", Share: .1},
+				{ID: "discuss", Title: "Discuss the response", Kind: "core", Guidance: "The reviewer is Quinn. Discuss one unresolved decision in the actual response.", Share: .8},
+				{ID: "wrap", Title: "Close", Kind: "wrap", Guidance: "Invite a final reflection before closing with the recorded contact Avery.", Share: .1},
+			},
+		},
+	}
+	before, _ := json.Marshal(q)
+	fingerprint := corpus.Fingerprint(q)
+	plan := SectionPlan(q, false, "")
+	base := SystemPrompt(q, "neutral", 3, "main", "", "Completed written response", 15, "aoede", "en", plan, "")
+	for _, stage := range plan {
+		if !strings.Contains(base, stage.ID+": "+stage.Title+" (kind: "+stage.Kind+")") {
+			t.Errorf("ordered plan lost stage identity %s", stage.ID)
+		}
+		if strings.Contains(base, stage.Guidance) {
+			t.Errorf("base prompt includes stage command %s", stage.ID)
+		}
+	}
+	working := base + activeStageInstruction(plan[1], 12*time.Minute)
+	if !strings.Contains(working, plan[1].Guidance) || !strings.Contains(working, "720 seconds remain") {
+		t.Fatal("active discussion lost guidance, stage facts or actual timing")
+	}
+	if strings.Contains(working, plan[2].Guidance) || strings.Contains(working, "recorded contact Avery") {
+		t.Fatal("future wrap instructions or stage-only facts primed the working turn")
+	}
+	closing := base + activeStageInstruction(plan[2], time.Minute)
+	if !strings.Contains(closing, plan[2].Guidance) || !strings.Contains(closing, "recorded contact Avery") {
+		t.Fatal("wrap guidance or historical stage facts unavailable when active")
+	}
+	after, _ := json.Marshal(q)
+	if string(before) != string(after) || corpus.Fingerprint(q) != fingerprint {
+		t.Fatal("scoping model commands changed the saved scenario")
+	}
+	if !strings.Contains(working, string(q.Reference)) || !strings.Contains(closing, string(q.Reference)) {
+		t.Fatal("scoping stage commands removed independent scenario facts")
+	}
+}

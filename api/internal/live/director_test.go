@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/tejo/mockinterview-api/internal/corpus"
 )
@@ -203,5 +204,56 @@ func TestNextPhaseSkipsByModality(t *testing.T) {
 	}
 	if got := NextPhase("system_design", "wrap"); got != "wrap" {
 		t.Errorf("terminal phase should stay wrap, got %q", got)
+	}
+}
+
+// The catalogue mixes legacy domain stages with authored generic core stages.
+// Written exercises must receive the same uninterrupted-work protection as code
+// and diagrams, without turning conversational roleplay into a work stage.
+func TestEveryWorkspaceFormatPreservesCandidateWorkingTime(t *testing.T) {
+	cat, err := corpus.Load("../../data/corpus")
+	if err != nil {
+		t.Fatal(err)
+	}
+	seen := map[string]int{}
+	for _, summary := range cat.List("", "", "") {
+		q, _ := cat.Get(summary.ID)
+		t.Run(q.ID, func(t *testing.T) {
+			work := q.Modality == "coding" || q.Modality == "system_design" || q.Modality == "written"
+			plan := SectionPlan(q, true, "")
+			mainStages := 0
+			for _, stage := range plan {
+				main := stage.Kind != "intro" && stage.Kind != "resume" && stage.Kind != "wrap"
+				if stage.CandidateLed != (work && main) {
+					t.Fatalf("%s/%s working protection = %t for %s", q.FormatID, stage.ID, stage.CandidateLed, q.Modality)
+				}
+				if main {
+					mainStages++
+					if work && !strings.Contains(activeStageInstruction(stage), "CANDIDATE-LED WORKING STAGE") {
+						t.Fatalf("%s loses candidate floor when the server advances the stage", stage.ID)
+					}
+				}
+			}
+			if mainStages == 0 {
+				t.Fatal("interview has no substantive stage")
+			}
+			if work {
+				seen[q.Modality]++
+				now := time.Date(2026, 10, 5, 12, 0, 0, 0, time.UTC)
+				activity := newConversationActivity(plan, now)
+				activity.observe(now.Add(40*time.Second), true, true)
+				if activity.allowNudge(now.Add(99 * time.Second)) {
+					t.Fatal("check-in interrupts a recent workspace edit")
+				}
+				if !activity.allowNudge(now.Add(100 * time.Second)) {
+					t.Fatal("check-in still requires more than one minute of silence")
+				}
+			}
+		})
+	}
+	for _, modality := range []string{"coding", "system_design", "written"} {
+		if seen[modality] == 0 {
+			t.Fatalf("catalogue coverage lost %s", modality)
+		}
 	}
 }
