@@ -10,6 +10,7 @@
   "main": "src/main.mjs",
   "repository": "https://github.com/tejovardhan-makineni/mockinterview",
   "scripts": {
+    "postinstall": "node scripts/fix-mac-keychain.mjs",
     "audit:security": "node ../scripts/security-audit.mjs desktop",
     "start": "electron .",
     "build:runtime": "node scripts/prepare.mjs",
