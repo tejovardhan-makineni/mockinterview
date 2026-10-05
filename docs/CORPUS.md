@@ -35,7 +35,8 @@ Each `api/data/corpus/<id>.json` uses its filename as its kebab-case `id` and ha
 - `schema_version: 1`, positive `revision`, a matching `format_id`,
   `review_status: "preview"`, and `minutes` between 3 and 90.
 - `title`, `track` (`engineering` or `professional`), `domain`, `areas`,
-  `modality`, `difficulty` (entry/junior/mid/senior/staff), `tags`, a candidate
+  `modality`, `difficulty` (entry/junior/mid/senior/staff/principal/manager/
+  senior_manager/director/vp/executive), `tags`, a candidate
   `prompt` and a concise `blurb`.
 - `rubric` with unique snake-case keys, labels, observable descriptions,
   positive weights up to 5 and optional score anchors keyed `"0"` through `"4"`.
@@ -45,6 +46,12 @@ Each `api/data/corpus/<id>.json` uses its filename as its kebab-case `id` and ha
   `reviewed` entry also requires an actual `reviewer` and `reviewed_at` date.
 - Optional `learning_drills`: unique `id`, `title`, `prompt`, 1–20 `minutes`
   and a nonempty `checklist`. These are self-guided, without a model request.
+- Optional `role_track`: `individual_contributor`, `management` or `executive`.
+  This describes the authored responsibility, separately from seniority. Omit it
+  for genuinely shared exercises. Missing metadata in old snapshots remains
+  unspecified; it is not evidence of an individual-contributor role. Target role
+  and level can be adapted during setup, but that does not create another authored
+  scenario or replace a specialist rubric.
 
 Start from `work-sample-reservation-review.json`, `ai-output-critique-forecast.json`
 or `incident-triage-checkout.json`. They are original AI-assisted **drafts**, not
@@ -134,3 +141,19 @@ Before moving a draft into the catalog, verify original/licensed provenance,
 fact consistency, fair difficulty, timing, plausible alternatives, accessibility
 and evidence-based anchors. Do not copy proprietary questions or imply employer
 endorsement. Consult [CONTRIBUTING.md](../CONTRIBUTING.md) for the review workflow.
+
+## Coverage and practitioner review
+
+`make content-audit` counts each scenario once under its primary area and shows
+shared discovery matches separately. An area with 26 listed matches may contain
+three primary exercises plus 23 shared career exercises. Primary counts are not
+exclusive relevance: for example, a software-authored ML design exercise can also
+be useful to data scientists. Neither count establishes all-role coverage.
+
+Use `python3 scripts/content_coverage.py --json` for machine-readable coverage.
+To prepare an unfilled review worksheet, run
+`python3 scripts/content_coverage.py --review-packet new-manager-feedback`.
+That worksheet includes **private reference material** and must stay in an
+author/reviewer context. It leaves the reviewer, findings and calibration results
+blank. Follow [the review and calibration protocol](CONTENT-REVIEW.md) before
+recording any reviewed status or reliability claim.

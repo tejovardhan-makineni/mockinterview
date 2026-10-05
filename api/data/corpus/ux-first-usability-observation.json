@@ -1,0 +1,137 @@
+{
+  "schema_version": 1,
+  "revision": 1,
+  "format_id": "work-sample-defense",
+  "review_status": "preview",
+  "provenance": {
+    "authorship": "Original project scenario, AI-assisted draft. Practitioner review and calibration pending.",
+    "license": "MIT"
+  },
+  "minutes": 20,
+  "id": "ux-first-usability-observation",
+  "title": "Junior UX Designer: Separate an Observation From a Design Assumption",
+  "track": "professional",
+  "domain": "design_critique",
+  "areas": [
+    "ux_design"
+  ],
+  "modality": "written",
+  "difficulty": "junior",
+  "role_track": "individual_contributor",
+  "tags": [
+    "ux-design",
+    "junior-specialist",
+    "evidence-based-practice",
+    "community-preview"
+  ],
+  "prompt": "You are a junior UX designer reviewing a fictional library-room booking prototype. In three short tests, two participants selected “Continue” without choosing a date and reached an error saying “Invalid input.” A design note concludes, “People do not read; make the button red.” The task was to book a room for next Tuesday. Review the observation, suggest a small improvement and describe how you would check it. You may explain the interface in words; no design software or portfolio is required.",
+  "blurb": "Turn a vague blame-based conclusion into a testable date-selection and error-message improvement.",
+  "rubric": [
+    {
+      "key": "observation",
+      "label": "Separate evidence from assumption",
+      "description": "Reports behavior without making unsupported claims about users.",
+      "weight": 1,
+      "anchors": {
+        "0": "Repeats that people do not read as an established cause.",
+        "2": "Describes the missing date and unclear error.",
+        "4": "Uses the small-screen field position and one stated expectation as hypotheses while keeping the second participant’s reason and broader prevalence unknown."
+      }
+    },
+    {
+      "key": "proposal",
+      "label": "Suggest a task-linked change",
+      "description": "Improves discoverability or recovery without relying on color alone.",
+      "weight": 1,
+      "anchors": {
+        "0": "Changes only the button color with no connection to the missing date.",
+        "2": "Proposes a clearer date label and specific error message.",
+        "4": "Makes the required date discoverable before progression and provides an actionable error, with understandable focus or navigation to the field and no loss of entered information."
+      }
+    },
+    {
+      "key": "check",
+      "label": "Test the change against the same goal",
+      "description": "Defines observable evidence of improvement.",
+      "weight": 1,
+      "anchors": {
+        "0": "Calls the change successful because it looks clearer.",
+        "2": "Repeats the booking task with new participants.",
+        "4": "Checks whether participants find the date, recover from an omission and complete the intended booking; notes the small sample and adds a keyboard check without claiming full accessibility validation."
+      }
+    }
+  ],
+  "reference": {
+    "scenario": "You are a junior UX designer reviewing a fictional library-room booking prototype. In three short tests, two participants selected “Continue” without choosing a date and reached an error saying “Invalid input.” A design note concludes, “People do not read; make the button red.” The task was to book a room for next Tuesday. Review the observation, suggest a small improvement and describe how you would check it. You may explain the interface in words; no design software or portfolio is required.",
+    "facts": [
+      {
+        "id": "interface",
+        "value": "The date field is below the initial viewport on a small screen. Its label says “When,” and there is no required-field text. The Continue button is visible above it.",
+        "reveal_when": "candidate asks what participants could see or how the field was labeled"
+      },
+      {
+        "id": "task",
+        "value": "One participant expected a date choice after Continue. The other did not comment on their expectation. No accessibility or keyboard interaction was tested.",
+        "reveal_when": "candidate asks what participants said or what remains unknown"
+      },
+      {
+        "id": "constraints",
+        "value": "The team can change field order, labels and error wording today. A follow-up test can use the same booking task with a few new participants; production success data is not yet available.",
+        "reveal_when": "candidate asks what changes and checks are feasible"
+      }
+    ],
+    "model_points": [
+      "The observation is two missing-date submissions in three tests, not a general finding that users do not read.",
+      "Field order, label and error wording each offer plausible improvements; explain which hypothesis the change addresses.",
+      "Relevant examples from school or personal projects are acceptable, but the answer can rely entirely on the supplied prototype."
+    ],
+    "probes": [
+      {
+        "trigger": "candidate changes the color but not the workflow",
+        "question": "How would that help someone who expects the date question on the next screen?"
+      },
+      {
+        "trigger": "candidate proposes disabling Continue until a date is entered",
+        "question": "How will someone discover what is required and understand why they cannot continue?"
+      },
+      {
+        "trigger": "candidate corrects a claim that both participants expected a later date screen",
+        "question": "Which expectation was actually observed and which remains unknown?"
+      }
+    ],
+    "fair_alternatives": [
+      "A separate clearly labeled date step can be reasonable if tested against the same booking task.",
+      "Disabling progression may work with discoverable requirements and explanation; it is not automatically better than helpful validation."
+    ],
+    "red_flags": [
+      "Repeats that people do not read as an established cause.",
+      "Changes only the button color with no connection to the missing date.",
+      "Calls the change successful because it looks clearer."
+    ],
+    "follow_ups": [
+      "Write one hypothesis and a test"
+    ],
+    "assessment_limits": [
+      "Assess only reasoning and communication demonstrated in this fictional task, not real-world professional competence, licensure or hiring readiness. No real action, external verification or tool execution has occurred.",
+      "Credit relevant plain-language reasoning and valid alternatives without requiring experience at a particular employer. Examples from education, volunteering, community work or paid work are equally acceptable when relevant.",
+      "A missing or unasked dimension is not assessed, not automatically a failure. In simulation, use neutral probes and reveal facts only when triggered; in coaching, label assistance and distinguish assisted performance from independent evidence.",
+      "Credit an explicit late correction using the final demonstrated reasoning while retaining the evidence of the earlier mistake; do not force agreement with one exemplar.",
+      "Do not penalize the candidate for a conditional fact that was never revealed. Credit an appropriate request for missing information and a conditional plan; distinguish the candidate’s assumptions from interviewer-supplied facts."
+    ]
+  },
+  "interviewer_notes": "Play the relevant reviewing colleague or stakeholder using the supplied facts only. Start with one focused question, not the full rubric. Ask for clarification before treating an ambiguous answer as wrong. Reveal conditional facts when their stated triggers are met, permit equivalent valid approaches and never invent organizational rules, laws, clinical findings, ratings or missing outcomes. Do not require a polished artifact or specialist software. In a short session prioritize the main decision and one material follow-up; allow silence for thinking, check in neutrally, and leave time for the candidate to correct their recommendation and ask a final question. Distinguish simulation from coaching and record any help given. Assess job-relevant evidence, not accent, confidence, speed, credentials or prestige. This is independent practice for adults 18+ and is not a real professional workflow.",
+  "learning_drills": [
+    {
+      "id": "decision-review",
+      "title": "Write one hypothesis and a test",
+      "minutes": 5,
+      "prompt": "Write one hypothesis and a test. Use the fictional facts from this exercise. This is self-guided practice; no model assessment is performed.",
+      "checklist": [
+        "Describe observed behavior neutrally",
+        "Link a change to a possible cause",
+        "Define successful date selection and recovery",
+        "State what three tests cannot establish"
+      ]
+    }
+  ]
+}

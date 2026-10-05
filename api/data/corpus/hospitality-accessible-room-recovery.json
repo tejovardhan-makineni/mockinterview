@@ -1,0 +1,137 @@
+{
+  "schema_version": 1,
+  "revision": 1,
+  "format_id": "stakeholder-simulation",
+  "review_status": "preview",
+  "provenance": {
+    "authorship": "Original project scenario, AI-assisted draft. Practitioner review and calibration pending.",
+    "license": "MIT"
+  },
+  "minutes": 30,
+  "id": "hospitality-accessible-room-recovery",
+  "title": "Senior Guest Services Specialist: Reconcile an Accessible Room Promise",
+  "track": "professional",
+  "domain": "hospitality_operations",
+  "areas": [
+    "retail_hospitality"
+  ],
+  "modality": "conversational",
+  "difficulty": "senior",
+  "role_track": "individual_contributor",
+  "tags": [
+    "retail-hospitality",
+    "senior-specialist",
+    "evidence-based-practice",
+    "community-preview"
+  ],
+  "prompt": "You are the senior guest-services specialist at a fictional hotel. An arriving guest booked a room with a step-free route and a roll-in shower. The booking confirmation lists both features, but the assigned room has a step-free route and a bathtub. A colleague offers a standard room and a discount without asking the guest. Supplied hotel policy permits transferring to a partner hotel with the guest’s agreement and manager authorization of transport and any price difference. Lead a respectful recovery conversation and verify a workable option.",
+  "blurb": "Resolve a service promise by verifying concrete access features, guest preferences and an accountable transfer.",
+  "rubric": [
+    {
+      "key": "needs",
+      "label": "Honor the actual service requirement",
+      "description": "Checks functional requirements and preference without demanding personal disclosure.",
+      "weight": 1,
+      "anchors": {
+        "0": "Treats a discount as a substitute for essential features or requests a diagnosis.",
+        "2": "Acknowledges the mismatch and asks what features are essential.",
+        "4": "Uses the guest’s stated features and one-transfer preference, explains unknowns and obtains agreement before pursuing a specific move."
+      }
+    },
+    {
+      "key": "verification",
+      "label": "Verify the whole option",
+      "description": "Checks availability, route, room and transport rather than relying on a broad label.",
+      "weight": 1,
+      "anchors": {
+        "0": "Promises the partner room solely because it is called accessible.",
+        "2": "Checks the roll-in shower and step-free route with the partner.",
+        "4": "Confirms the held room, arrival route and transport fit before approval; sets a fallback if the 20-minute hold or a required feature cannot be confirmed."
+      }
+    },
+    {
+      "key": "ownership",
+      "label": "Close the recovery handoff",
+      "description": "Coordinates authorization and continuity of service.",
+      "weight": 1,
+      "anchors": {
+        "0": "Sends the guest away to negotiate costs or promises tomorrow’s room as certain.",
+        "2": "Obtains the manager’s cost and transport approval.",
+        "4": "Gives one contact, confirmed booking and cost terms, verifies arrival handoff and records the feature-mapping error for correction without storing unnecessary health information."
+      }
+    }
+  ],
+  "reference": {
+    "scenario": "You are the senior guest-services specialist at a fictional hotel. An arriving guest booked a room with a step-free route and a roll-in shower. The booking confirmation lists both features, but the assigned room has a step-free route and a bathtub. A colleague offers a standard room and a discount without asking the guest. Supplied hotel policy permits transferring to a partner hotel with the guest’s agreement and manager authorization of transport and any price difference. Lead a respectful recovery conversation and verify a workable option.",
+    "facts": [
+      {
+        "id": "rooms",
+        "value": "No room with a roll-in shower is available here tonight. One may become available tomorrow, but checkout is unconfirmed. The partner hotel reports one such room available; its full route has not yet been checked.",
+        "reveal_when": "candidate asks about available rooms or certainty"
+      },
+      {
+        "id": "guest",
+        "value": "The guest says the roll-in shower and step-free route are essential and prefers one transfer over moving twice. They do not want to discuss medical history.",
+        "reveal_when": "candidate asks what features and options matter to the guest"
+      },
+      {
+        "id": "authority",
+        "value": "The duty manager can authorize the partner price difference and accessible transport after the required features and availability are confirmed. The partner can hold the room for 20 minutes pending confirmation.",
+        "reveal_when": "candidate asks about approval, transport or reservation holds"
+      }
+    ],
+    "model_points": [
+      "The confirmed essential features are the decision criteria; a discount does not satisfy an unusable room.",
+      "The partner option remains conditional until concrete features, transport and the hold are verified.",
+      "Do not promise a future room on an unconfirmed checkout. The guest can decline a move and participate in another feasible solution."
+    ],
+    "probes": [
+      {
+        "trigger": "candidate offers a discount before clarifying requirements",
+        "question": "Which promised features must an acceptable option actually provide?"
+      },
+      {
+        "trigger": "candidate proposes waiting until tomorrow",
+        "question": "How does that address tonight’s essential needs and the guest’s preference to avoid two moves?"
+      },
+      {
+        "trigger": "candidate retracts a guarantee about the partner room",
+        "question": "How will you explain the remaining check while keeping the guest informed within the hold period?"
+      }
+    ],
+    "fair_alternatives": [
+      "Another verified accommodation can be considered if the partner fails a requirement and the guest agrees.",
+      "A colleague may coordinate transport while the specialist confirms the room, with explicit ownership and a single guest update."
+    ],
+    "red_flags": [
+      "Treats a discount as a substitute for essential features or requests a diagnosis.",
+      "Promises the partner room solely because it is called accessible.",
+      "Sends the guest away to negotiate costs or promises tomorrow’s room as certain."
+    ],
+    "follow_ups": [
+      "Draft a verified transfer handoff"
+    ],
+    "assessment_limits": [
+      "Assess only reasoning and communication demonstrated in this fictional task, not real-world professional competence, licensure or hiring readiness. No real action, external verification or tool execution has occurred.",
+      "Credit relevant plain-language reasoning and valid alternatives without requiring experience at a particular employer. Examples from education, volunteering, community work or paid work are equally acceptable when relevant.",
+      "A missing or unasked dimension is not assessed, not automatically a failure. In simulation, use neutral probes and reveal facts only when triggered; in coaching, label assistance and distinguish assisted performance from independent evidence.",
+      "Credit an explicit late correction using the final demonstrated reasoning while retaining the evidence of the earlier mistake; do not force agreement with one exemplar.",
+      "Do not penalize the candidate for a conditional fact that was never revealed. Credit an appropriate request for missing information and a conditional plan; distinguish the candidate’s assumptions from interviewer-supplied facts."
+    ]
+  },
+  "interviewer_notes": "Play the relevant reviewing colleague or stakeholder using the supplied facts only. Start with one focused question, not the full rubric. Ask for clarification before treating an ambiguous answer as wrong. Reveal conditional facts when their stated triggers are met, permit equivalent valid approaches and never invent organizational rules, laws, clinical findings, ratings or missing outcomes. Do not require a polished artifact or specialist software. In a short session prioritize the main decision and one material follow-up; allow silence for thinking, check in neutrally, and leave time for the candidate to correct their recommendation and ask a final question. Distinguish simulation from coaching and record any help given. Assess job-relevant evidence, not accent, confidence, speed, credentials or prestige. This is independent practice for adults 18+ and is not a real professional workflow.",
+  "learning_drills": [
+    {
+      "id": "decision-review",
+      "title": "Draft a verified transfer handoff",
+      "minutes": 5,
+      "prompt": "Draft a verified transfer handoff. Use the fictional facts from this exercise. This is self-guided practice; no model assessment is performed.",
+      "checklist": [
+        "List required features, not medical details",
+        "Confirm room hold and route",
+        "Obtain cost and transport approval",
+        "Name one contact and fallback"
+      ]
+    }
+  ]
+}

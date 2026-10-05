@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "revision": 1,
+  "revision": 2,
   "format_id": "ai-output-critique",
   "review_status": "preview",
   "provenance": {
@@ -119,5 +119,6 @@
         "Limit access claims to verified features"
       ]
     }
-  ]
+  ],
+  "role_track": "individual_contributor"
 }

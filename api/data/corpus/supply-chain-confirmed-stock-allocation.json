@@ -1,0 +1,137 @@
+{
+  "schema_version": 1,
+  "revision": 1,
+  "format_id": "work-sample-defense",
+  "review_status": "preview",
+  "provenance": {
+    "authorship": "Original project scenario, AI-assisted draft. Practitioner review and calibration pending.",
+    "license": "MIT"
+  },
+  "minutes": 30,
+  "id": "supply-chain-confirmed-stock-allocation",
+  "title": "Senior Supply Chain Planner: Separate Confirmed Stock From a Recovery Promise",
+  "track": "professional",
+  "domain": "supply_planning",
+  "areas": [
+    "supply_chain"
+  ],
+  "modality": "written",
+  "difficulty": "senior",
+  "role_track": "individual_contributor",
+  "tags": [
+    "supply-chain",
+    "senior-specialist",
+    "evidence-based-practice",
+    "community-preview"
+  ],
+  "prompt": "You are a senior supply-chain planner for a fictional parts supplier. There are 170 verified usable units. Committed orders are A: 90 units due day 2; B: 70 due day 4; C: 60 due day 5. All units are interchangeable. An 80-unit inbound shipment is estimated for day 3 but has not departed. The draft plan commits all 220 units and labels every order covered. Supplied allocation policy honors earlier confirmed deadlines first; changing a customer commitment needs the account owner’s agreement. Review the plan and propose a decision with contingencies. All numbered days are consecutive working days.",
+  "blurb": "Distinguish physical availability, uncertain inbound supply and customer commitments in a time-phased recovery plan.",
+  "rubric": [
+    {
+      "key": "availability",
+      "label": "Build a time-phased stock position",
+      "description": "Separates verified usable stock from estimated arrivals.",
+      "weight": 1,
+      "anchors": {
+        "0": "Calls all 220 units covered because inbound supply is expected.",
+        "2": "Reserves 90 for A and identifies a 50-unit overall shortfall.",
+        "4": "Shows 80 remaining after A, 10 after B and a 50-unit gap for C; dates inbound availability after inspection and labels it conditional."
+      }
+    },
+    {
+      "key": "contingency",
+      "label": "Compare the two supply paths",
+      "description": "Uses deadlines, inspection and approval in the recovery choice.",
+      "weight": 1,
+      "anchors": {
+        "0": "Counts alternate units as usable immediately on arrival or waits beyond its order cutoff without acknowledging it.",
+        "2": "Considers the approved alternate’s 50 units.",
+        "4": "Recognizes the day 1 order cutoff occurs before original departure confirmation, weighs approved extra cost against C’s risk and specifies cancellation or dual-supply assumptions only if actually confirmed."
+      }
+    },
+    {
+      "key": "commitments",
+      "label": "Communicate honest allocations and triggers",
+      "description": "Preserves the stated priority rule and ownership.",
+      "weight": 1,
+      "anchors": {
+        "0": "Secretly reallocates A or guarantees C based on the estimate.",
+        "2": "Notifies the account owner of C’s conditional coverage.",
+        "4": "Records committed versus provisional allocations, obtains any cost or customer-change approval and assigns checks at departure, receipt and inspection with a customer update trigger if they fail."
+      }
+    }
+  ],
+  "reference": {
+    "scenario": "You are a senior supply-chain planner for a fictional parts supplier. There are 170 verified usable units. Committed orders are A: 90 units due day 2; B: 70 due day 4; C: 60 due day 5. All units are interchangeable. An 80-unit inbound shipment is estimated for day 3 but has not departed. The draft plan commits all 220 units and labels every order covered. Supplied allocation policy honors earlier confirmed deadlines first; changing a customer commitment needs the account owner’s agreement. Review the plan and propose a decision with contingencies. All numbered days are consecutive working days.",
+    "facts": [
+      {
+        "id": "inspection",
+        "value": "Every inbound shipment needs one working day of receiving inspection before its units become usable. The existing 170 units have already passed inspection.",
+        "reveal_when": "candidate asks when inbound stock becomes usable"
+      },
+      {
+        "id": "alternate",
+        "value": "An approved alternate supplier can deliver 50 units on day 2 if ordered by the end of day 1. Those units also need one day of inspection. Their additional cost needs procurement approval.",
+        "reveal_when": "candidate asks about alternative supply or decision deadlines"
+      },
+      {
+        "id": "forecast",
+        "value": "The original supplier can confirm departure by midday on day 2. A day 3 arrival would therefore become usable on day 4 if inspection passes. No guarantee or expedited inspection is authorized.",
+        "reveal_when": "candidate asks about confirmation points or the arrival estimate"
+      }
+    ],
+    "model_points": [
+      "Confirmed stock covers A and B in full and only ten units of C. The unconfirmed shipment could close the gap but is not usable on arrival.",
+      "The alternate provides the exact 50-unit gap after inspection on day 3, but must be ordered before the original’s departure confirmation.",
+      "There is no objectively required purchase decision without a supplied risk appetite or penalty; assess explicit tradeoffs and authorized commitments."
+    ],
+    "probes": [
+      {
+        "trigger": "candidate counts day 3 inbound as immediately usable",
+        "question": "How does the required one-day inspection change your availability dates?"
+      },
+      {
+        "trigger": "candidate declines the alternate to avoid extra cost",
+        "question": "What risk to C is being accepted, who can accept it and when must the customer be updated?"
+      },
+      {
+        "trigger": "candidate revises a promise after noticing the inspection day",
+        "question": "Which allocations and customer statements need correction, even if final due dates might still be met?"
+      }
+    ],
+    "fair_alternatives": [
+      "Buying the alternate or retaining the original-only plan can both be defensible with explicit approvals, risk and customer communication.",
+      "An agreed partial shipment for C is possible if the account owner and customer accept it; do not silently change the commitment."
+    ],
+    "red_flags": [
+      "Calls all 220 units covered because inbound supply is expected.",
+      "Counts alternate units as usable immediately on arrival or waits beyond its order cutoff without acknowledging it.",
+      "Secretly reallocates A or guarantees C based on the estimate."
+    ],
+    "follow_ups": [
+      "Draw a stock-and-decision timeline"
+    ],
+    "assessment_limits": [
+      "Assess only reasoning and communication demonstrated in this fictional task, not real-world professional competence, licensure or hiring readiness. No real action, external verification or tool execution has occurred.",
+      "Credit relevant plain-language reasoning and valid alternatives without requiring experience at a particular employer. Examples from education, volunteering, community work or paid work are equally acceptable when relevant.",
+      "A missing or unasked dimension is not assessed, not automatically a failure. In simulation, use neutral probes and reveal facts only when triggered; in coaching, label assistance and distinguish assisted performance from independent evidence.",
+      "Credit an explicit late correction using the final demonstrated reasoning while retaining the evidence of the earlier mistake; do not force agreement with one exemplar.",
+      "Do not penalize the candidate for a conditional fact that was never revealed. Credit an appropriate request for missing information and a conditional plan; distinguish the candidate’s assumptions from interviewer-supplied facts."
+    ]
+  },
+  "interviewer_notes": "Play the relevant reviewing colleague or stakeholder using the supplied facts only. Start with one focused question, not the full rubric. Ask for clarification before treating an ambiguous answer as wrong. Reveal conditional facts when their stated triggers are met, permit equivalent valid approaches and never invent organizational rules, laws, clinical findings, ratings or missing outcomes. Do not require a polished artifact or specialist software. In a short session prioritize the main decision and one material follow-up; allow silence for thinking, check in neutrally, and leave time for the candidate to correct their recommendation and ask a final question. Distinguish simulation from coaching and record any help given. Assess job-relevant evidence, not accent, confidence, speed, credentials or prestige. This is independent practice for adults 18+ and is not a real professional workflow.",
+  "learning_drills": [
+    {
+      "id": "decision-review",
+      "title": "Draw a stock-and-decision timeline",
+      "minutes": 5,
+      "prompt": "Draw a stock-and-decision timeline. Use the fictional facts from this exercise. This is self-guided practice; no model assessment is performed.",
+      "checklist": [
+        "Separate usable stock from expected receipts",
+        "Add inspection time",
+        "Mark the day 1 alternate cutoff",
+        "Assign customer and procurement decisions"
+      ]
+    }
+  ]
+}

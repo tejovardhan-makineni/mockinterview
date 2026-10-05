@@ -1,0 +1,119 @@
+{
+  "schema_version": 1,
+  "revision": 1,
+  "format_id": "stakeholder-simulation",
+  "review_status": "preview",
+  "provenance": {
+    "authorship": "Original project scenario, AI-assisted draft. Practitioner review and scoring calibration pending.",
+    "license": "MIT"
+  },
+  "minutes": 30,
+  "id": "new-manager-delegation",
+  "title": "First-Time Manager: Delegate Without Taking the Work Back",
+  "track": "professional",
+  "domain": "delegation",
+  "areas": [
+    "management"
+  ],
+  "role_track": "management",
+  "modality": "conversational",
+  "difficulty": "manager",
+  "tags": [
+    "management",
+    "manager",
+    "delegation",
+    "leadership",
+    "community-preview"
+  ],
+  "prompt": "You have just become manager of a four-person service team. A weekly reconciliation takes you six hours; a team member, Alex, has asked to learn it. Friday is the deadline. The draft handoff says only, \"Own this now; ask me if you get stuck.\" Alex has two hours free today and three tomorrow. Speak with Alex (played by the AI) and agree a realistic delegation plan. No real employee information is needed.",
+  "blurb": "Write a delegation agreement",
+  "rubric": [
+    {
+      "key": "ownership",
+      "label": "Define ownership",
+      "description": "Makes the deliverable and decision rights explicit.",
+      "weight": 1,
+      "anchors": {
+        "0": "Transfers the work without an outcome or retains every decision.",
+        "2": "Defines the Friday deliverable and identifies a review checkpoint.",
+        "4": "Agrees a clear deliverable, access to the example, an independent review boundary and escalation triggers while letting Alex choose how to do the work."
+      }
+    },
+    {
+      "key": "capacity",
+      "label": "Make learning feasible",
+      "description": "Accounts for capacity and learning time.",
+      "weight": 1,
+      "anchors": {
+        "0": "Assumes five hours guarantees completion of a task that takes an experienced person six hours.",
+        "2": "Recognizes the time mismatch and considers reprioritization.",
+        "4": "Treats learning time as uncertain, discusses the extra capacity or narrower scope, checks workload and sets an early checkpoint rather than relying on hidden overtime."
+      }
+    },
+    {
+      "key": "coaching",
+      "label": "Support without rescuing",
+      "description": "Uses a checkpoint to develop judgment.",
+      "weight": 1,
+      "anchors": {
+        "0": "Takes the task back at the first uncertainty or leaves Alex unsupported.",
+        "2": "Offers support and asks Alex to explain their approach.",
+        "4": "Agrees what Alex will try independently, a specific point to compare progress and how to adapt the plan without punishing an honest question."
+      }
+    }
+  ],
+  "reference": {
+    "scenario": "You have just become manager of a four-person service team. A weekly reconciliation takes you six hours; a team member, Alex, has asked to learn it. Friday is the deadline. The draft handoff says only, \"Own this now; ask me if you get stuck.\" Alex has two hours free today and three tomorrow. Speak with Alex (played by the AI) and agree a realistic delegation plan. No real employee information is needed.",
+    "facts": [
+      {
+        "id": "fact-1",
+        "value": "Alex has observed one reconciliation but has never done one. A worked example and checklist exist.",
+        "reveal_when": "candidate asks about experience or available support"
+      },
+      {
+        "id": "fact-2",
+        "value": "You can free two additional hours by moving a low-priority internal report. A second reviewer must approve reconciliation adjustments under the fictional team policy.",
+        "reveal_when": "candidate asks about capacity, priorities or decision authority"
+      }
+    ],
+    "model_points": [
+      "Agrees a clear deliverable, access to the example, an independent review boundary and escalation triggers while letting Alex choose how to do the work.",
+      "Treats learning time as uncertain, discusses the extra capacity or narrower scope, checks workload and sets an early checkpoint rather than relying on hidden overtime.",
+      "Agrees what Alex will try independently, a specific point to compare progress and how to adapt the plan without punishing an honest question."
+    ],
+    "probes": [
+      {
+        "trigger": "candidate says only \"let me know\"",
+        "question": "What will let both of you notice a problem before Friday?"
+      },
+      {
+        "trigger": "candidate proposes doing it together throughout",
+        "question": "Which decisions will Alex own next time?"
+      },
+      {
+        "trigger": "candidate revises the capacity estimate",
+        "question": "How does your revised estimate change the handoff?"
+      }
+    ],
+    "fair_alternatives": [
+      "A smaller first assignment is valid if Alex retains meaningful ownership and the remaining work has an owner.",
+      "Pairing for one learning step is valid without making the manager the permanent operator."
+    ],
+    "assessment_limits": "Assess only the decisions and reasoning demonstrated in this fictional exercise. No hiring-readiness, personality, legal compliance or workplace performance claim follows from this score. A valid alternative can earn full credit. Unrevealed conditional facts must not be assumed known or required for credit; credit asking for needed information and a conditional plan."
+  },
+  "interviewer_notes": "You are the counterpart named in the prompt. If this is a written review, remain the hiring interviewer while the candidate reads and writes. Let the candidate finish, including thinking and self-correction. Answer only supplied facts when their reveal condition is met; otherwise say the information is unknown. Use neutral probes after a completed answer, one at a time. Do not prescribe the rubric as a spoken checklist. Accept relevant examples from work, education and community leadership. Do not request private employee records, infer protected traits, invent employment rules or promise a real organizational outcome. Simulation gives no answer before assessment; coaching may offer labeled assistance.",
+  "learning_drills": [
+    {
+      "id": "decision-practice",
+      "title": "Write a delegation agreement",
+      "prompt": "Write a six-line handoff for Alex with a deliverable, authority, capacity, support, checkpoint and escalation trigger. This is self-guided practice with no automated assessment.",
+      "minutes": 7,
+      "checklist": [
+        "Name the outcome",
+        "Account for learning time",
+        "Keep review authority explicit",
+        "Preserve Alex’s ownership"
+      ]
+    }
+  ]
+}

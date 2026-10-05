@@ -242,3 +242,27 @@ func TestStageInstructionsAreScopedToTheActiveTask(t *testing.T) {
 		t.Fatal("scoping stage commands removed independent scenario facts")
 	}
 }
+
+func TestRoleTrackChangesPrioritiesWithoutAssumingManagementFromSeniority(t *testing.T) {
+	for _, tc := range []struct{ track, level, want string }{
+		{"individual_contributor", "principal", "Technical leadership does not require direct reports"},
+		{"management", "senior_manager", "team outcomes through coaching, delegation"},
+		{"executive", "vp", "enterprise strategy, organizational design"},
+		{"", "senior", "do not assume formal management authority"},
+	} {
+		raw, _ := json.Marshal(map[string]string{"role_track": tc.track, "target_level": tc.level})
+		q := corpus.ApplySessionConfig(corpus.Question{Difficulty: "mid"}, raw)
+		prompt := SystemPrompt(q, "", 3, "intro", "", "", 20, "", "en", nil, "")
+		if !strings.Contains(prompt, tc.want) || !strings.Contains(prompt, "Target level: "+tc.level) {
+			t.Fatalf("lost role scope %s/%s", tc.track, tc.level)
+		}
+	}
+}
+
+func TestAuthorPreviewInheritsAuthoredRoleScope(t *testing.T) {
+	q := corpus.Question{RoleTrack: "management", Difficulty: "director"}
+	prompt := SystemPrompt(q, "", 3, "intro", "", "", 20, "", "en", nil, "")
+	if !strings.Contains(prompt, "ROLE TRACK: management") || !strings.Contains(prompt, "Target level: director") {
+		t.Fatal("author preview dropped role scope")
+	}
+}

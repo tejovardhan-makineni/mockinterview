@@ -1,0 +1,119 @@
+{
+  "schema_version": 1,
+  "revision": 1,
+  "format_id": "panel-simulation",
+  "review_status": "preview",
+  "provenance": {
+    "authorship": "Original project scenario, AI-assisted draft. Practitioner review and scoring calibration pending.",
+    "license": "MIT"
+  },
+  "minutes": 45,
+  "id": "vp-leadership-alignment",
+  "title": "Vice President: Align Directors Around a Shared Outcome",
+  "track": "professional",
+  "domain": "leadership_alignment",
+  "areas": [
+    "management"
+  ],
+  "role_track": "executive",
+  "modality": "conversational",
+  "difficulty": "vp",
+  "tags": [
+    "management",
+    "vp",
+    "leadership-alignment",
+    "leadership",
+    "community-preview"
+  ],
+  "prompt": "Two directors have conflicting targets. Acquisition is rewarded for new accounts; Service is rewarded for low cost per case. Acquisition launched a campaign that increased complex new accounts by 30%; Service limited onboarding support to meet its cost target. Complaints rose, but no shared customer-completion measure exists. Lead a discussion with both directors, represented by one AI using labeled perspectives.",
+  "blurb": "Repair an incentive system",
+  "rubric": [
+    {
+      "key": "system_judgment",
+      "label": "Identify the incentive conflict",
+      "description": "Distinguishes local success from organization-wide outcomes.",
+      "weight": 1,
+      "anchors": {
+        "0": "Blames one director without examining target definitions.",
+        "2": "Recognizes the conflicting incentives.",
+        "4": "Traces incomplete onboarding and hidden repeat contacts across both measures, avoids unsupported personal blame and identifies the missing end-to-end outcome."
+      }
+    },
+    {
+      "key": "alignment",
+      "label": "Set shared accountability",
+      "description": "Creates a joint outcome without erasing distinct responsibilities.",
+      "weight": 1,
+      "anchors": {
+        "0": "Adds a vague teamwork target or makes both directors own everything.",
+        "2": "Proposes a shared completion measure and joint review.",
+        "4": "Agrees a shared customer outcome with quality/cost guardrails, retains named owners for acquisition and service decisions, and secures authority to change the old incentives."
+      }
+    },
+    {
+      "key": "change",
+      "label": "Fund and evaluate a pilot",
+      "description": "Makes cross-functional work feasible.",
+      "weight": 1,
+      "anchors": {
+        "0": "Adds work with no capacity or declares success from fewer complaints alone.",
+        "2": "Runs a pilot and reviews results.",
+        "4": "Funds a bounded four-week pilot by reprioritizing work, examines comparable cohorts and repeat contacts, and defines adjustment/stop criteria and how learning will change targets."
+      }
+    }
+  ],
+  "reference": {
+    "scenario": "Two directors have conflicting targets. Acquisition is rewarded for new accounts; Service is rewarded for low cost per case. Acquisition launched a campaign that increased complex new accounts by 30%; Service limited onboarding support to meet its cost target. Complaints rose, but no shared customer-completion measure exists. Lead a discussion with both directors, represented by one AI using labeled perspectives.",
+    "facts": [
+      {
+        "id": "fact-1",
+        "value": "Acquisition’s reported growth includes accounts that never completed onboarding. Service’s cost measure excludes repeat contacts handled by another team. Neither director designed these definitions alone.",
+        "reveal_when": "candidate asks about metric definitions or attribution"
+      },
+      {
+        "id": "fact-2",
+        "value": "The executive team can amend the targets. Both directors can assign people to a four-week shared pilot if priorities are explicitly reduced elsewhere.",
+        "reveal_when": "candidate asks about authority or pilot capacity"
+      }
+    ],
+    "model_points": [
+      "Traces incomplete onboarding and hidden repeat contacts across both measures, avoids unsupported personal blame and identifies the missing end-to-end outcome.",
+      "Agrees a shared customer outcome with quality/cost guardrails, retains named owners for acquisition and service decisions, and secures authority to change the old incentives.",
+      "Funds a bounded four-week pilot by reprioritizing work, examines comparable cohorts and repeat contacts, and defines adjustment/stop criteria and how learning will change targets."
+    ],
+    "probes": [
+      {
+        "trigger": "candidate keeps both original targets unchanged",
+        "question": "What behavior will each director still be rewarded for?"
+      },
+      {
+        "trigger": "candidate makes one combined metric",
+        "question": "What harm could that metric conceal?"
+      },
+      {
+        "trigger": "candidate revises the ownership split",
+        "question": "How will a frontline team know who decides an exception?"
+      }
+    ],
+    "fair_alternatives": [
+      "A balanced set of shared and local measures is valid; one metric need not carry all accountability.",
+      "Immediate target suspension can be valid if the executive authority and temporary decision rule are explicit."
+    ],
+    "assessment_limits": "Assess only the decisions and reasoning demonstrated in this fictional exercise. No hiring-readiness, personality, legal compliance or workplace performance claim follows from this score. A valid alternative can earn full credit. Unrevealed conditional facts must not be assumed known or required for credit; credit asking for needed information and a conditional plan."
+  },
+  "interviewer_notes": "You are the counterpart named in the prompt. If this is a written review, remain the hiring interviewer while the candidate reads and writes. Let the candidate finish, including thinking and self-correction. Answer only supplied facts when their reveal condition is met; otherwise say the information is unknown. Use neutral probes after a completed answer, one at a time. Do not prescribe the rubric as a spoken checklist. Accept relevant examples from work, education and community leadership. Do not request private employee records, infer protected traits, invent employment rules or promise a real organizational outcome. Simulation gives no answer before assessment; coaching may offer labeled assistance.",
+  "learning_drills": [
+    {
+      "id": "decision-practice",
+      "title": "Repair an incentive system",
+      "prompt": "Write one shared outcome, two balancing measures and a decision-rights map for the pilot. This is self-guided practice with no automated assessment.",
+      "minutes": 7,
+      "checklist": [
+        "Define completed outcomes",
+        "Count repeat work",
+        "Fund capacity",
+        "Preserve clear decision owners"
+      ]
+    }
+  ]
+}

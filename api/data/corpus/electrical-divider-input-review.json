@@ -1,0 +1,137 @@
+{
+  "schema_version": 1,
+  "revision": 1,
+  "format_id": "work-sample-defense",
+  "review_status": "preview",
+  "provenance": {
+    "authorship": "Original project scenario, AI-assisted draft. Practitioner review and calibration pending.",
+    "license": "MIT"
+  },
+  "minutes": 20,
+  "id": "electrical-divider-input-review",
+  "title": "Junior Electrical Engineer: Check a Sensor Input Divider",
+  "track": "engineering",
+  "domain": "circuits",
+  "areas": [
+    "electrical_engineering"
+  ],
+  "modality": "written",
+  "difficulty": "junior",
+  "role_track": "individual_contributor",
+  "tags": [
+    "electrical-engineering",
+    "junior-specialist",
+    "evidence-based-practice",
+    "community-preview"
+  ],
+  "prompt": "You are a junior electrical engineer reviewing a fictional circuit on paper. An ideal 12 V source feeds a divider: 2 kΩ from source to output and 1 kΩ from output to ground. The connected measurement input must not exceed 3.3 V. The draft note says “the 1 kΩ resistor makes the output one third of 12 V, so it is safe.” For the first calculation assume the input draws no current. Use Vout = Vin × Rbottom / (Rtop + Rbottom). Check the arithmetic and explain what needs verification before any real design approval; no circuit is built or powered.",
+  "blurb": "Use a supplied divider relation, compare with an input limit and state how loading and tolerances affect a paper result.",
+  "rubric": [
+    {
+      "key": "nominal",
+      "label": "Check the supplied arithmetic and limit",
+      "description": "Calculates output and compares it directly with the maximum.",
+      "weight": 1,
+      "anchors": {
+        "0": "Calls one third of 12 V less than 3.3 V.",
+        "2": "Calculates 4 V and identifies the limit violation.",
+        "4": "Explains that the ratio is mathematically one third but 4 V exceeds the stated maximum, so the original nominal design cannot be approved."
+      }
+    },
+    {
+      "key": "variation",
+      "label": "Evaluate an alternative with explicit assumptions",
+      "description": "Distinguishes nominal arithmetic from worst-case evidence.",
+      "weight": 1,
+      "anchors": {
+        "0": "Guarantees the 3 kΩ/1 kΩ alternative from its 3 V nominal value alone.",
+        "2": "Calculates 3 V nominal for the alternative.",
+        "4": "Calculates 3.25 V at 13 V using nominal resistors and identifies missing tolerance and loading information rather than treating the 0.05 V nominal margin as guaranteed."
+      }
+    },
+    {
+      "key": "verification",
+      "label": "Ask for relevant input and component information",
+      "description": "Plans supervised checks without claiming execution.",
+      "weight": 1,
+      "anchors": {
+        "0": "Provides live wiring instructions or says the circuit was tested.",
+        "2": "Requests resistor tolerances and input specifications.",
+        "4": "Separates maximum-voltage protection from measurement accuracy, describes a specification-based worst-case check and routes an authorized test plan to the supervisor."
+      }
+    }
+  ],
+  "reference": {
+    "scenario": "You are a junior electrical engineer reviewing a fictional circuit on paper. An ideal 12 V source feeds a divider: 2 kΩ from source to output and 1 kΩ from output to ground. The connected measurement input must not exceed 3.3 V. The draft note says “the 1 kΩ resistor makes the output one third of 12 V, so it is safe.” For the first calculation assume the input draws no current. Use Vout = Vin × Rbottom / (Rtop + Rbottom). Check the arithmetic and explain what needs verification before any real design approval; no circuit is built or powered.",
+    "facts": [
+      {
+        "id": "alternative",
+        "value": "An alternative uses 3 kΩ above 1 kΩ. For this exercise those are nominal values, and the source could be as high as 13 V. Resistor tolerances are not supplied.",
+        "reveal_when": "candidate asks about another ratio or source range"
+      },
+      {
+        "id": "loading",
+        "value": "The input’s actual loading is not characterized. A finite input resistance would be in parallel with the lower resistor in this simple model. No minimum acceptable measured voltage or accuracy requirement is supplied.",
+        "reveal_when": "candidate asks about input current, loading or accuracy"
+      },
+      {
+        "id": "approval",
+        "value": "A supervising engineer can obtain input specifications and component tolerances. They require a worst-case calculation and an authorized verification plan before approval.",
+        "reveal_when": "candidate asks about missing specifications or verification"
+      }
+    ],
+    "model_points": [
+      "12×1/(2+1)=4 V. The original design violates the supplied 3.3 V maximum even under its ideal assumptions.",
+      "For the alternative, 12×1/(3+1)=3 V and 13×1/4=3.25 V at nominal resistance values.",
+      "Input loading may lower output in this simple model but can change measurement accuracy; missing specifications prevent a final conclusion."
+    ],
+    "probes": [
+      {
+        "trigger": "candidate accepts the original one-third ratio as safe",
+        "question": "What is one third of 12 V, and how does it compare with 3.3 V?"
+      },
+      {
+        "trigger": "candidate proposes a different resistor ratio",
+        "question": "How would you check maximum source voltage, tolerance and input loading for that choice?"
+      },
+      {
+        "trigger": "candidate retracts approval of the alternative after noticing tolerances are absent",
+        "question": "What calculation remains valid, and what evidence is needed to turn it into a worst-case conclusion?"
+      }
+    ],
+    "fair_alternatives": [
+      "Another suitable ratio or a different interface approach can be discussed if it is checked against the supplied limit and missing requirements.",
+      "An annotated calculation is sufficient; no simulator or remembered electronics standard is required."
+    ],
+    "red_flags": [
+      "Calls one third of 12 V less than 3.3 V.",
+      "Guarantees the 3 kΩ/1 kΩ alternative from its 3 V nominal value alone.",
+      "Provides live wiring instructions or says the circuit was tested."
+    ],
+    "follow_ups": [
+      "Write a divider review table"
+    ],
+    "assessment_limits": [
+      "Assess only reasoning and communication demonstrated in this fictional task, not real-world professional competence, licensure or hiring readiness. No real action, external verification or tool execution has occurred.",
+      "Credit relevant plain-language reasoning and valid alternatives without requiring experience at a particular employer. Examples from education, volunteering, community work or paid work are equally acceptable when relevant.",
+      "A missing or unasked dimension is not assessed, not automatically a failure. In simulation, use neutral probes and reveal facts only when triggered; in coaching, label assistance and distinguish assisted performance from independent evidence.",
+      "Credit an explicit late correction using the final demonstrated reasoning while retaining the evidence of the earlier mistake; do not force agreement with one exemplar.",
+      "Do not penalize the candidate for a conditional fact that was never revealed. Credit an appropriate request for missing information and a conditional plan; distinguish the candidate’s assumptions from interviewer-supplied facts."
+    ]
+  },
+  "interviewer_notes": "Play the relevant reviewing colleague or stakeholder using the supplied facts only. Start with one focused question, not the full rubric. Ask for clarification before treating an ambiguous answer as wrong. Reveal conditional facts when their stated triggers are met, permit equivalent valid approaches and never invent organizational rules, laws, clinical findings, ratings or missing outcomes. Do not require a polished artifact or specialist software. In a short session prioritize the main decision and one material follow-up; allow silence for thinking, check in neutrally, and leave time for the candidate to correct their recommendation and ask a final question. Distinguish simulation from coaching and record any help given. Assess job-relevant evidence, not accent, confidence, speed, credentials or prestige. This is independent practice for adults 18+ and is not a real professional workflow.",
+  "learning_drills": [
+    {
+      "id": "decision-review",
+      "title": "Write a divider review table",
+      "minutes": 5,
+      "prompt": "Write a divider review table. Use the fictional facts from this exercise. This is self-guided practice; no model assessment is performed.",
+      "checklist": [
+        "Calculate the original 4 V",
+        "Compare directly with 3.3 V",
+        "Check the alternative at 13 V",
+        "List tolerance and input-loading evidence"
+      ]
+    }
+  ]
+}

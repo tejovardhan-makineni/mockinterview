@@ -1,0 +1,121 @@
+{
+  "schema_version": 1,
+  "revision": 1,
+  "format_id": "work-sample-defense",
+  "review_status": "preview",
+  "provenance": {
+    "authorship": "Original project scenario, AI-assisted draft. Practitioner review and scoring calibration pending.",
+    "license": "MIT"
+  },
+  "minutes": 30,
+  "id": "engineering-manager-incident-ownership",
+  "title": "Engineering Manager: Improve On-Call Without Blaming the Responder",
+  "track": "engineering",
+  "domain": "engineering_reliability",
+  "areas": [
+    "engineering_management",
+    "software_engineering",
+    "management"
+  ],
+  "role_track": "management",
+  "modality": "written",
+  "difficulty": "manager",
+  "tags": [
+    "engineering-management",
+    "manager",
+    "engineering-reliability",
+    "leadership",
+    "community-preview"
+  ],
+  "prompt": "Review a draft incident follow-up: \"The responder took 25 minutes to find the right runbook. Action: remind engineers to be more careful. Increase on-call shifts until response time improves.\" There were six noisy alerts before the actionable one; the runbook link pointed to an archived page. The team has five engineers and no additional on-call budget this month. Propose a management response and an accountable follow-up.",
+  "blurb": "Rewrite an incident action",
+  "rubric": [
+    {
+      "key": "analysis",
+      "label": "Distinguish system and individual evidence",
+      "description": "Uses the timeline without assigning unsupported blame.",
+      "weight": 1,
+      "anchors": {
+        "0": "Concludes carelessness from response time or treats all pages as unavoidable.",
+        "2": "Identifies the broken runbook and alert noise.",
+        "4": "Reconstructs the response and escalation, separates observed actions from assumptions and identifies missing ownership and overlapping demands as testable contributors."
+      }
+    },
+    {
+      "key": "improvement",
+      "label": "Choose bounded corrective work",
+      "description": "Links changes to the documented problem.",
+      "weight": 1,
+      "anchors": {
+        "0": "Adds shifts or disables alerts without checking consequences.",
+        "2": "Assigns owners to runbooks and alert review.",
+        "4": "Sets a small service-owner-reviewed alert change and verified runbook repair, with completion evidence, balancing checks and a rollback/escalation plan if coverage degrades."
+      }
+    },
+    {
+      "key": "sustainability",
+      "label": "Manage capacity and learning",
+      "description": "Makes reliability work feasible and learning safe.",
+      "weight": 1,
+      "anchors": {
+        "0": "Requires indefinite extra on-call work as punishment.",
+        "2": "Accounts for the current staffing and workload.",
+        "4": "Reprioritizes funded capacity with stakeholders, checks responder support and follow-up burden, and reviews recurrence and actionable-page load rather than using response speed alone."
+      }
+    }
+  ],
+  "reference": {
+    "scenario": "Review a draft incident follow-up: \"The responder took 25 minutes to find the right runbook. Action: remind engineers to be more careful. Increase on-call shifts until response time improves.\" There were six noisy alerts before the actionable one; the runbook link pointed to an archived page. The team has five engineers and no additional on-call budget this month. Propose a management response and an accountable follow-up.",
+    "facts": [
+      {
+        "id": "fact-1",
+        "value": "The responder escalated after ten minutes. The backup was handling another alert. No single owner is assigned to runbook links or alert usefulness.",
+        "reveal_when": "candidate asks about the timeline, escalation or ownership"
+      },
+      {
+        "id": "fact-2",
+        "value": "Two low-value alerts account for half of overnight pages. Changing them requires service-owner review and a check that important signals remain covered.",
+        "reveal_when": "candidate asks about a bounded improvement or alert quality"
+      }
+    ],
+    "model_points": [
+      "Reconstructs the response and escalation, separates observed actions from assumptions and identifies missing ownership and overlapping demands as testable contributors.",
+      "Sets a small service-owner-reviewed alert change and verified runbook repair, with completion evidence, balancing checks and a rollback/escalation plan if coverage degrades.",
+      "Reprioritizes funded capacity with stakeholders, checks responder support and follow-up burden, and reviews recurrence and actionable-page load rather than using response speed alone."
+    ],
+    "probes": [
+      {
+        "trigger": "candidate recommends retraining only",
+        "question": "Which supplied failure would still exist after everyone repeats training?"
+      },
+      {
+        "trigger": "candidate proposes suppressing alerts",
+        "question": "How will you verify that important failures remain detectable?"
+      },
+      {
+        "trigger": "candidate revises an initial blame statement",
+        "question": "How would you correct that statement in the incident record?"
+      }
+    ],
+    "fair_alternatives": [
+      "Additional training is valid if it addresses demonstrated knowledge gaps alongside the broken system.",
+      "A different small alert pilot is acceptable with a coverage check and owner."
+    ],
+    "assessment_limits": "Assess only the decisions and reasoning demonstrated in this fictional exercise. No hiring-readiness, personality, legal compliance or workplace performance claim follows from this score. A valid alternative can earn full credit. Unrevealed conditional facts must not be assumed known or required for credit; credit asking for needed information and a conditional plan."
+  },
+  "interviewer_notes": "You are the counterpart named in the prompt. If this is a written review, remain the hiring interviewer while the candidate reads and writes. Let the candidate finish, including thinking and self-correction. Answer only supplied facts when their reveal condition is met; otherwise say the information is unknown. Use neutral probes after a completed answer, one at a time. Do not prescribe the rubric as a spoken checklist. Accept relevant examples from work, education and community leadership. Do not request private employee records, infer protected traits, invent employment rules or promise a real organizational outcome. Simulation gives no answer before assessment; coaching may offer labeled assistance.",
+  "learning_drills": [
+    {
+      "id": "decision-practice",
+      "title": "Rewrite an incident action",
+      "prompt": "Replace the draft reminder with two owned, verifiable improvements and a balancing measure. This is self-guided practice with no automated assessment.",
+      "minutes": 7,
+      "checklist": [
+        "Tie each action to evidence",
+        "Name an owner",
+        "Define completion",
+        "Check workload and detection coverage"
+      ]
+    }
+  ]
+}

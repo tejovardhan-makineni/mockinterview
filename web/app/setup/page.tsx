@@ -4,6 +4,14 @@ import Link from "next/link";
 import { Suspense, useCallback, useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { api, IS_MOCK } from "@/lib/api";
+import {
+  ROLE_TRACKS,
+  levelAfterTrackChange,
+  levelLabel,
+  levelsForRoleTrack,
+  roleTrackLabel,
+  type RoleTrack,
+} from "@/lib/roleScope";
 import { readSetupDraft, writeSetupDraft } from "@/lib/setupDraft";
 import type { QuestionSummary } from "@/lib/features/catalog";
 import { DEFAULT_CONFIG, type InterviewConfig } from "@/lib/features/profile";
@@ -148,7 +156,8 @@ function Setup() {
               id: "", // The server still resolves and records this pack round.
               title: round.title,
               minutes: round.minutes,
-              difficulty: round.difficulty as QuestionSummary["difficulty"],
+              difficulty: round.difficulty || scenario.difficulty,
+              role_track: round.role_track ?? scenario.role_track,
             };
           }
           return {
@@ -158,7 +167,8 @@ function Setup() {
             domain: round.domain,
             areas: pack.areas,
             modality: round.modality,
-            difficulty: round.difficulty as QuestionSummary["difficulty"],
+            difficulty: round.difficulty || "mid",
+            role_track: round.role_track,
             tags: [],
             prompt: round.focus,
             blurb: pack.blurb,
@@ -186,6 +196,7 @@ function Setup() {
         setCfg((c) => ({
           ...c,
           target_level: q.difficulty,
+          role_track: q.role_track,
           ...draft?.config,
           include_resume: false,
         }));
@@ -206,6 +217,7 @@ function Setup() {
               ? saved.face_id
               : "alex",
             target_level: q.difficulty,
+            role_track: q.role_track,
             ...draft?.config,
             include_resume: false,
           });
@@ -530,9 +542,44 @@ function Setup() {
                   </div>
                 )}
                 <div className="mt-7 grid gap-5 sm:grid-cols-2">
+                  <Field
+                    label="Role track"
+                    hint={
+                      isCustom
+                        ? "Choose the responsibilities to practice; your brief defines the seniority."
+                        : "This adapts the selected scenario; its task and scoring criteria stay the same."
+                    }
+                  >
+                    <select
+                      aria-label="Role track"
+                      className="field-select"
+                      value={cfg.role_track ?? ""}
+                      onChange={(e) => {
+                        const track = (e.target.value || undefined) as
+                          RoleTrack | undefined;
+                        setCfg({
+                          ...cfg,
+                          role_track: track,
+                          target_level: isCustom
+                            ? cfg.target_level
+                            : levelAfterTrackChange(track, cfg.target_level),
+                        });
+                      }}
+                    >
+                      {!question.role_track && (
+                        <option value="">Across roles / unspecified</option>
+                      )}
+                      {ROLE_TRACKS.map((track) => (
+                        <option key={track} value={track}>
+                          {roleTrackLabel(track)}
+                        </option>
+                      ))}
+                    </select>
+                  </Field>
                   {!isCustom && (
                     <Field label="Target level">
                       <select
+                        aria-label="Target level"
                         className="field-select"
                         value={cfg.target_level}
                         onChange={(e) =>
@@ -543,13 +590,14 @@ function Setup() {
                           })
                         }
                       >
-                        {["entry", "junior", "mid", "senior", "staff"].map(
-                          (l) => (
-                            <option key={l} value={l}>
-                              {pretty(l)}
-                            </option>
-                          ),
-                        )}
+                        {levelsForRoleTrack(
+                          cfg.role_track,
+                          cfg.target_level,
+                        ).map((l) => (
+                          <option key={l} value={l}>
+                            {levelLabel(l)}
+                          </option>
+                        ))}
                       </select>
                     </Field>
                   )}
@@ -838,7 +886,11 @@ function Setup() {
                 <p className="mt-1 text-xs text-[var(--color-muted)]">
                   Your AI interviewer
                   <br />
-                  {pretty(cfg.target_level ?? "mid")} · {minutes} minutes
+                  {isCustom
+                    ? custom.level
+                    : levelLabel(cfg.target_level ?? "mid")}{" "}
+                  · {minutes} minutes
+                  {cfg.role_track && <> · {roleTrackLabel(cfg.role_track)}</>}
                 </p>
               </div>
             </div>

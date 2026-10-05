@@ -56,37 +56,47 @@
       "uniqueItems": true,
       "items": {
         "enum": [
-          "software_engineering",
+          "accounting",
+          "agriculture",
+          "allied_health",
+          "architecture",
+          "aviation",
+          "business_operations",
+          "career_foundations",
+          "civil_engineering",
+          "consulting",
+          "creative_communications",
+          "customer_support",
+          "cybersecurity",
           "data_science",
-          "product_management",
+          "dentistry",
+          "education",
+          "electrical_engineering",
+          "engineering_management",
+          "finance",
+          "human_resources",
+          "it_support",
+          "law",
+          "management",
+          "manufacturing",
+          "marketing",
+          "mechanical_engineering",
           "medicine",
           "nursing",
-          "law",
-          "consulting",
-          "finance",
-          "mechanical_engineering",
-          "electrical_engineering",
-          "civil_engineering",
-          "ux_design",
-          "sales",
-          "marketing",
-          "human_resources",
-          "education",
-          "career_foundations",
-          "cybersecurity",
-          "it_support",
-          "quality_assurance",
+          "pharmacy",
+          "product_management",
           "project_management",
-          "business_operations",
-          "accounting",
-          "customer_support",
-          "retail_hospitality",
-          "supply_chain",
-          "skilled_trades",
           "public_service",
-          "social_work",
+          "quality_assurance",
           "research",
-          "creative_communications"
+          "retail_hospitality",
+          "sales",
+          "skilled_trades",
+          "social_work",
+          "software_engineering",
+          "supply_chain",
+          "ux_design",
+          "veterinary"
         ]
       }
     },
@@ -104,7 +114,13 @@
         "junior",
         "mid",
         "senior",
-        "staff"
+        "staff",
+        "principal",
+        "manager",
+        "senior_manager",
+        "director",
+        "vp",
+        "executive"
       ]
     },
     "format_id": {
@@ -278,6 +294,15 @@
           }
         }
       }
+    },
+    "role_track": {
+      "type": "string",
+      "enum": [
+        "individual_contributor",
+        "management",
+        "executive"
+      ],
+      "description": "Optional authored role scope. Omission is shared or unspecified, not an individual-contributor label."
     }
   }
 }

@@ -1,0 +1,137 @@
+{
+  "schema_version": 1,
+  "revision": 1,
+  "format_id": "work-sample-defense",
+  "review_status": "preview",
+  "provenance": {
+    "authorship": "Original project scenario, AI-assisted draft. Practitioner review and calibration pending.",
+    "license": "MIT"
+  },
+  "minutes": 30,
+  "id": "public-service-eligibility-quality-review",
+  "title": "Senior Public Service Analyst: Audit a Misleading Processing-Time Improvement",
+  "track": "professional",
+  "domain": "public_service_operations",
+  "areas": [
+    "public_service"
+  ],
+  "modality": "written",
+  "difficulty": "senior",
+  "role_track": "individual_contributor",
+  "tags": [
+    "public-service",
+    "senior-specialist",
+    "evidence-based-practice",
+    "community-preview"
+  ],
+  "prompt": "You are a senior public service analyst reviewing a fictional assistance program’s pilot. A dashboard says median processing time fell from ten days to six. The old period includes all 200 applications; the pilot dashboard includes 120 completed applications but excludes 80 still open. An accompanying proposal recommends making the pilot permanent. Supplied program criteria require consistent published eligibility rules, an assisted application route and a written explanation for incomplete applications. Review the evidence and propose a defensible decision.",
+  "blurb": "Examine excluded cases, fair access and comparable outcomes before recommending a service change.",
+  "rubric": [
+    {
+      "key": "measurement",
+      "label": "Identify the comparison problem",
+      "description": "Distinguishes completed-case speed from outcomes for the whole cohort.",
+      "weight": 1,
+      "anchors": {
+        "0": "Accepts six days as proof the program improved for everyone.",
+        "2": "Notes that excluding open cases biases the comparison.",
+        "4": "Explains the incomplete observation window, reports open-case ages and completion share alongside comparable time measures and avoids assigning a final median to unresolved cases."
+      }
+    },
+    {
+      "key": "access",
+      "label": "Examine implementation against supplied criteria",
+      "description": "Uses evidence of process gaps without inferring protected traits.",
+      "weight": 1,
+      "anchors": {
+        "0": "Changes eligibility or blames applicants without evidence.",
+        "2": "Identifies the unsent clarification letters as a service gap.",
+        "4": "Separates letter delay from applicant response time, checks assisted-route outcomes and requests missing evidence without assuming who deserves eligibility."
+      }
+    },
+    {
+      "key": "decision",
+      "label": "Design a bounded accountable continuation",
+      "description": "Connects remedy, monitoring and approval criteria.",
+      "weight": 1,
+      "anchors": {
+        "0": "Makes the pilot permanent on the current dashboard alone.",
+        "2": "Recommends extending the pilot while fixing the letter queue.",
+        "4": "Specifies owner and deadline for letters, cohort tracking and access checks, then defines evidence for continue, revise or stop decisions by the service owner."
+      }
+    }
+  ],
+  "reference": {
+    "scenario": "You are a senior public service analyst reviewing a fictional assistance program’s pilot. A dashboard says median processing time fell from ten days to six. The old period includes all 200 applications; the pilot dashboard includes 120 completed applications but excludes 80 still open. An accompanying proposal recommends making the pilot permanent. Supplied program criteria require consistent published eligibility rules, an assisted application route and a written explanation for incomplete applications. Review the evidence and propose a defensible decision.",
+    "facts": [
+      {
+        "id": "open-cases",
+        "value": "Of the 80 open applications, 50 await clarification letters that have not been sent. Thirty are under ordinary review. Forty applicants requested assisted completion; their outcomes have not been separately checked.",
+        "reveal_when": "candidate asks about exclusions, waiting reasons or access needs"
+      },
+      {
+        "id": "comparison",
+        "value": "The prior period’s median included time to completion for all cases eventually resolved. The pilot has run only 12 days, so some outcomes are not yet observable. No change in the eligibility rule was authorized.",
+        "reveal_when": "candidate asks about observation windows or policy changes"
+      },
+      {
+        "id": "resources",
+        "value": "The program can extend the pilot for two weeks, issue the queued letters and track assisted-route outcomes. A service owner must approve permanent changes.",
+        "reveal_when": "candidate asks about a bounded next step or decision authority"
+      }
+    ],
+    "model_points": [
+      "The two reported medians use different inclusion and observation rules; neither the overall benefit nor harm is established by that comparison alone.",
+      "Unsent letters are an actionable process failure under the supplied criteria, independently of whether the pilot is ultimately effective.",
+      "Track all submitted applications and distinguish pending from completed outcomes; do not manufacture current eligibility law."
+    ],
+    "probes": [
+      {
+        "trigger": "candidate compares ten and six as a 40% service improvement",
+        "question": "Who is missing from the six-day number, and what outcomes are not observable yet?"
+      },
+      {
+        "trigger": "candidate proposes stopping the pilot immediately",
+        "question": "Which part can be safely retained while the letter backlog and comparison method are repaired?"
+      },
+      {
+        "trigger": "candidate withdraws a claim that assisted applicants are slower",
+        "question": "What evidence is actually available about their outcomes, and how would you collect a fair comparison?"
+      }
+    ],
+    "fair_alternatives": [
+      "A pause in expansion while preserving useful operational changes is acceptable if monitoring and ownership are explicit.",
+      "Different transparent time-to-event summaries can be appropriate; statistical jargon is not required to explain pending cases fairly."
+    ],
+    "red_flags": [
+      "Accepts six days as proof the program improved for everyone.",
+      "Changes eligibility or blames applicants without evidence.",
+      "Makes the pilot permanent on the current dashboard alone."
+    ],
+    "follow_ups": [
+      "Draft a fair pilot dashboard"
+    ],
+    "assessment_limits": [
+      "Assess only reasoning and communication demonstrated in this fictional task, not real-world professional competence, licensure or hiring readiness. No real action, external verification or tool execution has occurred.",
+      "Credit relevant plain-language reasoning and valid alternatives without requiring experience at a particular employer. Examples from education, volunteering, community work or paid work are equally acceptable when relevant.",
+      "A missing or unasked dimension is not assessed, not automatically a failure. In simulation, use neutral probes and reveal facts only when triggered; in coaching, label assistance and distinguish assisted performance from independent evidence.",
+      "Credit an explicit late correction using the final demonstrated reasoning while retaining the evidence of the earlier mistake; do not force agreement with one exemplar.",
+      "Do not penalize the candidate for a conditional fact that was never revealed. Credit an appropriate request for missing information and a conditional plan; distinguish the candidate’s assumptions from interviewer-supplied facts."
+    ]
+  },
+  "interviewer_notes": "Play the relevant reviewing colleague or stakeholder using the supplied facts only. Start with one focused question, not the full rubric. Ask for clarification before treating an ambiguous answer as wrong. Reveal conditional facts when their stated triggers are met, permit equivalent valid approaches and never invent organizational rules, laws, clinical findings, ratings or missing outcomes. Do not require a polished artifact or specialist software. In a short session prioritize the main decision and one material follow-up; allow silence for thinking, check in neutrally, and leave time for the candidate to correct their recommendation and ask a final question. Distinguish simulation from coaching and record any help given. Assess job-relevant evidence, not accent, confidence, speed, credentials or prestige. This is independent practice for adults 18+ and is not a real professional workflow.",
+  "learning_drills": [
+    {
+      "id": "decision-review",
+      "title": "Draft a fair pilot dashboard",
+      "minutes": 5,
+      "prompt": "Draft a fair pilot dashboard. Use the fictional facts from this exercise. This is self-guided practice; no model assessment is performed.",
+      "checklist": [
+        "Include all submitted cases",
+        "Show pending ages separately",
+        "Track clarification and assisted-route gaps",
+        "Tie expansion to evidence and approval"
+      ]
+    }
+  ]
+}

@@ -1,6 +1,6 @@
 {
   "id": "retail-hospitality-practice",
-  "revision": 1,
+  "revision": 2,
   "review_status": "preview",
   "source_note": "Original community practice path. Each round is a separate attempt. Content is an AI-assisted preview awaiting practitioner review and calibration; this is not an employer process or a hiring-readiness certification.",
   "name": "Retail and Hospitality Practice",
@@ -38,10 +38,11 @@
       "kind": "stakeholder-simulation",
       "domain": "hospitality_operations",
       "modality": "conversational",
-      "difficulty": "mid",
+      "difficulty": "manager",
       "minutes": 30,
       "question_id": "hospitality-overbooking-recovery",
-      "focus": "Coordinate a suitable room alternative by verifying access needs, transport, guest consent, and arrival arrangements."
+      "focus": "Coordinate a suitable room alternative by verifying access needs, transport, guest consent, and arrival arrangements.",
+      "role_track": "management"
     },
     {
       "id": "round-4",

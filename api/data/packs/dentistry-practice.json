@@ -1,0 +1,47 @@
+{
+  "id": "dentistry-practice",
+  "revision": 1,
+  "review_status": "preview",
+  "source_note": "Original AI-assisted community practice path spanning entry, mid, and senior individual-contributor tasks. Each pinned round is a separate practice attempt, not a hiring sequence. Practitioner review and scoring calibration are pending; these exercises do not certify professional or operational competence.",
+  "name": "Dentistry Practice",
+  "areas": [
+    "dentistry"
+  ],
+  "track": "professional",
+  "blurb": "Practice consent support, referral verification, and an appointment-access evidence review.",
+  "rounds": [
+    {
+      "id": "round-1",
+      "title": "Dental Assistant: Support a Patient Who Wants to Pause",
+      "kind": "stakeholder-simulation",
+      "domain": "dental_communication",
+      "modality": "conversational",
+      "difficulty": "entry",
+      "minutes": 20,
+      "question_id": "dentistry-assistant-consent-pause",
+      "focus": "Respect a pause, surface an unanswered question, and support an informed conversation with the clinician."
+    },
+    {
+      "id": "round-2",
+      "title": "Dental Clinician: Repair an Unconfirmed Referral Handoff",
+      "kind": "work-sample-defense",
+      "domain": "dental_referral",
+      "modality": "written",
+      "difficulty": "mid",
+      "minutes": 30,
+      "question_id": "dentistry-referral-loop-review",
+      "focus": "Distinguish transmission from acceptance and repair an overconfident referral message."
+    },
+    {
+      "id": "round-3",
+      "title": "Senior Dental Clinician: Review an Appointment Access Claim",
+      "kind": "work-sample-defense",
+      "domain": "dental_service_review",
+      "modality": "written",
+      "difficulty": "senior",
+      "minutes": 35,
+      "question_id": "dentistry-senior-access-audit",
+      "focus": "Challenge a misleading attendance claim and evaluate reminders without excluding people who need another channel."
+    }
+  ]
+}

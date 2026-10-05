@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"github.com/tejo/mockinterview-api/internal/corpus"
 	"os"
+	"path/filepath"
 	"strings"
 	"testing"
 )
@@ -16,12 +17,28 @@ func TestContributedScenarioContextFixtures(t *testing.T) {
 		ContextContains   []string          `json:"context_contains"`
 		CandidateExamples map[string]string `json:"candidate_examples"`
 	}
-	b, err := os.ReadFile("../../data/fixtures/director-context.json")
+	files, err := filepath.Glob("../../data/fixtures/*-context.json")
 	if err != nil {
 		t.Fatal(err)
 	}
-	if err = json.Unmarshal(b, &fixtures); err != nil {
-		t.Fatal(err)
+	if len(files) == 0 {
+		t.Fatal("no director context fixtures found")
+	}
+	for _, path := range files {
+		b, err := os.ReadFile(path)
+		if err != nil {
+			t.Fatal(err)
+		}
+		var rows []struct {
+			ScenarioID        string            `json:"scenario_id"`
+			ExpectedFormat    string            `json:"expected_format"`
+			ContextContains   []string          `json:"context_contains"`
+			CandidateExamples map[string]string `json:"candidate_examples"`
+		}
+		if err = json.Unmarshal(b, &rows); err != nil {
+			t.Fatal(err)
+		}
+		fixtures = append(fixtures, rows...)
 	}
 	cat, err := corpus.Load("../../data/corpus")
 	if err != nil {

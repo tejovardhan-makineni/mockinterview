@@ -1,0 +1,137 @@
+{
+  "schema_version": 1,
+  "revision": 1,
+  "format_id": "work-sample-defense",
+  "review_status": "preview",
+  "provenance": {
+    "authorship": "Original project scenario, AI-assisted draft. Practitioner review and calibration pending.",
+    "license": "MIT"
+  },
+  "minutes": 30,
+  "id": "qa-retry-idempotency-review",
+  "title": "QA Engineer: Test a Payment Retry Without Counting a Duplicate Success",
+  "track": "professional",
+  "domain": "test_design",
+  "areas": [
+    "quality_assurance"
+  ],
+  "modality": "written",
+  "difficulty": "mid",
+  "role_track": "individual_contributor",
+  "tags": [
+    "quality-assurance",
+    "mid-specialist",
+    "evidence-based-practice",
+    "community-preview"
+  ],
+  "prompt": "You are a QA engineer reviewing a fictional checkout retry test plan. The user clicks Pay, sees a timeout and clicks Retry. The draft check passes if a confirmation screen appears. Supplied product behavior requires one order and one payment attempt accepted by the simulated payment service for the same checkout request, even after a retry. A new checkout request may create a separate order. Review the missing coverage and propose tests and evidence. No real payment or code execution is available; use written test cases and supplied synthetic records.",
+  "blurb": "Define state-based retry evidence across failures instead of treating one success screen as proof of correctness.",
+  "rubric": [
+    {
+      "key": "oracle",
+      "label": "Define the correct success evidence",
+      "description": "Checks order and payment state against the supplied requirement.",
+      "weight": 1,
+      "anchors": {
+        "0": "Passes the case because the confirmation screen appears.",
+        "2": "Requires one order and one accepted payment for the same key.",
+        "4": "Identifies K7 as a failure despite one order and one screen because P90 and P91 both represent accepted payments, and ties evidence to the checkout key."
+      }
+    },
+    {
+      "key": "coverage",
+      "label": "Choose discriminating retry cases",
+      "description": "Covers failure timing and identity boundaries.",
+      "weight": 1,
+      "anchors": {
+        "0": "Repeats only the ordinary success flow.",
+        "2": "Tests retry after a timeout using the same key.",
+        "4": "Separates pre-acceptance and post-acceptance timeout cases, repeated retries and an intentional new-key checkout, with expected state counts for each rather than asserting all requests must deduplicate."
+      }
+    },
+    {
+      "key": "reporting",
+      "label": "Produce reproducible evidence and a clear recommendation",
+      "description": "Communicates defect scope and verification limits.",
+      "weight": 1,
+      "anchors": {
+        "0": "Claims tests ran or says all payments duplicate from one trace.",
+        "2": "Records K7, O41, P90 and P91 and the failing invariant.",
+        "4": "Writes reproducible synthetic setup and expected state, distinguishes observed trace from proposed tests, identifies customer impact and requires targeted verification before recommending release."
+      }
+    }
+  ],
+  "reference": {
+    "scenario": "You are a QA engineer reviewing a fictional checkout retry test plan. The user clicks Pay, sees a timeout and clicks Retry. The draft check passes if a confirmation screen appears. Supplied product behavior requires one order and one payment attempt accepted by the simulated payment service for the same checkout request, even after a retry. A new checkout request may create a separate order. Review the missing coverage and propose tests and evidence. No real payment or code execution is available; use written test cases and supplied synthetic records.",
+    "facts": [
+      {
+        "id": "records",
+        "value": "In the synthetic trace, checkout key K7 has two submit events, one order O41 and two accepted payment records P90 and P91. The UI shows one confirmation. The two payment records are not reversals or authorizations for different orders.",
+        "reveal_when": "candidate asks for backend evidence or the observed retry behavior"
+      },
+      {
+        "id": "failures",
+        "value": "A timeout may occur before the simulated service accepts a payment or after acceptance but before the response arrives. Tests can specify either condition; the UI alone cannot tell which occurred.",
+        "reveal_when": "candidate asks about failure timing or controlling test conditions"
+      },
+      {
+        "id": "identity",
+        "value": "The client should reuse the same checkout key for Retry. A deliberately new checkout receives a new key. The test environment provides synthetic records for inspecting keys, orders and accepted payments but does not actually execute submitted cases.",
+        "reveal_when": "candidate asks about request identity or available evidence"
+      }
+    ],
+    "model_points": [
+      "The trace violates the supplied one-accepted-payment requirement even though the UI and order count look correct.",
+      "A retry after acceptance is the critical uncertainty: failure to receive a response is not evidence that nothing happened.",
+      "A new key is a different checkout and must not be incorrectly suppressed by an overly broad duplicate guard."
+    ],
+    "probes": [
+      {
+        "trigger": "candidate tests only the number of orders",
+        "question": "What do the two accepted payment records establish even if only O41 exists?"
+      },
+      {
+        "trigger": "candidate proposes rejecting every second submit",
+        "question": "How would that behave for a genuinely new checkout key or a retry before any acceptance?"
+      },
+      {
+        "trigger": "candidate corrects an initial pass after inspecting P90 and P91",
+        "question": "Which evidence changes the result, and how would you revise the defect report without claiming unrun tests?"
+      }
+    ],
+    "fair_alternatives": [
+      "A state table, sequence description or pseudocode test plan is acceptable; no particular test framework is required.",
+      "Different fault-injection strategies are valid if they distinguish acceptance timing and preserve synthetic request identity."
+    ],
+    "red_flags": [
+      "Passes the case because the confirmation screen appears.",
+      "Repeats only the ordinary success flow.",
+      "Claims tests ran or says all payments duplicate from one trace."
+    ],
+    "follow_ups": [
+      "Write a retry test matrix"
+    ],
+    "assessment_limits": [
+      "Assess only reasoning and communication demonstrated in this fictional task, not real-world professional competence, licensure or hiring readiness. No real action, external verification or tool execution has occurred.",
+      "Credit relevant plain-language reasoning and valid alternatives without requiring experience at a particular employer. Examples from education, volunteering, community work or paid work are equally acceptable when relevant.",
+      "A missing or unasked dimension is not assessed, not automatically a failure. In simulation, use neutral probes and reveal facts only when triggered; in coaching, label assistance and distinguish assisted performance from independent evidence.",
+      "Credit an explicit late correction using the final demonstrated reasoning while retaining the evidence of the earlier mistake; do not force agreement with one exemplar.",
+      "Do not penalize the candidate for a conditional fact that was never revealed. Credit an appropriate request for missing information and a conditional plan; distinguish the candidate’s assumptions from interviewer-supplied facts."
+    ]
+  },
+  "interviewer_notes": "Play the relevant reviewing colleague or stakeholder using the supplied facts only. Start with one focused question, not the full rubric. Ask for clarification before treating an ambiguous answer as wrong. Reveal conditional facts when their stated triggers are met, permit equivalent valid approaches and never invent organizational rules, laws, clinical findings, ratings or missing outcomes. Do not require a polished artifact or specialist software. In a short session prioritize the main decision and one material follow-up; allow silence for thinking, check in neutrally, and leave time for the candidate to correct their recommendation and ask a final question. Distinguish simulation from coaching and record any help given. Assess job-relevant evidence, not accent, confidence, speed, credentials or prestige. This is independent practice for adults 18+ and is not a real professional workflow.",
+  "learning_drills": [
+    {
+      "id": "decision-review",
+      "title": "Write a retry test matrix",
+      "minutes": 5,
+      "prompt": "Write a retry test matrix. Use the fictional facts from this exercise. This is self-guided practice; no model assessment is performed.",
+      "checklist": [
+        "Define order and accepted-payment invariants",
+        "Separate before and after acceptance timeouts",
+        "Include same-key and new-key requests",
+        "Label observed evidence and proposed tests"
+      ]
+    }
+  ]
+}

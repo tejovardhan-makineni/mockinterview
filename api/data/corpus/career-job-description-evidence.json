@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "revision": 1,
+  "revision": 2,
   "format_id": "written-response",
   "review_status": "preview",
   "provenance": {
@@ -43,7 +43,17 @@
     "social_work",
     "software_engineering",
     "supply_chain",
-    "ux_design"
+    "ux_design",
+    "management",
+    "engineering_management",
+    "pharmacy",
+    "dentistry",
+    "allied_health",
+    "veterinary",
+    "architecture",
+    "manufacturing",
+    "aviation",
+    "agriculture"
   ],
   "modality": "written",
   "difficulty": "entry",

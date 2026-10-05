@@ -120,6 +120,42 @@ function titles() {
 }
 
 describe("interview catalog", () => {
+  it("shows primary/shared coverage and filters manager roles separately from seniority", async () => {
+    const manager: QuestionSummary = {
+      ...software,
+      id: "manager",
+      title: "Lead an engineering team",
+      role_track: "management",
+      difficulty: "director",
+    };
+    const shared: QuestionSummary = {
+      ...software,
+      id: "shared",
+      title: "Tell your career story",
+      areas: ["career_foundations", "software_engineering"],
+    };
+    vi.mocked(api.listQuestions).mockResolvedValue([software, manager, shared]);
+    vi.mocked(api.listProfessions).mockResolvedValue([
+      { ...professions[0], count: 3, primary_count: 2, shared_count: 1 },
+    ]);
+    await act(async () => root.render(<Catalog />));
+    await choose("Profession", "software_engineering");
+    expect(document.body.textContent).toContain(
+      "2 primary scenarios · 1 shared scenario in this catalog",
+    );
+    expect(document.body.textContent).toContain(
+      "do not establish coverage of every role or level",
+    );
+    await choose("Role track", "management");
+    await choose("Scenario level", "director");
+    expect(titles()).toContain(manager.title);
+    expect(titles()).not.toContain(software.title);
+    expect(titles()).not.toContain(shared.title);
+    await choose("Scenario level", "");
+    await choose("Role track", "unspecified");
+    expect(titles()).toContain(shared.title);
+    expect(titles()).not.toContain(manager.title);
+  });
   it("uses registry career families and profession labels and preserves scenario links", async () => {
     await act(async () => root.render(<Catalog />));
     expect(select("Career family").textContent).toContain(

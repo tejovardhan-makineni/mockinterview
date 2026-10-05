@@ -1,0 +1,137 @@
+{
+  "schema_version": 1,
+  "revision": 1,
+  "format_id": "work-sample-defense",
+  "review_status": "preview",
+  "provenance": {
+    "authorship": "Original project scenario, AI-assisted draft. Practitioner review and calibration pending.",
+    "license": "MIT"
+  },
+  "minutes": 30,
+  "id": "operations-capacity-mix-review",
+  "title": "Senior Operations Analyst: Test a Backlog Reduction Claim",
+  "track": "professional",
+  "domain": "process_improvement",
+  "areas": [
+    "business_operations"
+  ],
+  "modality": "written",
+  "difficulty": "senior",
+  "role_track": "individual_contributor",
+  "tags": [
+    "business-operations",
+    "senior-specialist",
+    "evidence-based-practice",
+    "community-preview"
+  ],
+  "prompt": "You are a senior operations analyst reviewing a fictional service desk proposal. There are 120 simple cases needing 10 minutes each and 40 complex cases needing 30 minutes each. The desk has 2,400 productive staff-minutes tomorrow. A proposal says “160 cases at our usual 15-minute average fit exactly; clear the backlog and accept 40 new cases.” Review the capacity claim and recommend a feasible plan using the supplied mix. The service’s priority rule is to handle urgent harm first and then age within each case type; do not invent which cases are urgent.",
+  "blurb": "Use case mix, arrivals and rework to distinguish a real capacity plan from an average-based promise.",
+  "rubric": [
+    {
+      "key": "capacity",
+      "label": "Calculate mix-based demand",
+      "description": "Uses work content rather than a misleading average.",
+      "weight": 1,
+      "anchors": {
+        "0": "Claims backlog plus arrivals fits in 2,400 minutes.",
+        "2": "Calculates backlog demand as 2,400 minutes and new work as 600.",
+        "4": "Shows the 3,000-minute baseline exceeds capacity by 600 before rework, distinguishes forecast uncertainty and avoids treating last week’s rework as guaranteed."
+      }
+    },
+    {
+      "key": "options",
+      "label": "Compare feasible bounded plans",
+      "description": "Quantifies the value and limits of a transfer.",
+      "weight": 1,
+      "anchors": {
+        "0": "Transfers complex work to an unqualified team or assumes handoff is free.",
+        "2": "Considers the partner’s ten simple cases.",
+        "4": "Calculates 100 minutes removed less 30 handoff as 70 net minutes saved, identifies the remaining 530-minute baseline gap and presents explicit deferral or additional-capacity choices."
+      }
+    },
+    {
+      "key": "priority",
+      "label": "Make an accountable service recommendation",
+      "description": "Applies the supplied rule and tracks outcomes rather than hidden closures.",
+      "weight": 1,
+      "anchors": {
+        "0": "Closes unfinished cases or invents urgency to meet the metric.",
+        "2": "Requests urgency and age information before ordering the queue.",
+        "4": "Uses the rule transparently, communicates an achievable commitment range, tracks completed quality work and sets a checkpoint to update the plan when arrivals or rework differ."
+      }
+    }
+  ],
+  "reference": {
+    "scenario": "You are a senior operations analyst reviewing a fictional service desk proposal. There are 120 simple cases needing 10 minutes each and 40 complex cases needing 30 minutes each. The desk has 2,400 productive staff-minutes tomorrow. A proposal says “160 cases at our usual 15-minute average fit exactly; clear the backlog and accept 40 new cases.” Review the capacity claim and recommend a feasible plan using the supplied mix. The service’s priority rule is to handle urgent harm first and then age within each case type; do not invent which cases are urgent.",
+    "facts": [
+      {
+        "id": "arrivals",
+        "value": "The 40 expected new cases are estimated to include 30 simple and 10 complex cases. The estimate is uncertain by plus or minus ten cases; no type mix is available for that uncertainty.",
+        "reveal_when": "candidate asks about incoming work or forecast uncertainty"
+      },
+      {
+        "id": "rework",
+        "value": "The productive 2,400 minutes exclude breaks and meetings but not rework. Last week ten complex cases needed 15 minutes of additional work each; recurrence is uncertain.",
+        "reveal_when": "candidate asks what capacity includes or about rework"
+      },
+      {
+        "id": "options",
+        "value": "A partner team can take ten verified simple cases tomorrow after a 30-minute handoff charged to this desk. Complex cases cannot be transferred without an additional qualified reviewer, who is unavailable tomorrow.",
+        "reveal_when": "candidate asks about scope, extra capacity or transfer options"
+      }
+    ],
+    "model_points": [
+      "The proposal’s average happens to match the existing backlog but leaves no room for arrivals or rework.",
+      "The partner option adds only 70 net minutes of relief and cannot bridge a 600-minute gap.",
+      "A defensible plan identifies what will wait and why; closing or splitting cases to improve the dashboard is not capacity creation."
+    ],
+    "probes": [
+      {
+        "trigger": "candidate accepts the 15-minute average without considering arrivals",
+        "question": "How many staff-minutes do tomorrow’s 30 simple and ten complex arrivals add?"
+      },
+      {
+        "trigger": "candidate recommends the partner transfer",
+        "question": "What is its net capacity benefit after the handoff, and what remains unserved?"
+      },
+      {
+        "trigger": "candidate corrects an arithmetic estimate of transfer savings",
+        "question": "How does the corrected 70-minute benefit change your commitment and customer communication?"
+      }
+    ],
+    "fair_alternatives": [
+      "Declining the small transfer can be reasonable if coordination uncertainty erodes its value.",
+      "A bounded additional shift or a revised service commitment is discussable if authority, qualified capacity and worker constraints are checked rather than assumed."
+    ],
+    "red_flags": [
+      "Claims backlog plus arrivals fits in 2,400 minutes.",
+      "Transfers complex work to an unqualified team or assumes handoff is free.",
+      "Closes unfinished cases or invents urgency to meet the metric."
+    ],
+    "follow_ups": [
+      "Write a capacity decision note"
+    ],
+    "assessment_limits": [
+      "Assess only reasoning and communication demonstrated in this fictional task, not real-world professional competence, licensure or hiring readiness. No real action, external verification or tool execution has occurred.",
+      "Credit relevant plain-language reasoning and valid alternatives without requiring experience at a particular employer. Examples from education, volunteering, community work or paid work are equally acceptable when relevant.",
+      "A missing or unasked dimension is not assessed, not automatically a failure. In simulation, use neutral probes and reveal facts only when triggered; in coaching, label assistance and distinguish assisted performance from independent evidence.",
+      "Credit an explicit late correction using the final demonstrated reasoning while retaining the evidence of the earlier mistake; do not force agreement with one exemplar.",
+      "Do not penalize the candidate for a conditional fact that was never revealed. Credit an appropriate request for missing information and a conditional plan; distinguish the candidate’s assumptions from interviewer-supplied facts."
+    ]
+  },
+  "interviewer_notes": "Play the relevant reviewing colleague or stakeholder using the supplied facts only. Start with one focused question, not the full rubric. Ask for clarification before treating an ambiguous answer as wrong. Reveal conditional facts when their stated triggers are met, permit equivalent valid approaches and never invent organizational rules, laws, clinical findings, ratings or missing outcomes. Do not require a polished artifact or specialist software. In a short session prioritize the main decision and one material follow-up; allow silence for thinking, check in neutrally, and leave time for the candidate to correct their recommendation and ask a final question. Distinguish simulation from coaching and record any help given. Assess job-relevant evidence, not accent, confidence, speed, credentials or prestige. This is independent practice for adults 18+ and is not a real professional workflow.",
+  "learning_drills": [
+    {
+      "id": "decision-review",
+      "title": "Write a capacity decision note",
+      "minutes": 5,
+      "prompt": "Write a capacity decision note. Use the fictional facts from this exercise. This is self-guided practice; no model assessment is performed.",
+      "checklist": [
+        "Calculate demand by case type",
+        "Include incoming work and uncertainty",
+        "Subtract transfer overhead",
+        "State priorities and an honest commitment"
+      ]
+    }
+  ]
+}

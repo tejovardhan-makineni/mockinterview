@@ -1,0 +1,122 @@
+{
+  "schema_version": 1,
+  "revision": 1,
+  "id": "pharmacy-senior-near-miss-learning",
+  "title": "Senior Pharmacist: Interpret a Near-Miss Reporting Pilot",
+  "track": "professional",
+  "domain": "pharmacy_service_quality",
+  "areas": [
+    "pharmacy"
+  ],
+  "modality": "written",
+  "difficulty": "senior",
+  "role_track": "individual_contributor",
+  "format_id": "work-sample-defense",
+  "minutes": 35,
+  "review_status": "preview",
+  "tags": [
+    "pharmacy",
+    "community-preview"
+  ],
+  "prompt": "You are a senior pharmacist advising fictional Larch Service on a handoff pilot. Supplied four-week table: Site A before: 8 near-miss reports / 800 collections; after: 18 / 900. Site B before: 6 / 600; after: 7 / 700. Only A introduced a simpler reporting form and protected reporting time. The project slide says, \"The pilot made A less safe: cancel it.\" Reporting completeness and independently reviewed incident severity were not measured. Review the claim and propose a six-week learning plan. Exercise policy requires potential patient concerns to be reviewed by the designated clinical lead independently of the analytics review. Do not infer clinical harm or design medicine-handling procedures.",
+  "blurb": "Separate reporting changes from safety outcomes and design a modest, auditable learning plan.",
+  "rubric": [
+    {
+      "key": "report_interpretation",
+      "label": "Interpret the denominators and reporting change",
+      "description": "Computes or explains rates without mistaking reports for harm.",
+      "weight": 1,
+      "anchors": {
+        "0": "Uses the raw increase from 8 to 18 as proof of doubled harm.",
+        "2": "Identifies A's reporting rate change from 1% to 2% and B's stable 1%.",
+        "4": "Explains that a reporting intervention can alter ascertainment and that neither rates nor the comparison establish harm, benefit, or causality without completeness/severity information."
+      }
+    },
+    {
+      "key": "learning_design",
+      "label": "Specify useful evidence",
+      "description": "Creates a feasible way to test competing explanations.",
+      "weight": 1,
+      "anchors": {
+        "0": "Declares success or failure without additional evidence.",
+        "2": "Proposes reviewing cases and measuring reporting completeness.",
+        "4": "Defines a six-week sample review with consistent definitions, independent clinical classification, comparable exposure counts, reporting participation, and criteria to revise or stop the pilot if reviewed concerns emerge."
+      }
+    },
+    {
+      "key": "safe_governance",
+      "label": "Separate immediate review from aggregate learning",
+      "description": "Keeps individual concerns owned while avoiding punitive reporting incentives.",
+      "weight": 1,
+      "anchors": {
+        "0": "Waits six weeks to send potential patient concerns for review or ranks staff by report count.",
+        "2": "Routes individual concerns to the clinical lead and avoids blaming high reporters.",
+        "4": "Gives concerns a prompt acknowledged route, reports uncertainty transparently, protects reporting participation, and assigns an accountable review date and decision owner."
+      }
+    }
+  ],
+  "reference": {
+    "scenario": "You are a senior pharmacist advising fictional Larch Service on a handoff pilot. Supplied four-week table: Site A before: 8 near-miss reports / 800 collections; after: 18 / 900. Site B before: 6 / 600; after: 7 / 700. Only A introduced a simpler reporting form and protected reporting time. The project slide says, \"The pilot made A less safe: cancel it.\" Reporting completeness and independently reviewed incident severity were not measured. Review the claim and propose a six-week learning plan. Exercise policy requires potential patient concerns to be reviewed by the designated clinical lead independently of the analytics review. Do not infer clinical harm or design medicine-handling procedures.",
+    "facts": [
+      {
+        "id": "fact-1",
+        "value": "The simpler form reduced completion time from about six minutes to two, measured on five test entries; this small usability observation is not a safety outcome.",
+        "reveal_when": "candidate asks how reporting changed"
+      },
+      {
+        "id": "fact-2",
+        "value": "A protected review budget permits 20 randomly selected report reviews plus all cases flagged by the clinical lead; no comparable independent audit existed before the pilot.",
+        "reveal_when": "candidate asks about review resources"
+      },
+      {
+        "id": "fact-3",
+        "value": "Staff worry that high report counts will be treated as poor performance. The clinical lead can receive a concern immediately through the internal review channel.",
+        "reveal_when": "candidate asks about reporting incentives or concern escalation"
+      }
+    ],
+    "model_points": [
+      "The after-period exposure-adjusted reporting rates are 2% at A and 1% at B; A was 1% before. The change may include altered detection and reporting, so the slide overclaims.",
+      "A limited six-week review can improve definitions and distinguish case mix, reporting participation, and reviewed severity. A random sample alone may miss rare concerns; the supplied clinical-flag route complements it.",
+      "Do not hold individual concern review for the pilot decision. Give the sponsor options with uncertainty, owned checkpoints, and no punitive target to reduce reports."
+    ],
+    "probes": [
+      {
+        "trigger": "candidate calculates percentages but concludes the intervention caused harm",
+        "question": "What else changed the probability that an event would be reported?"
+      },
+      {
+        "trigger": "candidate recommends pausing expansion while collecting evidence",
+        "question": "Which activities would continue, and how would you avoid suppressing reports?"
+      },
+      {
+        "trigger": "candidate revises an early recommendation to cancel",
+        "question": "How would you correct the sponsor slide and explain the basis for the change?"
+      }
+    ],
+    "fair_alternatives": [
+      "Continue A under monitoring or pause expansion to other sites; either can be defended if individual concerns are reviewed and the uncertainty is explicit.",
+      "Exact statistical tests are unnecessary; careful denominator reasoning and a feasible evidence plan are the task.",
+      "Assess the work demonstrated here. Accept relevant examples from education, volunteering, caregiving, placements, or paid work; professional vocabulary and employer pedigree are not evidence of a stronger answer."
+    ],
+    "assessment_limits": "Assess service-quality reasoning and communication, not clinical harm assessment, epidemiological certification, or management authority. Unobserved dimensions are not failures. Credit a reasoned correction and distinguish independently demonstrated reasoning from coached assistance. Do not penalize a candidate for an unrevealed conditional fact; credit appropriate requests and conditional plans, and distinguish candidate assumptions from interviewer-supplied evidence."
+  },
+  "interviewer_notes": "Assess service-quality reasoning and communication, not clinical harm assessment, epidemiological certification, or management authority. Use only the supplied fictional facts and policies; acknowledge unknowns. Ask one triggered probe at a time after the candidate has finished. Accept plain language and accessible written or spoken explanations. Do not score accent, typing speed, confidence, credentials, or experience with a named employer. Credit revisions and record assistance. All participants are fictional adults; no real patient, client, operational, or confidential data is needed. Allow silence for thinking without treating it as failure. In short sessions prioritize the core decision and one material follow-up, leaving room for a correction and wrap-up.",
+  "learning_drills": [
+    {
+      "id": "focused-practice",
+      "title": "Write an uncertainty-aware pilot decision",
+      "prompt": "Draft a five-sentence sponsor note with the observed rates, two explanations, an immediate review route, and a six-week decision. This is self-guided practice; no model assessment is performed.",
+      "minutes": 7,
+      "checklist": [
+        "Separate reports from verified outcomes",
+        "State changed ascertainment",
+        "Keep clinical concerns out of the waiting queue",
+        "Avoid a target to minimize reports"
+      ]
+    }
+  ],
+  "provenance": {
+    "authorship": "Original project scenario, AI-assisted draft using fictional organizations, records, and exercise policies. Practitioner review and scoring calibration pending.",
+    "license": "MIT"
+  }
+}

@@ -154,5 +154,7 @@
       "Returning indices from the sorted 3-Sum when the original indices were required."
     ]
   },
-  "interviewer_notes": "Let the candidate finish their reasoning and any workspace changes before a focused follow-up. Ask only about a material unresolved issue, then return the floor. Let the candidate complete Two Sum before introducing the authored Three Sum variant. Assess correctness and justified complexity without steering from a double loop to a hash map. nums=[3,3], target=6 can test distinct-index behavior after their own testing. For Three Sum, assess duplicate handling and complexity; [0,0,0,0] is a useful completed-solution test. Sorting and two pointers are private reference techniques, not hints to provide during a pause. Three Sum Closest or k-Sum is optional only if useful time remains after the current work is complete."
+  "interviewer_notes": "Let the candidate finish their reasoning and any workspace changes before a focused follow-up. Ask only about a material unresolved issue, then return the floor. Let the candidate complete Two Sum before introducing the authored Three Sum variant. Assess correctness and justified complexity without steering from a double loop to a hash map. nums=[3,3], target=6 can test distinct-index behavior after their own testing. For Three Sum, assess duplicate handling and complexity; [0,0,0,0] is a useful completed-solution test. Sorting and two pointers are private reference techniques, not hints to provide during a pause. Three Sum Closest or k-Sum is optional only if useful time remains after the current work is complete.",
+  "role_track": "individual_contributor",
+  "revision": 2
 }

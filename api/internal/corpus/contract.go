@@ -25,6 +25,7 @@ type Drill struct {
 // SessionSettings come from validated session config, never from candidate text.
 type SessionSettings struct {
 	TargetLevel  string `json:"target_level"`
+	RoleTrack    string `json:"role_track,omitempty"`
 	Challenge    string `json:"challenge"`
 	PracticeMode string `json:"practice_mode"`
 	FaceID       string `json:"face_id"`
@@ -36,6 +37,9 @@ func ApplySessionConfig(q Question, config json.RawMessage) Question {
 	_ = json.Unmarshal(config, &s)
 	if !validDifficulty[s.TargetLevel] {
 		s.TargetLevel = q.Difficulty
+	}
+	if !ValidRoleTrack(s.RoleTrack) {
+		s.RoleTrack = q.RoleTrack
 	}
 	if q.Domain == "custom" {
 		var custom struct {
@@ -125,4 +129,19 @@ func validateReference(q Question, ref map[string]json.RawMessage) error {
 		ids[d.ID] = true
 	}
 	return nil
+}
+
+// RoleTrackGuidance is shared by interviewing and assessment so a title does
+// not silently turn an IC scenario into a people-management assessment.
+func RoleTrackGuidance(track string) string {
+	switch track {
+	case "individual_contributor":
+		return "Probe hands-on judgment, craft, independent execution and influence appropriate to the level. Technical leadership does not require direct reports; do not demand hiring or performance-management authority."
+	case "management":
+		return "Probe team outcomes through coaching, delegation, staffing, fair performance decisions, prioritization and accountable delivery. Distinguish the candidate's decisions from the team's work; assess respectful evidence-based people judgment, not personal heroics."
+	case "executive":
+		return "Probe enterprise strategy, organizational design, portfolio and resource allocation, governance, succession and accountability across functions. Ask how the candidate would resolve competing outcomes and measure execution; do not substitute an individual coding or task-delivery exercise for executive judgment."
+	default:
+		return "Role track is unspecified. Assess the scenario and stated responsibilities without assuming direct reports or formal authority."
+	}
 }

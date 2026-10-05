@@ -1,0 +1,119 @@
+{
+  "schema_version": 1,
+  "revision": 1,
+  "format_id": "work-sample-defense",
+  "review_status": "preview",
+  "provenance": {
+    "authorship": "Original project scenario, AI-assisted draft. Practitioner review and scoring calibration pending.",
+    "license": "MIT"
+  },
+  "minutes": 30,
+  "id": "director-organizational-design",
+  "title": "Director: Review an Organization Design Proposal",
+  "track": "professional",
+  "domain": "organizational_design",
+  "areas": [
+    "management"
+  ],
+  "role_track": "management",
+  "modality": "written",
+  "difficulty": "director",
+  "tags": [
+    "management",
+    "director",
+    "organizational-design",
+    "leadership",
+    "community-preview"
+  ],
+  "prompt": "Review a proposal to combine three service teams into one central queue: \"Pool all staff, cut two coordinator posts immediately and standardize every request.\" Current teams handle onboarding, specialist escalations and renewals. Their request volumes are 200, 40 and 160 weekly, but handling times and required skills differ. As the incoming director, explain what you would change and how you would evaluate a transition.",
+  "blurb": "Test an organization design",
+  "rubric": [
+    {
+      "key": "design",
+      "label": "Connect structure to work",
+      "description": "Avoids a headcount-only organization design.",
+      "weight": 1,
+      "anchors": {
+        "0": "Treats request counts as equivalent workloads and removes coordination immediately.",
+        "2": "Asks about skills and request complexity.",
+        "4": "Maps different work, decision rights, specialist access and handoffs; explains which activities can be pooled and which require protected expertise or ownership."
+      }
+    },
+    {
+      "key": "transition",
+      "label": "Plan a reversible transition",
+      "description": "Accounts for service continuity and human impact.",
+      "weight": 1,
+      "anchors": {
+        "0": "Changes reporting and removes capacity without transition owners.",
+        "2": "Proposes a staged pilot and communication.",
+        "4": "Defines a bounded pilot, transition responsibility and necessary capacity, consults affected teams and applicable process, and states rollback/escalation conditions without promising personnel outcomes."
+      }
+    },
+    {
+      "key": "measurement",
+      "label": "Evaluate outcomes and costs",
+      "description": "Balances service, capacity and coordination effects.",
+      "weight": 1,
+      "anchors": {
+        "0": "Claims two removed posts equal net savings.",
+        "2": "Tracks response time and costs.",
+        "4": "Measures completed customer outcomes, case mix, specialist wait and repeat handoffs alongside full transition/coordination cost; states what result would disconfirm the proposal."
+      }
+    }
+  ],
+  "reference": {
+    "scenario": "Review a proposal to combine three service teams into one central queue: \"Pool all staff, cut two coordinator posts immediately and standardize every request.\" Current teams handle onboarding, specialist escalations and renewals. Their request volumes are 200, 40 and 160 weekly, but handling times and required skills differ. As the incoming director, explain what you would change and how you would evaluate a transition.",
+    "facts": [
+      {
+        "id": "fact-1",
+        "value": "Specialist escalations require credentials held by only four people. Renewals have a predictable month-end peak; onboarding has variable missing-information delays.",
+        "reveal_when": "candidate asks about work differences or skills"
+      },
+      {
+        "id": "fact-2",
+        "value": "The coordinators currently manage partner handoffs and exception routing. The proposal includes no replacement owner, transition budget or baseline customer outcome measures.",
+        "reveal_when": "candidate asks about coordinator work, transition cost or measurement"
+      }
+    ],
+    "model_points": [
+      "Maps different work, decision rights, specialist access and handoffs; explains which activities can be pooled and which require protected expertise or ownership.",
+      "Defines a bounded pilot, transition responsibility and necessary capacity, consults affected teams and applicable process, and states rollback/escalation conditions without promising personnel outcomes.",
+      "Measures completed customer outcomes, case mix, specialist wait and repeat handoffs alongside full transition/coordination cost; states what result would disconfirm the proposal."
+    ],
+    "probes": [
+      {
+        "trigger": "candidate divides total cases by total people",
+        "question": "Which supplied differences make that comparison misleading?"
+      },
+      {
+        "trigger": "candidate retains every team unchanged",
+        "question": "What evidence would support pooling one part of the work?"
+      },
+      {
+        "trigger": "candidate revises the staffing proposal",
+        "question": "Which unowned responsibility caused the revision?"
+      }
+    ],
+    "fair_alternatives": [
+      "A shared intake with specialist teams can be valid.",
+      "Keeping separate queues can be valid if common standards and unnecessary handoffs are addressed."
+    ],
+    "assessment_limits": "Assess only the decisions and reasoning demonstrated in this fictional exercise. No hiring-readiness, personality, legal compliance or workplace performance claim follows from this score. A valid alternative can earn full credit. Unrevealed conditional facts must not be assumed known or required for credit; credit asking for needed information and a conditional plan."
+  },
+  "interviewer_notes": "You are the counterpart named in the prompt. If this is a written review, remain the hiring interviewer while the candidate reads and writes. Let the candidate finish, including thinking and self-correction. Answer only supplied facts when their reveal condition is met; otherwise say the information is unknown. Use neutral probes after a completed answer, one at a time. Do not prescribe the rubric as a spoken checklist. Accept relevant examples from work, education and community leadership. Do not request private employee records, infer protected traits, invent employment rules or promise a real organizational outcome. Simulation gives no answer before assessment; coaching may offer labeled assistance.",
+  "learning_drills": [
+    {
+      "id": "decision-practice",
+      "title": "Test an organization design",
+      "prompt": "Draw the proposed ownership and handoffs, then identify a pilot and three balancing measures. This is self-guided practice with no automated assessment.",
+      "minutes": 7,
+      "checklist": [
+        "Map specialist authority",
+        "Include coordination work",
+        "Budget the transition",
+        "Define a reversal condition"
+      ]
+    }
+  ]
+}

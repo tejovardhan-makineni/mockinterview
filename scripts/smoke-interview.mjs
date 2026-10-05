@@ -43,12 +43,17 @@ try{
  assert.equal(auth.user.role==='admin',false,'registration granted admin');
  if(auth.development_action_url){const link=new URL(auth.development_action_url);await request('POST','/auth/verify',{token:link.searchParams.get('token')});}
  else if(auth.verification_required)throw new Error('Complete the controlled inbox verification before remote smoke; local mode returns a link.');
- const question=list.find(q=>q.id==='behavioral_conflict')||list.find(q=>q.modality==='conversational')||list[0];
+ const question=process.env.SMOKE_QUESTION_ID
+  ?list.find(q=>q.id===process.env.SMOKE_QUESTION_ID)
+  :list.find(q=>q.id==='behavioral_conflict')||list.find(q=>q.modality==='conversational')||list[0];
+ assert.ok(question,'requested smoke scenario is missing');
  const session=await request('POST','/sessions',{question_id:question.id,minutes:5,mode:'text',funding:'platform'});
+ assert.equal(session.config.target_level,question.difficulty,'authored level was not saved');
+ assert.equal(session.config.role_track,question.role_track,'authored role track was not saved');
  const {ticket}=await request('GET','/ws-ticket');
  let live=openLive(session.id,ticket);await live.wait(m=>m.type==='ready');await live.wait(m=>m.type==='say');
  const eventID=randomUUID();
- const answer='On a service migration, I first clarified the customer impact and the rollback constraints. I compared a staged rollout with a full cutover, then proposed a small canary with latency and error budgets. I asked the team to challenge that decision, tested failure recovery, and took responsibility for reverting when a canary exposed missing data. We repaired the migration and documented the evidence before trying again.';
+ const answer=process.env.SMOKE_ANSWER||'On a service migration, I first clarified the customer impact and the rollback constraints. I compared a staged rollout with a full cutover, then proposed a small canary with latency and error budgets. I asked the team to challenge that decision, tested failure recovery, and took responsibility for reverting when a canary exposed missing data. We repaired the migration and documented the evidence before trying again.';
  live.send({type:'user_text',text:answer,event_id:eventID});await live.wait(m=>m.type==='ack'&&m.event_id===eventID);await live.wait(m=>m.type==='say');
  // Retransmission of an acknowledged answer must not duplicate the transcript.
  live.send({type:'user_text',text:answer,event_id:eventID});await live.wait(m=>m.type==='ack'&&m.event_id===eventID);
@@ -57,6 +62,8 @@ try{
  live.send({type:'end'});await live.wait(m=>m.type==='saved');
  await new Promise(resolve=>{if(socket.readyState===WebSocket.CLOSED)return resolve();socket.addEventListener('close',resolve,{once:true});});
  let detail=await request('GET',`/sessions/${session.id}`);assert.equal(detail.workspace.content,workspace.content);assert.equal(detail.workspace.data.notes,workspace.data.notes);
+ assert.equal(detail.config.target_level,question.difficulty,'recovery changed the level');
+ assert.equal(detail.config.role_track,question.role_track,'recovery changed the role track');
  const oldDeadline=detail.deadline_at;
  const beforeResume=await request('GET',`/sessions/${session.id}/transcript`);
  const savedTurns=Array.isArray(beforeResume)?beforeResume:beforeResume.turns;
@@ -80,7 +87,7 @@ try{
  await request('POST',`/sessions/${session.id}/finish`,undefined,200);
  const exported=await request('GET','/account/export');assertPrivateExportOmitted(exported);assert.equal(exported.account.id,uid);
  await request('POST','/feedback',{kind:'interview',rating:4,message:'',context:{session_id:session.id,target:'interviewer_realism'}});
- console.log(JSON.stringify({result:'passed',catalog_count:list.length,checks:['public catalog','registration and verification','provider-ready handshake','acknowledged answer deduplication','exact workspace restore','silent reconnect with unchanged deadline','durable scoring','idempotent finish','private export','rating-only feedback']},null,2));
+ console.log(JSON.stringify({result:'passed',catalog_count:list.length,scenario:question.id,role_track:question.role_track,target_level:question.difficulty,checks:['public catalog','registration and verification','authored role and level persistence','provider-ready handshake','acknowledged answer deduplication','exact workspace restore','silent reconnect with unchanged deadline','durable scoring','idempotent finish','private export','rating-only feedback']},null,2));
 }finally{
  if(socket&&socket.readyState<2)socket.close();
  if(token&&uid){try{await request('DELETE','/account',undefined,204);}catch{console.error('Cleanup failed: delete the synthetic smoke account from the local test database.');}}

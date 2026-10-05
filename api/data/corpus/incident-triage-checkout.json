@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "revision": 1,
+  "revision": 2,
   "format_id": "incident-simulation",
   "review_status": "preview",
   "provenance": {
@@ -23,7 +23,7 @@
     "community-preview"
   ],
   "prompt": "You are the on-call engineer. Checkout errors rose after a deployment, and support is reporting failed purchases. Talk through your first actions, what evidence you need, and how you will communicate. I will provide incident observations when asked.",
-  "blurb": "Triage a Checkout Incident \u2014 original practice scenario, awaiting practitioner review.",
+  "blurb": "Triage a Checkout Incident — original practice scenario, awaiting practitioner review.",
   "rubric": [
     {
       "key": "triage",
@@ -136,7 +136,7 @@
       },
       {
         "trigger": "candidate declares recovery",
-        "question": "What would you verify from a customer\u2019s perspective?"
+        "question": "What would you verify from a customer’s perspective?"
       }
     ],
     "red_flags": [
@@ -163,5 +163,6 @@
         "State what would change your mind"
       ]
     }
-  ]
+  ],
+  "role_track": "individual_contributor"
 }

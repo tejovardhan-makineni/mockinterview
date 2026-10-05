@@ -1,0 +1,137 @@
+{
+  "schema_version": 1,
+  "revision": 1,
+  "format_id": "work-sample-defense",
+  "review_status": "preview",
+  "provenance": {
+    "authorship": "Original project scenario, AI-assisted draft. Practitioner review and calibration pending.",
+    "license": "MIT"
+  },
+  "minutes": 30,
+  "id": "trades-recurring-alarm-diagnosis",
+  "title": "Senior Maintenance Technician: Review a Recurring Air-Handler Alarm",
+  "track": "professional",
+  "domain": "maintenance_safety",
+  "areas": [
+    "skilled_trades"
+  ],
+  "modality": "written",
+  "difficulty": "senior",
+  "role_track": "individual_contributor",
+  "tags": [
+    "skilled-trades",
+    "senior-specialist",
+    "evidence-based-practice",
+    "community-preview"
+  ],
+  "prompt": "You are a senior maintenance technician reviewing a fictional building air-handler’s recurring high-filter-pressure alarm. A draft work order says “replace the filter again and disable the alarm if it returns.” The filter was replaced last week. Existing authorized inspection records show the alarm began after a pressure sensor replacement. The supplied site process requires isolation and authorization before equipment work, forbids disabling protective alarms to hide faults and requires verification before return to service. Review the work order and propose a diagnostic and handoff plan. Describe the plan only; no physical work is performed.",
+  "blurb": "Use maintenance history and independent evidence to distinguish a real restriction from a measurement fault.",
+  "rubric": [
+    {
+      "key": "diagnostic_reasoning",
+      "label": "Develop and test competing explanations",
+      "description": "Uses chronology and comparable evidence without declaring cause prematurely.",
+      "weight": 1,
+      "anchors": {
+        "0": "Orders repeated filter replacement solely because the alarm says pressure is high.",
+        "2": "Considers a sensor or configuration problem after the replacement.",
+        "4": "Uses the independent same-condition reading and range mismatch to prioritize measurement-chain checks while preserving the possibility of an intermittent real restriction."
+      }
+    },
+    {
+      "key": "work_control",
+      "label": "Keep diagnostics within authorized boundaries",
+      "description": "Specifies safe process and avoids defeating protection.",
+      "weight": 1,
+      "anchors": {
+        "0": "Disables the alarm or directs live intrusive work without authorization.",
+        "2": "Rejects bypass and requests authorized isolation and checks.",
+        "4": "Defines review of the approved configuration and installation procedure by a qualified person, keeps any temporary operating arrangement subject to its designated approval and records unresolved risks."
+      }
+    },
+    {
+      "key": "verification",
+      "label": "Prove the repaired measurement and function",
+      "description": "Separates a cleared alarm from a verified repair.",
+      "weight": 1,
+      "anchors": {
+        "0": "Closes the job when the alarm is reset.",
+        "2": "Compares the sensor with an independent reading after correction.",
+        "4": "Requires documented agreement over the approved operating checks, alarm-function verification through the approved procedure, final authorization and a monitored recurrence handoff."
+      }
+    }
+  ],
+  "reference": {
+    "scenario": "You are a senior maintenance technician reviewing a fictional building air-handler’s recurring high-filter-pressure alarm. A draft work order says “replace the filter again and disable the alarm if it returns.” The filter was replaced last week. Existing authorized inspection records show the alarm began after a pressure sensor replacement. The supplied site process requires isolation and authorization before equipment work, forbids disabling protective alarms to hide faults and requires verification before return to service. Review the work order and propose a diagnostic and handoff plan. Describe the plan only; no physical work is performed.",
+    "facts": [
+      {
+        "id": "comparison",
+        "value": "An existing authorized check with an independent calibrated instrument recorded pressure within the supplied normal band while the installed sensor reported above the alarm threshold. Both readings were taken under the same operating condition. Exact values are not needed for this exercise.",
+        "reveal_when": "candidate asks for independent measurements or operating conditions"
+      },
+      {
+        "id": "installation",
+        "value": "The sensor part number matches the approved spare list. Its configured measurement range differs from the documented commissioning range. No one has yet verified wiring, tubing or configuration against the approved procedure.",
+        "reveal_when": "candidate asks about replacement compatibility, configuration or installation records"
+      },
+      {
+        "id": "operation",
+        "value": "Facilities can use a documented temporary ventilation arrangement while authorized diagnostics occur. Only the site’s designated responsible person can approve that arrangement and final return to service.",
+        "reveal_when": "candidate asks about continued operation, authority or fallback arrangements"
+      }
+    ],
+    "model_points": [
+      "The chronology and discrepant same-condition measurements support investigation of the measurement chain; they do not prove configuration is the only cause.",
+      "A matching part number does not prove a matching configuration or correct installation.",
+      "Use supplied site procedures and qualified review; do not invent alarm setpoints, isolation steps or hazardous diagnostic instructions."
+    ],
+    "probes": [
+      {
+        "trigger": "candidate replaces the filter without examining measurement evidence",
+        "question": "How does the independent same-condition reading affect your next check?"
+      },
+      {
+        "trigger": "candidate recommends using the temporary ventilation arrangement",
+        "question": "Who authorizes it, what limitation must be communicated and what ends the temporary state?"
+      },
+      {
+        "trigger": "candidate revises a claim that the sensor is definitely broken",
+        "question": "How would you distinguish a configuration mismatch from a failed sensor before specifying replacement?"
+      }
+    ],
+    "fair_alternatives": [
+      "Replacing a confirmed faulty sensor is acceptable after appropriate evidence and authorization.",
+      "Investigating intermittent restriction in parallel is reasonable if authorized and tied to a testable hypothesis rather than unbounded part replacement."
+    ],
+    "red_flags": [
+      "Orders repeated filter replacement solely because the alarm says pressure is high.",
+      "Disables the alarm or directs live intrusive work without authorization.",
+      "Closes the job when the alarm is reset."
+    ],
+    "follow_ups": [
+      "Write a diagnostic work-order revision"
+    ],
+    "assessment_limits": [
+      "Assess only reasoning and communication demonstrated in this fictional task, not real-world professional competence, licensure or hiring readiness. No real action, external verification or tool execution has occurred.",
+      "Credit relevant plain-language reasoning and valid alternatives without requiring experience at a particular employer. Examples from education, volunteering, community work or paid work are equally acceptable when relevant.",
+      "A missing or unasked dimension is not assessed, not automatically a failure. In simulation, use neutral probes and reveal facts only when triggered; in coaching, label assistance and distinguish assisted performance from independent evidence.",
+      "Credit an explicit late correction using the final demonstrated reasoning while retaining the evidence of the earlier mistake; do not force agreement with one exemplar.",
+      "Do not penalize the candidate for a conditional fact that was never revealed. Credit an appropriate request for missing information and a conditional plan; distinguish the candidate’s assumptions from interviewer-supplied facts."
+    ]
+  },
+  "interviewer_notes": "Play the relevant reviewing colleague or stakeholder using the supplied facts only. Start with one focused question, not the full rubric. Ask for clarification before treating an ambiguous answer as wrong. Reveal conditional facts when their stated triggers are met, permit equivalent valid approaches and never invent organizational rules, laws, clinical findings, ratings or missing outcomes. Do not require a polished artifact or specialist software. In a short session prioritize the main decision and one material follow-up; allow silence for thinking, check in neutrally, and leave time for the candidate to correct their recommendation and ask a final question. Distinguish simulation from coaching and record any help given. Assess job-relevant evidence, not accent, confidence, speed, credentials or prestige. This is independent practice for adults 18+ and is not a real professional workflow.",
+  "learning_drills": [
+    {
+      "id": "decision-review",
+      "title": "Write a diagnostic work-order revision",
+      "minutes": 5,
+      "prompt": "Write a diagnostic work-order revision. Use the fictional facts from this exercise. This is self-guided practice; no model assessment is performed.",
+      "checklist": [
+        "State competing fault explanations",
+        "Reference authorized isolation and procedures",
+        "Verify measurement and alarm function",
+        "Name return-to-service approval"
+      ]
+    }
+  ]
+}

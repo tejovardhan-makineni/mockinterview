@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "revision": 1,
+  "revision": 2,
   "format_id": "work-sample-defense",
   "review_status": "preview",
   "provenance": {
@@ -24,7 +24,7 @@
     "community-preview"
   ],
   "prompt": "A dashboard defines day-7 retention as the fraction of a signup cohort with at least one event on calendar day 7 after signup, in UTC. users(id, signup_date) has one row per user; events(user_id, event_date) can have many rows per day. Review this query, explain the defects, and propose corrected SQL or pseudocode. This is query reasoning, not an executing SQL environment.\nSELECT COUNT(e.user_id) * 1.0 / COUNT(u.id)\nFROM users u JOIN events e ON u.id=e.user_id\nWHERE e.event_date = u.signup_date + INTERVAL '7 days';",
-  "blurb": "Review a Retention Query \u2014 original practice scenario, awaiting practitioner review.",
+  "blurb": "Review a Retention Query — original practice scenario, awaiting practitioner review.",
   "rubric": [
     {
       "key": "denominator",
@@ -154,5 +154,6 @@
         "State what would change your mind"
       ]
     }
-  ]
+  ],
+  "role_track": "individual_contributor"
 }

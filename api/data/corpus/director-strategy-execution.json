@@ -1,0 +1,119 @@
+{
+  "schema_version": 1,
+  "revision": 1,
+  "format_id": "stakeholder-simulation",
+  "review_status": "preview",
+  "provenance": {
+    "authorship": "Original project scenario, AI-assisted draft. Practitioner review and scoring calibration pending.",
+    "license": "MIT"
+  },
+  "minutes": 30,
+  "id": "director-strategy-execution",
+  "title": "Director: Turn a Strategy Into Decisions Teams Can Execute",
+  "track": "professional",
+  "domain": "strategy_execution",
+  "areas": [
+    "management"
+  ],
+  "role_track": "management",
+  "modality": "conversational",
+  "difficulty": "director",
+  "tags": [
+    "management",
+    "director",
+    "strategy-execution",
+    "leadership",
+    "community-preview"
+  ],
+  "prompt": "The annual strategy says, \"Grow while becoming more efficient.\" Your division has a fixed $2 million change budget and three proposals: expand into a new segment ($1.2m), simplify onboarding ($0.8m), and replace reporting infrastructure ($0.9m). Benefits are estimates from different teams using different assumptions. Discuss a decision process and first-quarter direction with the executive sponsor (the AI).",
+  "blurb": "Write a strategy decision page",
+  "rubric": [
+    {
+      "key": "strategy",
+      "label": "Clarify the intended outcome",
+      "description": "Makes the broad strategy actionable.",
+      "weight": 1,
+      "anchors": {
+        "0": "Funds projects by slogan or claims all benefits are established.",
+        "2": "Asks which growth and efficiency outcomes matter.",
+        "4": "Defines measurable outcomes and a decision horizon with the sponsor, identifies incompatible assumptions and separates validated problems from speculative benefits."
+      }
+    },
+    {
+      "key": "investment",
+      "label": "Choose a feasible portfolio",
+      "description": "Respects budget and option value.",
+      "weight": 1,
+      "anchors": {
+        "0": "Commits $2.9m within a $2m budget.",
+        "2": "Selects projects within budget and notes tradeoffs.",
+        "4": "Presents a feasible staged allocation, explicitly handles the unsigned partner dependency and measurement repair option, and explains deferred work and evidence that could alter the choice."
+      }
+    },
+    {
+      "key": "execution",
+      "label": "Connect teams to decisions",
+      "description": "Turns funding into accountable learning and delivery.",
+      "weight": 1,
+      "anchors": {
+        "0": "Sets targets without owners or feedback.",
+        "2": "Assigns owners and quarterly reviews.",
+        "4": "Defines team outcomes, dependencies, decision rights and a first-quarter stop/continue/expand checkpoint using comparable evidence rather than activity counts."
+      }
+    }
+  ],
+  "reference": {
+    "scenario": "The annual strategy says, \"Grow while becoming more efficient.\" Your division has a fixed $2 million change budget and three proposals: expand into a new segment ($1.2m), simplify onboarding ($0.8m), and replace reporting infrastructure ($0.9m). Benefits are estimates from different teams using different assumptions. Discuss a decision process and first-quarter direction with the executive sponsor (the AI).",
+    "facts": [
+      {
+        "id": "fact-1",
+        "value": "The new-segment estimate assumes a partner agreement that is not signed. Onboarding has a measured abandonment problem, but its revenue estimate assumes all recovered customers convert. Reporting is needed for reliable operational measures, though a $0.3m limited repair may cover the first quarter.",
+        "reveal_when": "candidate asks about evidence, dependencies or smaller options"
+      },
+      {
+        "id": "fact-2",
+        "value": "No proposal is mandatory by regulation or contract in this fictional case. The sponsor can approve staged funding and expects an explicit learning checkpoint after the first quarter.",
+        "reveal_when": "candidate asks about constraints, authority or stage gates"
+      }
+    ],
+    "model_points": [
+      "Defines measurable outcomes and a decision horizon with the sponsor, identifies incompatible assumptions and separates validated problems from speculative benefits.",
+      "Presents a feasible staged allocation, explicitly handles the unsigned partner dependency and measurement repair option, and explains deferred work and evidence that could alter the choice.",
+      "Defines team outcomes, dependencies, decision rights and a first-quarter stop/continue/expand checkpoint using comparable evidence rather than activity counts."
+    ],
+    "probes": [
+      {
+        "trigger": "candidate adds projected benefits without caveats",
+        "question": "Which assumptions are shared or incompatible?"
+      },
+      {
+        "trigger": "candidate chooses only the largest estimated return",
+        "question": "What low-cost evidence could change that choice?"
+      },
+      {
+        "trigger": "candidate corrects the budget",
+        "question": "How does the revised portfolio still serve the intended outcome?"
+      }
+    ],
+    "fair_alternatives": [
+      "Different portfolios can score fully if budget, evidence and dependencies are explicit.",
+      "Holding some funding unallocated is valid when a dated decision gate and cost of delay are explained."
+    ],
+    "assessment_limits": "Assess only the decisions and reasoning demonstrated in this fictional exercise. No hiring-readiness, personality, legal compliance or workplace performance claim follows from this score. A valid alternative can earn full credit. Unrevealed conditional facts must not be assumed known or required for credit; credit asking for needed information and a conditional plan."
+  },
+  "interviewer_notes": "You are the counterpart named in the prompt. If this is a written review, remain the hiring interviewer while the candidate reads and writes. Let the candidate finish, including thinking and self-correction. Answer only supplied facts when their reveal condition is met; otherwise say the information is unknown. Use neutral probes after a completed answer, one at a time. Do not prescribe the rubric as a spoken checklist. Accept relevant examples from work, education and community leadership. Do not request private employee records, infer protected traits, invent employment rules or promise a real organizational outcome. Simulation gives no answer before assessment; coaching may offer labeled assistance.",
+  "learning_drills": [
+    {
+      "id": "decision-practice",
+      "title": "Write a strategy decision page",
+      "prompt": "Write outcomes, an affordable allocation, accountable owners and a first-quarter decision gate. This is self-guided practice with no automated assessment.",
+      "minutes": 7,
+      "checklist": [
+        "Separate assumptions from observations",
+        "Stay within budget",
+        "Name deferred options",
+        "Define stop/continue evidence"
+      ]
+    }
+  ]
+}

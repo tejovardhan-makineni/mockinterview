@@ -1,0 +1,36 @@
+[
+  {
+    "scenario_id": "principal-engineer-migration-strategy",
+    "expected_format": "work-sample-defense",
+    "context_contains": [
+      "The shared interface has two incompatible interpretations of a timestamp field. There are no reported data-loss incidents, but consumers disagree about ordering. One team could migrate a low-volume path using two engineer-weeks of work. These are effort estimates; calendar duration depends on staffing and sequencing.",
+      "candidate asks about the specific compatibility risk or a bounded pilot",
+      "candidate declares a mandatory deadline"
+    ],
+    "candidate_examples": {
+      "clarification": "What contract disagreement are consumers seeing, and who can commit each team’s capacity?",
+      "partial": "I would start with one small consumer path and compare old and new behavior.",
+      "alternative": "Keeping the current interface while clarifying semantics can be valid if the risk and maintenance cost are compared.",
+      "correction": "I treated platform ownership as covering every consumer; I would assign explicit producer and consumer owners and negotiate capacity through managers.",
+      "silence": "",
+      "wrap": "I would record the decision, evidence and ownership, and return for review when the agreed trigger is reached."
+    }
+  },
+  {
+    "scenario_id": "principal-data-scientist-measurement-governance",
+    "expected_format": "work-sample-defense",
+    "context_contains": [
+      "Random assignment was at visitor level before checkout. Team A excluded assigned visitors who never reached checkout. Both teams used the same two-week assignment window, but a final data reconciliation is still pending.",
+      "candidate asks about assignment, denominators or data lineage",
+      "candidate calculates a 20% lift and recommends rollout"
+    ],
+    "candidate_examples": {
+      "clarification": "Was assignment before checkout, and did both analyses include everyone assigned?",
+      "partial": "The conditional conversion denominator may have changed, so I would request orders per assigned visitor.",
+      "alternative": "Pausing for reconciliation, extending a pre-specified design where permitted, or declining rollout can each be defensible when the uncertainty and decision cost are explicit.",
+      "correction": "The 20 percent relative lift does not establish overall benefit after checkout selection changed; I would correct that causal claim and check reconciliation and uncertainty.",
+      "silence": "",
+      "wrap": "I would record the decision, evidence and ownership, and return for review when the agreed trigger is reached."
+    }
+  }
+]

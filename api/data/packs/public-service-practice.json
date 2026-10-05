@@ -1,6 +1,6 @@
 {
   "id": "public-service-practice",
-  "revision": 1,
+  "revision": 2,
   "review_status": "preview",
   "source_note": "Original community practice path. Each round is a separate attempt. Content is an AI-assisted preview awaiting practitioner review and calibration; this is not an employer process or a hiring-readiness certification.",
   "name": "Public Service Practice",
@@ -38,10 +38,11 @@
       "kind": "work-sample-defense",
       "domain": "public_service_operations",
       "modality": "written",
-      "difficulty": "mid",
+      "difficulty": "manager",
       "minutes": 30,
       "question_id": "public-service-service-backlog",
-      "focus": "Design a fair appointment pilot using documented urgency, assisted booking, and realistic service capacity."
+      "focus": "Design a fair appointment pilot using documented urgency, assisted booking, and realistic service capacity.",
+      "role_track": "management"
     },
     {
       "id": "round-4",

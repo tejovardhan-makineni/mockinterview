@@ -162,5 +162,7 @@
       "Word Break II: skipping the up-front Word Break I feasibility check, so the search explores exponentially many partial splits that can never complete."
     ]
   },
-  "interviewer_notes": "Let the candidate finish their reasoning and any workspace changes before a focused follow-up. Ask only about a material unresolved issue, then return the floor. Assess segmentation correctness, memoization or other justified reuse, dictionary handling and complexity from the completed implementation. s=aaaaaaa with dictionary {aaaa,aaa} and an adversarial aaaa...b with {a,aa,...} are supplied testing options, not hints to introduce while the candidate works. Let the boolean task finish before selecting an optional later extension. Trie lookup and enumerating all segmentations may provide depth; recognize output can itself be exponential and do not require a particular feasibility-pruning implementation or rush toward DP."
+  "interviewer_notes": "Let the candidate finish their reasoning and any workspace changes before a focused follow-up. Ask only about a material unresolved issue, then return the floor. Assess segmentation correctness, memoization or other justified reuse, dictionary handling and complexity from the completed implementation. s=aaaaaaa with dictionary {aaaa,aaa} and an adversarial aaaa...b with {a,aa,...} are supplied testing options, not hints to introduce while the candidate works. Let the boolean task finish before selecting an optional later extension. Trie lookup and enumerating all segmentations may provide depth; recognize output can itself be exponential and do not require a particular feasibility-pruning implementation or rush toward DP.",
+  "role_track": "individual_contributor",
+  "revision": 2
 }
