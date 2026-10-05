@@ -1,0 +1,137 @@
+{
+  "schema_version": 1,
+  "revision": 1,
+  "format_id": "work-sample-defense",
+  "review_status": "preview",
+  "provenance": {
+    "authorship": "Original project scenario, AI-assisted draft. Practitioner review and calibration pending.",
+    "license": "MIT"
+  },
+  "minutes": 30,
+  "id": "research-preregistration-deviation-review",
+  "title": "Senior Researcher: Review an Unplanned Outcome Change",
+  "track": "professional",
+  "domain": "study_design",
+  "areas": [
+    "research"
+  ],
+  "modality": "written",
+  "difficulty": "senior",
+  "role_track": "individual_contributor",
+  "tags": [
+    "research",
+    "senior-specialist",
+    "evidence-based-practice",
+    "community-preview"
+  ],
+  "prompt": "You are a senior researcher reviewing a fictional adult-learning study before its internal report is released. The dated analysis plan named a six-week task-completion score as the primary outcome. The draft report highlights a one-week satisfaction score and calls the program “proven effective.” Of 100 participants, six-week results are available for 62. The draft does not mention missing outcomes or the change in emphasis. Review the reporting and propose a credible analysis and communication plan without inventing study findings.",
+  "blurb": "Distinguish planned analysis, exploratory findings and missing data before making a causal or effectiveness claim.",
+  "rubric": [
+    {
+      "key": "claim_scope",
+      "label": "Match conclusions to study design",
+      "description": "Separates association, exploration and causal certainty.",
+      "weight": 1,
+      "anchors": {
+        "0": "Claims effectiveness from satisfaction or treats self-selection as randomization.",
+        "2": "Flags the changed outcome and limits causal language.",
+        "4": "Distinguishes the planned six-week task outcome from exploratory satisfaction, identifies cohort and baseline differences and describes the result as uncertain evidence rather than proof."
+      }
+    },
+    {
+      "key": "missing_data",
+      "label": "Investigate incomplete outcomes",
+      "description": "Checks missingness assumptions without replacing data arbitrarily.",
+      "weight": 1,
+      "anchors": {
+        "0": "Treats all missing values as successes or drops them without disclosure.",
+        "2": "Reports 62 observed and 38 missing outcomes.",
+        "4": "Separates known from unknown reasons, proposes permitted follow-up and sensitivity analyses with explicit assumptions and avoids treating eight explained cases as representative of all 38."
+      }
+    },
+    {
+      "key": "transparent_record",
+      "label": "Correct the report and preserve provenance",
+      "description": "Makes deviations and limitations inspectable.",
+      "weight": 1,
+      "anchors": {
+        "0": "Rewrites the original plan to match the preferred result.",
+        "2": "Documents the outcome change and report limitations.",
+        "4": "Retains the dated plan, labels planned and exploratory analyses, versions the correction and identifies what further evidence could strengthen or overturn the claim."
+      }
+    }
+  ],
+  "reference": {
+    "scenario": "You are a senior researcher reviewing a fictional adult-learning study before its internal report is released. The dated analysis plan named a six-week task-completion score as the primary outcome. The draft report highlights a one-week satisfaction score and calls the program “proven effective.” Of 100 participants, six-week results are available for 62. The draft does not mention missing outcomes or the change in emphasis. Review the reporting and propose a credible analysis and communication plan without inventing study findings.",
+    "facts": [
+      {
+        "id": "design",
+        "value": "Participants chose whether to join the program; there was no randomized assignment. The comparison group comes from an earlier cohort, and its baseline task-completion score was higher.",
+        "reveal_when": "candidate asks about assignment, comparison or baseline balance"
+      },
+      {
+        "id": "missing",
+        "value": "Thirty-eight six-week outcomes are missing. Follow-up contact was attempted once. Reasons are known for eight participants who changed work schedules; reasons for the other 30 are unknown.",
+        "reveal_when": "candidate asks about missingness or follow-up evidence"
+      },
+      {
+        "id": "reporting",
+        "value": "The analysis plan and raw records are preserved. The team can issue a revised report with planned and exploratory analyses separated and can attempt approved follow-up contact, but cannot change the original plan retrospectively.",
+        "reveal_when": "candidate asks about correction, additional data or research governance"
+      }
+    ],
+    "model_points": [
+      "One-week satisfaction and six-week task performance answer different questions; a favorable former cannot replace an unavailable latter.",
+      "Self-selection, historical comparison and baseline differences limit causal interpretation even if missing data are later recovered.",
+      "Sensitivity analysis can show dependence on assumptions, but cannot establish an unknown missing-data mechanism."
+    ],
+    "probes": [
+      {
+        "trigger": "candidate focuses only on the 62 observed outcomes",
+        "question": "What assumptions would make those participants representative of the 38 without results?"
+      },
+      {
+        "trigger": "candidate proposes reporting satisfaction as the main story",
+        "question": "How will you make the exploratory change and original primary outcome visible to readers?"
+      },
+      {
+        "trigger": "candidate retracts a causal claim after learning assignment was voluntary",
+        "question": "What language and analysis in the report must change, and what evidence remains useful?"
+      }
+    ],
+    "fair_alternatives": [
+      "Withholding an overall effectiveness conclusion while publishing transparent descriptive findings is acceptable.",
+      "Different justified sensitivity methods are acceptable; no specific software or statistical brand is required."
+    ],
+    "red_flags": [
+      "Claims effectiveness from satisfaction or treats self-selection as randomization.",
+      "Treats all missing values as successes or drops them without disclosure.",
+      "Rewrites the original plan to match the preferred result."
+    ],
+    "follow_ups": [
+      "Write a limitations and deviation note"
+    ],
+    "assessment_limits": [
+      "Assess only reasoning and communication demonstrated in this fictional task, not real-world professional competence, licensure or hiring readiness. No real action, external verification or tool execution has occurred.",
+      "Credit relevant plain-language reasoning and valid alternatives without requiring experience at a particular employer. Examples from education, volunteering, community work or paid work are equally acceptable when relevant.",
+      "A missing or unasked dimension is not assessed, not automatically a failure. In simulation, use neutral probes and reveal facts only when triggered; in coaching, label assistance and distinguish assisted performance from independent evidence.",
+      "Credit an explicit late correction using the final demonstrated reasoning while retaining the evidence of the earlier mistake; do not force agreement with one exemplar.",
+      "Do not penalize the candidate for a conditional fact that was never revealed. Credit an appropriate request for missing information and a conditional plan; distinguish the candidate’s assumptions from interviewer-supplied facts."
+    ]
+  },
+  "interviewer_notes": "Play the relevant reviewing colleague or stakeholder using the supplied facts only. Start with one focused question, not the full rubric. Ask for clarification before treating an ambiguous answer as wrong. Reveal conditional facts when their stated triggers are met, permit equivalent valid approaches and never invent organizational rules, laws, clinical findings, ratings or missing outcomes. Do not require a polished artifact or specialist software. In a short session prioritize the main decision and one material follow-up; allow silence for thinking, check in neutrally, and leave time for the candidate to correct their recommendation and ask a final question. Distinguish simulation from coaching and record any help given. Assess job-relevant evidence, not accent, confidence, speed, credentials or prestige. This is independent practice for adults 18+ and is not a real professional workflow.",
+  "learning_drills": [
+    {
+      "id": "decision-review",
+      "title": "Write a limitations and deviation note",
+      "minutes": 5,
+      "prompt": "Write a limitations and deviation note. Use the fictional facts from this exercise. This is self-guided practice; no model assessment is performed.",
+      "checklist": [
+        "Preserve the original primary outcome",
+        "Separate planned and exploratory work",
+        "Quantify missing outcomes",
+        "Limit causal claims to the design"
+      ]
+    }
+  ]
+}

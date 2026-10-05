@@ -1,0 +1,137 @@
+{
+  "schema_version": 1,
+  "revision": 1,
+  "format_id": "work-sample-defense",
+  "review_status": "preview",
+  "provenance": {
+    "authorship": "Original project scenario, AI-assisted draft. Practitioner review and calibration pending.",
+    "license": "MIT"
+  },
+  "minutes": 30,
+  "id": "communications-correction-channel-review",
+  "title": "Senior Communications Specialist: Correct a Misleading Service Notice",
+  "track": "professional",
+  "domain": "communications_review",
+  "areas": [
+    "creative_communications"
+  ],
+  "modality": "written",
+  "difficulty": "senior",
+  "role_track": "individual_contributor",
+  "tags": [
+    "creative-communications",
+    "senior-specialist",
+    "evidence-based-practice",
+    "community-preview"
+  ],
+  "prompt": "You are a senior communications specialist for a fictional community service. A published notice says, “All locations reopen Monday, and every visitor can walk in.” The supplied operations brief says two of five locations reopen Monday; appointments are required at both, and phone booking remains available. The notice is on the website, a printed flyer and a scheduled social post. A colleague suggests quietly editing the website. Review the claim, propose a correction and explain how you would handle inconsistent channels without inventing reopening dates.",
+  "blurb": "Repair a public claim across channels while preserving clear access information and a traceable correction.",
+  "rubric": [
+    {
+      "key": "claim_accuracy",
+      "label": "Reconcile the notice with the source",
+      "description": "Corrects each material claim without filling information gaps.",
+      "weight": 1,
+      "anchors": {
+        "0": "Repeats that all five locations are open or promises walk-in access.",
+        "2": "Corrects the count to two and states appointments are required.",
+        "4": "Provides the two-location scope, appointment requirement, confirmed booking routes and explicit uncertainty about remaining dates without importing unsupported claims."
+      }
+    },
+    {
+      "key": "channel_repair",
+      "label": "Reach people exposed to the original notice",
+      "description": "Matches corrective action to each channel’s recoverability.",
+      "weight": 1,
+      "anchors": {
+        "0": "Makes a silent website edit and ignores flyers or the scheduled post.",
+        "2": "Pauses the post and updates the website and replacement flyer.",
+        "4": "Prioritizes preventing further spread, labels the material correction, gives service desks and partner venues consistent wording, and tracks unrecoverable distribution."
+      }
+    },
+    {
+      "key": "verification",
+      "label": "Check understanding and decision ownership",
+      "description": "Uses verification and audience comprehension rather than style preference.",
+      "weight": 1,
+      "anchors": {
+        "0": "Treats polished wording as sufficient or announces dates without operations approval.",
+        "2": "Obtains an operations accuracy check.",
+        "4": "Checks a plain-language version with a reader, verifies phone and form details, records approval and measures misdirected arrivals or booking confusion after correction."
+      }
+    }
+  ],
+  "reference": {
+    "scenario": "You are a senior communications specialist for a fictional community service. A published notice says, “All locations reopen Monday, and every visitor can walk in.” The supplied operations brief says two of five locations reopen Monday; appointments are required at both, and phone booking remains available. The notice is on the website, a printed flyer and a scheduled social post. A colleague suggests quietly editing the website. Review the claim, propose a correction and explain how you would handle inconsistent channels without inventing reopening dates.",
+    "facts": [
+      {
+        "id": "distribution",
+        "value": "The social post is scheduled for this afternoon and can be paused. Two hundred flyers have been distributed; the service desk can display a replacement notice and contact partner venues holding remaining flyers.",
+        "reveal_when": "candidate asks about reach, timing or recoverable channels"
+      },
+      {
+        "id": "access",
+        "value": "The two locations have step-free entrances. No access information is confirmed for the other three. Phone booking is available 9–5; the website form is also available.",
+        "reveal_when": "candidate asks about accessibility or booking details"
+      },
+      {
+        "id": "approval",
+        "value": "An operations contact can verify the wording today. Communications can correct inaccurate wording after that check; only operations may announce additional opening dates.",
+        "reveal_when": "candidate asks who can approve the correction or supply missing dates"
+      }
+    ],
+    "model_points": [
+      "Both universal claims are wrong. A useful correction must say what visitors can actually do now.",
+      "Preventing a scheduled post and repairing high-reach channels should happen promptly while confirmation and version tracking continue.",
+      "Printed material cannot be recalled completely; desk scripts and partner notices address that residual risk."
+    ],
+    "probes": [
+      {
+        "trigger": "candidate changes only the opening date",
+        "question": "How does the walk-in claim affect someone planning a visit?"
+      },
+      {
+        "trigger": "candidate recommends contacting every flyer recipient",
+        "question": "Which recipients are identifiable, and what fallback reaches people you cannot identify?"
+      },
+      {
+        "trigger": "candidate retracts an invented date for the remaining locations",
+        "question": "How would you remove that unsupported date from all drafted versions and explain what is still unknown?"
+      }
+    ],
+    "fair_alternatives": [
+      "A prominently dated correction or a replacement notice can work if it clearly supersedes the wrong instructions.",
+      "A short text-first notice is acceptable; no graphic-design software or polished portfolio is required."
+    ],
+    "red_flags": [
+      "Repeats that all five locations are open or promises walk-in access.",
+      "Makes a silent website edit and ignores flyers or the scheduled post.",
+      "Treats polished wording as sufficient or announces dates without operations approval."
+    ],
+    "follow_ups": [
+      "Write a four-sentence correction"
+    ],
+    "assessment_limits": [
+      "Assess only reasoning and communication demonstrated in this fictional task, not real-world professional competence, licensure or hiring readiness. No real action, external verification or tool execution has occurred.",
+      "Credit relevant plain-language reasoning and valid alternatives without requiring experience at a particular employer. Examples from education, volunteering, community work or paid work are equally acceptable when relevant.",
+      "A missing or unasked dimension is not assessed, not automatically a failure. In simulation, use neutral probes and reveal facts only when triggered; in coaching, label assistance and distinguish assisted performance from independent evidence.",
+      "Credit an explicit late correction using the final demonstrated reasoning while retaining the evidence of the earlier mistake; do not force agreement with one exemplar.",
+      "Do not penalize the candidate for a conditional fact that was never revealed. Credit an appropriate request for missing information and a conditional plan; distinguish the candidate’s assumptions from interviewer-supplied facts."
+    ]
+  },
+  "interviewer_notes": "Play the relevant reviewing colleague or stakeholder using the supplied facts only. Start with one focused question, not the full rubric. Ask for clarification before treating an ambiguous answer as wrong. Reveal conditional facts when their stated triggers are met, permit equivalent valid approaches and never invent organizational rules, laws, clinical findings, ratings or missing outcomes. Do not require a polished artifact or specialist software. In a short session prioritize the main decision and one material follow-up; allow silence for thinking, check in neutrally, and leave time for the candidate to correct their recommendation and ask a final question. Distinguish simulation from coaching and record any help given. Assess job-relevant evidence, not accent, confidence, speed, credentials or prestige. This is independent practice for adults 18+ and is not a real professional workflow.",
+  "learning_drills": [
+    {
+      "id": "decision-review",
+      "title": "Write a four-sentence correction",
+      "minutes": 5,
+      "prompt": "Write a four-sentence correction. Use the fictional facts from this exercise. This is self-guided practice; no model assessment is performed.",
+      "checklist": [
+        "Correct both inaccurate claims",
+        "Give confirmed booking routes",
+        "Identify unavailable information",
+        "Name channels needing replacement"
+      ]
+    }
+  ]
+}

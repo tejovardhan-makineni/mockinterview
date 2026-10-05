@@ -1,0 +1,137 @@
+{
+  "schema_version": 1,
+  "revision": 1,
+  "format_id": "work-sample-defense",
+  "review_status": "preview",
+  "provenance": {
+    "authorship": "Original project scenario, AI-assisted draft. Practitioner review and calibration pending.",
+    "license": "MIT"
+  },
+  "minutes": 30,
+  "id": "hr-hiring-evidence-calibration",
+  "title": "Senior HR Specialist: Reconcile a Hiring Panel’s Conflicting Evidence",
+  "track": "professional",
+  "domain": "structured_hiring",
+  "areas": [
+    "human_resources"
+  ],
+  "modality": "written",
+  "difficulty": "senior",
+  "role_track": "individual_contributor",
+  "tags": [
+    "human-resources",
+    "senior-specialist",
+    "evidence-based-practice",
+    "community-preview"
+  ],
+  "prompt": "You are a senior HR specialist supporting a fictional hiring panel. The published criteria are resolving a customer problem, explaining a decision and keeping accurate records. Reviewer A recommends rejection because the candidate was “not polished.” Reviewer B recommends hire because they worked at a famous company. A third reviewer records that the candidate identified a billing error, explained two remedies, but did not describe how they would document the resolution. The panel must provide a criterion-based recommendation tomorrow. Review the evidence and propose a fair next step.",
+  "blurb": "Replace impression-based hiring claims with comparable evidence and a bounded follow-up on a missing criterion.",
+  "rubric": [
+    {
+      "key": "evidence_quality",
+      "label": "Map claims to job criteria",
+      "description": "Distinguishes relevant behavior from prestige and style proxies.",
+      "weight": 1,
+      "anchors": {
+        "0": "Treats polish or employer reputation as decisive job evidence.",
+        "2": "Rejects those proxies and uses the billing example.",
+        "4": "Maps the specific problem and explanation evidence to the criteria, marks recordkeeping unassessed and refuses to manufacture quotations or certainty from vague recollection."
+      }
+    },
+    {
+      "key": "fair_followup",
+      "label": "Resolve a material evidence gap consistently",
+      "description": "Chooses proportionate comparable follow-up rather than a favored-candidate exception.",
+      "weight": 1,
+      "anchors": {
+        "0": "Fails the candidate for an unasked question or gives one candidate the answer.",
+        "2": "Suggests asking about documentation before final judgment.",
+        "4": "Uses the available common prompt and equivalent conditions for candidates with the same gap, records assistance and evaluates the new evidence against the unchanged criterion."
+      }
+    },
+    {
+      "key": "panel_process",
+      "label": "Produce a reviewable recommendation",
+      "description": "Handles disagreement without overstating authority.",
+      "weight": 1,
+      "anchors": {
+        "0": "Invents a pass threshold or suppresses dissenting records.",
+        "2": "Documents the disagreement and routes the decision to the chair.",
+        "4": "Separates current ratings from missing evidence, records the reason for any changed rating and gives the chair a recommendation with limitations and a clear follow-up deadline."
+      }
+    }
+  ],
+  "reference": {
+    "scenario": "You are a senior HR specialist supporting a fictional hiring panel. The published criteria are resolving a customer problem, explaining a decision and keeping accurate records. Reviewer A recommends rejection because the candidate was “not polished.” Reviewer B recommends hire because they worked at a famous company. A third reviewer records that the candidate identified a billing error, explained two remedies, but did not describe how they would document the resolution. The panel must provide a criterion-based recommendation tomorrow. Review the evidence and propose a fair next step.",
+    "facts": [
+      {
+        "id": "rubric",
+        "value": "The same three criteria apply to all candidates. Examples from study, volunteering or paid work are equally acceptable. A missing answer is not an observed failure.",
+        "reveal_when": "candidate asks about scoring rules or acceptable experience"
+      },
+      {
+        "id": "records",
+        "value": "Only the third reviewer captured answer notes. There is no recording, and reviewers cannot reliably reconstruct exact candidate wording. A short follow-up using the same recordkeeping prompt is available to every candidate with this evidence gap.",
+        "reveal_when": "candidate asks for source evidence or a way to resolve missing information"
+      },
+      {
+        "id": "decision",
+        "value": "The panel chair owns the decision. HR can require the recommendation to separate observed evidence, inference and not-assessed criteria, but cannot invent a passing score.",
+        "reveal_when": "candidate asks about authority or thresholds"
+      }
+    ],
+    "model_points": [
+      "Job evidence can support some criteria without supporting an overall hire/no-hire conclusion.",
+      "The common follow-up addresses a measurement gap; it should not coach a preferred response or introduce a new criterion.",
+      "Respectful disagreement and an auditable recommendation are the goal, not enforcing identical impressions."
+    ],
+    "probes": [
+      {
+        "trigger": "candidate rejects the applicant for missing recordkeeping evidence",
+        "question": "Was poor recordkeeping observed, or was the criterion not assessed?"
+      },
+      {
+        "trigger": "candidate recommends deciding without another interview",
+        "question": "How will your recommendation represent the unresolved criterion without inventing evidence?"
+      },
+      {
+        "trigger": "candidate revises a rating that relied on employer prestige",
+        "question": "What criterion-linked evidence remains, and how should the rating change be recorded?"
+      }
+    ],
+    "fair_alternatives": [
+      "A decision under the organization’s existing incomplete-evidence procedure can be discussed if the procedure is requested rather than invented.",
+      "A written common follow-up can work as well as a spoken one when conditions and the job-relevant goal remain comparable."
+    ],
+    "red_flags": [
+      "Treats polish or employer reputation as decisive job evidence.",
+      "Fails the candidate for an unasked question or gives one candidate the answer.",
+      "Invents a pass threshold or suppresses dissenting records."
+    ],
+    "follow_ups": [
+      "Write a criterion-evidence matrix"
+    ],
+    "assessment_limits": [
+      "Assess only reasoning and communication demonstrated in this fictional task, not real-world professional competence, licensure or hiring readiness. No real action, external verification or tool execution has occurred.",
+      "Credit relevant plain-language reasoning and valid alternatives without requiring experience at a particular employer. Examples from education, volunteering, community work or paid work are equally acceptable when relevant.",
+      "A missing or unasked dimension is not assessed, not automatically a failure. In simulation, use neutral probes and reveal facts only when triggered; in coaching, label assistance and distinguish assisted performance from independent evidence.",
+      "Credit an explicit late correction using the final demonstrated reasoning while retaining the evidence of the earlier mistake; do not force agreement with one exemplar.",
+      "Do not penalize the candidate for a conditional fact that was never revealed. Credit an appropriate request for missing information and a conditional plan; distinguish the candidate’s assumptions from interviewer-supplied facts."
+    ]
+  },
+  "interviewer_notes": "Play the relevant reviewing colleague or stakeholder using the supplied facts only. Start with one focused question, not the full rubric. Ask for clarification before treating an ambiguous answer as wrong. Reveal conditional facts when their stated triggers are met, permit equivalent valid approaches and never invent organizational rules, laws, clinical findings, ratings or missing outcomes. Do not require a polished artifact or specialist software. In a short session prioritize the main decision and one material follow-up; allow silence for thinking, check in neutrally, and leave time for the candidate to correct their recommendation and ask a final question. Distinguish simulation from coaching and record any help given. Assess job-relevant evidence, not accent, confidence, speed, credentials or prestige. This is independent practice for adults 18+ and is not a real professional workflow.",
+  "learning_drills": [
+    {
+      "id": "decision-review",
+      "title": "Write a criterion-evidence matrix",
+      "minutes": 5,
+      "prompt": "Write a criterion-evidence matrix. Use the fictional facts from this exercise. This is self-guided practice; no model assessment is performed.",
+      "checklist": [
+        "Exclude style and prestige proxies",
+        "Mark unassessed evidence explicitly",
+        "Keep follow-up conditions comparable",
+        "Record the chair’s decision and limitations"
+      ]
+    }
+  ]
+}

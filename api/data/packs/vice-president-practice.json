@@ -1,0 +1,50 @@
+{
+  "id": "vice-president-practice",
+  "revision": 1,
+  "review_status": "preview",
+  "source_note": "Original AI-assisted management practice path. Each round is a separate attempt. Practitioner review and scoring calibration are pending; this does not certify leadership or hiring readiness.",
+  "name": "Vice President",
+  "areas": [
+    "management"
+  ],
+  "track": "professional",
+  "blurb": "Practice investment governance, leadership alignment, strategy execution.",
+  "rounds": [
+    {
+      "id": "round-1",
+      "title": "Vice President: Rebalance Investment Under a New Constraint",
+      "kind": "stakeholder-simulation",
+      "domain": "investment_governance",
+      "modality": "conversational",
+      "difficulty": "vp",
+      "role_track": "executive",
+      "minutes": 45,
+      "question_id": "vp-investment-tradeoffs",
+      "focus": "Reconcile a portfolio choice"
+    },
+    {
+      "id": "round-2",
+      "title": "Vice President: Align Directors Around a Shared Outcome",
+      "kind": "panel-simulation",
+      "domain": "leadership_alignment",
+      "modality": "conversational",
+      "difficulty": "vp",
+      "role_track": "executive",
+      "minutes": 45,
+      "question_id": "vp-leadership-alignment",
+      "focus": "Repair an incentive system"
+    },
+    {
+      "id": "round-3",
+      "title": "Director: Turn a Strategy Into Decisions Teams Can Execute",
+      "kind": "stakeholder-simulation",
+      "domain": "strategy_execution",
+      "modality": "conversational",
+      "difficulty": "director",
+      "role_track": "management",
+      "minutes": 30,
+      "question_id": "director-strategy-execution",
+      "focus": "Write a strategy decision page"
+    }
+  ]
+}

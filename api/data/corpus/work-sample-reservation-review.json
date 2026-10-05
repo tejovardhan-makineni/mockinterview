@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "revision": 1,
+  "revision": 2,
   "format_id": "work-sample-defense",
   "review_status": "preview",
   "provenance": {
@@ -23,7 +23,7 @@
     "community-preview"
   ],
   "prompt": "Review this proposed inventory function. It should accept positive integer requests and nonnegative integer stock, reject invalid inputs without changing stock, and return (remaining_stock, accepted). Explain your review, propose tests, and defend a minimal fix. This is a code walkthrough; code is not executed here.\n\ndef reserve(stock, requested):\n    if stock < requested:\n        return stock, False\n    return stock - requested, True",
-  "blurb": "Review a Reservation Change \u2014 original practice scenario, awaiting practitioner review.",
+  "blurb": "Review a Reservation Change — original practice scenario, awaiting practitioner review.",
   "rubric": [
     {
       "key": "correctness",
@@ -148,5 +148,6 @@
         "State what would change your mind"
       ]
     }
-  ]
+  ],
+  "role_track": "individual_contributor"
 }

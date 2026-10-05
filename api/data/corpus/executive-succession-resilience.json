@@ -1,0 +1,119 @@
+{
+  "schema_version": 1,
+  "revision": 1,
+  "format_id": "work-sample-defense",
+  "review_status": "preview",
+  "provenance": {
+    "authorship": "Original project scenario, AI-assisted draft. Practitioner review and scoring calibration pending.",
+    "license": "MIT"
+  },
+  "minutes": 45,
+  "id": "executive-succession-resilience",
+  "title": "Executive: Review Succession and Organizational Resilience",
+  "track": "professional",
+  "domain": "succession_planning",
+  "areas": [
+    "management"
+  ],
+  "role_track": "executive",
+  "modality": "written",
+  "difficulty": "executive",
+  "tags": [
+    "management",
+    "executive",
+    "succession-planning",
+    "leadership",
+    "community-preview"
+  ],
+  "prompt": "Review this fictional leadership risk note: \"Our regional director is indispensable. Their deputy is popular, so name the deputy successor now. Keep the plan private and ask the director to document everything next weekend.\" The director owns three partner relationships and several approval decisions with no trained backup. No departure is announced. Explain a proportionate resilience and succession plan.",
+  "blurb": "Write a resilience plan",
+  "rubric": [
+    {
+      "key": "evidence",
+      "label": "Use role-relevant succession evidence",
+      "description": "Separates popularity, readiness and development.",
+      "weight": 1,
+      "anchors": {
+        "0": "Chooses the successor solely for popularity or assumes one person must replicate the director exactly.",
+        "2": "Defines role requirements and examines evidence.",
+        "4": "Assesses the region’s critical responsibilities against observed evidence, marks gaps without ranking personal traits and distinguishes immediate backup coverage from longer-term succession decisions."
+      }
+    },
+    {
+      "key": "continuity",
+      "label": "Reduce dependency fairly",
+      "description": "Builds continuity without unfunded emergency work.",
+      "weight": 1,
+      "anchors": {
+        "0": "Requires weekend documentation or covertly removes authority.",
+        "2": "Assigns backups and schedules knowledge transfer.",
+        "4": "Uses authorized delegation, supported partner introductions and funded documentation time, with a test of actual backup coverage and appropriate confidentiality rather than secrecy without purpose."
+      }
+    },
+    {
+      "key": "development",
+      "label": "Create a transparent governance process",
+      "description": "Provides development and decision accountability.",
+      "weight": 1,
+      "anchors": {
+        "0": "Promises either manager the role or invents a selection policy.",
+        "2": "Offers development assignments and periodic review.",
+        "4": "Agrees job-relevant development opportunities, responsible review and appropriate communication with the director and candidates; follows applicable selection process and revisits readiness without guaranteeing appointment."
+      }
+    }
+  ],
+  "reference": {
+    "scenario": "Review this fictional leadership risk note: \"Our regional director is indispensable. Their deputy is popular, so name the deputy successor now. Keep the plan private and ask the director to document everything next weekend.\" The director owns three partner relationships and several approval decisions with no trained backup. No departure is announced. Explain a proportionate resilience and succession plan.",
+    "facts": [
+      {
+        "id": "fact-1",
+        "value": "The deputy has led one operational improvement but has not managed the region’s budget. Another manager has budget experience but limited partner exposure. Both can undertake supported development assignments.",
+        "reveal_when": "candidate asks about role evidence or development opportunities"
+      },
+      {
+        "id": "fact-2",
+        "value": "Some approvals can be delegated through the existing authorization process. Partner introductions and documentation need scheduled work time; no emergency has been declared.",
+        "reveal_when": "candidate asks about immediate continuity measures or authority"
+      }
+    ],
+    "model_points": [
+      "Assesses the region’s critical responsibilities against observed evidence, marks gaps without ranking personal traits and distinguishes immediate backup coverage from longer-term succession decisions.",
+      "Uses authorized delegation, supported partner introductions and funded documentation time, with a test of actual backup coverage and appropriate confidentiality rather than secrecy without purpose.",
+      "Agrees job-relevant development opportunities, responsible review and appropriate communication with the director and candidates; follows applicable selection process and revisits readiness without guaranteeing appointment."
+    ],
+    "probes": [
+      {
+        "trigger": "candidate names the deputy immediately",
+        "question": "Which required responsibility still lacks evidence?"
+      },
+      {
+        "trigger": "candidate treats documentation as sufficient",
+        "question": "How would you check that a backup can make an authorized decision?"
+      },
+      {
+        "trigger": "candidate changes the successor recommendation",
+        "question": "How do you preserve fair expectations for both managers?"
+      }
+    ],
+    "fair_alternatives": [
+      "Splitting backup responsibilities among several people can be more practical than naming one immediate replacement.",
+      "External recruitment may be considered through an authorized process; it is not evidence that internal candidates cannot develop."
+    ],
+    "assessment_limits": "Assess only the decisions and reasoning demonstrated in this fictional exercise. No hiring-readiness, personality, legal compliance or workplace performance claim follows from this score. A valid alternative can earn full credit. Unrevealed conditional facts must not be assumed known or required for credit; credit asking for needed information and a conditional plan."
+  },
+  "interviewer_notes": "You are the counterpart named in the prompt. If this is a written review, remain the hiring interviewer while the candidate reads and writes. Let the candidate finish, including thinking and self-correction. Answer only supplied facts when their reveal condition is met; otherwise say the information is unknown. Use neutral probes after a completed answer, one at a time. Do not prescribe the rubric as a spoken checklist. Accept relevant examples from work, education and community leadership. Do not request private employee records, infer protected traits, invent employment rules or promise a real organizational outcome. Simulation gives no answer before assessment; coaching may offer labeled assistance.",
+  "learning_drills": [
+    {
+      "id": "decision-practice",
+      "title": "Write a resilience plan",
+      "prompt": "Map three critical responsibilities to authorized backups, development evidence and a continuity exercise. This is self-guided practice with no automated assessment.",
+      "minutes": 7,
+      "checklist": [
+        "Use role evidence",
+        "Fund handover work",
+        "Test coverage",
+        "Avoid appointment promises"
+      ]
+    }
+  ]
+}

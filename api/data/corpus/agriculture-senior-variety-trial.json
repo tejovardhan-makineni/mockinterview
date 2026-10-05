@@ -1,0 +1,122 @@
+{
+  "schema_version": 1,
+  "revision": 1,
+  "id": "agriculture-senior-variety-trial",
+  "title": "Senior Agricultural Scientist: Challenge a Variety Adoption Claim",
+  "track": "professional",
+  "domain": "agricultural_trial_analysis",
+  "areas": [
+    "agriculture"
+  ],
+  "modality": "written",
+  "difficulty": "senior",
+  "role_track": "individual_contributor",
+  "format_id": "work-sample-defense",
+  "minutes": 35,
+  "review_status": "preview",
+  "tags": [
+    "agriculture",
+    "community-preview"
+  ],
+  "prompt": "You are a senior agricultural scientist reviewing a wholly fictional grain-variety trial. One unmatched plot of variety A yielded 4.2 tonnes per hectare with seed cost 200 credits per hectare; one plot of B yielded 4.6 with seed cost 260. Both use an assumed sale value of 300 credits per tonne. A was planted on an upper field and B on a lower field; planting dates, input use, and harvest-quality data were not recorded. The slide says, \"B yields 9.5% more and is more profitable: replace A everywhere.\" Review the evidence, calculate the limited revenue-minus-seed comparison, and design a next trial using 12 equal-size plots across two fields. Do not recommend a real crop variety or farming treatment.",
+  "blurb": "Separate a one-plot observed advantage from a causal adoption claim and design a stronger agricultural comparison.",
+  "rubric": [
+    {
+      "key": "economic_arithmetic",
+      "label": "Compute the limited comparison honestly",
+      "description": "Labels what the arithmetic includes and omits.",
+      "weight": 1,
+      "anchors": {
+        "0": "Treats the higher yield as a complete profit calculation.",
+        "2": "Computes A 1,060 and B 1,120 credits per hectare after seed only.",
+        "4": "Reports B's observed 60-credit advantage under the assumed price, distinguishes the approximate 9.5% yield difference from causation, and identifies unmeasured inputs and harvest quality as missing from profit."
+      }
+    },
+    {
+      "key": "trial_inference",
+      "label": "Identify confounding and replication limits",
+      "description": "Explains why variety is inseparable from plot context.",
+      "weight": 1,
+      "anchors": {
+        "0": "Attributes the entire difference to variety and recommends universal replacement.",
+        "2": "Notes one plot per variety and different field positions.",
+        "4": "Explains that variety, location, and unrecorded practices are confounded; the comparison has no within-condition replication and cannot establish an everywhere advantage or an uncertainty range."
+      }
+    },
+    {
+      "key": "next_trial_design",
+      "label": "Design a feasible comparison and adoption gate",
+      "description": "Uses 12 plots to improve comparability with traceable outcomes.",
+      "weight": 1,
+      "anchors": {
+        "0": "Repeats one A plot and one B plot and leaves the rest unspecified.",
+        "2": "Proposes replication of both varieties across both fields with consistent records.",
+        "4": "Allocates both varieties across all 12 plots with balanced assignment within fields or justified blocks, predefines yield/quality and cost records, preserves plot-level outcomes, and recommends staged adoption only after an owned review of results and limitations."
+      }
+    }
+  ],
+  "reference": {
+    "scenario": "You are a senior agricultural scientist reviewing a wholly fictional grain-variety trial. One unmatched plot of variety A yielded 4.2 tonnes per hectare with seed cost 200 credits per hectare; one plot of B yielded 4.6 with seed cost 260. Both use an assumed sale value of 300 credits per tonne. A was planted on an upper field and B on a lower field; planting dates, input use, and harvest-quality data were not recorded. The slide says, \"B yields 9.5% more and is more profitable: replace A everywhere.\" Review the evidence, calculate the limited revenue-minus-seed comparison, and design a next trial using 12 equal-size plots across two fields. Do not recommend a real crop variety or farming treatment.",
+    "facts": [
+      {
+        "id": "fact-1",
+        "value": "Each of the two fields can hold six equal-size plots. Assignment may be randomized within each field; no physical restrictions require grouping one variety in a separate field.",
+        "reveal_when": "candidate asks about plot layout or randomization"
+      },
+      {
+        "id": "fact-2",
+        "value": "The research team can record planting date, input quantities and costs, harvest quantity, and a fictional buyer quality grade consistently. There is no supplied rule for an acceptable adoption margin.",
+        "reveal_when": "candidate asks about feasible measurements or decision thresholds"
+      },
+      {
+        "id": "fact-3",
+        "value": "The grower can retain A for commercial production while the next comparison runs; no immediate replacement is required.",
+        "reveal_when": "candidate asks about interim adoption choices"
+      }
+    ],
+    "model_points": [
+      "A: 4.2*300-200=1,060. B: 4.6*300-260=1,120. The 60-credit difference is a revenue-minus-seed observation under a common assumed price, not full profit or proof of variety effect.",
+      "With one unmatched plot per variety, location and other practices cannot be separated from variety. Even correct yield arithmetic does not support replacement everywhere.",
+      "A feasible design places three A and three B plots in each field with randomized or blocked assignment and consistent measurement; other justified balanced designs are acceptable. Keep plot-level observations and pre-agree the adoption decision before viewing results."
+    ],
+    "probes": [
+      {
+        "trigger": "candidate calculates the 60-credit difference and endorses full replacement",
+        "question": "Which differences between the two plots could produce that result without a variety effect?"
+      },
+      {
+        "trigger": "candidate proposes paired blocks instead of unrestricted randomization",
+        "question": "How would all 12 plots include both varieties and preserve the comparison within field conditions?"
+      },
+      {
+        "trigger": "candidate first calls the result profit then revises",
+        "question": "Which label and adoption recommendation would you change after considering the missing costs?"
+      }
+    ],
+    "fair_alternatives": [
+      "Randomized within-field assignment or justified paired blocking are both valid with replication and transparent records.",
+      "The candidate may recommend no adoption yet or a small separately monitored demonstration, but must not present the current data as general proof.",
+      "Assess the work demonstrated here. Accept relevant examples from education, volunteering, caregiving, placements, or paid work; professional vocabulary and employer pedigree are not evidence of a stronger answer."
+    ],
+    "assessment_limits": "Assess experimental reasoning, fictional trial economics, and evidence-based recommendations. Do not give real cultivar, fertilizer, pesticide, irrigation, or food-safety advice. Unobserved dimensions are not failures. Credit a reasoned correction and distinguish independently demonstrated reasoning from coached assistance. Do not penalize a candidate for an unrevealed conditional fact; credit appropriate requests and conditional plans, and distinguish candidate assumptions from interviewer-supplied evidence."
+  },
+  "interviewer_notes": "Assess experimental reasoning, fictional trial economics, and evidence-based recommendations. Do not give real cultivar, fertilizer, pesticide, irrigation, or food-safety advice. Use only the supplied fictional facts and policies; acknowledge unknowns. Ask one triggered probe at a time after the candidate has finished. Accept plain language and accessible written or spoken explanations. Do not score accent, typing speed, confidence, credentials, or experience with a named employer. Credit revisions and record assistance. All participants are fictional adults; no real patient, client, operational, or confidential data is needed. Allow silence for thinking without treating it as failure. In short sessions prioritize the core decision and one material follow-up, leaving room for a correction and wrap-up.",
+  "learning_drills": [
+    {
+      "id": "focused-practice",
+      "title": "Write a cautious trial recommendation",
+      "prompt": "Draft an economic comparison and a 12-plot allocation, then name three records needed before any adoption claim. This is self-guided practice; no model assessment is performed.",
+      "minutes": 7,
+      "checklist": [
+        "Label revenue minus seed rather than full profit",
+        "Keep location confounding visible",
+        "Include both varieties in both fields",
+        "Predefine outcomes and the decision owner"
+      ]
+    }
+  ],
+  "provenance": {
+    "authorship": "Original project scenario, AI-assisted draft using fictional organizations, records, and exercise policies. Practitioner review and scoring calibration pending.",
+    "license": "MIT"
+  }
+}

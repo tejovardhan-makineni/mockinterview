@@ -1,0 +1,137 @@
+{
+  "schema_version": 1,
+  "revision": 1,
+  "format_id": "work-sample-defense",
+  "review_status": "preview",
+  "provenance": {
+    "authorship": "Original project scenario, AI-assisted draft. Practitioner review and calibration pending.",
+    "license": "MIT"
+  },
+  "minutes": 30,
+  "id": "electrical-power-budget-review",
+  "title": "Senior Electrical Engineer: Review a Power Supply Margin Claim",
+  "track": "engineering",
+  "domain": "power_systems",
+  "areas": [
+    "electrical_engineering"
+  ],
+  "modality": "written",
+  "difficulty": "senior",
+  "role_track": "individual_contributor",
+  "tags": [
+    "electrical-engineering",
+    "senior-specialist",
+    "evidence-based-practice",
+    "community-preview"
+  ],
+  "prompt": "You are a senior electrical engineer reviewing a fictional low-voltage sensor cabinet design on paper. Its 24 V supply has a headline rating of 10 A continuous, but the draft does not state the temperature conditions to which that rating applies. The draft loads are controller 2 A, sensors 3 A and actuator bank 4 A continuous. The actuator bank can add 4 A for 200 ms when starting. A design note says “9 A is below 10 A, so approved.” Review the claim, identify required evidence and propose a verification plan. No live electrical work or equipment instructions are involved.",
+  "blurb": "Distinguish steady load, transient demand and environmental ratings before recommending a design revision.",
+  "rubric": [
+    {
+      "key": "load_model",
+      "label": "Build the applicable load envelope",
+      "description": "Checks ratings and demand under the stated conditions.",
+      "weight": 1,
+      "anchors": {
+        "0": "Approves solely from 9 A being below the headline 10 A.",
+        "2": "Calculates 9 A continuous and 13 A during simultaneous start.",
+        "4": "Uses the 8 A temperature rating to identify a continuous shortfall and treats the 13 A transient as a separate unverified requirement."
+      }
+    },
+    {
+      "key": "design_options",
+      "label": "Compare changes against distinct constraints",
+      "description": "Evaluates larger supply and sequencing without assuming either solves everything.",
+      "weight": 1,
+      "anchors": {
+        "0": "Claims staggering starts fixes the 9 A continuous load.",
+        "2": "Suggests a temperature-rated larger supply.",
+        "4": "Separates continuous capacity from transient response, checks the proposed 12 A option’s remaining startup gap and requires evidence before crediting sequencing."
+      }
+    },
+    {
+      "key": "verification",
+      "label": "Specify a bounded engineering check",
+      "description": "Defines observations and acceptance references without inventing ratings.",
+      "weight": 1,
+      "anchors": {
+        "0": "Approves from a calculation alone or gives hazardous live-test directions.",
+        "2": "Requests relevant curves and a controlled verification plan.",
+        "4": "Specifies qualified testing of worst supported load, temperature and startup overlap against actual supply and controller limits, records rail minimum and recovery and requires design-review approval before use."
+      }
+    }
+  ],
+  "reference": {
+    "scenario": "You are a senior electrical engineer reviewing a fictional low-voltage sensor cabinet design on paper. Its 24 V supply has a headline rating of 10 A continuous, but the draft does not state the temperature conditions to which that rating applies. The draft loads are controller 2 A, sensors 3 A and actuator bank 4 A continuous. The actuator bank can add 4 A for 200 ms when starting. A design note says “9 A is below 10 A, so approved.” Review the claim, identify required evidence and propose a verification plan. No live electrical work or equipment instructions are involved.",
+    "facts": [
+      {
+        "id": "derating",
+        "value": "At the cabinet’s expected maximum temperature the supplied manufacturer table rates this supply at 8 A continuous. The 10 A figure applies at a lower temperature.",
+        "reveal_when": "candidate asks about environment or derating"
+      },
+      {
+        "id": "transient",
+        "value": "No transient capability curve or startup sequencing test is available. The controller resets if its input falls below its specified minimum, whose exact value is not supplied.",
+        "reveal_when": "candidate asks about surge capability, rail behavior or failure effects"
+      },
+      {
+        "id": "options",
+        "value": "A larger supply is available with a stated 12 A continuous rating at the cabinet temperature; its transient capability is also unverified. The actuator controller supports staggered starts, but overlap depends on software timing that has not been measured.",
+        "reveal_when": "candidate asks about alternatives or design constraints"
+      }
+    ],
+    "model_points": [
+      "Continuous demand is 2+3+4=9 A. The stated start adds 4 A, producing 13 A for 200 ms.",
+      "At the stated cabinet temperature, the current supply is below continuous demand; startup scheduling alone cannot remove that shortfall.",
+      "No numerical minimum voltage or transient acceptance limit should be invented. The alternative’s 12 A continuous rating does not prove 13 A transient performance."
+    ],
+    "probes": [
+      {
+        "trigger": "candidate calculates only the steady 9 A load",
+        "question": "What changes when the actuator bank starts at the expected cabinet temperature?"
+      },
+      {
+        "trigger": "candidate proposes staggered startup",
+        "question": "Which requirement does it address, and which continuous-load issue remains?"
+      },
+      {
+        "trigger": "candidate changes their approval after seeing derating",
+        "question": "How would you revise the design note and distinguish the two unresolved requirements?"
+      }
+    ],
+    "fair_alternatives": [
+      "Reducing supported continuous load may be a valid design change if functional requirements allow it and it is verified.",
+      "A separate actuator supply can be considered with interface, protection and failure analysis; no particular architecture is required."
+    ],
+    "red_flags": [
+      "Approves solely from 9 A being below the headline 10 A.",
+      "Claims staggering starts fixes the 9 A continuous load.",
+      "Approves from a calculation alone or gives hazardous live-test directions."
+    ],
+    "follow_ups": [
+      "Build a load-envelope review table"
+    ],
+    "assessment_limits": [
+      "Assess only reasoning and communication demonstrated in this fictional task, not real-world professional competence, licensure or hiring readiness. No real action, external verification or tool execution has occurred.",
+      "Credit relevant plain-language reasoning and valid alternatives without requiring experience at a particular employer. Examples from education, volunteering, community work or paid work are equally acceptable when relevant.",
+      "A missing or unasked dimension is not assessed, not automatically a failure. In simulation, use neutral probes and reveal facts only when triggered; in coaching, label assistance and distinguish assisted performance from independent evidence.",
+      "Credit an explicit late correction using the final demonstrated reasoning while retaining the evidence of the earlier mistake; do not force agreement with one exemplar.",
+      "Do not penalize the candidate for a conditional fact that was never revealed. Credit an appropriate request for missing information and a conditional plan; distinguish the candidate’s assumptions from interviewer-supplied facts."
+    ]
+  },
+  "interviewer_notes": "Play the relevant reviewing colleague or stakeholder using the supplied facts only. Start with one focused question, not the full rubric. Ask for clarification before treating an ambiguous answer as wrong. Reveal conditional facts when their stated triggers are met, permit equivalent valid approaches and never invent organizational rules, laws, clinical findings, ratings or missing outcomes. Do not require a polished artifact or specialist software. In a short session prioritize the main decision and one material follow-up; allow silence for thinking, check in neutrally, and leave time for the candidate to correct their recommendation and ask a final question. Distinguish simulation from coaching and record any help given. Assess job-relevant evidence, not accent, confidence, speed, credentials or prestige. This is independent practice for adults 18+ and is not a real professional workflow.",
+  "learning_drills": [
+    {
+      "id": "decision-review",
+      "title": "Build a load-envelope review table",
+      "minutes": 5,
+      "prompt": "Build a load-envelope review table. Use the fictional facts from this exercise. This is self-guided practice; no model assessment is performed.",
+      "checklist": [
+        "Calculate continuous and transient demand",
+        "Use the temperature-specific rating",
+        "List remaining evidence for each option",
+        "Reference actual acceptance limits"
+      ]
+    }
+  ]
+}

@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "revision": 1,
+  "revision": 2,
   "format_id": "stakeholder-simulation",
   "review_status": "preview",
   "provenance": {
@@ -16,7 +16,7 @@
     "retail_hospitality"
   ],
   "modality": "conversational",
-  "difficulty": "mid",
+  "difficulty": "manager",
   "tags": [
     "hotel-duty-manager",
     "front-office-manager",
@@ -119,5 +119,6 @@
         "Keep one accountable hotel contact"
       ]
     }
-  ]
+  ],
+  "role_track": "management"
 }

@@ -1,0 +1,50 @@
+{
+  "id": "experienced-manager-practice",
+  "revision": 1,
+  "review_status": "preview",
+  "source_note": "Original AI-assisted management practice path. Each round is a separate attempt. Practitioner review and scoring calibration are pending; this does not certify leadership or hiring readiness.",
+  "name": "Experienced People Manager",
+  "areas": [
+    "management"
+  ],
+  "track": "professional",
+  "blurb": "Practice performance support, structured hiring, team conflict.",
+  "rounds": [
+    {
+      "id": "round-1",
+      "title": "Experienced Manager: Investigate a Performance Gap Fairly",
+      "kind": "stakeholder-simulation",
+      "domain": "performance_support",
+      "modality": "conversational",
+      "difficulty": "manager",
+      "role_track": "management",
+      "minutes": 30,
+      "question_id": "manager-underperformance-support",
+      "focus": "Separate observations from conclusions"
+    },
+    {
+      "id": "round-2",
+      "title": "Experienced Manager: Repair a Hiring Debrief",
+      "kind": "work-sample-defense",
+      "domain": "management_hiring",
+      "modality": "written",
+      "difficulty": "manager",
+      "role_track": "management",
+      "minutes": 30,
+      "question_id": "manager-structured-hiring",
+      "focus": "Rewrite a hiring debrief"
+    },
+    {
+      "id": "round-3",
+      "title": "Experienced Manager: Resolve a Cross-Team Ownership Conflict",
+      "kind": "stakeholder-simulation",
+      "domain": "team_conflict",
+      "modality": "conversational",
+      "difficulty": "manager",
+      "role_track": "management",
+      "minutes": 30,
+      "question_id": "manager-conflict-ownership",
+      "focus": "Define a handoff contract"
+    }
+  ]
+}

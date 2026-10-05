@@ -1,0 +1,119 @@
+{
+  "schema_version": 1,
+  "revision": 1,
+  "format_id": "stakeholder-simulation",
+  "review_status": "preview",
+  "provenance": {
+    "authorship": "Original project scenario, AI-assisted draft. Practitioner review and scoring calibration pending.",
+    "license": "MIT"
+  },
+  "minutes": 30,
+  "id": "new-manager-team-priorities",
+  "title": "First-Time Manager: Reset an Overcommitted Week",
+  "track": "professional",
+  "domain": "capacity_planning",
+  "areas": [
+    "management"
+  ],
+  "role_track": "management",
+  "modality": "conversational",
+  "difficulty": "manager",
+  "tags": [
+    "management",
+    "manager",
+    "capacity-planning",
+    "leadership",
+    "community-preview"
+  ],
+  "prompt": "Your five-person team has 120 available hours this week after leave and routine work. Requests total 170 hours: a contractual delivery (70), an internal dashboard (40), a customer issue investigation (30) and training (30). The investigation has no confirmed deadline or severity yet. Your director (the AI) asks you to accept everything. Negotiate a plan and explain how you will involve the team.",
+  "blurb": "Make the tradeoff visible",
+  "rubric": [
+    {
+      "key": "arithmetic",
+      "label": "Use a capacity model",
+      "description": "Reconciles estimates with available time.",
+      "weight": 1,
+      "anchors": {
+        "0": "Commits to 170 hours with 120 available or treats unapproved overtime as free capacity.",
+        "2": "Identifies the 50-hour gap and proposes deferral.",
+        "4": "Presents a feasible allocation with explicit estimates and uncertainty; for example 70 delivery + 10 onboarding + 4 triage leaves 36 hours for chosen work and contingency, subject to actual skills."
+      }
+    },
+    {
+      "key": "priorities",
+      "label": "Resolve uncertain priority",
+      "description": "Checks impact before making a rigid commitment.",
+      "weight": 1,
+      "anchors": {
+        "0": "Drops the issue or all onboarding solely because neither is loudest.",
+        "2": "Asks about the issue and required training.",
+        "4": "Uses a bounded fact-finding step and conditional replan, separates required from optional work and explains who decides if the issue proves urgent."
+      }
+    },
+    {
+      "key": "communication",
+      "label": "Negotiate an accountable plan",
+      "description": "Makes tradeoffs and team constraints visible.",
+      "weight": 1,
+      "anchors": {
+        "0": "Accepts incompatible demands or blames the team.",
+        "2": "States what must move and informs stakeholders.",
+        "4": "Checks skills and workload with the team, offers the director clear options, names owners and tells affected requesters what changed and when it will be reviewed."
+      }
+    }
+  ],
+  "reference": {
+    "scenario": "Your five-person team has 120 available hours this week after leave and routine work. Requests total 170 hours: a contractual delivery (70), an internal dashboard (40), a customer issue investigation (30) and training (30). The investigation has no confirmed deadline or severity yet. Your director (the AI) asks you to accept everything. Negotiate a plan and explain how you will involve the team.",
+    "facts": [
+      {
+        "id": "fact-1",
+        "value": "The dashboard can move one week without affecting an external commitment. Training has a 10-hour required onboarding component; the other 20 hours can be rescheduled.",
+        "reveal_when": "candidate asks about deadlines, obligations or movable scope"
+      },
+      {
+        "id": "fact-2",
+        "value": "The issue affects a small number of customers; its impact has not yet been verified. A four-hour investigation can establish whether it needs urgent escalation.",
+        "reveal_when": "candidate asks about issue severity or bounded investigation"
+      }
+    ],
+    "model_points": [
+      "Presents a feasible allocation with explicit estimates and uncertainty; for example 70 delivery + 10 onboarding + 4 triage leaves 36 hours for chosen work and contingency, subject to actual skills.",
+      "Uses a bounded fact-finding step and conditional replan, separates required from optional work and explains who decides if the issue proves urgent.",
+      "Checks skills and workload with the team, offers the director clear options, names owners and tells affected requesters what changed and when it will be reviewed."
+    ],
+    "probes": [
+      {
+        "trigger": "candidate presents an allocation above 120 hours",
+        "question": "Can you reconcile that plan with this week’s available capacity?"
+      },
+      {
+        "trigger": "candidate postpones all investigation",
+        "question": "What missing information could change its priority?"
+      },
+      {
+        "trigger": "candidate corrects the allocation",
+        "question": "Which stakeholder commitments now need updating?"
+      }
+    ],
+    "fair_alternatives": [
+      "A different feasible allocation can score fully if obligations and the uncertainty about customer impact are handled.",
+      "A shorter delivery scope can be negotiated if the contractual owner approves; do not assume approval."
+    ],
+    "assessment_limits": "Assess only the decisions and reasoning demonstrated in this fictional exercise. No hiring-readiness, personality, legal compliance or workplace performance claim follows from this score. A valid alternative can earn full credit. Unrevealed conditional facts must not be assumed known or required for credit; credit asking for needed information and a conditional plan."
+  },
+  "interviewer_notes": "You are the counterpart named in the prompt. If this is a written review, remain the hiring interviewer while the candidate reads and writes. Let the candidate finish, including thinking and self-correction. Answer only supplied facts when their reveal condition is met; otherwise say the information is unknown. Use neutral probes after a completed answer, one at a time. Do not prescribe the rubric as a spoken checklist. Accept relevant examples from work, education and community leadership. Do not request private employee records, infer protected traits, invent employment rules or promise a real organizational outcome. Simulation gives no answer before assessment; coaching may offer labeled assistance.",
+  "learning_drills": [
+    {
+      "id": "decision-practice",
+      "title": "Make the tradeoff visible",
+      "prompt": "Write two feasible weekly allocations and state the evidence that would make you choose between them. This is self-guided practice with no automated assessment.",
+      "minutes": 7,
+      "checklist": [
+        "Stay within 120 hours",
+        "Mark unknown impact",
+        "Name the decision owner",
+        "Include a replan trigger"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,137 @@
+{
+  "schema_version": 1,
+  "revision": 1,
+  "format_id": "work-sample-defense",
+  "review_status": "preview",
+  "provenance": {
+    "authorship": "Original project scenario, AI-assisted draft. Practitioner review and calibration pending.",
+    "license": "MIT"
+  },
+  "minutes": 20,
+  "id": "marketing-campaign-measurement-basics",
+  "title": "Junior Marketing Specialist: Review an Event Campaign’s Success Claim",
+  "track": "professional",
+  "domain": "marketing_experimentation",
+  "areas": [
+    "marketing"
+  ],
+  "modality": "written",
+  "difficulty": "junior",
+  "role_track": "individual_contributor",
+  "tags": [
+    "marketing",
+    "junior-specialist",
+    "evidence-based-practice",
+    "community-preview"
+  ],
+  "prompt": "You are a junior marketing specialist reviewing a fictional adult-learning event campaign. Channel A cost 300 and produced 60 registrations; Channel B cost 200 and produced 25 registrations. A slide declares A the winner because it has more registrations. The campaign goal is attended places within a fixed budget, not raw sign-ups. Calculate cost per registration, identify the additional evidence needed and propose a clear report. The figures use the same currency; no external market benchmark is supplied.",
+  "blurb": "Connect channel spending to the actual attendance goal and avoid comparing incomplete funnels as final outcomes.",
+  "rubric": [
+    {
+      "key": "costs",
+      "label": "Calculate labeled funnel costs",
+      "description": "Uses spend and the correct outcome denominator.",
+      "weight": 1,
+      "anchors": {
+        "0": "Calls A cheaper per attendee from registrations alone.",
+        "2": "Calculates registration costs of 5 for A and 8 for B.",
+        "4": "After attendance is supplied, calculates 15 per attendee for A and 10 for B and explains why the preferred channel changes with the stated goal."
+      }
+    },
+    {
+      "key": "interpretation",
+      "label": "State what attribution and sample data establish",
+      "description": "Keeps descriptive comparisons separate from causal or scale claims.",
+      "weight": 1,
+      "anchors": {
+        "0": "Claims the source tag proves causation or promises proportional growth.",
+        "2": "Notes overlap and avoids declaring certainty from one event.",
+        "4": "Explains the consistent attribution rule, missing incremental impact and unknown scaling response without discarding the useful observed costs."
+      }
+    },
+    {
+      "key": "next_step",
+      "label": "Recommend a measurable next budget decision",
+      "description": "Provides an understandable limited recommendation.",
+      "weight": 1,
+      "anchors": {
+        "0": "Moves all spend based solely on registration totals.",
+        "2": "Suggests testing more of B while tracking attendance.",
+        "4": "Sets a bounded reallocation or repeat comparison using the same definitions, reports both funnel stages and preserves budget for learning rather than assuming B scales indefinitely."
+      }
+    }
+  ],
+  "reference": {
+    "scenario": "You are a junior marketing specialist reviewing a fictional adult-learning event campaign. Channel A cost 300 and produced 60 registrations; Channel B cost 200 and produced 25 registrations. A slide declares A the winner because it has more registrations. The campaign goal is attended places within a fixed budget, not raw sign-ups. Calculate cost per registration, identify the additional evidence needed and propose a clear report. The figures use the same currency; no external market benchmark is supplied.",
+    "facts": [
+      {
+        "id": "attendance",
+        "value": "After the event, A has 20 verified attendees and B has 20. Those counts use the same check-in process. No attendee-quality or repeat-attendance measure is available.",
+        "reveal_when": "candidate asks about attendance or the campaign goal"
+      },
+      {
+        "id": "attribution",
+        "value": "Five attendees interacted with both channels but are each assigned to one source using a consistent last-recorded-source rule. This is attribution, not proof that the assigned channel caused attendance.",
+        "reveal_when": "candidate asks about overlap or attribution"
+      },
+      {
+        "id": "next-campaign",
+        "value": "A future small campaign can use the same registration and attendance definitions. No reliable estimate says that doubling spend will double attendance.",
+        "reveal_when": "candidate asks about allocating the next budget or testing a change"
+      }
+    ],
+    "model_points": [
+      "A costs 300/60=5 per registration; B costs 200/25=8. With 20 attendees each, costs become 15 and 10 per attendee.",
+      "Different funnel outcomes answer different questions. Neither descriptive cost establishes incremental causal effect.",
+      "No industry benchmark or model is required; clear arithmetic and honest uncertainty are the assessed skills."
+    ],
+    "probes": [
+      {
+        "trigger": "candidate declares A the winner from 60 registrations",
+        "question": "Which outcome does the campaign goal actually value, and what denominator is missing?"
+      },
+      {
+        "trigger": "candidate recommends allocating all next spend to B",
+        "question": "What evidence supports B’s response to additional spend, and how could you test it within a limit?"
+      },
+      {
+        "trigger": "candidate corrects the winning-channel statement after attendance data",
+        "question": "How would you rewrite the slide so readers see why the recommendation changed?"
+      }
+    ],
+    "fair_alternatives": [
+      "Repeating the split to gather more evidence can be reasonable if the learning goal is stated.",
+      "A limited increase to B can also be justified by observed attendee cost, provided causal and scaling uncertainty remain explicit."
+    ],
+    "red_flags": [
+      "Calls A cheaper per attendee from registrations alone.",
+      "Claims the source tag proves causation or promises proportional growth.",
+      "Moves all spend based solely on registration totals."
+    ],
+    "follow_ups": [
+      "Write a funnel-cost summary"
+    ],
+    "assessment_limits": [
+      "Assess only reasoning and communication demonstrated in this fictional task, not real-world professional competence, licensure or hiring readiness. No real action, external verification or tool execution has occurred.",
+      "Credit relevant plain-language reasoning and valid alternatives without requiring experience at a particular employer. Examples from education, volunteering, community work or paid work are equally acceptable when relevant.",
+      "A missing or unasked dimension is not assessed, not automatically a failure. In simulation, use neutral probes and reveal facts only when triggered; in coaching, label assistance and distinguish assisted performance from independent evidence.",
+      "Credit an explicit late correction using the final demonstrated reasoning while retaining the evidence of the earlier mistake; do not force agreement with one exemplar.",
+      "Do not penalize the candidate for a conditional fact that was never revealed. Credit an appropriate request for missing information and a conditional plan; distinguish the candidate’s assumptions from interviewer-supplied facts."
+    ]
+  },
+  "interviewer_notes": "Play the relevant reviewing colleague or stakeholder using the supplied facts only. Start with one focused question, not the full rubric. Ask for clarification before treating an ambiguous answer as wrong. Reveal conditional facts when their stated triggers are met, permit equivalent valid approaches and never invent organizational rules, laws, clinical findings, ratings or missing outcomes. Do not require a polished artifact or specialist software. In a short session prioritize the main decision and one material follow-up; allow silence for thinking, check in neutrally, and leave time for the candidate to correct their recommendation and ask a final question. Distinguish simulation from coaching and record any help given. Assess job-relevant evidence, not accent, confidence, speed, credentials or prestige. This is independent practice for adults 18+ and is not a real professional workflow.",
+  "learning_drills": [
+    {
+      "id": "decision-review",
+      "title": "Write a funnel-cost summary",
+      "minutes": 5,
+      "prompt": "Write a funnel-cost summary. Use the fictional facts from this exercise. This is self-guided practice; no model assessment is performed.",
+      "checklist": [
+        "Calculate both registration costs",
+        "Calculate both attendee costs",
+        "Describe the attribution rule",
+        "Propose a bounded next comparison"
+      ]
+    }
+  ]
+}

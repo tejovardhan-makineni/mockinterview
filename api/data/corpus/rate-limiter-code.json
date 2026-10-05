@@ -149,5 +149,7 @@
       "Not injecting the clock, making the limiter untestable without real sleeps."
     ]
   },
-  "interviewer_notes": "Let the candidate finish their reasoning and any workspace changes before a focused follow-up. Ask only about a material unresolved issue, then return the floor. Assess burst capacity, refill timing, fractional tokens, rejection and concurrency in the candidate's own implementation. The idle-100s case can test a completed refill calculation. Lazy refill, timers, injectable clocks and other designs should be judged by correctness, scale and testability rather than prescribed. Let the single-threaded implementation and independent tests finish before a focused question. Thread safety, per-client state and distributed operation are optional later extensions; do not coach through locks, CAS, striping and Redis as a mandatory sequence."
+  "interviewer_notes": "Let the candidate finish their reasoning and any workspace changes before a focused follow-up. Ask only about a material unresolved issue, then return the floor. Assess burst capacity, refill timing, fractional tokens, rejection and concurrency in the candidate's own implementation. The idle-100s case can test a completed refill calculation. Lazy refill, timers, injectable clocks and other designs should be judged by correctness, scale and testability rather than prescribed. Let the single-threaded implementation and independent tests finish before a focused question. Thread safety, per-client state and distributed operation are optional later extensions; do not coach through locks, CAS, striping and Redis as a mandatory sequence.",
+  "role_track": "individual_contributor",
+  "revision": 2
 }

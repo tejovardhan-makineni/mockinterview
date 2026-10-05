@@ -1,0 +1,47 @@
+{
+  "id": "veterinary-practice",
+  "revision": 1,
+  "review_status": "preview",
+  "source_note": "Original AI-assisted community practice path spanning entry, mid, and senior individual-contributor tasks. Each pinned round is a separate practice attempt, not a hiring sequence. Practitioner review and scoring calibration are pending; these exercises do not certify professional or operational competence.",
+  "name": "Veterinary Practice",
+  "areas": [
+    "veterinary"
+  ],
+  "track": "professional",
+  "blurb": "Practice concern escalation, conflicting follow-up records, and callback audit interpretation.",
+  "rounds": [
+    {
+      "id": "round-1",
+      "title": "Veterinary Reception Trainee: Escalate an Unclear Concern",
+      "kind": "stakeholder-simulation",
+      "domain": "veterinary_client_communication",
+      "modality": "conversational",
+      "difficulty": "entry",
+      "minutes": 20,
+      "question_id": "veterinary-reception-concern-escalation",
+      "focus": "Acknowledge uncertainty, collect a useful callback, and connect an animal-health concern to the duty clinician."
+    },
+    {
+      "id": "round-2",
+      "title": "Veterinary Clinician: Resolve a Conflicting Follow-Up Record",
+      "kind": "work-sample-defense",
+      "domain": "veterinary_handoff",
+      "modality": "written",
+      "difficulty": "mid",
+      "minutes": 30,
+      "question_id": "veterinary-clinician-record-conflict",
+      "focus": "Reconcile conflicting follow-up messages without treating a booking as an agreed clinical plan."
+    },
+    {
+      "id": "round-3",
+      "title": "Senior Veterinary Clinician: Review a Callback Reliability Audit",
+      "kind": "work-sample-defense",
+      "domain": "veterinary_service_quality",
+      "modality": "written",
+      "difficulty": "senior",
+      "minutes": 35,
+      "question_id": "veterinary-senior-callback-audit",
+      "focus": "Distinguish closed tasks from completed contact and improve the evidence behind a service-quality claim."
+    }
+  ]
+}

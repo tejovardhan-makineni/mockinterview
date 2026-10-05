@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "revision": 1,
+  "revision": 2,
   "format_id": "stakeholder-simulation",
   "review_status": "preview",
   "provenance": {
@@ -119,5 +119,6 @@
         "Distinguish listed service from confirmed support"
       ]
     }
-  ]
+  ],
+  "role_track": "individual_contributor"
 }

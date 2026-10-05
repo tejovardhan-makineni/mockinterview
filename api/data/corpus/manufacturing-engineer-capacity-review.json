@@ -1,0 +1,117 @@
+{
+  "schema_version": 1,
+  "revision": 1,
+  "id": "manufacturing-engineer-capacity-review",
+  "title": "Manufacturing Engineer: Find the Constraint in a Capacity Proposal",
+  "track": "professional",
+  "domain": "manufacturing_flow",
+  "areas": [
+    "manufacturing"
+  ],
+  "modality": "written",
+  "difficulty": "mid",
+  "role_track": "individual_contributor",
+  "format_id": "work-sample-defense",
+  "minutes": 30,
+  "review_status": "preview",
+  "tags": [
+    "manufacturing",
+    "community-preview"
+  ],
+  "prompt": "You are a manufacturing engineer reviewing a fictional line proposal. Three serial stages run one shift of 420 available minutes: assembly 5 minutes per unit, inspection 7, packing 4. Each has one station, one unit at a time, and no parallel capacity. The simplified model assumes no changeovers, defects, or downtime beyond the stated available time. The proposal says, \"Reduce packing from 4 to 2 minutes; output will double.\" Demand is 70 units per shift. Review the calculation and recommend one improvement to investigate, including what the simplified model cannot tell you. Do not design machinery changes or remove quality checks.",
+  "blurb": "Use serial-stage capacity to challenge a throughput claim and propose a measured improvement.",
+  "rubric": [
+    {
+      "key": "constraint_math",
+      "label": "Find the limiting capacity",
+      "description": "Computes stage capacities and line limitation under stated assumptions.",
+      "weight": 1,
+      "anchors": {
+        "0": "Doubles line output because packing time halves.",
+        "2": "Identifies inspection as the limiting stage at 60 units per shift.",
+        "4": "Computes assembly 84, inspection 60, packing 105 and proposed packing 210; explains why sustainable output remains limited to 60 and misses demand by 10 under the simplified model."
+      }
+    },
+    {
+      "key": "improvement_hypothesis",
+      "label": "Target the constraint with a bounded proposal",
+      "description": "Proposes investigation tied to capacity and quality.",
+      "weight": 1,
+      "anchors": {
+        "0": "Skips inspection or changes staffing/equipment without checking feasibility.",
+        "2": "Investigates inspection capacity or inspection waiting time.",
+        "4": "States the conditional target of at most 6 minutes per unit at the limiting stage to reach 70 in the ideal model, or an equivalent capacity option, while retaining authorized quality requirements and verifying labor/space constraints."
+      }
+    },
+    {
+      "key": "measurement_limits",
+      "label": "Plan a useful observation",
+      "description": "Identifies operational effects excluded from the model.",
+      "weight": 1,
+      "anchors": {
+        "0": "Guarantees 70 output based only on nominal cycle times.",
+        "2": "Names variation, downtime, or defects as missing.",
+        "4": "Proposes observed cycle and queue measurements across representative shifts, distinguishes utilization from realized output, and compares demand attainment and quality before approving an improvement."
+      }
+    }
+  ],
+  "reference": {
+    "scenario": "You are a manufacturing engineer reviewing a fictional line proposal. Three serial stages run one shift of 420 available minutes: assembly 5 minutes per unit, inspection 7, packing 4. Each has one station, one unit at a time, and no parallel capacity. The simplified model assumes no changeovers, defects, or downtime beyond the stated available time. The proposal says, \"Reduce packing from 4 to 2 minutes; output will double.\" Demand is 70 units per shift. Review the calculation and recommend one improvement to investigate, including what the simplified model cannot tell you. Do not design machinery changes or remove quality checks.",
+    "facts": [
+      {
+        "id": "fact-1",
+        "value": "The proposed packing improvement costs 12 fictional budget units. A time study at inspection costs 1 and can be completed within a week. No second inspection station, labor, or floor space has been approved.",
+        "reveal_when": "candidate asks about cost or alternative capacity"
+      },
+      {
+        "id": "fact-2",
+        "value": "The 7-minute inspection value is a planning average, not a measured distribution. The quality lead owns any change to the required inspection method.",
+        "reveal_when": "candidate asks about variation or inspection scope"
+      }
+    ],
+    "model_points": [
+      "At steady state in the simplified model, the slowest serial stage limits sustainable throughput. Packing improvement alone increases spare capacity downstream of the constraint, not line output.",
+      "The ideal target for 70 units is 420/70 = 6 minutes at each required stage. A hypothesis about inspection time or capacity needs observation and authorized quality review; removing required checks is not justified.",
+      "Variation, finite buffers, staffing, defects, and startup effects are excluded. A low-cost time study can test whether the stated constraint reflects observed work before investment."
+    ],
+    "probes": [
+      {
+        "trigger": "candidate identifies inspection but offers no numerical comparison to demand",
+        "question": "What ideal inspection capacity would be needed for 70 units in 420 minutes?"
+      },
+      {
+        "trigger": "candidate proposes a parallel inspection station rather than shorter cycle time",
+        "question": "Which staffing, quality, cost, and flow assumptions would need verification?"
+      },
+      {
+        "trigger": "candidate initially sums cycle times as the steady-state bottleneck then revises",
+        "question": "How do you distinguish a unit's total processing time from the line's sustained output rate?"
+      }
+    ],
+    "fair_alternatives": [
+      "Study inspection time, explore authorized parallel capacity, or smooth variation; accept a justified option with its assumptions and costs.",
+      "Candidates may point out startup and end-of-shift effects; the stated per-shift capacities are a steady-state planning simplification, not a guarantee of exact completed units.",
+      "Assess the work demonstrated here. Accept relevant examples from education, volunteering, caregiving, placements, or paid work; professional vocabulary and employer pedigree are not evidence of a stronger answer."
+    ],
+    "assessment_limits": "Assess operations arithmetic, hypothesis quality, and measurement planning. Do not assess equipment modification, industrial safety procedures, or qualification to change inspection methods. Unobserved dimensions are not failures. Credit a reasoned correction and distinguish independently demonstrated reasoning from coached assistance. Do not penalize a candidate for an unrevealed conditional fact; credit appropriate requests and conditional plans, and distinguish candidate assumptions from interviewer-supplied evidence."
+  },
+  "interviewer_notes": "Assess operations arithmetic, hypothesis quality, and measurement planning. Do not assess equipment modification, industrial safety procedures, or qualification to change inspection methods. Use only the supplied fictional facts and policies; acknowledge unknowns. Ask one triggered probe at a time after the candidate has finished. Accept plain language and accessible written or spoken explanations. Do not score accent, typing speed, confidence, credentials, or experience with a named employer. Credit revisions and record assistance. All participants are fictional adults; no real patient, client, operational, or confidential data is needed. Allow silence for thinking without treating it as failure. In short sessions prioritize the core decision and one material follow-up, leaving room for a correction and wrap-up.",
+  "learning_drills": [
+    {
+      "id": "focused-practice",
+      "title": "Check a serial-line investment",
+      "prompt": "Write the four capacity calculations and a short investment note naming the constraint, demand gap, and one measurement. This is self-guided practice; no model assessment is performed.",
+      "minutes": 7,
+      "checklist": [
+        "Use 420 available minutes consistently",
+        "Separate stage speed from line output",
+        "Retain inspection requirements",
+        "Label ideal-model limits"
+      ]
+    }
+  ],
+  "provenance": {
+    "authorship": "Original project scenario, AI-assisted draft using fictional organizations, records, and exercise policies. Practitioner review and scoring calibration pending.",
+    "license": "MIT"
+  }
+}

@@ -1,0 +1,47 @@
+{
+  "id": "manufacturing-practice",
+  "revision": 1,
+  "review_status": "preview",
+  "source_note": "Original AI-assisted community practice path spanning entry, mid, and senior individual-contributor tasks. Each pinned round is a separate practice attempt, not a hiring sequence. Practitioner review and scoring calibration are pending; these exercises do not certify professional or operational competence.",
+  "name": "Manufacturing Practice",
+  "areas": [
+    "manufacturing"
+  ],
+  "track": "professional",
+  "blurb": "Practice lot traceability, serial-line capacity, and supplier pilot evaluation.",
+  "rounds": [
+    {
+      "id": "round-1",
+      "title": "Manufacturing Quality Trainee: Protect Lot Traceability",
+      "kind": "incident-simulation",
+      "domain": "manufacturing_traceability",
+      "modality": "conversational",
+      "difficulty": "entry",
+      "minutes": 20,
+      "question_id": "manufacturing-trainee-lot-traceability",
+      "focus": "Hold an uncertain lot identity and preserve evidence instead of turning a plausible guess into a dispatch record."
+    },
+    {
+      "id": "round-2",
+      "title": "Manufacturing Engineer: Find the Constraint in a Capacity Proposal",
+      "kind": "work-sample-defense",
+      "domain": "manufacturing_flow",
+      "modality": "written",
+      "difficulty": "mid",
+      "minutes": 30,
+      "question_id": "manufacturing-engineer-capacity-review",
+      "focus": "Use serial-stage capacity to challenge a throughput claim and propose a measured improvement."
+    },
+    {
+      "id": "round-3",
+      "title": "Senior Manufacturing Engineer: Review a Supplier Pilot Release",
+      "kind": "work-sample-defense",
+      "domain": "manufacturing_change_validation",
+      "modality": "written",
+      "difficulty": "senior",
+      "minutes": 35,
+      "question_id": "manufacturing-senior-supplier-change",
+      "focus": "Separate final acceptance from hidden rework and test a supplier claim under comparable production conditions."
+    }
+  ]
+}

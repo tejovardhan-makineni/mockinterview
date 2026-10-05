@@ -26,24 +26,30 @@ func ProfessionLabel(key string) string {
 // the tracks it appears under. The client uses this to gate the catalog + build
 // the onboarding/settings profession picker (backend is the source of truth).
 type Profession struct {
-	Key         string           `json:"key"`
-	Label       string           `json:"label"`
-	Family      string           `json:"family"`
-	FamilyLabel string           `json:"family_label"`
-	Aliases     []string         `json:"aliases"`
-	Agent       InterviewerAgent `json:"agent"`
-	Count       int              `json:"count"`
-	Tracks      []string         `json:"tracks"`
+	Key          string           `json:"key"`
+	Label        string           `json:"label"`
+	Family       string           `json:"family"`
+	FamilyLabel  string           `json:"family_label"`
+	Aliases      []string         `json:"aliases"`
+	Agent        InterviewerAgent `json:"agent"`
+	Count        int              `json:"count"`
+	PrimaryCount int              `json:"primary_count"`
+	SharedCount  int              `json:"shared_count"`
+	Tracks       []string         `json:"tracks"`
 }
 
 // Professions returns every profession present in the loaded corpus, with a
 // question count and the set of tracks it spans, sorted by count desc then key.
 func (c *Catalog) Professions() []Profession {
 	counts := map[string]int{}
+	primary := map[string]int{}
 	tracks := map[string]map[string]bool{}
 	for _, id := range c.order {
 		q := c.byID[id]
-		for _, a := range q.Areas {
+		for i, a := range q.Areas {
+			if i == 0 {
+				primary[a]++
+			}
 			counts[a]++
 			if tracks[a] == nil {
 				tracks[a] = map[string]bool{}
@@ -64,7 +70,7 @@ func (c *Catalog) Professions() []Profession {
 		out = append(out, Profession{
 			Key: key, Label: definition.Label, Family: definition.Family,
 			FamilyLabel: professionFamilies[definition.Family], Aliases: append([]string{}, definition.Aliases...),
-			Agent: definition.Profile.Agent(), Count: n, Tracks: ts,
+			Agent: definition.Profile.Agent(), Count: n, PrimaryCount: primary[key], SharedCount: n - primary[key], Tracks: ts,
 		})
 	}
 	sort.Slice(out, func(i, j int) bool {

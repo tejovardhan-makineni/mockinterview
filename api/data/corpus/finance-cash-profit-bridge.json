@@ -1,0 +1,137 @@
+{
+  "schema_version": 1,
+  "revision": 1,
+  "format_id": "work-sample-defense",
+  "review_status": "preview",
+  "provenance": {
+    "authorship": "Original project scenario, AI-assisted draft. Practitioner review and calibration pending.",
+    "license": "MIT"
+  },
+  "minutes": 20,
+  "id": "finance-cash-profit-bridge",
+  "title": "Junior Financial Analyst: Explain Why a Profitable Month Used Cash",
+  "track": "professional",
+  "domain": "valuation",
+  "areas": [
+    "finance"
+  ],
+  "modality": "written",
+  "difficulty": "junior",
+  "role_track": "individual_contributor",
+  "tags": [
+    "finance",
+    "junior-specialist",
+    "evidence-based-practice",
+    "community-preview"
+  ],
+  "prompt": "You are a junior financial analyst reviewing a fictional business’s monthly report. Revenue is 100,000; operating expenses are 70,000, including 5,000 of non-cash depreciation. Cash collected from customers is 60,000. Cash paid for operating expenses is 65,000. A manager says, “Profit is 30,000, so the bank balance must have risen by 30,000.” Explain the difference using these figures. For this exercise there are no taxes, financing flows or other operating adjustments. All amounts use the same currency.",
+  "blurb": "Reconcile an income-statement result with operating cash and identify the information needed for total cash movement.",
+  "rubric": [
+    {
+      "key": "profit",
+      "label": "Read the operating result correctly",
+      "description": "Separates recognized income and non-cash expense from cash receipts.",
+      "weight": 1,
+      "anchors": {
+        "0": "Treats revenue as identical to cash collected.",
+        "2": "Calculates the stated 30,000 profit.",
+        "4": "Explains that the 5,000 depreciation reduced profit without a current cash payment and that 40,000 of recognized revenue was not collected."
+      }
+    },
+    {
+      "key": "cash_bridge",
+      "label": "Reconcile the supplied cash movements",
+      "description": "Uses direct and indirect views consistently.",
+      "weight": 1,
+      "anchors": {
+        "0": "Claims cash increased by 30,000 or subtracts depreciation twice.",
+        "2": "Calculates operating cash as 60,000 minus 65,000, or negative 5,000.",
+        "4": "Reconciles 30,000 plus 5,000 less 40,000 to negative 5,000, then identifies the separate equipment outflow and total negative 25,000 movement from supplied flows."
+      }
+    },
+    {
+      "key": "followup",
+      "label": "Explain implications without inventing forecasts",
+      "description": "Distinguishes a historical cash shortfall from a proven solvency conclusion.",
+      "weight": 1,
+      "anchors": {
+        "0": "Declares bankruptcy or guaranteed future collection without evidence.",
+        "2": "Requests payment timing and receivables information.",
+        "4": "Presents the bridge plainly, asks for an aging schedule and starting cash/near-term commitments, and avoids giving a financing recommendation from incomplete liquidity information."
+      }
+    }
+  ],
+  "reference": {
+    "scenario": "You are a junior financial analyst reviewing a fictional business’s monthly report. Revenue is 100,000; operating expenses are 70,000, including 5,000 of non-cash depreciation. Cash collected from customers is 60,000. Cash paid for operating expenses is 65,000. A manager says, “Profit is 30,000, so the bank balance must have risen by 30,000.” Explain the difference using these figures. For this exercise there are no taxes, financing flows or other operating adjustments. All amounts use the same currency.",
+    "facts": [
+      {
+        "id": "receivables",
+        "value": "The 40,000 difference between recognized revenue and customer receipts is an increase in receivables. There were no write-offs or opening-balance collections to complicate the supplied bridge.",
+        "reveal_when": "candidate asks about the revenue-to-collection difference"
+      },
+      {
+        "id": "investment",
+        "value": "The company also paid 20,000 for equipment during the month. That amount is a separate investing cash outflow, not an additional operating expense in the supplied report.",
+        "reveal_when": "candidate asks about other cash movements or capital spending"
+      },
+      {
+        "id": "forecast",
+        "value": "Receivable due dates and customer payment commitments are not included. The analyst can request an aging schedule and near-term cash forecast; no financing decision is requested.",
+        "reveal_when": "candidate asks about liquidity follow-up or collection timing"
+      }
+    ],
+    "model_points": [
+      "The report’s profit is 30,000, but operating cash flow is negative 5,000.",
+      "The indirect bridge adds back non-cash depreciation and subtracts the receivables increase. Equipment spending is outside that operating bridge.",
+      "With the separately supplied 20,000 equipment purchase, total cash movement from the stated flows is negative 25,000; the ending bank balance needs the opening balance."
+    ],
+    "probes": [
+      {
+        "trigger": "candidate says profit equals cash generated",
+        "question": "How much did customers actually pay, and how much operating cash was paid out?"
+      },
+      {
+        "trigger": "candidate uses only the direct cash calculation",
+        "question": "How could you explain the same negative 5,000 starting from the 30,000 profit?"
+      },
+      {
+        "trigger": "candidate corrects a total cash result after learning about equipment",
+        "question": "Which part belongs outside operating cash flow, and what is the revised total movement?"
+      }
+    ],
+    "fair_alternatives": [
+      "A direct-method explanation is sufficient if it reconciles the stated flows and clearly separates investing cash.",
+      "A simple annotated table can replace accounting terminology; no external financial reporting rule is required."
+    ],
+    "red_flags": [
+      "Treats revenue as identical to cash collected.",
+      "Claims cash increased by 30,000 or subtracts depreciation twice.",
+      "Declares bankruptcy or guaranteed future collection without evidence."
+    ],
+    "follow_ups": [
+      "Build a profit-to-cash bridge"
+    ],
+    "assessment_limits": [
+      "Assess only reasoning and communication demonstrated in this fictional task, not real-world professional competence, licensure or hiring readiness. No real action, external verification or tool execution has occurred.",
+      "Credit relevant plain-language reasoning and valid alternatives without requiring experience at a particular employer. Examples from education, volunteering, community work or paid work are equally acceptable when relevant.",
+      "A missing or unasked dimension is not assessed, not automatically a failure. In simulation, use neutral probes and reveal facts only when triggered; in coaching, label assistance and distinguish assisted performance from independent evidence.",
+      "Credit an explicit late correction using the final demonstrated reasoning while retaining the evidence of the earlier mistake; do not force agreement with one exemplar.",
+      "Do not penalize the candidate for a conditional fact that was never revealed. Credit an appropriate request for missing information and a conditional plan; distinguish the candidate’s assumptions from interviewer-supplied facts."
+    ]
+  },
+  "interviewer_notes": "Play the relevant reviewing colleague or stakeholder using the supplied facts only. Start with one focused question, not the full rubric. Ask for clarification before treating an ambiguous answer as wrong. Reveal conditional facts when their stated triggers are met, permit equivalent valid approaches and never invent organizational rules, laws, clinical findings, ratings or missing outcomes. Do not require a polished artifact or specialist software. In a short session prioritize the main decision and one material follow-up; allow silence for thinking, check in neutrally, and leave time for the candidate to correct their recommendation and ask a final question. Distinguish simulation from coaching and record any help given. Assess job-relevant evidence, not accent, confidence, speed, credentials or prestige. This is independent practice for adults 18+ and is not a real professional workflow.",
+  "learning_drills": [
+    {
+      "id": "decision-review",
+      "title": "Build a profit-to-cash bridge",
+      "minutes": 5,
+      "prompt": "Build a profit-to-cash bridge. Use the fictional facts from this exercise. This is self-guided practice; no model assessment is performed.",
+      "checklist": [
+        "Start from 30,000 profit",
+        "Add back 5,000 depreciation",
+        "Subtract 40,000 uncollected revenue",
+        "Show equipment separately and request opening cash"
+      ]
+    }
+  ]
+}

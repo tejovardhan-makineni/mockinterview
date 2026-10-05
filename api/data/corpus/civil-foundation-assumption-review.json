@@ -1,0 +1,137 @@
+{
+  "schema_version": 1,
+  "revision": 1,
+  "format_id": "work-sample-defense",
+  "review_status": "preview",
+  "provenance": {
+    "authorship": "Original project scenario, AI-assisted draft. Practitioner review and calibration pending.",
+    "license": "MIT"
+  },
+  "minutes": 30,
+  "id": "civil-foundation-assumption-review",
+  "title": "Senior Civil Engineer: Review a Foundation Change Against Its Assumptions",
+  "track": "engineering",
+  "domain": "geotechnical",
+  "areas": [
+    "civil_engineering"
+  ],
+  "modality": "written",
+  "difficulty": "senior",
+  "role_track": "individual_contributor",
+  "tags": [
+    "civil-engineering",
+    "senior-specialist",
+    "evidence-based-practice",
+    "community-preview"
+  ],
+  "prompt": "You are a senior civil engineer reviewing a fictional preliminary foundation calculation. The existing service load is 900 kN on a 10 m² footing. A proposed equipment addition raises the total service load to 1,300 kN. The supplied preliminary geotechnical note permits an average service bearing pressure of 120 kPa only under its stated dry-ground assumptions. The draft change request says “existing footing passed, so no review needed.” Review the arithmetic, scope and missing evidence. This is a paper exercise, not an approval to build or a request for real code values.",
+  "blurb": "Test a proposed load change against an explicitly conditional ground model and define the evidence needed for review.",
+  "rubric": [
+    {
+      "key": "load_check",
+      "label": "Calculate the stated pressure comparison",
+      "description": "Uses the correct total load, area and units.",
+      "weight": 1,
+      "anchors": {
+        "0": "Reuses the old passing result or confuses kN and kPa.",
+        "2": "Calculates 90 kPa existing and 130 kPa proposed.",
+        "4": "Shows the proposed 130 kPa exceeds the conditional 120 kPa figure while recognizing that passing an average-pressure check alone would not establish suitability."
+      }
+    },
+    {
+      "key": "assumptions",
+      "label": "Recheck the model’s validity",
+      "description": "Separates arithmetic failure from changed ground and missing design information.",
+      "weight": 1,
+      "anchors": {
+        "0": "Uses the dry-ground figure as valid despite the groundwater observation.",
+        "2": "Requests an updated geotechnical assessment.",
+        "4": "Identifies groundwater, settlement and eccentricity as distinct unresolved inputs and avoids inventing a replacement capacity or concluding the old footing is safe under changed conditions."
+      }
+    },
+    {
+      "key": "recommendation",
+      "label": "Frame a reviewable change decision",
+      "description": "Defines a hold and evidence path within professional authority.",
+      "weight": 1,
+      "anchors": {
+        "0": "Approves construction or sizes a final footing from the lone pressure number.",
+        "2": "Recommends holding installation pending design review.",
+        "4": "Compares postpone, relocate and redesign as conditional options, names required geotechnical and structural evidence and routes a documented change to authorized reviewers."
+      }
+    }
+  ],
+  "reference": {
+    "scenario": "You are a senior civil engineer reviewing a fictional preliminary foundation calculation. The existing service load is 900 kN on a 10 m² footing. A proposed equipment addition raises the total service load to 1,300 kN. The supplied preliminary geotechnical note permits an average service bearing pressure of 120 kPa only under its stated dry-ground assumptions. The draft change request says “existing footing passed, so no review needed.” Review the arithmetic, scope and missing evidence. This is a paper exercise, not an approval to build or a request for real code values.",
+    "facts": [
+      {
+        "id": "ground",
+        "value": "A recent site observation records groundwater at footing level after prolonged rain. The note’s dry-ground assumption has not been reconfirmed. No revised bearing or settlement recommendation is available.",
+        "reveal_when": "candidate asks whether site conditions still match the note"
+      },
+      {
+        "id": "load",
+        "value": "The 1,300 kN figure is the total service load for this exercise, not an added 1,300 kN. Load eccentricity and settlement criteria for the new equipment have not been supplied.",
+        "reveal_when": "candidate asks about load definition or checks beyond average pressure"
+      },
+      {
+        "id": "options",
+        "value": "The owner can postpone installation, seek a different equipment location or ask the design team to evaluate a larger foundation. Only the appointed designer and geotechnical reviewer can approve a revised design.",
+        "reveal_when": "candidate asks about reversible options or approval authority"
+      }
+    ],
+    "model_points": [
+      "900/10=90 kPa and 1,300/10=130 kPa. The average-pressure comparison already rejects the draft’s no-review claim.",
+      "The groundwater observation invalidates uncritical reuse of the dry-ground assumption; no alternate soil capacity is supplied.",
+      "A larger area calculated from 1,300/120 would still depend on an unverified capacity and would not address settlement, eccentricity or approval."
+    ],
+    "probes": [
+      {
+        "trigger": "candidate proposes a larger footing using only 1,300 divided by 120",
+        "question": "Which assumption behind the 120 kPa value has changed, and what other checks are missing?"
+      },
+      {
+        "trigger": "candidate proposes relocating the equipment",
+        "question": "What evidence would establish that the new location’s foundation and ground conditions are suitable?"
+      },
+      {
+        "trigger": "candidate corrects treating 1,300 kN as additional rather than total",
+        "question": "What pressure comparison should replace the earlier calculation, and does the review decision change?"
+      }
+    ],
+    "fair_alternatives": [
+      "Postponement, relocation or redesign are defensible pending the appropriate evidence; no final engineering solution is required.",
+      "Plain-language unit and assumption checks receive full credit without requiring a particular design code or specialist software."
+    ],
+    "red_flags": [
+      "Reuses the old passing result or confuses kN and kPa.",
+      "Uses the dry-ground figure as valid despite the groundwater observation.",
+      "Approves construction or sizes a final footing from the lone pressure number."
+    ],
+    "follow_ups": [
+      "Write a preliminary change-review note"
+    ],
+    "assessment_limits": [
+      "Assess only reasoning and communication demonstrated in this fictional task, not real-world professional competence, licensure or hiring readiness. No real action, external verification or tool execution has occurred.",
+      "Credit relevant plain-language reasoning and valid alternatives without requiring experience at a particular employer. Examples from education, volunteering, community work or paid work are equally acceptable when relevant.",
+      "A missing or unasked dimension is not assessed, not automatically a failure. In simulation, use neutral probes and reveal facts only when triggered; in coaching, label assistance and distinguish assisted performance from independent evidence.",
+      "Credit an explicit late correction using the final demonstrated reasoning while retaining the evidence of the earlier mistake; do not force agreement with one exemplar.",
+      "Do not penalize the candidate for a conditional fact that was never revealed. Credit an appropriate request for missing information and a conditional plan; distinguish the candidate’s assumptions from interviewer-supplied facts."
+    ]
+  },
+  "interviewer_notes": "Play the relevant reviewing colleague or stakeholder using the supplied facts only. Start with one focused question, not the full rubric. Ask for clarification before treating an ambiguous answer as wrong. Reveal conditional facts when their stated triggers are met, permit equivalent valid approaches and never invent organizational rules, laws, clinical findings, ratings or missing outcomes. Do not require a polished artifact or specialist software. In a short session prioritize the main decision and one material follow-up; allow silence for thinking, check in neutrally, and leave time for the candidate to correct their recommendation and ask a final question. Distinguish simulation from coaching and record any help given. Assess job-relevant evidence, not accent, confidence, speed, credentials or prestige. This is independent practice for adults 18+ and is not a real professional workflow.",
+  "learning_drills": [
+    {
+      "id": "decision-review",
+      "title": "Write a preliminary change-review note",
+      "minutes": 5,
+      "prompt": "Write a preliminary change-review note. Use the fictional facts from this exercise. This is self-guided practice; no model assessment is performed.",
+      "checklist": [
+        "Calculate existing and proposed pressures",
+        "State the conditional ground assumption",
+        "List missing checks without invented values",
+        "Name the approval and hold conditions"
+      ]
+    }
+  ]
+}

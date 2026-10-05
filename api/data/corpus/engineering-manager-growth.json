@@ -1,0 +1,121 @@
+{
+  "schema_version": 1,
+  "revision": 1,
+  "format_id": "stakeholder-simulation",
+  "review_status": "preview",
+  "provenance": {
+    "authorship": "Original project scenario, AI-assisted draft. Practitioner review and scoring calibration pending.",
+    "license": "MIT"
+  },
+  "minutes": 30,
+  "id": "engineering-manager-growth",
+  "title": "Engineering Manager: Build a Growth Plan Without Promising Promotion",
+  "track": "engineering",
+  "domain": "engineering_coaching",
+  "areas": [
+    "engineering_management",
+    "software_engineering",
+    "management"
+  ],
+  "role_track": "management",
+  "modality": "conversational",
+  "difficulty": "manager",
+  "tags": [
+    "engineering-management",
+    "manager",
+    "engineering-coaching",
+    "leadership",
+    "community-preview"
+  ],
+  "prompt": "An engineer, Morgan, says, \"I want promotion this cycle, so give me the largest project.\" Morgan has delivered two reliable components but has limited experience coordinating across teams. The largest project has three external dependencies and must ship in six weeks. Conduct a growth conversation with Morgan (the AI). You cannot guarantee promotion or invent your organization’s criteria.",
+  "blurb": "Plan a growth experiment",
+  "rubric": [
+    {
+      "key": "goals",
+      "label": "Clarify growth evidence",
+      "description": "Connects opportunity to role expectations rather than visibility alone.",
+      "weight": 1,
+      "anchors": {
+        "0": "Promises promotion for a large assignment or equates project size with readiness.",
+        "2": "Reviews expectations and asks about Morgan’s interests.",
+        "4": "Distinguishes promotion decisions from skill development, checks the actual criteria and identifies cross-team coordination evidence Morgan wants to build."
+      }
+    },
+    {
+      "key": "assignment",
+      "label": "Scope a supported opportunity",
+      "description": "Balances stretch, risk and ownership.",
+      "weight": 1,
+      "anchors": {
+        "0": "Assigns the largest project without support or denies all stretch.",
+        "2": "Proposes an appropriately supported assignment.",
+        "4": "Offers a meaningful coordination responsibility, technical review and partner support, with explicit boundaries and a plan if dependency risk grows."
+      }
+    },
+    {
+      "key": "feedback",
+      "label": "Make progress observable",
+      "description": "Agrees fair evidence and feedback checkpoints.",
+      "weight": 1,
+      "anchors": {
+        "0": "Promises an outcome or measures only visibility.",
+        "2": "Sets check-ins and feedback.",
+        "4": "Agrees concrete evidence of coordination, gathers relevant feedback without popularity scoring, and explains promotion decision rights and uncertainty while keeping the development plan useful."
+      }
+    }
+  ],
+  "reference": {
+    "scenario": "An engineer, Morgan, says, \"I want promotion this cycle, so give me the largest project.\" Morgan has delivered two reliable components but has limited experience coordinating across teams. The largest project has three external dependencies and must ship in six weeks. Conduct a growth conversation with Morgan (the AI). You cannot guarantee promotion or invent your organization’s criteria.",
+    "facts": [
+      {
+        "id": "fact-1",
+        "value": "Morgan wants more ownership and visibility, and is willing to pair on coordination. The approved role expectations are available but have not been reviewed together.",
+        "reveal_when": "candidate asks what growth means or checks role expectations"
+      },
+      {
+        "id": "fact-2",
+        "value": "A smaller integration has one external dependency, a named partner and a senior technical reviewer. It could provide coordination evidence within the cycle without changing the review criteria.",
+        "reveal_when": "candidate asks about alternative assignments or support"
+      }
+    ],
+    "model_points": [
+      "Distinguishes promotion decisions from skill development, checks the actual criteria and identifies cross-team coordination evidence Morgan wants to build.",
+      "Offers a meaningful coordination responsibility, technical review and partner support, with explicit boundaries and a plan if dependency risk grows.",
+      "Agrees concrete evidence of coordination, gathers relevant feedback without popularity scoring, and explains promotion decision rights and uncertainty while keeping the development plan useful."
+    ],
+    "probes": [
+      {
+        "trigger": "candidate says Morgan is not ready without explanation",
+        "question": "What observable skill and evidence would you discuss with Morgan?"
+      },
+      {
+        "trigger": "candidate proposes the smaller project",
+        "question": "How will Morgan retain meaningful ownership?"
+      },
+      {
+        "trigger": "candidate retracts a promotion promise",
+        "question": "How would you correct that expectation clearly?"
+      }
+    ],
+    "fair_alternatives": [
+      "A bounded leadership component of the larger project can be valid with sufficient support and delivery safeguards.",
+      "Growth may extend beyond the current promotion cycle; avoid converting the deadline into a false guarantee."
+    ],
+    "assessment_limits": "Assess only the decisions and reasoning demonstrated in this fictional exercise. No hiring-readiness, personality, legal compliance or workplace performance claim follows from this score. A valid alternative can earn full credit. Unrevealed conditional facts must not be assumed known or required for credit; credit asking for needed information and a conditional plan."
+  },
+  "interviewer_notes": "You are the counterpart named in the prompt. If this is a written review, remain the hiring interviewer while the candidate reads and writes. Let the candidate finish, including thinking and self-correction. Answer only supplied facts when their reveal condition is met; otherwise say the information is unknown. Use neutral probes after a completed answer, one at a time. Do not prescribe the rubric as a spoken checklist. Accept relevant examples from work, education and community leadership. Do not request private employee records, infer protected traits, invent employment rules or promise a real organizational outcome. Simulation gives no answer before assessment; coaching may offer labeled assistance.",
+  "learning_drills": [
+    {
+      "id": "decision-practice",
+      "title": "Plan a growth experiment",
+      "prompt": "Write one skill goal, one supported assignment, two evidence signals and a feedback date. This is self-guided practice with no automated assessment.",
+      "minutes": 7,
+      "checklist": [
+        "Use real role expectations",
+        "Keep promotion uncertain",
+        "Preserve ownership",
+        "Avoid visibility-only measures"
+      ]
+    }
+  ]
+}

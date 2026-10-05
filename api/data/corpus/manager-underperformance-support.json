@@ -1,0 +1,119 @@
+{
+  "schema_version": 1,
+  "revision": 1,
+  "format_id": "stakeholder-simulation",
+  "review_status": "preview",
+  "provenance": {
+    "authorship": "Original project scenario, AI-assisted draft. Practitioner review and scoring calibration pending.",
+    "license": "MIT"
+  },
+  "minutes": 30,
+  "id": "manager-underperformance-support",
+  "title": "Experienced Manager: Investigate a Performance Gap Fairly",
+  "track": "professional",
+  "domain": "performance_support",
+  "areas": [
+    "management"
+  ],
+  "role_track": "management",
+  "modality": "conversational",
+  "difficulty": "manager",
+  "tags": [
+    "management",
+    "manager",
+    "performance-support",
+    "leadership",
+    "community-preview"
+  ],
+  "prompt": "You lead eight analysts. Casey completed 12 of 20 assigned reviews this month; the team median was 18. The assignment sheet has no complexity field. Quality checks found one correction in Casey’s completed work and one in a peer’s, but the sample sizes differ. Your manager asks you to start a formal warning immediately. Explain your next steps to the manager (the AI).",
+  "blurb": "Separate observations from conclusions",
+  "rubric": [
+    {
+      "key": "diagnosis",
+      "label": "Check comparability",
+      "description": "Interprets throughput and quality evidence carefully.",
+      "weight": 1,
+      "anchors": {
+        "0": "Treats 12 versus 18 as proof of poor effort or converts unequal quality samples into a ranking.",
+        "2": "Asks about complexity and blockers.",
+        "4": "Separates workload mix, availability, quality and individual behavior, states the limits of the current comparison and seeks proportionate job-relevant evidence."
+      }
+    },
+    {
+      "key": "support",
+      "label": "Set fair expectations",
+      "description": "Builds a supported improvement process.",
+      "weight": 1,
+      "anchors": {
+        "0": "Guarantees a warning or dismissal without inquiry.",
+        "2": "Discusses expectations and support with Casey.",
+        "4": "Invites Casey’s account, fixes controllable blockers, agrees measurable expectations with a review period and consults the stated procedure before formal action."
+      }
+    },
+    {
+      "key": "accountability",
+      "label": "Respond to pressure",
+      "description": "Communicates a bounded management decision.",
+      "weight": 1,
+      "anchors": {
+        "0": "Hides the issue or promises that support will necessarily resolve it.",
+        "2": "Explains that more evidence is needed.",
+        "4": "Gives the manager a dated plan for evidence, support and review; protects confidentiality while keeping the performance concern visible and open to a different conclusion."
+      }
+    }
+  ],
+  "reference": {
+    "scenario": "You lead eight analysts. Casey completed 12 of 20 assigned reviews this month; the team median was 18. The assignment sheet has no complexity field. Quality checks found one correction in Casey’s completed work and one in a peer’s, but the sample sizes differ. Your manager asks you to start a formal warning immediately. Explain your next steps to the manager (the AI).",
+    "facts": [
+      {
+        "id": "fact-1",
+        "value": "Casey handled six escalated cases, while most peers handled one or two. A tooling problem also blocked three assigned cases for two days.",
+        "reveal_when": "candidate asks about case mix, obstacles or comparable evidence"
+      },
+      {
+        "id": "fact-2",
+        "value": "The organization’s fictional procedure requires consulting People Operations before formal action and documenting expectations and support. No outcome is predetermined.",
+        "reveal_when": "candidate asks about process or authority"
+      }
+    ],
+    "model_points": [
+      "Separates workload mix, availability, quality and individual behavior, states the limits of the current comparison and seeks proportionate job-relevant evidence.",
+      "Invites Casey’s account, fixes controllable blockers, agrees measurable expectations with a review period and consults the stated procedure before formal action.",
+      "Gives the manager a dated plan for evidence, support and review; protects confidentiality while keeping the performance concern visible and open to a different conclusion."
+    ],
+    "probes": [
+      {
+        "trigger": "candidate uses team median as a quota",
+        "question": "How would the escalated cases affect that comparison?"
+      },
+      {
+        "trigger": "candidate rejects any performance concern after hearing about blockers",
+        "question": "What evidence would still warrant a supported performance conversation?"
+      },
+      {
+        "trigger": "candidate retracts a premature conclusion",
+        "question": "How will you correct the record and explain the revised plan?"
+      }
+    ],
+    "fair_alternatives": [
+      "A workload adjustment can be an evidence-gathering and support step without assuming there is no performance issue.",
+      "Immediate escalation is valid if a separately evidenced safety concern emerges; none is supplied here."
+    ],
+    "assessment_limits": "Assess only the decisions and reasoning demonstrated in this fictional exercise. No hiring-readiness, personality, legal compliance or workplace performance claim follows from this score. A valid alternative can earn full credit. Unrevealed conditional facts must not be assumed known or required for credit; credit asking for needed information and a conditional plan."
+  },
+  "interviewer_notes": "You are the counterpart named in the prompt. If this is a written review, remain the hiring interviewer while the candidate reads and writes. Let the candidate finish, including thinking and self-correction. Answer only supplied facts when their reveal condition is met; otherwise say the information is unknown. Use neutral probes after a completed answer, one at a time. Do not prescribe the rubric as a spoken checklist. Accept relevant examples from work, education and community leadership. Do not request private employee records, infer protected traits, invent employment rules or promise a real organizational outcome. Simulation gives no answer before assessment; coaching may offer labeled assistance.",
+  "learning_drills": [
+    {
+      "id": "decision-practice",
+      "title": "Separate observations from conclusions",
+      "prompt": "Write a short evidence table: observed fact, possible explanation, missing evidence and next action. This is self-guided practice with no automated assessment.",
+      "minutes": 7,
+      "checklist": [
+        "Avoid effort assumptions",
+        "Use comparable work",
+        "Include support",
+        "Respect the fictional formal process"
+      ]
+    }
+  ]
+}

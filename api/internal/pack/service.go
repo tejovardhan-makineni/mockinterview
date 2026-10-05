@@ -82,6 +82,31 @@ func (s *Service) ResolveRoundForUser(ctx context.Context, userID, packID, round
 	return "", "", 0, false
 }
 
+// RoundDefaults preserves the authored scope even when an older client omits
+// session settings. A pinned scenario supplies values absent from its round.
+func (s *Service) RoundDefaults(packID, roundID string) (targetLevel, roleTrack string, ok bool) {
+	p, found := s.packs.Get(packID)
+	if !found {
+		return "", "", false
+	}
+	for _, rd := range p.Rounds {
+		if rd.ID != roundID {
+			continue
+		}
+		level, track := rd.Difficulty, rd.RoleTrack
+		if q, found := s.corpus.Get(rd.QuestionID); found {
+			if level == "" {
+				level = q.Difficulty
+			}
+			if track == "" {
+				track = q.RoleTrack
+			}
+		}
+		return level, track, true
+	}
+	return "", "", false
+}
+
 // ---- client-safe views ----
 
 // roundSummary is the trimmed round shape returned in pack listings.

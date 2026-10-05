@@ -1,0 +1,50 @@
+{
+  "id": "executive-leadership-practice",
+  "revision": 1,
+  "review_status": "preview",
+  "source_note": "Original AI-assisted management practice path. Each round is a separate attempt. Practitioner review and scoring calibration are pending; this does not certify leadership or hiring readiness.",
+  "name": "Executive Leadership",
+  "areas": [
+    "management"
+  ],
+  "track": "professional",
+  "blurb": "Practice board communication, crisis governance, succession planning.",
+  "rounds": [
+    {
+      "id": "round-1",
+      "title": "Executive: Present an Uncertain Recovery Plan to the Board",
+      "kind": "stakeholder-simulation",
+      "domain": "board_communication",
+      "modality": "conversational",
+      "difficulty": "executive",
+      "role_track": "executive",
+      "minutes": 45,
+      "question_id": "executive-board-uncertainty",
+      "focus": "Write a candid board update"
+    },
+    {
+      "id": "round-2",
+      "title": "Executive: Establish Decision Rights During a Service Crisis",
+      "kind": "panel-simulation",
+      "domain": "crisis_governance",
+      "modality": "conversational",
+      "difficulty": "executive",
+      "role_track": "executive",
+      "minutes": 45,
+      "question_id": "executive-crisis-governance",
+      "focus": "Map crisis decisions"
+    },
+    {
+      "id": "round-3",
+      "title": "Executive: Review Succession and Organizational Resilience",
+      "kind": "work-sample-defense",
+      "domain": "succession_planning",
+      "modality": "written",
+      "difficulty": "executive",
+      "role_track": "executive",
+      "minutes": 45,
+      "question_id": "executive-succession-resilience",
+      "focus": "Write a resilience plan"
+    }
+  ]
+}

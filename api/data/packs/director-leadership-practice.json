@@ -1,0 +1,50 @@
+{
+  "id": "director-leadership-practice",
+  "revision": 1,
+  "review_status": "preview",
+  "source_note": "Original AI-assisted management practice path. Each round is a separate attempt. Practitioner review and scoring calibration are pending; this does not certify leadership or hiring readiness.",
+  "name": "Director Leadership",
+  "areas": [
+    "management"
+  ],
+  "track": "professional",
+  "blurb": "Practice organizational design, strategy execution, manager development.",
+  "rounds": [
+    {
+      "id": "round-1",
+      "title": "Director: Review an Organization Design Proposal",
+      "kind": "work-sample-defense",
+      "domain": "organizational_design",
+      "modality": "written",
+      "difficulty": "director",
+      "role_track": "management",
+      "minutes": 30,
+      "question_id": "director-organizational-design",
+      "focus": "Test an organization design"
+    },
+    {
+      "id": "round-2",
+      "title": "Director: Turn a Strategy Into Decisions Teams Can Execute",
+      "kind": "stakeholder-simulation",
+      "domain": "strategy_execution",
+      "modality": "conversational",
+      "difficulty": "director",
+      "role_track": "management",
+      "minutes": 30,
+      "question_id": "director-strategy-execution",
+      "focus": "Write a strategy decision page"
+    },
+    {
+      "id": "round-3",
+      "title": "Senior Manager: Coach a Manager Who Solves Everything Personally",
+      "kind": "stakeholder-simulation",
+      "domain": "manager_development",
+      "modality": "conversational",
+      "difficulty": "senior_manager",
+      "role_track": "management",
+      "minutes": 30,
+      "question_id": "senior-manager-manager-coaching",
+      "focus": "Design a management experiment"
+    }
+  ]
+}

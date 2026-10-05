@@ -145,5 +145,7 @@
       "Collecting all matches and full-sorting when only top-3 is needed (use a bounded heap / partial selection)."
     ]
   },
-  "interviewer_notes": "Let the candidate finish their reasoning and any workspace changes before a focused follow-up. Ask only about a material unresolved issue, then return the floor. Assess the exact contract, including # save-and-reset and frequency-descending then lexicographic ordering, plus per-keystroke cost and update correctness. At 10^5 sentences, evaluate the cost of the candidate's chosen structure without requiring a trie or a fixed sequence of implementations. Retrieval versus precomputation, dead prefixes and keeping cached results fresh can provide depth after a working proposal. Typo tolerance and sharding are optional later extensions. Let the candidate implement and test independently; do not reveal trie pointers, top-k caching or tie-break fixes as hints."
+  "interviewer_notes": "Let the candidate finish their reasoning and any workspace changes before a focused follow-up. Ask only about a material unresolved issue, then return the floor. Assess the exact contract, including # save-and-reset and frequency-descending then lexicographic ordering, plus per-keystroke cost and update correctness. At 10^5 sentences, evaluate the cost of the candidate's chosen structure without requiring a trie or a fixed sequence of implementations. Retrieval versus precomputation, dead prefixes and keeping cached results fresh can provide depth after a working proposal. Typo tolerance and sharding are optional later extensions. Let the candidate implement and test independently; do not reveal trie pointers, top-k caching or tie-break fixes as hints.",
+  "role_track": "individual_contributor",
+  "revision": 2
 }

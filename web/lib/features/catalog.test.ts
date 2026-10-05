@@ -171,6 +171,38 @@ describe("catalog metadata search", () => {
 });
 
 describe("filterCatalog", () => {
+  it("filters authored role scope without relabeling unspecified content", () => {
+    const ic: QuestionSummary = {
+      ...q,
+      id: "principal",
+      role_track: "individual_contributor",
+      difficulty: "principal",
+    };
+    const manager: QuestionSummary = {
+      ...q,
+      id: "director",
+      role_track: "management",
+      difficulty: "director",
+    };
+    const executive: QuestionSummary = {
+      ...q,
+      id: "vp",
+      role_track: "executive",
+      difficulty: "vp",
+    };
+    const bank = [q, ic, manager, executive];
+    expect(
+      filterCatalog(bank, [], { role_track: "management", level: "director" }),
+    ).toEqual([manager]);
+    expect(
+      filterCatalog(bank, [], { role_track: "individual_contributor" }),
+    ).toEqual([ic]);
+    expect(filterCatalog(bank, [], { role_track: "unspecified" })).toEqual([q]);
+    expect(filterCatalog(bank, [], { role_track: "executive" })).toEqual([
+      executive,
+    ]);
+    expect(filterCatalog(bank, [], { query: "principal" })).toContain(ic);
+  });
   const shared = {
     ...teaching,
     id: "shared",
