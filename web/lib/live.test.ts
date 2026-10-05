@@ -300,7 +300,7 @@ describe("workspace observation and candidate thinking time", () => {
     expect(sentMessages("canvas").at(-1)?.text).toBe("");
   });
 
-  it("protects active drawing and waits two minutes after the last technical edit", async () => {
+  it("protects active drawing and waits one minute after the last technical edit", async () => {
     live = new LiveSession("design", [], "aoede", {
       mode: "text",
       modality: "system_design",
@@ -314,7 +314,7 @@ describe("workspace observation and candidate thinking time", () => {
       await vi.advanceTimersByTimeAsync(5000);
     }
     expect(sentMessages("nudge")).toHaveLength(0);
-    await vi.advanceTimersByTimeAsync(110000);
+    await vi.advanceTimersByTimeAsync(50000);
     expect(sentMessages("nudge")).toHaveLength(0);
     await vi.advanceTimersByTimeAsync(13000);
     expect(sentMessages("nudge")).toHaveLength(1);
@@ -376,7 +376,7 @@ describe("server and browser idle coordination", () => {
     await Promise.resolve();
     Socket.instances[0].message({ type: "ready", mode: "text" });
     live.noteWorkspaceActivity();
-    await vi.advanceTimersByTimeAsync(64000);
+    await vi.advanceTimersByTimeAsync(48000);
     expect(sentMessages("nudge")).toHaveLength(0);
     live.submitText("Here is my completed answer.");
     await vi.advanceTimersByTimeAsync(48000);

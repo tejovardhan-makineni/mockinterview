@@ -14,22 +14,22 @@ func TestIdleCheckWaitsForRealWorkspaceInactivity(t *testing.T) {
 	for _, kind := range []string{"coding", "design", "lld"} {
 		t.Run(kind, func(t *testing.T) {
 			activity := newConversationActivity([]Section{{Kind: kind}}, start)
-			if activity.allowNudge(start.Add(119 * time.Second)) {
+			if activity.allowNudge(start.Add(59 * time.Second)) {
 				t.Fatal("interrupted a candidate during technical working time")
 			}
-			activity.observe(start.Add(115*time.Second), true, true)
-			if activity.allowNudge(start.Add(2 * time.Minute)) {
+			activity.observe(start.Add(55*time.Second), true, true)
+			if activity.allowNudge(start.Add(time.Minute)) {
 				t.Fatal("recent workspace editing was mistaken for silence")
 			}
-			if !activity.allowNudge(start.Add(235 * time.Second)) {
+			if !activity.allowNudge(start.Add(115 * time.Second)) {
 				t.Fatal("a long inactive workspace can receive one check-in")
 			}
-			activity.observe(start.Add(240*time.Second), false, false)
+			activity.observe(start.Add(120*time.Second), false, false)
 			if activity.allowNudge(start.Add(10 * time.Minute)) {
 				t.Fatal("interviewer's own speech rearmed a repeated nudge")
 			}
 			activity.observe(start.Add(10*time.Minute), true, true)
-			if !activity.allowNudge(start.Add(12 * time.Minute)) {
+			if !activity.allowNudge(start.Add(11 * time.Minute)) {
 				t.Fatal("fresh candidate work should allow a later check-in")
 			}
 		})
@@ -39,8 +39,11 @@ func TestIdleCheckWaitsForRealWorkspaceInactivity(t *testing.T) {
 		t.Fatal("conversational silence should use its shorter window")
 	}
 	activity.observe(start.Add(time.Minute), true, true)
-	if activity.allowNudge(start.Add(2 * time.Minute)) {
+	if activity.allowNudge(start.Add(119 * time.Second)) {
 		t.Fatal("working-time request must extend the conversational quiet window")
+	}
+	if !activity.allowNudge(start.Add(2 * time.Minute)) {
+		t.Fatal("inactive workspace should permit a neutral check-in after one minute")
 	}
 	// A subsequent substantive candidate turn ends the workspace interval.
 	activity.observe(start.Add(3*time.Minute), true, false)

@@ -180,12 +180,9 @@ export class LiveSession {
   private startNudgeWatch() {
     this.nudgeTimer = window.setInterval(() => {
       if (this.stopped || !this.ready || this.aiSpeaking || this.nudged) return;
-      const idleMs = this.workspaceActive
-        ? 120000
-        : this.options.modality
-          ? this.options.modality === "conversational"
-            ? 45000
-            : 120000
+      const idleMs =
+        !this.workspaceActive && this.options.modality === "conversational"
+          ? 45000
           : 60000;
       if (Date.now() - this.lastActivity < idleMs) return;
       if (this.mode === "local") {

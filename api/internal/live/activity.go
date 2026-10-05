@@ -21,7 +21,7 @@ func newConversationActivity(sections []Section, now time.Time) *conversationAct
 	quietFor := 45 * time.Second
 	for _, section := range sections {
 		if section.Kind == "coding" || section.Kind == "design" || section.Kind == "lld" {
-			quietFor = 2 * time.Minute
+			quietFor = time.Minute
 		}
 	}
 	return &conversationActivity{last: now, quietFor: quietFor}
@@ -42,7 +42,7 @@ func (a *conversationActivity) allowNudge(now time.Time) bool {
 	defer a.mu.Unlock()
 	quietFor := a.quietFor
 	if a.working {
-		quietFor = max(quietFor, 2*time.Minute)
+		quietFor = max(quietFor, time.Minute)
 	}
 	if a.nudged || now.Sub(a.last) < quietFor {
 		return false
