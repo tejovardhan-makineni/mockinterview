@@ -1,0 +1,517 @@
+.history {
+  --journal-violet: #6550b9;
+  --journal-violet-soft: #f0ebfc;
+  --journal-teal: #267668;
+  --journal-teal-soft: #e3f2ec;
+  --journal-amber: #976419;
+  --journal-amber-soft: #fff0d1;
+  --journal-rose: #a64e68;
+  --journal-rose-soft: #fce9ee;
+  --journal-paper: #fffdf9;
+  --journal-hero: #f5f0fe;
+  --journal-border: #e4ddef;
+  --journal-shadow: 0 7px 24px rgb(52 39 76 / 4%);
+}
+
+:global(:root[data-theme="dark"]) .history,
+:global(:root[data-theme="quantum"]) .history {
+  --journal-violet: #c2b4ff;
+  --journal-violet-soft: #352f49;
+  --journal-teal: #8edbc6;
+  --journal-teal-soft: #263c36;
+  --journal-amber: #f0cc86;
+  --journal-amber-soft: #423924;
+  --journal-rose: #f1adbf;
+  --journal-rose-soft: #442e39;
+  --journal-paper: #232a25;
+  --journal-hero: #2b2837;
+  --journal-border: #4b435b;
+  --journal-shadow: 0 7px 24px rgb(0 0 0 / 9%);
+}
+
+.hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1.3fr) minmax(230px, 0.7fr);
+  align-items: center;
+  gap: 28px;
+  overflow: hidden;
+  position: relative;
+  isolation: isolate;
+  margin-bottom: 24px;
+  padding: 38px 42px;
+  border: 1px solid var(--journal-border);
+  border-radius: 24px;
+  background:
+    radial-gradient(
+      ellipse at 95% 5%,
+      var(--journal-rose-soft),
+      transparent 48%
+    ),
+    radial-gradient(
+      ellipse at 70% 100%,
+      var(--journal-teal-soft),
+      transparent 50%
+    ),
+    var(--journal-hero);
+}
+
+.heroCopy {
+  position: relative;
+  z-index: 1;
+}
+.eyebrow {
+  color: var(--journal-violet);
+  font-size: 11px;
+  font-weight: 750;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+}
+.title {
+  margin-top: 14px;
+  font-size: clamp(2rem, 4.5vw, 3.1rem);
+  font-weight: 650;
+  letter-spacing: -0.055em;
+  line-height: 1.1;
+}
+.heroDescription {
+  max-width: 440px;
+  margin: 18px 0 24px;
+  color: var(--color-muted);
+  font-size: 15px;
+}
+.primaryButton {
+  color: var(--journal-paper);
+  background: var(--journal-violet);
+  border-color: var(--journal-violet);
+  box-shadow: 0 3px 0 color-mix(in srgb, var(--journal-violet), transparent 75%);
+}
+
+.journalArt {
+  position: relative;
+  width: 100%;
+  max-width: 290px;
+  height: 246px;
+  justify-self: center;
+}
+.artOrbit {
+  position: absolute;
+  inset: 5px 3px 25px;
+  border: 1px dashed color-mix(in srgb, var(--journal-violet), transparent 66%);
+  border-radius: 50%;
+  transform: rotate(-25deg);
+}
+.artSpark {
+  position: absolute;
+  right: 5px;
+  top: 9px;
+  z-index: 3;
+  color: var(--journal-amber);
+  font-size: 39px;
+  line-height: 1;
+  transform: rotate(8deg);
+}
+.artCard {
+  position: absolute;
+  width: 132px;
+  height: 166px;
+  padding: 18px;
+  border: 1px solid var(--journal-border);
+  border-radius: 15px;
+  box-shadow: 0 12px 22px rgb(42 29 63 / 8%);
+}
+.artCard > span:not(.artCheck) {
+  display: block;
+  height: 5px;
+  margin-top: 11px;
+  border-radius: 8px;
+  background: currentColor;
+  opacity: 0.25;
+}
+.artCard > span:last-child {
+  width: 64%;
+}
+.artCardBack {
+  top: 31px;
+  left: 12px;
+  color: var(--journal-teal);
+  background: var(--journal-teal-soft);
+  transform: rotate(-14deg);
+}
+.artCardBack svg {
+  width: 48px;
+  height: 48px;
+  margin: 0 0 9px 22px;
+}
+.artCardFront {
+  right: 13px;
+  top: 41px;
+  color: var(--journal-violet);
+  background: var(--journal-paper);
+  transform: rotate(10deg);
+}
+.artCheck {
+  display: grid;
+  width: 34px;
+  height: 34px;
+  place-items: center;
+  border-radius: 50%;
+  color: var(--journal-violet);
+  background: var(--journal-violet-soft);
+  font-weight: 750;
+  font-size: 20px;
+}
+.artCard .artLine {
+  width: 72%;
+}
+.artDots {
+  display: flex;
+  gap: 6px;
+  margin-top: 16px;
+}
+.artDots i {
+  width: 16px;
+  height: 8px;
+  border-radius: 4px;
+  background: var(--journal-violet-soft);
+}
+.artDots i:nth-child(2) {
+  background: var(--journal-teal-soft);
+}
+.artDots i:nth-child(3) {
+  background: var(--journal-amber-soft);
+}
+.artCaption {
+  position: absolute;
+  bottom: 2px;
+  left: 0;
+  right: 0;
+  text-align: center;
+  color: var(--journal-violet);
+  font-size: 12px;
+  font-weight: 650;
+  letter-spacing: 0.02em;
+}
+
+.toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 18px;
+  margin: 34px 0 20px;
+}
+.sectionHeading {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+}
+.sectionHeading h2 {
+  font-size: 20px;
+  font-weight: 650;
+  letter-spacing: -0.025em;
+}
+.loadedCount {
+  border: 1px solid var(--journal-border);
+  border-radius: 999px;
+  padding: 4px 9px;
+  color: var(--journal-violet);
+  background: var(--journal-violet-soft);
+  font-size: 11px;
+  font-weight: 650;
+}
+.search {
+  position: relative;
+  display: block;
+  width: min(100%, 340px);
+}
+.search svg {
+  position: absolute;
+  top: 14px;
+  left: 14px;
+  width: 19px;
+  height: 19px;
+  color: var(--color-muted);
+  pointer-events: none;
+}
+.search input {
+  padding-left: 41px;
+  border-radius: 12px;
+  background: var(--journal-paper);
+  font-size: 13px;
+}
+.sessions {
+  display: grid;
+  gap: 15px;
+}
+.session {
+  padding: 23px 25px 8px;
+  border-color: color-mix(
+    in srgb,
+    var(--journal-border),
+    var(--color-line) 40%
+  );
+  border-radius: 18px;
+  background: var(--journal-paper);
+  box-shadow: var(--journal-shadow);
+  transition: box-shadow 180ms ease;
+}
+.session:hover {
+  box-shadow: 0 9px 28px rgb(52 39 76 / 9%);
+}
+.sessionMain {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+.modalityIcon {
+  display: grid;
+  flex-shrink: 0;
+  place-items: center;
+  width: 62px;
+  height: 66px;
+  border: 1px solid color-mix(in srgb, currentColor, transparent 87%);
+  border-radius: 17px;
+}
+.modalityIcon svg {
+  width: 30px;
+  height: 30px;
+}
+.modalityIcon[data-tone="violet"] {
+  color: var(--journal-violet);
+  background: var(--journal-violet-soft);
+}
+.modalityIcon[data-tone="teal"] {
+  color: var(--journal-teal);
+  background: var(--journal-teal-soft);
+}
+.modalityIcon[data-tone="amber"] {
+  color: var(--journal-amber);
+  background: var(--journal-amber-soft);
+}
+.modalityIcon[data-tone="rose"] {
+  color: var(--journal-rose);
+  background: var(--journal-rose-soft);
+}
+.sessionCopy {
+  flex: 1;
+  min-width: 0;
+}
+.sessionLabels {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px 12px;
+}
+.modalityLabel {
+  font-size: 10px;
+  font-weight: 750;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+}
+.modalityLabel[data-tone="violet"] {
+  color: var(--journal-violet);
+}
+.modalityLabel[data-tone="teal"] {
+  color: var(--journal-teal);
+}
+.modalityLabel[data-tone="amber"] {
+  color: var(--journal-amber);
+}
+.modalityLabel[data-tone="rose"] {
+  color: var(--journal-rose);
+}
+.status {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  color: var(--color-muted);
+  font-size: 11px;
+}
+.statusDot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: currentColor;
+  flex-shrink: 0;
+}
+.status[data-state="complete"] {
+  color: var(--journal-teal);
+}
+.status[data-state="feedback_failed"],
+.status[data-state="scoring"],
+.status[data-state="ending"] {
+  color: var(--journal-amber);
+}
+.sessionCopy h3 {
+  margin-top: 7px;
+  font-size: 17px;
+  font-weight: 650;
+  letter-spacing: -0.025em;
+  line-height: 1.35;
+}
+.sessionDate {
+  margin-top: 5px;
+  font-size: 12px;
+  color: var(--color-muted);
+}
+.reviewButton {
+  flex-shrink: 0;
+  color: var(--journal-violet);
+  background: var(--journal-violet-soft);
+  border-color: transparent;
+}
+.sessionFooter {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 6px 15px;
+  margin-top: 16px;
+  border-top: 1px solid var(--color-line);
+}
+.checkInButton {
+  min-height: 42px;
+  padding: 8px 0;
+  font-size: 12px;
+  font-weight: 500;
+  border: 0;
+  background: transparent;
+  color: var(--color-muted);
+}
+.checkInButton:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.deleteButton {
+  padding: 8px 0;
+  font-size: 12px;
+  color: var(--color-muted);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.deleteButton:hover {
+  color: var(--color-bad);
+}
+.loading {
+  padding: 38px;
+  text-align: center;
+  color: var(--color-muted);
+}
+.loading span {
+  margin-right: 6px;
+  color: var(--journal-violet);
+}
+.emptyState {
+  padding: 45px 24px;
+  background: var(--journal-paper);
+  text-align: center;
+  border-style: dashed;
+}
+.emptyIcon {
+  display: grid;
+  place-items: center;
+  width: 62px;
+  height: 62px;
+  margin: 0 auto 18px;
+  color: var(--journal-violet);
+  background: var(--journal-violet-soft);
+  border-radius: 20px;
+  transform: rotate(-7deg);
+}
+.emptyIcon svg {
+  width: 30px;
+  height: 30px;
+  transform: rotate(7deg);
+}
+.emptyState h2 {
+  font-size: 20px;
+  font-weight: 650;
+}
+.emptyState p {
+  margin: 12px 0 24px;
+  color: var(--color-muted);
+  font-size: 14px;
+}
+.noMatches {
+  padding: 28px;
+  text-align: center;
+  background: var(--journal-paper);
+}
+
+@media (max-width: 700px) {
+  .hero {
+    grid-template-columns: minmax(0, 1fr) 180px;
+    padding: 30px;
+    gap: 12px;
+  }
+  .journalArt {
+    transform: scale(0.8);
+    transform-origin: center;
+    width: 240px;
+    margin-right: 20px;
+  }
+  .heroDescription {
+    font-size: 14px;
+  }
+  .session {
+    padding: 19px 19px 6px;
+  }
+  .sessionMain {
+    gap: 14px;
+    flex-wrap: wrap;
+  }
+  .modalityIcon {
+    width: 50px;
+    height: 54px;
+    border-radius: 14px;
+  }
+  .modalityIcon svg {
+    width: 26px;
+    height: 26px;
+  }
+  .sessionCopy {
+    flex-basis: calc(100% - 70px);
+  }
+  .reviewButton {
+    margin-left: 64px;
+  }
+}
+
+@media (max-width: 480px) {
+  .hero {
+    grid-template-columns: 1fr;
+    padding: 28px 24px;
+  }
+  .journalArt {
+    display: none;
+  }
+  .title {
+    font-size: 2.25rem;
+  }
+  .heroDescription {
+    max-width: 290px;
+  }
+  .toolbar {
+    gap: 15px;
+    margin-top: 28px;
+  }
+  .search {
+    width: 100%;
+  }
+  .search input {
+    font-size: 16px;
+  }
+  .sessionLabels {
+    gap: 5px 9px;
+  }
+  .sessionCopy h3 {
+    font-size: 16px;
+  }
+  .sessionFooter {
+    justify-content: space-between;
+  }
+  .sessionFooter > :only-child {
+    margin-left: auto;
+  }
+}

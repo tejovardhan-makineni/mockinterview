@@ -11,7 +11,67 @@ import {
 import { feedbackHref } from "@/lib/interviewFeedback";
 import { errorMessage } from "@/lib/http";
 import { AppShell } from "@/components/AppShell";
-import { Badge, Button, Panel, ErrorNotice } from "@/components/ui";
+import { Button, Panel, ErrorNotice } from "@/components/ui";
+import styles from "./results.module.css";
+
+type InterviewTone = "violet" | "teal" | "amber" | "rose";
+
+function modalityStyle(modality: string): {
+  label: string;
+  tone: InterviewTone;
+} {
+  switch (modality) {
+    case "coding":
+      return { label: "Coding", tone: "violet" };
+    case "system_design":
+      return { label: "System design", tone: "teal" };
+    case "written":
+      return { label: "Written exercise", tone: "amber" };
+    case "conversational":
+      return { label: "Conversation", tone: "rose" };
+    default:
+      return { label: modality.replace(/_/g, " "), tone: "violet" };
+  }
+}
+
+function InterviewIcon({ modality }: { modality: string }) {
+  return (
+    <svg
+      viewBox="0 0 32 32"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+      focusable="false"
+    >
+      {modality === "coding" ? (
+        <>
+          <path d="m10 9-7 7 7 7M22 9l7 7-7 7M19 6l-6 20" />
+        </>
+      ) : modality === "system_design" ? (
+        <>
+          <rect x="11" y="3" width="10" height="8" rx="2" />
+          <rect x="2" y="22" width="10" height="8" rx="2" />
+          <rect x="20" y="22" width="10" height="8" rx="2" />
+          <path d="M16 11v6M7 22v-5h18v5" />
+        </>
+      ) : modality === "written" ? (
+        <>
+          <path d="M22 7V4H5v24h22V14M10 11h5M10 23h12" />
+          <path d="m17 16 9-9 3 3-9 9-4 1 1-4Z" />
+        </>
+      ) : (
+        <>
+          <path d="M27 19a4 4 0 0 1-4 4H13l-7 5v-7a4 4 0 0 1-3-4V8a4 4 0 0 1 4-4h16a4 4 0 0 1 4 4v11Z" />
+          <path d="M9 11h12M9 16h8" />
+        </>
+      )}
+    </svg>
+  );
+}
+
 export default function History() {
   const router = useRouter();
   const [signedIn, setSignedIn] = useState(false);
@@ -81,107 +141,188 @@ export default function History() {
   );
   return (
     <AppShell active="results">
-      <div className="flex flex-wrap items-end justify-between gap-4">
-        <div>
-          <p className="eyebrow">Keep the useful parts</p>
-          <h1 className="page-title mt-3">Your practice, in one place.</h1>
-          <p className="mt-3 text-[var(--color-muted)]">
-            Revisit your answers, saved work and next steps.
-          </p>
+      <div className={styles.history}>
+        <section className={styles.hero} aria-labelledby="history-title">
+          <div className={styles.heroCopy}>
+            <p className={styles.eyebrow}>Your practice journal</p>
+            <h1 id="history-title" className={styles.title}>
+              Small steps.
+              <br />
+              Stronger interviews.
+            </h1>
+            <p className={styles.heroDescription}>
+              Revisit your answers, celebrate what clicked, and find your next
+              thing to work on.
+            </p>
+            <Button href="/interviews" className={styles.primaryButton}>
+              Practice an interview <span aria-hidden="true">↗</span>
+            </Button>
+          </div>
+          <div className={styles.journalArt} aria-hidden="true">
+            <span className={styles.artOrbit} />
+            <span className={styles.artSpark}>✦</span>
+            <div className={`${styles.artCard} ${styles.artCardBack}`}>
+              <InterviewIcon modality="system_design" />
+              <span />
+              <span />
+            </div>
+            <div className={`${styles.artCard} ${styles.artCardFront}`}>
+              <span className={styles.artCheck}>✓</span>
+              <span className={styles.artLine} />
+              <span />
+              <span />
+              <div className={styles.artDots}>
+                <i />
+                <i />
+                <i />
+              </div>
+            </div>
+            <div className={styles.artCaption}>Reflect. Refine. Repeat.</div>
+          </div>
+        </section>
+        {pending && <RequiredFeedbackNotice pending={pending} />}
+        {pendingError && (
+          <ErrorNotice
+            message={"Check-in status could not load. " + pendingError}
+            onRetry={() => void refreshPending().catch(() => {})}
+          />
+        )}
+        <div className={styles.toolbar}>
+          <div className={styles.sectionHeading}>
+            <h2>Your interviews</h2>
+            {items.length > 0 && (
+              <span className={styles.loadedCount}>{items.length} loaded</span>
+            )}
+          </div>
+          <label className={styles.search}>
+            <span className="sr-only">Search loaded interview history</span>
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.7"
+              aria-hidden="true"
+              focusable="false"
+            >
+              <circle cx="10.5" cy="10.5" r="6.5" />
+              <path d="m16 16 5 5" />
+            </svg>
+            <input
+              type="search"
+              className="field-select"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Search your loaded interviews"
+            />
+          </label>
         </div>
-        <Button href="/interviews">Practice an interview →</Button>
-      </div>
-      {pending && <RequiredFeedbackNotice pending={pending} />}
-      {pendingError && (
-        <ErrorNotice
-          message={"Check-in status could not load. " + pendingError}
-          onRetry={() => void refreshPending().catch(() => {})}
-        />
-      )}
-      <label className="mt-8 block">
-        <span className="sr-only">Search loaded interview history</span>
-        <input
-          type="search"
-          className="field-select max-w-lg"
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          placeholder="Search your loaded interviews"
-        />
-      </label>
-      {error && (
-        <div className="mt-5">
-          <ErrorNotice message={error} onRetry={() => void load()} />
-        </div>
-      )}
-      {notice && (
-        <p role="status" className="notice mt-5">
-          {notice}
-        </p>
-      )}
-      {loading && !items.length ? (
-        <p className="mt-8" role="status">
-          Loading history…
-        </p>
-      ) : !items.length && !error ? (
-        <Panel className="mt-6 p-10 text-center">
-          <h2 className="text-lg font-medium">
-            Your first interview is a good place to start.
-          </h2>
-          <p className="my-4 text-sm text-[var(--color-muted)]">
-            Choose a format and leave with a clearer next step.
+        {error && (
+          <div className="mt-5">
+            <ErrorNotice message={error} onRetry={() => void load()} />
+          </div>
+        )}
+        {notice && (
+          <p role="status" className="notice mt-5">
+            {notice}
           </p>
-          <Button href="/interviews">Explore interviews</Button>
-        </Panel>
-      ) : (
-        <div className="mt-6 space-y-3">
-          {shown.map((item) => {
-            const processing = [
-              "scoring",
-              "ending",
-              "feedback_failed",
-            ].includes(item.status);
-            const recoverable = [
-              "created",
-              "reserved",
-              "active",
-              "interrupted",
-            ].includes(item.status);
-            const report = item.status === "complete" || processing;
-            return (
-              <Panel key={item.id} className="p-5">
-                <div className="flex flex-wrap items-center justify-between gap-4">
-                  <div className="min-w-0">
-                    <h2 className="font-semibold">{item.title}</h2>
-                    <p className="mt-2 text-xs text-[var(--color-muted)]">
-                      {new Date(item.created_at).toLocaleString()} ·{" "}
-                      {item.modality.replace(/_/g, " ")}
-                    </p>
-                  </div>
-                  <div className="flex flex-wrap items-center gap-3">
-                    <Badge
-                      tone={
-                        item.status === "feedback_failed" ? "warn" : "muted"
-                      }
+        )}
+        {loading && !items.length ? (
+          <p className={styles.loading} role="status">
+            <span aria-hidden="true">✦</span> Loading history…
+          </p>
+        ) : !items.length && !error ? (
+          <Panel className={styles.emptyState}>
+            <div className={styles.emptyIcon}>
+              <InterviewIcon modality="conversational" />
+            </div>
+            <h2>Your first interview is a good place to start.</h2>
+            <p>Choose a format and leave with a clearer next step.</p>
+            <Button href="/interviews" className={styles.primaryButton}>
+              Explore interviews
+            </Button>
+          </Panel>
+        ) : (
+          <div className={styles.sessions}>
+            {shown.map((item) => {
+              const processing = [
+                "scoring",
+                "ending",
+                "feedback_failed",
+              ].includes(item.status);
+              const recoverable = [
+                "created",
+                "reserved",
+                "active",
+                "interrupted",
+              ].includes(item.status);
+              const report = item.status === "complete" || processing;
+              const modality = modalityStyle(item.modality);
+              return (
+                <Panel key={item.id} className={styles.session}>
+                  <div className={styles.sessionMain}>
+                    <div
+                      className={styles.modalityIcon}
+                      data-tone={modality.tone}
                     >
-                      {item.status === "complete"
-                        ? "Completed"
-                        : item.status === "scoring"
-                          ? "Preparing feedback"
-                          : item.status === "feedback_failed"
-                            ? "Feedback needs a retry"
-                            : item.status.replace(/_/g, " ")}
-                    </Badge>
+                      <InterviewIcon modality={item.modality} />
+                    </div>
+                    <div className={styles.sessionCopy}>
+                      <div className={styles.sessionLabels}>
+                        <span
+                          className={styles.modalityLabel}
+                          data-tone={modality.tone}
+                        >
+                          {modality.label}
+                        </span>
+                        <span
+                          className={styles.status}
+                          data-state={item.status}
+                        >
+                          <span
+                            aria-hidden="true"
+                            className={styles.statusDot}
+                          />
+                          {item.status === "complete"
+                            ? "Completed"
+                            : item.status === "scoring"
+                              ? "Preparing feedback"
+                              : item.status === "feedback_failed"
+                                ? "Feedback needs a retry"
+                                : item.status.replace(/_/g, " ")}
+                        </span>
+                      </div>
+                      <h3>{item.title}</h3>
+                      <p className={styles.sessionDate}>
+                        <time dateTime={item.created_at}>
+                          {new Date(item.created_at).toLocaleString()}
+                        </time>
+                      </p>
+                    </div>
                     {report ? (
-                      <Button href={"/report?s=" + item.id} variant="ghost">
+                      <Button
+                        href={"/report?s=" + item.id}
+                        variant="ghost"
+                        className={styles.reviewButton}
+                      >
                         {processing ? "View progress" : "Review →"}
                       </Button>
                     ) : recoverable ? (
-                      <Button href={"/interview?s=" + item.id} variant="ghost">
+                      <Button
+                        href={"/interview?s=" + item.id}
+                        variant="ghost"
+                        className={styles.reviewButton}
+                      >
                         Resume →
                       </Button>
                     ) : null}
+                  </div>
+                  <div className={styles.sessionFooter}>
                     {pending?.items.some((p) => p.session_id === item.id) ? (
-                      <Button href={feedbackHref(item.id)} variant="ghost">
+                      <Button
+                        href={feedbackHref(item.id)}
+                        variant="ghost"
+                        className={styles.checkInButton}
+                      >
                         Check-in needed →
                       </Button>
                     ) : [
@@ -190,60 +331,67 @@ export default function History() {
                         "complete",
                         "feedback_failed",
                       ].includes(item.status) ? (
-                      <Button href={feedbackHref(item.id)} variant="ghost">
+                      <Button
+                        href={feedbackHref(item.id)}
+                        variant="ghost"
+                        className={styles.checkInButton}
+                      >
                         Interview check-in
                       </Button>
                     ) : null}
                     <button
                       type="button"
                       aria-label={"Delete " + item.title}
-                      className="text-xs text-[var(--color-muted)] underline"
+                      className={styles.deleteButton}
                       onClick={() => setConfirm(item.id)}
                     >
                       Delete
                     </button>
                   </div>
-                </div>
-                {confirm === item.id && (
-                  <div className="notice mt-4">
-                    <p className="text-sm">
-                      Delete this interview and its saved content? This cannot
-                      be undone and will not reset your allowance.
-                    </p>
-                    <div className="mt-3 flex gap-2">
-                      <Button
-                        variant="danger"
-                        disabled={busy}
-                        onClick={() => void remove(item.id)}
-                      >
-                        Delete interview
-                      </Button>
-                      <Button variant="ghost" onClick={() => setConfirm("")}>
-                        Keep it
-                      </Button>
+                  {confirm === item.id && (
+                    <div className="notice mt-4">
+                      <p className="text-sm">
+                        Delete this interview and its saved content? This cannot
+                        be undone and will not reset your allowance.
+                      </p>
+                      <div className="mt-3 flex flex-wrap gap-2">
+                        <Button
+                          variant="danger"
+                          disabled={busy}
+                          onClick={() => void remove(item.id)}
+                        >
+                          Delete interview
+                        </Button>
+                        <Button variant="ghost" onClick={() => setConfirm("")}>
+                          Keep it
+                        </Button>
+                      </div>
                     </div>
-                  </div>
-                )}
+                  )}
+                </Panel>
+              );
+            })}
+            {!shown.length && (
+              <Panel className={styles.noMatches}>
+                <p>No loaded interviews match this search.</p>
+                <p className="text-sm text-[var(--color-muted)]">
+                  Try a title, format, or status.
+                </p>
               </Panel>
-            );
-          })}
-          {!shown.length && (
-            <p className="p-5 text-sm">
-              No loaded interviews match this search.
-            </p>
-          )}
-        </div>
-      )}
-      {more && (
-        <Button
-          className="mt-6"
-          variant="ghost"
-          disabled={loading}
-          onClick={() => void load(items[items.length - 1]?.created_at)}
-        >
-          {loading ? "Loading…" : "Load older interviews"}
-        </Button>
-      )}
+            )}
+          </div>
+        )}
+        {more && (
+          <Button
+            className="mt-6"
+            variant="ghost"
+            disabled={loading}
+            onClick={() => void load(items[items.length - 1]?.created_at)}
+          >
+            {loading ? "Loading…" : "Load older interviews"}
+          </Button>
+        )}
+      </div>
     </AppShell>
   );
 }

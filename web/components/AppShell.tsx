@@ -108,7 +108,7 @@ export function AppShell({
                 getContext={() => ({ section: active })}
               />
             )}
-            <nav aria-label="Main" className="flex gap-1">
+            <nav aria-label="Main" className="flex flex-wrap gap-1">
               {[
                 { label: "Practice", href: "/interviews" },
                 ...(signedIn ? [{ label: "History", href: "/results" }] : []),
@@ -120,7 +120,7 @@ export function AppShell({
                   href={n.href}
                   aria-current={current === n.label ? "page" : undefined}
                   className={
-                    "rounded-lg px-3 py-2.5 text-sm no-underline " +
+                    "rounded-lg whitespace-nowrap px-3 py-2.5 text-sm no-underline " +
                     (current === n.label
                       ? "bg-[var(--color-panel-2)] font-semibold"
                       : "text-[var(--color-muted)]")

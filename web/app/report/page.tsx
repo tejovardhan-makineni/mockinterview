@@ -12,9 +12,18 @@ import type {
 } from "@/lib/features/interview";
 import { errorMessage } from "@/lib/http";
 import { AppShell } from "@/components/AppShell";
-import { Badge, Button, Panel, ErrorNotice } from "@/components/ui";
+import { Button, Panel, ErrorNotice } from "@/components/ui";
 import { PersonalKeyRecovery } from "@/components/PersonalKeyRecovery";
 import { InterviewCheckIn } from "@/components/InterviewCheckIn";
+import {
+  IconClock,
+  IconFeedback,
+  IconResults,
+  IconResume,
+  IconThinking,
+} from "@/components/icons";
+import { ScoreRing } from "@/components/results/ScoreRing";
+import styles from "./report.module.css";
 const pretty = (value: string) =>
   value.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
 function ReportView({ sid }: { sid: string }) {
@@ -107,272 +116,494 @@ function ReportView({ sid }: { sid: string }) {
     a.click();
     URL.revokeObjectURL(url);
   }
+  const scored = report?.scored !== false;
+  const dimensions = report?.scores ?? [];
+  const assessedCount = dimensions.filter(
+    (score) => score.assessed !== false,
+  ).length;
+  const overallAssessed =
+    scored && (dimensions.length === 0 || assessedCount > 0);
+  const drills = (report?.learning_drills ?? []).slice(0, 2);
   return (
     <AppShell active="results" feedbackSessionId={session?.id}>
-      <a href="/results" className="text-sm text-[var(--color-muted)]">
-        ← Your history
-      </a>
-      {error && (
-        <div className="my-5">
-          <ErrorNotice
-            message={error}
-            onRetry={() => {
-              setError("");
-              setRetry((n) => n + 1);
-            }}
-          />
-        </div>
-      )}
-      {!report ? (
-        <Panel className="mx-auto mt-10 max-w-2xl p-8">
-          <p className="eyebrow">
-            {session ? "Your interview is saved" : "Loading your interview"}
-          </p>
-          <h1 className="mt-3 text-2xl font-medium">
-            {processing?.status === "feedback_failed"
-              ? "Feedback needs another try."
-              : "Preparing your next steps."}
-          </h1>
-          <p className="mt-4 text-sm text-[var(--color-muted)]" role="status">
-            {processing?.status === "feedback_failed"
-              ? processing.error ||
-                "The report could not be completed. Retry uses the same saved interview and does not consume another attempt."
-              : session
-                ? "Your saved answers and work are being reviewed. You can leave this page and return from History."
-                : "Loading the saved record. If the service is unavailable, retry or return to History."}
-          </p>
-          {processing?.status === "feedback_failed" &&
-            session?.funding === "byok" && (
-              <div className="mt-4">
-                <PersonalKeyRecovery
-                  sessionId={sid}
-                  provider={session.provider}
-                  onSaved={retryScoring}
-                />
-              </div>
-            )}
-          {processing?.status === "feedback_failed" && (
-            <Button
-              className="mt-5"
-              disabled={busy}
-              onClick={() => void retryScoring()}
-            >
-              {busy ? "Retrying…" : "Retry feedback"}
-            </Button>
-          )}
-          <Button href="/results" variant="ghost" className="ml-3 mt-5">
-            Back to history
-          </Button>
-        </Panel>
-      ) : (
-        <>
-          <div
-            id="report-summary"
-            className="mt-7 flex flex-wrap items-start justify-between gap-4"
-          >
-            <div>
-              <p className="eyebrow">A clearer next step</p>
-              <h1 className="page-title mt-3">
-                {report.scored === false
-                  ? "Keep going. There’s more to learn."
-                  : "Know what to practice next."}
-              </h1>
-              <p className="mt-3 text-[var(--color-muted)]">
-                {report.question_title}
-              </p>
-            </div>
-            <div className="no-print flex gap-2">
-              <Button variant="ghost" onClick={() => window.print()}>
-                Print / save PDF
-              </Button>
-              <Button variant="ghost" onClick={exportReport}>
-                Export record
-              </Button>
-            </div>
+      <div className={styles.report}>
+        <a href="/results" className={styles.backLink}>
+          ← Your history
+        </a>
+        {error && (
+          <div className="my-5">
+            <ErrorNotice
+              message={error}
+              onRetry={() => {
+                setError("");
+                setRetry((n) => n + 1);
+              }}
+            />
           </div>
-          {report.scored === false ? (
-            <p className="notice mt-6">
-              {report.note ??
-                "There was not enough evidence to score this attempt fairly. Your transcript and work are still saved below."}
+        )}
+        {!report ? (
+          <Panel className={styles.preparing}>
+            <span className={styles.iconTile}>
+              <IconThinking />
+            </span>
+            <p className="eyebrow">
+              {session ? "Your interview is saved" : "Loading your interview"}
             </p>
-          ) : (
-            <div className="mt-7 grid gap-5 md:grid-cols-2">
-              <Panel className="p-6">
-                <p className="eyebrow">Keep doing</p>
-                <h2 className="mt-3 text-xl font-medium">What worked</h2>
-                <ul className="mt-4 space-y-3">
-                  {report.strengths?.map((x, i) => (
-                    <li
-                      key={i}
-                      className="text-sm leading-relaxed text-[var(--color-muted)]"
-                    >
-                      {x}
-                    </li>
-                  ))}
-                </ul>
-              </Panel>
-              <Panel className="p-6">
-                <p className="eyebrow">A little more attention</p>
-                <h2 className="mt-3 text-xl font-medium">
-                  Your next improvements
-                </h2>
-                <ol className="mt-4 space-y-3">
-                  {report.gaps?.slice(0, 3).map((x, i) => (
-                    <li
-                      key={i}
-                      className="text-sm leading-relaxed text-[var(--color-muted)]"
-                    >
-                      {i + 1}. {x}
-                    </li>
-                  ))}
-                </ol>
-              </Panel>
-            </div>
-          )}
-          <div className="mt-6 grid gap-6 lg:grid-cols-[1.7fr_1fr]">
-            <div className="space-y-4">
-              <Panel className="p-6">
-                <details open>
-                  <summary className="font-semibold">
-                    Evidence behind the feedback
-                  </summary>
-                  <div className="mt-5 space-y-5">
-                    {report.scores?.map((score) => (
-                      <div
-                        key={score.dimension}
-                        className="border-t border-[var(--color-line)] pt-4"
-                      >
-                        <div className="flex items-center justify-between gap-4">
-                          <h3 className="text-sm font-semibold">
-                            {pretty(score.dimension)}
-                          </h3>
-                          <Badge>
-                            {score.assessed === false
-                              ? "Not assessed"
-                              : score.score.toFixed(1) + " / 4"}
-                          </Badge>
-                        </div>
-                        {score.assessed !== false && (
-                          <>
-                            <p className="mt-2 text-sm text-[var(--color-muted)]">
-                              {score.actual}
-                            </p>
-                            {score.evidence && (
-                              <blockquote className="mt-3 border-l-2 border-[var(--color-accent)] pl-3 text-sm text-[var(--color-muted)]">
-                                {score.evidence}
-                              </blockquote>
-                            )}
-                            {score.expected && (
-                              <p className="mt-3 text-xs text-[var(--color-muted)]">
-                                Next time: {score.expected}
-                              </p>
-                            )}
-                          </>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                </details>
-              </Panel>
-              <Panel className="p-6">
-                <details>
-                  <summary className="font-semibold">
-                    Full transcript · {turns.length} turns
-                  </summary>
-                  <div className="mt-5 max-h-[60vh] space-y-5 overflow-auto">
-                    {turns.map((turn, i) => (
-                      <div key={i}>
-                        <p className="text-xs font-semibold">
-                          {turn.role === "candidate"
-                            ? "You"
-                            : turn.role === "interviewer"
-                              ? "Interviewer"
-                              : "System"}
-                        </p>
-                        <p className="mt-1 whitespace-pre-wrap text-sm text-[var(--color-muted)]">
-                          {turn.text}
-                        </p>
-                      </div>
-                    ))}
-                  </div>
-                </details>
-              </Panel>
-              <Panel className="p-6">
-                <details>
-                  <summary className="font-semibold">
-                    Saved work & interview settings
-                  </summary>
-                  <pre className="mt-4 max-h-80 overflow-auto whitespace-pre-wrap text-sm">
-                    {session?.workspace?.content ||
-                      report.workspace ||
-                      "No workspace content was added."}
-                  </pre>
-                  <p className="mt-4 text-xs text-[var(--color-muted)]">
-                    {pretty(session?.config.target_level ?? "mid")} ·{" "}
-                    {pretty(session?.config.challenge ?? "standard")} ·{" "}
-                    {session?.duration_minutes} minutes ·{" "}
-                    {session?.provider
-                      ? providerName(session.provider)
-                      : "Configured provider"}{" "}
-                    {session?.model} · Scoring version{" "}
-                    {report.scoring_version ?? "original"}
-                  </p>
-                </details>
-              </Panel>
-            </div>
-            <aside className="space-y-5">
-              {(report.learning_drills ?? []).slice(0, 2).map((drill) => (
-                <Panel key={drill.id} className="p-6">
-                  <p className="eyebrow">
-                    {drill.minutes} minutes · no model needed
-                  </p>
-                  <h2 className="mt-3 text-lg font-semibold">{drill.title}</h2>
-                  <p className="mt-3 text-sm text-[var(--color-muted)]">
-                    {drill.prompt}
-                  </p>
-                  <ul className="mt-4 space-y-2 text-xs text-[var(--color-muted)]">
-                    {drill.checklist.map((x) => (
-                      <li key={x}>• {x}</li>
-                    ))}
-                  </ul>
-                  <label className="mt-4 block text-xs">
-                    Try it now
-                    <textarea
-                      rows={4}
-                      className="field-select mt-2"
-                      placeholder="Notes for this exercise — not saved"
-                    />
-                  </label>
-                </Panel>
-              ))}
-              {checkInEligible && (
-                <a
-                  href="#interview-check-in"
-                  className="block rounded-xl border border-[var(--color-line)] p-5 text-sm underline"
-                >
-                  Review your interview check-in ↓
-                </a>
+            <h1 className="mt-3 text-2xl font-medium">
+              {processing?.status === "feedback_failed"
+                ? "Feedback needs another try."
+                : "Preparing your next steps."}
+            </h1>
+            <p className="mt-4 text-sm text-[var(--color-muted)]" role="status">
+              {processing?.status === "feedback_failed"
+                ? processing.error ||
+                  "The report could not be completed. Retry uses the same saved interview and does not consume another attempt."
+                : session
+                  ? "Your saved answers and work are being reviewed. You can leave this page and return from History."
+                  : "Loading the saved record. If the service is unavailable, retry or return to History."}
+            </p>
+            {processing?.status === "feedback_failed" &&
+              session?.funding === "byok" && (
+                <div className="mt-4">
+                  <PersonalKeyRecovery
+                    sessionId={sid}
+                    provider={session.provider}
+                    onSaved={retryScoring}
+                  />
+                </div>
               )}
-              <Button href="/interviews" variant="ghost" className="w-full">
-                Explore your next practice →
+            {processing?.status === "feedback_failed" && (
+              <Button
+                className="mt-5"
+                disabled={busy}
+                onClick={() => void retryScoring()}
+              >
+                {busy ? "Retrying…" : "Retry feedback"}
               </Button>
-            </aside>
-          </div>
-          <p className="mt-7 text-xs text-[var(--color-muted)]">
-            AI practice feedback can be incomplete or mistaken. Unassessed
-            dimensions are not zeroes. Camera presence and appearance do not
-            contribute to these scores.
-          </p>
-        </>
-      )}
-      {session && (
-        <InterviewCheckIn
-          key={sid}
-          sessionId={sid}
-          reportAvailable={!!report}
-          onEligibilityChange={setCheckInEligible}
-        />
-      )}
+            )}
+            <Button href="/results" variant="ghost" className="ml-3 mt-5">
+              Back to history
+            </Button>
+          </Panel>
+        ) : (
+          <>
+            <section
+              id="report-summary"
+              className={styles.hero}
+              aria-labelledby="recap-heading"
+            >
+              <div className={styles.heroCopy}>
+                <p className={styles.eyebrow}>
+                  <IconResults /> Your interview recap
+                </p>
+                <h1 id="recap-heading">
+                  A little practice.
+                  <br />
+                  <span>A clearer next step.</span>
+                </h1>
+                <p className={styles.questionTitle}>{report.question_title}</p>
+                <div className={styles.meta}>
+                  {(session?.modality || report.modality) && (
+                    <span>
+                      {pretty(session?.modality || report.modality || "")}
+                    </span>
+                  )}
+                  {session?.duration_minutes != null && (
+                    <span>
+                      <IconClock /> {session.duration_minutes}-minute session
+                    </span>
+                  )}
+                  {scored && dimensions.length > 0 && (
+                    <span>
+                      {assessedCount} of {dimensions.length} areas assessed
+                    </span>
+                  )}
+                </div>
+              </div>
+              <div className={styles.scoreSpotlight}>
+                <span className={styles.orbitStar} aria-hidden="true">
+                  ✦
+                </span>
+                <ScoreRing score={report.overall} assessed={overallAssessed} />
+                <p>
+                  {overallAssessed &&
+                  Number.isFinite(report.overall) &&
+                  report.overall >= 0 &&
+                  report.overall <= 4
+                    ? "Your practice score"
+                    : "Your practice is saved"}
+                </p>
+                <span>A starting point for your next step.</span>
+              </div>
+            </section>
+            <div className={styles.toolbar}>
+              <p>Keep what worked. Build on the rest.</p>
+              <div className="no-print flex flex-wrap gap-2">
+                <Button variant="ghost" onClick={() => window.print()}>
+                  Print / save PDF
+                </Button>
+                <Button variant="ghost" onClick={exportReport}>
+                  Export record
+                </Button>
+              </div>
+            </div>
+            {!scored ? (
+              <div className={styles.unscored}>
+                <IconResume />
+                <div>
+                  <h2>A saved attempt, without a score</h2>
+                  <p>
+                    {report.note ??
+                      "There was not enough evidence to score this attempt fairly. Your transcript and work are still saved below."}
+                  </p>
+                </div>
+              </div>
+            ) : (
+              <>
+                <div className={styles.highlights}>
+                  <section
+                    className={styles.strengths}
+                    aria-labelledby="strengths-heading"
+                  >
+                    <div className={styles.cardHeading}>
+                      <span className={styles.iconTile} aria-hidden="true">
+                        ✦
+                      </span>
+                      <div>
+                        <p className={styles.eyebrow}>Keep this energy</p>
+                        <h2 id="strengths-heading">What worked</h2>
+                      </div>
+                    </div>
+                    {report.strengths?.length ? (
+                      <ul className={styles.feedbackList}>
+                        {report.strengths.map((item, i) => (
+                          <li key={i}>
+                            <span
+                              className={styles.listMark}
+                              aria-hidden="true"
+                            >
+                              ✓
+                            </span>
+                            <p>{item}</p>
+                          </li>
+                        ))}
+                      </ul>
+                    ) : (
+                      <p className={styles.emptyNote}>
+                        No specific strengths were recorded for this attempt.
+                        Review the evidence below for more context.
+                      </p>
+                    )}
+                  </section>
+                  <section
+                    className={styles.improvements}
+                    aria-labelledby="improvements-heading"
+                  >
+                    <div className={styles.cardHeading}>
+                      <span className={styles.iconTile}>
+                        <IconResults />
+                      </span>
+                      <div>
+                        <p className={styles.eyebrow}>Your next move</p>
+                        <h2 id="improvements-heading">Room to grow</h2>
+                      </div>
+                    </div>
+                    {report.gaps?.length ? (
+                      <ol className={styles.feedbackList}>
+                        {report.gaps.slice(0, 3).map((item, i) => (
+                          <li key={i}>
+                            <span
+                              className={styles.listMark}
+                              aria-hidden="true"
+                            >
+                              {i + 1}
+                            </span>
+                            <p>{item}</p>
+                          </li>
+                        ))}
+                      </ol>
+                    ) : (
+                      <p className={styles.emptyNote}>
+                        No specific improvements were recorded. Use the detailed
+                        feedback to choose your next practice focus.
+                      </p>
+                    )}
+                  </section>
+                </div>
+                {dimensions.length > 0 && (
+                  <section
+                    className={styles.skills}
+                    aria-labelledby="skills-heading"
+                  >
+                    <div className={styles.sectionHeading}>
+                      <div>
+                        <p className={styles.eyebrow}>The bigger picture</p>
+                        <h2 id="skills-heading">Your skill snapshot</h2>
+                      </div>
+                      <p>Select an area to see the evidence.</p>
+                    </div>
+                    <div className={styles.skillGrid}>
+                      {dimensions.map((score, i) => {
+                        const available =
+                          score.assessed !== false &&
+                          Number.isFinite(score.score) &&
+                          score.score >= 0 &&
+                          score.score <= 4;
+                        return (
+                          <a
+                            key={score.dimension}
+                            className={styles.skillCard}
+                            data-tone={i % 4}
+                            href={"#dimension-" + i}
+                            onClick={() =>
+                              document
+                                .getElementById("dimension-" + i)
+                                ?.closest("details")
+                                ?.setAttribute("open", "")
+                            }
+                          >
+                            <span className={styles.skillName}>
+                              {pretty(score.dimension)}
+                            </span>
+                            <span className={styles.skillValue}>
+                              {available ? (
+                                <>
+                                  <strong>{score.score.toFixed(1)}</strong>
+                                  <span> / 4</span>
+                                </>
+                              ) : (
+                                <span className={styles.notAssessed}>
+                                  {score.assessed === false
+                                    ? "Not assessed"
+                                    : "Score unavailable"}
+                                </span>
+                              )}
+                            </span>
+                            <span
+                              className={styles.skillTrack}
+                              aria-hidden="true"
+                            >
+                              {available && (
+                                <span
+                                  style={{
+                                    width: `${(score.score / 4) * 100}%`,
+                                  }}
+                                />
+                              )}
+                            </span>
+                          </a>
+                        );
+                      })}
+                    </div>
+                  </section>
+                )}
+              </>
+            )}
+            <div className={styles.detailGrid}>
+              <div className={styles.evidenceColumn}>
+                <Panel className={styles.evidencePanel}>
+                  <details open>
+                    <summary className={styles.detailSummary}>
+                      <span className={styles.summaryContent}>
+                        <IconFeedback /> Evidence behind the feedback
+                      </span>
+                    </summary>
+                    <div className={styles.evidenceList}>
+                      {dimensions.length ? (
+                        dimensions.map((score, i) => {
+                          const available =
+                            scored &&
+                            score.assessed !== false &&
+                            Number.isFinite(score.score) &&
+                            score.score >= 0 &&
+                            score.score <= 4;
+                          return (
+                            <div
+                              key={score.dimension}
+                              id={"dimension-" + i}
+                              className={styles.evidenceItem}
+                            >
+                              <div className={styles.evidenceTitle}>
+                                <h3>{pretty(score.dimension)}</h3>
+                                <span className={styles.scoreBadge}>
+                                  {available
+                                    ? score.score.toFixed(1) + " / 4"
+                                    : !scored || score.assessed === false
+                                      ? "Not assessed"
+                                      : "Score unavailable"}
+                                </span>
+                              </div>
+                              {scored && score.assessed !== false && (
+                                <>
+                                  {score.actual && (
+                                    <p className={styles.actual}>
+                                      {score.actual}
+                                    </p>
+                                  )}
+                                  {score.evidence && (
+                                    <blockquote>{score.evidence}</blockquote>
+                                  )}
+                                  {score.expected && (
+                                    <p className={styles.nextTime}>
+                                      <strong>Next time</strong>
+                                      {score.expected}
+                                    </p>
+                                  )}
+                                </>
+                              )}
+                            </div>
+                          );
+                        })
+                      ) : (
+                        <p className={styles.emptyNote}>
+                          No dimension-level feedback was recorded for this
+                          attempt. Your saved transcript and work are available
+                          below.
+                        </p>
+                      )}
+                    </div>
+                  </details>
+                </Panel>
+                <Panel className={styles.archivePanel}>
+                  <details>
+                    <summary className={styles.detailSummary}>
+                      <span className={styles.summaryContent}>
+                        <IconFeedback /> Full transcript{" "}
+                        <span className={styles.turnCount}>
+                          {turns.length} turns
+                        </span>
+                      </span>
+                    </summary>
+                    <div className={styles.transcript}>
+                      {turns.length ? (
+                        turns.map((turn, i) => (
+                          <div
+                            key={i}
+                            className={styles.turn}
+                            data-candidate={turn.role === "candidate"}
+                          >
+                            <p className={styles.turnRole}>
+                              {turn.role === "candidate"
+                                ? "You"
+                                : turn.role === "interviewer"
+                                  ? "Interviewer"
+                                  : "System"}
+                            </p>
+                            <p>{turn.text}</p>
+                          </div>
+                        ))
+                      ) : (
+                        <p className={styles.emptyNote}>
+                          No transcript was recorded for this attempt.
+                        </p>
+                      )}
+                    </div>
+                  </details>
+                </Panel>
+                <Panel className={styles.archivePanel}>
+                  <details>
+                    <summary className={styles.detailSummary}>
+                      <span className={styles.summaryContent}>
+                        <IconResume /> Saved work & interview settings
+                      </span>
+                    </summary>
+                    <pre className={styles.savedWork}>
+                      {session?.workspace?.content ||
+                        report.workspace ||
+                        "No workspace content was added."}
+                    </pre>
+                    <p className={styles.settings}>
+                      {pretty(session?.config.target_level ?? "mid")} ·{" "}
+                      {pretty(session?.config.challenge ?? "standard")} ·{" "}
+                      {session?.duration_minutes} minutes ·{" "}
+                      {session?.provider
+                        ? providerName(session.provider)
+                        : "Configured provider"}{" "}
+                      {session?.model} · Scoring version{" "}
+                      {report.scoring_version ?? "original"}
+                    </p>
+                  </details>
+                </Panel>
+              </div>
+              <aside
+                className={styles.practiceColumn}
+                aria-label="Your next practice"
+              >
+                {drills.length > 0 && (
+                  <div className={styles.practiceHeading}>
+                    <span className={styles.iconTile}>
+                      <IconThinking />
+                    </span>
+                    <div>
+                      <p className={styles.eyebrow}>Put it into practice</p>
+                      <h2>Your next small wins</h2>
+                    </div>
+                  </div>
+                )}
+                {drills.map((drill, i) => (
+                  <section key={drill.id} className={styles.drill}>
+                    <div className={styles.drillTop}>
+                      <span className={styles.drillNumber}>
+                        Practice {String(i + 1).padStart(2, "0")}
+                      </span>
+                      <span>
+                        <IconClock /> {drill.minutes} min
+                      </span>
+                    </div>
+                    <h3>{drill.title}</h3>
+                    <p className={styles.drillPrompt}>{drill.prompt}</p>
+                    <ul className={styles.checklist}>
+                      {drill.checklist.map((item) => (
+                        <li key={item}>
+                          <span aria-hidden="true">◇</span>
+                          {item}
+                        </li>
+                      ))}
+                    </ul>
+                    <label className={styles.drillNotes}>
+                      Try it now
+                      <textarea
+                        rows={4}
+                        className="field-select mt-2"
+                        placeholder="Notes for this exercise — not saved"
+                      />
+                    </label>
+                    <p className={styles.drillFootnote}>
+                      A quick exercise. No model needed.
+                    </p>
+                  </section>
+                ))}
+                <div className={styles.nextPractice}>
+                  <span aria-hidden="true">↗</span>
+                  <h2>Keep the momentum.</h2>
+                  <p>Bring one thing you learned into your next interview.</p>
+                  <Button href="/interviews" className={styles.practiceButton}>
+                    Choose your next practice →
+                  </Button>
+                </div>
+                {checkInEligible && (
+                  <a href="#interview-check-in" className={styles.checkInLink}>
+                    Review your interview check-in ↓
+                  </a>
+                )}
+              </aside>
+            </div>
+            <p className={styles.disclaimer}>
+              AI practice feedback can be incomplete or mistaken. Unassessed
+              dimensions are not zeroes. Camera presence and appearance do not
+              contribute to these scores.
+            </p>
+          </>
+        )}
+        {session && (
+          <InterviewCheckIn
+            key={sid}
+            sessionId={sid}
+            reportAvailable={!!report}
+            onEligibilityChange={setCheckInEligible}
+          />
+        )}
+      </div>
     </AppShell>
   );
 }
