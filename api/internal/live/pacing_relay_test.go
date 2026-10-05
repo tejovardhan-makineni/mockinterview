@@ -132,3 +132,90 @@ func TestTextReconnectUsesSessionPlanAndPreservesPendingQuestion(t *testing.T) {
 		})
 	}
 }
+
+func TestTextDrawingRequestWaitsAndUsesOnlyLatestWorkspace(t *testing.T) {
+	ctx := context.Background()
+	memory := memstore.New()
+	user, err := memory.CreateUser(ctx, "drawing@example.test", "unused")
+	if err != nil {
+		t.Fatal(err)
+	}
+	sess, err := memory.ReserveSession(ctx, store.Reservation{Session: store.Session{UserID: user.ID, Mode: "text", DurationMinutes: 30, Funding: "platform"}, Identity: "drawing", Unlimited: true})
+	if err != nil {
+		t.Fatal(err)
+	}
+	owner := store.NewID()
+	sess, err = memory.AcquireLive(ctx, sess.ID, owner)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err = memory.AddTurn(ctx, sess.ID, "interviewer", "Design a click analytics pipeline.", 0, nil); err != nil {
+		t.Fatal(err)
+	}
+	capture := &pacingCapture{requests: make(chan llm.GenerateRequest, 4)}
+	done := make(chan struct{})
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
+		defer close(done)
+		conn, err := (&websocket.Upgrader{}).Upgrade(w, req, nil)
+		if err != nil {
+			t.Error(err)
+			return
+		}
+		(&Relay{store: memory, attempt: sess, owner: owner, llm: capture}).runText(conn, sess.ID, conversationPolicy, []Section{{Kind: "design", Title: "System design"}})
+	}))
+	defer server.Close()
+	client, _, err := websocket.DefaultDialer.Dial("ws"+strings.TrimPrefix(server.URL, "http"), nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer client.Close()
+	_ = client.SetReadDeadline(time.Now().Add(5 * time.Second))
+	for {
+		var msg serverMsg
+		if err = client.ReadJSON(&msg); err != nil {
+			t.Fatal(err)
+		}
+		if msg.Type == "ready" {
+			break
+		}
+	}
+	for _, msg := range []clientMsg{
+		{Type: "user_text", Text: "Why don't you let me draw the system design?", EventID: "draw"},
+		{Type: "canvas", Text: "obsolete unfinished sketch"},
+		{Type: "workspace_activity"},
+		{Type: "canvas", Text: "completed diagram with billing reconciliation"},
+		{Type: "nudge"},
+		{Type: "user_text", Text: "My design is ready for review.", EventID: "ready"},
+	} {
+		if err = client.WriteJSON(msg); err != nil {
+			t.Fatal(err)
+		}
+	}
+	select {
+	case request := <-capture.requests:
+		if request.Messages[len(request.Messages)-1].Text != "My design is ready for review." {
+			t.Fatal("interviewer responded to drawing request or editing")
+		}
+		if !strings.Contains(request.System, "completed diagram with billing reconciliation") || strings.Contains(request.System, "obsolete unfinished sketch") {
+			t.Fatal("model must see only latest workspace snapshot")
+		}
+		for _, message := range request.Messages {
+			if strings.Contains(message.Text, "sketch") || strings.Contains(message.Text, "completed diagram") {
+				t.Fatal("workspace snapshots polluted spoken conversation history")
+			}
+		}
+	case <-time.After(5 * time.Second):
+		t.Fatal("candidate could not resume after drawing")
+	}
+	_ = client.WriteJSON(clientMsg{Type: "end"})
+	select {
+	case <-done:
+	case <-time.After(5 * time.Second):
+		t.Fatal("relay did not close")
+	}
+	select {
+	case <-capture.requests:
+		t.Fatal("drawing or activity generated an extra follow-up")
+	default:
+	}
+}

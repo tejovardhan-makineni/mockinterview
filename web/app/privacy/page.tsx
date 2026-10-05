@@ -32,15 +32,15 @@ export default function Privacy() {
           expiring local session copy can support interview reconnection.
         </p>
         <p>
-          Desktop sharing starts off. “Share analytics” sends usage and error
-          metrics for new interviews to the project admin under a separately
-          connected hosted account. “Include interview results” separately
-          permits new scores and written feedback, which may contain personal
-          details. Consent is saved on this computer; the hosted login lasts
-          only for the current app session (until close or reload). Eligible
-          saved interviews are retried on later visits while consent and a
-          connected account remain active. No upload failure prevents local
-          practice.
+          Desktop analytics starts on for new interviews; result sharing starts
+          off. “Share analytics” sends usage and error metrics for new
+          interviews to the project admin under a separately connected hosted
+          account. “Include interview results” separately permits new scores and
+          written feedback, which may contain personal details. Consent is saved
+          on this computer; the hosted login lasts only for the current app
+          session (until close or reload). Eligible saved interviews are retried
+          on later visits while consent and a connected account remain active.
+          No upload failure prevents local practice.
         </p>
         <p>
           Desktop feedback and template requests stay local unless you
@@ -200,13 +200,13 @@ export default function Privacy() {
         </p>
         <h2>Optional analytics and community requests</h2>
         <p>
-          “Share analytics” starts off. When enabled, new interview results,
-          assessment feedback and reliability metrics may be sent to the
-          configured project server for product improvement. These records are
-          associated with your account and accessible only through the private
-          administrator portal; they are not published or sold. Model providers
-          still process the content needed to deliver an interview as described
-          above.
+          “Share analytics” starts on for new interviews and can be turned off
+          in Settings. When enabled, new interview results, assessment feedback
+          and reliability metrics may be sent to the configured project server
+          for product improvement. These records are associated with your
+          account and accessible only through the private administrator portal;
+          they are not published or sold. Model providers still process the
+          content needed to deliver an interview as described above.
         </p>
         <p>
           Sharing includes the report, model and provider, completion or failure
@@ -218,11 +218,12 @@ export default function Privacy() {
         <p>
           Unavailable servers are skipped quietly so practice continues. Web and
           desktop clients can retry eligible results on a later visit. Turning
-          sharing off stops future uploads. “Delete shared analytics” deletes
-          previous uploads from the connected account; if the server is offline,
-          retry deletion when available. This does not delete your private
-          interview history, which has its own controls. Shared records remain
-          until deleted or the account is deleted.
+          sharing off stops future uploads. “Delete shared analytics” under
+          “Manage shared data” deletes previous uploads from the connected
+          account; if the server is offline, retry deletion when available. This
+          does not delete your private interview history, which has its own
+          controls. Shared records remain until deleted or the account is
+          deleted.
         </p>
         <p>
           Beta applications store your motivation, feedback commitment and

@@ -36,7 +36,7 @@ your operating-system account and backups.
 
 ### Desktop sharing
 
-**Share analytics** starts off and sends new interview usage/error metrics only
+**Share analytics** starts on for new installations and can be turned off and sends new interview usage/error metrics only
 when a hosted account is connected. **Include interview results** is a separate
 choice for new scores and written feedback, which may contain personal details.
 Consent choices survive restarts; the hosted login is memory-only and must be
@@ -195,7 +195,7 @@ local practice. They are best-effort, not a guaranteed backup or cross-device
 history sync. No server address or central credential is bundled by the launcher.
 Read the app's Privacy page for data categories and controls.
 
-The packaged desktop app has its own default-off analytics and result-sharing
+The packaged desktop app has its own default-on analytics and default-off result-sharing
 preferences, saved on the computer. Its optional project connection uses the
 bundled local API bridge; see [desktop setup and storage](#desktop-app).
 

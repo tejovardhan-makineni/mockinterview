@@ -280,3 +280,106 @@ describe("silence nudge budget", () => {
     expect(sentMessages("nudge")).toHaveLength(1);
   });
 });
+
+describe("workspace observation and candidate thinking time", () => {
+  it("sends only changed snapshots every five seconds, including erased work", async () => {
+    const socket = await start();
+    socket.message({ type: "ready", mode: "text" });
+    live.sendCanvas("Kafka → Flink");
+    await vi.advanceTimersByTimeAsync(4999);
+    expect(sentMessages("canvas")).toHaveLength(0);
+    live.sendCanvas("Kafka → Flink → OLAP");
+    await vi.advanceTimersByTimeAsync(1);
+    expect(sentMessages("canvas")).toEqual([
+      { type: "canvas", text: "Kafka → Flink → OLAP" },
+    ]);
+    await vi.advanceTimersByTimeAsync(10000);
+    expect(sentMessages("canvas")).toHaveLength(1);
+    live.sendCanvas("");
+    await vi.advanceTimersByTimeAsync(5000);
+    expect(sentMessages("canvas").at(-1)?.text).toBe("");
+  });
+
+  it("protects active drawing and waits two minutes after the last technical edit", async () => {
+    live = new LiveSession("design", [], "aoede", {
+      mode: "text",
+      modality: "system_design",
+    });
+    await live.start();
+    await Promise.resolve();
+    Socket.instances[0].message({ type: "ready", mode: "text" });
+    for (let i = 0; i < 36; i++) {
+      live.noteWorkspaceActivity();
+      live.sendCanvas(`design revision ${i}`);
+      await vi.advanceTimersByTimeAsync(5000);
+    }
+    expect(sentMessages("nudge")).toHaveLength(0);
+    await vi.advanceTimersByTimeAsync(110000);
+    expect(sentMessages("nudge")).toHaveLength(0);
+    await vi.advanceTimersByTimeAsync(13000);
+    expect(sentMessages("nudge")).toHaveLength(1);
+    await vi.advanceTimersByTimeAsync(240000);
+    expect(sentMessages("nudge")).toHaveLength(1);
+  });
+
+  it("throttles activity signals and sends the latest code before a submitted answer", async () => {
+    const socket = await start();
+    socket.message({ type: "ready", mode: "text" });
+    for (let i = 0; i < 20; i++) live.noteWorkspaceActivity();
+    expect(sentMessages("workspace_activity")).toHaveLength(1);
+    live.sendCanvas("return result;");
+    live.submitText("I have finished implementing it.");
+    const messages = socket.send.mock.calls.map(([data]) => JSON.parse(data));
+    expect(sentMessages("canvas")).toHaveLength(1);
+    expect(messages.findIndex((m) => m.type === "canvas")).toBeLessThan(
+      messages.findIndex((m) => m.type === "user_text"),
+    );
+    socket.close();
+    await vi.advanceTimersByTimeAsync(500);
+    Socket.instances.at(-1)!.message({ type: "ready", mode: "text" });
+    expect(sentMessages("canvas")).toHaveLength(2);
+  });
+});
+
+describe("server and browser idle coordination", () => {
+  it("keeps restored empty notes from extending conversational thinking time", async () => {
+    live = new LiveSession("conversation", [], "aoede", {
+      mode: "text",
+      modality: "conversational",
+    });
+    live.sendCanvas("");
+    await live.start();
+    await Promise.resolve();
+    Socket.instances[0].message({ type: "ready", mode: "text" });
+    await vi.advanceTimersByTimeAsync(48000);
+    expect(sentMessages("nudge")).toHaveLength(1);
+  });
+
+  it("retries a check-in deferred by newer server activity without repeating accepted nudges", async () => {
+    const socket = await start();
+    socket.message({ type: "ready", mode: "text" });
+    await vi.advanceTimersByTimeAsync(64000);
+    expect(sentMessages("nudge")).toHaveLength(1);
+    socket.message({ type: "nudge_deferred" });
+    await vi.advanceTimersByTimeAsync(64000);
+    expect(sentMessages("nudge")).toHaveLength(2);
+    await vi.advanceTimersByTimeAsync(128000);
+    expect(sentMessages("nudge")).toHaveLength(2);
+  });
+
+  it("extends thinking time during notes but restores conversation pacing after a submitted answer", async () => {
+    live = new LiveSession("notes", [], "aoede", {
+      mode: "text",
+      modality: "conversational",
+    });
+    await live.start();
+    await Promise.resolve();
+    Socket.instances[0].message({ type: "ready", mode: "text" });
+    live.noteWorkspaceActivity();
+    await vi.advanceTimersByTimeAsync(64000);
+    expect(sentMessages("nudge")).toHaveLength(0);
+    live.submitText("Here is my completed answer.");
+    await vi.advanceTimersByTimeAsync(48000);
+    expect(sentMessages("nudge")).toHaveLength(1);
+  });
+});

@@ -179,12 +179,12 @@ response versions, non-response and score interpretation. Do not treat a missing
 survey answer as a favorable experience or a failed assessment as a zero score.
 
 Optional central sharing from local web installations requires an explicitly
-configured HTTPS API, a separate sign-in, and the default-off **Share analytics**
-choice. Desktop sharing uses the bundled local API bridge and separate default-off
-analytics and result-sharing preferences. User-facing copy stays short; details
+configured HTTPS API, a separate sign-in, and the default-on **Share analytics**
+choice. Desktop sharing uses the bundled local API bridge and default-on analytics and separate default-off
+result-sharing preferences. User-facing copy stays short; details
 belong in Privacy. Remote sharing credentials stay in memory. Web consent is
 stored per local account in that browser; desktop consent is saved on the computer.
-Both remain off until enabled and can be withdrawn. Clients must reconnect their
+Analytics can be disabled; result sharing requires separate activation on desktop. Clients must reconnect their
 remote account after closing or reloading. Uploads are best-effort; network
 failures do not block local practice.
 There is no guaranteed upload queue, backup or cross-device history sync.

@@ -94,12 +94,29 @@ export function preferencesStore(directory) {
             ? resultsSince
             : 0,
       };
-    } catch {
-      return { ...DEFAULT_PREFERENCES, analyticsSince: 0, resultsSince: 0 };
+    } catch (error) {
+      if (error.code !== "ENOENT")
+        return {
+          ...DEFAULT_PREFERENCES,
+          shareAnalytics: false,
+          analyticsSince: 0,
+          resultsSince: 0,
+        };
+      const initial = {
+        ...DEFAULT_PREFERENCES,
+        analyticsSince: Date.now(),
+        resultsSince: 0,
+      };
+      await writePrivateJSON(filename, initial);
+      return initial;
     }
   }
   return {
-    get: () => queue.then(read),
+    get: () => {
+      const operation = queue.then(read);
+      queue = operation.catch(() => {});
+      return operation;
+    },
     set: (patch) => {
       const checked = validatePreferences(patch, true);
       const operation = queue.then(async () => {

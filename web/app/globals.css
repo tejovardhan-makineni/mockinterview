@@ -80,9 +80,16 @@ textarea {
   accent-color: var(--color-accent);
 }
 button,
-input,
+input:not([type="checkbox"]):not([type="radio"]),
 select {
   min-height: 42px;
+}
+input[type="checkbox"],
+input[type="radio"] {
+  width: 1rem;
+  height: 1rem;
+  min-height: 1rem;
+  flex-shrink: 0;
 }
 h1,
 h2,

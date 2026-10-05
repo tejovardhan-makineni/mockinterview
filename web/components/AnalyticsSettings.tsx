@@ -83,9 +83,9 @@ export function AnalyticsSettings({
           <span className="text-[var(--color-muted)]">
             {IS_DESKTOP
               ? compact
-                ? "Optional usage and error counts, private to the admin."
-                : "Share usage and error counts privately with the admin. Optional; retries when connected."
-              : "Share new interview results and error metrics privately with the admin to improve practice. Optional; skips uploads when offline."}{" "}
+                ? "Usage and error counts, private to the admin."
+                : "Share usage and error counts privately with the admin to improve practice."
+              : "Share new interview results and error metrics privately with the admin to improve practice."}{" "}
             <Link href="/privacy" className="underline">
               Details
             </Link>
@@ -143,8 +143,8 @@ export function AnalyticsSettings({
         <div className="space-y-3 rounded-lg border border-[var(--color-line)] p-4">
           <p className="text-xs">
             Connect your hosted account to share from this installation. Session
-            lasts until this app closes or reloads. Sign-in alone does not
-            enable analytics. Server:{" "}
+            lasts until this app closes or reloads. Your sharing preferences
+            control what is sent. Server:{" "}
             {IS_DESKTOP
               ? "mockinterview.live"
               : analyticsTarget() || "Not configured"}
@@ -200,24 +200,35 @@ export function AnalyticsSettings({
         </Button>
       )}
       {!compact && (
-        <Button
-          variant="ghost"
-          disabled={busy || !userId}
-          onClick={async () => {
-            setBusy(true);
-            try {
-              if (userId) await setAnalyticsConsent(userId, false);
-              await deleteSharedAnalytics();
-              setMessage("Shared interview analytics deleted. Sharing is off.");
-            } catch (e) {
-              setMessage(e instanceof Error ? e.message : "Deletion failed.");
-            } finally {
-              setBusy(false);
-            }
-          }}
-        >
-          Delete shared analytics
-        </Button>
+        <details className="text-sm">
+          <summary className="cursor-pointer text-[var(--color-muted)]">
+            Manage shared data
+          </summary>
+          <p className="my-3 text-xs text-[var(--color-muted)]">
+            Remove previously shared analytics from the connected account. Your
+            private interview history stays available.
+          </p>
+          <Button
+            variant="ghost"
+            disabled={busy || !userId}
+            onClick={async () => {
+              setBusy(true);
+              try {
+                if (userId) await setAnalyticsConsent(userId, false);
+                await deleteSharedAnalytics();
+                setMessage(
+                  "Shared interview analytics deleted. Sharing is off.",
+                );
+              } catch (e) {
+                setMessage(e instanceof Error ? e.message : "Deletion failed.");
+              } finally {
+                setBusy(false);
+              }
+            }}
+          >
+            Delete shared analytics
+          </Button>
+        </details>
       )}
       {message && (
         <p role="status" className="text-xs">

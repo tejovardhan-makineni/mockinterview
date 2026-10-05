@@ -86,6 +86,11 @@ export class LiveSession {
   private lastActivity = Date.now();
   private nudgeTimer?: number;
   private nudged = false;
+  private workspaceTimer?: number;
+  private workspaceActive = false;
+  private workspaceContent?: string;
+  private sentWorkspace?: string;
+  private lastWorkspaceSignal = -Infinity;
   private aiSpeaking = false;
   private questionTags: string[];
   private audioCtx?: AudioContext;
@@ -116,6 +121,7 @@ export class LiveSession {
       language?: string;
       inputDeviceId?: string;
       prompt?: string;
+      modality?: "coding" | "system_design" | "written" | "conversational";
     } = {},
   ) {
     this.questionTags = questionTags;
@@ -169,11 +175,19 @@ export class LiveSession {
     if (candidate) this.nudged = false;
   }
 
-  // After ~60s of silence (and the AI isn't talking), nudge ONCE — don't repeat.
+  // Technical work needs a longer thinking window. Only real candidate activity
+  // earns another check-in; the interviewer cannot repeatedly prompt itself.
   private startNudgeWatch() {
     this.nudgeTimer = window.setInterval(() => {
       if (this.stopped || !this.ready || this.aiSpeaking || this.nudged) return;
-      if (Date.now() - this.lastActivity < 60000) return;
+      const idleMs = this.workspaceActive
+        ? 120000
+        : this.options.modality
+          ? this.options.modality === "conversational"
+            ? 45000
+            : 120000
+          : 60000;
+      if (Date.now() - this.lastActivity < idleMs) return;
       if (this.mode === "local") {
         this.nudged = true;
         this.localNudge();
@@ -224,6 +238,7 @@ export class LiveSession {
     for (const [id, text] of this.outbox)
       this.pushCaption({ role: "candidate", text, id, delivery: "pending" });
     this.startNudgeWatch();
+    this.workspaceTimer = window.setInterval(() => this.flushWorkspace(), 5000);
     if (IS_MOCK) {
       this.mode = "local";
       this.emit("mode", "local");
@@ -352,6 +367,8 @@ export class LiveSession {
         this.setConn("connected");
         this.emit("status", "Interviewer ready");
         this.mode = m.mode === "voice" ? "voice" : "text";
+        this.sentWorkspace = undefined;
+        this.flushWorkspace();
         this.options.mode = this.mode;
         if (this.mode === "text") this.setMuted(true);
         this.emit("mode", this.mode);
@@ -386,6 +403,12 @@ export class LiveSession {
           this.handleDrop();
         }
         break;
+      case "nudge_deferred":
+        // Server activity can be newer than the browser's. Try again after a
+        // quiet interval instead of losing the only check-in to that race.
+        this.nudged = false;
+        this.touch();
+        break;
       case "say":
         // Text-director full line: display + speak. The server persists the turn.
         if (m.text?.trim()) this.touch();
@@ -399,7 +422,11 @@ export class LiveSession {
       case "transcript": {
         // Voice-mode transcript: full-text-so-far, coalesced client-side.
         const role = m.role === "candidate" ? "candidate" : "interviewer";
-        if (m.text?.trim()) this.touch(role === "candidate");
+        if (m.text?.trim()) {
+          this.touch(role === "candidate");
+          if (role === "candidate" && !m.streaming)
+            this.workspaceActive = false;
+        }
         this.emit("caption", {
           role,
           text: m.text ?? "",
@@ -580,6 +607,7 @@ export class LiveSession {
   handleCandidate(text: string) {
     if (!text.trim()) return;
     this.touch(true);
+    this.workspaceActive = false;
     const id = crypto.randomUUID();
     this.pushCaption({
       role: "candidate",
@@ -597,6 +625,7 @@ export class LiveSession {
       this.localRespond(text);
       return;
     }
+    this.flushWorkspace();
     this.outbox.set(id, text);
     this.persistOutbox();
     this.sendPending(id, text);
@@ -674,14 +703,46 @@ export class LiveSession {
   submitText(text: string) {
     if (text.trim()) this.handleCandidate(text.trim());
   }
+  // Queue the newest work independently of autosave/network persistence.
+  // Empty snapshots are sent too, so deleting a diagram clears stale context.
   sendCanvas(desc: string) {
-    if (this.mode === "local") return;
-    if (this.ready && this.ws?.readyState === WebSocket.OPEN) {
-      try {
-        this.ws.send(JSON.stringify({ type: "canvas", text: desc }));
-      } catch {
-        this.handleDrop();
-      }
+    this.workspaceContent = desc;
+  }
+  noteWorkspaceActivity() {
+    this.touch(true);
+    this.workspaceActive = true;
+    if (
+      this.stopped ||
+      this.mode === "local" ||
+      !this.ready ||
+      this.ws?.readyState !== WebSocket.OPEN ||
+      Date.now() - this.lastWorkspaceSignal < 4000
+    )
+      return;
+    try {
+      this.ws.send(JSON.stringify({ type: "workspace_activity" }));
+      this.lastWorkspaceSignal = Date.now();
+    } catch {
+      this.handleDrop();
+    }
+  }
+  private flushWorkspace() {
+    if (
+      this.stopped ||
+      this.mode === "local" ||
+      !this.ready ||
+      this.ws?.readyState !== WebSocket.OPEN ||
+      this.workspaceContent === undefined ||
+      this.workspaceContent === this.sentWorkspace
+    )
+      return;
+    try {
+      this.ws.send(
+        JSON.stringify({ type: "canvas", text: this.workspaceContent }),
+      );
+      this.sentWorkspace = this.workspaceContent;
+    } catch {
+      this.handleDrop();
     }
   }
 
@@ -952,6 +1013,7 @@ export class LiveSession {
     }
     if (this.pauseTimer) clearInterval(this.pauseTimer);
     if (this.nudgeTimer) clearInterval(this.nudgeTimer);
+    if (this.workspaceTimer) clearInterval(this.workspaceTimer);
     if (this.ampTimer) clearInterval(this.ampTimer);
     this.micStop?.();
     this.meterStop?.();

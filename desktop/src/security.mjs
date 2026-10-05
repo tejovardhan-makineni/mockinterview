@@ -148,7 +148,7 @@ export function childEnvironment(source, config) {
 }
 
 export const DEFAULT_PREFERENCES = Object.freeze({
-  shareAnalytics: false,
+  shareAnalytics: true,
   shareInterviewResults: false,
   theme: "system",
 });

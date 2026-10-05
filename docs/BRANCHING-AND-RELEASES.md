@@ -74,14 +74,15 @@ at build time; source package versions are local-development baselines.
 
 ## Release a new desktop version
 
-1. Configure and verify the signing prerequisites below once.
+1. Configure and verify signing prerequisites for the selected platforms (Linux needs no Apple/Windows signing credentials).
 2. Merge changes and wait for all `main` checks to pass.
 3. GitHub Actions → **Release desktop** → **Run workflow**, select `main` and
-   enter a newer version such as `0.1.0-beta.2` or `1.0.0`.
+   enter a newer version such as `0.1.0-beta.2` or `1.0.0`, and choose `all`, `linux`, `macos`, or `windows` for `target`.
 
-The workflow builds Apple Silicon/Intel macOS, Windows x64 and Linux x64 from the
-same source, injecting the requested desktop version into the disposable build
-checkout. It verifies the actual packaged runtime, macOS Developer ID signatures,
+The workflow builds the selected platforms from the same source, injecting the
+requested desktop version into the disposable build checkout. Selecting macOS
+always includes Apple Silicon and Intel. Linux can ship while macOS/Windows
+await credentials; every selected platform must still pass its complete checks. It verifies the actual packaged runtime, macOS Developer ID signatures,
 notarization/stapling and Gatekeeper, and Windows Authenticode publisher identity.
 Linux artifacts carry checksums but are not described as platform-code-signed.
 
@@ -92,9 +93,11 @@ publishes. Tags and published versions are immutable: never replace public
 installer files with different bytes under the same version.
 
 GitHub Releases hosts the files. After publication, the workflow redeploys the
-website without a web-version bump. Complete, verified **stable** desktop releases
-appear on Downloads automatically; prereleases are available through their
-explicit GitHub release page. The app's Help menu links to releases for manual
+website without a web-version bump, when production deployment is enabled.
+Complete, verified platform releases appear on Downloads automatically; betas
+are labeled as beta downloads. The website checks the published manifest hash,
+per-platform native receipts and every installer hash/size before linking. A new
+release for one platform preserves the latest verified links for other platforms. The app's Help menu links to releases for manual
 updates. This pipeline does not silently install updates or close active interviews.
 
 If an upload/signing run fails, no partial draft is promoted. Inspect the failure;
@@ -115,11 +118,12 @@ Desktop environment secrets:
 - `DESKTOP_WIN_CSC_LINK`, `DESKTOP_WIN_CSC_KEY_PASSWORD`: Windows signing certificate.
 - Environment variable `DESKTOP_WINDOWS_PUBLISHER`: exact certificate subject name.
 
-No public release bypasses missing or invalid signing credentials. The existing
-unsigned/ad-hoc `0.1.0-beta.1` draft remains a draft. Before the first public release,
-complete clean installation, upgrade/data-preservation and microphone checks on
-each supported platform. Automated startup tests do not certify microphone/AI
-quality.
+macOS and Windows releases never bypass missing or invalid signing credentials.
+Linux has no platform-signing requirement, and its release metadata says so.
+The existing unsigned/ad-hoc `0.1.0-beta.1` draft remains a draft. Before describing
+a beta as a fully tested stable release, complete clean installation, upgrade/data
+preservation and microphone checks on each supported platform. Automated startup
+tests do not certify microphone/AI quality; generated beta notes state that limit.
 
 Firebase Hosting cannot currently be scoped by IAM to one site in a shared
 project. Decide between a dedicated Hosting project or explicitly granting the

@@ -197,7 +197,12 @@ func stubDirectorTurn(req GenerateRequest) string {
 		if strings.Contains(req.System, "Domain: behavioral.") {
 			return intro + "Tell me about one specific situation related to this topic."
 		}
-		return intro + "What would you clarify first about the scenario shown in your workspace?"
+		if _, brief, ok := strings.Cut(req.System, "CANDIDATE BRIEF: "); ok {
+			if brief, _, ok = strings.Cut(brief, "\n"); ok && strings.TrimSpace(brief) != "" {
+				return intro + strings.TrimSpace(brief)
+			}
+		}
+		return intro + "The selected problem is shown in your workspace."
 	}
 	closing := "Let's leave this topic there. What would you like to ask before we wrap up?"
 	if asked[closing] {

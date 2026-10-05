@@ -28,27 +28,49 @@ export default function Downloads() {
       <div className={styles.cardGrid}>
         {(
           [
-            { platform: "mac", name: "macOS" },
-            { platform: "windows", name: "Windows" },
-            { platform: "linux", name: "Linux" },
+            {
+              platform: "mac",
+              name: "macOS",
+              pending: "Awaiting Apple signing",
+              detail:
+                "The macOS app is built. Downloads open after Developer ID signing and Apple notarization are complete.",
+            },
+            {
+              platform: "windows",
+              name: "Windows",
+              pending: "Awaiting publisher signing",
+              detail:
+                "The Windows app is built. Downloads open after its publisher certificate and installer signature are verified.",
+            },
+            {
+              platform: "linux",
+              name: "Linux",
+              pending: "Release verification pending",
+              detail:
+                "Linux packages are built. Downloads open when native runtime checks and published file hashes are verified.",
+            },
           ] as const
-        ).map(({ platform, name }) => {
+        ).map(({ platform, name, pending, detail }) => {
           const assets =
             DESKTOP_RELEASE?.assets.filter(
               (asset) => asset.platform === platform,
             ) || [];
+          const tag = assets[0]?.tag || DESKTOP_RELEASE?.tag;
+          const preview = assets[0]?.prerelease ?? DESKTOP_RELEASE?.prerelease;
           return (
             <article key={platform} className={styles.card}>
               <span className={styles.cardNumber}>{name}</span>
               <h3>
                 {assets.length
-                  ? "Download the app"
-                  : "Installer in preparation"}
+                  ? preview
+                    ? "Download the beta"
+                    : "Download the app"
+                  : pending}
               </h3>
               <p>
                 {assets.length
-                  ? `Release ${DESKTOP_RELEASE!.tag}. Install, open, and connect your AI provider.`
-                  : "A verified installer for this platform has not been published here yet."}
+                  ? `Version ${tag?.replace(/^desktop-v/, "")}. Install, open, and connect your AI provider.`
+                  : detail}
               </p>
               <div className={styles.actions}>
                 {assets.length ? (
@@ -58,11 +80,21 @@ export default function Downloads() {
                     </Button>
                   ))
                 ) : (
-                  <Button href={RELEASES_URL} variant="ghost">
-                    Check GitHub releases ↗
+                  <Button href="/interviews" variant="ghost">
+                    Practice in your browser →
                   </Button>
                 )}
               </div>
+              {assets.length > 0 && (
+                <p className="text-sm">
+                  <a
+                    className={styles.textLink}
+                    href={`${RELEASES_URL}/tag/${tag}`}
+                  >
+                    Release notes and checksums ↗
+                  </a>
+                </p>
+              )}
             </article>
           );
         })}
@@ -92,10 +124,9 @@ export default function Downloads() {
           <article className={styles.card}>
             <h3 className="!mt-0">Sharing is your choice.</h3>
             <p>
-              Analytics starts off. Connect a hosted account and enable “Share
-              analytics” to help the admin improve practice. Sharing interview
-              results is a separate choice. Failed uploads never block your
-              local practice.
+              Share analytics starts on and can be turned off in Settings.
+              Desktop uploads require a connected hosted account. Sharing
+              interview results is a separate choice.
             </p>
             <p>
               Your model connection resets when you close or reload the app.

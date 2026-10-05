@@ -1,4 +1,5 @@
 "use client";
+import { providerName } from "@/lib/providers";
 import { Suspense, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { syncAnalytics } from "@/lib/analytics";
@@ -310,7 +311,9 @@ function ReportView({ sid }: { sid: string }) {
                     {pretty(session?.config.target_level ?? "mid")} ·{" "}
                     {pretty(session?.config.challenge ?? "standard")} ·{" "}
                     {session?.duration_minutes} minutes ·{" "}
-                    {session?.provider || "Configured provider"}{" "}
+                    {session?.provider
+                      ? providerName(session.provider)
+                      : "Configured provider"}{" "}
                     {session?.model} · Scoring version{" "}
                     {report.scoring_version ?? "original"}
                   </p>

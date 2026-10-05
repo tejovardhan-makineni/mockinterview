@@ -89,7 +89,7 @@ func firstQuestionFocus(q corpus.Question) string {
 	case "learning_from_feedback":
 		return "How would you respond to this feedback?"
 	case "coding", "system_design", "ml_system_design", "low_level_design":
-		return "What would you clarify first about the problem?"
+		return "WAIT SILENTLY after stating the problem. Give the candidate the floor to decide how to begin. Do not ask them to clarify, outline steps, or suggest requirements; observe whether they do so independently."
 	case "clinical_reasoning", "prioritization":
 		return "What would you assess first?"
 	case "case":
@@ -110,6 +110,8 @@ func firstQuestionSetup(q corpus.Question) string {
 		return "The first situation invitation below establishes the behavioral topic; no separate scenario or STAR checklist is needed."
 	}
 	switch q.ID {
+	case "ad-click-aggregator":
+		return "Design a real-time ad click aggregation and analytics pipeline. Advertisers need near-real-time dashboards showing clicks, impressions and spend by campaign and time period, plus accurate totals for billing. State only this problem, then give the candidate the floor. Keep volume, event size and specific freshness targets for matching candidate questions."
 	case "two-sum-variants":
 		return "Given an integer array nums and an integer target, find the indices of two numbers whose sum equals target. There is exactly one solution, and the same element may not be used twice. Introduce only Two Sum now; Three Sum is a later follow-up."
 	case "ai-output-critique-forecast":
@@ -125,7 +127,7 @@ func firstQuestionSetup(q corpus.Question) string {
 	case "candidate-questions-role-fit":
 		return "This is the final part of a fictional interview with the hiring manager of a small service team. The candidate asks questions to understand role fit."
 	default:
-		return "Briefly state the primary problem from the candidate brief, including the inputs, outputs, essential constraints and facts needed to start. Present any code or diagram as the artifact visible in the workspace. Do not read later variants, probing checklists or all deliverables at once. Then ask the first focused question below."
+		return "Briefly state the primary problem from the candidate brief, including the inputs, outputs, essential constraints and facts needed to start. Present any code or diagram as the artifact visible in the workspace. Do not read later variants, probing checklists or all deliverables at once. Then follow FIRST QUESTION FOCUS, which may require waiting silently without a question."
 	}
 }
 

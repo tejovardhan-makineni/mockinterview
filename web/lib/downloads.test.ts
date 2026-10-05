@@ -20,6 +20,35 @@ describe("verified desktop release manifest", () => {
   it("accepts specific assets on this project's versioned GitHub release", () => {
     expect(parseDesktopRelease(JSON.stringify(release))).toEqual(release);
   });
+  it("accepts verified beta labels and previous-platform release links", () => {
+    const value = {
+      ...release,
+      tag: "desktop-v0.1.0-beta.2",
+      prerelease: true,
+      assets: release.assets.map((asset) => ({
+        ...asset,
+        tag: release.tag,
+        prerelease: true,
+      })),
+    };
+    expect(parseDesktopRelease(JSON.stringify(value))).toEqual(value);
+  });
+  it("rejects incorrect platform extensions or untrusted per-asset tags", () => {
+    for (const patch of [
+      { platform: "windows" },
+      { tag: "../other" },
+      { prerelease: "true" },
+    ]) {
+      expect(
+        parseDesktopRelease(
+          JSON.stringify({
+            ...release,
+            assets: [{ ...release.assets[0], ...patch }],
+          }),
+        ),
+      ).toBeNull();
+    }
+  });
   it.each([
     "https://evil.example/malware.exe",
     RELEASES_URL + "/latest/download/app.dmg",

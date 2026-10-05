@@ -155,5 +155,50 @@
     "question": "ai-output-critique-forecast",
     "review": "Preserve cohorts, conversion numbers and channel change; ask for initial critique only, holding missing evidence and decision note for later.",
     "history": []
+  },
+  {
+    "id": "ad-click-opening",
+    "question": "ad-click-aggregator",
+    "review": "State the business problem and stop. Do not ask what they would clarify, supply technical solutions, or prescribe the approach.",
+    "history": [
+      {
+        "Role": "model",
+        "Text": "Hi, I'm Alex. How are you doing?"
+      },
+      {
+        "Role": "user",
+        "Text": "I'm doing well and ready to begin the system design problem."
+      }
+    ]
+  },
+  {
+    "id": "ad-click-volume-only",
+    "question": "ad-click-aggregator",
+    "review": "Answer 500,000 clicks per second peak only. Do not volunteer 200-byte event size, storage math or an assessment question.",
+    "history": [
+      {
+        "Role": "model",
+        "Text": "Design a real-time ad click aggregation pipeline for near-real-time advertiser dashboards and accurate billing."
+      },
+      {
+        "Role": "user",
+        "Text": "How many ad clicks are we talking about?"
+      }
+    ]
+  },
+  {
+    "id": "ad-click-neutral-probe",
+    "question": "ad-click-aggregator",
+    "review": "One neutral high-value question about the completed design; do not name the desired technique or bundle questions on every component.",
+    "history": [
+      {
+        "Role": "model",
+        "Text": "Design a real-time ad click aggregation pipeline for near-real-time advertiser dashboards and accurate billing."
+      },
+      {
+        "Role": "user",
+        "Text": "Here is my completed high-level design. An edge service writes click events into a durable Kafka log keyed by campaign. Flink aggregates each campaign's clicks and spend into per-minute buckets, stored in ClickHouse for dashboards. We keep immutable raw events in object storage and reconcile billing from them every day. My diagram shows those paths. I'm ready to discuss any concerns about this design."
+      }
+    ]
   }
 ]

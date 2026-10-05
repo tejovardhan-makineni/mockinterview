@@ -21,6 +21,8 @@ import {
   parseChecksums,
   releaseContext,
   stageReleaseAssets,
+  verifiedDownloadManifest,
+  releaseArtifacts,
 } from "../scripts/release-assets.mjs";
 import { installerNames } from "../../scripts/release-policy.mjs";
 
@@ -45,7 +47,7 @@ const signing = {
   },
   linux: { status: "not-applicable", method: "none" },
 };
-async function fixture(t) {
+async function fixture(t, target = "all") {
   const root = await mkdtemp(
     path.join(os.tmpdir(), "mockinterview-release-assets-"),
   );
@@ -53,7 +55,8 @@ async function fixture(t) {
   const input = path.join(root, "artifacts"),
     output = path.join(root, "publish");
   await mkdir(input);
-  for (const [artifact, policy] of Object.entries(ARTIFACTS)) {
+  for (const artifact of releaseArtifacts(target)) {
+    const policy = ARTIFACTS[artifact];
     const directory = path.join(input, artifact);
     await mkdir(directory);
     const files = [];
@@ -74,7 +77,7 @@ async function fixture(t) {
       path.join(directory, RECEIPT_NAME),
       JSON.stringify({
         schemaVersion: 1,
-        ...releaseContext(env),
+        ...releaseContext({ ...env, RELEASE_TARGET: target }),
         artifact,
         platform: policy.platform,
         verifiedAt: new Date().toISOString(),
@@ -289,4 +292,86 @@ test("release inputs cannot inject filenames or impersonate another CI repositor
     { GITHUB_RUN_URL: "https://attacker.test/run" },
   ])
     assert.throws(() => releaseContext({ ...env, ...patch }));
+});
+
+test("Linux publication is independent of unavailable macOS and Windows certificates", async (t) => {
+  const f = await fixture(t, "linux");
+  const manifest = await stageReleaseAssets(f.input, f.output, {
+    ...env,
+    RELEASE_TARGET: "linux",
+  });
+  assert.equal(manifest.files.length, 2);
+  assert.equal(manifest.platformVerification.length, 1);
+  assert.deepEqual(manifest.verification.platforms, {
+    linux: "not-applicable",
+  });
+  assert.deepEqual(
+    (await readdir(f.output)).sort(),
+    [
+      ...installerNames(env.RELEASE_VERSION, "linux"),
+      CHECKSUM_NAME,
+      "RELEASE-MANIFEST.json",
+    ].sort(),
+  );
+});
+
+test("selected platforms must be complete and cannot include unselected artifacts", async (t) => {
+  for (const target of ["linux", "macos", "windows"]) {
+    const f = await fixture(t, target);
+    const artifact = releaseArtifacts(target)[0];
+    await rm(path.join(f.input, artifact), { recursive: true });
+    await assert.rejects(
+      stageReleaseAssets(f.input, f.output, { ...env, RELEASE_TARGET: target }),
+      /selected desktop/,
+    );
+  }
+  const f = await fixture(t);
+  await assert.rejects(
+    stageReleaseAssets(f.input, f.output, { ...env, RELEASE_TARGET: "linux" }),
+    /selected desktop/,
+  );
+});
+
+test("published downloads recheck native receipts against the exact uploaded files", async (t) => {
+  const f = await fixture(t, "linux");
+  const metadata = await stageReleaseAssets(f.input, f.output, {
+    ...env,
+    RELEASE_TARGET: "linux",
+  });
+  const release = {
+    tag_name: `desktop-v${env.RELEASE_VERSION}`,
+    draft: false,
+    prerelease: false,
+    assets: [
+      ...metadata.files.map((file) => ({
+        name: file.name,
+        size: file.bytes,
+        digest: `sha256:${file.sha256}`,
+        state: "uploaded",
+      })),
+      { name: "RELEASE-MANIFEST.json", state: "uploaded" },
+    ],
+  };
+  assert.equal(verifiedDownloadManifest(release, metadata).assets.length, 2);
+  for (const mutate of [
+    (m) => {
+      m.platformVerification = [];
+    },
+    (m) => {
+      m.platformVerification[0].ci.runId = "999";
+    },
+    (m) => {
+      m.platformVerification[0].files[0].sha256 = "b".repeat(64);
+    },
+    (m) => {
+      m.platformVerification[0].checks = [];
+    },
+    (m) => {
+      m.platformVerification[0].target = "all";
+    },
+  ]) {
+    const copy = structuredClone(metadata);
+    mutate(copy);
+    assert.throws(() => verifiedDownloadManifest(release, copy));
+  }
 });
