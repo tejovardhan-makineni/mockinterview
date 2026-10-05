@@ -131,10 +131,11 @@ export default function Docs() {
       <section className={styles.section}>
         <div className={styles.callout}>
           <h2>Share analytics. Help improve practice.</h2>Analytics sharing is
-          optional. Shared interview results and diagnostics help the
-          administrator improve the app; they are not public testimonials. The
-          privacy page explains the details. Local sharing needs a reachable API
-          and your consent; a failed upload does not block local practice.
+          on by default and can be turned off in Settings. Shared interview
+          results and diagnostics help the administrator improve the app; they
+          are not public testimonials. The privacy page explains the details.
+          Local sharing needs a reachable API and your consent; a failed upload
+          does not block local practice.
         </div>
       </section>
       <ProjectResources />

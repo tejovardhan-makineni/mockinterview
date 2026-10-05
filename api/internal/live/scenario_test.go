@@ -75,7 +75,7 @@ func TestOpeningIntroducesFactsBeforeTheFocusedAsk(t *testing.T) {
 			}
 		})
 	}
-	if !strings.Contains(openingInstruction, "FIRST introduce the primary problem") || !strings.Contains(openingInstruction, "THEN ask only the FIRST QUESTION FOCUS") {
+	if !strings.Contains(openingInstruction, "FIRST introduce the primary problem") || !strings.Contains(openingInstruction, "THEN follow FIRST QUESTION FOCUS") {
 		t.Fatal("focused opening can omit the primary task's context")
 	}
 }

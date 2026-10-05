@@ -24,7 +24,7 @@ This first desktop version is a preview. A completed CI artifact is not automati
 - The SQLite database, installation keys and consent preferences live under the OS app-data folder. **Help → Open app data folder** locates it.
 - Keep the entire app-data directory together when backing up. Installation keys are encrypted by the OS keychain; moving them to another account or computer will not necessarily unlock them. Use app-level exports for portable interview content.
 - AI keys entered in the interface are not stored by the Electron preferences bridge. The interview engine encrypts keys needed for active interview sessions using the per-install key; ordinary local history is not whole-database encrypted. OS account permissions and disk encryption protect the device.
-- “Share analytics” and “Share interview results” are separate, initially-off preferences. Consent timestamps persist across app restarts. Sharing failures do not prevent local practice or erase results.
+- “Share analytics” starts on for a new installation; an existing saved off choice is preserved. “Share interview results” remains a separate, initially-off preference. Sharing requires a connected hosted account, and preferences persist across app restarts. Sharing failures do not prevent local practice or erase results.
 - AI provider processing is separate from project analytics. A cloud provider receives the interview content needed to run the selected model, and may charge the user's account.
 - The Help menu links to GitHub, Discord and Reddit, plus the repository's release page. Updates are explicit downloads. No automatic code installation is enabled.
 
@@ -52,9 +52,17 @@ Artifacts appear under `desktop/dist`. `npm --prefix desktop run pack` makes an 
 
 ## CI and signing
 
-`.github/workflows/desktop-build.yml` builds four native targets, runs boundary/storage tests, launches each staged and packaged engine, verifies no-key interview denial and restart persistence, then uploads installer artifacts. All publishing is disabled in electron-builder. An explicit workflow dispatch with `publish_draft=true` creates a **draft prerelease** only; publishing remains an owner action after review.
+`.github/workflows/desktop-build.yml` builds four native targets on ordinary pushes and pull requests, runs boundary/storage tests, launches each staged and packaged engine, verifies no-key interview denial and restart persistence, then uploads installer artifacts. All publishing is disabled in electron-builder.
 
-Configure these repository secrets to sign distribution builds:
+For a public release, run **Release desktop** on `main` with a new `version` and `target`: `all`, `linux`, `macos`, or `windows`. A platform can ship independently; macOS always includes both Apple Silicon and Intel. The workflow builds only the selected platforms, verifies their complete native receipts and file hashes, creates a draft, checks the uploaded bytes, and publishes after rechecking source and CI gates. Existing versions, including drafts, cannot be reused.
+
+```sh
+gh workflow run release-desktop.yml --ref main -f version=0.1.0-beta.2 -f target=linux
+```
+
+Use a newer version if that example version already exists. Linux requires no Apple or Windows credentials. macOS and Windows still require the signing configuration below; selecting another platform never makes unsigned assets public. Published betas appear on Downloads with a beta label after their metadata and native receipts are verified. Releasing one platform preserves the latest verified downloads for the others. Website refresh also requires production deployment to be enabled and configured.
+
+Configure these secrets in GitHub → repository Settings → Environments → `desktop-release` (repository secrets are also supported). Enter credentials there, never in a chat, source file or commit:
 
 | Secret                                                                             | Purpose                                                                                                 |
 | ---------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
@@ -63,19 +71,21 @@ Configure these repository secrets to sign distribution builds:
 | `DESKTOP_APPLE_ID`, `DESKTOP_APPLE_APP_SPECIFIC_PASSWORD`, `DESKTOP_APPLE_TEAM_ID` | Apple notarization credentials                                                                          |
 | `DESKTOP_WIN_CSC_LINK`, `DESKTOP_WIN_CSC_KEY_PASSWORD`                             | Windows code-signing certificate and password supported by the configured signer                        |
 
+Also set the `DESKTOP_WINDOWS_PUBLISHER` environment variable to the exact certificate subject name expected by Authenticode verification.
+
 Modern Windows signing certificates may require a hardware token or cloud signing service; adapt the CI signer to the actual certificate provider rather than exporting a non-exportable key. See [electron-builder signing](https://www.electron.build/v26/docs/code-signing) and [macOS configuration](https://www.electron.build/v26/docs/mac/).
 
 Without a Developer ID identity, macOS packaging explicitly uses an ad-hoc development signature. Without Windows credentials, the Windows package is unsigned. Neither is represented as a trusted public installer. A macOS Apple Development or App Store Apple Distribution certificate is not a substitute for Developer ID Application notarization.
 
 ## Release verification
 
-Before public release on every OS:
+For each platform, validate native release signatures and checksums in CI. Before promoting a beta as a fully tested stable desktop release, also complete these manual checks:
 
 1. Install using the actual downloadable artifact in a clean user account; verify expected publisher/signature and macOS notarization.
 2. Open without developer prerequisites, confirm local history survives quit/reopen, and test an app upgrade preserves it.
 3. Confirm missing/invalid AI keys cannot start an interview. Validate a real user-owned key, then exercise a short text and microphone/WebSocket interview, report, workspace, export and history.
 4. Verify microphone/camera prompts, editor and drawing input, keyboard navigation, external community links and the Help menu.
-5. Keep analytics off and confirm no project sharing; enable each consent independently, check server reachability failures do not block practice, and verify the admin receives only the consented payload.
+5. Turn analytics off and confirm no project sharing; verify an existing off choice survives upgrade. Enable each sharing preference independently, check server reachability failures do not block practice, and verify that result sharing stays off until explicitly enabled.
 6. Confirm all checksums, update release notes with tested platforms and actual signing status, publish the GitHub release, then enable website download links for those exact files.
 
 ## Security boundaries

@@ -61,7 +61,11 @@ func TestDirectorProviderEvaluation(t *testing.T) {
 			t.Error(err)
 		}
 	}()
+	selectedCases := "," + os.Getenv("DIRECTOR_EVAL_CASES") + ","
 	for _, example := range examples {
+		if selectedCases != ",," && !strings.Contains(selectedCases, ","+example.ID+",") {
+			continue
+		}
 		q, ok := cat.Get(example.Question)
 		if !ok {
 			t.Fatalf("unknown fixture question %s", example.Question)

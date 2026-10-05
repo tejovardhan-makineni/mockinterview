@@ -1,4 +1,5 @@
 "use client";
+import { providerName } from "@/lib/providers";
 import Link from "next/link";
 import { Suspense, useCallback, useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -84,6 +85,7 @@ function Setup() {
   const [busy, setBusy] = useState(false);
   const [deviceReady, setDeviceReady] = useState(false);
   const [device, setDevice] = useState("");
+  const [camera, setCamera] = useState(false);
   const [mode, setMode] = useState<"voice" | "text">(
     IS_MOCK ? "text" : "voice",
   );
@@ -375,6 +377,7 @@ function Setup() {
       );
       setKey("");
       sessionStorage.setItem("mi_device_" + session.id, device);
+      sessionStorage.setItem("mi_camera_" + session.id, camera ? "1" : "0");
       router.push("/interview?s=" + encodeURIComponent(session.id));
     } catch (e) {
       if (e instanceof ApiError && e.code === "interview_feedback_required") {
@@ -770,6 +773,8 @@ function Setup() {
                   mode={mode}
                   onReady={ready}
                   onDevice={setDevice}
+                  camera={camera}
+                  onCamera={setCamera}
                 />
                 {mode === "voice" && (
                   <label className="mt-5 flex items-start gap-3 text-sm">
@@ -891,7 +896,7 @@ function Setup() {
                       {["gemini", "openai", "anthropic", "deepseek", "xai"].map(
                         (p) => (
                           <option key={p} value={p}>
-                            {pretty(p)}
+                            {providerName(p)}
                           </option>
                         ),
                       )}

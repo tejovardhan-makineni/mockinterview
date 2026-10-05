@@ -13,7 +13,12 @@ import {
 } from "node:fs/promises";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
-import { installerNames, REPOSITORY } from "../../scripts/release-policy.mjs";
+import {
+  desktopManifest,
+  desktopPlatforms,
+  installerNames,
+  REPOSITORY,
+} from "../../scripts/release-policy.mjs";
 
 export const RECEIPT_NAME = "SIGNING-VERIFICATION.json";
 export const CHECKSUM_NAME = "SHA256SUMS.txt";
@@ -64,9 +69,16 @@ export function artifactInstallers(version, artifact) {
     name.includes(ARTIFACTS[artifact].match),
   );
 }
+export function releaseArtifacts(target = "all") {
+  const platforms = desktopPlatforms(target);
+  return Object.keys(ARTIFACTS).filter((name) =>
+    platforms.includes(ARTIFACTS[name].platform),
+  );
+}
 export function releaseContext(env = process.env) {
   const version = env.RELEASE_VERSION;
-  installerNames(version); // One version parser and filename policy for the release.
+  const target = env.RELEASE_TARGET || "all";
+  installerNames(version, target); // One version parser and filename policy for the release.
   assert(
     /^[a-f0-9]{40}$/.test(env.RELEASE_SHA || ""),
     "RELEASE_SHA must be a full source commit",
@@ -88,6 +100,7 @@ export function releaseContext(env = process.env) {
   );
   return {
     version,
+    target,
     sourceSha: env.RELEASE_SHA,
     repository: REPOSITORY,
     ci: { runId: env.GITHUB_RUN_ID, runAttempt, runUrl },
@@ -171,6 +184,7 @@ export function validateReceipt(receipt, context, artifact, files) {
   );
   assert(
     receipt.version === context.version &&
+      (receipt.target || "all") === context.target &&
       receipt.sourceSha === context.sourceSha &&
       receipt.repository === context.repository,
     "Signing receipt source/version mismatch",
@@ -234,6 +248,40 @@ export function validateReceipt(receipt, context, artifact, files) {
     );
   }
 }
+
+// Recheck the published, hash-verified manifest before exposing any download.
+// Per-platform releases retain the same native signing rules as a full release.
+export function verifiedDownloadManifest(release, metadata) {
+  const downloads = desktopManifest(release, metadata);
+  const context = releaseContext({
+    RELEASE_VERSION: metadata.version,
+    RELEASE_TARGET: metadata.target || "all",
+    RELEASE_SHA: metadata.sourceSha,
+    GITHUB_RUN_ID: metadata.ci?.runId,
+    GITHUB_RUN_ATTEMPT: metadata.ci?.runAttempt,
+    GITHUB_RUN_URL: metadata.ci?.runUrl,
+  });
+  const artifacts = releaseArtifacts(context.target);
+  assert(
+    Array.isArray(metadata.platformVerification) &&
+      metadata.platformVerification.length === artifacts.length,
+    "Missing native platform verification receipts",
+  );
+  for (const artifact of artifacts) {
+    const receipts = metadata.platformVerification.filter(
+      (entry) => entry.artifact === artifact,
+    );
+    assert(receipts.length === 1, "Missing or duplicate platform receipt");
+    const names = artifactInstallers(context.version, artifact);
+    const files = metadata.files.filter((file) => names.includes(file.name));
+    assert(
+      files.every((file) => file.artifact === artifact),
+      "Installer artifact mismatch",
+    );
+    validateReceipt(receipts[0], context, artifact, files);
+  }
+  return downloads;
+}
 async function copyVerified(source, destination, expected) {
   const input = await regularFile(source);
   let output;
@@ -280,21 +328,22 @@ export async function stageReleaseAssets(
     if (error.code !== "ENOENT") throw error;
   }
   const entries = await readdir(root, { withFileTypes: true });
+  const expectedArtifacts = releaseArtifacts(context.target);
   assert(
-    entries.length === Object.keys(ARTIFACTS).length &&
+    entries.length === expectedArtifacts.length &&
       entries.every(
         (entry) =>
-          Object.hasOwn(ARTIFACTS, entry.name) &&
+          expectedArtifacts.includes(entry.name) &&
           entry.isDirectory() &&
           !entry.isSymbolicLink(),
       ),
-    "Expected exactly four desktop artifact directories",
+    "Expected exactly the selected desktop artifact directories",
   );
   const files = [],
     receipts = [];
   // Validate every platform's complete file set, original checksums and native
   // verification receipt before creating any publishable output.
-  for (const artifact of Object.keys(ARTIFACTS)) {
+  for (const artifact of expectedArtifacts) {
     const directory = path.join(root, artifact),
       expected = artifactInstallers(context.version, artifact);
     const permitted = new Set([...expected, CHECKSUM_NAME, RECEIPT_NAME]);
@@ -337,7 +386,7 @@ export async function stageReleaseAssets(
     );
   }
   assert(
-    files.length === installerNames(context.version).length,
+    files.length === installerNames(context.version, context.target).length,
     "Incomplete desktop release",
   );
   files.sort((a, b) => a.name.localeCompare(b.name, "en"));
@@ -360,8 +409,12 @@ export async function stageReleaseAssets(
       verification: {
         checksums: "verified",
         provenance: "same-run-native-CI-receipts",
-        macosAndWindowsSigning: "verified",
-        linuxSigning: "not-applicable",
+        platforms: Object.fromEntries(
+          desktopPlatforms(context.target).map((platform) => [
+            platform,
+            platform === "linux" ? "not-applicable" : "verified",
+          ]),
+        ),
       },
       files,
       platformVerification: receipts,

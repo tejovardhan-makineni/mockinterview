@@ -1,4 +1,5 @@
 "use client";
+import { providerName } from "@/lib/providers";
 import { useState } from "react";
 import { api } from "@/lib/api";
 import { getDesktopModel, setDesktopModel, errorMessage } from "@/lib/http";
@@ -63,11 +64,7 @@ export function DesktopModelSettings() {
         >
           {["gemini", "openai", "anthropic", "deepseek", "xai"].map((p) => (
             <option key={p} value={p}>
-              {p === "openai"
-                ? "OpenAI"
-                : p === "xai"
-                  ? "xAI"
-                  : p[0].toUpperCase() + p.slice(1)}
+              {providerName(p)}
             </option>
           ))}
         </select>

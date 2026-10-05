@@ -117,6 +117,7 @@ function Room() {
         setInitial(restored);
         lastSnapshot.current = JSON.stringify(restored);
         setSession(s);
+        setCamera(sessionStorage.getItem("mi_camera_" + sid) === "1");
         setQuestion(q);
         setMuted(s.mode === "text");
         if (s.mode === "text") setTab("conversation");
@@ -132,7 +133,6 @@ function Room() {
           snapshot,
           async (next) => {
             const result = await api.saveSnapshot(sid, next);
-            ls?.sendCanvas(next.content);
             return result;
           },
           (value, e) => {
@@ -155,8 +155,10 @@ function Room() {
           language: s.config.language ?? "en",
           inputDeviceId: sessionStorage.getItem("mi_device_" + sid) ?? "",
           prompt: q.prompt,
+          modality: s.modality,
         });
         live.current = ls;
+        ls.sendCanvas(restored.content);
         ls.on("caption", (caption) => {
           setCaptions((prev) => {
             const last = prev[prev.length - 1];
@@ -205,9 +207,8 @@ function Room() {
             drive.current.mood = on ? "speaking" : "listening";
             setAiState(on ? "Speaking" : "Listening");
           })
-          .on("userSpeaking", (on) => {
-            if (!drive.current.speaking)
-              setAiState(on ? "Listening" : "Thinking");
+          .on("userSpeaking", () => {
+            if (!drive.current.speaking) setAiState("Listening");
           })
           .on("micLevel", setMicLevel)
           .on("amplitude", (v) => {
@@ -249,6 +250,8 @@ function Room() {
     if (serialized === lastSnapshot.current) return;
     lastSnapshot.current = serialized;
     saver.current?.update(snapshot);
+    live.current?.noteWorkspaceActivity();
+    live.current?.sendCanvas(snapshot.content);
   }, []);
   async function finish() {
     if (ending) return;
@@ -322,7 +325,10 @@ function Room() {
                   ? "Connection needs attention"
                   : "Connecting…"}
             </span>
-            <span className="font-mono" aria-label="Remaining time">
+            <span
+              className="shrink-0 whitespace-nowrap font-mono"
+              aria-label="Remaining time"
+            >
               {time}
             </span>
             <FeedbackWidget
@@ -368,7 +374,13 @@ function Room() {
             {draftNotice}
           </p>
         )}
-        <div className="mb-4 flex gap-2 lg:hidden" aria-label="Room panels">
+        <div
+          className={
+            "mb-4 flex gap-2 lg:hidden " +
+            (camera ? "min-h-[92px] flex-col items-start pr-28" : "")
+          }
+          aria-label="Room panels"
+        >
           {["workspace", "conversation"].map((value) => (
             <Button
               key={value}
@@ -380,7 +392,12 @@ function Room() {
             </Button>
           ))}
         </div>
-        <div className="room-grid">
+        <div className="room-grid relative">
+          {camera && (
+            <div className="absolute -top-[108px] right-0 z-20 w-24 lg:right-4 lg:top-4 lg:w-[122px]">
+              <Webcam compact />
+            </div>
+          )}
           <section
             id="room-work"
             className={tab !== "workspace" ? "hidden lg:block" : ""}
@@ -464,11 +481,26 @@ function Room() {
             <Panel className="p-4">
               <div
                 className={
-                  "mx-auto h-40 w-40 " +
-                  (session.modality === "conversational" ? "lg:hidden" : "")
+                  camera
+                    ? "lg:grid lg:grid-cols-2 lg:items-center lg:gap-3"
+                    : ""
                 }
               >
-                <Avatar3D faceId={session.config.face_id} drive={drive} />
+                <div
+                  className={
+                    (camera
+                      ? "mx-auto h-28 w-28 lg:w-full "
+                      : "mx-auto h-40 w-40 ") +
+                    (session.modality === "conversational" && !camera
+                      ? "lg:hidden"
+                      : "")
+                  }
+                >
+                  <Avatar3D faceId={session.config.face_id} drive={drive} />
+                </div>
+                {camera && (
+                  <div className="hidden lg:block" aria-hidden="true" />
+                )}
               </div>
               <div className="mt-3 flex items-center justify-between">
                 <h2 className="font-semibold">
@@ -544,7 +576,10 @@ function Room() {
                   rows={3}
                   className="field-select resize-y text-sm"
                   value={typed}
-                  onChange={(e) => setTyped(e.target.value)}
+                  onChange={(e) => {
+                    setTyped(e.target.value);
+                    live.current?.noteWorkspaceActivity();
+                  }}
                 />
                 <Button
                   type="submit"
@@ -556,7 +591,6 @@ function Room() {
                 </Button>
               </form>
             </Panel>
-            {camera && <Webcam />}
           </aside>
         </div>
       </main>
@@ -597,7 +631,10 @@ function Room() {
             <Button
               variant="ghost"
               aria-pressed={camera}
-              onClick={() => setCamera(!camera)}
+              onClick={() => {
+                sessionStorage.setItem("mi_camera_" + sid, camera ? "0" : "1");
+                setCamera(!camera);
+              }}
             >
               {camera ? "Camera off" : "Camera self-view"}
             </Button>

@@ -17,7 +17,7 @@
     "analytics",
     "lambda-architecture"
   ],
-  "prompt": "Design a real-time ad click aggregation and analytics pipeline. Ad clicks arrive at massive volume; advertisers need near-real-time dashboards of clicks/impressions/spend per campaign (and per minute/hour), plus accurate totals for billing. Cover the streaming pipeline, time windowing, deduplication of duplicate/replayed events, exactly-once/accurate counting, and handling hot partitions from viral campaigns.",
+  "prompt": "Design a real-time ad click aggregation and analytics pipeline. Ad clicks arrive at massive volume; advertisers need near-real-time dashboards of clicks, impressions and spend per campaign and time period, plus accurate totals for billing.",
   "blurb": "A streaming aggregation firehose where the dashboard can be approximate but billing must be exact — windowing, dedup, and the hot-campaign skew.",
   "rubric": [
     {
@@ -116,7 +116,8 @@
       "Resilient to spikes and viral (hot) campaigns; no data loss for billing"
     ],
     "clarifying_questions": [
-      "Expected click volume (events/s) and event size?",
+      "Expected click volume (events/s)?",
+      "Average event size?",
       "Dashboard freshness SLA — seconds, or a minute is fine?",
       "How exact must counts be — is the live dashboard allowed to be approximate while billing is exact?",
       "Which dimensions/granularities do advertisers slice by, and what's the cardinality?",
@@ -162,53 +163,53 @@
     "deep_dives": [
       {
         "topic": "windowing",
-        "probe": "A click happens at 10:00:59 but arrives at 10:01:30 due to mobile network delay. Which minute does it count in, and how do you make that happen? Explain event-time vs processing-time, watermarks, and allowed lateness — and what you do with an event that arrives after the window has closed."
+        "probe": "A click happens at 10:00:59 but arrives at 10:01:30 due to mobile network delay. How would your design account for that click?"
       },
       {
         "topic": "dedup_exactly_once",
-        "probe": "The same click gets sent twice (client retry) and later the stream reprocesses after a failure. How do you count it exactly once? Talk through the dedup key and state, why ingest is at-least-once, how checkpointing + idempotent upserts give effective exactly-once, and how you bound dedup-state memory."
+        "probe": "The same click gets sent twice after a client retry. How does your design avoid counting it twice?"
       },
       {
         "topic": "hot_partition",
-        "probe": "A campaign goes viral and 40% of all clicks share one campaign_id, hammering one partition/operator. How do you keep the pipeline from falling over — key salting, two-stage aggregation, adaptive partitioning — and how do you recombine the partial aggregates correctly?"
+        "probe": "A campaign goes viral and generates 40% of all clicks. How does your proposed design behave under that traffic?"
       },
       {
         "topic": "accuracy_reprocessing",
-        "probe": "The dashboard showed 1.02M clicks but billing must be exact. How do the fast path and the accurate path coexist (lambda vs kappa), how do you reprocess from the raw log to correct late data, and how do you reconcile and expose the corrected number without confusing advertisers?"
+        "probe": "The live dashboard showed 1.02 million clicks, but the final billing count differs. How would your design handle that discrepancy?"
       },
       {
         "topic": "cache_stampede",
-        "probe": "You cache hot dashboard query results (top campaigns' current-hour rollups). During a traffic spike those cached rollups expire while many advertisers refresh at once. How do you avoid a stampede recomputing them from the OLAP store — coalescing, jittered TTL, serving the last rollup?"
+        "probe": "Many advertisers refresh the same dashboard just as its cached result expires. How would your design handle that load?"
       },
       {
         "topic": "cdc_enrichment",
-        "probe": "Clicks must be enriched/joined with campaign and budget data that lives in an operational database (e.g., to compute spend and stop overspend). How do you get that DB's state into the stream — CDC/Debezium into a compacted topic joined against the click stream vs point lookups — and how do you handle updates to a campaign's budget mid-stream?"
+        "probe": "A campaign budget changes while clicks are still arriving. How does that update affect your pipeline?"
       }
     ],
     "followup_bank": [
       {
-        "trigger": "mentions window or windowing",
-        "question": "Event-time vs processing-time — how do watermarks and allowed lateness place a late/out-of-order click in the right window, and what happens to events past the lateness bound?"
+        "trigger": "After the candidate completes their proposal or invites discussion, if window or windowing is relevant and materially unresolved",
+        "question": "A click happens at 10:00:59 but arrives at 10:01:30 due to mobile network delay. How would your design account for that click?"
       },
       {
-        "trigger": "mentions dedup or exactly once or duplicate",
-        "question": "What's your dedup key, how is the dedup state bounded, and how do checkpointing + idempotent upserts give exactly-once counting despite at-least-once ingest?"
+        "trigger": "After the candidate completes their proposal or invites discussion, if dedup or exactly once or duplicate is relevant and materially unresolved",
+        "question": "The same click gets sent twice after a client retry. How does your design avoid counting it twice?"
       },
       {
-        "trigger": "mentions hot or skew or viral or partition",
-        "question": "How do you handle a single campaign dominating one partition — key salting + two-stage aggregation — and how do you correctly recombine the partial counts?"
+        "trigger": "After the candidate completes their proposal or invites discussion, if hot or skew or viral or partition is relevant and materially unresolved",
+        "question": "A campaign goes viral and generates 40% of all clicks. How does your proposed design behave under that traffic?"
       },
       {
-        "trigger": "mentions cache or redis",
-        "question": "Eviction/TTL for cached dashboard rollups, and how do you prevent a stampede recomputing hot current-hour aggregates when they expire during a spike?"
+        "trigger": "After the candidate completes their proposal or invites discussion, if cache or redis is relevant and materially unresolved",
+        "question": "Many advertisers refresh the same dashboard just as its cached result expires. How would your design handle that load?"
       },
       {
-        "trigger": "mentions database or campaign store or budget",
-        "question": "How do you join click events with campaign/budget data from an operational DB — CDC/Debezium into a compacted topic vs lookups — and handle budget updates mid-stream?"
+        "trigger": "After the candidate completes their proposal or invites discussion, if database or campaign store or budget is relevant and materially unresolved",
+        "question": "A campaign budget changes while clicks are still arriving. How does that update affect your pipeline?"
       },
       {
-        "trigger": "mentions billing or accurate or exact",
-        "question": "How do the approximate streaming path and the exact batch/reprocessing path coexist, and how do you reconcile them for billing?"
+        "trigger": "After the candidate completes their proposal or invites discussion, if billing or accurate or exact is relevant and materially unresolved",
+        "question": "The live dashboard showed 1.02 million clicks, but the final billing count differs. How would your design handle that discrepancy?"
       }
     ],
     "scaling": [
@@ -252,7 +253,29 @@
       "PII minimization on user/device fields; encryption",
       "Tamper-evident raw log for billing audit"
     ],
-    "reference_answer": "A strong answer builds a log-backed streaming pipeline: lightweight edge ingest appends clicks at-least-once to a partitioned log, a stream processor does event-time windowed aggregation with watermarks and allowed lateness to handle out-of-order clicks, dedupes on click_id in bounded keyed state, and writes idempotent upserts into an OLAP store for fast dashboards. It distinguishes the approximate live path from exact billing, keeping raw events for a batch/reprocessing path that recomputes exact totals and reconciles drift (lambda, or kappa via log replay). It handles hot viral campaigns with key salting + two-stage aggregation and backpressure so billing data is never dropped. The candidate protects hot dashboard rollups from cache stampede, enriches clicks against campaign/budget data via CDC into a compacted topic, and names the hot key, dedup-state memory, late-data recompute, and high-cardinality queries as the top bottlenecks with mitigations. Effective exactly-once = at-least-once ingest + checkpointing + idempotent sink + dedup, and freshness/accuracy is monitored via pipeline lag, watermark delay, and streaming-vs-batch reconciliation."
+    "reference_answer": "A strong answer builds a log-backed streaming pipeline: lightweight edge ingest appends clicks at-least-once to a partitioned log, a stream processor does event-time windowed aggregation with watermarks and allowed lateness to handle out-of-order clicks, dedupes on click_id in bounded keyed state, and writes idempotent upserts into an OLAP store for fast dashboards. It distinguishes the approximate live path from exact billing, keeping raw events for a batch/reprocessing path that recomputes exact totals and reconciles drift (lambda, or kappa via log replay). It handles hot viral campaigns with key salting + two-stage aggregation and backpressure so billing data is never dropped. The candidate protects hot dashboard rollups from cache stampede, enriches clicks against campaign/budget data via CDC into a compacted topic, and names the hot key, dedup-state memory, late-data recompute, and high-cardinality queries as the top bottlenecks with mitigations. Effective exactly-once = at-least-once ingest + checkpointing + idempotent sink + dedup, and freshness/accuracy is monitored via pipeline lag, watermark delay, and streaming-vs-batch reconciliation.",
+    "facts": [
+      {
+        "id": "peak-click-volume",
+        "value": "500,000 clicks per second at peak.",
+        "reveal_when": "The candidate asks about click volume, event rate, traffic or peak throughput. Give this fact alone unless other facts were requested."
+      },
+      {
+        "id": "average-click-event-size",
+        "value": "Around 200 bytes per click event.",
+        "reveal_when": "The candidate asks about event size or payload size. Do not bundle this with a volume-only answer."
+      },
+      {
+        "id": "dashboard-freshness",
+        "value": "Dashboard updates within 5–10 seconds are acceptable.",
+        "reveal_when": "The candidate asks about dashboard freshness, update latency or whether a 5–10-second target is acceptable."
+      },
+      {
+        "id": "billing-accuracy",
+        "value": "The live dashboard may be approximate; billing totals must be accurate.",
+        "reveal_when": "The candidate asks about accuracy requirements or approximation."
+      }
+    ]
   },
-  "interviewer_notes": "The defining tension is approximate-dashboard vs exact-billing — strong candidates ask about it early and design two coherent paths (or a kappa replay) rather than pretending one path is both instant and perfectly exact. Push the three core deep-dives: event-time windowing with watermarks/allowed-lateness (use the late-arriving-click scenario), dedup + effective exactly-once (make them define it precisely — at-least-once ingest + checkpoint + idempotent sink + dedup, not magic), and hot-partition handling for viral campaigns (salting + two-stage aggregation with correct recombination). Use the cache/stampede probe on hot dashboard rollups and the CDC probe as enriching clicks with campaign/budget state from an operational DB. Watch for red flags: counting on the processing-time wall clock, unbounded dedup state, ignoring late data, or a single hot key with no mitigation. Reserve time for reconciliation/reprocessing and observability (lag, watermark delay, count divergence)."
+  "interviewer_notes": "Let the candidate independently clarify scope and drive a coherent design before assessment questions. State the business problem without asking what they would clarify. Answer only each requested fact: volume, event size, freshness and accuracy have separate disclosure triggers. Do not add an assessment question to clarification answers. Observe diagram/code changes silently and wait while they draw, think or explain. After the candidate finishes or invites discussion, select one or two important unresolved areas from their actual design, such as late data, counting accuracy or skew. Ask one neutral question at a time without naming a technique they have not introduced, accept valid alternatives, and return the floor instead of cycling through every probe. Private assessment priorities include event-time correctness, bounded duplicate tracking, billing reconciliation and hot-campaign resilience. Record missing independent requirements gathering for feedback rather than coaching them to do it during the interview."
 }

@@ -88,8 +88,17 @@ export function checksReady(runs, sha) {
   });
 }
 
-export function installerNames(version) {
+export function desktopPlatforms(target = "all") {
+  assert(
+    ["all", "macos", "windows", "linux"].includes(target),
+    "Desktop target must be all, macos, windows or linux",
+  );
+  return target === "all" ? ["macos", "windows", "linux"] : [target];
+}
+
+export function installerNames(version, target = "all") {
   parseVersion(version);
+  const platforms = desktopPlatforms(target);
   return [
     `MockInterview-${version}-mac-arm64.dmg`,
     `MockInterview-${version}-mac-arm64.zip`,
@@ -98,17 +107,34 @@ export function installerNames(version) {
     `MockInterview-${version}-windows-x64-setup.exe`,
     `MockInterview-${version}-linux-x86_64.AppImage`,
     `MockInterview-${version}-linux-amd64.deb`,
-  ];
+  ].filter((name) => platforms.includes(installerPlatform(name)));
 }
 
-export function desktopManifest(release) {
-  assert(
-    !release.draft && !release.prerelease,
-    "Only public stable desktop releases are advertised",
-  );
+function installerPlatform(name) {
+  return name.includes("-mac-")
+    ? "macos"
+    : name.includes("-windows-")
+      ? "windows"
+      : "linux";
+}
+
+export function desktopManifest(release, metadata) {
+  assert(!release.draft, "Only public desktop releases are advertised");
   assert(release.tag_name.startsWith("desktop-v"), "Expected desktop release");
   const version = release.tag_name.slice(9);
-  const required = installerNames(version);
+  const required = installerNames(version, metadata?.target || "all");
+  assert(
+    metadata?.schemaVersion === 1 &&
+      metadata.component === "desktop" &&
+      metadata.version === version &&
+      metadata.repository === REPOSITORY &&
+      /^[a-f0-9]{40}$/.test(metadata.sourceSha || "") &&
+      metadata.verification?.checksums === "verified" &&
+      metadata.verification?.provenance === "same-run-native-CI-receipts" &&
+      Array.isArray(metadata.files) &&
+      metadata.files.length === required.length,
+    "Missing verified desktop release metadata",
+  );
   assert(
     release.assets.some(
       (a) => a.name === "RELEASE-MANIFEST.json" && a.state === "uploaded",
@@ -117,15 +143,33 @@ export function desktopManifest(release) {
   );
   for (const name of required) {
     const asset = release.assets.find((a) => a.name === name);
+    const files = metadata.files.filter((file) => file.name === name);
+    const file = files[0];
     assert(
-      asset?.state === "uploaded" &&
+      files.length === 1 &&
+        asset?.state === "uploaded" &&
         /^sha256:[a-f0-9]{64}$/.test(asset.digest) &&
-        asset.size > 0,
+        asset.size > 0 &&
+        asset.digest === `sha256:${file.sha256}` &&
+        asset.size === file.bytes &&
+        file.platform === installerPlatform(name),
       `Missing verified installer: ${name}`,
+    );
+    const signing = file.signing;
+    assert(
+      file.platform === "linux"
+        ? signing?.status === "not-applicable" && signing.method === "none"
+        : signing?.status === "verified" &&
+            signing.method ===
+              (file.platform === "macos"
+                ? "developer-id-and-notarization"
+                : "authenticode"),
+      `Installer signing was not verified: ${name}`,
     );
   }
   return {
     tag: release.tag_name,
+    prerelease: Boolean(release.prerelease),
     assets: required
       .filter((n) => !n.endsWith(".zip"))
       .map((name) => ({
@@ -146,4 +190,25 @@ export function desktopManifest(release) {
         url: `https://github.com/${REPOSITORY}/releases/download/${release.tag_name}/${name}`,
       })),
   };
+}
+
+/** Input is newest first, and every manifest has already passed verification. */
+export function mergeDesktopManifests(manifests) {
+  if (!manifests.length) return null;
+  const platforms = new Set();
+  const assets = [];
+  for (const manifest of manifests) {
+    const selected = manifest.assets.filter(
+      (asset) => !platforms.has(asset.platform),
+    );
+    for (const asset of selected) {
+      assets.push({
+        ...asset,
+        tag: manifest.tag,
+        prerelease: manifest.prerelease,
+      });
+      platforms.add(asset.platform);
+    }
+  }
+  return { tag: manifests[0].tag, prerelease: manifests[0].prerelease, assets };
 }

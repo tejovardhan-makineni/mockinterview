@@ -6,6 +6,12 @@ on:
         description: "New desktop version, e.g. 0.1.0-beta.2 or 1.0.0"
         type: string
         required: true
+      target:
+        description: "Platforms to publish (each selected platform still requires full native verification)"
+        type: choice
+        options: [all, linux, macos, windows]
+        default: all
+        required: true
 permissions:
   contents: read
 concurrency:
@@ -24,6 +30,7 @@ jobs:
       RELEASE_SHA: ${{ github.sha }}
       RELEASE_COMPONENT: desktop
       RELEASE_VERSION: ${{ inputs.version }}
+      RELEASE_TARGET: ${{ inputs.target }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -39,6 +46,7 @@ jobs:
     uses: ./.github/workflows/desktop-build.yml
     with:
       release_version: ${{ inputs.version }}
+      release_target: ${{ inputs.target }}
     secrets: inherit
   publish:
     needs: [validate, packages]
@@ -53,6 +61,7 @@ jobs:
       RELEASE_VERSION: ${{ inputs.version }}
       RELEASE_SHA: ${{ github.sha }}
       RELEASE_COMPONENT: desktop
+      RELEASE_TARGET: ${{ inputs.target }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -71,7 +80,8 @@ jobs:
         run: |
           node scripts/github-release.mjs current
           node scripts/github-release.mjs create-tag
-          gh release create "desktop-v$RELEASE_VERSION" release-assets/* --verify-tag --draft --title "Desktop $RELEASE_VERSION" --generate-notes
+          node desktop/scripts/release-notes.mjs release-assets/RELEASE-MANIFEST.json > release-notes.md
+          gh release create "desktop-v$RELEASE_VERSION" release-assets/* --verify-tag --draft --title "Desktop $RELEASE_VERSION ($RELEASE_TARGET)" --notes-file release-notes.md
           node scripts/github-release.mjs verify-assets
       - name: Publish verified release
         shell: bash

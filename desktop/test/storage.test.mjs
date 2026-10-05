@@ -60,20 +60,22 @@ test("insecure Linux plaintext fallback is refused", async () => {
   }
 });
 
-test("consent defaults off, timestamps are shell-owned, and concurrent saves survive restarts", async () => {
+test("analytics defaults on, result sharing stays off, timestamps are shell-owned, and concurrent saves survive restarts", async () => {
   const directory = await mkdtemp(
     path.join(os.tmpdir(), "mockinterview-prefs-"),
   );
   try {
     const preferences = preferencesStore(directory);
-    assert.deepEqual(await preferences.get(), {
-      shareAnalytics: false,
+    const start = Date.now();
+    const initial = await preferences.get();
+    assert.ok(initial.analyticsSince >= start);
+    assert.deepEqual(initial, {
+      shareAnalytics: true,
       shareInterviewResults: false,
-      analyticsSince: 0,
+      analyticsSince: initial.analyticsSince,
       resultsSince: 0,
       theme: "system",
     });
-    const start = Date.now();
     await Promise.all([
       preferences.set({ shareAnalytics: true }),
       preferences.set({ theme: "dark" }),
@@ -89,7 +91,7 @@ test("consent defaults off, timestamps are shell-owned, and concurrent saves sur
       enabled.analyticsSince,
     );
     await preferences.set({ shareAnalytics: false });
-    assert.equal((await preferences.get()).analyticsSince, 0);
+    assert.equal((await preferencesStore(directory).get()).analyticsSince, 0);
     assert.throws(() => preferences.set({ analyticsSince: 1 }));
   } finally {
     await rm(directory, { recursive: true, force: true });

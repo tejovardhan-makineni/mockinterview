@@ -2,8 +2,10 @@
 import { useEffect, useRef, useState } from "react";
 export function Webcam({
   onReady,
+  compact = false,
 }: {
   onReady?: (video: HTMLVideoElement) => void;
+  compact?: boolean;
 }) {
   const ref = useRef<HTMLVideoElement>(null);
   const [error, setError] = useState("");
@@ -40,7 +42,9 @@ export function Webcam({
   }, [onReady]);
   return (
     <div className="overflow-hidden rounded-xl border border-[var(--color-line)] bg-[var(--color-panel-2)]">
-      <p className="px-3 py-2 text-xs">Your self-view · visible only to you</p>
+      <p className={compact ? "px-2 py-1 text-[10px]" : "px-3 py-2 text-xs"}>
+        {compact ? "You · private" : "Your self-view · visible only to you"}
+      </p>
       {error ? (
         <p role="status" className="p-4 text-xs">
           {error}
@@ -51,7 +55,10 @@ export function Webcam({
           muted
           playsInline
           aria-label="Your local camera preview"
-          className="w-full -scale-x-100"
+          className={
+            "w-full -scale-x-100 object-cover " +
+            (compact ? "aspect-video max-h-28" : "aspect-[4/3]")
+          }
         />
       )}
     </div>

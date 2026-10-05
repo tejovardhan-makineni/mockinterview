@@ -11,6 +11,10 @@ on:
         description: "Validated version from the protected desktop release workflow"
         type: string
         default: ""
+      release_target:
+        description: "Platforms selected by the protected desktop release workflow"
+        type: string
+        default: all
 
 permissions:
   contents: read
@@ -20,48 +24,33 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  targets:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.matrix.outputs.matrix }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: "22"
+          package-manager-cache: false
+      - id: matrix
+        run: node desktop/scripts/build-targets.mjs
+        env:
+          RELEASE_TARGET: ${{ inputs.release_target || 'all' }}
   packages:
+    needs: targets
     name: Desktop (${{ matrix.name }})
     strategy:
       fail-fast: false
-      matrix:
-        include:
-          - {
-              name: mac-arm64,
-              runner: macos-latest,
-              target: darwin,
-              arch: arm64,
-              electron_arch: arm64,
-              package: mac-arm64,
-            }
-          - {
-              name: mac-x64,
-              runner: macos-15-intel,
-              target: darwin,
-              arch: amd64,
-              electron_arch: x64,
-              package: mac,
-            }
-          - {
-              name: windows-x64,
-              runner: windows-latest,
-              target: windows,
-              arch: amd64,
-              electron_arch: x64,
-              package: win-unpacked,
-            }
-          - {
-              name: linux-x64,
-              runner: ubuntu-latest,
-              target: linux,
-              arch: amd64,
-              electron_arch: x64,
-              package: linux-unpacked,
-            }
+      matrix: ${{ fromJSON(needs.targets.outputs.matrix) }}
     runs-on: ${{ matrix.runner }}
     environment: ${{ inputs.release_version != '' && 'desktop-release' || 'desktop-preview' }}
     env:
       RELEASE_VERSION: ${{ inputs.release_version }}
+      RELEASE_TARGET: ${{ inputs.release_target || 'all' }}
       RELEASE_SHA: ${{ github.sha }}
       DESKTOP_ARTIFACT_NAME: desktop-${{ matrix.name }}
       DESKTOP_PACKAGE_DIR: ${{ matrix.package }}

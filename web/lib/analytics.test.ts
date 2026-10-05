@@ -2,6 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { api } from "./api";
 import {
   setAnalyticsConsent,
+  analyticsSince,
   syncAnalytics,
   sharedReport,
   deleteSharedAnalytics,
@@ -25,6 +26,15 @@ afterEach(() => {
   vi.unstubAllGlobals();
 });
 describe("optional result sharing", () => {
+  it("defaults to new interviews, keeps a stable cutoff, and remembers opting out", () => {
+    const before = Date.now();
+    const since = analyticsSince("new-user");
+    expect(since).toBeGreaterThanOrEqual(before);
+    expect(analyticsSince("new-user")).toBe(since);
+    setAnalyticsConsent("new-user", false);
+    expect(analyticsSince("new-user")).toBe(0);
+    expect(localStorage.getItem("mi_analytics_new-user")).toBe("0");
+  });
   it("bounds large optional reports while preserving private originals", () => {
     const report = {
       overall: 3,
@@ -84,7 +94,8 @@ describe("optional result sharing", () => {
     await deletion;
     expect(vi.mocked(fetch).mock.calls[1][1]?.method).toBe("DELETE");
   });
-  it("does no work without consent", async () => {
+  it("does no work after sharing is turned off", async () => {
+    setAnalyticsConsent("user", false);
     await syncAnalytics("user");
     expect(api.listSessions).not.toHaveBeenCalled();
     expect(fetch).not.toHaveBeenCalled();

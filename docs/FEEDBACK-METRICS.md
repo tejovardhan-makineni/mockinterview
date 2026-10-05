@@ -160,7 +160,7 @@ These metrics are operational evidence, not scores or proof of learning gains.
 
 Desktop operational metrics and questionnaires persist in local SQLite. They do
 not automatically enter the hosted administrator’s dataset. Desktop **Share
-analytics** starts off and permits new usage/error metrics; **Include interview
+analytics** starts on for new installations and can be turned off and permits new usage/error metrics; **Include interview
 results** separately permits new scores and bounded written feedback. Consent
 activation times are owned by the desktop shell and survive random loopback
 ports and app restarts. A separately connected hosted account identifies uploaded

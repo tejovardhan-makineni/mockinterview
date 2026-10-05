@@ -9,11 +9,13 @@ import {
   checksReady,
   componentReleases,
   assertNewVersion,
-  desktopManifest,
+  desktopPlatforms,
+  mergeDesktopManifests,
   installerNames,
   parseVersion,
   compareVersions,
 } from "./release-policy.mjs";
+import { verifiedDownloadManifest } from "../desktop/scripts/release-assets.mjs";
 
 const repository = process.env.GITHUB_REPOSITORY || REPOSITORY;
 assert(repository === REPOSITORY, "Production releases are disabled in forks");
@@ -49,6 +51,52 @@ async function output(key, value) {
   if (process.env.GITHUB_OUTPUT)
     await appendFile(process.env.GITHUB_OUTPUT, `${key}=${value}\n`);
   else console.log(`${key}=${value}`);
+}
+async function publishedDesktopDownloads(releases) {
+  const manifests = [];
+  for (const release of componentReleases(releases, "desktop")) {
+    const asset = release.assets.find(
+      (entry) => entry.name === "RELEASE-MANIFEST.json",
+    );
+    // Legacy drafts/previews without native signing receipts are never linked.
+    if (!asset || asset.state !== "uploaded") continue;
+    try {
+      assert(Number.isSafeInteger(asset.id) && asset.id > 0);
+      assert(asset.size > 0 && asset.size <= 64 * 1024);
+      const response = await fetch(`${apiBase}/releases/assets/${asset.id}`, {
+        headers: {
+          Accept: "application/octet-stream",
+          Authorization: `Bearer ${token}`,
+          "X-GitHub-Api-Version": "2022-11-28",
+        },
+        signal: AbortSignal.timeout(30000),
+      });
+      assert(response.ok, "Could not read release metadata");
+      const bytes = Buffer.from(await response.arrayBuffer());
+      assert(bytes.length === asset.size && bytes.length <= 64 * 1024);
+      assert(
+        asset.digest ===
+          `sha256:${createHash("sha256").update(bytes).digest("hex")}`,
+        "Release metadata checksum mismatch",
+      );
+      manifests.push(
+        verifiedDownloadManifest(release, JSON.parse(bytes.toString("utf8"))),
+      );
+    } catch (error) {
+      console.warn(
+        `Skipping unverified desktop release ${release.tag_name}: ${error.message}`,
+      );
+    }
+    if (
+      new Set(
+        manifests.flatMap((manifest) =>
+          manifest.assets.map((entry) => entry.platform),
+        ),
+      ).size === 3
+    )
+      break;
+  }
+  return mergeDesktopManifests(manifests);
 }
 async function assertMain(sha) {
   assert(/^[a-f0-9]{40}$/.test(sha), "Expected full source commit");
@@ -88,6 +136,8 @@ if (command === "gate") {
 } else if (command === "version") {
   const component = process.env.RELEASE_COMPONENT;
   assert(COMPONENTS.includes(component), "Unknown release component");
+  if (component === "desktop")
+    desktopPlatforms(process.env.RELEASE_TARGET || "all");
   const releases = await pages("/releases");
   const fallback = JSON.parse(
     await readFile(`${component}/package.json`),
@@ -126,11 +176,7 @@ if (command === "gate") {
     fallback;
   await output("version", version);
   await output("tag", `${component}-v${version}`);
-  const desktop = componentReleases(releases, "desktop").find(
-    (r) => !r.prerelease,
-  );
-  // Never advertise an incomplete or legacy unsigned release.
-  const manifest = desktop ? desktopManifest(desktop) : null;
+  const manifest = await publishedDesktopDownloads(releases);
   await output("desktop_manifest", manifest ? JSON.stringify(manifest) : "");
 } else if (command === "current") {
   await assertMain(sha);
@@ -171,7 +217,10 @@ if (command === "gate") {
       `Remote asset mismatch: ${name}`,
     );
   }
-  for (const name of installerNames(process.env.RELEASE_VERSION))
+  for (const name of installerNames(
+    process.env.RELEASE_VERSION,
+    process.env.RELEASE_TARGET || "all",
+  ))
     assert(
       release.assets.some((a) => a.name === name),
       `Missing installer ${name}`,

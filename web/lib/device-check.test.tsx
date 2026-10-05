@@ -6,6 +6,26 @@ import { DeviceCheck } from "../components/studio/DeviceCheck";
 let root: Root | undefined;
 let inputLevel: number;
 let contexts: FakeAudioContext[];
+let recordings: FakeMediaRecorder[];
+
+class FakeMediaRecorder {
+  state: RecordingState = "inactive";
+  mimeType = "audio/webm";
+  ondataavailable: ((event: { data: Blob }) => void) | null = null;
+  onstop: (() => void) | null = null;
+  onerror: (() => void) | null = null;
+  start = vi.fn(() => {
+    this.state = "recording";
+  });
+  stop = vi.fn(() => {
+    this.state = "inactive";
+    this.ondataavailable?.({ data: new Blob(["the candidate’s own voice"]) });
+    this.onstop?.();
+  });
+  constructor() {
+    recordings.push(this);
+  }
+}
 
 class FakeAudioContext {
   state = "suspended";
@@ -38,11 +58,24 @@ function microphone() {
   return { track, stream };
 }
 
-function Setup({ mode = "voice" }: { mode?: "voice" | "text" }) {
+function Setup({
+  mode = "voice",
+  cameraOption = false,
+}: {
+  mode?: "voice" | "text";
+  cameraOption?: boolean;
+}) {
   const [ready, setReady] = useState(false);
+  const [camera, setCamera] = useState(false);
   return (
     <>
-      <DeviceCheck mode={mode} onReady={setReady} onDevice={() => {}} />
+      <DeviceCheck
+        mode={mode}
+        onReady={setReady}
+        onDevice={() => {}}
+        camera={camera}
+        onCamera={cameraOption ? setCamera : undefined}
+      />
       <button disabled={!ready}>Start interview</button>
     </>
   );
@@ -68,6 +101,18 @@ async function click(label: string) {
 beforeEach(() => {
   inputLevel = 0.03;
   contexts = [];
+  recordings = [];
+  vi.useFakeTimers();
+  vi.stubGlobal("MediaRecorder", FakeMediaRecorder);
+  vi.stubGlobal(
+    "URL",
+    class extends URL {
+      static createObjectURL = vi.fn(() => "blob:microphone-test");
+      static revokeObjectURL = vi.fn();
+    },
+  );
+  vi.spyOn(HTMLMediaElement.prototype, "play").mockResolvedValue();
+  vi.spyOn(HTMLMediaElement.prototype, "pause").mockImplementation(() => {});
   vi.stubGlobal("IS_REACT_ACT_ENVIRONMENT", true);
   vi.stubGlobal("AudioContext", FakeAudioContext);
   vi.stubGlobal(
@@ -88,6 +133,7 @@ beforeEach(() => {
 afterEach(async () => {
   if (root) await act(async () => root?.unmount());
   root = undefined;
+  vi.useRealTimers();
   vi.restoreAllMocks();
   vi.unstubAllGlobals();
 });
@@ -103,11 +149,11 @@ describe("interview microphone readiness", () => {
       vi.mocked(requestAnimationFrame).mock.calls.at(-1)![0](performance.now());
     });
     expect(document.querySelector("meter")!.value).toBeGreaterThan(0);
-    expect(document.querySelector('[role="status"]')!.textContent).toContain(
+    expect(document.body.textContent).toContain(
       "Microphone is working — input detected",
     );
     expect(button("Start interview").disabled).toBe(false);
-    expect(button("Play speaker test (optional)")).toBeDefined();
+    expect(button("Play speaker test")).toBeDefined();
     expect(document.querySelector('input[type="checkbox"]')).toBeNull();
   });
 
@@ -166,6 +212,10 @@ describe("interview microphone readiness", () => {
       .mockRejectedValueOnce(new Error("Microphone unavailable"));
     await render();
     await click("Check microphone");
+    await click("Stop & play back");
+    await act(async () =>
+      document.querySelector("audio")!.dispatchEvent(new Event("ended")),
+    );
     await click("Check microphone again");
     expect(button("Start interview").disabled).toBe(true);
     expect(mic.track.stop).toHaveBeenCalledOnce();
@@ -188,7 +238,7 @@ describe("interview microphone readiness", () => {
     await act(async () => grant(mic.stream));
     expect(mic.track.stop).toHaveBeenCalledOnce();
     expect(button("Start interview").disabled).toBe(true);
-    expect(document.body.textContent).toContain("Permission check cancelled");
+    expect(document.body.textContent).toContain("Microphone check cancelled");
     expect(contexts[0].close).toHaveBeenCalledOnce();
   });
 
@@ -232,5 +282,105 @@ describe("interview microphone readiness", () => {
     expect(mic.track.stop).toHaveBeenCalledOnce();
     expect(contexts[0].close).toHaveBeenCalledOnce();
     expect(cancelAnimationFrame).toHaveBeenCalled();
+  });
+  it("records a short local clip and plays back the candidate’s own voice", async () => {
+    const mic = microphone();
+    vi.mocked(navigator.mediaDevices.getUserMedia).mockResolvedValue(
+      mic.stream,
+    );
+    await render();
+    await click("Check microphone");
+    expect(recordings[0].start).toHaveBeenCalledOnce();
+    expect(button("Cancel check")).toBeDefined();
+    await act(async () => vi.advanceTimersByTime(5000));
+    const player = document.querySelector("audio")!;
+    expect(player.getAttribute("src")).toBe("blob:microphone-test");
+    expect(player.controls).toBe(true);
+    expect(HTMLMediaElement.prototype.play).toHaveBeenCalledOnce();
+    expect(mic.track.stop).toHaveBeenCalledOnce();
+    expect(contexts[0].close).toHaveBeenCalledOnce();
+    expect(document.body.textContent).toContain(
+      "Listen back to what you just said",
+    );
+    expect(button("Start interview").disabled).toBe(false);
+    await act(async () => player.dispatchEvent(new Event("ended")));
+    expect(button("Check microphone again").disabled).toBe(false);
+  });
+
+  it("allows an early playback and cancels either recording or playback", async () => {
+    await render();
+    await click("Check microphone");
+    await click("Cancel check");
+    expect(recordings[0].stop).toHaveBeenCalledOnce();
+    expect(document.querySelector("audio")).toBeNull();
+    await act(async () => vi.advanceTimersByTime(5000));
+    expect(HTMLMediaElement.prototype.play).not.toHaveBeenCalled();
+    await click("Check microphone");
+    await click("Stop & play back");
+    expect(document.querySelector("audio")).not.toBeNull();
+    await click("Cancel check");
+    expect(HTMLMediaElement.prototype.pause).toHaveBeenCalled();
+    expect(URL.revokeObjectURL).toHaveBeenCalledWith("blob:microphone-test");
+    expect(document.querySelector("audio")).toBeNull();
+  });
+
+  it("keeps playback controls when autoplay is blocked", async () => {
+    vi.mocked(HTMLMediaElement.prototype.play).mockRejectedValue(
+      new Error("User gesture required"),
+    );
+    await render();
+    await click("Check microphone");
+    await click("Stop & play back");
+    expect(document.body.textContent).toContain("Press play below");
+    expect(document.querySelector("audio")!.controls).toBe(true);
+    expect(button("Check microphone again").disabled).toBe(false);
+  });
+
+  it("discards the local recording when leaving setup", async () => {
+    await render();
+    await click("Check microphone");
+    await click("Stop & play back");
+    await act(async () => root!.unmount());
+    root = undefined;
+    expect(URL.revokeObjectURL).toHaveBeenCalledWith("blob:microphone-test");
+    expect(HTMLMediaElement.prototype.pause).toHaveBeenCalled();
+  });
+
+  it("plays a spoken sentence and allows the speaker sample to stop", async () => {
+    const speak = vi.fn();
+    const cancel = vi.fn();
+    class Utterance {
+      constructor(public text: string) {}
+      onend = null;
+      onerror = null;
+    }
+    vi.stubGlobal("speechSynthesis", { speak, cancel });
+    vi.stubGlobal("SpeechSynthesisUtterance", Utterance);
+    await render();
+    await click("Play speaker test");
+    expect(speak).toHaveBeenCalledOnce();
+    expect(speak.mock.calls[0][0].text).toContain(
+      "Welcome to your practice interview",
+    );
+    expect(speak.mock.calls[0][0].text.split(" ").length).toBeGreaterThan(20);
+    await click("Stop speaker test");
+    expect(cancel).toHaveBeenCalledOnce();
+    expect(button("Play speaker test").disabled).toBe(false);
+  });
+
+  it("requests camera access only after the setup self-view is selected", async () => {
+    root = createRoot(document.querySelector("#device-check-test")!);
+    await act(async () => root!.render(<Setup mode="text" cameraOption />));
+    expect(navigator.mediaDevices.getUserMedia).not.toHaveBeenCalled();
+    await act(async () =>
+      (
+        document.querySelector('input[type="checkbox"]') as HTMLInputElement
+      ).click(),
+    );
+    expect(navigator.mediaDevices.getUserMedia).toHaveBeenCalledWith({
+      video: { width: 480, height: 360 },
+      audio: false,
+    });
+    expect(document.querySelector("video")).not.toBeNull();
   });
 });

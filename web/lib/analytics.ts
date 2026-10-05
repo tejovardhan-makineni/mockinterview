@@ -7,7 +7,7 @@ import {
 import type { Report } from "./features/interview";
 import { api, IS_MOCK } from "./api";
 
-export const ANALYTICS_VERSION = "2026-10-04";
+export const ANALYTICS_VERSION = "2026-10-05";
 export const REMOTE_ANALYTICS_BASE = IS_DESKTOP
   ? "/desktop/remote"
   : process.env.NEXT_PUBLIC_ANALYTICS_API_BASE || "";
@@ -21,7 +21,12 @@ const preferenceKey = (uid: string) => "mi_analytics_" + uid;
 export function analyticsSince(uid: string): number {
   if (IS_DESKTOP) return desktopPreferences().analyticsSince;
   try {
-    return Number(localStorage.getItem(preferenceKey(uid))) || 0;
+    const stored = localStorage.getItem(preferenceKey(uid));
+    if (stored !== null) return Math.max(0, Number(stored) || 0);
+    // Start with new interviews only; never backfill existing private history.
+    const since = Date.now();
+    localStorage.setItem(preferenceKey(uid), String(since));
+    return since;
   } catch {
     return 0;
   }
@@ -31,7 +36,7 @@ export function setAnalyticsConsent(uid: string, enabled: boolean) {
   if (IS_DESKTOP) return saveDesktopPreferences({ shareAnalytics: enabled });
   try {
     if (enabled) localStorage.setItem(preferenceKey(uid), String(Date.now()));
-    else localStorage.removeItem(preferenceKey(uid));
+    else localStorage.setItem(preferenceKey(uid), "0");
   } catch {
     /* Optional sharing never blocks practice. */
   }
