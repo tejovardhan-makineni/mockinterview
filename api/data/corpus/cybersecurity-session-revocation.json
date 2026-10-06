@@ -1,0 +1,137 @@
+{
+  "schema_version": 1,
+  "revision": 1,
+  "format_id": "incident-simulation",
+  "review_status": "preview",
+  "provenance": {
+    "authorship": "Original project scenario, AI-assisted draft. Practitioner review and calibration pending.",
+    "license": "MIT"
+  },
+  "minutes": 30,
+  "id": "cybersecurity-session-revocation",
+  "title": "Senior Security Analyst: Contain a Stolen Session Without Losing Evidence",
+  "track": "professional",
+  "domain": "security_operations",
+  "areas": [
+    "cybersecurity"
+  ],
+  "modality": "conversational",
+  "difficulty": "senior",
+  "role_track": "individual_contributor",
+  "tags": [
+    "cybersecurity",
+    "senior-specialist",
+    "evidence-based-practice",
+    "community-preview"
+  ],
+  "prompt": "You are the senior security analyst for a fictional document service. At 10:04 an employee reports approving an unexpected sign-in prompt. At 10:06 the audit log shows that employee’s account creating an external sharing link for a folder. The employee says they did not create it. The supplied incident procedure authorizes revoking active sessions, disabling existing external sharing links, suspending new external sharing and preserving logs; deleting accounts or files requires separate approval. Walk through containment, investigation and a verified handoff using only this authorized fictional system.",
+  "blurb": "Contain suspected session misuse, preserve evidence and distinguish exposure risk from confirmed access.",
+  "rubric": [
+    {
+      "key": "containment",
+      "label": "Close each demonstrated access path",
+      "description": "Chooses authorized containment matching the service’s semantics.",
+      "weight": 1,
+      "anchors": {
+        "0": "Only resets the password or deletes the account and evidence.",
+        "2": "Revokes sessions and disables new external sharing.",
+        "4": "Also disables the existing link, confirms control success and separates rapid containment from later account recovery without destructive unsupported actions."
+      }
+    },
+    {
+      "key": "evidence",
+      "label": "Preserve and interpret incomplete evidence",
+      "description": "Retains the timeline and recognizes delayed telemetry.",
+      "weight": 1,
+      "anchors": {
+        "0": "Declares no exposure because no download is yet logged.",
+        "2": "Preserves sign-in and sharing records and notes the delay.",
+        "4": "Records timestamps, control actions and export integrity; schedules a later log check and distinguishes confirmed link creation from unconfirmed external access."
+      }
+    },
+    {
+      "key": "scope",
+      "label": "Hand off bounded hypotheses and recovery gates",
+      "description": "Communicates known scope and assigns unresolved checks.",
+      "weight": 1,
+      "anchors": {
+        "0": "Announces a confirmed data breach or clears the account without evidence.",
+        "2": "Escalates to the incident lead with known facts and open questions.",
+        "4": "Assigns session review, delayed-access review, sensitivity review and recovery verification; states what new evidence would expand scope or change notification decisions."
+      }
+    }
+  ],
+  "reference": {
+    "scenario": "You are the senior security analyst for a fictional document service. At 10:04 an employee reports approving an unexpected sign-in prompt. At 10:06 the audit log shows that employee’s account creating an external sharing link for a folder. The employee says they did not create it. The supplied incident procedure authorizes revoking active sessions, disabling existing external sharing links, suspending new external sharing and preserving logs; deleting accounts or files requires separate approval. Walk through containment, investigation and a verified handoff using only this authorized fictional system.",
+    "facts": [
+      {
+        "id": "session",
+        "value": "Password reset alone does not revoke existing sessions in this fictional service. Session revocation invalidates them immediately; disabling new links does not disable an existing link.",
+        "reveal_when": "candidate asks how session or sharing controls work"
+      },
+      {
+        "id": "link",
+        "value": "The link was created at 10:06 and can be disabled separately. Access logging is delayed by up to 15 minutes, so absence of an access event now is not evidence of no access.",
+        "reveal_when": "candidate asks about link state, access evidence or log completeness"
+      },
+      {
+        "id": "impact",
+        "value": "The folder contains internal planning material; no record-level sensitivity review has occurred. An evidence export and link disablement can occur independently. The incident lead decides notifications after scope review.",
+        "reveal_when": "candidate asks about data classification, preservation dependencies or notifications"
+      }
+    ],
+    "model_points": [
+      "Unexpected approval plus an unrecognized link supports suspected misuse, but does not establish the full mechanism or data accessed.",
+      "Containment must address current sessions and the existing link; blocking future links covers a different path.",
+      "Preserve logs while containing, then revisit delayed telemetry. No exploitation or actual credential handling is part of the exercise."
+    ],
+    "probes": [
+      {
+        "trigger": "candidate only proposes a password reset",
+        "question": "Under the supplied service behavior, which access paths remain usable?"
+      },
+      {
+        "trigger": "candidate proposes temporarily suspending the account",
+        "question": "What approval and service-impact checks are needed, and how will you preserve evidence?"
+      },
+      {
+        "trigger": "candidate corrects an earlier claim of no external access",
+        "question": "How will you update the incident record to distinguish missing telemetry from evidence of no access?"
+      }
+    ],
+    "fair_alternatives": [
+      "An authorized temporary account restriction can supplement revocation if its impact and approval are checked.",
+      "Parallel evidence export and link disablement are acceptable; do not demand a single serial ordering when independent responders are available."
+    ],
+    "red_flags": [
+      "Only resets the password or deletes the account and evidence.",
+      "Declares no exposure because no download is yet logged.",
+      "Announces a confirmed data breach or clears the account without evidence."
+    ],
+    "follow_ups": [
+      "Build a containment verification table"
+    ],
+    "assessment_limits": [
+      "Assess only reasoning and communication demonstrated in this fictional task, not real-world professional competence, licensure or hiring readiness. No real action, external verification or tool execution has occurred.",
+      "Credit relevant plain-language reasoning and valid alternatives without requiring experience at a particular employer. Examples from education, volunteering, community work or paid work are equally acceptable when relevant.",
+      "A missing or unasked dimension is not assessed, not automatically a failure. In simulation, use neutral probes and reveal facts only when triggered; in coaching, label assistance and distinguish assisted performance from independent evidence.",
+      "Credit an explicit late correction using the final demonstrated reasoning while retaining the evidence of the earlier mistake; do not force agreement with one exemplar.",
+      "Do not penalize the candidate for a conditional fact that was never revealed. Credit an appropriate request for missing information and a conditional plan; distinguish the candidate’s assumptions from interviewer-supplied facts."
+    ]
+  },
+  "interviewer_notes": "Play the relevant reviewing colleague or stakeholder using the supplied facts only. Start with one focused question, not the full rubric. Ask for clarification before treating an ambiguous answer as wrong. Reveal conditional facts when their stated triggers are met, permit equivalent valid approaches and never invent organizational rules, laws, clinical findings, ratings or missing outcomes. Do not require a polished artifact or specialist software. In a short session prioritize the main decision and one material follow-up; allow silence for thinking, check in neutrally, and leave time for the candidate to correct their recommendation and ask a final question. Distinguish simulation from coaching and record any help given. Assess job-relevant evidence, not accent, confidence, speed, credentials or prestige. This is independent practice for adults 18+ and is not a real professional workflow.",
+  "learning_drills": [
+    {
+      "id": "decision-review",
+      "title": "Build a containment verification table",
+      "minutes": 5,
+      "prompt": "Build a containment verification table. Use the fictional facts from this exercise. This is self-guided practice; no model assessment is performed.",
+      "checklist": [
+        "List current sessions and existing links separately",
+        "Record authorized controls and results",
+        "Flag delayed logs",
+        "Define recovery and scope owners"
+      ]
+    }
+  ]
+}

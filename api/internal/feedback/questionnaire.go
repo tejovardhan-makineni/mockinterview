@@ -25,7 +25,7 @@ type Questionnaire struct {
 type subject struct{ key, label, focus, domains string }
 
 var subjects = []subject{
-	{"software_design", "Software design", "your reasoning about software design decisions", "system_design,low_level_design"},
+	{"software_design", "Software design", "your reasoning about software design decisions", "system_design,low_level_design,technical_strategy"},
 	{"ml_design", "Machine-learning design", "your reasoning about machine-learning system decisions", "ml_system_design"},
 	{"coding", "Coding", "your reasoning about the coding solution", "coding"},
 	{"work_sample", "Work-sample review", "your reasoning about the work sample", "code_review,sql_review,ai_critique"},
@@ -35,13 +35,25 @@ var subjects = []subject{
 	{"clinical_reasoning", "Clinical reasoning", "your reasoning about the fictional clinical case", "clinical_reasoning"},
 	{"healthcare_scenarios", "Healthcare scenarios", "your decisions in the fictional healthcare scenario", "medical_residency,prioritization"},
 	{"legal", "Legal scenarios", "your reasoning about the fictional legal scenario", "issue_spotting,legal_practice"},
-	{"data_experimentation", "Data and experimentation", "your reasoning about data and evidence", "experimentation"},
+	{"data_experimentation", "Data and experimentation", "your reasoning about data and evidence", "experimentation,measurement_governance"},
 	{"product_marketing", "Product and marketing", "your reasoning about product or market decisions", "product_sense,go_to_market"},
 	{"finance", "Finance", "your financial reasoning", "valuation"},
 	{"ux", "User experience", "your reasoning about user-experience decisions", "design_critique,portfolio_review"},
 	{"roleplay", "Role-play", "your decisions during the role-play", "sales_roleplay,stakeholder_roleplay,employee_relations,classroom_management"},
 	{"incident_response", "Incident response", "your reasoning about incident response", "incident_response"},
 	{"candidate_questions", "Candidate questions", "the role-fit concerns behind your questions", "candidate_questions"},
+	// New domains only: preserve the wording/grouping of earlier saved attempts.
+	{"people_management", "People management", "your decisions about people, team responsibilities and management follow-through", "delegation,performance_feedback,capacity_planning,performance_support,management_hiring,team_conflict,manager_development,portfolio_capacity"},
+	{"engineering_management", "Engineering management", "your reasoning about engineering leadership and team outcomes", "engineering_delivery,engineering_reliability,engineering_coaching"},
+	{"organizational_leadership", "Organizational leadership", "your reasoning about organizational choices, tradeoffs and accountability", "organizational_design,strategy_execution,investment_governance,leadership_alignment,board_communication,crisis_governance,succession_planning"},
+	{"pharmacy_operations", "Pharmacy interview practice", "your communication, verification and handoff decisions in the fictional pharmacy scenario", "pharmacy_intake,pharmacy_handoff,pharmacy_service_quality"},
+	{"dental_operations", "Dental interview practice", "your communication and coordination decisions in the fictional dental scenario", "dental_communication,dental_referral,dental_service_review"},
+	{"allied_health_operations", "Allied health interview practice", "your communication, evidence and coordination decisions in the fictional therapy scenario", "therapy_communication,rehabilitation_handoff,allied_health_quality"},
+	{"veterinary_operations", "Veterinary interview practice", "your communication and handoff decisions in the fictional veterinary scenario", "veterinary_client_communication,veterinary_handoff,veterinary_service_quality"},
+	{"architecture", "Architecture", "your reasoning about the design brief, documentation and coordination", "architectural_documentation,architectural_briefing,architectural_change_control"},
+	{"manufacturing", "Manufacturing", "your reasoning about production evidence, traceability and process changes", "manufacturing_traceability,manufacturing_flow,manufacturing_change_validation"},
+	{"aviation_operations", "Aviation operations interview practice", "your verification, communication and coordination decisions in the fictional aviation scenario", "aviation_document_control,aviation_passenger_coordination,aviation_training_analysis"},
+	{"agriculture", "Agriculture", "your reasoning about field evidence, planning and uncertainty", "agricultural_sampling,agricultural_trial_planning,agricultural_trial_analysis"},
 }
 
 // Decode only public catalog metadata from the frozen snapshot. Never return

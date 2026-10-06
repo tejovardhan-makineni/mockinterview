@@ -1,0 +1,137 @@
+{
+  "schema_version": 1,
+  "revision": 1,
+  "format_id": "work-sample-defense",
+  "review_status": "preview",
+  "provenance": {
+    "authorship": "Original project scenario, AI-assisted draft. Practitioner review and calibration pending.",
+    "license": "MIT"
+  },
+  "minutes": 30,
+  "id": "nursing-handoff-reconciliation",
+  "title": "Senior Nurse: Reconcile a Conflicting Transfer Handoff",
+  "track": "professional",
+  "domain": "prioritization",
+  "areas": [
+    "nursing"
+  ],
+  "modality": "written",
+  "difficulty": "senior",
+  "role_track": "individual_contributor",
+  "tags": [
+    "nursing",
+    "senior-specialist",
+    "evidence-based-practice",
+    "community-preview"
+  ],
+  "prompt": "In this fictional educational exercise, you are a senior nurse receiving a transfer handoff. The verbal handoff says all follow-up tasks are complete. The written checklist has an unresolved item marked “review by receiving clinician before the next scheduled procedure,” and the receiving clinician has not acknowledged it. The transport team is ready to move the patient to the procedure area. Supplied local process requires acknowledgment of unresolved transfer items and confirmation of readiness before transfer to that area. Explain how you would reconcile the conflict and establish a safe, documented handoff. No diagnosis, medication or treatment is requested.",
+  "blurb": "Resolve contradictory handoff evidence and verify readiness without substituting assumptions for clinical acknowledgment.",
+  "rubric": [
+    {
+      "key": "reconciliation",
+      "label": "Resolve contradictory handoff statements",
+      "description": "Checks meaning and source before treating the task as complete.",
+      "weight": 1,
+      "anchors": {
+        "0": "Uses the verbal summary to erase the open checklist item.",
+        "2": "Recognizes the conflict and asks the sending nurse to clarify.",
+        "4": "Distinguishes transport paperwork from the unresolved clinical item and preserves the correct document version and owner."
+      }
+    },
+    {
+      "key": "readiness",
+      "label": "Apply the supplied transfer gate",
+      "description": "Pauses progression proportionately until the required confirmation exists.",
+      "weight": 1,
+      "anchors": {
+        "0": "Sends the patient to the procedure area without readiness confirmation.",
+        "2": "Holds transport and contacts the receiving clinician.",
+        "4": "Obtains acknowledgment and documented next steps, confirms readiness through the supplied process and coordinates the available slot hold without inventing treatment."
+      }
+    },
+    {
+      "key": "coordination",
+      "label": "Delegate and close the communication loop",
+      "description": "Uses colleagues within scope and provides an accountable update.",
+      "weight": 1,
+      "anchors": {
+        "0": "Asks an administrative colleague to interpret the clinical item.",
+        "2": "Delegates record checking and updates transport.",
+        "4": "Assigns independent checks, sets a near-term update to transport and the coordinator, and verifies the final handoff rather than assuming a sent message was received."
+      }
+    }
+  ],
+  "reference": {
+    "scenario": "In this fictional educational exercise, you are a senior nurse receiving a transfer handoff. The verbal handoff says all follow-up tasks are complete. The written checklist has an unresolved item marked “review by receiving clinician before the next scheduled procedure,” and the receiving clinician has not acknowledged it. The transport team is ready to move the patient to the procedure area. Supplied local process requires acknowledgment of unresolved transfer items and confirmation of readiness before transfer to that area. Explain how you would reconcile the conflict and establish a safe, documented handoff. No diagnosis, medication or treatment is requested.",
+    "facts": [
+      {
+        "id": "source",
+        "value": "The sending nurse confirms the unresolved item remains open; the verbal phrase “all complete” referred only to transport paperwork. The receiving clinician is reachable through the team contact.",
+        "reveal_when": "candidate asks to clarify the handoff or contact the responsible clinician"
+      },
+      {
+        "id": "timing",
+        "value": "There are 20 minutes before the procedure slot. The procedure-area coordinator can hold the slot while readiness is checked. Transport may wait, but must receive a specific update.",
+        "reveal_when": "candidate asks about timing or reversible pause options"
+      },
+      {
+        "id": "scope",
+        "value": "A colleague can check the document versions and contact the coordinator. Only the receiving clinician can determine the clinical meaning of the open item; nursing records acknowledgment, next steps and readiness confirmation.",
+        "reveal_when": "candidate asks about delegation or scope of decisions"
+      }
+    ],
+    "model_points": [
+      "The conflict is partly semantic, but the open item remains real until the receiving clinician reviews it.",
+      "A brief, explicit hold is supported by the supplied readiness gate and available slot hold; avoid implying indefinite delay is automatically safer.",
+      "The scenario assesses handoff reasoning and communication, not clinical competence or a particular treatment choice."
+    ],
+    "probes": [
+      {
+        "trigger": "candidate asks for clarification but allows transport to proceed",
+        "question": "What evidence satisfies the supplied readiness gate before movement to the procedure area?"
+      },
+      {
+        "trigger": "candidate chooses to cancel the slot immediately",
+        "question": "What does the available 20-minute hold make possible, and when would cancellation become necessary?"
+      },
+      {
+        "trigger": "candidate revises an initial assumption that everything was complete",
+        "question": "How will you correct the handoff record and update people relying on the earlier summary?"
+      }
+    ],
+    "fair_alternatives": [
+      "Another authorized clinician may accept the item when coverage is explicit and readiness is confirmed.",
+      "Parallel coordination is acceptable; assess clear responsibilities rather than a fixed sequence of phone calls."
+    ],
+    "red_flags": [
+      "Uses the verbal summary to erase the open checklist item.",
+      "Sends the patient to the procedure area without readiness confirmation.",
+      "Asks an administrative colleague to interpret the clinical item."
+    ],
+    "follow_ups": [
+      "Write a closed transfer handoff"
+    ],
+    "assessment_limits": [
+      "Assess only reasoning and communication demonstrated in this fictional task, not real-world professional competence, licensure or hiring readiness. No real action, external verification or tool execution has occurred.",
+      "Credit relevant plain-language reasoning and valid alternatives without requiring experience at a particular employer. Examples from education, volunteering, community work or paid work are equally acceptable when relevant.",
+      "A missing or unasked dimension is not assessed, not automatically a failure. In simulation, use neutral probes and reveal facts only when triggered; in coaching, label assistance and distinguish assisted performance from independent evidence.",
+      "Credit an explicit late correction using the final demonstrated reasoning while retaining the evidence of the earlier mistake; do not force agreement with one exemplar.",
+      "Do not penalize the candidate for a conditional fact that was never revealed. Credit an appropriate request for missing information and a conditional plan; distinguish the candidate’s assumptions from interviewer-supplied facts."
+    ]
+  },
+  "interviewer_notes": "Play the relevant reviewing colleague or stakeholder using the supplied facts only. Start with one focused question, not the full rubric. Ask for clarification before treating an ambiguous answer as wrong. Reveal conditional facts when their stated triggers are met, permit equivalent valid approaches and never invent organizational rules, laws, clinical findings, ratings or missing outcomes. Do not require a polished artifact or specialist software. In a short session prioritize the main decision and one material follow-up; allow silence for thinking, check in neutrally, and leave time for the candidate to correct their recommendation and ask a final question. Distinguish simulation from coaching and record any help given. Assess job-relevant evidence, not accent, confidence, speed, credentials or prestige. This is independent practice for adults 18+ and is not a real professional workflow.",
+  "learning_drills": [
+    {
+      "id": "decision-review",
+      "title": "Write a closed transfer handoff",
+      "minutes": 5,
+      "prompt": "Write a closed transfer handoff. Use the fictional facts from this exercise. This is self-guided practice; no model assessment is performed.",
+      "checklist": [
+        "Name the unresolved item and source",
+        "Obtain clinician acknowledgment",
+        "Record readiness confirmation",
+        "Give transport a timed update"
+      ]
+    }
+  ]
+}

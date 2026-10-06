@@ -1,0 +1,137 @@
+{
+  "schema_version": 1,
+  "revision": 1,
+  "format_id": "work-sample-defense",
+  "review_status": "preview",
+  "provenance": {
+    "authorship": "Original project scenario, AI-assisted draft. Practitioner review and calibration pending.",
+    "license": "MIT"
+  },
+  "minutes": 20,
+  "id": "civil-drainage-level-check",
+  "title": "Junior Civil Engineer: Check a Drainage Gradient Note",
+  "track": "engineering",
+  "domain": "transportation",
+  "areas": [
+    "civil_engineering"
+  ],
+  "modality": "written",
+  "difficulty": "junior",
+  "role_track": "individual_contributor",
+  "tags": [
+    "civil-engineering",
+    "junior-specialist",
+    "evidence-based-practice",
+    "community-preview"
+  ],
+  "prompt": "You are a junior civil engineer checking a fictional site drainage drawing on paper. A proposed channel runs 40 m horizontally from point A to point B. The invert level at A is 100.60 m and at B is 100.20 m, on the same stated datum. The design brief permits a gradient from 0.5% to 2.0% for this exercise. A drawing note says “fall = 0.40%; construction ready.” Calculate the fall and gradient, identify what the supplied numbers establish and prepare questions before the supervising engineer reviews the drawing. No construction work or real code approval is requested.",
+  "blurb": "Distinguish level difference from percentage gradient and check drawing assumptions before a site handoff.",
+  "rubric": [
+    {
+      "key": "calculation",
+      "label": "Calculate fall and gradient with units",
+      "description": "Separates vertical difference from dimensionless slope.",
+      "weight": 1,
+      "anchors": {
+        "0": "Calls a 0.40 m fall a 0.40% gradient.",
+        "2": "Calculates 0.40 m over 40 m as 1.0%.",
+        "4": "States flow is toward B under the proposed levels, calculates 0.01 or 1.0% and compares it with the supplied 0.5–2.0% exercise range."
+      }
+    },
+    {
+      "key": "assumptions",
+      "label": "Identify what the calculation does not prove",
+      "description": "Checks datum, source and interfaces.",
+      "weight": 1,
+      "anchors": {
+        "0": "Treats numerical gradient compliance as construction approval.",
+        "2": "Asks whether levels and the receiving connection are verified.",
+        "4": "Distinguishes proposed from surveyed levels and flags the receiving invert and service crossing as unresolved without inventing clearance values."
+      }
+    },
+    {
+      "key": "handoff",
+      "label": "Prepare a useful supervised review",
+      "description": "Communicates a clear correction and evidence request.",
+      "weight": 1,
+      "anchors": {
+        "0": "Changes site levels or issues an instruction to build.",
+        "2": "Corrects the note and sends it for review.",
+        "4": "Documents units, source drawing and open checks, requests authorized survey/interface information and leaves approval with the supervising engineer."
+      }
+    }
+  ],
+  "reference": {
+    "scenario": "You are a junior civil engineer checking a fictional site drainage drawing on paper. A proposed channel runs 40 m horizontally from point A to point B. The invert level at A is 100.60 m and at B is 100.20 m, on the same stated datum. The design brief permits a gradient from 0.5% to 2.0% for this exercise. A drawing note says “fall = 0.40%; construction ready.” Calculate the fall and gradient, identify what the supplied numbers establish and prepare questions before the supervising engineer reviews the drawing. No construction work or real code approval is requested.",
+    "facts": [
+      {
+        "id": "survey",
+        "value": "The levels are proposed design levels, not verified survey measurements. The receiving connection level is shown from an old drawing and has not been checked on site.",
+        "reveal_when": "candidate asks about the source or verification of levels"
+      },
+      {
+        "id": "interface",
+        "value": "The channel connects at B to an existing drain. An underground service is shown crossing the route, but its depth is unconfirmed.",
+        "reveal_when": "candidate asks about downstream connection or interfaces"
+      },
+      {
+        "id": "review",
+        "value": "The junior engineer may mark up the calculation and request survey information. The supervising engineer owns design approval and coordination of any authorized site checks.",
+        "reveal_when": "candidate asks about responsibility or next steps"
+      }
+    ],
+    "model_points": [
+      "100.60−100.20=0.40 m. Dividing by 40 m gives 0.01, or 1.0%, within the supplied exercise range.",
+      "The note confuses a vertical length with a percentage and overstates what a paper calculation establishes.",
+      "Interface evidence and authorization are still needed; do not invent local drainage rules or utility-clearance requirements."
+    ],
+    "probes": [
+      {
+        "trigger": "candidate reports 0.40% as the gradient",
+        "question": "What units result when you divide the 0.40 m fall by the 40 m horizontal run?"
+      },
+      {
+        "trigger": "candidate proposes re-surveying the entire site",
+        "question": "Which specific measurements resolve the receiving connection and crossing uncertainties first?"
+      },
+      {
+        "trigger": "candidate corrects the flow direction from A to B",
+        "question": "Which level comparison establishes that direction, and what part remains unverified in the field?"
+      }
+    ],
+    "fair_alternatives": [
+      "A sketch, ratio or percentage calculation is acceptable if direction and units are correct.",
+      "A targeted survey request or a broader coordinated survey can be justified by the interfaces; no particular surveying tool is required."
+    ],
+    "red_flags": [
+      "Calls a 0.40 m fall a 0.40% gradient.",
+      "Treats numerical gradient compliance as construction approval.",
+      "Changes site levels or issues an instruction to build."
+    ],
+    "follow_ups": [
+      "Annotate the gradient review"
+    ],
+    "assessment_limits": [
+      "Assess only reasoning and communication demonstrated in this fictional task, not real-world professional competence, licensure or hiring readiness. No real action, external verification or tool execution has occurred.",
+      "Credit relevant plain-language reasoning and valid alternatives without requiring experience at a particular employer. Examples from education, volunteering, community work or paid work are equally acceptable when relevant.",
+      "A missing or unasked dimension is not assessed, not automatically a failure. In simulation, use neutral probes and reveal facts only when triggered; in coaching, label assistance and distinguish assisted performance from independent evidence.",
+      "Credit an explicit late correction using the final demonstrated reasoning while retaining the evidence of the earlier mistake; do not force agreement with one exemplar.",
+      "Do not penalize the candidate for a conditional fact that was never revealed. Credit an appropriate request for missing information and a conditional plan; distinguish the candidate’s assumptions from interviewer-supplied facts."
+    ]
+  },
+  "interviewer_notes": "Play the relevant reviewing colleague or stakeholder using the supplied facts only. Start with one focused question, not the full rubric. Ask for clarification before treating an ambiguous answer as wrong. Reveal conditional facts when their stated triggers are met, permit equivalent valid approaches and never invent organizational rules, laws, clinical findings, ratings or missing outcomes. Do not require a polished artifact or specialist software. In a short session prioritize the main decision and one material follow-up; allow silence for thinking, check in neutrally, and leave time for the candidate to correct their recommendation and ask a final question. Distinguish simulation from coaching and record any help given. Assess job-relevant evidence, not accent, confidence, speed, credentials or prestige. This is independent practice for adults 18+ and is not a real professional workflow.",
+  "learning_drills": [
+    {
+      "id": "decision-review",
+      "title": "Annotate the gradient review",
+      "minutes": 5,
+      "prompt": "Annotate the gradient review. Use the fictional facts from this exercise. This is self-guided practice; no model assessment is performed.",
+      "checklist": [
+        "Show the 0.40 m fall",
+        "Compute and label 1.0%",
+        "Distinguish proposed from verified levels",
+        "List interfaces for supervisor review"
+      ]
+    }
+  ]
+}

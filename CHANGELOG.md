@@ -56,6 +56,25 @@ migration/retention checks, web and desktop unit tests, lint/type checks, and
 browser checks at desktop/mobile sizes with synthetic mic/camera devices.
 No hosted deployment or native installer release is claimed by this source entry.
 
+## 2026-10-05 — Profession depth and management practice
+
+- Expand source content from 185 to 262 scenarios and from 23 to 38 paths.
+  Add pharmacy, dentistry, allied health, veterinary, architecture, manufacturing,
+  aviation operations and agriculture, plus people and engineering management.
+- Add first-time manager, experienced manager, engineering manager, senior manager,
+  director, VP and executive paths, with principal-level IC exercises and deeper
+  entry/junior and senior coverage across existing professions.
+- Separate role track from seniority in discovery, setup, custom planning,
+  saved settings and reports. Distinguish primary specialist content from shared
+  matches instead of treating every catalog match as specialist depth.
+- Preserve frozen legacy scenario metadata rather than inheriting newly added
+  fields from current catalog entries. Saved report titles use their snapshot.
+- Add a coverage audit, private reviewer worksheets, context examples and a
+  practitioner review/calibration protocol. All scenarios remain preview.
+
+Implementation and checks are recorded in
+[the coverage record](docs/INTERVIEW-COVERAGE-2026-10-05.md); deployment is separate.
+
 ## 2026-10-04 — Open source practice and community
 
 ### Project and community

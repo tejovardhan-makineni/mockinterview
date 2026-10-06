@@ -1,0 +1,119 @@
+{
+  "schema_version": 1,
+  "revision": 1,
+  "format_id": "stakeholder-simulation",
+  "review_status": "preview",
+  "provenance": {
+    "authorship": "Original project scenario, AI-assisted draft. Practitioner review and scoring calibration pending.",
+    "license": "MIT"
+  },
+  "minutes": 30,
+  "id": "new-manager-feedback",
+  "title": "First-Time Manager: Give Specific Feedback and Hear the Explanation",
+  "track": "professional",
+  "domain": "performance_feedback",
+  "areas": [
+    "management"
+  ],
+  "role_track": "management",
+  "modality": "conversational",
+  "difficulty": "manager",
+  "tags": [
+    "management",
+    "manager",
+    "performance-feedback",
+    "leadership",
+    "community-preview"
+  ],
+  "prompt": "You manage a small events team. In two of the last four handoffs, Jordan sent venue details after the agreed noon deadline, and a colleague had to recheck arrangements. The other two handoffs were on time. Conduct a first feedback conversation with Jordan (the AI). You have not established why this happened, and no disciplinary decision has been made.",
+  "blurb": "Practice a feedback opening",
+  "rubric": [
+    {
+      "key": "evidence",
+      "label": "Use proportionate evidence",
+      "description": "Describes observed behavior and impact without attributing motives.",
+      "weight": 1,
+      "anchors": {
+        "0": "Calls Jordan unreliable or threatens discipline from two events without inquiry.",
+        "2": "Names the two late handoffs and their impact.",
+        "4": "Distinguishes the observed lateness from unknown causes, acknowledges successful handoffs and invites Jordan’s account before forming a conclusion."
+      }
+    },
+    {
+      "key": "expectations",
+      "label": "Set a workable expectation",
+      "description": "Separates a controllable update from an external dependency.",
+      "weight": 1,
+      "anchors": {
+        "0": "Demands guaranteed venue confirmation by noon regardless of control.",
+        "2": "Agrees to communicate delays earlier.",
+        "4": "Agrees a noon confirmed-or-pending update, a named recipient and escalation for unresolved dependencies; checks Jordan understands and can meet it."
+      }
+    },
+    {
+      "key": "follow_through",
+      "label": "Agree support and review",
+      "description": "Creates a specific and fair follow-up.",
+      "weight": 1,
+      "anchors": {
+        "0": "Ends with \"improve your attitude\" or no follow-up.",
+        "2": "Offers support and a later check-in.",
+        "4": "Sets a review across the next few handoffs, records the agreement accurately and checks whether a team process change is needed without promising formal HR outcomes."
+      }
+    }
+  ],
+  "reference": {
+    "scenario": "You manage a small events team. In two of the last four handoffs, Jordan sent venue details after the agreed noon deadline, and a colleague had to recheck arrangements. The other two handoffs were on time. Conduct a first feedback conversation with Jordan (the AI). You have not established why this happened, and no disciplinary decision has been made.",
+    "facts": [
+      {
+        "id": "fact-1",
+        "value": "For the two late handoffs, the venue confirmed details at 11:50 and 12:20. Jordan did not alert the receiving colleague while waiting.",
+        "reveal_when": "candidate asks Jordan what happened or checks the dependency"
+      },
+      {
+        "id": "fact-2",
+        "value": "The receiving colleague needs either confirmed details or an explicit pending-items update by noon. The manager can clarify this expectation with the whole team.",
+        "reveal_when": "candidate asks what a useful on-time handoff requires"
+      }
+    ],
+    "model_points": [
+      "Distinguishes the observed lateness from unknown causes, acknowledges successful handoffs and invites Jordan’s account before forming a conclusion.",
+      "Agrees a noon confirmed-or-pending update, a named recipient and escalation for unresolved dependencies; checks Jordan understands and can meet it.",
+      "Sets a review across the next few handoffs, records the agreement accurately and checks whether a team process change is needed without promising formal HR outcomes."
+    ],
+    "probes": [
+      {
+        "trigger": "candidate gives feedback without inquiry",
+        "question": "What would you want to understand from Jordan before agreeing a change?"
+      },
+      {
+        "trigger": "candidate accepts that nothing can change because the venue was late",
+        "question": "What can Jordan control even when the venue has not replied?"
+      },
+      {
+        "trigger": "candidate changes their initial judgment",
+        "question": "How would you acknowledge that correction to Jordan?"
+      }
+    ],
+    "fair_alternatives": [
+      "A private written summary after the conversation is useful if Jordan can correct misunderstandings.",
+      "Changing the team’s handoff procedure can accompany individual feedback."
+    ],
+    "assessment_limits": "Assess only the decisions and reasoning demonstrated in this fictional exercise. No hiring-readiness, personality, legal compliance or workplace performance claim follows from this score. A valid alternative can earn full credit. Unrevealed conditional facts must not be assumed known or required for credit; credit asking for needed information and a conditional plan."
+  },
+  "interviewer_notes": "You are the counterpart named in the prompt. If this is a written review, remain the hiring interviewer while the candidate reads and writes. Let the candidate finish, including thinking and self-correction. Answer only supplied facts when their reveal condition is met; otherwise say the information is unknown. Use neutral probes after a completed answer, one at a time. Do not prescribe the rubric as a spoken checklist. Accept relevant examples from work, education and community leadership. Do not request private employee records, infer protected traits, invent employment rules or promise a real organizational outcome. Simulation gives no answer before assessment; coaching may offer labeled assistance.",
+  "learning_drills": [
+    {
+      "id": "decision-practice",
+      "title": "Practice a feedback opening",
+      "prompt": "Write an opening that states an observation, explains its impact and asks a neutral question. This is self-guided practice with no automated assessment.",
+      "minutes": 7,
+      "checklist": [
+        "Use two concrete examples",
+        "Avoid motive labels",
+        "Invite the other account",
+        "Define a follow-up"
+      ]
+    }
+  ]
+}

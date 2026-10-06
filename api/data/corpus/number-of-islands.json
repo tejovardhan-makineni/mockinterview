@@ -152,5 +152,7 @@
       "Mutating the grid when the caller needed it preserved — use a visited set instead."
     ]
   },
-  "interviewer_notes": "Let the candidate finish their reasoning and any workspace changes before a focused follow-up. Ask only about a material unresolved issue, then return the floor. Assess the agreed adjacency rule, visited state, bounds, correctness and complexity in the completed solution. The grids [[1,0],[0,1]] and 2x2 all-land can test the chosen contract; a 300x300 all-land grid is a relevant recursion-depth case. Let the candidate implement and self-test before discussing an observed issue, and do not supply visited-state fixes. Streaming land additions are an optional later extension; union-find is a reference approach, not an unsolicited hint or required name."
+  "interviewer_notes": "Let the candidate finish their reasoning and any workspace changes before a focused follow-up. Ask only about a material unresolved issue, then return the floor. Assess the agreed adjacency rule, visited state, bounds, correctness and complexity in the completed solution. The grids [[1,0],[0,1]] and 2x2 all-land can test the chosen contract; a 300x300 all-land grid is a relevant recursion-depth case. Let the candidate implement and self-test before discussing an observed issue, and do not supply visited-state fixes. Streaming land additions are an optional later extension; union-find is a reference approach, not an unsolicited hint or required name.",
+  "role_track": "individual_contributor",
+  "revision": 2
 }

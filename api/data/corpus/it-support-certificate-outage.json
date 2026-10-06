@@ -1,0 +1,137 @@
+{
+  "schema_version": 1,
+  "revision": 1,
+  "format_id": "incident-simulation",
+  "review_status": "preview",
+  "provenance": {
+    "authorship": "Original project scenario, AI-assisted draft. Practitioner review and calibration pending.",
+    "license": "MIT"
+  },
+  "minutes": 30,
+  "id": "it-support-certificate-outage",
+  "title": "Senior IT Support Specialist: Diagnose a Certificate-Related Outage",
+  "track": "professional",
+  "domain": "it_incident_management",
+  "areas": [
+    "it_support"
+  ],
+  "modality": "conversational",
+  "difficulty": "senior",
+  "role_track": "individual_contributor",
+  "tags": [
+    "it-support",
+    "senior-specialist",
+    "evidence-based-practice",
+    "community-preview"
+  ],
+  "prompt": "You are the senior IT support specialist for a fictional organization. At 09:10, users on managed laptops report a certificate warning when opening the payroll portal. Personal devices on a guest network open the public sign-in page normally. A colleague proposes telling everyone to bypass the warning. Supplied policy prohibits bypassing certificate checks and permits rollback of a managed proxy configuration after its owner approves. Payroll submissions are due at noon. Establish the fault boundary, a safe recovery option and verification.",
+  "blurb": "Use contrasting observations to isolate an outage without treating an insecure workaround as restoration.",
+  "rubric": [
+    {
+      "key": "isolation",
+      "label": "Test the fault boundary",
+      "description": "Uses controlled comparisons without collecting credentials.",
+      "weight": 1,
+      "anchors": {
+        "0": "Assumes the payroll website is down from one report.",
+        "2": "Compares affected and unaffected networks and devices.",
+        "4": "Connects managed-network dependence, the 09:00 change and issuer evidence into a proxy hypothesis while retaining a check for unrelated failures."
+      }
+    },
+    {
+      "key": "safe_recovery",
+      "label": "Choose an authorized reversible action",
+      "description": "Balances recovery scope and impact under the supplied policy.",
+      "weight": 1,
+      "anchors": {
+        "0": "Tells users to bypass the warning or uses their passwords.",
+        "2": "Requests proxy-owner approval for rollback.",
+        "4": "Checks broader rollback impact, records the exact prior configuration and requests a deadline exception if safe restoration cannot be verified in time."
+      }
+    },
+    {
+      "key": "verification",
+      "label": "Prove service recovery and ownership",
+      "description": "Checks the affected path and closes communication gaps.",
+      "weight": 1,
+      "anchors": {
+        "0": "Declares success because the public sign-in page opens once.",
+        "2": "Retests a managed device on the affected network after rollback.",
+        "4": "Verifies certificate trust and an authorized end-to-end submission test without exposing payroll data, samples VPN and office paths and assigns follow-up on the failed inspection change."
+      }
+    }
+  ],
+  "reference": {
+    "scenario": "You are the senior IT support specialist for a fictional organization. At 09:10, users on managed laptops report a certificate warning when opening the payroll portal. Personal devices on a guest network open the public sign-in page normally. A colleague proposes telling everyone to bypass the warning. Supplied policy prohibits bypassing certificate checks and permits rollback of a managed proxy configuration after its owner approves. Payroll submissions are due at noon. Establish the fault boundary, a safe recovery option and verification.",
+    "facts": [
+      {
+        "id": "cohorts",
+        "value": "Managed laptops on the office network and corporate VPN show the warning; a managed laptop disconnected from both reaches the public sign-in page normally. No credentials have been entered during these tests.",
+        "reveal_when": "candidate asks about network cohorts or safe diagnostic comparisons"
+      },
+      {
+        "id": "change",
+        "value": "At 09:00 the proxy team changed certificate inspection. The portal certificate itself is valid in the supplied observation. The proxy logs show an untrusted issuer for the affected domain.",
+        "reveal_when": "candidate asks about recent changes or certificate evidence"
+      },
+      {
+        "id": "rollback",
+        "value": "The proxy owner can approve a rollback to the previous signed configuration in ten minutes. Rollback affects all inspected traffic; endpoint bypass is not authorized. Payroll can accept a documented deadline exception requested by its service owner.",
+        "reveal_when": "candidate asks about rollback authority, impact or deadline alternatives"
+      }
+    ],
+    "model_points": [
+      "Guest access alone cannot isolate the cause because device and network differ; the managed-laptop comparison is more discriminating.",
+      "Do not use real accounts or credentials. Describe an authorized test account and synthetic submission if end-to-end verification is needed.",
+      "Restoration should address the proxy fault without removing endpoint security controls or hiding the certificate warning."
+    ],
+    "probes": [
+      {
+        "trigger": "candidate jumps from guest success to a device fault",
+        "question": "What comparison changes the network while keeping the device constant?"
+      },
+      {
+        "trigger": "candidate proposes a service-owner deadline exception before rollback",
+        "question": "What work can proceed in parallel so the exception does not replace recovery?"
+      },
+      {
+        "trigger": "candidate corrects a conclusion that the portal certificate expired",
+        "question": "How does the supplied valid-certificate observation change your hypothesis and next diagnostic?"
+      }
+    ],
+    "fair_alternatives": [
+      "A narrowly scoped proxy exception is discussable only if the owner authorizes it and trust remains verified; it is not the same as an endpoint bypass.",
+      "Holding submissions briefly with a documented exception is acceptable when safe rollback cannot be completed before noon."
+    ],
+    "red_flags": [
+      "Assumes the payroll website is down from one report.",
+      "Tells users to bypass the warning or uses their passwords.",
+      "Declares success because the public sign-in page opens once."
+    ],
+    "follow_ups": [
+      "Write an outage decision log"
+    ],
+    "assessment_limits": [
+      "Assess only reasoning and communication demonstrated in this fictional task, not real-world professional competence, licensure or hiring readiness. No real action, external verification or tool execution has occurred.",
+      "Credit relevant plain-language reasoning and valid alternatives without requiring experience at a particular employer. Examples from education, volunteering, community work or paid work are equally acceptable when relevant.",
+      "A missing or unasked dimension is not assessed, not automatically a failure. In simulation, use neutral probes and reveal facts only when triggered; in coaching, label assistance and distinguish assisted performance from independent evidence.",
+      "Credit an explicit late correction using the final demonstrated reasoning while retaining the evidence of the earlier mistake; do not force agreement with one exemplar.",
+      "Do not penalize the candidate for a conditional fact that was never revealed. Credit an appropriate request for missing information and a conditional plan; distinguish the candidate’s assumptions from interviewer-supplied facts."
+    ]
+  },
+  "interviewer_notes": "Play the relevant reviewing colleague or stakeholder using the supplied facts only. Start with one focused question, not the full rubric. Ask for clarification before treating an ambiguous answer as wrong. Reveal conditional facts when their stated triggers are met, permit equivalent valid approaches and never invent organizational rules, laws, clinical findings, ratings or missing outcomes. Do not require a polished artifact or specialist software. In a short session prioritize the main decision and one material follow-up; allow silence for thinking, check in neutrally, and leave time for the candidate to correct their recommendation and ask a final question. Distinguish simulation from coaching and record any help given. Assess job-relevant evidence, not accent, confidence, speed, credentials or prestige. This is independent practice for adults 18+ and is not a real professional workflow.",
+  "learning_drills": [
+    {
+      "id": "decision-review",
+      "title": "Write an outage decision log",
+      "minutes": 5,
+      "prompt": "Write an outage decision log. Use the fictional facts from this exercise. This is self-guided practice; no model assessment is performed.",
+      "checklist": [
+        "Record controlled comparisons",
+        "Separate hypothesis from confirmation",
+        "Name rollback authority",
+        "Verify the affected end-to-end path"
+      ]
+    }
+  ]
+}

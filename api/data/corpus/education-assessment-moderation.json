@@ -1,0 +1,137 @@
+{
+  "schema_version": 1,
+  "revision": 1,
+  "format_id": "work-sample-defense",
+  "review_status": "preview",
+  "provenance": {
+    "authorship": "Original project scenario, AI-assisted draft. Practitioner review and calibration pending.",
+    "license": "MIT"
+  },
+  "minutes": 30,
+  "id": "education-assessment-moderation",
+  "title": "Senior Teacher: Resolve Conflicting Evidence of Student Understanding",
+  "track": "professional",
+  "domain": "instructional_assessment",
+  "areas": [
+    "education"
+  ],
+  "modality": "written",
+  "difficulty": "senior",
+  "role_track": "individual_contributor",
+  "tags": [
+    "education",
+    "senior-specialist",
+    "evidence-based-practice",
+    "community-preview"
+  ],
+  "prompt": "You are a senior teacher reviewing a fictional adult-learning class’s assessment. On a 20-item written quiz, 18 of 24 learners passed. In a practical demonstration, 10 completed the same target task independently. A colleague concludes that the other 14 lack ability and should repeat the whole course. The learning goal is to choose and explain the correct procedure for a supplied situation. Review what these results establish, identify missing evidence and propose a fair next assessment and teaching response.",
+  "blurb": "Distinguish task understanding, assessment conditions and access barriers before choosing targeted instruction.",
+  "rubric": [
+    {
+      "key": "interpretation",
+      "label": "Separate construct and conditions",
+      "description": "Explains what each task measures without attributing ability from a group label.",
+      "weight": 1,
+      "anchors": {
+        "0": "Equates failure under the timer with lack of ability.",
+        "2": "Notes that recognition and independent application differ.",
+        "4": "Connects interface language and time to possible confounds, uses the four oral explanations as evidence to investigate and avoids generalizing their result to all 14."
+      }
+    },
+    {
+      "key": "assessment_design",
+      "label": "Gather comparable individual evidence",
+      "description": "Creates a fair check of the stated learning goal.",
+      "weight": 1,
+      "anchors": {
+        "0": "Repeats the same unclear task or gives the answer before grading independence.",
+        "2": "Clarifies instructions and asks learners to explain a comparable new task.",
+        "4": "Checks procedure choice and rationale with an accessible equivalent response route, records support given and keeps coached success separate from independent transfer."
+      }
+    },
+    {
+      "key": "instruction",
+      "label": "Target support and verify transfer",
+      "description": "Allocates the available session to evidence-based next steps.",
+      "weight": 1,
+      "anchors": {
+        "0": "Requires everyone to repeat the full course without diagnosis.",
+        "2": "Groups support around observed misunderstandings.",
+        "4": "Uses a brief diagnostic, targeted practice and a fresh transfer check within 30 minutes; revises groupings if evidence changes and protects learner dignity."
+      }
+    }
+  ],
+  "reference": {
+    "scenario": "You are a senior teacher reviewing a fictional adult-learning class’s assessment. On a 20-item written quiz, 18 of 24 learners passed. In a practical demonstration, 10 completed the same target task independently. A colleague concludes that the other 14 lack ability and should repeat the whole course. The learning goal is to choose and explain the correct procedure for a supplied situation. Review what these results establish, identify missing evidence and propose a fair next assessment and teaching response.",
+    "facts": [
+      {
+        "id": "conditions",
+        "value": "The practical task used an unfamiliar screen layout and a six-minute limit. Eight learners asked what two interface labels meant. The written quiz tested recognition of steps, not explanation or transfer.",
+        "reveal_when": "candidate asks how the assessments differed"
+      },
+      {
+        "id": "examples",
+        "value": "Four learners who failed the practical task explained the correct procedure aloud after the timer stopped. No learner-level comparison has yet been made for the remaining results.",
+        "reveal_when": "candidate asks about individual evidence or alternative demonstrations"
+      },
+      {
+        "id": "options",
+        "value": "The next session allows 30 minutes for assessment and support. Instructions may be clarified and the interface demonstrated without demonstrating the target procedure. Independent performance must remain separately recorded from coached work.",
+        "reveal_when": "candidate asks about time, permitted support or assessment integrity"
+      }
+    ],
+    "model_points": [
+      "A pass count across different constructs cannot establish a stable ability ranking. Compare individual evidence and assessment conditions.",
+      "Clarifying an interface can remove irrelevant difficulty while preserving the decision being assessed.",
+      "A fresh task after targeted support can show transfer; a coached repetition alone cannot establish independent performance."
+    ],
+    "probes": [
+      {
+        "trigger": "candidate interprets 18 versus 10 as a simple decline",
+        "question": "What did the two tasks actually ask learners to demonstrate?"
+      },
+      {
+        "trigger": "candidate offers oral assessment to everyone",
+        "question": "How will you preserve the same procedure-choice goal and record any prompts given?"
+      },
+      {
+        "trigger": "candidate revises a whole-class remedial plan after the oral evidence",
+        "question": "Which learners or skill gaps would you reassess before assigning support?"
+      }
+    ],
+    "fair_alternatives": [
+      "Written, spoken or demonstrated explanations are acceptable if they assess the same decision and relevant access needs are met.",
+      "Whole-class clarification is reasonable for a shared interface issue; targeted instruction should follow evidence of the underlying skill gap."
+    ],
+    "red_flags": [
+      "Equates failure under the timer with lack of ability.",
+      "Repeats the same unclear task or gives the answer before grading independence.",
+      "Requires everyone to repeat the full course without diagnosis."
+    ],
+    "follow_ups": [
+      "Design a short transfer check"
+    ],
+    "assessment_limits": [
+      "Assess only reasoning and communication demonstrated in this fictional task, not real-world professional competence, licensure or hiring readiness. No real action, external verification or tool execution has occurred.",
+      "Credit relevant plain-language reasoning and valid alternatives without requiring experience at a particular employer. Examples from education, volunteering, community work or paid work are equally acceptable when relevant.",
+      "A missing or unasked dimension is not assessed, not automatically a failure. In simulation, use neutral probes and reveal facts only when triggered; in coaching, label assistance and distinguish assisted performance from independent evidence.",
+      "Credit an explicit late correction using the final demonstrated reasoning while retaining the evidence of the earlier mistake; do not force agreement with one exemplar.",
+      "Do not penalize the candidate for a conditional fact that was never revealed. Credit an appropriate request for missing information and a conditional plan; distinguish the candidate’s assumptions from interviewer-supplied facts."
+    ]
+  },
+  "interviewer_notes": "Play the relevant reviewing colleague or stakeholder using the supplied facts only. Start with one focused question, not the full rubric. Ask for clarification before treating an ambiguous answer as wrong. Reveal conditional facts when their stated triggers are met, permit equivalent valid approaches and never invent organizational rules, laws, clinical findings, ratings or missing outcomes. Do not require a polished artifact or specialist software. In a short session prioritize the main decision and one material follow-up; allow silence for thinking, check in neutrally, and leave time for the candidate to correct their recommendation and ask a final question. Distinguish simulation from coaching and record any help given. Assess job-relevant evidence, not accent, confidence, speed, credentials or prestige. This is independent practice for adults 18+ and is not a real professional workflow.",
+  "learning_drills": [
+    {
+      "id": "decision-review",
+      "title": "Design a short transfer check",
+      "minutes": 5,
+      "prompt": "Design a short transfer check. Use the fictional facts from this exercise. This is self-guided practice; no model assessment is performed.",
+      "checklist": [
+        "State the target skill",
+        "Remove an irrelevant barrier",
+        "Record assistance separately",
+        "Use a fresh situation after practice"
+      ]
+    }
+  ]
+}

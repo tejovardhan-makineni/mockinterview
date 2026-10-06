@@ -155,5 +155,7 @@
       "Rebuilding neighbor lists by rescanning all N words each step (O(N) per node) instead of generating variants."
     ]
   },
-  "interviewer_notes": "Let the candidate finish their reasoning and any workspace changes before a focused follow-up. Ask only about a material unresolved issue, then return the floor. Assess shortest-path correctness, neighbor generation, visited timing, missing end words and justified complexity in the candidate's completed solution. Breadth-first search is a reference approach, not a hint to reveal by asking about edge cost. Let the candidate implement and test independently before discussing one observed risk. Character substitution, prefix buckets and other valid neighbor strategies are acceptable. Bidirectional search or returning all shortest paths is an optional later extension; do not force a progression through named algorithms."
+  "interviewer_notes": "Let the candidate finish their reasoning and any workspace changes before a focused follow-up. Ask only about a material unresolved issue, then return the floor. Assess shortest-path correctness, neighbor generation, visited timing, missing end words and justified complexity in the candidate's completed solution. Breadth-first search is a reference approach, not a hint to reveal by asking about edge cost. Let the candidate implement and test independently before discussing one observed risk. Character substitution, prefix buckets and other valid neighbor strategies are acceptable. Bidirectional search or returning all shortest paths is an optional later extension; do not force a progression through named algorithms.",
+  "role_track": "individual_contributor",
+  "revision": 2
 }

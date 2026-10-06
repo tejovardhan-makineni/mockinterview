@@ -149,5 +149,7 @@
       "Mutating the input while iterating in the brute-force version."
     ]
   },
-  "interviewer_notes": "Let the candidate finish their reasoning and any workspace changes before a focused follow-up. Ask only about a material unresolved issue, then return the floor. Observe whether the candidate independently clarifies touching endpoints and input order. The touching case [[1,4],[4,5]] and nested case [[1,4],[2,3]] can test the completed implementation under the agreed contract. Assess correctness, complexity and self-testing without supplying sort-and-sweep or the maximum-end update as hints. Insert Interval is an optional later variant after a correct base solution; do not require a succession of additional interval problems just because the first answer was quick."
+  "interviewer_notes": "Let the candidate finish their reasoning and any workspace changes before a focused follow-up. Ask only about a material unresolved issue, then return the floor. Observe whether the candidate independently clarifies touching endpoints and input order. The touching case [[1,4],[4,5]] and nested case [[1,4],[2,3]] can test the completed implementation under the agreed contract. Assess correctness, complexity and self-testing without supplying sort-and-sweep or the maximum-end update as hints. Insert Interval is an optional later variant after a correct base solution; do not require a succession of additional interval problems just because the first answer was quick.",
+  "role_track": "individual_contributor",
+  "revision": 2
 }

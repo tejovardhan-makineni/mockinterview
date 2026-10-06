@@ -1,0 +1,137 @@
+{
+  "schema_version": 1,
+  "revision": 1,
+  "format_id": "work-sample-defense",
+  "review_status": "preview",
+  "provenance": {
+    "authorship": "Original project scenario, AI-assisted draft. Practitioner review and calibration pending.",
+    "license": "MIT"
+  },
+  "minutes": 20,
+  "id": "law-contract-version-comparison",
+  "title": "Junior Legal Specialist: Compare a Contract Change With the Signed Terms",
+  "track": "professional",
+  "domain": "legal_practice",
+  "areas": [
+    "law"
+  ],
+  "modality": "written",
+  "difficulty": "junior",
+  "role_track": "individual_contributor",
+  "tags": [
+    "law",
+    "junior-specialist",
+    "evidence-based-practice",
+    "community-preview"
+  ],
+  "prompt": "You are a junior legal specialist preparing a review note for a supervising lawyer in a fictional matter. The signed service agreement says, “Either party may end the service on 30 days’ written notice. Changes require both parties’ written agreement.” An unsigned renewal draft says, “The customer may end the service on seven days’ notice.” A sales email tells the customer, “Your new seven-day option is active.” Identify the differences, missing evidence and questions for the supervisor. No jurisdiction or applicable law is supplied; the task is document comparison, not a final legal opinion.",
+  "blurb": "Distinguish signed text, an unsigned proposal and a commercial assurance before summarizing an unresolved contract issue.",
+  "rubric": [
+    {
+      "key": "comparison",
+      "label": "Identify material text differences",
+      "description": "Compares notice period, party rights and agreement status.",
+      "weight": 1,
+      "anchors": {
+        "0": "Treats the unsigned seven-day draft as unquestionably active.",
+        "2": "Notes 30 versus seven days and that the draft is unsigned.",
+        "4": "Also notes the change from either party to customer only and the signed agreement’s change requirement, without assuming the file proves no agreement could exist elsewhere."
+      }
+    },
+    {
+      "key": "missing_evidence",
+      "label": "Request relevant records",
+      "description": "Separates absence in the file from a final conclusion.",
+      "weight": 1,
+      "anchors": {
+        "0": "Declares the email legally irrelevant or binding without context.",
+        "2": "Asks for an agreed amendment and sender authority.",
+        "4": "Requests the full exchange, any external agreement, relevant authority and applicable governing context, connecting each to the customer’s proposed next-week termination."
+      }
+    },
+    {
+      "key": "handoff",
+      "label": "Give a bounded factual recommendation",
+      "description": "Preserves urgency without supplying an unsupported legal answer.",
+      "weight": 1,
+      "anchors": {
+        "0": "Promises a seven-day exit or a guaranteed penalty.",
+        "2": "Sends the comparison and email to the supervising lawyer.",
+        "4": "Gives a concise dated issue summary, distinguishes facts from questions and seeks same-day review before any customer assurance or action."
+      }
+    }
+  ],
+  "reference": {
+    "scenario": "You are a junior legal specialist preparing a review note for a supervising lawyer in a fictional matter. The signed service agreement says, “Either party may end the service on 30 days’ written notice. Changes require both parties’ written agreement.” An unsigned renewal draft says, “The customer may end the service on seven days’ notice.” A sales email tells the customer, “Your new seven-day option is active.” Identify the differences, missing evidence and questions for the supervisor. No jurisdiction or applicable law is supplied; the task is document comparison, not a final legal opinion.",
+    "facts": [
+      {
+        "id": "documents",
+        "value": "The file contains no signed amendment or customer reply agreeing to the new terms. There is no evidence yet about whether another authorized agreement exists outside this file.",
+        "reveal_when": "candidate asks whether the change was agreed or whether the file is complete"
+      },
+      {
+        "id": "intent",
+        "value": "The customer wants to end the service next week and is relying on the sales email. The renewal date is next month. The email sender’s authority to change terms is unknown.",
+        "reveal_when": "candidate asks about the client’s practical goal, timing or authority"
+      },
+      {
+        "id": "review",
+        "value": "The supervising lawyer can review the documents today. The junior specialist may collect records and prepare a factual comparison but may not promise the outcome to the customer.",
+        "reveal_when": "candidate asks about escalation or their role"
+      }
+    ],
+    "model_points": [
+      "The draft changes both notice length and which party has the stated right. Its unsigned status and the missing agreement evidence matter.",
+      "An email may raise authority or reliance questions; their legal resolution cannot be supplied without governing context and review.",
+      "The junior task is to compare, gather and escalate accurately. Legal terminology or prior law-firm employment is not required."
+    ],
+    "probes": [
+      {
+        "trigger": "candidate compares only the two notice periods",
+        "question": "Who can end the service under each version, and what does the signed change clause say?"
+      },
+      {
+        "trigger": "candidate proposes asking the customer for the complete email chain",
+        "question": "How will you explain that request without implying the seven-day option is already confirmed?"
+      },
+      {
+        "trigger": "candidate retracts a definitive statement that the email cannot matter",
+        "question": "What question should replace that conclusion in the supervising lawyer’s note?"
+      }
+    ],
+    "fair_alternatives": [
+      "A side-by-side table or short memo is equally acceptable.",
+      "The supervisor may choose another evidence-gathering sequence; score accurate distinctions and timely escalation rather than a fixed legal theory."
+    ],
+    "red_flags": [
+      "Treats the unsigned seven-day draft as unquestionably active.",
+      "Declares the email legally irrelevant or binding without context.",
+      "Promises a seven-day exit or a guaranteed penalty."
+    ],
+    "follow_ups": [
+      "Write a contract comparison note"
+    ],
+    "assessment_limits": [
+      "Assess only reasoning and communication demonstrated in this fictional task, not real-world professional competence, licensure or hiring readiness. No real action, external verification or tool execution has occurred.",
+      "Credit relevant plain-language reasoning and valid alternatives without requiring experience at a particular employer. Examples from education, volunteering, community work or paid work are equally acceptable when relevant.",
+      "A missing or unasked dimension is not assessed, not automatically a failure. In simulation, use neutral probes and reveal facts only when triggered; in coaching, label assistance and distinguish assisted performance from independent evidence.",
+      "Credit an explicit late correction using the final demonstrated reasoning while retaining the evidence of the earlier mistake; do not force agreement with one exemplar.",
+      "Do not penalize the candidate for a conditional fact that was never revealed. Credit an appropriate request for missing information and a conditional plan; distinguish the candidate’s assumptions from interviewer-supplied facts."
+    ]
+  },
+  "interviewer_notes": "Play the relevant reviewing colleague or stakeholder using the supplied facts only. Start with one focused question, not the full rubric. Ask for clarification before treating an ambiguous answer as wrong. Reveal conditional facts when their stated triggers are met, permit equivalent valid approaches and never invent organizational rules, laws, clinical findings, ratings or missing outcomes. Do not require a polished artifact or specialist software. In a short session prioritize the main decision and one material follow-up; allow silence for thinking, check in neutrally, and leave time for the candidate to correct their recommendation and ask a final question. Distinguish simulation from coaching and record any help given. Assess job-relevant evidence, not accent, confidence, speed, credentials or prestige. This is independent practice for adults 18+ and is not a real professional workflow.",
+  "learning_drills": [
+    {
+      "id": "decision-review",
+      "title": "Write a contract comparison note",
+      "minutes": 5,
+      "prompt": "Write a contract comparison note. Use the fictional facts from this exercise. This is self-guided practice; no model assessment is performed.",
+      "checklist": [
+        "Separate signed and unsigned wording",
+        "Compare party rights and notice periods",
+        "List agreement and authority evidence",
+        "Flag the customer deadline for review"
+      ]
+    }
+  ]
+}

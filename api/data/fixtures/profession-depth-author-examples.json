@@ -1,0 +1,1392 @@
+{
+  "schema_version": 1,
+  "purpose": "Original fictional author-review examples with expected probes. The corresponding profession-depth-context.json verifies prompt inclusion deterministically; these examples are not transcripts of evaluated model behavior or claims of calibration.",
+  "cases": [
+    {
+      "question_id": "accounting-revenue-cutoff-review",
+      "profession": "accounting",
+      "target_level": "senior",
+      "examples": [
+        {
+          "kind": "clarification",
+          "candidate": "Do we have evidence of when B was accepted and whether the dispute was resolved?",
+          "expected": "Reveal the relevant authored fact without adding missing information: B has an email from the customer dated January 3 accepting the equipment after a January 2 repair. There is no earlier acceptance or separate performance obligation in this exercise."
+        },
+        {
+          "kind": "partial_reasoning",
+          "candidate": "I would remove C’s 50,000 from December and leave the other orders as recorded.",
+          "expected_neutral_probe": "What evidence establishes when B met the supplied acceptance rule?"
+        },
+        {
+          "kind": "alternative",
+          "candidate": "I would delay the whole report until the controller approves the corrections.",
+          "expected_neutral_probe": "What could be finalized now, and what condition would release the report?",
+          "acceptable_alternatives": [
+            "A controlled report delay is acceptable if approval cannot be completed today.",
+            "A corrected provisional report is acceptable if clearly labeled and approved; do not require one journal-entry vocabulary."
+          ]
+        },
+        {
+          "kind": "late_correction",
+          "candidate": "I initially removed only C. B was accepted in January too, so I revise the December reduction to 130,000 and retain A’s 120,000.",
+          "expected_neutral_probe": "Explain which new evidence changed the adjustment and how you would preserve that correction in the review record.",
+          "expected_scoring": "Credit supported corrected reasoning while preserving the earlier evidence; do not claim unobserved execution, verification or professional competence."
+        },
+        {
+          "kind": "silence",
+          "candidate": "",
+          "expected": "Allow thinking time and check in neutrally; do not provide the solution during simulation or automatically fail an unassessed job dimension."
+        },
+        {
+          "kind": "wrap_up",
+          "candidate": "I have no further questions.",
+          "expected": "Acknowledge and close without a new substantive test or a claim that a real action was performed."
+        }
+      ]
+    },
+    {
+      "question_id": "medicine-results-ownership-review",
+      "profession": "medicine",
+      "target_level": "senior",
+      "examples": [
+        {
+          "kind": "clarification",
+          "candidate": "Who is covering the absent clinician, and does the portal record any clinician acknowledgment?",
+          "expected": "Reveal the relevant authored fact without adding missing information: A’s listed clinician is away. The covering clinician is available by phone. The patient portal records that a message was sent, but not that a clinician reviewed the result or that the patient received an agreed plan."
+        },
+        {
+          "kind": "partial_reasoning",
+          "candidate": "The message was sent through the portal, so A appears to be closed.",
+          "expected_neutral_probe": "What evidence establishes clinician acceptance and a documented next step?"
+        },
+        {
+          "kind": "alternative",
+          "candidate": "I would ask the covering clinician to accept both A and C, provided they have capacity.",
+          "expected_neutral_probe": "How will you confirm capacity and avoid leaving either report ambiguously owned?",
+          "acceptable_alternatives": [
+            "One covering clinician may accept both cases if capacity and explicit ownership are confirmed.",
+            "A clinician may use another authorized contact route; evaluate documented ownership and closure, not a preferred communications tool."
+          ]
+        },
+        {
+          "kind": "late_correction",
+          "candidate": "I treated C as acknowledged, but that applied to the earlier version. I will obtain acknowledgment of the amendment and document who owns its next step.",
+          "expected_neutral_probe": "What changes in your queue and handoff record once you recognize that the original acknowledgment is insufficient?",
+          "expected_scoring": "Credit supported corrected reasoning while preserving the earlier evidence; do not claim unobserved execution, verification or professional competence."
+        },
+        {
+          "kind": "silence",
+          "candidate": "",
+          "expected": "Allow thinking time and check in neutrally; do not provide the solution during simulation or automatically fail an unassessed job dimension."
+        },
+        {
+          "kind": "wrap_up",
+          "candidate": "I have no further questions.",
+          "expected": "Acknowledge and close without a new substantive test or a claim that a real action was performed."
+        }
+      ]
+    },
+    {
+      "question_id": "communications-correction-channel-review",
+      "profession": "creative_communications",
+      "target_level": "senior",
+      "examples": [
+        {
+          "kind": "clarification",
+          "candidate": "Which notices have already reached people, and can the scheduled post still be stopped?",
+          "expected": "Reveal the relevant authored fact without adding missing information: The social post is scheduled for this afternoon and can be paused. Two hundred flyers have been distributed; the service desk can display a replacement notice and contact partner venues holding remaining flyers."
+        },
+        {
+          "kind": "partial_reasoning",
+          "candidate": "I would change the website to say two locations reopen Monday.",
+          "expected_neutral_probe": "How does the walk-in claim affect someone planning a visit?"
+        },
+        {
+          "kind": "alternative",
+          "candidate": "I would try to contact everyone who received a flyer with the correction.",
+          "expected_neutral_probe": "Which recipients are identifiable, and what fallback reaches people you cannot identify?",
+          "acceptable_alternatives": [
+            "A prominently dated correction or a replacement notice can work if it clearly supersedes the wrong instructions.",
+            "A short text-first notice is acceptable; no graphic-design software or polished portfolio is required."
+          ]
+        },
+        {
+          "kind": "late_correction",
+          "candidate": "I added a date for the other three locations without evidence. I will remove it, state that their dates are unconfirmed and seek an operations update.",
+          "expected_neutral_probe": "How would you remove that unsupported date from all drafted versions and explain what is still unknown?",
+          "expected_scoring": "Credit supported corrected reasoning while preserving the earlier evidence; do not claim unobserved execution, verification or professional competence."
+        },
+        {
+          "kind": "silence",
+          "candidate": "",
+          "expected": "Allow thinking time and check in neutrally; do not provide the solution during simulation or automatically fail an unassessed job dimension."
+        },
+        {
+          "kind": "wrap_up",
+          "candidate": "I have no further questions.",
+          "expected": "Acknowledge and close without a new substantive test or a claim that a real action was performed."
+        }
+      ]
+    },
+    {
+      "question_id": "customer-support-entitlement-recovery",
+      "profession": "customer_support",
+      "target_level": "senior",
+      "examples": [
+        {
+          "kind": "clarification",
+          "candidate": "Can we see who changed the seat count and which users were verified before renewal?",
+          "expected": "Reveal the relevant authored fact without adding missing information: The customer’s admin audit shows no seat-removal action. A renewal integration wrote the 12-seat update. Eight affected users can be matched to the verified pre-renewal roster."
+        },
+        {
+          "kind": "partial_reasoning",
+          "candidate": "I would restore the eight seats and then close the ticket.",
+          "expected_neutral_probe": "What happens in 48 hours if the mapping is still wrong?"
+        },
+        {
+          "kind": "alternative",
+          "candidate": "I would wait for engineering to fix the mapping before making any access change.",
+          "expected_neutral_probe": "What evidence would justify a bounded temporary restoration while investigation continues?",
+          "acceptable_alternatives": [
+            "Waiting briefly for verification is defensible if the roster cannot be trusted; explain the customer impact and decision deadline.",
+            "A phone or written update is acceptable when it accurately states restoration, uncertainty and the next contact time."
+          ]
+        },
+        {
+          "kind": "late_correction",
+          "candidate": "I promised a refund outside my authority. I will correct that statement, send the request to billing and provide a decision update time without guaranteeing approval.",
+          "expected_neutral_probe": "How would you correct the customer expectation and preserve the billing request without promising its outcome?",
+          "expected_scoring": "Credit supported corrected reasoning while preserving the earlier evidence; do not claim unobserved execution, verification or professional competence."
+        },
+        {
+          "kind": "silence",
+          "candidate": "",
+          "expected": "Allow thinking time and check in neutrally; do not provide the solution during simulation or automatically fail an unassessed job dimension."
+        },
+        {
+          "kind": "wrap_up",
+          "candidate": "I have no further questions.",
+          "expected": "Acknowledge and close without a new substantive test or a claim that a real action was performed."
+        }
+      ]
+    },
+    {
+      "question_id": "cybersecurity-session-revocation",
+      "profession": "cybersecurity",
+      "target_level": "senior",
+      "examples": [
+        {
+          "kind": "clarification",
+          "candidate": "Does changing the password revoke current sessions, and does blocking new links disable existing ones?",
+          "expected": "Reveal the relevant authored fact without adding missing information: Password reset alone does not revoke existing sessions in this fictional service. Session revocation invalidates them immediately; disabling new links does not disable an existing link."
+        },
+        {
+          "kind": "partial_reasoning",
+          "candidate": "I would reset the password to remove the attacker’s access.",
+          "expected_neutral_probe": "Under the supplied service behavior, which access paths remain usable?"
+        },
+        {
+          "kind": "alternative",
+          "candidate": "I would request approval to temporarily suspend the account while preserving the logs.",
+          "expected_neutral_probe": "What approval and service-impact checks are needed, and how will you preserve evidence?",
+          "acceptable_alternatives": [
+            "An authorized temporary account restriction can supplement revocation if its impact and approval are checked.",
+            "Parallel evidence export and link disablement are acceptable; do not demand a single serial ordering when independent responders are available."
+          ]
+        },
+        {
+          "kind": "late_correction",
+          "candidate": "I called the folder unaccessed too early. The logging delay means access is unknown; I will revise the incident note and schedule the delayed-log review.",
+          "expected_neutral_probe": "How will you update the incident record to distinguish missing telemetry from evidence of no access?",
+          "expected_scoring": "Credit supported corrected reasoning while preserving the earlier evidence; do not claim unobserved execution, verification or professional competence."
+        },
+        {
+          "kind": "silence",
+          "candidate": "",
+          "expected": "Allow thinking time and check in neutrally; do not provide the solution during simulation or automatically fail an unassessed job dimension."
+        },
+        {
+          "kind": "wrap_up",
+          "candidate": "I have no further questions.",
+          "expected": "Acknowledge and close without a new substantive test or a claim that a real action was performed."
+        }
+      ]
+    },
+    {
+      "question_id": "education-assessment-moderation",
+      "profession": "education",
+      "target_level": "senior",
+      "examples": [
+        {
+          "kind": "clarification",
+          "candidate": "Were the two tasks testing the same behavior under similar conditions?",
+          "expected": "Reveal the relevant authored fact without adding missing information: The practical task used an unfamiliar screen layout and a six-minute limit. Eight learners asked what two interface labels meant. The written quiz tested recognition of steps, not explanation or transfer."
+        },
+        {
+          "kind": "partial_reasoning",
+          "candidate": "The drop from 18 passing to ten shows the learners are doing worse.",
+          "expected_neutral_probe": "What did the two tasks actually ask learners to demonstrate?"
+        },
+        {
+          "kind": "alternative",
+          "candidate": "I would offer everyone a spoken explanation task for the same procedure-choice goal.",
+          "expected_neutral_probe": "How will you preserve the same procedure-choice goal and record any prompts given?",
+          "acceptable_alternatives": [
+            "Written, spoken or demonstrated explanations are acceptable if they assess the same decision and relevant access needs are met.",
+            "Whole-class clarification is reasonable for a shared interface issue; targeted instruction should follow evidence of the underlying skill gap."
+          ]
+        },
+        {
+          "kind": "late_correction",
+          "candidate": "I assumed all 14 needed the full course again. The four oral explanations show a different pattern, so I will compare individual evidence and target support before deciding.",
+          "expected_neutral_probe": "Which learners or skill gaps would you reassess before assigning support?",
+          "expected_scoring": "Credit supported corrected reasoning while preserving the earlier evidence; do not claim unobserved execution, verification or professional competence."
+        },
+        {
+          "kind": "silence",
+          "candidate": "",
+          "expected": "Allow thinking time and check in neutrally; do not provide the solution during simulation or automatically fail an unassessed job dimension."
+        },
+        {
+          "kind": "wrap_up",
+          "candidate": "I have no further questions.",
+          "expected": "Acknowledge and close without a new substantive test or a claim that a real action was performed."
+        }
+      ]
+    },
+    {
+      "question_id": "hospitality-accessible-room-recovery",
+      "profession": "retail_hospitality",
+      "target_level": "senior",
+      "examples": [
+        {
+          "kind": "clarification",
+          "candidate": "What rooms are actually available tonight, and which partner-room features have been verified?",
+          "expected": "Reveal the relevant authored fact without adding missing information: No room with a roll-in shower is available here tonight. One may become available tomorrow, but checkout is unconfirmed. The partner hotel reports one such room available; its full route has not yet been checked."
+        },
+        {
+          "kind": "partial_reasoning",
+          "candidate": "I would offer a discount to make up for the different room.",
+          "expected_neutral_probe": "Which promised features must an acceptable option actually provide?"
+        },
+        {
+          "kind": "alternative",
+          "candidate": "I would suggest staying here tonight and moving to the room expected tomorrow.",
+          "expected_neutral_probe": "How does that address tonight’s essential needs and the guest’s preference to avoid two moves?",
+          "acceptable_alternatives": [
+            "Another verified accommodation can be considered if the partner fails a requirement and the guest agrees.",
+            "A colleague may coordinate transport while the specialist confirms the room, with explicit ownership and a single guest update."
+          ]
+        },
+        {
+          "kind": "late_correction",
+          "candidate": "I said the partner room was confirmed too soon. I will explain that its route still needs checking and update the guest before the 20-minute hold expires.",
+          "expected_neutral_probe": "How will you explain the remaining check while keeping the guest informed within the hold period?",
+          "expected_scoring": "Credit supported corrected reasoning while preserving the earlier evidence; do not claim unobserved execution, verification or professional competence."
+        },
+        {
+          "kind": "silence",
+          "candidate": "",
+          "expected": "Allow thinking time and check in neutrally; do not provide the solution during simulation or automatically fail an unassessed job dimension."
+        },
+        {
+          "kind": "wrap_up",
+          "candidate": "I have no further questions.",
+          "expected": "Acknowledge and close without a new substantive test or a claim that a real action was performed."
+        }
+      ]
+    },
+    {
+      "question_id": "hr-hiring-evidence-calibration",
+      "profession": "human_resources",
+      "target_level": "senior",
+      "examples": [
+        {
+          "kind": "clarification",
+          "candidate": "What do the rubric and source notes say about missing evidence and acceptable examples?",
+          "expected": "Reveal the relevant authored fact without adding missing information: The same three criteria apply to all candidates. Examples from study, volunteering or paid work are equally acceptable. A missing answer is not an observed failure."
+        },
+        {
+          "kind": "partial_reasoning",
+          "candidate": "We have no recordkeeping example, so I would score that criterion as a failure.",
+          "expected_neutral_probe": "Was poor recordkeeping observed, or was the criterion not assessed?"
+        },
+        {
+          "kind": "alternative",
+          "candidate": "I would let the chair decide from the current evidence, with the missing criterion explicitly marked.",
+          "expected_neutral_probe": "How will your recommendation represent the unresolved criterion without inventing evidence?",
+          "acceptable_alternatives": [
+            "A decision under the organization’s existing incomplete-evidence procedure can be discussed if the procedure is requested rather than invented.",
+            "A written common follow-up can work as well as a spoken one when conditions and the job-relevant goal remain comparable."
+          ]
+        },
+        {
+          "kind": "late_correction",
+          "candidate": "I treated a famous employer as evidence of competence. I will remove that basis and score only the described billing decisions, with recordkeeping still unassessed.",
+          "expected_neutral_probe": "What criterion-linked evidence remains, and how should the rating change be recorded?",
+          "expected_scoring": "Credit supported corrected reasoning while preserving the earlier evidence; do not claim unobserved execution, verification or professional competence."
+        },
+        {
+          "kind": "silence",
+          "candidate": "",
+          "expected": "Allow thinking time and check in neutrally; do not provide the solution during simulation or automatically fail an unassessed job dimension."
+        },
+        {
+          "kind": "wrap_up",
+          "candidate": "I have no further questions.",
+          "expected": "Acknowledge and close without a new substantive test or a claim that a real action was performed."
+        }
+      ]
+    },
+    {
+      "question_id": "it-support-certificate-outage",
+      "profession": "it_support",
+      "target_level": "senior",
+      "examples": [
+        {
+          "kind": "clarification",
+          "candidate": "Do managed laptops work when off the corporate network, and is the portal certificate itself valid?",
+          "expected": "Reveal the relevant authored fact without adding missing information: Managed laptops on the office network and corporate VPN show the warning; a managed laptop disconnected from both reaches the public sign-in page normally. No credentials have been entered during these tests."
+        },
+        {
+          "kind": "partial_reasoning",
+          "candidate": "Since guest devices work, I think the managed laptops are broken.",
+          "expected_neutral_probe": "What comparison changes the network while keeping the device constant?"
+        },
+        {
+          "kind": "alternative",
+          "candidate": "I would ask payroll for a deadline exception while we investigate.",
+          "expected_neutral_probe": "What work can proceed in parallel so the exception does not replace recovery?",
+          "acceptable_alternatives": [
+            "A narrowly scoped proxy exception is discussable only if the owner authorizes it and trust remains verified; it is not the same as an endpoint bypass.",
+            "Holding submissions briefly with a documented exception is acceptable when safe rollback cannot be completed before noon."
+          ]
+        },
+        {
+          "kind": "late_correction",
+          "candidate": "I assumed the portal certificate expired. The supplied certificate check is valid, so I will investigate the proxy’s issuer chain and the recent inspection change.",
+          "expected_neutral_probe": "How does the supplied valid-certificate observation change your hypothesis and next diagnostic?",
+          "expected_scoring": "Credit supported corrected reasoning while preserving the earlier evidence; do not claim unobserved execution, verification or professional competence."
+        },
+        {
+          "kind": "silence",
+          "candidate": "",
+          "expected": "Allow thinking time and check in neutrally; do not provide the solution during simulation or automatically fail an unassessed job dimension."
+        },
+        {
+          "kind": "wrap_up",
+          "candidate": "I have no further questions.",
+          "expected": "Acknowledge and close without a new substantive test or a claim that a real action was performed."
+        }
+      ]
+    },
+    {
+      "question_id": "nursing-handoff-reconciliation",
+      "profession": "nursing",
+      "target_level": "senior",
+      "examples": [
+        {
+          "kind": "clarification",
+          "candidate": "Can the sending nurse clarify what was complete and who can acknowledge the open item?",
+          "expected": "Reveal the relevant authored fact without adding missing information: The sending nurse confirms the unresolved item remains open; the verbal phrase “all complete” referred only to transport paperwork. The receiving clinician is reachable through the team contact."
+        },
+        {
+          "kind": "partial_reasoning",
+          "candidate": "I will contact the clinician, but let transport proceed while I wait.",
+          "expected_neutral_probe": "What evidence satisfies the supplied readiness gate before movement to the procedure area?"
+        },
+        {
+          "kind": "alternative",
+          "candidate": "I would cancel the slot now so no one feels pressured to skip the readiness check.",
+          "expected_neutral_probe": "What does the available 20-minute hold make possible, and when would cancellation become necessary?",
+          "acceptable_alternatives": [
+            "Another authorized clinician may accept the item when coverage is explicit and readiness is confirmed.",
+            "Parallel coordination is acceptable; assess clear responsibilities rather than a fixed sequence of phone calls."
+          ]
+        },
+        {
+          "kind": "late_correction",
+          "candidate": "I interpreted “all complete” too broadly. I will retain the unresolved clinical item, obtain receiving-clinician acknowledgment and update transport before proceeding.",
+          "expected_neutral_probe": "How will you correct the handoff record and update people relying on the earlier summary?",
+          "expected_scoring": "Credit supported corrected reasoning while preserving the earlier evidence; do not claim unobserved execution, verification or professional competence."
+        },
+        {
+          "kind": "silence",
+          "candidate": "",
+          "expected": "Allow thinking time and check in neutrally; do not provide the solution during simulation or automatically fail an unassessed job dimension."
+        },
+        {
+          "kind": "wrap_up",
+          "candidate": "I have no further questions.",
+          "expected": "Acknowledge and close without a new substantive test or a claim that a real action was performed."
+        }
+      ]
+    },
+    {
+      "question_id": "electrical-power-budget-review",
+      "profession": "electrical_engineering",
+      "target_level": "senior",
+      "examples": [
+        {
+          "kind": "clarification",
+          "candidate": "Does the supply rating apply at the cabinet’s expected temperature?",
+          "expected": "Reveal the relevant authored fact without adding missing information: At the cabinet’s expected maximum temperature the supplied manufacturer table rates this supply at 8 A continuous. The 10 A figure applies at a lower temperature."
+        },
+        {
+          "kind": "partial_reasoning",
+          "candidate": "The loads add to nine amps, which is below the ten-amp supply rating.",
+          "expected_neutral_probe": "What changes when the actuator bank starts at the expected cabinet temperature?"
+        },
+        {
+          "kind": "alternative",
+          "candidate": "I would stagger the actuator starts rather than immediately change the supply.",
+          "expected_neutral_probe": "Which requirement does it address, and which continuous-load issue remains?",
+          "acceptable_alternatives": [
+            "Reducing supported continuous load may be a valid design change if functional requirements allow it and it is verified.",
+            "A separate actuator supply can be considered with interface, protection and failure analysis; no particular architecture is required."
+          ]
+        },
+        {
+          "kind": "late_correction",
+          "candidate": "I used the 10 A headline rating. At the cabinet temperature it is 8 A, so the 9 A continuous load already fails; startup remains a separate 13 A verification question.",
+          "expected_neutral_probe": "How would you revise the design note and distinguish the two unresolved requirements?",
+          "expected_scoring": "Credit supported corrected reasoning while preserving the earlier evidence; do not claim unobserved execution, verification or professional competence."
+        },
+        {
+          "kind": "silence",
+          "candidate": "",
+          "expected": "Allow thinking time and check in neutrally; do not provide the solution during simulation or automatically fail an unassessed job dimension."
+        },
+        {
+          "kind": "wrap_up",
+          "candidate": "I have no further questions.",
+          "expected": "Acknowledge and close without a new substantive test or a claim that a real action was performed."
+        }
+      ]
+    },
+    {
+      "question_id": "operations-capacity-mix-review",
+      "profession": "business_operations",
+      "target_level": "senior",
+      "examples": [
+        {
+          "kind": "clarification",
+          "candidate": "What case mix is expected among tomorrow’s arrivals, and how uncertain is that forecast?",
+          "expected": "Reveal the relevant authored fact without adding missing information: The 40 expected new cases are estimated to include 30 simple and 10 complex cases. The estimate is uncertain by plus or minus ten cases; no type mix is available for that uncertainty."
+        },
+        {
+          "kind": "partial_reasoning",
+          "candidate": "The average is 15 minutes, so 160 cases fit in the 2,400 minutes.",
+          "expected_neutral_probe": "How many staff-minutes do tomorrow’s 30 simple and ten complex arrivals add?"
+        },
+        {
+          "kind": "alternative",
+          "candidate": "I would send ten simple cases to the partner team to gain capacity.",
+          "expected_neutral_probe": "What is its net capacity benefit after the handoff, and what remains unserved?",
+          "acceptable_alternatives": [
+            "Declining the small transfer can be reasonable if coordination uncertainty erodes its value.",
+            "A bounded additional shift or a revised service commitment is discussable if authority, qualified capacity and worker constraints are checked rather than assumed."
+          ]
+        },
+        {
+          "kind": "late_correction",
+          "candidate": "I counted the transfer as 100 minutes gained. The handoff costs 30, so the net gain is 70 and the baseline shortfall remains 530 minutes.",
+          "expected_neutral_probe": "How does the corrected 70-minute benefit change your commitment and customer communication?",
+          "expected_scoring": "Credit supported corrected reasoning while preserving the earlier evidence; do not claim unobserved execution, verification or professional competence."
+        },
+        {
+          "kind": "silence",
+          "candidate": "",
+          "expected": "Allow thinking time and check in neutrally; do not provide the solution during simulation or automatically fail an unassessed job dimension."
+        },
+        {
+          "kind": "wrap_up",
+          "candidate": "I have no further questions.",
+          "expected": "Acknowledge and close without a new substantive test or a claim that a real action was performed."
+        }
+      ]
+    },
+    {
+      "question_id": "project-dependency-confidence-review",
+      "profession": "project_management",
+      "target_level": "senior",
+      "examples": [
+        {
+          "kind": "clarification",
+          "candidate": "Could the supplier deliver a self-contained module earlier, and what work would that scope require?",
+          "expected": "Reveal the relevant authored fact without adding missing information: The supplier can deliver one self-contained module on day 4. It needs three days of integration and two days of rehearsal. A staged launch is technically possible but requires the service owner to accept temporary dual operation."
+        },
+        {
+          "kind": "partial_reasoning",
+          "candidate": "If the supplier is 90% confident, I would keep the launch status green.",
+          "expected_neutral_probe": "Which sequential task disappears if the confidence estimate is high?"
+        },
+        {
+          "kind": "alternative",
+          "candidate": "I would recommend a staged launch of the early module.",
+          "expected_neutral_probe": "What service-owner decision must be obtained before the day 8 notice deadline?",
+          "acceptable_alternatives": [
+            "Delaying all scope can be preferable if temporary dual operation is unacceptable.",
+            "A revised supplier commitment may change the recommendation, but require specific evidence and preserve all acceptance work."
+          ]
+        },
+        {
+          "kind": "late_correction",
+          "candidate": "I omitted one rehearsal day. The full path ends on day 13, so I will change the status and present the staged option or a delay before the notice deadline.",
+          "expected_neutral_probe": "How does that correction change the status and the decision you ask the sponsor to make?",
+          "expected_scoring": "Credit supported corrected reasoning while preserving the earlier evidence; do not claim unobserved execution, verification or professional competence."
+        },
+        {
+          "kind": "silence",
+          "candidate": "",
+          "expected": "Allow thinking time and check in neutrally; do not provide the solution during simulation or automatically fail an unassessed job dimension."
+        },
+        {
+          "kind": "wrap_up",
+          "candidate": "I have no further questions.",
+          "expected": "Acknowledge and close without a new substantive test or a claim that a real action was performed."
+        }
+      ]
+    },
+    {
+      "question_id": "public-service-eligibility-quality-review",
+      "profession": "public_service",
+      "target_level": "senior",
+      "examples": [
+        {
+          "kind": "clarification",
+          "candidate": "Why are the 80 applications still open, and what happened to people who requested assisted completion?",
+          "expected": "Reveal the relevant authored fact without adding missing information: Of the 80 open applications, 50 await clarification letters that have not been sent. Thirty are under ordinary review. Forty applicants requested assisted completion; their outcomes have not been separately checked."
+        },
+        {
+          "kind": "partial_reasoning",
+          "candidate": "The median fell from ten to six days, so the service improved by 40%.",
+          "expected_neutral_probe": "Who is missing from the six-day number, and what outcomes are not observable yet?"
+        },
+        {
+          "kind": "alternative",
+          "candidate": "I would stop the pilot immediately until the evidence is corrected.",
+          "expected_neutral_probe": "Which part can be safely retained while the letter backlog and comparison method are repaired?",
+          "acceptable_alternatives": [
+            "A pause in expansion while preserving useful operational changes is acceptable if monitoring and ownership are explicit.",
+            "Different transparent time-to-event summaries can be appropriate; statistical jargon is not required to explain pending cases fairly."
+          ]
+        },
+        {
+          "kind": "late_correction",
+          "candidate": "I claimed the assisted route was causing delay, but its outcomes were not checked. I will withdraw that claim and investigate the recorded process stages before attributing cause.",
+          "expected_neutral_probe": "What evidence is actually available about their outcomes, and how would you collect a fair comparison?",
+          "expected_scoring": "Credit supported corrected reasoning while preserving the earlier evidence; do not claim unobserved execution, verification or professional competence."
+        },
+        {
+          "kind": "silence",
+          "candidate": "",
+          "expected": "Allow thinking time and check in neutrally; do not provide the solution during simulation or automatically fail an unassessed job dimension."
+        },
+        {
+          "kind": "wrap_up",
+          "candidate": "I have no further questions.",
+          "expected": "Acknowledge and close without a new substantive test or a claim that a real action was performed."
+        }
+      ]
+    },
+    {
+      "question_id": "research-preregistration-deviation-review",
+      "profession": "research",
+      "target_level": "senior",
+      "examples": [
+        {
+          "kind": "clarification",
+          "candidate": "How were participants assigned, and were the comparison cohorts similar at baseline?",
+          "expected": "Reveal the relevant authored fact without adding missing information: Participants chose whether to join the program; there was no randomized assignment. The comparison group comes from an earlier cohort, and its baseline task-completion score was higher."
+        },
+        {
+          "kind": "partial_reasoning",
+          "candidate": "I would analyze the 62 completed outcomes and report their average.",
+          "expected_neutral_probe": "What assumptions would make those participants representative of the 38 without results?"
+        },
+        {
+          "kind": "alternative",
+          "candidate": "I would lead with satisfaction because that outcome is available.",
+          "expected_neutral_probe": "How will you make the exploratory change and original primary outcome visible to readers?",
+          "acceptable_alternatives": [
+            "Withholding an overall effectiveness conclusion while publishing transparent descriptive findings is acceptable.",
+            "Different justified sensitivity methods are acceptable; no specific software or statistical brand is required."
+          ]
+        },
+        {
+          "kind": "late_correction",
+          "candidate": "I described the program as causing improvement. Since assignment was voluntary and the comparison cohort differs, I will revise that to an uncertain association and separate the exploratory outcome.",
+          "expected_neutral_probe": "What language and analysis in the report must change, and what evidence remains useful?",
+          "expected_scoring": "Credit supported corrected reasoning while preserving the earlier evidence; do not claim unobserved execution, verification or professional competence."
+        },
+        {
+          "kind": "silence",
+          "candidate": "",
+          "expected": "Allow thinking time and check in neutrally; do not provide the solution during simulation or automatically fail an unassessed job dimension."
+        },
+        {
+          "kind": "wrap_up",
+          "candidate": "I have no further questions.",
+          "expected": "Acknowledge and close without a new substantive test or a claim that a real action was performed."
+        }
+      ]
+    },
+    {
+      "question_id": "sales-renewal-value-discovery",
+      "profession": "sales",
+      "target_level": "senior",
+      "examples": [
+        {
+          "kind": "clarification",
+          "candidate": "Can we check how many of the 200 events were distinct completed appointments and what work users still did?",
+          "expected": "Reveal the relevant authored fact without adding missing information: The buyer says the 200 events include repeated retries; only 80 distinct appointments were completed. Staff still manually corrected 20 of those. The customer has not measured time saved per appointment."
+        },
+        {
+          "kind": "partial_reasoning",
+          "candidate": "I would offer a discount so the buyer stays with us.",
+          "expected_neutral_probe": "What does the buyer need to believe about the product before even a lower price is worthwhile?"
+        },
+        {
+          "kind": "alternative",
+          "candidate": "If the customer sees no value, I would discuss a respectful non-renewal rather than pushing a sale.",
+          "expected_neutral_probe": "What evidence would let both parties make that decision rather than assuming value is impossible?",
+          "acceptable_alternatives": [
+            "A prompt scheduling-only proposal is acceptable if value and decision criteria are still clarified.",
+            "A respectful non-renewal recommendation can be appropriate if the agreed evaluation fails; no scripted close is required."
+          ]
+        },
+        {
+          "kind": "late_correction",
+          "candidate": "I repeated the 400-hour estimate without checking it. I will withdraw it, correct the slide and agree how to measure completed appointments and actual staff time.",
+          "expected_neutral_probe": "How will you correct the slide and agree a measurable replacement without moving the goalposts?",
+          "expected_scoring": "Credit supported corrected reasoning while preserving the earlier evidence; do not claim unobserved execution, verification or professional competence."
+        },
+        {
+          "kind": "silence",
+          "candidate": "",
+          "expected": "Allow thinking time and check in neutrally; do not provide the solution during simulation or automatically fail an unassessed job dimension."
+        },
+        {
+          "kind": "wrap_up",
+          "candidate": "I have no further questions.",
+          "expected": "Acknowledge and close without a new substantive test or a claim that a real action was performed."
+        }
+      ]
+    },
+    {
+      "question_id": "civil-foundation-assumption-review",
+      "profession": "civil_engineering",
+      "target_level": "senior",
+      "examples": [
+        {
+          "kind": "clarification",
+          "candidate": "Do current ground observations still match the note’s dry-ground assumptions?",
+          "expected": "Reveal the relevant authored fact without adding missing information: A recent site observation records groundwater at footing level after prolonged rain. The note’s dry-ground assumption has not been reconfirmed. No revised bearing or settlement recommendation is available."
+        },
+        {
+          "kind": "partial_reasoning",
+          "candidate": "I would divide 1,300 by 120 and specify a larger footing area.",
+          "expected_neutral_probe": "Which assumption behind the 120 kPa value has changed, and what other checks are missing?"
+        },
+        {
+          "kind": "alternative",
+          "candidate": "I would ask the owner to consider relocating the equipment.",
+          "expected_neutral_probe": "What evidence would establish that the new location’s foundation and ground conditions are suitable?",
+          "acceptable_alternatives": [
+            "Postponement, relocation or redesign are defensible pending the appropriate evidence; no final engineering solution is required.",
+            "Plain-language unit and assumption checks receive full credit without requiring a particular design code or specialist software."
+          ]
+        },
+        {
+          "kind": "late_correction",
+          "candidate": "I treated 1,300 kN as additional load. It is the total, so pressure is 130 kPa; it still exceeds the conditional figure and the groundwater assumption remains unresolved.",
+          "expected_neutral_probe": "What pressure comparison should replace the earlier calculation, and does the review decision change?",
+          "expected_scoring": "Credit supported corrected reasoning while preserving the earlier evidence; do not claim unobserved execution, verification or professional competence."
+        },
+        {
+          "kind": "silence",
+          "candidate": "",
+          "expected": "Allow thinking time and check in neutrally; do not provide the solution during simulation or automatically fail an unassessed job dimension."
+        },
+        {
+          "kind": "wrap_up",
+          "candidate": "I have no further questions.",
+          "expected": "Acknowledge and close without a new substantive test or a claim that a real action was performed."
+        }
+      ]
+    },
+    {
+      "question_id": "social-work-consent-boundary-review",
+      "profession": "social_work",
+      "target_level": "senior",
+      "examples": [
+        {
+          "kind": "clarification",
+          "candidate": "Which information does the booking officer actually need to arrange this appointment?",
+          "expected": "Reveal the relevant authored fact without adding missing information: The housing team confirms it needs contact details and access requirements to book the appointment. A full case history is not required for booking. A later assessment may ask for additional information directly from the person."
+        },
+        {
+          "kind": "partial_reasoning",
+          "candidate": "I would send the full file because the partner says that is necessary to help.",
+          "expected_neutral_probe": "Which booking requirement cannot be met using the already consented information?"
+        },
+        {
+          "kind": "alternative",
+          "candidate": "I would offer to support the person in calling the housing team directly.",
+          "expected_neutral_probe": "How would you respect that choice while offering support and verifying the agreed next step?",
+          "acceptable_alternatives": [
+            "Supporting a direct call led by the person is acceptable if they choose it and access needs are addressed.",
+            "A supervisor consultation can occur in parallel without unnecessarily delaying an already authorized limited referral."
+          ]
+        },
+        {
+          "kind": "late_correction",
+          "candidate": "I assumed the partner could require the whole file. No exception is supplied, so I will use the consented booking details and route any new exception claim for review.",
+          "expected_neutral_probe": "How will you correct the referral plan and record while keeping the appointment work moving?",
+          "expected_scoring": "Credit supported corrected reasoning while preserving the earlier evidence; do not claim unobserved execution, verification or professional competence."
+        },
+        {
+          "kind": "silence",
+          "candidate": "",
+          "expected": "Allow thinking time and check in neutrally; do not provide the solution during simulation or automatically fail an unassessed job dimension."
+        },
+        {
+          "kind": "wrap_up",
+          "candidate": "I have no further questions.",
+          "expected": "Acknowledge and close without a new substantive test or a claim that a real action was performed."
+        }
+      ]
+    },
+    {
+      "question_id": "supply-chain-confirmed-stock-allocation",
+      "profession": "supply_chain",
+      "target_level": "senior",
+      "examples": [
+        {
+          "kind": "clarification",
+          "candidate": "When do inbound units become usable, and is receiving inspection included in the arrival estimate?",
+          "expected": "Reveal the relevant authored fact without adding missing information: Every inbound shipment needs one working day of receiving inspection before its units become usable. The existing 170 units have already passed inspection."
+        },
+        {
+          "kind": "partial_reasoning",
+          "candidate": "The incoming 80 units can cover orders as soon as they arrive on day three.",
+          "expected_neutral_probe": "How does the required one-day inspection change your availability dates?"
+        },
+        {
+          "kind": "alternative",
+          "candidate": "I would decline the alternate’s extra cost and keep the original shipment plan, with explicit approval of C’s risk.",
+          "expected_neutral_probe": "What risk to C is being accepted, who can accept it and when must the customer be updated?",
+          "acceptable_alternatives": [
+            "Buying the alternate or retaining the original-only plan can both be defensible with explicit approvals, risk and customer communication.",
+            "An agreed partial shipment for C is possible if the account owner and customer accept it; do not silently change the commitment."
+          ]
+        },
+        {
+          "kind": "late_correction",
+          "candidate": "I treated the day 3 receipt as usable that day. Inspection moves availability to day 4, so I will correct the timeline and keep C’s coverage conditional until inspection passes.",
+          "expected_neutral_probe": "Which allocations and customer statements need correction, even if final due dates might still be met?",
+          "expected_scoring": "Credit supported corrected reasoning while preserving the earlier evidence; do not claim unobserved execution, verification or professional competence."
+        },
+        {
+          "kind": "silence",
+          "candidate": "",
+          "expected": "Allow thinking time and check in neutrally; do not provide the solution during simulation or automatically fail an unassessed job dimension."
+        },
+        {
+          "kind": "wrap_up",
+          "candidate": "I have no further questions.",
+          "expected": "Acknowledge and close without a new substantive test or a claim that a real action was performed."
+        }
+      ]
+    },
+    {
+      "question_id": "trades-recurring-alarm-diagnosis",
+      "profession": "skilled_trades",
+      "target_level": "senior",
+      "examples": [
+        {
+          "kind": "clarification",
+          "candidate": "Do we have an independent pressure reading from the same operating conditions?",
+          "expected": "Reveal the relevant authored fact without adding missing information: An existing authorized check with an independent calibrated instrument recorded pressure within the supplied normal band while the installed sensor reported above the alarm threshold. Both readings were taken under the same operating condition. Exact values are not needed for this exercise."
+        },
+        {
+          "kind": "partial_reasoning",
+          "candidate": "I would replace the filter again because the high-pressure alarm returned.",
+          "expected_neutral_probe": "How does the independent same-condition reading affect your next check?"
+        },
+        {
+          "kind": "alternative",
+          "candidate": "I would request authorization for the documented temporary ventilation arrangement while qualified diagnostics proceed.",
+          "expected_neutral_probe": "Who authorizes it, what limitation must be communicated and what ends the temporary state?",
+          "acceptable_alternatives": [
+            "Replacing a confirmed faulty sensor is acceptable after appropriate evidence and authorization.",
+            "Investigating intermittent restriction in parallel is reasonable if authorized and tied to a testable hypothesis rather than unbounded part replacement."
+          ]
+        },
+        {
+          "kind": "late_correction",
+          "candidate": "I called the sensor broken too soon. The mismatch could be configuration or installation, so I will request the approved checks before specifying replacement.",
+          "expected_neutral_probe": "How would you distinguish a configuration mismatch from a failed sensor before specifying replacement?",
+          "expected_scoring": "Credit supported corrected reasoning while preserving the earlier evidence; do not claim unobserved execution, verification or professional competence."
+        },
+        {
+          "kind": "silence",
+          "candidate": "",
+          "expected": "Allow thinking time and check in neutrally; do not provide the solution during simulation or automatically fail an unassessed job dimension."
+        },
+        {
+          "kind": "wrap_up",
+          "candidate": "I have no further questions.",
+          "expected": "Acknowledge and close without a new substantive test or a claim that a real action was performed."
+        }
+      ]
+    },
+    {
+      "question_id": "ux-completion-metric-accessibility-review",
+      "profession": "ux_design",
+      "target_level": "senior",
+      "examples": [
+        {
+          "kind": "clarification",
+          "candidate": "Were the study tasks comparable, and how many submitted bookings had usable contact details?",
+          "expected": "Reveal the relevant authored fact without adding missing information: Different participants tested the two versions, and the task wording changed. Neither study included keyboard-only completion. Three of the nine new-version submissions lacked a usable contact method."
+        },
+        {
+          "kind": "partial_reasoning",
+          "candidate": "Nine of ten reached confirmation, so the redesign improved completion.",
+          "expected_neutral_probe": "How many submissions produced a usable contact method, and why does that change the task definition?"
+        },
+        {
+          "kind": "alternative",
+          "candidate": "I would test inline validation rather than wait until final submission to explain missing information.",
+          "expected_neutral_probe": "How would you test timing, clarity and recovery without repeatedly interrupting users?",
+          "acceptable_alternatives": [
+            "Inline, submit-time or combined validation can be acceptable if errors are understandable, discoverable and recoverable.",
+            "A limited rollout or holding the redesign are both defensible depending on the revised test evidence; no preferred visual style is scored."
+          ]
+        },
+        {
+          "kind": "late_correction",
+          "candidate": "I said both designs were equally effective because each had six usable outcomes. The samples and tasks differ, so that conclusion is unsupported; we need a comparable test.",
+          "expected_neutral_probe": "What can the two small, different studies actually support, and what comparison is still needed?",
+          "expected_scoring": "Credit supported corrected reasoning while preserving the earlier evidence; do not claim unobserved execution, verification or professional competence."
+        },
+        {
+          "kind": "silence",
+          "candidate": "",
+          "expected": "Allow thinking time and check in neutrally; do not provide the solution during simulation or automatically fail an unassessed job dimension."
+        },
+        {
+          "kind": "wrap_up",
+          "candidate": "I have no further questions.",
+          "expected": "Acknowledge and close without a new substantive test or a claim that a real action was performed."
+        }
+      ]
+    },
+    {
+      "question_id": "data-analysis-denominator-check",
+      "profession": "data_science",
+      "target_level": "junior",
+      "examples": [
+        {
+          "kind": "clarification",
+          "candidate": "Were the audiences assigned in the same way, and were the sends on comparable days?",
+          "expected": "Reveal the relevant authored fact without adding missing information: A went to a general mailing list; B went to people who previously attended a workshop. The messages were sent on different days."
+        },
+        {
+          "kind": "partial_reasoning",
+          "candidate": "A converted 30% and B 50%, so B seems much better.",
+          "expected_neutral_probe": "What fraction of delivered messages led to a sign-up for each version?"
+        },
+        {
+          "kind": "alternative",
+          "candidate": "I would use B for a small next send while treating the result as uncertain.",
+          "expected_neutral_probe": "What uncertainty should accompany that practical choice, and how could the next send test it?",
+          "acceptable_alternatives": [
+            "A cautious small use of B can be defensible if the uncertainty is explicit and future outcomes are monitored.",
+            "A count-and-rate table or a short spoken explanation is equally acceptable; jargon earns no extra credit."
+          ]
+        },
+        {
+          "kind": "late_correction",
+          "candidate": "I used ten clicks as B’s denominator. For delivered-message conversion it is five sign-ups out of 20 deliveries, or 25%.",
+          "expected_neutral_probe": "Which denominator changed, and how would you correct the report label so the mistake is not repeated?",
+          "expected_scoring": "Credit supported corrected reasoning while preserving the earlier evidence; do not claim unobserved execution, verification or professional competence."
+        },
+        {
+          "kind": "silence",
+          "candidate": "",
+          "expected": "Allow thinking time and check in neutrally; do not provide the solution during simulation or automatically fail an unassessed job dimension."
+        },
+        {
+          "kind": "wrap_up",
+          "candidate": "I have no further questions.",
+          "expected": "Acknowledge and close without a new substantive test or a claim that a real action was performed."
+        }
+      ]
+    },
+    {
+      "question_id": "ux-first-usability-observation",
+      "profession": "ux_design",
+      "target_level": "junior",
+      "examples": [
+        {
+          "kind": "clarification",
+          "candidate": "Where is the date field on the screen, and what label do participants see?",
+          "expected": "Reveal the relevant authored fact without adding missing information: The date field is below the initial viewport on a small screen. Its label says “When,” and there is no required-field text. The Continue button is visible above it."
+        },
+        {
+          "kind": "partial_reasoning",
+          "candidate": "I would make Continue red so people notice it.",
+          "expected_neutral_probe": "How would that help someone who expects the date question on the next screen?"
+        },
+        {
+          "kind": "alternative",
+          "candidate": "I would consider disabling Continue until the required date is entered, with a clear explanation.",
+          "expected_neutral_probe": "How will someone discover what is required and understand why they cannot continue?",
+          "acceptable_alternatives": [
+            "A separate clearly labeled date step can be reasonable if tested against the same booking task.",
+            "Disabling progression may work with discoverable requirements and explanation; it is not automatically better than helpful validation."
+          ]
+        },
+        {
+          "kind": "late_correction",
+          "candidate": "I said both people expected a later date screen, but only one said that. I will keep the other person’s reason unknown and test the field-order hypothesis.",
+          "expected_neutral_probe": "Which expectation was actually observed and which remains unknown?",
+          "expected_scoring": "Credit supported corrected reasoning while preserving the earlier evidence; do not claim unobserved execution, verification or professional competence."
+        },
+        {
+          "kind": "silence",
+          "candidate": "",
+          "expected": "Allow thinking time and check in neutrally; do not provide the solution during simulation or automatically fail an unassessed job dimension."
+        },
+        {
+          "kind": "wrap_up",
+          "candidate": "I have no further questions.",
+          "expected": "Acknowledge and close without a new substantive test or a claim that a real action was performed."
+        }
+      ]
+    },
+    {
+      "question_id": "hr-first-interview-scheduling",
+      "profession": "human_resources",
+      "target_level": "junior",
+      "examples": [
+        {
+          "kind": "clarification",
+          "candidate": "What are the approved date, time zone and interview duration?",
+          "expected": "Reveal the relevant authored fact without adding missing information: The panel’s approved slot is Tuesday, November 10, 2026, at 10:00 Pacific time. The calendar system can display local time for recipients; no manual conversion is required."
+        },
+        {
+          "kind": "partial_reasoning",
+          "candidate": "I would write the candidate’s local time myself even though their location is not confirmed.",
+          "expected_neutral_probe": "How can the verified calendar invitation avoid an unsupported conversion?"
+        },
+        {
+          "kind": "alternative",
+          "candidate": "I might invite a portfolio as an optional extra so the candidate can show more evidence.",
+          "expected_neutral_probe": "How could that alter expectations or comparability when the approved process does not use a portfolio?",
+          "acceptable_alternatives": [
+            "A clear text invitation with explicit time zone can work if the candidate confirms timing; a calendar event is helpful but not mandatory.",
+            "A separate private scheduling message can be used when the standard invitation cannot provide the approved support route."
+          ]
+        },
+        {
+          "kind": "late_correction",
+          "candidate": "I left reply-all as the support route. I will replace it with the approved private HR mailbox and keep any personal reason out of the panel invitation.",
+          "expected_neutral_probe": "What wording and recipient handling would you change before sending?",
+          "expected_scoring": "Credit supported corrected reasoning while preserving the earlier evidence; do not claim unobserved execution, verification or professional competence."
+        },
+        {
+          "kind": "silence",
+          "candidate": "",
+          "expected": "Allow thinking time and check in neutrally; do not provide the solution during simulation or automatically fail an unassessed job dimension."
+        },
+        {
+          "kind": "wrap_up",
+          "candidate": "I have no further questions.",
+          "expected": "Acknowledge and close without a new substantive test or a claim that a real action was performed."
+        }
+      ]
+    },
+    {
+      "question_id": "law-contract-version-comparison",
+      "profession": "law",
+      "target_level": "junior",
+      "examples": [
+        {
+          "kind": "clarification",
+          "candidate": "Is there an agreed amendment or any missing correspondence outside this file?",
+          "expected": "Reveal the relevant authored fact without adding missing information: The file contains no signed amendment or customer reply agreeing to the new terms. There is no evidence yet about whether another authorized agreement exists outside this file."
+        },
+        {
+          "kind": "partial_reasoning",
+          "candidate": "The key difference is that notice changed from 30 days to seven.",
+          "expected_neutral_probe": "Who can end the service under each version, and what does the signed change clause say?"
+        },
+        {
+          "kind": "alternative",
+          "candidate": "I would ask the customer for the complete email chain before the supervisor concludes anything.",
+          "expected_neutral_probe": "How will you explain that request without implying the seven-day option is already confirmed?",
+          "acceptable_alternatives": [
+            "A side-by-side table or short memo is equally acceptable.",
+            "The supervisor may choose another evidence-gathering sequence; score accurate distinctions and timely escalation rather than a fixed legal theory."
+          ]
+        },
+        {
+          "kind": "late_correction",
+          "candidate": "I dismissed the email as irrelevant without enough context. I will instead flag its authority and reliance implications for the supervisor and request the full exchange.",
+          "expected_neutral_probe": "What question should replace that conclusion in the supervising lawyer’s note?",
+          "expected_scoring": "Credit supported corrected reasoning while preserving the earlier evidence; do not claim unobserved execution, verification or professional competence."
+        },
+        {
+          "kind": "silence",
+          "candidate": "",
+          "expected": "Allow thinking time and check in neutrally; do not provide the solution during simulation or automatically fail an unassessed job dimension."
+        },
+        {
+          "kind": "wrap_up",
+          "candidate": "I have no further questions.",
+          "expected": "Acknowledge and close without a new substantive test or a claim that a real action was performed."
+        }
+      ]
+    },
+    {
+      "question_id": "consulting-promotion-unit-economics",
+      "profession": "consulting",
+      "target_level": "junior",
+      "examples": [
+        {
+          "kind": "clarification",
+          "candidate": "How many boxes can operations ship, and is there a reliable promotional demand forecast?",
+          "expected": "Reveal the relevant authored fact without adding missing information: The operations team can ship at most 1,500 boxes this month with current capacity. No reliable forecast of promotional demand is available."
+        },
+        {
+          "kind": "partial_reasoning",
+          "candidate": "At a price of 16, higher sales should make up for the lower revenue per box.",
+          "expected_neutral_probe": "What remains per box after both variable costs, before fixed costs?"
+        },
+        {
+          "kind": "alternative",
+          "candidate": "I would consider a small deliberately loss-making pilot if we can fund a specific learning objective.",
+          "expected_neutral_probe": "What learning objective, spend limit and stopping condition would make that a deliberate experiment?",
+          "acceptable_alternatives": [
+            "A smaller discount may be considered with the same arithmetic and demand uncertainty.",
+            "A funded learning pilot is not automatically wrong; distinguish its learning goal from the claim that the promotion pays for itself."
+          ]
+        },
+        {
+          "kind": "late_correction",
+          "candidate": "I assumed 20% more sales offsets a 20% price cut. The contribution falls from five to one, so break-even is 4,000 boxes, beyond the 1,500 capacity.",
+          "expected_neutral_probe": "Which assumption produced the first number, and how does the corrected value change the recommendation?",
+          "expected_scoring": "Credit supported corrected reasoning while preserving the earlier evidence; do not claim unobserved execution, verification or professional competence."
+        },
+        {
+          "kind": "silence",
+          "candidate": "",
+          "expected": "Allow thinking time and check in neutrally; do not provide the solution during simulation or automatically fail an unassessed job dimension."
+        },
+        {
+          "kind": "wrap_up",
+          "candidate": "I have no further questions.",
+          "expected": "Acknowledge and close without a new substantive test or a claim that a real action was performed."
+        }
+      ]
+    },
+    {
+      "question_id": "product-assistant-priority-choice",
+      "profession": "product_management",
+      "target_level": "junior",
+      "examples": [
+        {
+          "kind": "clarification",
+          "candidate": "How representative are these support contacts, and have we observed anyone use the confirmation page?",
+          "expected": "Reveal the relevant authored fact without adding missing information: The 20 contacts are from people who chose to contact support; total booking volume and repeat callers are unknown. Three observed sessions show users checking email because the confirmation page never states whether their booking succeeded."
+        },
+        {
+          "kind": "partial_reasoning",
+          "candidate": "Sixty percent of users cannot tell whether their booking worked.",
+          "expected_neutral_probe": "What population do the 20 support contacts actually represent?"
+        },
+        {
+          "kind": "alternative",
+          "candidate": "I would consider calendar export first if it also gives people a reliable booking record.",
+          "expected_neutral_probe": "How would you show that it addresses the agreed uncertainty goal within the available time?",
+          "acceptable_alternatives": [
+            "A short additional discovery session is acceptable if it targets a material uncertainty and preserves time for a useful decision.",
+            "Another feature can be justified with evidence linked to the stated goal; do not require the confirmation page as a memorized answer."
+          ]
+        },
+        {
+          "kind": "late_correction",
+          "candidate": "I promised confirmation plus calendar export in five days, but that leaves no verification day. I will narrow the scope and use the result to choose the next improvement.",
+          "expected_neutral_probe": "How would you explain the revised scope and what evidence determines the next feature?",
+          "expected_scoring": "Credit supported corrected reasoning while preserving the earlier evidence; do not claim unobserved execution, verification or professional competence."
+        },
+        {
+          "kind": "silence",
+          "candidate": "",
+          "expected": "Allow thinking time and check in neutrally; do not provide the solution during simulation or automatically fail an unassessed job dimension."
+        },
+        {
+          "kind": "wrap_up",
+          "candidate": "I have no further questions.",
+          "expected": "Acknowledge and close without a new substantive test or a claim that a real action was performed."
+        }
+      ]
+    },
+    {
+      "question_id": "finance-cash-profit-bridge",
+      "profession": "finance",
+      "target_level": "junior",
+      "examples": [
+        {
+          "kind": "clarification",
+          "candidate": "Does the uncollected 40,000 represent a receivables increase, or are other adjustments involved?",
+          "expected": "Reveal the relevant authored fact without adding missing information: The 40,000 difference between recognized revenue and customer receipts is an increase in receivables. There were no write-offs or opening-balance collections to complicate the supplied bridge."
+        },
+        {
+          "kind": "partial_reasoning",
+          "candidate": "Profit was 30,000, so that is how much cash the month generated.",
+          "expected_neutral_probe": "How much did customers actually pay, and how much operating cash was paid out?"
+        },
+        {
+          "kind": "alternative",
+          "candidate": "I would explain operating cash directly as 60,000 received less 65,000 paid.",
+          "expected_neutral_probe": "How could you explain the same negative 5,000 starting from the 30,000 profit?",
+          "acceptable_alternatives": [
+            "A direct-method explanation is sufficient if it reconciles the stated flows and clearly separates investing cash.",
+            "A simple annotated table can replace accounting terminology; no external financial reporting rule is required."
+          ]
+        },
+        {
+          "kind": "late_correction",
+          "candidate": "I called negative 5,000 the total cash change. That is operating cash only; the separate 20,000 equipment payment makes the supplied total movement negative 25,000.",
+          "expected_neutral_probe": "Which part belongs outside operating cash flow, and what is the revised total movement?",
+          "expected_scoring": "Credit supported corrected reasoning while preserving the earlier evidence; do not claim unobserved execution, verification or professional competence."
+        },
+        {
+          "kind": "silence",
+          "candidate": "",
+          "expected": "Allow thinking time and check in neutrally; do not provide the solution during simulation or automatically fail an unassessed job dimension."
+        },
+        {
+          "kind": "wrap_up",
+          "candidate": "I have no further questions.",
+          "expected": "Acknowledge and close without a new substantive test or a claim that a real action was performed."
+        }
+      ]
+    },
+    {
+      "question_id": "civil-drainage-level-check",
+      "profession": "civil_engineering",
+      "target_level": "junior",
+      "examples": [
+        {
+          "kind": "clarification",
+          "candidate": "Are these surveyed levels or proposed levels, and has the receiving connection been checked?",
+          "expected": "Reveal the relevant authored fact without adding missing information: The levels are proposed design levels, not verified survey measurements. The receiving connection level is shown from an old drawing and has not been checked on site."
+        },
+        {
+          "kind": "partial_reasoning",
+          "candidate": "The fall is 0.40, so I would label the gradient 0.40%.",
+          "expected_neutral_probe": "What units result when you divide the 0.40 m fall by the 40 m horizontal run?"
+        },
+        {
+          "kind": "alternative",
+          "candidate": "I would request a survey of the whole site before proceeding with the drainage design.",
+          "expected_neutral_probe": "Which specific measurements resolve the receiving connection and crossing uncertainties first?",
+          "acceptable_alternatives": [
+            "A sketch, ratio or percentage calculation is acceptable if direction and units are correct.",
+            "A targeted survey request or a broader coordinated survey can be justified by the interfaces; no particular surveying tool is required."
+          ]
+        },
+        {
+          "kind": "late_correction",
+          "candidate": "I reversed the direction. A is higher than B by 0.40 m, so the proposed fall is toward B; the receiving connection still needs verification.",
+          "expected_neutral_probe": "Which level comparison establishes that direction, and what part remains unverified in the field?",
+          "expected_scoring": "Credit supported corrected reasoning while preserving the earlier evidence; do not claim unobserved execution, verification or professional competence."
+        },
+        {
+          "kind": "silence",
+          "candidate": "",
+          "expected": "Allow thinking time and check in neutrally; do not provide the solution during simulation or automatically fail an unassessed job dimension."
+        },
+        {
+          "kind": "wrap_up",
+          "candidate": "I have no further questions.",
+          "expected": "Acknowledge and close without a new substantive test or a claim that a real action was performed."
+        }
+      ]
+    },
+    {
+      "question_id": "electrical-divider-input-review",
+      "profession": "electrical_engineering",
+      "target_level": "junior",
+      "examples": [
+        {
+          "kind": "clarification",
+          "candidate": "Could we change the resistor ratio, and what is the source’s maximum voltage?",
+          "expected": "Reveal the relevant authored fact without adding missing information: An alternative uses 3 kΩ above 1 kΩ. For this exercise those are nominal values, and the source could be as high as 13 V. Resistor tolerances are not supplied."
+        },
+        {
+          "kind": "partial_reasoning",
+          "candidate": "The output is one third of the supply, so it should be safe for the input.",
+          "expected_neutral_probe": "What is one third of 12 V, and how does it compare with 3.3 V?"
+        },
+        {
+          "kind": "alternative",
+          "candidate": "I would propose a different divider ratio and calculate its output.",
+          "expected_neutral_probe": "How would you check maximum source voltage, tolerance and input loading for that choice?",
+          "acceptable_alternatives": [
+            "Another suitable ratio or a different interface approach can be discussed if it is checked against the supplied limit and missing requirements.",
+            "An annotated calculation is sufficient; no simulator or remembered electronics standard is required."
+          ]
+        },
+        {
+          "kind": "late_correction",
+          "candidate": "I approved the alternative from its nominal 3.25 V maximum-source calculation. Resistor tolerances are missing, so that is not yet a worst-case approval.",
+          "expected_neutral_probe": "What calculation remains valid, and what evidence is needed to turn it into a worst-case conclusion?",
+          "expected_scoring": "Credit supported corrected reasoning while preserving the earlier evidence; do not claim unobserved execution, verification or professional competence."
+        },
+        {
+          "kind": "silence",
+          "candidate": "",
+          "expected": "Allow thinking time and check in neutrally; do not provide the solution during simulation or automatically fail an unassessed job dimension."
+        },
+        {
+          "kind": "wrap_up",
+          "candidate": "I have no further questions.",
+          "expected": "Acknowledge and close without a new substantive test or a claim that a real action was performed."
+        }
+      ]
+    },
+    {
+      "question_id": "mechanical-fit-tolerance-check",
+      "profession": "mechanical_engineering",
+      "target_level": "junior",
+      "examples": [
+        {
+          "kind": "clarification",
+          "candidate": "Can the drawing tolerances change, and what process capability has the supplier confirmed?",
+          "expected": "Reveal the relevant authored fact without adding missing information: The supplier proposes changing only the hole nominal diameter while retaining both ±0.10 mm tolerances. No verified tighter process capability has been provided."
+        },
+        {
+          "kind": "partial_reasoning",
+          "candidate": "The minimum clearance is zero, so I have checked the tightest fit.",
+          "expected_neutral_probe": "What is the loosest permitted pin-and-hole combination, and does it meet the maximum clearance?"
+        },
+        {
+          "kind": "alternative",
+          "candidate": "I would shift the nominal hole diameter upward to increase clearance.",
+          "expected_neutral_probe": "Does that reduce the width of the clearance range or only move it?",
+          "acceptable_alternatives": [
+            "Another tolerance allocation is acceptable if both clearance limits and feasible manufacturing are checked.",
+            "A simple limit table is enough; no statistical distribution, machining process or specialized tolerance software is assumed."
+          ]
+        },
+        {
+          "kind": "late_correction",
+          "candidate": "I treated zero clearance as acceptable, but the requirement starts at 0.05 mm. The original drawing fails at both the tightest and loosest combinations.",
+          "expected_neutral_probe": "What minimum does the supplied requirement actually permit, and how does that change the drawing note?",
+          "expected_scoring": "Credit supported corrected reasoning while preserving the earlier evidence; do not claim unobserved execution, verification or professional competence."
+        },
+        {
+          "kind": "silence",
+          "candidate": "",
+          "expected": "Allow thinking time and check in neutrally; do not provide the solution during simulation or automatically fail an unassessed job dimension."
+        },
+        {
+          "kind": "wrap_up",
+          "candidate": "I have no further questions.",
+          "expected": "Acknowledge and close without a new substantive test or a claim that a real action was performed."
+        }
+      ]
+    },
+    {
+      "question_id": "marketing-campaign-measurement-basics",
+      "profession": "marketing",
+      "target_level": "junior",
+      "examples": [
+        {
+          "kind": "clarification",
+          "candidate": "How many people from each attributed source actually attended?",
+          "expected": "Reveal the relevant authored fact without adding missing information: After the event, A has 20 verified attendees and B has 20. Those counts use the same check-in process. No attendee-quality or repeat-attendance measure is available."
+        },
+        {
+          "kind": "partial_reasoning",
+          "candidate": "A is the winner because it produced 60 registrations at lower cost.",
+          "expected_neutral_probe": "Which outcome does the campaign goal actually value, and what denominator is missing?"
+        },
+        {
+          "kind": "alternative",
+          "candidate": "I would put all of next month’s budget into B because its attendee cost was lower.",
+          "expected_neutral_probe": "What evidence supports B’s response to additional spend, and how could you test it within a limit?",
+          "acceptable_alternatives": [
+            "Repeating the split to gather more evidence can be reasonable if the learning goal is stated.",
+            "A limited increase to B can also be justified by observed attendee cost, provided causal and scaling uncertainty remain explicit."
+          ]
+        },
+        {
+          "kind": "late_correction",
+          "candidate": "I called A the winner from registration cost alone. The goal is attendance, where B cost ten per attendee versus fifteen for A; I will report both stages and the uncertainty.",
+          "expected_neutral_probe": "How would you rewrite the slide so readers see why the recommendation changed?",
+          "expected_scoring": "Credit supported corrected reasoning while preserving the earlier evidence; do not claim unobserved execution, verification or professional competence."
+        },
+        {
+          "kind": "silence",
+          "candidate": "",
+          "expected": "Allow thinking time and check in neutrally; do not provide the solution during simulation or automatically fail an unassessed job dimension."
+        },
+        {
+          "kind": "wrap_up",
+          "candidate": "I have no further questions.",
+          "expected": "Acknowledge and close without a new substantive test or a claim that a real action was performed."
+        }
+      ]
+    },
+    {
+      "question_id": "qa-retry-idempotency-review",
+      "profession": "quality_assurance",
+      "target_level": "mid",
+      "examples": [
+        {
+          "kind": "clarification",
+          "candidate": "Can we inspect the synthetic order and accepted-payment records for the same checkout key?",
+          "expected": "Reveal the relevant authored fact without adding missing information: In the synthetic trace, checkout key K7 has two submit events, one order O41 and two accepted payment records P90 and P91. The UI shows one confirmation. The two payment records are not reversals or authorizations for different orders."
+        },
+        {
+          "kind": "partial_reasoning",
+          "candidate": "The trace has one order, so the retry test passes.",
+          "expected_neutral_probe": "What do the two accepted payment records establish even if only O41 exists?"
+        },
+        {
+          "kind": "alternative",
+          "candidate": "I would reject every second submit event to prevent duplicate payment attempts.",
+          "expected_neutral_probe": "How would that behave for a genuinely new checkout key or a retry before any acceptance?",
+          "acceptable_alternatives": [
+            "A state table, sequence description or pseudocode test plan is acceptable; no particular test framework is required.",
+            "Different fault-injection strategies are valid if they distinguish acceptance timing and preserve synthetic request identity."
+          ]
+        },
+        {
+          "kind": "late_correction",
+          "candidate": "I passed the case after seeing one order. P90 and P91 are both accepted payments for K7, so I will mark the trace failed and propose tests for both timeout positions.",
+          "expected_neutral_probe": "Which evidence changes the result, and how would you revise the defect report without claiming unrun tests?",
+          "expected_scoring": "Credit supported corrected reasoning while preserving the earlier evidence; do not claim unobserved execution, verification or professional competence."
+        },
+        {
+          "kind": "silence",
+          "candidate": "",
+          "expected": "Allow thinking time and check in neutrally; do not provide the solution during simulation or automatically fail an unassessed job dimension."
+        },
+        {
+          "kind": "wrap_up",
+          "candidate": "I have no further questions.",
+          "expected": "Acknowledge and close without a new substantive test or a claim that a real action was performed."
+        }
+      ]
+    }
+  ]
+}

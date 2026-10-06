@@ -299,12 +299,7 @@ func (r *Relay) Handle(w http.ResponseWriter, req *http.Request) {
 			local.apiKey = key
 		}
 	}
-	q, ok := r.corpus.Get(sess.QuestionID)
-	if len(sess.QuestionSnapshot) > 2 {
-		if json.Unmarshal(sess.QuestionSnapshot, &q) == nil {
-			ok = true
-		}
-	}
+	q, ok := r.corpus.ResolveSnapshot(sess.QuestionID, sess.QuestionSnapshot)
 	if !ok {
 		_ = wc.writeServerMsg(serverMsg{Type: "error", Code: "question_unavailable", Text: "Interview content unavailable.", Retryable: false})
 		return

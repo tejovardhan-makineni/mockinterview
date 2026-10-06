@@ -151,5 +151,7 @@
       "Heap version: comparing sizes with the wrong inequality and keeping k+1 or k-1 elements."
     ]
   },
-  "interviewer_notes": "Let the candidate finish their reasoning and any workspace changes before a focused follow-up. Ask only about a material unresolved issue, then return the floor. Assess whether the chosen algorithm meets the requested improvement over sorting and whether complexity is justified. Heaps and selection algorithms are private reference alternatives, not hints to provide. The mapping to index n-k and cases nums=[3,2,1,5,6,4], k=2, all-equal [3,3,3,3] and already-sorted input can test a completed implementation when relevant. Allow independent testing first. A streaming class or worst-case guarantee is an optional later extension; do not steer through heap then Quickselect or require a named algorithm when another valid approach works."
+  "interviewer_notes": "Let the candidate finish their reasoning and any workspace changes before a focused follow-up. Ask only about a material unresolved issue, then return the floor. Assess whether the chosen algorithm meets the requested improvement over sorting and whether complexity is justified. Heaps and selection algorithms are private reference alternatives, not hints to provide. The mapping to index n-k and cases nums=[3,2,1,5,6,4], k=2, all-equal [3,3,3,3] and already-sorted input can test a completed implementation when relevant. Allow independent testing first. A streaming class or worst-case guarantee is an optional later extension; do not steer through heap then Quickselect or require a named algorithm when another valid approach works.",
+  "role_track": "individual_contributor",
+  "revision": 2
 }

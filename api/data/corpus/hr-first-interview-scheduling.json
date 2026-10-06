@@ -1,0 +1,137 @@
+{
+  "schema_version": 1,
+  "revision": 1,
+  "format_id": "work-sample-defense",
+  "review_status": "preview",
+  "provenance": {
+    "authorship": "Original project scenario, AI-assisted draft. Practitioner review and calibration pending.",
+    "license": "MIT"
+  },
+  "minutes": 20,
+  "id": "hr-first-interview-scheduling",
+  "title": "Junior HR Coordinator: Repair an Interview Scheduling Handoff",
+  "track": "professional",
+  "domain": "structured_hiring",
+  "areas": [
+    "human_resources"
+  ],
+  "modality": "written",
+  "difficulty": "junior",
+  "role_track": "individual_contributor",
+  "tags": [
+    "human-resources",
+    "junior-specialist",
+    "evidence-based-practice",
+    "community-preview"
+  ],
+  "prompt": "You are a junior HR coordinator reviewing a fictional interview invitation before it is sent. It says “Tuesday at 10, bring a portfolio, reply all if you need an adjustment.” The candidate is in a different time zone, the job does not require a portfolio, and the reply-all list includes all panel members. Supplied process requires a dated time with time zone, only approved selection requirements and a private contact for access or scheduling needs. Rewrite the invitation’s key details and identify what you must confirm before sending.",
+  "blurb": "Create a clear, consistent invitation with verified timing, job-related requirements and a private support route.",
+  "rubric": [
+    {
+      "key": "clarity",
+      "label": "Provide verified practical details",
+      "description": "Prevents ambiguity without guessing the candidate’s local time.",
+      "weight": 1,
+      "anchors": {
+        "0": "Sends “Tuesday at 10” without date or time zone.",
+        "2": "Includes the full date, Pacific time and 30-minute duration.",
+        "4": "Uses the verified calendar invitation for local display, confirms the meeting link or location and offers a contact route if the displayed time is unclear."
+      }
+    },
+    {
+      "key": "consistency",
+      "label": "Keep preparation job-related and approved",
+      "description": "Removes invented selection demands.",
+      "weight": 1,
+      "anchors": {
+        "0": "Keeps the portfolio requirement despite the approved format.",
+        "2": "Removes the portfolio and describes the customer-issue conversation.",
+        "4": "Explains that relevant examples may come from education, volunteering or paid work and avoids adding a take-home task or promising interview questions not supplied."
+      }
+    },
+    {
+      "key": "privacy",
+      "label": "Handle requests through the right channel",
+      "description": "Shares the arrangement rather than unnecessary personal details.",
+      "weight": 1,
+      "anchors": {
+        "0": "Asks the candidate to disclose personal needs to reply-all.",
+        "2": "Gives the approved private HR contact.",
+        "4": "Explains the private request route, checks only what is needed to arrange the interview and shares agreed logistics with the panel without inventing a request or demanding a diagnosis."
+      }
+    }
+  ],
+  "reference": {
+    "scenario": "You are a junior HR coordinator reviewing a fictional interview invitation before it is sent. It says “Tuesday at 10, bring a portfolio, reply all if you need an adjustment.” The candidate is in a different time zone, the job does not require a portfolio, and the reply-all list includes all panel members. Supplied process requires a dated time with time zone, only approved selection requirements and a private contact for access or scheduling needs. Rewrite the invitation’s key details and identify what you must confirm before sending.",
+    "facts": [
+      {
+        "id": "time",
+        "value": "The panel’s approved slot is Tuesday, November 10, 2026, at 10:00 Pacific time. The calendar system can display local time for recipients; no manual conversion is required.",
+        "reveal_when": "candidate asks for the actual date or time zone"
+      },
+      {
+        "id": "format",
+        "value": "The approved interview is a 30-minute conversation about resolving a customer issue. Candidates may use examples from education, volunteering or paid work. No portfolio or advance task is required.",
+        "reveal_when": "candidate asks about interview format or approved preparation"
+      },
+      {
+        "id": "contact",
+        "value": "A shared HR support mailbox is approved for private requests. Panel members need only the agreed scheduling or access arrangement, not the reason behind it. The candidate has not requested any adjustment yet.",
+        "reveal_when": "candidate asks about private contact, sharing or existing requests"
+      }
+    ],
+    "model_points": [
+      "The coordinator should confirm missing logistical details, not manufacture a meeting link or calculate an unsupported local time.",
+      "The invitation must reflect the approved interview format and consistent preparation requirements.",
+      "A private support route is useful without assuming the candidate has a disability or needs an adjustment."
+    ],
+    "probes": [
+      {
+        "trigger": "candidate supplies a local time without knowing the candidate’s location",
+        "question": "How can the verified calendar invitation avoid an unsupported conversion?"
+      },
+      {
+        "trigger": "candidate wants to invite a portfolio as optional extra evidence",
+        "question": "How could that alter expectations or comparability when the approved process does not use a portfolio?"
+      },
+      {
+        "trigger": "candidate corrects a draft that included reply-all for access requests",
+        "question": "What wording and recipient handling would you change before sending?"
+      }
+    ],
+    "fair_alternatives": [
+      "A clear text invitation with explicit time zone can work if the candidate confirms timing; a calendar event is helpful but not mandatory.",
+      "A separate private scheduling message can be used when the standard invitation cannot provide the approved support route."
+    ],
+    "red_flags": [
+      "Sends “Tuesday at 10” without date or time zone.",
+      "Keeps the portfolio requirement despite the approved format.",
+      "Asks the candidate to disclose personal needs to reply-all."
+    ],
+    "follow_ups": [
+      "Write a complete interview invitation"
+    ],
+    "assessment_limits": [
+      "Assess only reasoning and communication demonstrated in this fictional task, not real-world professional competence, licensure or hiring readiness. No real action, external verification or tool execution has occurred.",
+      "Credit relevant plain-language reasoning and valid alternatives without requiring experience at a particular employer. Examples from education, volunteering, community work or paid work are equally acceptable when relevant.",
+      "A missing or unasked dimension is not assessed, not automatically a failure. In simulation, use neutral probes and reveal facts only when triggered; in coaching, label assistance and distinguish assisted performance from independent evidence.",
+      "Credit an explicit late correction using the final demonstrated reasoning while retaining the evidence of the earlier mistake; do not force agreement with one exemplar.",
+      "Do not penalize the candidate for a conditional fact that was never revealed. Credit an appropriate request for missing information and a conditional plan; distinguish the candidate’s assumptions from interviewer-supplied facts."
+    ]
+  },
+  "interviewer_notes": "Play the relevant reviewing colleague or stakeholder using the supplied facts only. Start with one focused question, not the full rubric. Ask for clarification before treating an ambiguous answer as wrong. Reveal conditional facts when their stated triggers are met, permit equivalent valid approaches and never invent organizational rules, laws, clinical findings, ratings or missing outcomes. Do not require a polished artifact or specialist software. In a short session prioritize the main decision and one material follow-up; allow silence for thinking, check in neutrally, and leave time for the candidate to correct their recommendation and ask a final question. Distinguish simulation from coaching and record any help given. Assess job-relevant evidence, not accent, confidence, speed, credentials or prestige. This is independent practice for adults 18+ and is not a real professional workflow.",
+  "learning_drills": [
+    {
+      "id": "decision-review",
+      "title": "Write a complete interview invitation",
+      "minutes": 5,
+      "prompt": "Write a complete interview invitation. Use the fictional facts from this exercise. This is self-guided practice; no model assessment is performed.",
+      "checklist": [
+        "Use verified date, time zone and duration",
+        "Describe only approved preparation",
+        "Confirm the meeting details",
+        "Offer a private support contact"
+      ]
+    }
+  ]
+}

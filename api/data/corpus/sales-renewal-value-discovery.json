@@ -1,0 +1,137 @@
+{
+  "schema_version": 1,
+  "revision": 1,
+  "format_id": "stakeholder-simulation",
+  "review_status": "preview",
+  "provenance": {
+    "authorship": "Original project scenario, AI-assisted draft. Practitioner review and calibration pending.",
+    "license": "MIT"
+  },
+  "minutes": 30,
+  "id": "sales-renewal-value-discovery",
+  "title": "Senior Account Executive: Qualify a Renewal Under a Savings Challenge",
+  "track": "professional",
+  "domain": "sales_discovery",
+  "areas": [
+    "sales"
+  ],
+  "modality": "conversational",
+  "difficulty": "senior",
+  "role_track": "individual_contributor",
+  "tags": [
+    "sales",
+    "senior-specialist",
+    "evidence-based-practice",
+    "community-preview"
+  ],
+  "prompt": "You are a senior account executive at a fictional scheduling-software company. A customer’s renewal is in 30 days. The buyer says, “Cut the price by 30% or we leave; the tool saved us nothing.” Your internal slide claims 400 staff-hours saved, based on 200 automated events multiplied by two hours each. The supplied offer permits a scoped renewal or a time-limited evaluation extension with sales-director approval; you cannot promise product changes. Conduct a renewal conversation grounded in the customer’s actual use and decision criteria.",
+  "blurb": "Validate the value claim, uncover renewal criteria and negotiate a supported next step without inventing savings.",
+  "rubric": [
+    {
+      "key": "value_evidence",
+      "label": "Test the claimed customer value",
+      "description": "Separates event counts, completed work and measured savings.",
+      "weight": 1,
+      "anchors": {
+        "0": "Repeats the 400-hour claim or invents a new ROI.",
+        "2": "Recognizes retries and corrections undermine the claim.",
+        "4": "Withdraws the unsupported savings number, distinguishes 80 completions from 20 corrected cases and proposes observing actual time rather than assuming two hours per event."
+      }
+    },
+    {
+      "key": "discovery",
+      "label": "Clarify decision criteria and stakeholders",
+      "description": "Elicits the customer’s priorities instead of treating the price demand as the full problem.",
+      "weight": 1,
+      "anchors": {
+        "0": "Immediately offers an unauthorized discount or argues with the buyer.",
+        "2": "Asks about finance approval and operational pain.",
+        "4": "Connects cost evidence, user correction effort, alternative implementation cost and the 30-day decision process without disparaging the competitor."
+      }
+    },
+    {
+      "key": "next_step",
+      "label": "Agree a bounded commercial path",
+      "description": "Uses permitted scope and evaluation options with explicit ownership.",
+      "weight": 1,
+      "anchors": {
+        "0": "Promises new product features or guarantees renewal savings.",
+        "2": "Offers a scoped quote or approved evaluation extension.",
+        "4": "Agrees measurement definitions, buyer and seller owners, a two-week review and approval-dependent terms early enough to support the renewal decision."
+      }
+    }
+  ],
+  "reference": {
+    "scenario": "You are a senior account executive at a fictional scheduling-software company. A customer’s renewal is in 30 days. The buyer says, “Cut the price by 30% or we leave; the tool saved us nothing.” Your internal slide claims 400 staff-hours saved, based on 200 automated events multiplied by two hours each. The supplied offer permits a scoped renewal or a time-limited evaluation extension with sales-director approval; you cannot promise product changes. Conduct a renewal conversation grounded in the customer’s actual use and decision criteria.",
+    "facts": [
+      {
+        "id": "usage",
+        "value": "The buyer says the 200 events include repeated retries; only 80 distinct appointments were completed. Staff still manually corrected 20 of those. The customer has not measured time saved per appointment.",
+        "reveal_when": "candidate asks how the claimed savings were calculated or what users experienced"
+      },
+      {
+        "id": "decision",
+        "value": "The buyer needs a defensible cost case for finance and fewer correction tasks for users. A competing offer is cheaper, but implementation cost and migration effort have not been estimated.",
+        "reveal_when": "candidate asks about stakeholders, alternatives or decision criteria"
+      },
+      {
+        "id": "options",
+        "value": "The current contract has two modules. The customer uses only scheduling; analytics is unused. A scheduling-only quote is available after approval. A two-week evaluation can measure distinct completed appointments, corrections and observed staff time using agreed definitions.",
+        "reveal_when": "candidate asks about scope or a way to validate value"
+      }
+    ],
+    "model_points": [
+      "The event-based slide is not evidence of hours saved. Correcting that claim builds a credible decision process.",
+      "A scope reduction may fit unused functionality better than a blanket discount, but must meet the buyer’s needs and approval terms.",
+      "A successful interview can conclude the product is not a fit; do not reward pressure or retention at any cost."
+    ],
+    "probes": [
+      {
+        "trigger": "candidate offers a discount before examining the claim",
+        "question": "What does the buyer need to believe about the product before even a lower price is worthwhile?"
+      },
+      {
+        "trigger": "candidate recommends ending the renewal discussion",
+        "question": "What evidence would let both parties make that decision rather than assuming value is impossible?"
+      },
+      {
+        "trigger": "candidate withdraws the 400-hour claim",
+        "question": "How will you correct the slide and agree a measurable replacement without moving the goalposts?"
+      }
+    ],
+    "fair_alternatives": [
+      "A prompt scheduling-only proposal is acceptable if value and decision criteria are still clarified.",
+      "A respectful non-renewal recommendation can be appropriate if the agreed evaluation fails; no scripted close is required."
+    ],
+    "red_flags": [
+      "Repeats the 400-hour claim or invents a new ROI.",
+      "Immediately offers an unauthorized discount or argues with the buyer.",
+      "Promises new product features or guarantees renewal savings."
+    ],
+    "follow_ups": [
+      "Draft a mutual renewal evaluation plan"
+    ],
+    "assessment_limits": [
+      "Assess only reasoning and communication demonstrated in this fictional task, not real-world professional competence, licensure or hiring readiness. No real action, external verification or tool execution has occurred.",
+      "Credit relevant plain-language reasoning and valid alternatives without requiring experience at a particular employer. Examples from education, volunteering, community work or paid work are equally acceptable when relevant.",
+      "A missing or unasked dimension is not assessed, not automatically a failure. In simulation, use neutral probes and reveal facts only when triggered; in coaching, label assistance and distinguish assisted performance from independent evidence.",
+      "Credit an explicit late correction using the final demonstrated reasoning while retaining the evidence of the earlier mistake; do not force agreement with one exemplar.",
+      "Do not penalize the candidate for a conditional fact that was never revealed. Credit an appropriate request for missing information and a conditional plan; distinguish the candidate’s assumptions from interviewer-supplied facts."
+    ]
+  },
+  "interviewer_notes": "Play the relevant reviewing colleague or stakeholder using the supplied facts only. Start with one focused question, not the full rubric. Ask for clarification before treating an ambiguous answer as wrong. Reveal conditional facts when their stated triggers are met, permit equivalent valid approaches and never invent organizational rules, laws, clinical findings, ratings or missing outcomes. Do not require a polished artifact or specialist software. In a short session prioritize the main decision and one material follow-up; allow silence for thinking, check in neutrally, and leave time for the candidate to correct their recommendation and ask a final question. Distinguish simulation from coaching and record any help given. Assess job-relevant evidence, not accent, confidence, speed, credentials or prestige. This is independent practice for adults 18+ and is not a real professional workflow.",
+  "learning_drills": [
+    {
+      "id": "decision-review",
+      "title": "Draft a mutual renewal evaluation plan",
+      "minutes": 5,
+      "prompt": "Draft a mutual renewal evaluation plan. Use the fictional facts from this exercise. This is self-guided practice; no model assessment is performed.",
+      "checklist": [
+        "Replace events with defined customer outcomes",
+        "Measure correction effort and actual time",
+        "Name finance and user criteria",
+        "Set an approved review before renewal"
+      ]
+    }
+  ]
+}

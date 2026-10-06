@@ -75,6 +75,8 @@ Also set the `DESKTOP_WINDOWS_PUBLISHER` environment variable to the exact certi
 
 Modern Windows signing certificates may require a hardware token or cloud signing service; adapt the CI signer to the actual certificate provider rather than exporting a non-exportable key. See [electron-builder signing](https://www.electron.build/v26/docs/code-signing) and [macOS configuration](https://www.electron.build/v26/docs/mac/).
 
+The desktop `postinstall` temporarily corrects a macOS keychain password bug in `app-builder-lib` 26.15.3: certificate import keeps the P12 password, while key access setup uses the generated keychain password. The script accepts only that version and the complete original or corrected source hash, and fails installation on an unknown dependency. Review and remove the workaround when upgrading to an upstream fix; do not bypass installation scripts for release builds. Developer ID, hardened runtime, notarization and native verification remain required.
+
 Without a Developer ID identity, macOS packaging explicitly uses an ad-hoc development signature. Without Windows credentials, the Windows package is unsigned. Neither is represented as a trusted public installer. A macOS Apple Development or App Store Apple Distribution certificate is not a substitute for Developer ID Application notarization.
 
 ## Release verification

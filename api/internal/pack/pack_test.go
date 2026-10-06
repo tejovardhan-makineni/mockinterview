@@ -171,3 +171,28 @@ func TestListProfession(t *testing.T) {
 		t.Error("did not expect amazon in consulting list")
 	}
 }
+
+func TestRoleTrackValidationAndPinnedDefaults(t *testing.T) {
+	cc, _ := loadAll(t)
+	q, _ := cc.Get("url-shortener")
+	rd := Round{ID: "decision", Title: "Leadership decision", Domain: q.Domain, Modality: q.Modality, Difficulty: "director", Minutes: 20, QuestionID: q.ID}
+	p := Pack{ID: "scope-test", Name: "Scope test", Areas: q.Areas, Rounds: []Round{rd}}
+	if err := Validate(p, cc); err != nil {
+		t.Fatal(err)
+	}
+	pc := &Catalog{byID: map[string]Pack{p.ID: p}, order: []string{p.ID}}
+	svc := NewService(cc, pc, nil)
+	level, track, ok := svc.RoundDefaults(p.ID, rd.ID)
+	if !ok || level != "director" || track != q.RoleTrack {
+		t.Fatal("pinned defaults changed")
+	}
+	p.Rounds[0].RoleTrack = "unknown"
+	if Validate(p, cc) == nil {
+		t.Fatal("unknown track accepted")
+	}
+	p.Rounds[0].RoleTrack = ""
+	p.Rounds[0].Difficulty = "ceo"
+	if Validate(p, cc) == nil {
+		t.Fatal("unknown seniority accepted")
+	}
+}

@@ -71,6 +71,26 @@ describe("profile slice (mock)", () => {
 });
 
 describe("interview slice (mock)", () => {
+  it("recovers a custom management interview with its exact free-text seniority", async () => {
+    const created = await interviewMock.createSession(
+      "",
+      { ...DEFAULT_CONFIG, role_track: "management" },
+      undefined,
+      {
+        custom: {
+          profession: "Research librarian",
+          goal: "Lead an archive team",
+          level: "Senior department lead",
+          questions: "",
+          structure: "",
+        },
+      },
+    );
+    const recovered = await interviewMock.getSession(created.id);
+    expect(recovered.config.role_track).toBe("management");
+    expect(recovered.config.target_level).toBe("Senior department lead");
+    expect(recovered.question?.role_track).toBe("management");
+  });
   it("creates a session and lists a completed one", async () => {
     const sess = await interviewMock.createSession(
       "url-shortener",

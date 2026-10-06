@@ -1,0 +1,50 @@
+{
+  "id": "engineering-manager-practice",
+  "revision": 1,
+  "review_status": "preview",
+  "source_note": "Original AI-assisted management practice path. Each round is a separate attempt. Practitioner review and scoring calibration are pending; this does not certify leadership or hiring readiness.",
+  "name": "Engineering Manager",
+  "areas": [
+    "engineering_management"
+  ],
+  "track": "engineering",
+  "blurb": "Practice engineering delivery, engineering reliability, engineering coaching.",
+  "rounds": [
+    {
+      "id": "round-1",
+      "title": "Engineering Manager: Negotiate Scope Without Hiding Reliability Work",
+      "kind": "stakeholder-simulation",
+      "domain": "engineering_delivery",
+      "modality": "conversational",
+      "difficulty": "manager",
+      "role_track": "management",
+      "minutes": 30,
+      "question_id": "engineering-manager-delivery-risk",
+      "focus": "Write a delivery decision note"
+    },
+    {
+      "id": "round-2",
+      "title": "Engineering Manager: Improve On-Call Without Blaming the Responder",
+      "kind": "work-sample-defense",
+      "domain": "engineering_reliability",
+      "modality": "written",
+      "difficulty": "manager",
+      "role_track": "management",
+      "minutes": 30,
+      "question_id": "engineering-manager-incident-ownership",
+      "focus": "Rewrite an incident action"
+    },
+    {
+      "id": "round-3",
+      "title": "Engineering Manager: Build a Growth Plan Without Promising Promotion",
+      "kind": "stakeholder-simulation",
+      "domain": "engineering_coaching",
+      "modality": "conversational",
+      "difficulty": "manager",
+      "role_track": "management",
+      "minutes": 30,
+      "question_id": "engineering-manager-growth",
+      "focus": "Plan a growth experiment"
+    }
+  ]
+}

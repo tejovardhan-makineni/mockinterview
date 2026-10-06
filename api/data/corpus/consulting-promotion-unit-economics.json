@@ -1,0 +1,137 @@
+{
+  "schema_version": 1,
+  "revision": 1,
+  "format_id": "work-sample-defense",
+  "review_status": "preview",
+  "provenance": {
+    "authorship": "Original project scenario, AI-assisted draft. Practitioner review and calibration pending.",
+    "license": "MIT"
+  },
+  "minutes": 20,
+  "id": "consulting-promotion-unit-economics",
+  "title": "Junior Consultant: Check a Promotion’s Profit Claim",
+  "track": "professional",
+  "domain": "case",
+  "areas": [
+    "consulting"
+  ],
+  "modality": "written",
+  "difficulty": "junior",
+  "role_track": "individual_contributor",
+  "tags": [
+    "consulting",
+    "junior-specialist",
+    "evidence-based-practice",
+    "community-preview"
+  ],
+  "prompt": "You are a junior consultant reviewing a fictional subscription-box retailer’s proposed one-month promotion. The current price is 20 per box; product cost is 12 and shipping is 3 per box. Monthly fixed costs are 4,000. At 1,000 boxes, a slide claims a 20% price cut will “pay for itself with a little more volume.” Calculate the current contribution and operating result, then the promotional contribution and volume needed to cover the same fixed costs. Use only the supplied figures; currency units are consistent and tax is excluded.",
+  "blurb": "Connect price, variable cost and volume instead of treating revenue growth as proof of profitability.",
+  "rubric": [
+    {
+      "key": "base_case",
+      "label": "Calculate the baseline economics",
+      "description": "Separates revenue, contribution and fixed cost.",
+      "weight": 1,
+      "anchors": {
+        "0": "Treats 20 of revenue as profit per box.",
+        "2": "Calculates contribution of 5 per box.",
+        "4": "Calculates 5,000 total contribution and 1,000 operating profit at 1,000 boxes, clearly labeling the supplied fixed cost."
+      }
+    },
+    {
+      "key": "promotion",
+      "label": "Calculate the promotional break-even",
+      "description": "Uses the discounted price and unchanged variable costs.",
+      "weight": 1,
+      "anchors": {
+        "0": "Assumes a 20% price cut requires only 20% more boxes.",
+        "2": "Calculates price 16 and contribution 1.",
+        "4": "Calculates 4,000 boxes to cover 4,000 fixed cost and recognizes that the supplied 1,500-box capacity cannot reach it."
+      }
+    },
+    {
+      "key": "recommendation",
+      "label": "Give an evidence-bounded recommendation",
+      "description": "Links the arithmetic to feasible options and missing demand evidence.",
+      "weight": 1,
+      "anchors": {
+        "0": "Recommends the full discount because sales might rise.",
+        "2": "Advises against the unsupported profit claim.",
+        "4": "Explains the capacity constraint, considers a smaller discount or measured pilot and avoids inventing demand, retention or lifetime value to rescue the proposal."
+      }
+    }
+  ],
+  "reference": {
+    "scenario": "You are a junior consultant reviewing a fictional subscription-box retailer’s proposed one-month promotion. The current price is 20 per box; product cost is 12 and shipping is 3 per box. Monthly fixed costs are 4,000. At 1,000 boxes, a slide claims a 20% price cut will “pay for itself with a little more volume.” Calculate the current contribution and operating result, then the promotional contribution and volume needed to cover the same fixed costs. Use only the supplied figures; currency units are consistent and tax is excluded.",
+    "facts": [
+      {
+        "id": "volume",
+        "value": "The operations team can ship at most 1,500 boxes this month with current capacity. No reliable forecast of promotional demand is available.",
+        "reveal_when": "candidate asks about capacity or expected volume"
+      },
+      {
+        "id": "costs",
+        "value": "Product and shipping costs remain 12 and 3 for every box in the feasible volume range. The promotion has no separate advertising cost in this exercise.",
+        "reveal_when": "candidate asks about cost behavior or omitted campaign costs"
+      },
+      {
+        "id": "alternatives",
+        "value": "A smaller discount or a limited pilot is possible. Any estimate of repeat purchases would require new evidence; no retention or lifetime-value data is supplied.",
+        "reveal_when": "candidate asks about alternatives or longer-term value"
+      }
+    ],
+    "model_points": [
+      "Baseline contribution is 20−12−3=5; operating result is 1,000×5−4,000=1,000.",
+      "The discounted price is 16, contribution is 1 and operating break-even is 4,000 boxes, beyond the stated capacity.",
+      "At capacity the promotion contributes 1,500 against fixed cost 4,000. Whether a controlled loss is worth learning requires a separate explicit objective and approval."
+    ],
+    "probes": [
+      {
+        "trigger": "candidate calculates only revenue after discount",
+        "question": "What remains per box after both variable costs, before fixed costs?"
+      },
+      {
+        "trigger": "candidate recommends a limited loss-making pilot",
+        "question": "What learning objective, spend limit and stopping condition would make that a deliberate experiment?"
+      },
+      {
+        "trigger": "candidate corrects break-even from 1,200 to 4,000 boxes",
+        "question": "Which assumption produced the first number, and how does the corrected value change the recommendation?"
+      }
+    ],
+    "fair_alternatives": [
+      "A smaller discount may be considered with the same arithmetic and demand uncertainty.",
+      "A funded learning pilot is not automatically wrong; distinguish its learning goal from the claim that the promotion pays for itself."
+    ],
+    "red_flags": [
+      "Treats 20 of revenue as profit per box.",
+      "Assumes a 20% price cut requires only 20% more boxes.",
+      "Recommends the full discount because sales might rise."
+    ],
+    "follow_ups": [
+      "Write a promotion economics table"
+    ],
+    "assessment_limits": [
+      "Assess only reasoning and communication demonstrated in this fictional task, not real-world professional competence, licensure or hiring readiness. No real action, external verification or tool execution has occurred.",
+      "Credit relevant plain-language reasoning and valid alternatives without requiring experience at a particular employer. Examples from education, volunteering, community work or paid work are equally acceptable when relevant.",
+      "A missing or unasked dimension is not assessed, not automatically a failure. In simulation, use neutral probes and reveal facts only when triggered; in coaching, label assistance and distinguish assisted performance from independent evidence.",
+      "Credit an explicit late correction using the final demonstrated reasoning while retaining the evidence of the earlier mistake; do not force agreement with one exemplar.",
+      "Do not penalize the candidate for a conditional fact that was never revealed. Credit an appropriate request for missing information and a conditional plan; distinguish the candidate’s assumptions from interviewer-supplied facts."
+    ]
+  },
+  "interviewer_notes": "Play the relevant reviewing colleague or stakeholder using the supplied facts only. Start with one focused question, not the full rubric. Ask for clarification before treating an ambiguous answer as wrong. Reveal conditional facts when their stated triggers are met, permit equivalent valid approaches and never invent organizational rules, laws, clinical findings, ratings or missing outcomes. Do not require a polished artifact or specialist software. In a short session prioritize the main decision and one material follow-up; allow silence for thinking, check in neutrally, and leave time for the candidate to correct their recommendation and ask a final question. Distinguish simulation from coaching and record any help given. Assess job-relevant evidence, not accent, confidence, speed, credentials or prestige. This is independent practice for adults 18+ and is not a real professional workflow.",
+  "learning_drills": [
+    {
+      "id": "decision-review",
+      "title": "Write a promotion economics table",
+      "minutes": 5,
+      "prompt": "Write a promotion economics table. Use the fictional facts from this exercise. This is self-guided practice; no model assessment is performed.",
+      "checklist": [
+        "Calculate baseline contribution and profit",
+        "Calculate discounted contribution",
+        "Compare break-even with capacity",
+        "Name missing demand evidence"
+      ]
+    }
+  ]
+}

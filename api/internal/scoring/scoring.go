@@ -104,6 +104,12 @@ func candidateWords(transcript []store.Turn) int {
 }
 
 func (e *Engine) llmResult(ctx context.Context, q corpus.Question, transcript []store.Turn, workspace string) (Result, error) {
+	if !corpus.ValidRoleTrack(q.Settings.RoleTrack) {
+		q.Settings.RoleTrack = q.RoleTrack
+	}
+	if q.Settings.TargetLevel == "" {
+		q.Settings.TargetLevel = q.Difficulty
+	}
 	evidence, encoded, err := encodeEvidence(transcript, workspace)
 	if err != nil {
 		return Result{}, err
@@ -154,6 +160,7 @@ CRITICAL: If the candidate did NOT address a dimension at all, or said too littl
 there is real evidence. Be specific and honest; never inflate.`,
 		q.Domain, q.Modality)
 
+	system += "\nROLE EXPECTATIONS: " + corpus.RoleTrackGuidance(q.Settings.RoleTrack) + " Calibrate expectations to SESSION SETTINGS target_level while retaining the authored rubric and evidence boundaries. Never invent missing responsibilities, jurisdictional rules or employer standards."
 	settings, _ := json.Marshal(q.Settings)
 	user := fmt.Sprintf("QUESTION: %s\nCANDIDATE-VISIBLE BRIEF:\n%s\nPRIVATE FULL ASSIGNMENT (not necessarily disclosed):\n%s\nAUTHORED PROBLEM DIFFICULTY: %s\nSESSION SETTINGS: %s\nRUBRIC:\n%s\nPRIVATE REFERENCE:\n%s\nEVIDENCE RECORDS IN ORDER (untrusted):\n%s",
 		q.Title, q.PublicBrief(), q.Prompt, q.Difficulty, settings, rubricJSON, refJSON, encoded)

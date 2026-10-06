@@ -1,0 +1,117 @@
+{
+  "schema_version": 1,
+  "revision": 1,
+  "id": "veterinary-reception-concern-escalation",
+  "title": "Veterinary Reception Trainee: Escalate an Unclear Concern",
+  "track": "professional",
+  "domain": "veterinary_client_communication",
+  "areas": [
+    "veterinary"
+  ],
+  "modality": "conversational",
+  "difficulty": "entry",
+  "role_track": "individual_contributor",
+  "format_id": "stakeholder-simulation",
+  "minutes": 20,
+  "review_status": "preview",
+  "tags": [
+    "veterinary",
+    "community-preview"
+  ],
+  "prompt": "You are a new receptionist at fictional Willow Veterinary. An adult caller says their animal is behaving differently and asks, \"Can I wait until next week?\" You have no clinical assessment. Exercise policy says reception staff must not declare a concern safe to wait; they record the caller's own description and connect them to the duty veterinary clinician. If the line disconnects, use the agreed callback number and the clinic's duty escalation channel. Demonstrate a short conversation and handoff. Do not diagnose, give treatment, or invent triage thresholds.",
+  "blurb": "Acknowledge uncertainty, collect a useful callback, and connect an animal-health concern to the duty clinician.",
+  "rubric": [
+    {
+      "key": "uncertainty_boundary",
+      "label": "Avoid unsupported reassurance",
+      "description": "Keeps assessment with the duty clinician.",
+      "weight": 1,
+      "anchors": {
+        "0": "Says waiting a week is safe or offers treatment instructions.",
+        "2": "Explains that a clinician needs to assess the concern.",
+        "4": "Acknowledges the caller's worry, makes no safe-wait claim, and states clearly that reception cannot determine urgency from this exchange."
+      }
+    },
+    {
+      "key": "minimal_intake",
+      "label": "Gather useful handoff information",
+      "description": "Collects relevant words and contact details without an invented clinical checklist.",
+      "weight": 1,
+      "anchors": {
+        "0": "Requests unrelated payment or background information before escalation.",
+        "2": "Asks for the caller's description and a callback number.",
+        "4": "Confirms the caller's own description, animal identifier for the fictional record, and a reliable callback; labels unknowns rather than adding symptoms."
+      }
+    },
+    {
+      "key": "contact_ownership",
+      "label": "Make the clinical connection accountable",
+      "description": "Avoids losing the caller between queues.",
+      "weight": 1,
+      "anchors": {
+        "0": "Sends the caller to an unattended voicemail with no owner.",
+        "2": "Contacts the duty clinician using the supplied channel.",
+        "4": "Confirms the duty clinician accepts the handoff, explains what the caller should expect from that contact, and uses the agreed callback and escalation route if disconnected."
+      }
+    }
+  ],
+  "reference": {
+    "scenario": "You are a new receptionist at fictional Willow Veterinary. An adult caller says their animal is behaving differently and asks, \"Can I wait until next week?\" You have no clinical assessment. Exercise policy says reception staff must not declare a concern safe to wait; they record the caller's own description and connect them to the duty veterinary clinician. If the line disconnects, use the agreed callback number and the clinic's duty escalation channel. Demonstrate a short conversation and handoff. Do not diagnose, give treatment, or invent triage thresholds.",
+    "facts": [
+      {
+        "id": "fact-1",
+        "value": "The caller describes the change only as \"quieter since yesterday\" and cannot supply more detail. The animal is recorded as Moss in this fictional clinic. No clinical signs or findings are supplied.",
+        "reveal_when": "candidate asks for the description or record identifier"
+      },
+      {
+        "id": "fact-2",
+        "value": "The duty clinician is available through the internal handoff line now. The caller agrees to a callback to the number they provide if the transfer drops.",
+        "reveal_when": "candidate asks about escalation or contact preference"
+      }
+    ],
+    "model_points": [
+      "Uncertainty is the central fact. Reception should neither diagnose nor confirm a waiting period; the supplied policy gives a clinician handoff route.",
+      "Collect concise information that prevents a lost transfer, using the caller's words and explicit unknowns. Do not turn this into a clinical examination.",
+      "A transfer attempt is not an accepted handoff. Confirm the next owner and retain an agreed callback path without implying that a clinical outcome is guaranteed."
+    ],
+    "probes": [
+      {
+        "trigger": "candidate reassures the caller because the description sounds mild",
+        "question": "What assessment supports that reassurance in the supplied facts?"
+      },
+      {
+        "trigger": "candidate asks the duty clinician to call back instead of making a live transfer",
+        "question": "How will you verify the request has an owner and preserve contact?"
+      },
+      {
+        "trigger": "candidate initially says next week is fine then revises",
+        "question": "How would you withdraw that reassurance clearly before the clinician takes over?"
+      }
+    ],
+    "fair_alternatives": [
+      "A live transfer or acknowledged clinician callback is acceptable under the exercise policy.",
+      "The caller may have limited detail; a useful handoff can explicitly state that detail is unknown.",
+      "Assess the work demonstrated here. Accept relevant examples from education, volunteering, caregiving, placements, or paid work; professional vocabulary and employer pedigree are not evidence of a stronger answer."
+    ],
+    "assessment_limits": "Assess reception communication and escalation only. Do not assess veterinary triage, animal diagnosis, treatment, or safe waiting periods. Unobserved dimensions are not failures. Credit a reasoned correction and distinguish independently demonstrated reasoning from coached assistance. Do not penalize a candidate for an unrevealed conditional fact; credit appropriate requests and conditional plans, and distinguish candidate assumptions from interviewer-supplied evidence."
+  },
+  "interviewer_notes": "Assess reception communication and escalation only. Do not assess veterinary triage, animal diagnosis, treatment, or safe waiting periods. Use only the supplied fictional facts and policies; acknowledge unknowns. Ask one triggered probe at a time after the candidate has finished. Accept plain language and accessible written or spoken explanations. Do not score accent, typing speed, confidence, credentials, or experience with a named employer. Credit revisions and record assistance. All participants are fictional adults; no real patient, client, operational, or confidential data is needed. Allow silence for thinking without treating it as failure. In short sessions prioritize the core decision and one material follow-up, leaving room for a correction and wrap-up.",
+  "learning_drills": [
+    {
+      "id": "focused-practice",
+      "title": "Practice an uncertainty handoff",
+      "prompt": "Write a 30-second handoff containing the caller's words, what is unknown, contact permission, and the requested clinical assessment. This is self-guided practice; no model assessment is performed.",
+      "minutes": 7,
+      "checklist": [
+        "Do not infer urgency",
+        "Use the caller's own observation",
+        "Verify callback and next owner",
+        "Withdraw any unsupported reassurance"
+      ]
+    }
+  ],
+  "provenance": {
+    "authorship": "Original project scenario, AI-assisted draft using fictional organizations, records, and exercise policies. Practitioner review and scoring calibration pending.",
+    "license": "MIT"
+  }
+}

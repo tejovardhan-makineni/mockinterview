@@ -162,5 +162,7 @@
       "Integer overflow in count-ways for large amounts (use 64-bit or a modulus if the problem specifies one)."
     ]
   },
-  "interviewer_notes": "Let the candidate finish their reasoning and any workspace changes before a focused follow-up. Ask only about a material unresolved issue, then return the floor. Private correctness examples include coins=[1,3,4], amount=6, where greedy can return three coins instead of two, and coins=[1,2], amount=3, where ordered permutations total three but combinations total two. Assess the recurrence, sentinel, unreachable-case handling, complexity and tests from the candidate's own implementation. Let them finish and self-test before discussing one observed defect. Counting ways and reconstructing a coin set are optional later extensions after the base task is complete; do not supply DP, loop ordering or parent pointers as unsolicited hints."
+  "interviewer_notes": "Let the candidate finish their reasoning and any workspace changes before a focused follow-up. Ask only about a material unresolved issue, then return the floor. Private correctness examples include coins=[1,3,4], amount=6, where greedy can return three coins instead of two, and coins=[1,2], amount=3, where ordered permutations total three but combinations total two. Assess the recurrence, sentinel, unreachable-case handling, complexity and tests from the candidate's own implementation. Let them finish and self-test before discussing one observed defect. Counting ways and reconstructing a coin set are optional later extensions after the base task is complete; do not supply DP, loop ordering or parent pointers as unsolicited hints.",
+  "role_track": "individual_contributor",
+  "revision": 2
 }

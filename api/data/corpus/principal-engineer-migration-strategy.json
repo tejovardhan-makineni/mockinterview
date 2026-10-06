@@ -1,0 +1,119 @@
+{
+  "schema_version": 1,
+  "revision": 1,
+  "format_id": "work-sample-defense",
+  "review_status": "preview",
+  "provenance": {
+    "authorship": "Original project scenario, AI-assisted draft. Practitioner review and scoring calibration pending.",
+    "license": "MIT"
+  },
+  "minutes": 45,
+  "id": "principal-engineer-migration-strategy",
+  "title": "Principal Engineer: Set a Migration Strategy Across Teams",
+  "track": "engineering",
+  "domain": "technical_strategy",
+  "areas": [
+    "software_engineering"
+  ],
+  "role_track": "individual_contributor",
+  "modality": "written",
+  "difficulty": "principal",
+  "tags": [
+    "software-engineering",
+    "principal",
+    "technical-strategy",
+    "leadership",
+    "community-preview"
+  ],
+  "prompt": "Three product teams use a shared event interface. A proposed replacement improves versioning, but migration would consume 18 engineer-weeks this quarter. The available cross-team change capacity is 10 engineer-weeks. The draft strategy says, \"Require every team to migrate by quarter-end; the platform team will handle any compatibility issues.\" You are a principal individual contributor with technical influence, not the teams’ line manager. Review the proposal and present a technical decision to the engineering director (the AI).",
+  "blurb": "Write a cross-team technical decision",
+  "rubric": [
+    {
+      "key": "technical_risk",
+      "label": "Identify the contract risk",
+      "description": "Uses the actual shared-interface ambiguity to shape migration evidence.",
+      "weight": 1,
+      "anchors": {
+        "0": "Mandates migration by preference or claims the new interface necessarily fixes ordering.",
+        "2": "Identifies timestamp semantics and seeks consumer evidence.",
+        "4": "Defines the ambiguous contract and compatibility tests across producer/consumer versions, separates observed risk from unsupported incident claims and identifies evidence that would change the design choice."
+      }
+    },
+    {
+      "key": "transition",
+      "label": "Design a feasible transition",
+      "description": "Compares transition options within real capacity.",
+      "weight": 1,
+      "anchors": {
+        "0": "Commits 18 engineer-weeks within 10 engineer-weeks or assumes an unowned layer is free.",
+        "2": "Proposes staged migration or a compatibility layer.",
+        "4": "Compares a bounded path migration and compatibility option against the 10-engineer-week constraint, includes verification and ownership, and sets explicit expansion/removal or rollback criteria without double-counting capacity."
+      }
+    },
+    {
+      "key": "technical_leadership",
+      "label": "Lead through influence and ownership",
+      "description": "Clarifies cross-team adoption without inventing managerial authority.",
+      "weight": 1,
+      "anchors": {
+        "0": "Orders other teams to reprioritize unilaterally or leaves all compatibility to the platform team.",
+        "2": "Consults managers and names technical owners.",
+        "4": "Builds an evidence-backed decision record with accountable producer/consumer owners, negotiates capacity through managers/director and separates interface governance from line-management decisions."
+      }
+    }
+  ],
+  "reference": {
+    "scenario": "Three product teams use a shared event interface. A proposed replacement improves versioning, but migration would consume 18 engineer-weeks this quarter. The available cross-team change capacity is 10 engineer-weeks. The draft strategy says, \"Require every team to migrate by quarter-end; the platform team will handle any compatibility issues.\" You are a principal individual contributor with technical influence, not the teams’ line manager. Review the proposal and present a technical decision to the engineering director (the AI).",
+    "facts": [
+      {
+        "id": "fact-1",
+        "value": "The shared interface has two incompatible interpretations of a timestamp field. There are no reported data-loss incidents, but consumers disagree about ordering. One team could migrate a low-volume path using two engineer-weeks of work. These are effort estimates; calendar duration depends on staffing and sequencing.",
+        "reveal_when": "candidate asks about the specific compatibility risk or a bounded pilot"
+      },
+      {
+        "id": "fact-2",
+        "value": "A compatibility layer requiring six engineer-weeks of work could support old and new consumers temporarily, but ongoing ownership and removal criteria are not assigned. Team managers control their engineers’ commitments.",
+        "reveal_when": "candidate asks about transition options, capacity or decision rights"
+      }
+    ],
+    "model_points": [
+      "Defines the ambiguous contract and compatibility tests across producer/consumer versions, separates observed risk from unsupported incident claims and identifies evidence that would change the design choice.",
+      "Compares a bounded path migration and compatibility option against the 10-engineer-week constraint, includes verification and ownership, and sets explicit expansion/removal or rollback criteria without double-counting capacity.",
+      "Builds an evidence-backed decision record with accountable producer/consumer owners, negotiates capacity through managers/director and separates interface governance from line-management decisions."
+    ],
+    "probes": [
+      {
+        "trigger": "candidate declares a mandatory deadline",
+        "question": "Who can commit the other teams’ capacity?"
+      },
+      {
+        "trigger": "candidate chooses a compatibility layer",
+        "question": "What prevents it becoming an indefinite second interface?"
+      },
+      {
+        "trigger": "candidate revises the ordering assumption",
+        "question": "Which contract tests and migration decisions must change?"
+      }
+    ],
+    "fair_alternatives": [
+      "Keeping the current interface while clarifying semantics can be valid if the risk and maintenance cost are compared.",
+      "A phased direct migration can be valid without a compatibility layer when consumer sequencing is supported."
+    ],
+    "assessment_limits": "Assess only the decisions and reasoning demonstrated in this fictional exercise. No hiring-readiness, personality, legal compliance or workplace performance claim follows from this score. A valid alternative can earn full credit. Unrevealed conditional facts must not be assumed known or required for credit; credit asking for needed information and a conditional plan."
+  },
+  "interviewer_notes": "You are the counterpart named in the prompt. If this is a written review, remain the hiring interviewer while the candidate reads and writes. Let the candidate finish, including thinking and self-correction. Answer only supplied facts when their reveal condition is met; otherwise say the information is unknown. Use neutral probes after a completed answer, one at a time. Do not prescribe the rubric as a spoken checklist. Accept relevant examples from work, education and community leadership. Do not request private employee records, infer protected traits, invent employment rules or promise a real organizational outcome. Simulation gives no answer before assessment; coaching may offer labeled assistance.",
+  "learning_drills": [
+    {
+      "id": "decision-practice",
+      "title": "Write a cross-team technical decision",
+      "prompt": "Write the contract problem, competing options, a capacity-feasible first step and evidence for expanding or reversing it. This is self-guided practice with no automated assessment.",
+      "minutes": 7,
+      "checklist": [
+        "Define timestamp semantics",
+        "Stay within capacity",
+        "Assign compatibility ownership",
+        "Use influence rather than assumed line authority"
+      ]
+    }
+  ]
+}

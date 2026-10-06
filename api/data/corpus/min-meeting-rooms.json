@@ -151,5 +151,7 @@
       "O(n^2) pairwise overlap counting when the input can be 10^4 meetings."
     ]
   },
-  "interviewer_notes": "Let the candidate finish their reasoning and any workspace changes before a focused follow-up. Ask only about a material unresolved issue, then return the floor. Observe independent clarification of touching endpoints and assess whether the proposed method correctly counts simultaneous demand. The case [[0,5],[5,10]] can test the agreed boundary rule after implementation. Heap, sweep-line and other correct approaches are valid; inspect update ordering and complexity without suggesting the algorithm. Allow the candidate to finish and test before discussing a material defect. Room assignment or an online variant is an optional later extension, not a compulsory sequence."
+  "interviewer_notes": "Let the candidate finish their reasoning and any workspace changes before a focused follow-up. Ask only about a material unresolved issue, then return the floor. Observe independent clarification of touching endpoints and assess whether the proposed method correctly counts simultaneous demand. The case [[0,5],[5,10]] can test the agreed boundary rule after implementation. Heap, sweep-line and other correct approaches are valid; inspect update ordering and complexity without suggesting the algorithm. Allow the candidate to finish and test before discussing a material defect. Room assignment or an online variant is an optional later extension, not a compulsory sequence.",
+  "role_track": "individual_contributor",
+  "revision": 2
 }

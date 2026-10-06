@@ -315,13 +315,13 @@ func validateConfig(raw json.RawMessage) (json.RawMessage, error) {
 	if e := json.Unmarshal(raw, &m); e != nil || m == nil {
 		return nil, errors.New("configuration must be an object")
 	}
-	allowed := map[string]bool{"voice_id": true, "face_id": true, "personality": true, "intensity": true, "language": true, "target_level": true, "challenge": true, "practice_mode": true, "include_resume": true}
+	allowed := map[string]bool{"voice_id": true, "face_id": true, "personality": true, "intensity": true, "language": true, "target_level": true, "role_track": true, "challenge": true, "practice_mode": true, "include_resume": true}
 	for k, v := range m {
 		if !allowed[k] || len(v) > 2000 {
 			return nil, fmt.Errorf("unsupported interview setting: %s", k)
 		}
 	}
-	for k, values := range map[string][]string{"target_level": {"entry", "junior", "mid", "senior", "staff"}, "challenge": {"foundation", "standard", "stretch"}, "practice_mode": {"simulation", "coaching"}} {
+	for k, values := range map[string][]string{"challenge": {"foundation", "standard", "stretch"}, "practice_mode": {"simulation", "coaching"}} {
 		if v, ok := m[k]; ok {
 			var a string
 			if json.Unmarshal(v, &a) != nil {
@@ -344,7 +344,7 @@ func validateConfig(raw json.RawMessage) (json.RawMessage, error) {
 			return nil, errors.New("include_resume must be true or false")
 		}
 	}
-	for k, valid := range map[string]func(string) bool{"voice_id": persona.ValidVoice, "face_id": persona.ValidFace, "personality": persona.ValidPersonality, "language": persona.ValidLanguage} {
+	for k, valid := range map[string]func(string) bool{"role_track": corpus.ValidRoleTrack, "target_level": corpus.ValidDifficulty, "voice_id": persona.ValidVoice, "face_id": persona.ValidFace, "personality": persona.ValidPersonality, "language": persona.ValidLanguage} {
 		if v, ok := m[k]; ok {
 			var value string
 			if json.Unmarshal(v, &value) != nil || !valid(value) {

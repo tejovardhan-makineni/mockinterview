@@ -1,0 +1,137 @@
+{
+  "schema_version": 1,
+  "revision": 1,
+  "format_id": "work-sample-defense",
+  "review_status": "preview",
+  "provenance": {
+    "authorship": "Original project scenario, AI-assisted draft. Practitioner review and calibration pending.",
+    "license": "MIT"
+  },
+  "minutes": 30,
+  "id": "accounting-revenue-cutoff-review",
+  "title": "Senior Accountant: Resolve a Revenue Cutoff Disagreement",
+  "track": "professional",
+  "domain": "financial_controls",
+  "areas": [
+    "accounting"
+  ],
+  "modality": "written",
+  "difficulty": "senior",
+  "role_track": "individual_contributor",
+  "tags": [
+    "accounting",
+    "senior-specialist",
+    "evidence-based-practice",
+    "community-preview"
+  ],
+  "prompt": "You are the senior accountant reviewing a fictional equipment supplier’s year-end close. The draft ledger recognizes all three orders as December revenue: A, 120,000; B, 80,000; C, 50,000. The supplied company policy recognizes revenue when the customer accepts the equipment, not when an invoice is issued. A has signed acceptance on December 29. B was delivered December 30 but the customer disputed its condition. C was accepted January 2. The controller wants the close completed today. Review the draft and recommend supported corrections and unresolved items.",
+  "blurb": "Reconcile acceptance evidence, quantify the supported correction and preserve an audit trail under close pressure.",
+  "rubric": [
+    {
+      "key": "cutoff",
+      "label": "Apply the supplied recognition rule",
+      "description": "Distinguishes acceptance evidence from invoicing or cash timing.",
+      "weight": 1,
+      "anchors": {
+        "0": "Keeps B or C in December solely because they were invoiced.",
+        "2": "Keeps A and flags B and C for acceptance review.",
+        "4": "Uses B’s January acceptance and C’s January 2 acceptance to support 120,000 December revenue, with the supplied policy made explicit."
+      }
+    },
+    {
+      "key": "reconciliation",
+      "label": "Quantify and trace the correction",
+      "description": "Links each adjustment to records rather than forcing a balancing total.",
+      "weight": 1,
+      "anchors": {
+        "0": "Proposes an unexplained plug or erases the original records.",
+        "2": "Calculates a 130,000 December overstatement.",
+        "4": "Reconciles 250,000 less 80,000 and 50,000 to 120,000, separates proposed entries from approved postings and preserves links to each order."
+      }
+    },
+    {
+      "key": "close_decision",
+      "label": "Communicate the unresolved close decision",
+      "description": "Defines approval, evidence and reporting consequences.",
+      "weight": 1,
+      "anchors": {
+        "0": "Claims the correction has been posted or hides the dispute to meet the deadline.",
+        "2": "Requests controller approval and holds the unsupported draft.",
+        "4": "Presents the correction, evidence, reviewer and release condition; accepts a controlled delay or corrected draft without inventing an accounting standard."
+      }
+    }
+  ],
+  "reference": {
+    "scenario": "You are the senior accountant reviewing a fictional equipment supplier’s year-end close. The draft ledger recognizes all three orders as December revenue: A, 120,000; B, 80,000; C, 50,000. The supplied company policy recognizes revenue when the customer accepts the equipment, not when an invoice is issued. A has signed acceptance on December 29. B was delivered December 30 but the customer disputed its condition. C was accepted January 2. The controller wants the close completed today. Review the draft and recommend supported corrections and unresolved items.",
+    "facts": [
+      {
+        "id": "b-evidence",
+        "value": "B has an email from the customer dated January 3 accepting the equipment after a January 2 repair. There is no earlier acceptance or separate performance obligation in this exercise.",
+        "reveal_when": "candidate asks about B’s acceptance, dispute or contract terms"
+      },
+      {
+        "id": "ledger",
+        "value": "The draft recognizes 250,000 in December revenue. All amounts exclude tax; payment timing does not affect the supplied recognition rule. Corrections require controller approval.",
+        "reveal_when": "candidate asks for the ledger total, other entries or approval authority"
+      },
+      {
+        "id": "reporting",
+        "value": "Management’s report is still a draft. The controller can postpone circulation by one working day; the auditor wants the acceptance evidence and adjustment rationale.",
+        "reveal_when": "candidate asks about deadline flexibility or downstream users"
+      }
+    ],
+    "model_points": [
+      "Only A meets the exercise’s December acceptance rule. Delivery, invoicing and cash collection are not substitutes for acceptance.",
+      "B plus C require a proposed 130,000 revenue reduction in December; exact debit/credit account names depend on the supplied ledger configuration and are not required.",
+      "An approved correction and a traceable close memo are preferable to silently changing records. Do not generalize this fictional policy to all revenue contracts."
+    ],
+    "probes": [
+      {
+        "trigger": "candidate identifies only C as late",
+        "question": "What evidence establishes when B met the supplied acceptance rule?"
+      },
+      {
+        "trigger": "candidate proposes delaying the whole close",
+        "question": "What could be finalized now, and what condition would release the report?"
+      },
+      {
+        "trigger": "candidate corrects an earlier 50,000 adjustment to 130,000",
+        "question": "Explain which new evidence changed the adjustment and how you would preserve that correction in the review record."
+      }
+    ],
+    "fair_alternatives": [
+      "A controlled report delay is acceptable if approval cannot be completed today.",
+      "A corrected provisional report is acceptable if clearly labeled and approved; do not require one journal-entry vocabulary."
+    ],
+    "red_flags": [
+      "Keeps B or C in December solely because they were invoiced.",
+      "Proposes an unexplained plug or erases the original records.",
+      "Claims the correction has been posted or hides the dispute to meet the deadline."
+    ],
+    "follow_ups": [
+      "Write a three-order cutoff memo"
+    ],
+    "assessment_limits": [
+      "Assess only reasoning and communication demonstrated in this fictional task, not real-world professional competence, licensure or hiring readiness. No real action, external verification or tool execution has occurred.",
+      "Credit relevant plain-language reasoning and valid alternatives without requiring experience at a particular employer. Examples from education, volunteering, community work or paid work are equally acceptable when relevant.",
+      "A missing or unasked dimension is not assessed, not automatically a failure. In simulation, use neutral probes and reveal facts only when triggered; in coaching, label assistance and distinguish assisted performance from independent evidence.",
+      "Credit an explicit late correction using the final demonstrated reasoning while retaining the evidence of the earlier mistake; do not force agreement with one exemplar.",
+      "Do not penalize the candidate for a conditional fact that was never revealed. Credit an appropriate request for missing information and a conditional plan; distinguish the candidate’s assumptions from interviewer-supplied facts."
+    ]
+  },
+  "interviewer_notes": "Play the relevant reviewing colleague or stakeholder using the supplied facts only. Start with one focused question, not the full rubric. Ask for clarification before treating an ambiguous answer as wrong. Reveal conditional facts when their stated triggers are met, permit equivalent valid approaches and never invent organizational rules, laws, clinical findings, ratings or missing outcomes. Do not require a polished artifact or specialist software. In a short session prioritize the main decision and one material follow-up; allow silence for thinking, check in neutrally, and leave time for the candidate to correct their recommendation and ask a final question. Distinguish simulation from coaching and record any help given. Assess job-relevant evidence, not accent, confidence, speed, credentials or prestige. This is independent practice for adults 18+ and is not a real professional workflow.",
+  "learning_drills": [
+    {
+      "id": "decision-review",
+      "title": "Write a three-order cutoff memo",
+      "minutes": 5,
+      "prompt": "Write a three-order cutoff memo. Use the fictional facts from this exercise. This is self-guided practice; no model assessment is performed.",
+      "checklist": [
+        "State the recognition rule",
+        "Calculate the December amount",
+        "Attach evidence by order",
+        "Separate recommendation, approval and posting"
+      ]
+    }
+  ]
+}

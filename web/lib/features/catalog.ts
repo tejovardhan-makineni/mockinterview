@@ -4,6 +4,7 @@
 
 import { req } from "../http";
 import preview from "./catalog-preview.json";
+import type { InterviewLevel, RoleTrack } from "../roleScope";
 import type { Modality } from "../domain";
 import type { Profession, SpecialistAgent } from "./profile";
 
@@ -22,7 +23,8 @@ export interface QuestionSummary {
   domain: string; // sub-topic: system_design | coding | clinical_reasoning | ...
   areas: string[]; // professions this interview is valid for (shared): engineering, medicine, ...
   modality: Modality;
-  difficulty: "junior" | "mid" | "senior" | "staff" | "entry";
+  difficulty: InterviewLevel;
+  role_track?: RoleTrack;
   tags: string[];
   // Both fields contain only the public opening when an authored brief exists.
   candidate_brief?: string;
@@ -76,6 +78,8 @@ export function matchScore(
       q.title,
       q.domain,
       q.track,
+      q.role_track,
+      q.difficulty,
       q.areas[0],
       ...q.tags,
       q.blurb,
@@ -125,6 +129,7 @@ export interface CatalogFilters {
   format?: string;
   level?: string;
   workspace?: string;
+  role_track?: RoleTrack | "unspecified";
 }
 
 // Filtering runs over the whole collection before the page applies its display
@@ -145,6 +150,10 @@ export function filterCatalog(
         (!filters.topic || q.domain === filters.topic) &&
         (!filters.format || q.format_id === filters.format) &&
         (!filters.level || q.difficulty === filters.level) &&
+        (!filters.role_track ||
+          (filters.role_track === "unspecified"
+            ? !q.role_track
+            : q.role_track === filters.role_track)) &&
         (!filters.workspace || q.modality === filters.workspace),
     )
     .map((q) => ({ q, score: matchScore(q, filters.query ?? "", professions) }))
@@ -159,7 +168,7 @@ export function filterCatalog(
 }
 
 // ---- mock ----
-// A small client-safe snapshot generated from the corpus Summary/Professions
+// A client-safe snapshot generated from the corpus Summary/Professions
 // projections. It contains public practice briefs and specialist descriptions;
 // reference answers and interviewer instructions are never bundled here.
 export const MOCK_QUESTIONS: QuestionSummary[] =

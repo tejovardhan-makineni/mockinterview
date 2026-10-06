@@ -154,5 +154,7 @@
       "Assuming ties need breaking — the base problem guarantees a unique answer, but Top K Frequent Words does not (surface this in the follow-up)."
     ]
   },
-  "interviewer_notes": "Let the candidate finish their reasoning and any workspace changes before a focused follow-up. Ask only about a material unresolved issue, then return the floor. Assess whether the chosen algorithm improves on sorting all frequencies and whether correctness and complexity are justified. A size-k heap and a frequency-bucket approach are valid reference alternatives; do not reveal the frequency bound or steer toward buckets. Let the candidate implement and test independently, including k equal to the number of distinct values and an all-same array. Top K Frequent Words or approximate streaming counts are optional later extensions after a complete base solution, not obligatory escalations."
+  "interviewer_notes": "Let the candidate finish their reasoning and any workspace changes before a focused follow-up. Ask only about a material unresolved issue, then return the floor. Assess whether the chosen algorithm improves on sorting all frequencies and whether correctness and complexity are justified. A size-k heap and a frequency-bucket approach are valid reference alternatives; do not reveal the frequency bound or steer toward buckets. Let the candidate implement and test independently, including k equal to the number of distinct values and an all-same array. Top K Frequent Words or approximate streaming counts are optional later extensions after a complete base solution, not obligatory escalations.",
+  "role_track": "individual_contributor",
+  "revision": 2
 }

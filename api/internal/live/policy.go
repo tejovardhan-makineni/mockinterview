@@ -61,6 +61,9 @@ func buildSystemPrompt(q corpus.Question, personality string, intensity int, pha
 	q = corpus.Normalize(q)
 	q = liveQuestion(q)
 	settings := q.Settings
+	if !corpus.ValidRoleTrack(settings.RoleTrack) {
+		settings.RoleTrack = q.RoleTrack
+	}
 	if settings.TargetLevel == "" {
 		settings.TargetLevel = q.Difficulty
 	}
@@ -78,7 +81,12 @@ func buildSystemPrompt(q corpus.Question, personality string, intensity int, pha
 	fmt.Fprintf(&b, "INTERVIEW: %s. Format: %s. Domain: %s. Workspace: %s. Target level: %s. Challenge: %s. Duration: %d minutes. Content status: %s.\n", q.Title, q.FormatID, q.Domain, q.Modality, settings.TargetLevel, settings.Challenge, minutes, q.ReviewStatus)
 	b.WriteString("ASSESSMENT CONTRACT: when eliciting evidence, ask at most ONE focused question then wait. Follow up on the actual answer, not a script. Allow thinking, drawing, typing and self-correction. Ask for clarification when audio or meaning is unclear. Never interpret silence as refusal without checking. Do not manufacture mistakes or demand a particular tool when alternatives work. Brief acknowledgment is enough; avoid constant praise.\n")
 	b.WriteString(conversationPolicy)
-	b.WriteString("DIFFICULTY: entry/junior assesses sound fundamentals and explicit reasoning; mid expects independent decisions; senior/staff expects broader tradeoffs, failure handling and impact. Foundation supplies a narrower, clearer problem; standard uses the authored scope; stretch adds one relevant constraint at a time. Demeanor changes delivery, never grading severity or factual truth.\n")
+	b.WriteString("DIFFICULTY: entry/junior assesses sound fundamentals and explicit reasoning; mid expects independent decisions; senior expects broader tradeoffs and failure handling; staff/principal expects expert judgment, direction and impact across teams, not people-management authority. Manager expects team delivery, coaching, delegation and fair performance decisions; senior_manager expects multiple-team leadership and manager development; director expects organizational design, capacity and strategy execution; vp/executive expects enterprise strategy, capital and resource allocation, governance, succession and accountability. Calibrate scope to the stated role and supplied scenario; titles alone do not establish authority or competence. Foundation supplies a narrower, clearer problem; standard uses the authored scope; stretch adds one relevant constraint at a time. Demeanor changes delivery, never grading severity or factual truth.\n")
+	if settings.RoleTrack != "" {
+		fmt.Fprintf(&b, "ROLE TRACK: %s. %s\n", settings.RoleTrack, corpus.RoleTrackGuidance(settings.RoleTrack))
+	} else {
+		b.WriteString("ROLE TRACK: unspecified. Follow the scenario and candidate's stated responsibilities; do not assume formal management authority from seniority or infer an IC track from missing metadata.\n")
+	}
 	b.WriteString(engineeringStandard(q))
 	if settings.PracticeMode == "coaching" {
 		b.WriteString("COACHING MODE: hints are permitted only when requested or after asking whether the candidate wants help. Identify each hint as assistance. Begin with a question, then a small clue; do not silently solve the task. Explain that assisted work is different from an independent attempt.\n")

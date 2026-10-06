@@ -1,0 +1,47 @@
+{
+  "id": "aviation-practice",
+  "revision": 1,
+  "review_status": "preview",
+  "source_note": "Original AI-assisted community practice path spanning entry, mid, and senior individual-contributor tasks. Each pinned round is a separate practice attempt, not a hiring sequence. Practitioner review and scoring calibration are pending; these exercises do not certify professional or operational competence.",
+  "name": "Aviation Practice",
+  "areas": [
+    "aviation"
+  ],
+  "track": "professional",
+  "blurb": "Practice training-document verification, passenger assistance handoffs, and simulator evidence review.",
+  "rounds": [
+    {
+      "id": "round-1",
+      "title": "Aviation Operations Trainee: Escalate a Briefing Version Conflict",
+      "kind": "stakeholder-simulation",
+      "domain": "aviation_document_control",
+      "modality": "conversational",
+      "difficulty": "entry",
+      "minutes": 20,
+      "question_id": "aviation-operations-briefing-version",
+      "focus": "Keep a document check honest and obtain the approved training briefing without inferring operational readiness."
+    },
+    {
+      "id": "round-2",
+      "title": "Ground Operations Coordinator: Preserve an Agreed Assistance Handoff",
+      "kind": "stakeholder-simulation",
+      "domain": "aviation_passenger_coordination",
+      "modality": "conversational",
+      "difficulty": "mid",
+      "minutes": 30,
+      "question_id": "aviation-ground-support-handoff",
+      "focus": "Maintain passenger choice and a confirmed assistance owner during a changed departure arrangement."
+    },
+    {
+      "id": "round-3",
+      "title": "Aviation Safety Analyst: Reconcile a Simulator Debrief Timeline",
+      "kind": "work-sample-defense",
+      "domain": "aviation_training_analysis",
+      "modality": "written",
+      "difficulty": "senior",
+      "minutes": 35,
+      "question_id": "aviation-senior-simulation-debrief",
+      "focus": "Check clock alignment and source meaning before assigning a causal story to a training-event timeline."
+    }
+  ]
+}

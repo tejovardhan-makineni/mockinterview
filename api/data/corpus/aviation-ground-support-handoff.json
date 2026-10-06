@@ -1,0 +1,117 @@
+{
+  "schema_version": 1,
+  "revision": 1,
+  "id": "aviation-ground-support-handoff",
+  "title": "Ground Operations Coordinator: Preserve an Agreed Assistance Handoff",
+  "track": "professional",
+  "domain": "aviation_passenger_coordination",
+  "areas": [
+    "aviation"
+  ],
+  "modality": "conversational",
+  "difficulty": "mid",
+  "role_track": "individual_contributor",
+  "format_id": "stakeholder-simulation",
+  "minutes": 30,
+  "review_status": "preview",
+  "tags": [
+    "aviation",
+    "community-preview"
+  ],
+  "prompt": "You are a ground operations coordinator in a fictional passenger-service simulation. A departure moves from waiting area A to B. An adult passenger has requested assistance between those areas and says, \"Please speak to me directly and tell me who is meeting me.\" The assistance tracker says request sent; it has no accepted assignment. A colleague suggests marking the passenger transferred so the list looks complete. Exercise policy requires the receiving assistance worker to acknowledge the handoff and the passenger to agree to the support arrangement before the service is marked complete. Coordinate the conversation and handoff. Do not provide mobility techniques, aircraft loading guidance, or flight-operational decisions.",
+  "blurb": "Maintain passenger choice and a confirmed assistance owner during a changed departure arrangement.",
+  "rubric": [
+    {
+      "key": "passenger_agency",
+      "label": "Center the passenger's preferences",
+      "description": "Offers clear information and an agreed support arrangement.",
+      "weight": 1,
+      "anchors": {
+        "0": "Speaks only to a companion or moves the passenger without agreement.",
+        "2": "Speaks directly to the passenger and explains the changed waiting area.",
+        "4": "Checks the assistance the passenger wants, describes the proposed arrangement and named next contact, and confirms agreement without assuming capability from appearance."
+      }
+    },
+    {
+      "key": "handoff_evidence",
+      "label": "Keep sent distinct from accepted",
+      "description": "Uses an acknowledgement before completing the service.",
+      "weight": 1,
+      "anchors": {
+        "0": "Marks transferred while the request is only sent.",
+        "2": "Leaves the task pending and seeks an assigned worker.",
+        "4": "Separates request sent, worker acceptance, passenger agreement, and completed handoff; confirms each state before reporting it and preserves uncertainty when no owner has accepted."
+      }
+    },
+    {
+      "key": "contingency_coordination",
+      "label": "Coordinate a practical fallback",
+      "description": "Keeps the passenger informed and the service owned.",
+      "weight": 1,
+      "anchors": {
+        "0": "Leaves the passenger to find B alone without agreement or promises an arrival time without confirmation.",
+        "2": "Contacts the assistance desk and gives the passenger an update.",
+        "4": "Uses the supplied service-desk fallback, confirms who remains with or contacts the passenger by agreement, and informs the departure-service coordinator of the unresolved assistance status without deciding flight operations."
+      }
+    }
+  ],
+  "reference": {
+    "scenario": "You are a ground operations coordinator in a fictional passenger-service simulation. A departure moves from waiting area A to B. An adult passenger has requested assistance between those areas and says, \"Please speak to me directly and tell me who is meeting me.\" The assistance tracker says request sent; it has no accepted assignment. A colleague suggests marking the passenger transferred so the list looks complete. Exercise policy requires the receiving assistance worker to acknowledge the handoff and the passenger to agree to the support arrangement before the service is marked complete. Coordinate the conversation and handoff. Do not provide mobility techniques, aircraft loading guidance, or flight-operational decisions.",
+    "facts": [
+      {
+        "id": "fact-1",
+        "value": "The assistance desk can assign an available worker but has not yet done so. The passenger prefers to wait in A until the worker confirms where they will meet.",
+        "reveal_when": "candidate asks about availability or preferences"
+      },
+      {
+        "id": "fact-2",
+        "value": "A departure-service coordinator can receive an assistance-status update. No boarding cutoff, flight delay authority, accessibility regulation, or physical handling procedure is supplied.",
+        "reveal_when": "candidate asks about timing or operational authority"
+      }
+    ],
+    "model_points": [
+      "A changed waiting area does not justify bypassing the passenger's preference or substituting a companion's decision. Ask about the desired assistance in plain language.",
+      "A sent request is not an accepted assignment, and an accepted assignment is not a completed handoff. Keep the tracker truthful.",
+      "Use the service desk for a named next owner and the departure-service coordinator for status, while avoiding operational promises or physical assistance techniques outside the exercise."
+    ],
+    "probes": [
+      {
+        "trigger": "candidate promises a worker will arrive but has not obtained acceptance",
+        "question": "Who has actually accepted the assignment, and what can you honestly promise now?"
+      },
+      {
+        "trigger": "candidate suggests meeting the worker in B instead of waiting in A",
+        "question": "How would you check whether that arrangement is acceptable to the passenger and assigned worker?"
+      },
+      {
+        "trigger": "candidate first marks transferred then reverses the status",
+        "question": "How would you correct the tracker and alert colleagues who may rely on it?"
+      }
+    ],
+    "fair_alternatives": [
+      "A different meeting location can be valid if the passenger agrees and a worker accepts; the stated preference should be explored rather than overridden.",
+      "The coordinator may remain the contact or arrange another acknowledged contact; the key is no unowned gap.",
+      "Assess the work demonstrated here. Accept relevant examples from education, volunteering, caregiving, placements, or paid work; professional vocabulary and employer pedigree are not evidence of a stronger answer."
+    ],
+    "assessment_limits": "Assess passenger-service coordination and respect for choice. Do not assess aviation operations, physical assistance skills, disability status, or real-world compliance requirements. Unobserved dimensions are not failures. Credit a reasoned correction and distinguish independently demonstrated reasoning from coached assistance. Do not penalize a candidate for an unrevealed conditional fact; credit appropriate requests and conditional plans, and distinguish candidate assumptions from interviewer-supplied evidence."
+  },
+  "interviewer_notes": "Assess passenger-service coordination and respect for choice. Do not assess aviation operations, physical assistance skills, disability status, or real-world compliance requirements. Use only the supplied fictional facts and policies; acknowledge unknowns. Ask one triggered probe at a time after the candidate has finished. Accept plain language and accessible written or spoken explanations. Do not score accent, typing speed, confidence, credentials, or experience with a named employer. Credit revisions and record assistance. All participants are fictional adults; no real patient, client, operational, or confidential data is needed. Allow silence for thinking without treating it as failure. In short sessions prioritize the core decision and one material follow-up, leaving room for a correction and wrap-up.",
+  "learning_drills": [
+    {
+      "id": "focused-practice",
+      "title": "Map an assistance handoff",
+      "prompt": "Write four tracker states from request to completion and the evidence needed to move between them. This is self-guided practice; no model assessment is performed.",
+      "minutes": 7,
+      "checklist": [
+        "Speak directly to the passenger",
+        "Confirm the support arrangement",
+        "Separate sent from accepted",
+        "Avoid unverified timing or flight promises"
+      ]
+    }
+  ],
+  "provenance": {
+    "authorship": "Original project scenario, AI-assisted draft using fictional organizations, records, and exercise policies. Practitioner review and scoring calibration pending.",
+    "license": "MIT"
+  }
+}

@@ -1,0 +1,122 @@
+{
+  "schema_version": 1,
+  "revision": 1,
+  "id": "aviation-senior-simulation-debrief",
+  "title": "Aviation Safety Analyst: Reconcile a Simulator Debrief Timeline",
+  "track": "professional",
+  "domain": "aviation_training_analysis",
+  "areas": [
+    "aviation"
+  ],
+  "modality": "written",
+  "difficulty": "senior",
+  "role_track": "individual_contributor",
+  "format_id": "work-sample-defense",
+  "minutes": 35,
+  "review_status": "preview",
+  "tags": [
+    "aviation",
+    "community-preview"
+  ],
+  "prompt": "You are a senior aviation safety analyst reviewing a fictional simulator training debrief. Supplied artifact: simulator recorder on the reference clock shows a prompt at 14:02:10; instructor log on the same clock says \"pause requested\" at 14:02:40; trainee tablet entry reads \"acknowledged\" at 14:01:55. Draft conclusion: \"The trainee acknowledged before the prompt, so the instructor caused confusion.\" Clock calibration is not included, the tablet entry is a manually typed timestamp, and no voice recording is available. Review the conclusion, build an uncertainty-aware timeline, and propose a fair learning debrief. This is a classroom data-analysis exercise, not a real incident or a flight-procedure test.",
+  "blurb": "Check clock alignment and source meaning before assigning a causal story to a training-event timeline.",
+  "rubric": [
+    {
+      "key": "timeline_normalization",
+      "label": "Check comparability of timestamps",
+      "description": "Handles clock offset and the limits of a manual entry.",
+      "weight": 1,
+      "anchors": {
+        "0": "Accepts the apparent early acknowledgement as fact without checking clocks.",
+        "2": "Asks about clock alignment and notices the manually entered time.",
+        "4": "Uses the supplied 60-second-slow tablet correction to place its nominal timestamp at 14:02:55 on the reference clock, while preserving the uncertainty that a typed entry does not prove when an acknowledgement occurred."
+      }
+    },
+    {
+      "key": "causal_restraint",
+      "label": "Separate observations from blame",
+      "description": "Tests what the sources can and cannot establish.",
+      "weight": 1,
+      "anchors": {
+        "0": "Assigns fault or motive to the instructor or trainee from the table.",
+        "2": "Removes the unsupported blame claim and lists missing context.",
+        "4": "Distinguishes recorded prompt, logged pause request, and self-entered acknowledgement; identifies timing/content ambiguities and seeks each participant's account without presenting sequence as proof of causation."
+      }
+    },
+    {
+      "key": "learning_debrief",
+      "label": "Design a fair and useful follow-up",
+      "description": "Creates a learning process with preserved evidence and bounded conclusions.",
+      "weight": 1,
+      "anchors": {
+        "0": "Uses the record to rate pilot competence or demand operational corrections.",
+        "2": "Suggests a neutral debrief and better timestamp recording.",
+        "4": "Preserves original and normalized records, asks focused nonleading questions about message understanding, records disagreements, and proposes a follow-up training check of communication evidence with an owner and review date."
+      }
+    }
+  ],
+  "reference": {
+    "scenario": "You are a senior aviation safety analyst reviewing a fictional simulator training debrief. Supplied artifact: simulator recorder on the reference clock shows a prompt at 14:02:10; instructor log on the same clock says \"pause requested\" at 14:02:40; trainee tablet entry reads \"acknowledged\" at 14:01:55. Draft conclusion: \"The trainee acknowledged before the prompt, so the instructor caused confusion.\" Clock calibration is not included, the tablet entry is a manually typed timestamp, and no voice recording is available. Review the conclusion, build an uncertainty-aware timeline, and propose a fair learning debrief. This is a classroom data-analysis exercise, not a real incident or a flight-procedure test.",
+    "facts": [
+      {
+        "id": "fact-1",
+        "value": "A calibration note shows the trainee tablet was exactly 60 seconds slow relative to the reference clock during the exercise. This corrects the displayed timestamp but does not validate the manually entered event time.",
+        "reveal_when": "candidate asks about clock calibration or timestamp sources"
+      },
+      {
+        "id": "fact-2",
+        "value": "The instructor log was typed after the exercise using notes. The simulator recorder automatically timestamps displayed prompts. Neither source records what the trainee heard or understood.",
+        "reveal_when": "candidate asks about how the records were produced"
+      },
+      {
+        "id": "fact-3",
+        "value": "Both participants are available for a nonpunitive debrief. The training coordinator can add a common reference clock and explicit event markers to a future fictional exercise.",
+        "reveal_when": "candidate asks how to follow up"
+      }
+    ],
+    "model_points": [
+      "Adding 60 seconds converts the tablet display to 14:02:55 on the reference clock, but manual-entry uncertainty remains. Keep the original and transformed values so a reader can reconstruct the reasoning.",
+      "The records establish different kinds of evidence. No audio or understanding measure supports a confident causal or competence judgment; removing blame is not equivalent to declaring nothing happened.",
+      "A fair debrief asks about what each participant perceived, intended, and recorded, preserves disagreement, and improves future observability without becoming an operational procedure lesson."
+    ],
+    "probes": [
+      {
+        "trigger": "candidate normalizes the clock but treats 14:02:55 as a verified acknowledgement time",
+        "question": "What does the manual timestamp tell you, and what does it not verify?"
+      },
+      {
+        "trigger": "candidate declines to construct a single exact timeline",
+        "question": "How could you present the known sequence and uncertain event windows usefully without inventing precision?"
+      },
+      {
+        "trigger": "candidate first repeats the blame conclusion then revises after calibration",
+        "question": "Which sentence in the report changes, and what original evidence do you retain?"
+      }
+    ],
+    "fair_alternatives": [
+      "An annotated timeline or a source/evidence table is acceptable; exact chronology can remain unresolved.",
+      "A decision to defer causal conclusions while improving future evidence is appropriate if paired with specific learning questions and ownership.",
+      "Assess the work demonstrated here. Accept relevant examples from education, volunteering, caregiving, placements, or paid work; professional vocabulary and employer pedigree are not evidence of a stronger answer."
+    ],
+    "assessment_limits": "Assess safety-analysis reasoning in a wholly fictional training setting. Do not assess pilot competence, prescribe cockpit procedures, investigate a real event, or infer operational safety. Unobserved dimensions are not failures. Credit a reasoned correction and distinguish independently demonstrated reasoning from coached assistance. Do not penalize a candidate for an unrevealed conditional fact; credit appropriate requests and conditional plans, and distinguish candidate assumptions from interviewer-supplied evidence."
+  },
+  "interviewer_notes": "Assess safety-analysis reasoning in a wholly fictional training setting. Do not assess pilot competence, prescribe cockpit procedures, investigate a real event, or infer operational safety. Use only the supplied fictional facts and policies; acknowledge unknowns. Ask one triggered probe at a time after the candidate has finished. Accept plain language and accessible written or spoken explanations. Do not score accent, typing speed, confidence, credentials, or experience with a named employer. Credit revisions and record assistance. All participants are fictional adults; no real patient, client, operational, or confidential data is needed. Allow silence for thinking without treating it as failure. In short sessions prioritize the core decision and one material follow-up, leaving room for a correction and wrap-up.",
+  "learning_drills": [
+    {
+      "id": "focused-practice",
+      "title": "Build a source-aware timeline",
+      "prompt": "Create three rows with source, original timestamp, reference-clock timestamp, and a limitation for each entry. This is self-guided practice; no model assessment is performed.",
+      "minutes": 7,
+      "checklist": [
+        "Add rather than subtract the slow-clock offset",
+        "Retain original times",
+        "Do not equate typed entry with observed event",
+        "Replace blame with testable questions"
+      ]
+    }
+  ],
+  "provenance": {
+    "authorship": "Original project scenario, AI-assisted draft using fictional organizations, records, and exercise policies. Practitioner review and scoring calibration pending.",
+    "license": "MIT"
+  }
+}

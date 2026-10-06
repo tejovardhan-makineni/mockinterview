@@ -1,0 +1,50 @@
+{
+  "id": "senior-manager-practice",
+  "revision": 1,
+  "review_status": "preview",
+  "source_note": "Original AI-assisted management practice path. Each round is a separate attempt. Practitioner review and scoring calibration are pending; this does not certify leadership or hiring readiness.",
+  "name": "Senior Manager",
+  "areas": [
+    "management"
+  ],
+  "track": "professional",
+  "blurb": "Practice manager development, portfolio capacity, performance support.",
+  "rounds": [
+    {
+      "id": "round-1",
+      "title": "Senior Manager: Coach a Manager Who Solves Everything Personally",
+      "kind": "stakeholder-simulation",
+      "domain": "manager_development",
+      "modality": "conversational",
+      "difficulty": "senior_manager",
+      "role_track": "management",
+      "minutes": 30,
+      "question_id": "senior-manager-manager-coaching",
+      "focus": "Design a management experiment"
+    },
+    {
+      "id": "round-2",
+      "title": "Senior Manager: Allocate Scarce Capacity Across Teams",
+      "kind": "panel-simulation",
+      "domain": "portfolio_capacity",
+      "modality": "conversational",
+      "difficulty": "senior_manager",
+      "role_track": "management",
+      "minutes": 30,
+      "question_id": "senior-manager-capacity-allocation",
+      "focus": "Write an allocation decision"
+    },
+    {
+      "id": "round-3",
+      "title": "Experienced Manager: Investigate a Performance Gap Fairly",
+      "kind": "stakeholder-simulation",
+      "domain": "performance_support",
+      "modality": "conversational",
+      "difficulty": "manager",
+      "role_track": "management",
+      "minutes": 30,
+      "question_id": "manager-underperformance-support",
+      "focus": "Separate observations from conclusions"
+    }
+  ]
+}

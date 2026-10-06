@@ -31,7 +31,7 @@ into a room with voice, an optional camera, notes and an appropriate workspace.
 Reports use the scenario's rubric and cited candidate evidence; missing evidence
 is marked **not assessed**. Appearance is not part of the interview score.
 
-The hosted catalog contains **185 scenarios** across **30 professional areas
+The September 14 deployed catalog contains **185 scenarios** across **30 professional areas
 plus career foundations**, organized into seven career families with specialized
 AI interviewer profiles and 23 practice paths. The
 [September 14 bank audit and expansion](docs/INTERVIEW-BANK-EXPANSION-2026-09-14.md)
@@ -44,6 +44,16 @@ candidate-question practice. Content and AI feedback are **community previews**:
 practitioner review and scoring calibration remain pending. Employer-named packs
 are practice approximations, with no employer affiliation or claim of exact
 questions. Code and SQL are reviewed as text; there is no execution sandbox.
+
+The October 5 source expansion contains **262 scenarios across 41 career areas
+and 38 practice paths**, including separate individual-contributor, management
+and executive tracks. It adds eight professions, seven management paths,
+specialist entry/junior and senior coverage, and two principal-level exercises.
+This source count is **not a deployment claim**. See the
+[coverage and validation record](docs/INTERVIEW-COVERAGE-2026-10-05.md) and run
+`make content-audit` for primary versus shared coverage. All content remains a
+community preview pending practitioner review and scoring calibration; the
+[review protocol](docs/CONTENT-REVIEW.md) includes unfilled reviewer worksheets.
 
 ## Desktop app
 

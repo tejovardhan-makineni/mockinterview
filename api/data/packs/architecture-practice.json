@@ -1,0 +1,47 @@
+{
+  "id": "architecture-practice",
+  "revision": 1,
+  "review_status": "preview",
+  "source_note": "Original AI-assisted community practice path spanning entry, mid, and senior individual-contributor tasks. Each pinned round is a separate practice attempt, not a hiring sequence. Practitioner review and scoring calibration are pending; these exercises do not certify professional or operational competence.",
+  "name": "Architecture Practice",
+  "areas": [
+    "architecture"
+  ],
+  "track": "professional",
+  "blurb": "Practice drawing coordination, a constrained community brief, and a late design-change decision.",
+  "rounds": [
+    {
+      "id": "round-1",
+      "title": "Architectural Assistant: Find a Drawing Revision Conflict",
+      "kind": "work-sample-defense",
+      "domain": "architectural_documentation",
+      "modality": "written",
+      "difficulty": "entry",
+      "minutes": 20,
+      "question_id": "architecture-assistant-revision-check",
+      "focus": "Detect a cross-document mismatch and route a precise coordination issue without guessing the correct drawing."
+    },
+    {
+      "id": "round-2",
+      "title": "Architectural Designer: Reconcile a Community Room Brief",
+      "kind": "written-response",
+      "domain": "architectural_briefing",
+      "modality": "written",
+      "difficulty": "mid",
+      "minutes": 30,
+      "question_id": "architecture-community-room-brief",
+      "focus": "Turn an overfull brief into two transparent concept options while preserving access and functional relationships."
+    },
+    {
+      "id": "round-3",
+      "title": "Senior Architect: Evaluate a Late Brief Change",
+      "kind": "work-sample-defense",
+      "domain": "architectural_change_control",
+      "modality": "written",
+      "difficulty": "senior",
+      "minutes": 35,
+      "question_id": "architecture-senior-change-review",
+      "focus": "Challenge an incomplete cost-neutral claim and structure a client decision around a changed requirement."
+    }
+  ]
+}

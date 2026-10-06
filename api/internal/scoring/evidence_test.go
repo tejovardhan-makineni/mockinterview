@@ -79,3 +79,16 @@ func TestUnassessedCannotCarryScoreAndOversizedEvidenceIsExplicit(t *testing.T) 
 		t.Fatal("invalid result")
 	}
 }
+
+func TestScoringUsesSavedRoleTrackAndSeniority(t *testing.T) {
+	model := &captureModel{response: `{"scores":[]}`}
+	q := sampleQuestion()
+	q.Settings.RoleTrack, q.Settings.TargetLevel = "management", "director"
+	_, err := New(model, "").Evaluate(context.Background(), q, []store.Turn{{ID: "candidate", Role: "candidate", Text: strings.Repeat("My team decision used documented evidence. ", 20)}}, "")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(model.request.System, "team outcomes through coaching, delegation") || !strings.Contains(model.request.Messages[0].Text, `"role_track":"management"`) || !strings.Contains(model.request.Messages[0].Text, `"target_level":"director"`) {
+		t.Fatal("scorer ignored saved scope")
+	}
+}

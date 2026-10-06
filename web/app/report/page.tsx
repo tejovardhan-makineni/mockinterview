@@ -1,4 +1,5 @@
 "use client";
+import { levelLabel, roleTrackLabel } from "@/lib/roleScope";
 import { providerName } from "@/lib/providers";
 import { Suspense, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -528,8 +529,15 @@ function ReportView({ sid }: { sid: string }) {
                         "No workspace content was added."}
                     </pre>
                     <p className={styles.settings}>
-                      {pretty(session?.config.target_level ?? "mid")} ·{" "}
-                      {pretty(session?.config.challenge ?? "standard")} ·{" "}
+                      {session?.config.role_track && (
+                        <>{roleTrackLabel(session.config.role_track)} · </>
+                      )}
+                      {levelLabel(
+                        session?.config.target_level ??
+                          session?.question?.difficulty ??
+                          "mid",
+                      )}{" "}
+                      · {pretty(session?.config.challenge ?? "standard")} ·{" "}
                       {session?.duration_minutes} minutes ·{" "}
                       {session?.provider
                         ? providerName(session.provider)

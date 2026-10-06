@@ -175,6 +175,22 @@ func (s *Service) Create(w http.ResponseWriter, r *http.Request) {
 		httpx.WriteProblem(w, http.StatusBadRequest, "unknown question_id")
 		return
 	}
+	if req.Custom == nil {
+		level, roleTrack := q.Difficulty, q.RoleTrack
+		if defaults, found := s.packs.(interface {
+			RoundDefaults(string, string) (string, string, bool)
+		}); found && req.PackID != "" {
+			if packLevel, packTrack, ok := defaults.RoundDefaults(req.PackID, req.RoundID); ok {
+				if packLevel != "" {
+					level = packLevel
+				}
+				if packTrack != "" {
+					roleTrack = packTrack
+				}
+			}
+		}
+		req.Config = withAssessmentDefaults(req.Config, level, roleTrack)
+	}
 	if roundFocus != "" {
 		req.Config = withRoundFocus(req.Config, roundFocus)
 	}
@@ -240,6 +256,7 @@ func (s *Service) Create(w http.ResponseWriter, r *http.Request) {
 	// Duration and live model are server-controlled and frozen for reconnects.
 	var settings map[string]any
 	_ = json.Unmarshal(req.Config, &settings)
+	roleTrack, _ := settings["role_track"].(string)
 	settings["minutes"] = req.Minutes
 	settings["director_version"] = live.DirectorVersion
 	settings["question_fingerprint"] = corpus.Fingerprint(q)
@@ -280,7 +297,7 @@ func (s *Service) Create(w http.ResponseWriter, r *http.Request) {
 	if req.Custom != nil {
 		// Draft metadata is local only. The preparing status prevents a socket
 		// or scorer from using it while the real planner runs after admission.
-		q, e = s.customQuestion(r.Context(), llm.NewStub(), *req.Custom, req.Minutes)
+		q, e = s.customQuestion(r.Context(), llm.NewStub(), *req.Custom, req.Minutes, roleTrack)
 		if e != nil {
 			httpx.WriteProblem(w, 503, e.Error()+". No interview allowance was used.")
 			return
@@ -318,7 +335,7 @@ func (s *Service) Create(w http.ResponseWriter, r *http.Request) {
 				_ = s.store.AddEvent(cleanup, sess.ID, 0, "interview_error", json.RawMessage(`{"code":"planning_failed","stage":"preparation"}`))
 			}
 		}()
-		q, e = s.customQuestion(r.Context(), planner, *req.Custom, req.Minutes)
+		q, e = s.customQuestion(r.Context(), planner, *req.Custom, req.Minutes, roleTrack)
 		if e != nil {
 			httpx.WriteProblem(w, 503, e.Error()+". No interview allowance was used.")
 			return
@@ -335,6 +352,23 @@ func (s *Service) Create(w http.ResponseWriter, r *http.Request) {
 	}
 
 	s.writeSession(w, r, sess)
+}
+
+// withAssessmentDefaults records authored defaults for recovery and reports.
+// Explicit candidate choices win; no role track is invented for legacy content.
+func withAssessmentDefaults(raw json.RawMessage, level, roleTrack string) json.RawMessage {
+	var settings map[string]json.RawMessage
+	_ = json.Unmarshal(raw, &settings)
+	if settings == nil {
+		settings = map[string]json.RawMessage{}
+	}
+	for key, value := range map[string]string{"target_level": level, "role_track": roleTrack} {
+		if _, supplied := settings[key]; !supplied && value != "" {
+			settings[key], _ = json.Marshal(value)
+		}
+	}
+	out, _ := json.Marshal(settings)
+	return out
 }
 
 // withRoundFocus merges a `round_focus` string into the session config JSON so
@@ -373,10 +407,7 @@ func (s *Service) writeSession(w http.ResponseWriter, r *http.Request, sess stor
 		httpx.WriteProblem(w, 503, "Saved interview metrics temporarily unavailable")
 		return
 	}
-	q, found := s.corpus.Get(sess.QuestionID)
-	if len(sess.QuestionSnapshot) > 2 && json.Unmarshal(sess.QuestionSnapshot, &q) == nil {
-		found = true
-	}
+	q, found := s.corpus.ResolveSnapshot(sess.QuestionID, sess.QuestionSnapshot)
 	var summary *corpus.Summary
 	if found {
 		v := q.Summary()
@@ -556,11 +587,7 @@ func (s *Service) Report(w http.ResponseWriter, r *http.Request) {
 	_ = json.Unmarshal(rep.Radar, &radar)
 
 	title := sess.QuestionID
-	var frozen corpus.Question
-	if json.Unmarshal(sess.QuestionSnapshot, &frozen) == nil && frozen.Title != "" {
-		title = frozen.Title
-	}
-	if q, found := s.corpus.Get(sess.QuestionID); found {
+	if q, found := s.corpus.ResolveSnapshot(sess.QuestionID, sess.QuestionSnapshot); found && q.Title != "" {
 		title = q.Title
 	}
 	workspace, workErr := s.store.LatestWorkspace(r.Context(), sess.ID)

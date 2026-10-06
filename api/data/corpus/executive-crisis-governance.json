@@ -1,0 +1,119 @@
+{
+  "schema_version": 1,
+  "revision": 1,
+  "format_id": "panel-simulation",
+  "review_status": "preview",
+  "provenance": {
+    "authorship": "Original project scenario, AI-assisted draft. Practitioner review and scoring calibration pending.",
+    "license": "MIT"
+  },
+  "minutes": 45,
+  "id": "executive-crisis-governance",
+  "title": "Executive: Establish Decision Rights During a Service Crisis",
+  "track": "professional",
+  "domain": "crisis_governance",
+  "areas": [
+    "management"
+  ],
+  "role_track": "executive",
+  "modality": "conversational",
+  "difficulty": "executive",
+  "tags": [
+    "management",
+    "executive",
+    "crisis-governance",
+    "leadership",
+    "community-preview"
+  ],
+  "prompt": "A fictional company’s customer portal has been unavailable for 70 minutes. The technical lead is investigating; the cause and recovery time are unknown. Sales wants to promise restoration within an hour, while Communications wants to wait for certainty. You are the executive incident sponsor. Explain your decisions to the leadership team, represented by one AI using labeled perspectives. This is an organizational communication exercise, not a technical recovery procedure.",
+  "blurb": "Map crisis decisions",
+  "rubric": [
+    {
+      "key": "authority",
+      "label": "Protect operational decision rights",
+      "description": "Coordinates leadership without creating competing commands.",
+      "weight": 1,
+      "anchors": {
+        "0": "Overrides recovery with unverified technical instructions or lets each executive issue separate orders.",
+        "2": "Names an incident commander and an executive sponsor.",
+        "4": "Preserves the commander’s technical authority, removes executive blockers through a single channel, assigns customer/compliance decisions to accountable owners and respects the bounded investigation window."
+      }
+    },
+    {
+      "key": "communication",
+      "label": "Communicate useful confirmed facts",
+      "description": "Balances urgency and uncertainty.",
+      "weight": 1,
+      "anchors": {
+        "0": "Promises an unsupported restoration time or waits indefinitely for certainty.",
+        "2": "Acknowledges the outage and promises another update.",
+        "4": "Communicates known impact, available limited support and a specific update time while keeping cause/ETA unknown; establishes consistent internal and external messages with correction ownership."
+      }
+    },
+    {
+      "key": "governance",
+      "label": "Oversee consequences and learning",
+      "description": "Makes escalation and recovery review accountable.",
+      "weight": 1,
+      "anchors": {
+        "0": "Assumes no reporting obligations or declares recovery without verification.",
+        "2": "Involves the relevant leads and schedules review.",
+        "4": "Assigns qualified assessment of reporting/contract duties without inventing them, defines executive escalation and verified recovery communication, then preserves an evidence-based review of customer and organizational consequences."
+      }
+    }
+  ],
+  "reference": {
+    "scenario": "A fictional company’s customer portal has been unavailable for 70 minutes. The technical lead is investigating; the cause and recovery time are unknown. Sales wants to promise restoration within an hour, while Communications wants to wait for certainty. You are the executive incident sponsor. Explain your decisions to the leadership team, represented by one AI using labeled perspectives. This is an organizational communication exercise, not a technical recovery procedure.",
+    "facts": [
+      {
+        "id": "fact-1",
+        "value": "The incident commander owns technical recovery and has requested a 30-minute protected investigation window. Support can offer a documented manual route for a limited set of urgent requests.",
+        "reveal_when": "candidate asks about existing authority or customer contingencies"
+      },
+      {
+        "id": "fact-2",
+        "value": "The fictional communications policy permits confirmed facts and a promised next-update time, but not an unverified restoration estimate. Any required external reporting must be assessed by the designated legal/compliance lead; no jurisdiction or deadline is supplied.",
+        "reveal_when": "candidate asks about communications policy or reporting obligations"
+      }
+    ],
+    "model_points": [
+      "Preserves the commander’s technical authority, removes executive blockers through a single channel, assigns customer/compliance decisions to accountable owners and respects the bounded investigation window.",
+      "Communicates known impact, available limited support and a specific update time while keeping cause/ETA unknown; establishes consistent internal and external messages with correction ownership.",
+      "Assigns qualified assessment of reporting/contract duties without inventing them, defines executive escalation and verified recovery communication, then preserves an evidence-based review of customer and organizational consequences."
+    ],
+    "probes": [
+      {
+        "trigger": "candidate promises restoration to calm customers",
+        "question": "What confirmed statement can you make instead?"
+      },
+      {
+        "trigger": "candidate starts directing individual engineers",
+        "question": "How will that affect the commander’s investigation?"
+      },
+      {
+        "trigger": "candidate learns an earlier message was wrong",
+        "question": "Who corrects it and how quickly can the confirmed facts be updated?"
+      }
+    ],
+    "fair_alternatives": [
+      "A shorter or longer update cadence is valid if feasible, explicit and owned.",
+      "Manual support may be limited or paused when its authorization or capacity is unclear."
+    ],
+    "assessment_limits": "Assess only the decisions and reasoning demonstrated in this fictional exercise. No hiring-readiness, personality, legal compliance or workplace performance claim follows from this score. A valid alternative can earn full credit. Unrevealed conditional facts must not be assumed known or required for credit; credit asking for needed information and a conditional plan."
+  },
+  "interviewer_notes": "You are the counterpart named in the prompt. If this is a written review, remain the hiring interviewer while the candidate reads and writes. Let the candidate finish, including thinking and self-correction. Answer only supplied facts when their reveal condition is met; otherwise say the information is unknown. Use neutral probes after a completed answer, one at a time. Do not prescribe the rubric as a spoken checklist. Accept relevant examples from work, education and community leadership. Do not request private employee records, infer protected traits, invent employment rules or promise a real organizational outcome. Simulation gives no answer before assessment; coaching may offer labeled assistance.",
+  "learning_drills": [
+    {
+      "id": "decision-practice",
+      "title": "Map crisis decisions",
+      "prompt": "List recovery, customer support, public updates and compliance decisions with one accountable owner each. This is self-guided practice with no automated assessment.",
+      "minutes": 7,
+      "checklist": [
+        "Preserve command clarity",
+        "Do not invent an ETA",
+        "Set the next update",
+        "Use qualified obligation review"
+      ]
+    }
+  ]
+}

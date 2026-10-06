@@ -1,0 +1,117 @@
+{
+  "schema_version": 1,
+  "revision": 1,
+  "id": "veterinary-senior-callback-audit",
+  "title": "Senior Veterinary Clinician: Review a Callback Reliability Audit",
+  "track": "professional",
+  "domain": "veterinary_service_quality",
+  "areas": [
+    "veterinary"
+  ],
+  "modality": "written",
+  "difficulty": "senior",
+  "role_track": "individual_contributor",
+  "format_id": "work-sample-defense",
+  "minutes": 35,
+  "review_status": "preview",
+  "tags": [
+    "veterinary",
+    "community-preview"
+  ],
+  "prompt": "You are a senior veterinary clinician advising fictional Elm Practice. A callback audit reports \"90% follow-up complete\" because 45 of 50 tasks were marked closed. In a supplied ten-task review of those 45 closed tasks: 4 contain an acknowledged two-way conversation, 3 contain voicemail only, 2 contain a failed-number note, and 1 has no contact record. The ten were chosen from one shift for convenience. Exercise policy defines contact complete as acknowledged communication or an explicitly agreed alternative; unresolved clinical concerns go to the duty clinician through a separate channel. Review the claim and design a proportionate recovery and re-audit. Do not infer animal health outcomes from these records.",
+  "blurb": "Distinguish closed tasks from completed contact and improve the evidence behind a service-quality claim.",
+  "rubric": [
+    {
+      "key": "audit_interpretation",
+      "label": "Test completion against its definition",
+      "description": "Uses the evidence categories without extrapolating the convenience sample.",
+      "weight": 1,
+      "anchors": {
+        "0": "Repeats 90% as verified contact or treats all voicemail as acknowledged.",
+        "2": "Notes that only four sampled records clearly demonstrate two-way contact.",
+        "4": "Separates task closure from policy-defined contact, checks for agreed alternatives before classifying the other six, and explains why the one-shift sample cannot establish a practice-wide completion rate."
+      }
+    },
+    {
+      "key": "recovery_priority",
+      "label": "Recover unresolved communication safely",
+      "description": "Assigns review ownership without inventing clinical priority.",
+      "weight": 1,
+      "anchors": {
+        "0": "Treats failed numbers as resolved or creates a clinical urgency ranking from absent data.",
+        "2": "Reviews unclear closed tasks and sends clinical concerns to the duty clinician.",
+        "4": "Defines accountable review of missing acknowledgement/contact routes, privacy-respecting verification of failed numbers, client-preferred contact where known, and immediate separate ownership for any identified clinical concern."
+      }
+    },
+    {
+      "key": "measurement_repair",
+      "label": "Make the re-audit reliable",
+      "description": "Separates process measures and improves sampling.",
+      "weight": 1,
+      "anchors": {
+        "0": "Sets a target to close more tasks without evidence.",
+        "2": "Separates attempted and acknowledged contacts and broadens the sample.",
+        "4": "Defines attempted, acknowledged, agreed-alternative, unresolved, and clinically escalated states; samples across shifts, checks reviewer agreement, and sets an owned re-audit date without claiming verified clinical benefit."
+      }
+    }
+  ],
+  "reference": {
+    "scenario": "You are a senior veterinary clinician advising fictional Elm Practice. A callback audit reports \"90% follow-up complete\" because 45 of 50 tasks were marked closed. In a supplied ten-task review of those 45 closed tasks: 4 contain an acknowledged two-way conversation, 3 contain voicemail only, 2 contain a failed-number note, and 1 has no contact record. The ten were chosen from one shift for convenience. Exercise policy defines contact complete as acknowledged communication or an explicitly agreed alternative; unresolved clinical concerns go to the duty clinician through a separate channel. Review the claim and design a proportionate recovery and re-audit. Do not infer animal health outcomes from these records.",
+    "facts": [
+      {
+        "id": "fact-1",
+        "value": "The audit team can inspect all 50 tasks for contact-state evidence this week. No individual clinical detail is included in the exercise.",
+        "reveal_when": "candidate asks about review capacity"
+      },
+      {
+        "id": "fact-2",
+        "value": "Some clients have agreed to written summaries, but the ten reviewed tasks did not record whether that agreement applied. A second reviewer is available for disputed classifications.",
+        "reveal_when": "candidate asks about alternatives or classification uncertainty"
+      }
+    ],
+    "model_points": [
+      "The 90% figure measures closure. The reviewed subset contains four confirmed conversations and six records that need evaluation against the definition, including any agreed alternatives.",
+      "A convenience sample cannot justify a practice-wide failure percentage. Review the existing 50 for communication recovery and design a broader prospective audit.",
+      "Keep clinical concerns with the duty clinician and measure evidence states rather than encouraging closure. Verification and respectful contact routes matter more than achieving a lower open-task count."
+    ],
+    "probes": [
+      {
+        "trigger": "candidate concludes only 40% of all callbacks succeeded",
+        "question": "What does the sampling method allow you to say about the other 40 tasks?"
+      },
+      {
+        "trigger": "candidate accepts written summaries as a completion route",
+        "question": "What evidence of agreement and receipt would your classification require under this exercise policy?"
+      },
+      {
+        "trigger": "candidate first counts voicemail as complete then corrects",
+        "question": "How would you revise both the headline metric and task state definitions?"
+      }
+    ],
+    "fair_alternatives": [
+      "A full evidence review of the 50 existing tasks and a prospective stratified sample both contribute; neither is a substitute for clinical review of an identified concern.",
+      "An agreed alternative can meet the exercise definition; do not require every client to use a phone conversation.",
+      "Assess the work demonstrated here. Accept relevant examples from education, volunteering, caregiving, placements, or paid work; professional vocabulary and employer pedigree are not evidence of a stronger answer."
+    ],
+    "assessment_limits": "Assess audit interpretation, contact reliability, and bounded service improvement. Do not assess clinical outcomes, veterinary triage, or legal communication standards. Unobserved dimensions are not failures. Credit a reasoned correction and distinguish independently demonstrated reasoning from coached assistance. Do not penalize a candidate for an unrevealed conditional fact; credit appropriate requests and conditional plans, and distinguish candidate assumptions from interviewer-supplied evidence."
+  },
+  "interviewer_notes": "Assess audit interpretation, contact reliability, and bounded service improvement. Do not assess clinical outcomes, veterinary triage, or legal communication standards. Use only the supplied fictional facts and policies; acknowledge unknowns. Ask one triggered probe at a time after the candidate has finished. Accept plain language and accessible written or spoken explanations. Do not score accent, typing speed, confidence, credentials, or experience with a named employer. Credit revisions and record assistance. All participants are fictional adults; no real patient, client, operational, or confidential data is needed. Allow silence for thinking without treating it as failure. In short sessions prioritize the core decision and one material follow-up, leaving room for a correction and wrap-up.",
+  "learning_drills": [
+    {
+      "id": "focused-practice",
+      "title": "Redesign the callback dashboard",
+      "prompt": "Draft five contact states and write a headline that distinguishes closed tasks from verified contact. This is self-guided practice; no model assessment is performed.",
+      "minutes": 7,
+      "checklist": [
+        "Do not generalize the convenience sample",
+        "Look for agreed alternatives",
+        "Keep concern escalation separate",
+        "Give the re-audit an owner and date"
+      ]
+    }
+  ],
+  "provenance": {
+    "authorship": "Original project scenario, AI-assisted draft using fictional organizations, records, and exercise policies. Practitioner review and scoring calibration pending.",
+    "license": "MIT"
+  }
+}

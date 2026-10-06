@@ -9,6 +9,7 @@ import { req, wsBase } from "../http";
 import type { Modality, Phase } from "../domain";
 import type { InterviewConfig } from "./profile";
 import type { QuestionSummary } from "./catalog";
+import type { PackDetailRound } from "./packs";
 import { MOCK_QUESTIONS } from "./catalog";
 
 export interface WorkspaceSnapshot {
@@ -82,7 +83,7 @@ export interface Session {
   deadline_at?: string;
   workspace?: WorkspaceSnapshot;
   phase: Phase | `section:${string}`;
-  config: InterviewConfig;
+  config: Omit<InterviewConfig, "target_level"> & { target_level?: string };
   pack_id?: string; // set when this session is a pack round
   pack_round_id?: string;
 }
@@ -488,13 +489,20 @@ export const interviewMock: InterviewSlice = {
   },
   async createSession(questionId, cfg, pack, options) {
     let q = MOCK_QUESTIONS.find((x) => x.id === questionId);
+    let round: PackDetailRound | undefined;
     if (pack) {
-      const { packsMock } = await import("./packs");
+      const { packsMock, resolveMockRound } = await import("./packs");
       const detail = await packsMock.getPack(pack.packId);
-      const round = detail.rounds.find((r) => r.id === pack.roundId);
-      q =
-        MOCK_QUESTIONS.find((x) => x.modality === round?.modality) ??
-        MOCK_QUESTIONS[0];
+      round = detail.rounds.find((r) => r.id === pack.roundId);
+      if (!round)
+        throw new Error(
+          "This practice round was not found in the bundled demo.",
+        );
+      q = resolveMockRound(detail, round, MOCK_QUESTIONS);
+      if (!q)
+        throw new Error(
+          "No compatible scenario is available for this demo round.",
+        );
     }
     q ??= MOCK_QUESTIONS[0];
     if (options?.custom)
@@ -503,21 +511,32 @@ export const interviewMock: InterviewSlice = {
         id: "custom-demo",
         title: options.custom.profession + " practice",
         modality: "conversational",
-        track: "general",
+        track: "professional",
+        domain: "custom",
+        areas: [],
+        difficulty: "mid",
+        role_track: cfg.role_track,
         prompt: options.custom.goal + "\n\n" + options.custom.questions,
         blurb: "Simulated custom interview preview",
       };
     const started = new Date();
-    const minutes = options?.minutes ?? 30;
+    const minutes = options?.minutes ?? round?.minutes ?? 30;
     const session: Session & { created_at: string } = {
       id: crypto.randomUUID(),
       question_id: q.id,
-      question: options?.custom ? q : undefined,
+      question: q,
       modality: q.modality,
       track: q.track,
       status: "active",
       phase: "intro",
-      config: cfg,
+      config: {
+        ...cfg,
+        role_track: cfg.role_track ?? round?.role_track ?? q.role_track,
+        target_level:
+          options?.custom?.level ??
+          cfg.target_level ??
+          (round?.difficulty || q.difficulty),
+      },
       pack_id: pack?.packId,
       pack_round_id: pack?.roundId,
       mode: options?.mode ?? "text",

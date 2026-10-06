@@ -1,0 +1,47 @@
+{
+  "id": "agriculture-practice",
+  "revision": 1,
+  "review_status": "preview",
+  "source_note": "Original AI-assisted community practice path spanning entry, mid, and senior individual-contributor tasks. Each pinned round is a separate practice attempt, not a hiring sequence. Practitioner review and scoring calibration are pending; these exercises do not certify professional or operational competence.",
+  "name": "Agriculture Practice",
+  "areas": [
+    "agriculture"
+  ],
+  "track": "professional",
+  "blurb": "Practice sample traceability, research-resource allocation, and variety-trial analysis.",
+  "rounds": [
+    {
+      "id": "round-1",
+      "title": "Agricultural Field Assistant: Resolve an Uncertain Sample Label",
+      "kind": "incident-simulation",
+      "domain": "agricultural_sampling",
+      "modality": "conversational",
+      "difficulty": "entry",
+      "minutes": 20,
+      "question_id": "agriculture-field-assistant-sample-label",
+      "focus": "Preserve sample identity uncertainty so a plausible correction cannot corrupt a crop trial."
+    },
+    {
+      "id": "round-2",
+      "title": "Agricultural Trial Coordinator: Reconcile a Research Water Budget",
+      "kind": "written-response",
+      "domain": "agricultural_trial_planning",
+      "modality": "written",
+      "difficulty": "mid",
+      "minutes": 30,
+      "question_id": "agriculture-trial-water-allocation",
+      "focus": "Resolve a constrained trial budget while preserving protocol minima and a transparent record of deviations."
+    },
+    {
+      "id": "round-3",
+      "title": "Senior Agricultural Scientist: Challenge a Variety Adoption Claim",
+      "kind": "work-sample-defense",
+      "domain": "agricultural_trial_analysis",
+      "modality": "written",
+      "difficulty": "senior",
+      "minutes": 35,
+      "question_id": "agriculture-senior-variety-trial",
+      "focus": "Separate a one-plot observed advantage from a causal adoption claim and design a stronger agricultural comparison."
+    }
+  ]
+}

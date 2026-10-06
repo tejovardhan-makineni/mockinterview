@@ -1,0 +1,137 @@
+{
+  "schema_version": 1,
+  "revision": 1,
+  "format_id": "work-sample-defense",
+  "review_status": "preview",
+  "provenance": {
+    "authorship": "Original project scenario, AI-assisted draft. Practitioner review and calibration pending.",
+    "license": "MIT"
+  },
+  "minutes": 30,
+  "id": "customer-support-entitlement-recovery",
+  "title": "Senior Support Specialist: Resolve Conflicting Account Entitlements",
+  "track": "professional",
+  "domain": "support_quality",
+  "areas": [
+    "customer_support"
+  ],
+  "modality": "written",
+  "difficulty": "senior",
+  "role_track": "individual_contributor",
+  "tags": [
+    "customer-support",
+    "senior-specialist",
+    "evidence-based-practice",
+    "community-preview"
+  ],
+  "prompt": "You are a senior support specialist at a fictional reporting service. A customer paid for 20 seats but eight users lost access after renewal. The invoice says 20; the admin screen says 12; the renewal event log shows a 12-seat update. A draft reply blames the customer for removing users and promises a refund today. Supplied policy permits support to restore previously verified access using a logged, reversible change; refunds require billing approval. Review the reply and propose a recovery with evidence and ownership.",
+  "blurb": "Reconcile billing and access evidence, recover service within authority and test whether the fault affects other renewals.",
+  "rubric": [
+    {
+      "key": "diagnosis",
+      "label": "Reconcile conflicting evidence",
+      "description": "Separates observed state, actor attribution and unproven root cause.",
+      "weight": 1,
+      "anchors": {
+        "0": "Blames the customer based only on the current admin screen.",
+        "2": "Recognizes a mismatch between invoice and renewal state.",
+        "4": "Uses the audit and roster to reject unsupported customer blame, identifies the integration event as a lead and avoids claiming that every renewal is affected."
+      }
+    },
+    {
+      "key": "recovery",
+      "label": "Bound and verify restoration",
+      "description": "Restores only verified entitlement and handles temporary limits.",
+      "weight": 1,
+      "anchors": {
+        "0": "Grants unlimited access or promises an unapproved refund.",
+        "2": "Restores the verified eight seats under the supplied process.",
+        "4": "Logs the reversible restoration, checks affected-user access, communicates the 48-hour limit and assigns source correction before expiry."
+      }
+    },
+    {
+      "key": "follow_through",
+      "label": "Coordinate durable resolution",
+      "description": "Connects customer updates, escalation and impact investigation.",
+      "weight": 1,
+      "anchors": {
+        "0": "Closes after the temporary fix with no owner.",
+        "2": "Routes mapping investigation to engineering and any credit request to billing.",
+        "4": "Links related cases for verification, gives the customer a specific next update and keeps ownership until entitlement persistence and any approved credit are confirmed."
+      }
+    }
+  ],
+  "reference": {
+    "scenario": "You are a senior support specialist at a fictional reporting service. A customer paid for 20 seats but eight users lost access after renewal. The invoice says 20; the admin screen says 12; the renewal event log shows a 12-seat update. A draft reply blames the customer for removing users and promises a refund today. Supplied policy permits support to restore previously verified access using a logged, reversible change; refunds require billing approval. Review the reply and propose a recovery with evidence and ownership.",
+    "facts": [
+      {
+        "id": "audit",
+        "value": "The customer’s admin audit shows no seat-removal action. A renewal integration wrote the 12-seat update. Eight affected users can be matched to the verified pre-renewal roster.",
+        "reveal_when": "candidate asks about actor attribution or which users are affected"
+      },
+      {
+        "id": "restore",
+        "value": "The temporary restoration expires after 48 hours unless the entitlement source is corrected. It does not change billing or grant seats beyond the verified 20.",
+        "reveal_when": "candidate asks about restoration scope, reversibility or expiry"
+      },
+      {
+        "id": "pattern",
+        "value": "Three other tickets mention access loss immediately after renewal, but their seat counts have not been verified. Engineering can inspect the renewal mapping; billing owns credits.",
+        "reveal_when": "candidate asks about recurrence, broader impact or ownership"
+      }
+    ],
+    "model_points": [
+      "The invoice, original roster and integration audit support a bounded restoration; the current screen alone does not explain cause.",
+      "Temporary access is a recovery measure, not proof that the source mapping is corrected.",
+      "Similar tickets justify an investigation, not an automatic mass entitlement change or a promise of compensation."
+    ],
+    "probes": [
+      {
+        "trigger": "candidate restores seats without an expiry plan",
+        "question": "What happens in 48 hours if the mapping is still wrong?"
+      },
+      {
+        "trigger": "candidate proposes waiting for engineering before restoring access",
+        "question": "What evidence would justify a bounded temporary restoration while investigation continues?"
+      },
+      {
+        "trigger": "candidate withdraws the refund promise",
+        "question": "How would you correct the customer expectation and preserve the billing request without promising its outcome?"
+      }
+    ],
+    "fair_alternatives": [
+      "Waiting briefly for verification is defensible if the roster cannot be trusted; explain the customer impact and decision deadline.",
+      "A phone or written update is acceptable when it accurately states restoration, uncertainty and the next contact time."
+    ],
+    "red_flags": [
+      "Blames the customer based only on the current admin screen.",
+      "Grants unlimited access or promises an unapproved refund.",
+      "Closes after the temporary fix with no owner."
+    ],
+    "follow_ups": [
+      "Write a recovery handoff"
+    ],
+    "assessment_limits": [
+      "Assess only reasoning and communication demonstrated in this fictional task, not real-world professional competence, licensure or hiring readiness. No real action, external verification or tool execution has occurred.",
+      "Credit relevant plain-language reasoning and valid alternatives without requiring experience at a particular employer. Examples from education, volunteering, community work or paid work are equally acceptable when relevant.",
+      "A missing or unasked dimension is not assessed, not automatically a failure. In simulation, use neutral probes and reveal facts only when triggered; in coaching, label assistance and distinguish assisted performance from independent evidence.",
+      "Credit an explicit late correction using the final demonstrated reasoning while retaining the evidence of the earlier mistake; do not force agreement with one exemplar.",
+      "Do not penalize the candidate for a conditional fact that was never revealed. Credit an appropriate request for missing information and a conditional plan; distinguish the candidate’s assumptions from interviewer-supplied facts."
+    ]
+  },
+  "interviewer_notes": "Play the relevant reviewing colleague or stakeholder using the supplied facts only. Start with one focused question, not the full rubric. Ask for clarification before treating an ambiguous answer as wrong. Reveal conditional facts when their stated triggers are met, permit equivalent valid approaches and never invent organizational rules, laws, clinical findings, ratings or missing outcomes. Do not require a polished artifact or specialist software. In a short session prioritize the main decision and one material follow-up; allow silence for thinking, check in neutrally, and leave time for the candidate to correct their recommendation and ask a final question. Distinguish simulation from coaching and record any help given. Assess job-relevant evidence, not accent, confidence, speed, credentials or prestige. This is independent practice for adults 18+ and is not a real professional workflow.",
+  "learning_drills": [
+    {
+      "id": "decision-review",
+      "title": "Write a recovery handoff",
+      "minutes": 5,
+      "prompt": "Write a recovery handoff. Use the fictional facts from this exercise. This is self-guided practice; no model assessment is performed.",
+      "checklist": [
+        "Separate facts from cause hypotheses",
+        "Limit access to verified seats",
+        "Plan for restoration expiry",
+        "Assign source correction and customer updates"
+      ]
+    }
+  ]
+}

@@ -23,11 +23,15 @@ import (
 )
 
 type customPlanner struct {
-	output string
-	err    error
+	request *llm.GenerateRequest
+	output  string
+	err     error
 }
 
-func (p customPlanner) Generate(context.Context, llm.GenerateRequest) (string, error) {
+func (p customPlanner) Generate(_ context.Context, r llm.GenerateRequest) (string, error) {
+	if p.request != nil {
+		*p.request = r
+	}
 	return p.output, p.err
 }
 func (p customPlanner) Stubbed() bool  { return false }
@@ -36,7 +40,7 @@ func (p customPlanner) Info() llm.Info { return llm.Info{Provider: "test", Model
 func TestCustomBriefAndPlannerValidation(t *testing.T) {
 	service := &Service{}
 	brief := CustomBrief{Profession: "Research librarian", Goal: "Practice leading an archive team", Level: "Senior department lead", Questions: "How do you preserve fragile archives?", Structure: "One scenario followed by a leadership discussion"}
-	q, err := service.customQuestion(context.Background(), llm.NewStub(), brief, 15)
+	q, err := service.customQuestion(context.Background(), llm.NewStub(), brief, 15, "management")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -45,6 +49,15 @@ func TestCustomBriefAndPlannerValidation(t *testing.T) {
 	}
 	if q.FormatDefinition == nil || len(q.Rubric) != 3 || !strings.Contains(q.Prompt, brief.Questions) {
 		t.Fatalf("lost custom contract: %+v", q)
+	}
+	plan, _ := json.Marshal(customPlan{Name: "Management interview", Stages: q.FormatDefinition.Stages, Rubric: q.Rubric})
+	var planningRequest llm.GenerateRequest
+	planned, err := service.customQuestion(context.Background(), customPlanner{output: string(plan), request: &planningRequest}, brief, 15, "management")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if planned.RoleTrack != "management" || !strings.Contains(planningRequest.System, "team outcomes through coaching, delegation") || !strings.Contains(planningRequest.Messages[0].Text, `"role_track":"management"`) {
+		t.Fatal("custom planner lost responsibility scope")
 	}
 	settings, _ := json.Marshal(map[string]any{"custom": brief})
 	q = corpus.ApplySessionConfig(q, settings)
@@ -64,7 +77,7 @@ func TestCustomBriefAndPlannerValidation(t *testing.T) {
 		}
 	}
 	for _, planner := range []customPlanner{{err: errors.New("secret provider diagnostic")}, {output: `{}`}, {output: `{"name":"Practice","stages":[],"rubric":[]}`}} {
-		if _, err = service.customQuestion(context.Background(), planner, brief, 15); err == nil || strings.Contains(err.Error(), "secret") {
+		if _, err = service.customQuestion(context.Background(), planner, brief, 15, "management"); err == nil || strings.Contains(err.Error(), "secret") {
 			t.Fatalf("invalid planner response or diagnostic leak: %v", err)
 		}
 	}
@@ -102,7 +115,7 @@ func TestCustomInterviewPersistsPrivatePlanAndReports(t *testing.T) {
 		}
 		return w.Body.Bytes()
 	}
-	const body = `{"custom":{"profession":"Research librarian","goal":"Lead an archive team","level":"Senior department lead","questions":"How do you preserve fragile archives?","structure":"Scenario then leadership"},"minutes":15,"mode":"text"}`
+	const body = `{"custom":{"profession":"Research librarian","goal":"Lead an archive team","level":"Senior department lead","questions":"How do you preserve fragile archives?","structure":"Scenario then leadership"},"minutes":15,"mode":"text","config":{"role_track":"management"}}`
 	service.SetPlanner(customPlanner{err: errors.New("unavailable")})
 	request("POST", "/sessions", body, 503)
 	sessions, _ := repo.ListUserSessions(ctx, u.ID, 50)
@@ -124,6 +137,14 @@ func TestCustomInterviewPersistsPrivatePlanAndReports(t *testing.T) {
 		t.Fatal("private question leaked into public catalog")
 	}
 	frozen, _ := repo.GetSession(ctx, created.ID)
+	var customScope corpus.Question
+	if err := json.Unmarshal(frozen.QuestionSnapshot, &customScope); err != nil {
+		t.Fatal(err)
+	}
+	customScope = corpus.ApplySessionConfig(customScope, frozen.Config)
+	if customScope.Settings.RoleTrack != "management" || customScope.Settings.TargetLevel != "Senior department lead" {
+		t.Fatal("custom role track or free-text seniority lost")
+	}
 	if !strings.Contains(string(frozen.QuestionSnapshot), "How do you preserve fragile archives?") {
 		t.Fatal("original brief was not snapshotted")
 	}

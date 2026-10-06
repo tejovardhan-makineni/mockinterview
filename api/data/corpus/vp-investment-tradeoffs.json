@@ -1,0 +1,119 @@
+{
+  "schema_version": 1,
+  "revision": 1,
+  "format_id": "stakeholder-simulation",
+  "review_status": "preview",
+  "provenance": {
+    "authorship": "Original project scenario, AI-assisted draft. Practitioner review and scoring calibration pending.",
+    "license": "MIT"
+  },
+  "minutes": 45,
+  "id": "vp-investment-tradeoffs",
+  "title": "Vice President: Rebalance Investment Under a New Constraint",
+  "track": "professional",
+  "domain": "investment_governance",
+  "areas": [
+    "management"
+  ],
+  "role_track": "executive",
+  "modality": "conversational",
+  "difficulty": "vp",
+  "tags": [
+    "management",
+    "vp",
+    "investment-governance",
+    "leadership",
+    "community-preview"
+  ],
+  "prompt": "You oversee a $12 million annual change portfolio. Half is already spent; $6m remains. A revised forecast reduces the remaining allowance to $4.5m. Teams propose cutting every remaining project by 25%. The four remaining commitments are $2m platform renewal, $1.5m service expansion, $1m quality recovery and $1.5m internal automation. Discuss your recommendation with the finance partner (the AI).",
+  "blurb": "Reconcile a portfolio choice",
+  "rubric": [
+    {
+      "key": "financial_reasoning",
+      "label": "Separate cost categories",
+      "description": "Uses remaining controllable costs rather than headline totals.",
+      "weight": 1,
+      "anchors": {
+        "0": "Treats spent money as available or assumes all remaining costs scale linearly.",
+        "2": "Identifies the $1.5m reduction and asks about commitments.",
+        "4": "Separates sunk, committed, pause and avoidable costs; reconciles an affordable remaining plan while stating where a partial allocation may fail to deliver value."
+      }
+    },
+    {
+      "key": "portfolio_judgment",
+      "label": "Prioritize organizational outcomes",
+      "description": "Uses evidence and consequences across divisions.",
+      "weight": 1,
+      "anchors": {
+        "0": "Cuts 25% indiscriminately without checking viability.",
+        "2": "Compares impact and urgency across projects.",
+        "4": "Compares customer obligations, quality risk, uncertainty and option value with consistent criteria; explains specific retained/deferred outcomes and tests sensitivity to the assumptions."
+      }
+    },
+    {
+      "key": "governance",
+      "label": "Own the decision and review",
+      "description": "Creates clear authorization and feedback.",
+      "weight": 1,
+      "anchors": {
+        "0": "Delegates the entire decision to arithmetic or hides tradeoffs from the board.",
+        "2": "Consults owners and communicates the allocation.",
+        "4": "Obtains viable options from accountable owners, verifies costs with finance, records the authorized decision and establishes a review trigger if benefits, risk or commitments change."
+      }
+    }
+  ],
+  "reference": {
+    "scenario": "You oversee a $12 million annual change portfolio. Half is already spent; $6m remains. A revised forecast reduces the remaining allowance to $4.5m. Teams propose cutting every remaining project by 25%. The four remaining commitments are $2m platform renewal, $1.5m service expansion, $1m quality recovery and $1.5m internal automation. Discuss your recommendation with the finance partner (the AI).",
+    "facts": [
+      {
+        "id": "fact-1",
+        "value": "Platform renewal has a $0.7m non-cancellable supplier commitment; service expansion can pause after a $0.3m customer handoff. Quality recovery addresses a documented recurring defect; automation benefits have not yet been demonstrated in a pilot.",
+        "reveal_when": "candidate asks about sunk costs, commitments or evidence"
+      },
+      {
+        "id": "fact-2",
+        "value": "The board approved the reduced allowance but has not chosen projects. The finance partner can help verify costs; project owners must validate the effect of partial funding.",
+        "reveal_when": "candidate asks about governance or reliability of cost assumptions"
+      }
+    ],
+    "model_points": [
+      "Separates sunk, committed, pause and avoidable costs; reconciles an affordable remaining plan while stating where a partial allocation may fail to deliver value.",
+      "Compares customer obligations, quality risk, uncertainty and option value with consistent criteria; explains specific retained/deferred outcomes and tests sensitivity to the assumptions.",
+      "Obtains viable options from accountable owners, verifies costs with finance, records the authorized decision and establishes a review trigger if benefits, risk or commitments change."
+    ],
+    "probes": [
+      {
+        "trigger": "candidate proposes uniform cuts",
+        "question": "Which project might become unviable at 75% funding?"
+      },
+      {
+        "trigger": "candidate cancels platform renewal for $2m savings",
+        "question": "Which portion is actually avoidable?"
+      },
+      {
+        "trigger": "candidate revises a savings number",
+        "question": "How will that change be reflected in the authorized portfolio?"
+      }
+    ],
+    "fair_alternatives": [
+      "Multiple allocations are acceptable; no preferred project is an answer key.",
+      "Renegotiation is an option to investigate, not an assumed release from a non-cancellable commitment."
+    ],
+    "assessment_limits": "Assess only the decisions and reasoning demonstrated in this fictional exercise. No hiring-readiness, personality, legal compliance or workplace performance claim follows from this score. A valid alternative can earn full credit. Unrevealed conditional facts must not be assumed known or required for credit; credit asking for needed information and a conditional plan."
+  },
+  "interviewer_notes": "You are the counterpart named in the prompt. If this is a written review, remain the hiring interviewer while the candidate reads and writes. Let the candidate finish, including thinking and self-correction. Answer only supplied facts when their reveal condition is met; otherwise say the information is unknown. Use neutral probes after a completed answer, one at a time. Do not prescribe the rubric as a spoken checklist. Accept relevant examples from work, education and community leadership. Do not request private employee records, infer protected traits, invent employment rules or promise a real organizational outcome. Simulation gives no answer before assessment; coaching may offer labeled assistance.",
+  "learning_drills": [
+    {
+      "id": "decision-practice",
+      "title": "Reconcile a portfolio choice",
+      "prompt": "Write an allocation totaling at most $4.5m, distinguishing commitments, change costs and deferred outcomes. This is self-guided practice with no automated assessment.",
+      "minutes": 7,
+      "checklist": [
+        "Do not reuse sunk money",
+        "Check partial-project viability",
+        "Explain tradeoffs",
+        "Set a review trigger"
+      ]
+    }
+  ]
+}

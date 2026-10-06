@@ -1,6 +1,6 @@
 {
   "id": "business-operations-practice",
-  "revision": 1,
+  "revision": 2,
   "review_status": "preview",
   "source_note": "Original community practice path. Each round is a separate attempt. Content is an AI-assisted preview awaiting practitioner review and calibration; this is not an employer process or a hiring-readiness certification.",
   "name": "Business Operations Practice",
@@ -38,10 +38,11 @@
       "kind": "work-sample-defense",
       "domain": "process_improvement",
       "modality": "written",
-      "difficulty": "mid",
+      "difficulty": "manager",
       "minutes": 30,
       "question_id": "operations-backlog-redesign",
-      "focus": "Design a practical backlog pilot that improves completed outcomes and waiting time while reducing rework."
+      "focus": "Design a practical backlog pilot that improves completed outcomes and waiting time while reducing rework.",
+      "role_track": "management"
     },
     {
       "id": "round-4",

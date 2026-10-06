@@ -231,5 +231,7 @@
     ],
     "reference_answer": "A strong answer recognizes ranking as the crux and reaches for a sorted set / skip-list giving O(log N) update and rank, explaining why a SQL count-based rank does not scale. It keeps a durable source of truth for scores, serves top-N/rank/around-me from the in-memory index, caches top-N, and rotates time-windowed boards. It handles ties by encoding a timestamp into the score, plans to shard huge boards with approximate ranks for the tail, and has a rebuild/sync story (CDC or replay) between the durable store and the index, plus stampede protection on the top-N cache."
   },
-  "interviewer_notes": "This is a mid-level question, so reward a clean, correct core before pushing scale. The single most important probe is why a naive SQL rank query fails and why a sorted set / skip-list is the right structure — do not let them hand-wave 'just index it'. If they mention Redis/cache, probe rotation and top-N stampede. If they add a durable store, hit the CDC/Debezium sync-and-rebuild probe. Stretch strong candidates on ties, sharding a board too big for one node, and approximate ranks for the long tail."
+  "interviewer_notes": "This is a mid-level question, so reward a clean, correct core before pushing scale. The single most important probe is why a naive SQL rank query fails and why a sorted set / skip-list is the right structure — do not let them hand-wave 'just index it'. If they mention Redis/cache, probe rotation and top-N stampede. If they add a durable store, hit the CDC/Debezium sync-and-rebuild probe. Stretch strong candidates on ties, sharding a board too big for one node, and approximate ranks for the long tail.",
+  "role_track": "individual_contributor",
+  "revision": 2
 }

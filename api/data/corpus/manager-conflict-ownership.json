@@ -1,0 +1,119 @@
+{
+  "schema_version": 1,
+  "revision": 1,
+  "format_id": "stakeholder-simulation",
+  "review_status": "preview",
+  "provenance": {
+    "authorship": "Original project scenario, AI-assisted draft. Practitioner review and scoring calibration pending.",
+    "license": "MIT"
+  },
+  "minutes": 30,
+  "id": "manager-conflict-ownership",
+  "title": "Experienced Manager: Resolve a Cross-Team Ownership Conflict",
+  "track": "professional",
+  "domain": "team_conflict",
+  "areas": [
+    "management"
+  ],
+  "role_track": "management",
+  "modality": "conversational",
+  "difficulty": "manager",
+  "tags": [
+    "management",
+    "manager",
+    "team-conflict",
+    "leadership",
+    "community-preview"
+  ],
+  "prompt": "Support and Operations both say the other team owns correcting failed customer imports. Support can explain the customer impact but cannot change import jobs. Operations can rerun jobs but lacks access to customer messages. Twelve cases are waiting, and two customers have contacted both teams three times. Facilitate a conversation with the Operations lead (the AI) and propose a workable handoff.",
+  "blurb": "Define a handoff contract",
+  "rubric": [
+    {
+      "key": "triage",
+      "label": "Differentiate blocked work",
+      "description": "Uses the case facts to avoid one undifferentiated queue.",
+      "weight": 1,
+      "anchors": {
+        "0": "Sends all 12 cases to the other team without checking missing inputs.",
+        "2": "Separates customer follow-up from technical reruns.",
+        "4": "Distinguishes missing-file, reproducible-error and undiagnosed cases, requests the evidence needed for each and avoids promising a rerun solves every case."
+      }
+    },
+    {
+      "key": "ownership",
+      "label": "Agree a handoff contract",
+      "description": "Makes responsibilities and acceptance criteria explicit.",
+      "weight": 1,
+      "anchors": {
+        "0": "Declares shared ownership without a named next-action owner.",
+        "2": "Names Support for contact and Operations for reruns.",
+        "4": "Agrees a case owner, minimum evidence, acceptance/rejection reason and escalation path; preserves one coherent customer update across team boundaries."
+      }
+    },
+    {
+      "key": "relationship",
+      "label": "Resolve disagreement constructively",
+      "description": "Balances immediate relief and process learning.",
+      "weight": 1,
+      "anchors": {
+        "0": "Blames one team or imposes an unfunded promise.",
+        "2": "Acknowledges both constraints and agrees near-term actions.",
+        "4": "Negotiates a capacity-aware plan for today, checks aged/repeated-contact cases and schedules a joint review of handoff failures with outcome measures."
+      }
+    }
+  ],
+  "reference": {
+    "scenario": "Support and Operations both say the other team owns correcting failed customer imports. Support can explain the customer impact but cannot change import jobs. Operations can rerun jobs but lacks access to customer messages. Twelve cases are waiting, and two customers have contacted both teams three times. Facilitate a conversation with the Operations lead (the AI) and propose a workable handoff.",
+    "facts": [
+      {
+        "id": "fact-1",
+        "value": "Six cases are missing source files, four have a reproducible import error and two have not been diagnosed. Both teams can use a shared case record, but customer contact remains with Support.",
+        "reveal_when": "candidate asks about case categories or available tools"
+      },
+      {
+        "id": "fact-2",
+        "value": "Operations has capacity for four reruns today if the source file and error evidence are attached. Support can complete six customer follow-ups today.",
+        "reveal_when": "candidate asks about immediate capacity or minimum handoff evidence"
+      }
+    ],
+    "model_points": [
+      "Distinguishes missing-file, reproducible-error and undiagnosed cases, requests the evidence needed for each and avoids promising a rerun solves every case.",
+      "Agrees a case owner, minimum evidence, acceptance/rejection reason and escalation path; preserves one coherent customer update across team boundaries.",
+      "Negotiates a capacity-aware plan for today, checks aged/repeated-contact cases and schedules a joint review of handoff failures with outcome measures."
+    ],
+    "probes": [
+      {
+        "trigger": "candidate assigns the same treatment to all cases",
+        "question": "Which cases can actually be rerun today?"
+      },
+      {
+        "trigger": "candidate suggests a joint inbox only",
+        "question": "Who owns the next action when a case is incomplete?"
+      },
+      {
+        "trigger": "candidate changes ownership after new facts",
+        "question": "How will the two teams and customer hear the revised plan?"
+      }
+    ],
+    "fair_alternatives": [
+      "A short daily triage session is valid if it ends in named ownership rather than repeated discussion.",
+      "A temporary coordinator may help without removing each team’s decision authority."
+    ],
+    "assessment_limits": "Assess only the decisions and reasoning demonstrated in this fictional exercise. No hiring-readiness, personality, legal compliance or workplace performance claim follows from this score. A valid alternative can earn full credit. Unrevealed conditional facts must not be assumed known or required for credit; credit asking for needed information and a conditional plan."
+  },
+  "interviewer_notes": "You are the counterpart named in the prompt. If this is a written review, remain the hiring interviewer while the candidate reads and writes. Let the candidate finish, including thinking and self-correction. Answer only supplied facts when their reveal condition is met; otherwise say the information is unknown. Use neutral probes after a completed answer, one at a time. Do not prescribe the rubric as a spoken checklist. Accept relevant examples from work, education and community leadership. Do not request private employee records, infer protected traits, invent employment rules or promise a real organizational outcome. Simulation gives no answer before assessment; coaching may offer labeled assistance.",
+  "learning_drills": [
+    {
+      "id": "decision-practice",
+      "title": "Define a handoff contract",
+      "prompt": "Write five required fields for the shared case record and the rule for accepting a handoff. This is self-guided practice with no automated assessment.",
+      "minutes": 7,
+      "checklist": [
+        "Name the next-action owner",
+        "Record missing inputs",
+        "Separate customer and technical responsibility",
+        "Add an escalation trigger"
+      ]
+    }
+  ]
+}
