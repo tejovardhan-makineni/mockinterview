@@ -16,11 +16,9 @@ import (
 	personapkg "github.com/tejo/mockinterview-api/internal/persona"
 )
 
-// Phases + NextPhase describe the interview's intended arc and are a SEAM for
-// explicit phase progression. Today the relay seeds the prompt with the "intro"
-// phase and lets the Gemini Live model pace the conversation naturally within
-// it (using the per-phase objectives below as guidance), so NextPhase is not yet
-// driven in production — don't assume the stored session phase advances.
+// Phases + NextPhase are legacy fine-grained planning helpers. Runtime progress
+// follows SectionPlan, with semantic advances and scheduled timing cues. The
+// relay persists that section as "section:<id>"; it does not drive NextPhase.
 var Phases = []string{
 	"intro", "requirements", "estimation", "hld", "api", "lld",
 	"deepdive", "scaling", "reliability", "observability", "security", "wrap",
@@ -93,8 +91,8 @@ var domainGuidance = map[string]string{
 
 // Section is one phase of the sectioned interview. The interview runs as ONE
 // continuous voice session, but the interviewer's "brain" specializes per
-// section: the relay drives progression on time and the SystemPrompt lays out
-// the whole plan so the model knows the arc and how to behave in each part.
+// section: the relay combines semantic decisions with time boundaries, and the
+// SystemPrompt lays out the ordered plan so the model knows the interview arc.
 type Section struct {
 	Share    float64
 	ID       string
@@ -288,14 +286,21 @@ func NextTurn(ctx context.Context, ai llm.Client, model, system string, history 
 		// Keep kickoff aligned with the authored format instead of adding rapport.
 		history = []llm.Message{{Role: "user", Text: openingInstruction}}
 	}
-	return ai.Generate(ctx, llm.GenerateRequest{
+	reply, err := ai.Generate(ctx, llm.GenerateRequest{
 		Purpose:     llm.PurposeDirector,
 		Model:       model,
-		System:      system,
+		System:      system + "\nTEXT DELIVERY: If the delivery decision is to wait silently, return exactly [[WAIT]] with no other text. Otherwise return only the natural interviewer utterance. Never narrate waiting. This token is transport control, not speech.",
 		Messages:    history,
 		Temperature: 0.7,
 		MaxTokens:   200,
 	})
+	if err != nil {
+		return "", err
+	}
+	if strings.Contains(reply, textIdleSilence) {
+		return "", nil
+	}
+	return reply, nil
 }
 
 // NextPhase returns the phase after the given one (or "wrap" at the end),

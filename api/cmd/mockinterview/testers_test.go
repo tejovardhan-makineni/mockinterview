@@ -72,7 +72,7 @@ func TestTesterAdminAPIAndHostedAccess(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	app := &App{Cfg: &config.Config{Hosted: true, JWTSecret: key, JWTTTL: time.Hour, LLMProvider: "gemini", LLMModel: "test", HostedDailyStartLimit: 1}, Store: repo, Corpus: cat, LLM: llm.NewStub()}
+	app := &App{Cfg: &config.Config{Hosted: true, JWTSecret: key, JWTTTL: time.Hour, LLMProvider: "gemini", LLMModel: "test", HostedDailyStartLimit: 2}, Store: repo, Corpus: cat, LLM: llm.NewStub()}
 	router := chi.NewRouter()
 	app.Routes(router)
 	request := func(token, method, path, body string, want int) *httptest.ResponseRecorder {

@@ -3,6 +3,7 @@ import { useState } from "react";
 import dynamic from "next/dynamic";
 import type { Modality } from "@/lib/types";
 import type { WorkspaceSnapshot } from "@/lib/features/interview";
+import { describeDiagram } from "@/lib/workspaceObservation";
 import "@excalidraw/excalidraw/index.css";
 const Excalidraw = dynamic(
   async () => {
@@ -46,7 +47,12 @@ export function Workspace({ modality, initial, onChange, onContent }: Props) {
   const [language, setLanguage] = useState(
     String(initial?.data?.language ?? "python"),
   );
-  const [plain, setPlain] = useState(false);
+  const [plain, setPlain] = useState(
+    () =>
+      modality === "system_design" &&
+      !!initial?.content &&
+      !Array.isArray(initial.data?.elements),
+  );
   const update = (content: string, data?: Record<string, unknown>) => {
     setText(content);
     onContent?.(content);
@@ -66,10 +72,10 @@ export function Workspace({ modality, initial, onChange, onContent }: Props) {
   };
   if (modality === "system_design" && !plain)
     return (
-      <div className="flex h-full flex-col">
-        <div className="flex items-center justify-between border-b border-[var(--color-line)] px-4 py-1 text-xs">
+      <div className="flex h-full min-w-0 flex-col">
+        <div className="flex shrink-0 flex-wrap items-center justify-between gap-x-3 gap-y-1 border-b border-[var(--color-line)] px-3 py-2 text-xs sm:px-4">
           <span>Whiteboard · diagram and connections are saved</span>
-          <button onClick={() => setPlain(true)} className="underline">
+          <button onClick={() => setPlain(true)} className="min-h-8 underline">
             Use text description
           </button>
         </div>
@@ -100,9 +106,9 @@ export function Workspace({ modality, initial, onChange, onContent }: Props) {
     );
   if (modality === "coding" && !plain)
     return (
-      <div className="flex h-full flex-col">
-        <div className="flex items-center justify-between gap-4 border-b border-[var(--color-line)] px-4 py-2">
-          <label className="flex items-center gap-3 text-xs">
+      <div className="flex h-full min-w-0 flex-col">
+        <div className="flex shrink-0 flex-wrap items-center justify-between gap-x-3 gap-y-1 border-b border-[var(--color-line)] px-3 py-2 sm:px-4">
+          <label className="flex min-w-0 items-center gap-2 text-xs">
             Language
             <select
               value={language}
@@ -110,7 +116,7 @@ export function Workspace({ modality, initial, onChange, onContent }: Props) {
                 setLanguage(e.target.value);
                 update(text, { language: e.target.value });
               }}
-              className="rounded border border-[var(--color-line)] bg-[var(--color-panel)] px-2"
+              className="min-w-0 max-w-40 rounded border border-[var(--color-line)] bg-[var(--color-panel)] px-2"
             >
               {[
                 "python",
@@ -125,11 +131,14 @@ export function Workspace({ modality, initial, onChange, onContent }: Props) {
               ))}
             </select>
           </label>
-          <button onClick={() => setPlain(true)} className="text-xs underline">
+          <button
+            onClick={() => setPlain(true)}
+            className="min-h-8 text-xs underline"
+          >
             Plain text editor
           </button>
         </div>
-        <p className="px-4 py-2 text-xs text-[var(--color-muted)]">
+        <p className="shrink-0 px-3 py-2 text-xs text-[var(--color-muted)] sm:px-4">
           Code review interview. Execution is unavailable; explain your tests
           and expected results.
         </p>
@@ -145,6 +154,7 @@ export function Workspace({ modality, initial, onChange, onContent }: Props) {
               scrollBeyondLastLine: false,
               accessibilitySupport: "on",
               ariaLabel: "Your interview solution",
+              automaticLayout: true,
             }}
           />
         </div>
@@ -176,34 +186,5 @@ export function Workspace({ modality, initial, onChange, onContent }: Props) {
   );
 }
 export function summarizeDiagram(elements: readonly unknown[]): string {
-  const live = (
-    elements as {
-      id: string;
-      type: string;
-      text?: string;
-      isDeleted?: boolean;
-      startBinding?: { elementId: string } | null;
-      endBinding?: { elementId: string } | null;
-      containerId?: string | null;
-    }[]
-  ).filter((e) => !e.isDeleted);
-  const names = new Map<string, string>();
-  for (const e of live)
-    if (e.text) {
-      names.set(e.id, e.text);
-      if (e.containerId) names.set(e.containerId, e.text);
-    }
-  const labels = [...new Set(names.values())];
-  const links = live
-    .filter((e) => e.type === "arrow")
-    .map(
-      (e) =>
-        (names.get(e.startBinding?.elementId ?? "") ?? "unlabeled component") +
-        " → " +
-        (names.get(e.endBinding?.elementId ?? "") ?? "unlabeled component"),
-    );
-  return (
-    (labels.length ? "Components: " + labels.join(", ") : "") +
-    (links.length ? "\nConnections: " + links.join("; ") : "")
-  );
+  return describeDiagram(elements);
 }

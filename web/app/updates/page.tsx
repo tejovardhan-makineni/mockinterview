@@ -17,6 +17,25 @@ export default function Updates() {
         updates and verified hosted releases are labeled separately.
       </ProjectHeading>
       <article className={styles.release}>
+        <time dateTime="2026-10-05">October 5, 2026</time>
+        <div>
+          <span className={styles.releaseState}>Source update · beta</span>
+          <h3>A clearer path from setup to feedback</h3>
+          <p>
+            Compact device checks show what is ready and what still needs
+            attention. During interviews, microphone, connection and sound
+            status stay visible. Reports keep feedback tucked into a short
+            expandable check-in.
+          </p>
+          <p className="mt-3">
+            Gemini 3.8 Flash is the new default. Standard accounts get one free
+            interview, with a shared capacity of 200 funded interviews per UTC
+            day. Beta status is visible across web, macOS, Ubuntu and Windows.
+            These source changes require deployment or a new desktop build.
+          </p>
+        </div>
+      </article>
+      <article className={styles.release}>
         <div>
           <span className={styles.releaseState}>
             October 4, 2026 · project release
@@ -25,8 +44,8 @@ export default function Updates() {
         <div>
           <h3>A more open, more personal practice experience</h3>
           <p>
-            This project update makes it easier to discover, run and
-            contribute to mockinterview.
+            This project update makes it easier to discover, run and contribute
+            to mockinterview.
           </p>
           <ul>
             <li>
@@ -38,7 +57,9 @@ export default function Updates() {
               optional persistent PostgreSQL.
             </li>
             <li>
-              One funded interview per day and unlimited personal-key practice.
+              At this release: one funded interview per day and unlimited
+              personal-key practice. The October 5 source update changes the
+              free allowance.
             </li>
             <li>
               Custom interviews built from your profession, goals, level,

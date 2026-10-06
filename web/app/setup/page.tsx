@@ -74,6 +74,14 @@ function Setup() {
   const [minutes, setMinutes] = useState(30);
   const [now, setNow] = useState(() => Date.now());
   const [stage, setStage] = useState<"setup" | "check">("setup");
+  const stageHeading = useRef<HTMLHeadingElement>(null);
+  const previousStage = useRef(stage);
+  useEffect(() => {
+    if (previousStage.current === stage) return;
+    previousStage.current = stage;
+    stageHeading.current?.focus({ preventScroll: true });
+    stageHeading.current?.scrollIntoView?.({ block: "start" });
+  }, [stage]);
   const [user, setUser] = useState<User | null>(null);
   const {
     pending,
@@ -106,6 +114,12 @@ function Setup() {
     mood: "listening",
   });
   const file = useRef<HTMLInputElement>(null);
+  const validationGeneration = useRef(0);
+  function invalidateKey() {
+    validationGeneration.current++;
+    setKeyValid(false);
+    setNotice("");
+  }
   const ready = useCallback((value: boolean) => setDeviceReady(value), []);
   useEffect(() => {
     let alive = true;
@@ -227,15 +241,22 @@ function Setup() {
     };
   }, [qid, packId, roundId, draftKey, isCustom]);
   useEffect(() => {
-    if (!usage?.next_start_at && !usage?.next_funded_at) return;
+    if (
+      !usage?.next_start_at &&
+      !usage?.next_funded_at &&
+      !usage?.global_reset_at
+    )
+      return;
     let cancelled = false;
     let refreshed = false;
     const timer = window.setInterval(() => {
       const time = Date.now();
       setNow(time);
-      const dates = [usage.next_start_at, usage.next_funded_at].filter(
-        Boolean,
-      ) as string[];
+      const dates = [
+        usage.next_start_at,
+        usage.next_funded_at,
+        usage.global_reset_at,
+      ].filter(Boolean) as string[];
       if (
         !refreshed &&
         dates.some((value) => new Date(value).getTime() <= time)
@@ -255,21 +276,68 @@ function Setup() {
       cancelled = true;
       window.clearInterval(timer);
     };
-  }, [usage?.next_start_at, usage?.next_funded_at]);
+  }, [usage?.next_start_at, usage?.next_funded_at, usage?.global_reset_at]);
   const dailyBlocked =
     !!usage?.next_start_at && new Date(usage.next_start_at).getTime() > now;
-  const blocked =
+  const projectBlocked =
+    funding === "platform" && usage?.global_daily_remaining === 0;
+  const freeInterviewUsed =
     !usage?.local_unlimited &&
     !usage?.tester_unlimited &&
-    funding === "platform" &&
-    (dailyBlocked ||
-      (funding === "platform" && usage?.funded_available === false));
-  const availableAt = Math.max(
-    new Date(usage?.next_start_at ?? 0).getTime() || 0,
-    funding === "platform"
-      ? new Date(usage?.next_funded_at ?? 0).getTime() || 0
-      : 0,
-  );
+    (usage?.free_interview_used === true ||
+      (usage?.funded_available === false && !projectBlocked));
+  const blocked =
+    projectBlocked ||
+    (!usage?.local_unlimited &&
+      !usage?.tester_unlimited &&
+      funding === "platform" &&
+      (dailyBlocked || freeInterviewUsed || usage?.funded_available === false));
+  const allowanceMessage = IS_DESKTOP
+    ? "Your key · no app interview limit. Provider charges apply."
+    : !user
+      ? "Sign in for your one free interview."
+      : !usage
+        ? "Checking your practice allowance…"
+        : funding === "byok"
+          ? "Your key · unlimited interviews. Provider charges apply."
+          : usage.local_unlimited
+            ? "Local installation · no product practice limit."
+            : freeInterviewUsed
+              ? "Your free interview has been used. Add your own API key to keep practicing."
+              : projectBlocked
+                ? "Today’s free interview capacity is full." +
+                  (usage.global_reset_at
+                    ? " Available again " + date(usage.global_reset_at) + "."
+                    : " Please try again tomorrow.")
+                : usage.tester_unlimited
+                  ? "Tester access · unlimited interviews within daily project capacity."
+                  : dailyBlocked
+                    ? "Next available: " + date(usage.next_start_at)
+                    : "Your one free interview is available.";
+  const startBlockers = [
+    ...(!usage ? ["Wait for your practice allowance to load."] : []),
+    ...(pending?.total ? ["Complete your previous interview’s check-in."] : []),
+    ...(blocked ? [allowanceMessage] : []),
+    ...(user?.policies_required
+      ? ["Review the current terms to continue."]
+      : []),
+    ...(!IS_DESKTOP && user?.email_verified === false && !usage?.local_unlimited
+      ? ["Verify your email before starting."]
+      : []),
+    ...(mode === "voice" && !deviceReady
+      ? ["Check your microphone, or choose a text conversation."]
+      : []),
+    ...(mode === "voice" && !voiceAcknowledged
+      ? ["Confirm the voice privacy checkbox below your device checks."]
+      : []),
+    ...(funding === "byok" && !keyValid
+      ? [
+          provider === "gemini" && !paidBilling
+            ? "Add your API key, confirm paid billing, and check the model connection."
+            : "Add your API key and check the model connection.",
+        ]
+      : []),
+  ];
   const returnTo = isCustom
     ? "/setup?custom=1"
     : packId
@@ -321,6 +389,7 @@ function Setup() {
     }
   }
   async function validate() {
+    const own = ++validationGeneration.current;
     setBusy(true);
     setError("");
     try {
@@ -331,6 +400,7 @@ function Setup() {
         mode,
         paid_billing_confirmed: paidBilling,
       });
+      if (own !== validationGeneration.current) return;
       setKeyValid(r.valid);
       if (r.valid && r.model) setModel(r.model);
       if (r.valid)
@@ -343,6 +413,7 @@ function Setup() {
           : "The connection could not be verified.",
       );
     } catch (e) {
+      if (own !== validationGeneration.current) return;
       setKeyValid(false);
       setError(errorMessage(e));
     } finally {
@@ -350,7 +421,7 @@ function Setup() {
     }
   }
   async function start() {
-    if (!question) return;
+    if (!question || busy || startBlockers.length > 0) return;
     setBusy(true);
     setError("");
     try {
@@ -385,7 +456,24 @@ function Setup() {
         setError(
           "Complete the required check-in for your previous interview before starting another. Your choices here are kept when you use the check-in link.",
         );
-      } else setError(errorMessage(e));
+      } else {
+        setError(errorMessage(e));
+        if (
+          e instanceof ApiError &&
+          (e.code === "daily_capacity_reached" ||
+            e.code === "free_interview_used")
+        ) {
+          // Another interview may claim the last place after the check. Show
+          // the server's current allowance instead of leaving a stale start CTA.
+          await api
+            .getUsage()
+            .then((value) => {
+              setUsage(value);
+              setNow(Date.now());
+            })
+            .catch(() => {});
+        }
+      }
       setBusy(false);
     }
   }
@@ -424,19 +512,21 @@ function Setup() {
         />
       )}
       <div className="mt-7 flex flex-wrap items-start justify-between gap-4">
-        <div>
+        <div className="min-w-0">
           <p className="eyebrow">
             {stage === "setup" ? "01 · Make it yours" : "02 · A quick check"}
           </p>
-          <h1 className="page-title mt-3">
-            {stage === "setup"
-              ? "A little preparation goes a long way."
-              : "Ready when you are."}
+          <h1
+            ref={stageHeading}
+            tabIndex={-1}
+            className="page-title mt-3 scroll-mt-6"
+          >
+            {stage === "setup" ? "Set up your interview" : "Check your devices"}
           </h1>
           <p className="mt-3 text-[var(--color-muted)]">
             {stage === "setup"
-              ? "Choose your level and pace. Everything else is optional."
-              : "Check your connection and devices before the interview begins."}
+              ? "Choose your level and time. Personalize the rest if you’d like."
+              : "Verify your microphone, check your sound, and start when you’re ready."}
           </p>
         </div>
         <Badge>
@@ -445,17 +535,24 @@ function Setup() {
             : "Community preview"}
         </Badge>
       </div>
-      <div className="mt-8 grid gap-6 lg:grid-cols-[1.7fr_1fr]">
-        <div className="space-y-5">
-          <Panel className="p-6 sm:p-7">
+      <div className="mt-8 grid min-w-0 gap-5 lg:grid-cols-[minmax(0,1.7fr)_minmax(0,1fr)] lg:gap-6">
+        <div className="min-w-0 space-y-5">
+          <Panel className="p-4 sm:p-6 lg:p-7">
             <p className="eyebrow">
               {pretty(question.areas?.[0] ?? question.track)} ·{" "}
               {pretty(question.domain)}
             </p>
             <h2 className="mt-3 text-xl font-semibold">{question.title}</h2>
-            <p className="mt-3 whitespace-pre-wrap text-sm text-[var(--color-muted)]">
-              {question.prompt}
-            </p>
+            {stage === "setup" ? (
+              <p className="mt-3 whitespace-pre-wrap text-sm text-[var(--color-muted)]">
+                {question.prompt}
+              </p>
+            ) : (
+              <details className="mt-3 text-sm text-[var(--color-muted)]">
+                <summary>Review your opening brief · {minutes} minutes</summary>
+                <p className="mt-2 whitespace-pre-wrap">{question.prompt}</p>
+              </details>
+            )}
             {question.format_name && (
               <p className="mt-4 text-xs text-[var(--color-muted)]">
                 Interview format · {question.format_name}
@@ -721,7 +818,7 @@ function Setup() {
                       }}
                     />
                     {resumeName && (
-                      <label className="mt-4 flex items-center gap-3 text-sm">
+                      <label className="mt-4 flex min-w-0 items-start gap-3 text-sm">
                         <input
                           type="checkbox"
                           checked={cfg.include_resume === true}
@@ -729,7 +826,9 @@ function Setup() {
                             setCfg({ ...cfg, include_resume: e.target.checked })
                           }
                         />
-                        Use {resumeName} for this interview
+                        <span className="min-w-0 break-words">
+                          Use {resumeName} for this interview
+                        </span>
                       </label>
                     )}
                     <p className="mt-2 text-xs text-[var(--color-muted)]">
@@ -749,7 +848,7 @@ function Setup() {
                       onChange={(e) => {
                         setMode(e.target.value as "voice" | "text");
                         setVoiceAcknowledged(false);
-                        setKeyValid(false);
+                        invalidateKey();
                       }}
                       className="field-select"
                     >
@@ -777,14 +876,14 @@ function Setup() {
                   onCamera={setCamera}
                 />
                 {mode === "voice" && (
-                  <label className="mt-5 flex items-start gap-3 text-sm">
+                  <label className="mt-4 flex items-start gap-3 rounded-lg bg-[var(--color-panel-2)] p-3 text-xs">
                     <input
                       className="mt-1"
                       type="checkbox"
                       checked={voiceAcknowledged}
                       onChange={(e) => setVoiceAcknowledged(e.target.checked)}
                     />
-                    <span>
+                    <span className="min-w-0">
                       {IS_DESKTOP
                         ? "When I start, my microphone audio will stream through this local app to Google Gemini, and my transcript will be saved on this computer."
                         : "When I start, my microphone audio will stream to mockinterview and Google Gemini for this AI conversation, and my transcript will be saved."}{" "}
@@ -802,7 +901,8 @@ function Setup() {
                   </label>
                 )}
                 <Button
-                  className="mt-6"
+                  className="mt-4"
+                  size="sm"
                   variant="ghost"
                   onClick={() => setStage("setup")}
                 >
@@ -813,7 +913,7 @@ function Setup() {
           </Panel>
           {error && <ErrorNotice message={error} />}
           {user && stage === "setup" && (
-            <Panel className="p-6">
+            <Panel className="p-4 sm:p-6">
               <AnalyticsSettings userId={user.id} compact={IS_DESKTOP} />
             </Panel>
           )}
@@ -825,13 +925,13 @@ function Setup() {
             </Link>
           </p>
         </div>
-        <aside className="space-y-5">
-          <Panel className="p-6">
+        <aside className="min-w-0 space-y-5">
+          <Panel className="p-4 sm:p-6">
             <div className="flex items-center gap-4">
               <div className="h-20 w-20 shrink-0">
                 <Avatar3D faceId={cfg.face_id} drive={drive} />
               </div>
-              <div>
+              <div className="min-w-0">
                 <h2 className="font-semibold">
                   {interviewerName(cfg.face_id)}
                 </h2>
@@ -866,14 +966,14 @@ function Setup() {
                     value={funding}
                     onChange={(e) => {
                       setFunding(e.target.value as "platform" | "byok");
-                      setKeyValid(false);
+                      invalidateKey();
                     }}
                     className="field-select"
                   >
                     <option value="platform">
                       {usage?.local_unlimited
                         ? "Local model / demo"
-                        : "Free · Gemini 2.5 Flash"}
+                        : "Free · Gemini 3.8 Flash"}
                     </option>
                     <option value="byok">Use my model & API key</option>
                   </select>
@@ -888,7 +988,7 @@ function Setup() {
                         setProvider(e.target.value);
                         setModel("");
                         setPaidBilling(false);
-                        setKeyValid(false);
+                        invalidateKey();
                         if (e.target.value !== "gemini") setMode("text");
                       }}
                       className="field-select"
@@ -910,7 +1010,7 @@ function Setup() {
                       onChange={(e) => {
                         setKey(e.target.value);
                         setPaidBilling(false);
-                        setKeyValid(false);
+                        invalidateKey();
                       }}
                       placeholder="Your provider API key"
                     />
@@ -920,7 +1020,7 @@ function Setup() {
                       value={model}
                       onChange={(e) => {
                         setModel(e.target.value);
-                        setKeyValid(false);
+                        invalidateKey();
                       }}
                       placeholder="Provider default"
                     />
@@ -942,10 +1042,10 @@ function Setup() {
                         checked={paidBilling}
                         onChange={(e) => {
                           setPaidBilling(e.target.checked);
-                          setKeyValid(false);
+                          invalidateKey();
                         }}
                       />
-                      <span>
+                      <span className="min-w-0">
                         This key belongs to a Google project with paid billing
                         enabled. Free-tier Gemini keys are unsuitable for
                         personal interview data.{" "}
@@ -963,6 +1063,7 @@ function Setup() {
                   )}
                   <Button
                     variant="ghost"
+                    className="w-full sm:w-auto"
                     onClick={() => void validate()}
                     disabled={
                       !key ||
@@ -983,27 +1084,20 @@ function Setup() {
                   )}
                 </div>
               )}
-              <div className="notice">
-                {IS_DESKTOP
-                  ? "Your key · no app interview limit. Provider charges apply."
-                  : !user
-                    ? "Sign in to see your practice allowance."
-                    : !usage
-                      ? "Checking your practice allowance…"
-                      : usage?.local_unlimited
-                        ? "Local installation · no product practice limit."
-                        : usage?.tester_unlimited
-                          ? "Tester access · unlimited interviews."
-                          : blocked
-                            ? "Next available: " +
-                              date(
-                                availableAt
-                                  ? new Date(availableAt).toISOString()
-                                  : undefined,
-                              )
-                            : funding === "platform"
-                              ? "Your daily free interview is available."
-                              : "Your key · unlimited interviews."}
+              <div
+                className="rounded-lg bg-[var(--color-panel-2)] px-3 py-2.5 text-xs"
+                role="status"
+              >
+                <p>{allowanceMessage}</p>
+                {!IS_DESKTOP &&
+                  funding === "platform" &&
+                  !usage?.local_unlimited && (
+                    <p className="mt-1 text-[var(--color-muted)]">
+                      Beta includes one free interview per person, with up to{" "}
+                      {usage?.global_daily_limit ?? 200} free interviews across
+                      the project each day (UTC).
+                    </p>
+                  )}
               </div>
               {!IS_DESKTOP &&
                 user?.email_verified === false &&
@@ -1041,30 +1135,47 @@ function Setup() {
                       : "Sign in to continue →"}
                 </Button>
               ) : (
-                <Button
-                  className="w-full"
-                  onClick={() => void start()}
-                  disabled={
-                    busy ||
-                    !usage ||
-                    !!pending?.total ||
-                    blocked ||
-                    !deviceReady ||
-                    user?.policies_required ||
-                    (mode === "voice" && !voiceAcknowledged) ||
-                    (funding === "byok" && !keyValid) ||
-                    (!IS_DESKTOP &&
-                      user?.email_verified === false &&
-                      !usage?.local_unlimited)
-                  }
-                >
-                  {busy ? "Preparing interview…" : "Start interview →"}
-                </Button>
+                <div className="space-y-3">
+                  <div
+                    id="interview-start-status"
+                    className="text-xs"
+                    role="status"
+                    aria-live="polite"
+                  >
+                    {startBlockers.length ? (
+                      <>
+                        <p className="font-semibold">Before you start</p>
+                        <ul className="mt-2 list-disc space-y-1 pl-4 text-[var(--color-muted)]">
+                          {startBlockers.map((reason) => (
+                            <li key={reason}>{reason}</li>
+                          ))}
+                        </ul>
+                      </>
+                    ) : (
+                      <p className="font-medium text-[var(--color-good)]">
+                        ✓ Ready to start ·{" "}
+                        {mode === "voice"
+                          ? "microphone access checked and voice privacy confirmed"
+                          : "text conversation selected"}
+                      </p>
+                    )}
+                  </div>
+                  <Button
+                    className="w-full"
+                    onClick={() => void start()}
+                    aria-describedby="interview-start-status"
+                    disabled={busy || startBlockers.length > 0}
+                  >
+                    {busy ? "Preparing interview…" : "Start interview →"}
+                  </Button>
+                </div>
               )}
               <p className="text-center text-xs text-[var(--color-muted)]">
                 {IS_DESKTOP
                   ? "Connection checks may make a small billable request."
-                  : "Checks do not consume your allowance."}
+                  : funding === "byok"
+                    ? "Device checks are free. Model checks may incur provider charges."
+                    : "Device checks do not use your free interview."}
               </p>
               {blocked && (
                 <Button href="/contribute" variant="ghost" className="w-full">

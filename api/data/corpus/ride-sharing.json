@@ -16,6 +16,7 @@
     "state-machine",
     "surge"
   ],
+  "candidate_brief": "Design the backend for a service that connects riders with drivers and manages their trips.",
   "prompt": "Design the backend for a ride-sharing service like Uber or Lyft. Riders request rides, the system matches them to nearby drivers, tracks the trip in real time, computes ETAs and fares, and applies surge pricing when demand is high. Assume a large metro deployment with millions of drivers streaming location updates.",
   "blurb": "Geospatial indexing under a firehose of GPS updates, low-latency matching, and a trip state machine that must not double-charge.",
   "rubric": [

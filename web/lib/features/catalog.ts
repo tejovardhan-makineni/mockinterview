@@ -24,6 +24,8 @@ export interface QuestionSummary {
   modality: Modality;
   difficulty: "junior" | "mid" | "senior" | "staff" | "entry";
   tags: string[];
+  // Both fields contain only the public opening when an authored brief exists.
+  candidate_brief?: string;
   prompt: string;
   blurb: string;
 }

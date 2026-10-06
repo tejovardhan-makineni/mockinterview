@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"time"
 
 	"github.com/jackc/pgx/v5"
@@ -12,6 +13,7 @@ import (
 var ErrDuplicateEvent = errors.New("event already persisted")
 var ErrSessionConflict = errors.New("attempt is already open or no longer writable")
 var ErrQuota = errors.New("interview allowance exhausted")
+var ErrGlobalQuota = fmt.Errorf("%w: daily community capacity reached", ErrQuota)
 var ErrCredentialExpired = errors.New("personal key expired; enter it again")
 
 type Workspace struct {
@@ -21,13 +23,17 @@ type Workspace struct {
 	Data     json.RawMessage `json:"data,omitempty"`
 }
 type Usage struct {
-	PendingFeedback bool       `json:"-"`
-	FundedAvailable bool       `json:"funded_available"`
-	NextFundedAt    *time.Time `json:"next_funded_at,omitempty"`
-	NextStartAt     *time.Time `json:"next_start_at,omitempty"`
-	ActiveSessionID string     `json:"active_session_id,omitempty"`
-	LocalUnlimited  bool       `json:"local_unlimited"`
-	TesterUnlimited bool       `json:"tester_unlimited"`
+	FreeInterviewUsed    bool       `json:"free_interview_used"`
+	GlobalDailyLimit     int        `json:"global_daily_limit,omitempty"`
+	GlobalDailyRemaining *int       `json:"global_daily_remaining,omitempty"`
+	GlobalResetAt        *time.Time `json:"global_reset_at,omitempty"`
+	PendingFeedback      bool       `json:"-"`
+	FundedAvailable      bool       `json:"funded_available"`
+	NextFundedAt         *time.Time `json:"next_funded_at,omitempty"`
+	NextStartAt          *time.Time `json:"next_start_at,omitempty"`
+	ActiveSessionID      string     `json:"active_session_id,omitempty"`
+	LocalUnlimited       bool       `json:"local_unlimited"`
+	TesterUnlimited      bool       `json:"tester_unlimited"`
 }
 type Reservation struct {
 	Preparing         bool
@@ -56,7 +62,7 @@ type SessionRuntime interface {
 	ReserveSession(context.Context, Reservation) (Session, error)
 	CompletePreparation(context.Context, string, string, json.RawMessage, json.RawMessage) error
 	FailPreparation(context.Context, string) error
-	Usage(context.Context, string, string, bool) (Usage, error)
+	Usage(context.Context, string, string, bool, ...int) (Usage, error)
 	AcquireLive(context.Context, string, string) (Session, error)
 	ActivateLive(context.Context, string, string) (Session, error)
 	HeartbeatLive(context.Context, string, string) error
@@ -97,14 +103,12 @@ func readUsage(ctx context.Context, q queryer, uid, identity string, unlimited b
 	}
 	u.TesterUnlimited = tester
 	if !unlimited && !tester {
-		var daily *time.Time
-		e := q.QueryRow(ctx, `SELECT max(activated_at)+interval '24 hours' FROM interview_usage WHERE identity=$1 AND funding='platform' AND activated_at>now()-interval '24 hours'`, identity).Scan(&daily)
-		if e != nil {
+		var claimed bool
+		if e := q.QueryRow(ctx, `SELECT EXISTS(SELECT 1 FROM free_interview_claims WHERE identity=$1)`, identity).Scan(&claimed); e != nil {
 			return u, e
 		}
-		u.NextStartAt = daily
-		u.NextFundedAt = daily
-		u.FundedAvailable = daily == nil
+		u.FreeInterviewUsed = claimed
+		u.FundedAvailable = !claimed
 	}
 	// Active and pending states share one MVCC statement snapshot. A scoring
 	// worker may transition ending -> scoring without the admission lock.
@@ -118,8 +122,31 @@ func readUsage(ctx context.Context, q queryer, uid, identity string, unlimited b
 	}
 	return u, nil
 }
-func (s *Store) Usage(ctx context.Context, uid, identity string, unlimited bool) (Usage, error) {
-	return readUsage(ctx, s.Pool, uid, identity, unlimited)
+func (s *Store) Usage(ctx context.Context, uid, identity string, unlimited bool, limits ...int) (Usage, error) {
+	u, err := readUsage(ctx, s.Pool, uid, identity, unlimited)
+	if err != nil || unlimited || len(limits) == 0 || limits[0] <= 0 {
+		return u, err
+	}
+	n, err := globalStarts(ctx, s.Pool, u.ActiveSessionID)
+	if err != nil {
+		return u, err
+	}
+	ApplyGlobalUsage(&u, limits[0], n, time.Now())
+	return u, nil
+}
+
+// UTCDayStart uses a calendar day, not a rolling 24-hour window.
+func UTCDayStart(now time.Time) time.Time {
+	now = now.UTC()
+	return time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, time.UTC)
+}
+func ApplyGlobalUsage(u *Usage, limit, starts int, now time.Time) {
+	remaining := max(0, limit-starts)
+	reset := UTCDayStart(now).AddDate(0, 0, 1)
+	u.GlobalDailyLimit, u.GlobalDailyRemaining, u.GlobalResetAt = limit, &remaining, &reset
+	if remaining == 0 {
+		u.FundedAvailable = false
+	}
 }
 func (s *Store) ReserveSession(ctx context.Context, r Reservation) (Session, error) {
 	tx, e := s.Pool.Begin(ctx)
@@ -144,10 +171,10 @@ func (s *Store) ReserveSession(ctx context.Context, r Reservation) (Session, err
 	if u.ActiveSessionID != "" {
 		return Session{}, ErrSessionConflict
 	}
-	if !r.Unlimited && !u.TesterUnlimited && r.Session.Funding == "platform" && u.NextFundedAt != nil {
+	if !r.Unlimited && !u.TesterUnlimited && r.Session.Funding == "platform" && !u.FundedAvailable {
 		return Session{}, ErrQuota
 	}
-	if !u.TesterUnlimited && r.Session.Funding == "platform" && r.GlobalDailyLimit > 0 {
+	if r.Session.Funding == "platform" && r.GlobalDailyLimit > 0 {
 		if e = checkGlobal(ctx, tx, r.GlobalDailyLimit, ""); e != nil {
 			return Session{}, e
 		}
@@ -229,7 +256,7 @@ func (s *Store) ActivateLive(ctx context.Context, id, owner string) (Session, er
 		if e != nil {
 			return Session{}, e
 		}
-		if !usage.TesterUnlimited && a.Funding == "platform" && globalLimit > 0 {
+		if a.Funding == "platform" && globalLimit > 0 {
 			if e = checkGlobal(ctx, tx, globalLimit, id); e != nil {
 				return Session{}, e
 			}
@@ -237,10 +264,15 @@ func (s *Store) ActivateLive(ctx context.Context, id, owner string) (Session, er
 		if usage.PendingFeedback {
 			return Session{}, ErrInterviewFeedbackRequired
 		}
-		if !exempt && !usage.TesterUnlimited && a.Funding == "platform" && usage.NextFundedAt != nil {
+		if !exempt && !usage.TesterUnlimited && a.Funding == "platform" && !usage.FundedAvailable {
 			return Session{}, ErrQuota
 		}
 
+		if a.Funding == "platform" && !exempt {
+			if _, e = tx.Exec(ctx, `INSERT INTO free_interview_claims(identity,claimed_at) VALUES($1,now()) ON CONFLICT DO NOTHING`, a.UsageIdentity); e != nil {
+				return Session{}, e
+			}
+		}
 		_, e = tx.Exec(ctx, `INSERT INTO interview_usage(session_id,identity,funding,activated_at,tester_exempt) VALUES($1,$2,$3,now(),$4) ON CONFLICT DO NOTHING`, id, a.UsageIdentity, a.Funding, usage.TesterUnlimited)
 		if e != nil {
 			return Session{}, e
@@ -490,13 +522,17 @@ func checkGlobal(ctx context.Context, tx pgx.Tx, limit int, exclude string) erro
 	if _, e := tx.Exec(ctx, `SELECT pg_advisory_xact_lock(1296648001)`); e != nil {
 		return e
 	}
-	var n int
-	e := tx.QueryRow(ctx, `SELECT (SELECT count(*) FROM interview_usage WHERE funding='platform' AND NOT tester_exempt AND activated_at>now()-interval '24 hours')+(SELECT count(*) FROM sessions s WHERE funding='platform' AND status IN ('preparing','reserved') AND reserved_until>now() AND id::text<>$1 AND NOT EXISTS(SELECT 1 FROM users u JOIN tester_emails t ON t.email=lower(btrim(u.email)) WHERE u.id=s.user_id AND u.email_verified=true))`, exclude).Scan(&n)
+	n, e := globalStarts(ctx, tx, exclude)
 	if e != nil {
 		return e
 	}
 	if n >= limit {
-		return ErrQuota
+		return ErrGlobalQuota
 	}
 	return nil
+}
+func globalStarts(ctx context.Context, q queryer, exclude string) (int, error) {
+	var n int
+	e := q.QueryRow(ctx, `SELECT (SELECT count(*) FROM interview_usage WHERE funding='platform' AND activated_at >= (date_trunc('day',now() AT TIME ZONE 'UTC') AT TIME ZONE 'UTC'))+(SELECT count(*) FROM sessions WHERE funding='platform' AND status IN ('preparing','reserved','created') AND reserved_until>now() AND id::text<>$1)`, exclude).Scan(&n)
+	return n, e
 }

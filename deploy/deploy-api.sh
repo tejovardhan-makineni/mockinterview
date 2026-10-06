@@ -57,8 +57,8 @@ case "$ACTION" in
   if [[ "${LLM_PROVIDER:-gemini}" != gemini ]]; then PROVIDER_ENV=$(printf %s "$LLM_PROVIDER" | tr '[:lower:]' '[:upper:]');REASONING_SECRET=$(secret_ref "$SECRET_PREFIX-reasoning-key");SECRETS+=",${PROVIDER_ENV}_API_KEY=$REASONING_SECRET";fi
   export RELEASE_SHA
   # JSON is valid YAML and preserves all delimiter-containing nonsecret values.
-  export PUBLIC_URL="${PUBLIC_URL:-https://mockinterview.live}" MAIL_FROM="${MAIL_FROM:-}" LLM_PROVIDER="${LLM_PROVIDER:-gemini}" LLM_MODEL="${LLM_MODEL:-}" GEMINI_MODEL_LIVE="${GEMINI_MODEL_LIVE:-gemini-2.5-flash-native-audio-preview-12-2025}"
-  export CORS_ALLOW="${CORS_ALLOW:-https://mockinterview.live,https://mockinterview-web.web.app}" SMTP_ADDRESS="${SMTP_ADDRESS:-}" SMTP_USERNAME="${SMTP_USERNAME:-}" HOSTED_DAILY_START_LIMIT="${HOSTED_DAILY_START_LIMIT:-50}"
+  export PUBLIC_URL="${PUBLIC_URL:-https://mockinterview.live}" MAIL_FROM="${MAIL_FROM:-}" LLM_PROVIDER="${LLM_PROVIDER:-gemini}" LLM_MODEL="${LLM_MODEL:-}" GEMINI_MODEL_LIVE="${GEMINI_MODEL_LIVE:-gemini-3.8-live}"
+  export CORS_ALLOW="${CORS_ALLOW:-https://mockinterview.live,https://mockinterview-web.web.app}" SMTP_ADDRESS="${SMTP_ADDRESS:-}" SMTP_USERNAME="${SMTP_USERNAME:-}" HOSTED_DAILY_START_LIMIT="${HOSTED_DAILY_START_LIMIT:-200}"
   python3 - "$BUILD_DIR/env.json" <<'PY'
 import os,json,sys
 keys=['RELEASE_SHA','PUBLIC_URL','MAIL_FROM','LLM_PROVIDER','LLM_MODEL','GEMINI_MODEL_LIVE','CORS_ALLOW','SMTP_ADDRESS','SMTP_USERNAME','HOSTED_DAILY_START_LIMIT']
@@ -71,10 +71,13 @@ PY
    [[ "$TARGET_SERVICE" == *-staging ]] || { echo 'Create production only after an isolated staging deployment.' >&2;exit 1; }
    TRAFFIC_ARGS=(--tag candidate)
   fi
+  # Keep background workers warm at service level, not once per tagged revision.
+  # Also bound tagged candidates, which do not share the service's traffic cap.
   gcloud run deploy "$TARGET_SERVICE" --image "$IMAGE" --project "$PROJECT_ID" --region "$REGION" \
    --platform managed --allow-unauthenticated --ingress all --service-account "$RUNTIME_SA" \
    --set-cloudsql-instances "$CLOUDSQL_INSTANCE" --cpu 1 --memory 512Mi --concurrency 20 \
-   --min-instances "${MIN_INSTANCES:-1}" --max-instances 5 --no-cpu-throttling --timeout 3600 \
+   --min "${MIN_INSTANCES:-1}" --max "${MAX_INSTANCES:-1}" \
+   --min-instances 0 --max-instances "${MAX_INSTANCES:-1}" --no-cpu-throttling --timeout 3600 \
    --startup-probe='httpGet.path=/ready,httpGet.port=8080,initialDelaySeconds=0,periodSeconds=10,timeoutSeconds=5,failureThreshold=12' \
    --liveness-probe='httpGet.path=/health,httpGet.port=8080,periodSeconds=30,timeoutSeconds=5,failureThreshold=3' \
    --env-vars-file "$BUILD_DIR/env.json" --set-secrets "$SECRETS" "${TRAFFIC_ARGS[@]}"

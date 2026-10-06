@@ -16,6 +16,7 @@
     "payment",
     "machine-coding"
   ],
+  "candidate_brief": "Design the object model for a vending machine where customers choose a product, pay for it, and receive the item and any change.",
   "prompt": "Design a vending machine. A customer selects a product, inserts money (coins/notes or card), the machine dispenses the item and returns change. Model the classes and, importantly, the machine's state machine — what the machine does when idle, when money is being inserted, when dispensing, and when a selection is sold out. Sketch the class diagram.",
   "blurb": "The textbook State-pattern problem — model the machine as an explicit state machine over selection, payment, dispensing, and change.",
   "rubric": [
@@ -28,7 +29,7 @@
     {
       "key": "core_entities",
       "label": "Core entities",
-      "description": "Identifies VendingMachine, Product, Slot/Inventory, the State hierarchy, Payment, and CoinBank/change dispenser.",
+      "description": "Assess whether the chosen decomposition expresses the required behavior and contracts. Names, class counts and representations below are examples; equivalent alternatives are valid: Identifies VendingMachine, Product, Slot/Inventory, the State hierarchy, Payment, and CoinBank/change dispenser.",
       "weight": 1.0
     },
     {
@@ -40,31 +41,31 @@
     {
       "key": "class_design",
       "label": "Class design",
-      "description": "State encapsulated as objects (not a mega-switch), inventory and coin-bank separated from control flow, product data immutable.",
+      "description": "Assess whether the chosen decomposition expresses the required behavior and contracts. Names, class counts and representations below are examples; equivalent alternatives are valid: State encapsulated as objects (not a mega-switch), inventory and coin-bank separated from control flow, product data immutable.",
       "weight": 1.1
     },
     {
       "key": "design_patterns",
-      "label": "Design patterns",
-      "description": "State pattern for machine behavior, Strategy for payment methods, optional Factory for states; each justified.",
+      "label": "Abstraction choices",
+      "description": "Assess coherent transitions and separation of inventory, payment and dispensing behavior. State or Strategy may help, but a clear transition table or simpler equivalent design is equally valid.",
       "weight": 1.1
     },
     {
       "key": "relationships",
       "label": "Relationships",
-      "description": "Machine composes Inventory and CoinBank; delegates behavior to current State; correct ownership.",
+      "description": "Assess whether the chosen decomposition expresses the required behavior and contracts. Names, class counts and representations below are examples; equivalent alternatives are valid: Machine composes Inventory and CoinBank; delegates behavior to current State; correct ownership.",
       "weight": 0.9
     },
     {
       "key": "api_methods",
       "label": "API methods",
-      "description": "selectProduct, insertMoney, dispense, cancel/refund; each routed through the current state.",
+      "description": "Assess whether the chosen decomposition expresses the required behavior and contracts. Names, class counts and representations below are examples; equivalent alternatives are valid: selectProduct, insertMoney, dispense, cancel/refund; each routed through the current state.",
       "weight": 1.0
     },
     {
       "key": "solid_principles",
-      "label": "SOLID principles",
-      "description": "Open/closed: new states or payment methods without editing existing ones; single-responsibility across state/inventory/payment.",
+      "label": "Separation and maintainability",
+      "description": "Assess whether responsibilities are cohesive and likely changes remain manageable within the disclosed scope; do not require an acronym, inheritance or a named pattern. These are example change boundaries, not a prescribed implementation: Open/closed: new states or payment methods without editing existing ones; single-responsibility across state/inventory/payment.",
       "weight": 1.0
     },
     {

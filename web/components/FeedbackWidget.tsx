@@ -144,9 +144,17 @@ export function FeedbackWidget({
         ref={trigger}
         type="button"
         aria-haspopup="dialog"
+        aria-label={
+          label ??
+          (variant === "studio" ? "Report a problem" : "Share feedback")
+        }
+        title={
+          label ??
+          (variant === "studio" ? "Report a problem" : "Share feedback")
+        }
         className={
           variant === "nav"
-            ? "inline-flex min-h-11 shrink-0 items-center gap-2 whitespace-nowrap rounded-full border border-[var(--color-accent)] bg-[var(--color-panel-2)] px-4 py-2 text-sm font-semibold text-[var(--color-accent)] transition hover:bg-[var(--color-accent)] hover:text-[var(--color-panel)]"
+            ? "mi-button mi-button-sm inline-flex shrink-0 items-center gap-2 whitespace-nowrap rounded-lg border border-[var(--color-line)] px-3 py-1.5 text-xs font-medium text-[var(--color-muted)]"
             : "inline-flex items-center gap-2 rounded-lg border border-[var(--color-line)] px-3 py-2 text-xs font-medium"
         }
         onClick={() => {
@@ -166,8 +174,12 @@ export function FeedbackWidget({
         }}
       >
         <IconFeedback className="h-4 w-4 shrink-0" />
-        {label ??
-          (variant === "studio" ? "Report a problem" : "Share feedback")}
+        <span
+          className={variant === "nav" ? "sr-only sm:not-sr-only" : undefined}
+        >
+          {label ??
+            (variant === "studio" ? "Report a problem" : "Share feedback")}
+        </span>
       </button>
       <dialog
         ref={dialog}

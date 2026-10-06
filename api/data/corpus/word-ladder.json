@@ -16,6 +16,7 @@
     "strings",
     "hashset"
   ],
+  "candidate_brief": "Given beginWord, endWord, and wordList, return the length of the shortest sequence changing one letter at a time. Each word after beginWord, including endWord, must be in wordList. Count both endpoints; return 0 if no sequence exists. All words are lowercase and the same length.",
   "prompt": "Given two words beginWord and endWord, and a dictionary wordList, return the length of the shortest transformation sequence from beginWord to endWord such that: each step changes exactly one letter, and every intermediate word must exist in wordList. Return 0 if no such sequence exists. The sequence length counts the number of words in the path (including begin and end). All words are the same length and lowercase.",
   "blurb": "An implicit unweighted graph where edges are one-letter edits — BFS gives the shortest path, and neighbor generation is the real design decision.",
   "rubric": [
@@ -28,25 +29,25 @@
     {
       "key": "approach",
       "label": "Approach",
-      "description": "Chooses BFS (not DFS) for shortest path; recognizes the graph is implicit and must be traversed without materializing all edges.",
+      "description": "Assess a correct approach and justified efficiency for the disclosed requirements; accept equivalent alternatives. Reference examples, not mandatory algorithms: Chooses BFS (not DFS) for shortest path; recognizes the graph is implicit and must be traversed without materializing all edges.",
       "weight": 1.3
     },
     {
       "key": "correctness",
       "label": "Correctness",
-      "description": "Level-order BFS counting levels, marking visited to avoid revisiting, returning at first sight of endWord; 0 if endWord absent or unreachable.",
+      "description": "Judge actual outputs and invariants of the chosen approach, crediting valid corrections. The following checks apply to the illustrated implementation, not every valid solution: Level-order BFS counting levels, marking visited to avoid revisiting, returning at first sight of endWord; 0 if endWord absent or unreachable.",
       "weight": 1.2
     },
     {
       "key": "complexity_analysis",
       "label": "Complexity analysis",
-      "description": "Neighbor generation dominates: O(L) placeholders * 26 vs O(N*L) pairwise. Reaches O(N * L^2) with the wildcard/placeholder trick and explains the tradeoff.",
+      "description": "Verify the time and space analysis of the actual implementation. Preserve disclosed performance requirements; these reference figures do not introduce hidden bounds or mandate an algorithm: Neighbor generation dominates: O(L) placeholders * 26 vs O(N*L) pairwise. Reaches O(N * L^2) with the wildcard/placeholder trick and explains the tradeoff.",
       "weight": 1.2
     },
     {
       "key": "code_quality",
       "label": "Code quality",
-      "description": "Clean neighbor-generation helper, wordList as a hash set for O(1) membership, no repeated string scans.",
+      "description": "Assess readability, appropriate structure and avoidable duplication in the chosen solution. These are illustrative implementation choices, not required forms: Clean neighbor-generation helper, wordList as a hash set for O(1) membership, no repeated string scans.",
       "weight": 1.0
     },
     {
@@ -64,7 +65,7 @@
     {
       "key": "communication",
       "label": "Communication",
-      "description": "Explains why BFS over DFS, and articulates the neighbor-generation tradeoff clearly.",
+      "description": "Assess whether the candidate explains the decisions and invariants of their own approach, without requiring an algorithm name or a prescribed order. Reference-specific explanation examples: Explains why BFS over DFS, and articulates the neighbor-generation tradeoff clearly.",
       "weight": 0.9
     }
   ],

@@ -17,6 +17,7 @@
     "analytics",
     "lambda-architecture"
   ],
+  "candidate_brief": "Design a service that collects advertising click events and makes campaign activity available to advertisers.",
   "prompt": "Design a real-time ad click aggregation and analytics pipeline. Ad clicks arrive at massive volume; advertisers need near-real-time dashboards of clicks, impressions and spend per campaign and time period, plus accurate totals for billing.",
   "blurb": "A streaming aggregation firehose where the dashboard can be approximate but billing must be exact — windowing, dedup, and the hot-campaign skew.",
   "rubric": [

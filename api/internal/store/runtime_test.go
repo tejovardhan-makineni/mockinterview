@@ -174,7 +174,7 @@ func TestPostgresAtomicAttemptsAndDurableFinish(t *testing.T) {
 		t.Fatal(e)
 	}
 	usage, e := s.Usage(ctx, u.ID, "same-verified-identity", false)
-	if e != nil || usage.NextStartAt == nil || usage.NextFundedAt == nil || usage.FundedAvailable {
+	if e != nil || usage.NextStartAt != nil || usage.NextFundedAt != nil || usage.FundedAvailable || !usage.FreeInterviewUsed {
 		t.Fatalf("deletion reset quota=%+v %v", usage, e)
 	}
 	personal, e := s.ReserveSession(ctx, reserveFor(u.ID, "same-verified-identity", "byok"))
@@ -193,12 +193,12 @@ func TestPostgresAtomicAttemptsAndDurableFinish(t *testing.T) {
 	if e = s.DeleteSession(ctx, personal.ID); e != nil {
 		t.Fatal(e)
 	}
-	// The hosted allowance resets on a rolling day; there is no weekly limit.
-	if _, e = s.Pool.Exec(ctx, `UPDATE interview_usage SET activated_at=now()-interval '25 hours'`); e != nil {
+	// A lifetime claim survives retention of the detailed seven-day usage ledger.
+	if _, e = s.Pool.Exec(ctx, `DELETE FROM interview_usage`); e != nil {
 		t.Fatal(e)
 	}
-	if _, e = s.ReserveSession(ctx, reserveFor(u.ID, "same-verified-identity", "platform")); e != nil {
-		t.Fatalf("funded daily reset=%v", e)
+	if _, e = s.ReserveSession(ctx, reserveFor(u.ID, "same-verified-identity", "platform")); !errors.Is(e, ErrQuota) {
+		t.Fatalf("lifetime allowance reset=%v", e)
 	}
 }
 func TestPostgresPreReadyRefundCredentialsAndGlobalCap(t *testing.T) {

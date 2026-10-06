@@ -16,6 +16,7 @@
     "union-find",
     "connected-components"
   ],
+  "candidate_brief": "Given a grid of 1s (land) and 0s (water), count its islands. Land connects only up, down, left, or right, not diagonally. The grid is surrounded by water.",
   "prompt": "Given an m x n 2D grid of '1's (land) and '0's (water), count the number of islands. An island is a maximal group of land cells connected 4-directionally (up, down, left, right). Cells connected only diagonally are NOT part of the same island. The grid's borders are all surrounded by water.",
   "blurb": "Counting connected components on a grid — flood-fill each unvisited land cell with DFS/BFS, or union adjacent land with union-find.",
   "rubric": [
@@ -28,25 +29,25 @@
     {
       "key": "approach",
       "label": "Approach",
-      "description": "Frames it as counting connected components: scan cells, and on each unvisited land cell increment the count and flood-fill (DFS or BFS) the whole component. Can articulate the union-find alternative.",
+      "description": "Assess a correct approach and justified efficiency for the disclosed requirements; accept equivalent alternatives. Reference examples, not mandatory algorithms: Frames it as counting connected components: scan cells, and on each unvisited land cell increment the count and flood-fill (DFS or BFS) the whole component. Can articulate the union-find alternative.",
       "weight": 1.3
     },
     {
       "key": "correctness",
       "label": "Correctness",
-      "description": "Marks cells visited (sink to '0' or a visited set) so a component is counted exactly once; bounds-checks the four neighbors; never revisits; only counts land.",
+      "description": "Judge actual outputs and invariants of the chosen approach, crediting valid corrections. The following checks apply to the illustrated implementation, not every valid solution: Marks cells visited (sink to '0' or a visited set) so a component is counted exactly once; bounds-checks the four neighbors; never revisits; only counts land.",
       "weight": 1.3
     },
     {
       "key": "complexity_analysis",
       "label": "Complexity analysis",
-      "description": "O(m*n) time — each cell is visited a constant number of times. Space O(m*n) worst case for the DFS recursion stack / BFS queue (a grid that is all land), or O(m*n) for union-find structures.",
+      "description": "Verify the time and space analysis of the actual implementation. Preserve disclosed performance requirements; these reference figures do not introduce hidden bounds or mandate an algorithm: O(m*n) time — each cell is visited a constant number of times. Space O(m*n) worst case for the DFS recursion stack / BFS queue (a grid that is all land), or O(m*n) for union-find structures.",
       "weight": 1.0
     },
     {
       "key": "code_quality",
       "label": "Code quality",
-      "description": "A clean neighbor iteration (direction array), a single flood-fill helper, and a guard that merges bounds + water + visited checks at the top of the recursion/pop.",
+      "description": "Assess readability, appropriate structure and avoidable duplication in the chosen solution. These are illustrative implementation choices, not required forms: A clean neighbor iteration (direction array), a single flood-fill helper, and a guard that merges bounds + water + visited checks at the top of the recursion/pop.",
       "weight": 1.0
     },
     {
@@ -64,7 +65,7 @@
     {
       "key": "communication",
       "label": "Communication",
-      "description": "Names it as connected components, states the visited strategy explicitly, and discusses the recursion-depth risk for very large grids.",
+      "description": "Assess whether the candidate explains the decisions and invariants of their own approach, without requiring an algorithm name or a prescribed order. Reference-specific explanation examples: Names it as connected components, states the visited strategy explicitly, and discusses the recursion-depth risk for very large grids.",
       "weight": 0.8
     }
   ],

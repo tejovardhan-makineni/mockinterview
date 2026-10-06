@@ -16,6 +16,7 @@
     "read-heavy",
     "celebrity-problem"
   ],
+  "candidate_brief": "Design a social network’s home feed, showing posts from accounts a user follows.",
   "prompt": "Design the home feed for a social network — the ranked list of posts a user sees from accounts they follow. It should load fast, stay reasonably fresh, and work for both normal users and celebrities with tens of millions of followers.",
   "blurb": "Fanout-on-write vs read, the celebrity problem, ranking, and timeline caching.",
   "rubric": [

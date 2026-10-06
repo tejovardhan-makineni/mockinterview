@@ -75,7 +75,7 @@ function Login() {
   }
   return (
     <AppShell active="public">
-      <Panel className="mx-auto my-8 max-w-md p-8">
+      <Panel className="mx-auto my-2 max-w-md p-5 sm:my-8 sm:p-8">
         <p className="eyebrow">Your next step</p>
         <h1 className="mt-3 text-3xl font-medium tracking-tight">
           {mode === "register"
@@ -86,7 +86,7 @@ function Login() {
         </h1>
         <p className="mt-3 text-sm text-[var(--color-muted)]">
           {mode === "register"
-            ? "Save your interviews and turn feedback into progress."
+            ? "One free interview, saved progress, and useful feedback. This project is still in beta."
             : mode === "forgot"
               ? "We’ll send a secure link if this email has an account."
               : "Your practice and feedback are waiting."}

@@ -22,6 +22,7 @@ describe("camera preview cleanup", () => {
     const stop = vi.fn();
     vi.mocked(navigator.mediaDevices.getUserMedia).mockResolvedValue({
       getTracks: () => [{ stop }],
+      getVideoTracks: () => [{ stop, readyState: "live" }],
     } as unknown as MediaStream);
     vi.spyOn(HTMLMediaElement.prototype, "play").mockRejectedValue(
       new Error("playback unavailable"),
@@ -47,5 +48,32 @@ describe("camera preview cleanup", () => {
     grant({ getTracks: () => [{ stop }] } as unknown as MediaStream);
     await Promise.resolve();
     expect(stop).toHaveBeenCalledOnce();
+  });
+  it("reports verification only after playback and revokes it on camera disconnect", async () => {
+    const status = vi.fn();
+    const track = {
+      readyState: "live",
+      onended: null as (() => void) | null,
+      stop: vi.fn(),
+    };
+    vi.mocked(navigator.mediaDevices.getUserMedia).mockResolvedValue({
+      getTracks: () => [track],
+      getVideoTracks: () => [track],
+    } as unknown as MediaStream);
+    let played!: () => void;
+    vi.spyOn(HTMLMediaElement.prototype, "play").mockImplementation(
+      () =>
+        new Promise<void>((resolve) => {
+          played = resolve;
+        }),
+    );
+    root = createRoot(document.querySelector("#camera-test")!);
+    await act(async () => root!.render(<Webcam onStatus={status} />));
+    expect(status).toHaveBeenLastCalledWith("checking");
+    await act(async () => played());
+    expect(status).toHaveBeenLastCalledWith("verified");
+    await act(async () => track.onended?.());
+    expect(status).toHaveBeenLastCalledWith("unavailable");
+    expect(track.stop).toHaveBeenCalledOnce();
   });
 });

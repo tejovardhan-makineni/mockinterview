@@ -16,7 +16,7 @@ export function PersonalKeyRecovery({
   const [error, setError] = useState("");
   const [paidBilling, setPaidBilling] = useState(false);
   return (
-    <details className="notice">
+    <details className="notice min-w-0">
       <summary className="font-semibold">
         Restore your personal model key
       </summary>
@@ -68,7 +68,7 @@ export function PersonalKeyRecovery({
               checked={paidBilling}
               onChange={(e) => setPaidBilling(e.target.checked)}
             />
-            <span>
+            <span className="min-w-0">
               This Gemini key belongs to a project with paid billing enabled. A
               connection check does not verify billing.{" "}
               <a
@@ -90,6 +90,7 @@ export function PersonalKeyRecovery({
         <Button
           type="submit"
           variant="ghost"
+          className="w-full sm:w-auto"
           disabled={busy || !key || (provider === "gemini" && !paidBilling)}
         >
           {busy ? "Checking connection…" : "Save key & retry"}

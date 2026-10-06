@@ -1,0 +1,177 @@
+.trigger {
+  max-width: 100%;
+  overflow-wrap: anywhere;
+  display: inline-flex;
+  align-items: center;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 8px 12px;
+  border: 1px solid var(--color-line);
+  border-radius: 10px;
+  background: var(--color-panel);
+  color: var(--color-muted);
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+.trigger[data-status="pending"] {
+  color: var(--color-warn);
+  border-color: color-mix(in srgb, var(--color-warn) 38%, var(--color-line));
+  background: color-mix(in srgb, var(--color-warn) 9%, var(--color-panel));
+}
+.trigger[data-status="submitted"] {
+  color: var(--color-good);
+  border-color: color-mix(in srgb, var(--color-good) 38%, var(--color-line));
+  background: color-mix(in srgb, var(--color-good) 9%, var(--color-panel));
+}
+.trigger:hover {
+  filter: brightness(0.96);
+}
+.status {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.7rem;
+}
+.dialog {
+  margin: auto;
+  width: min(640px, calc(100vw - 24px));
+  max-width: calc(100vw - 24px);
+  max-height: calc(100dvh - 24px);
+  padding: 0;
+  overflow: hidden;
+  border: 1px solid var(--color-line);
+  border-radius: 18px;
+  background: var(--color-panel);
+  color: var(--color-ink);
+  overflow-wrap: anywhere;
+  box-shadow: 0 24px 90px #0004;
+}
+/* Leave the closed dialog's native display:none intact. */
+.dialog[open] {
+  display: flex;
+  flex-direction: column;
+}
+.dialog::backdrop {
+  background: #12131c80;
+  backdrop-filter: blur(3px);
+}
+.header {
+  display: flex;
+  flex: none;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 20px 24px 16px;
+  border-bottom: 1px solid var(--color-line);
+}
+.header h2 {
+  font-size: 1.15rem;
+  font-weight: 650;
+  letter-spacing: -0.025em;
+}
+.header p {
+  margin-top: 5px;
+  max-width: 400px;
+  color: var(--color-muted);
+  font-size: 0.8rem;
+  line-height: 1.5;
+}
+.close {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  margin: -8px -12px 0 0;
+  border-radius: 8px;
+  cursor: pointer;
+}
+.close:hover,
+.done:hover {
+  background: var(--color-panel-2);
+}
+.body {
+  min-width: 0;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scroll-padding-block: 16px;
+  padding: 20px 24px 24px;
+}
+.footer {
+  display: flex;
+  flex: none;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 12px 24px;
+  border-top: 1px solid var(--color-line);
+}
+.footer p {
+  min-width: 0;
+  max-width: 280px;
+  color: var(--color-muted);
+  font-size: 0.7rem;
+  line-height: 1.5;
+}
+.done {
+  flex: none;
+  min-height: 44px;
+  padding: 8px 12px;
+  border: 1px solid var(--color-line);
+  border-radius: 8px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+@media (max-width: 480px) {
+  .header,
+  .body,
+  .footer {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+  .footer {
+    gap: 10px;
+  }
+}
+/* Scroll the whole panel in constrained windows so large text and landscape
+   layouts cannot squeeze the form between fixed header and footer sections. */
+@media (max-height: 480px), (max-width: 480px) {
+  .dialog[open] {
+    display: block;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scroll-padding-block: 12px;
+  }
+  .header {
+    align-items: center;
+    padding-block: 12px;
+  }
+  .header p {
+    display: none;
+  }
+  .close {
+    margin-top: 0;
+  }
+  .body {
+    overflow: visible;
+    padding-block: 16px;
+  }
+  .footer {
+    flex-wrap: wrap;
+    padding-block: 10px;
+  }
+  .done {
+    margin-left: auto;
+  }
+}
+@media print {
+  .trigger,
+  .dialog[open] {
+    display: none;
+  }
+}

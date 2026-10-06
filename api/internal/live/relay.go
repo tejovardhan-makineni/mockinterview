@@ -102,6 +102,7 @@ type Store interface {
 	UserByID(context.Context, string) (store.User, error)
 	GetSession(ctx context.Context, id string) (store.Session, error)
 	UpdateSessionStatus(ctx context.Context, id, status string) error
+	UpdateSessionPhase(ctx context.Context, id, phase string) error
 	AddTurn(ctx context.Context, sessionID, role, text string, tsMs int64, meta json.RawMessage) error
 	AddEvent(context.Context, string, int64, string, json.RawMessage) error
 	Transcript(ctx context.Context, sessionID string) ([]store.Turn, error)
@@ -109,21 +110,37 @@ type Store interface {
 }
 
 type Relay struct {
-	background    context.Context
-	activityClock func() time.Time // defaults to time.Now; independent of persisted session deadlines
-	hosted        bool
-	encryptionKey []byte
-	attempt       store.Session
-	owner         string
-	tokenVersion  int
-	store         Store
-	corpus        *corpus.Catalog
-	llm           llm.Client
-	apiKey        string
-	liveModel     string
-	reasonModel   string
-	upgrader      websocket.Upgrader
-	authFn        func(*http.Request) (string, error)
+	background           context.Context
+	activityClock        func() time.Time // defaults to time.Now; independent of persisted session deadlines
+	observationTicks     <-chan time.Time // test seam; production reviews every 30 seconds
+	observationWorkspace string
+	persistedStage       string // written only by the ordered relay event loop
+	hosted               bool
+	encryptionKey        []byte
+	attempt              store.Session
+	owner                string
+	tokenVersion         int
+	store                Store
+	corpus               *corpus.Catalog
+	llm                  llm.Client
+	apiKey               string
+	liveModel            string
+	reasonModel          string
+	upgrader             websocket.Upgrader
+	authFn               func(*http.Request) (string, error)
+}
+
+func (r *Relay) persistStage(ctx context.Context, sessionID string, section Section) {
+	if section.ID == "" || r.persistedStage == section.ID {
+		return
+	}
+	call, cancel := context.WithTimeout(ctx, persistBound)
+	defer cancel()
+	if err := r.store.UpdateSessionPhase(call, sessionID, "section:"+section.ID); err != nil {
+		slog.Warn("interview stage could not be saved; will retry", "session", sessionID)
+		return
+	}
+	r.persistedStage = section.ID
 }
 
 func NewRelay(st Store, cat *corpus.Catalog, ai llm.Client, apiKey, liveModel, reasonModel string, allowedOrigins []string, authFn func(*http.Request) (string, error)) *Relay {
@@ -309,6 +326,7 @@ func (r *Relay) Handle(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 	system := SystemPrompt(q, pid, intensity, "intro", resume, artifact.Content, sess.DurationMinutes, voice, language, sections, focus)
+	local.observationWorkspace = artifact.Content
 	if sess.Mode == "text" || local.llm.Stubbed() || local.apiKey == "" {
 		local.runText(conn, id, system, sections)
 		return
@@ -323,8 +341,6 @@ func (r *Relay) runText(conn *websocket.Conn, sessionID, system string, sections
 	if r.activityClock != nil {
 		now = r.activityClock
 	}
-	activity := newConversationActivity(sections, now())
-	candidateWorking := false
 	ctx, cancel := context.WithDeadline(r.parentContext(), r.deadline())
 	defer cancel()
 	wc := r.socket(conn, sessionID)
@@ -335,11 +351,36 @@ func (r *Relay) runText(conn *websocket.Conn, sessionID, system string, sections
 	if e != nil {
 		return
 	}
-	if len(prior) > 0 && prior[len(prior)-1].Role == "candidate" {
-		candidateWorking = requestsWorkingTime(prior[len(prior)-1].Text)
+	candidateWorking := len(prior) > 0 && prior[len(prior)-1].Role == "candidate" && requestsWorkingTime(prior[len(prior)-1].Text)
+	elapsed := func() time.Duration {
+		if r.attempt.StartedAt != nil {
+			return time.Since(*r.attempt.StartedAt)
+		}
+		return 0
 	}
+	observation := newObservationState(prior, r.observationWorkspace, restoredStage(sections, activeStageIndex(time.Duration(r.attempt.DurationMinutes)*time.Minute, sections, elapsed()), r.attempt.Phase), now())
+	emitStage := func() {
+		i := observation.currentStage()
+		if i < len(sections) {
+			sec := sections[i]
+			if wc.writeServerMsg(serverMsg{Type: "section", Index: i, Total: len(sections), Title: sec.Title, Kind: sec.Kind}) == nil {
+				r.persistStage(ctx, sessionID, sec)
+			}
+		}
+	}
+	stageContext := func() string {
+		if observation.timedStage(activeStageIndex(time.Duration(r.attempt.DurationMinutes)*time.Minute, sections, elapsed())) {
+			emitStage()
+		}
+		i := observation.currentStage()
+		if i >= len(sections) {
+			return ""
+		}
+		return "\n" + activeStageInstruction(sections[i], time.Until(r.deadline()))
+	}
+	emitStage()
 	history := []llm.Message{}
-	workspace := ""
+	workspace := workspaceObservation(r.observationWorkspace)
 	for _, t := range prior {
 		role := "user"
 		if t.Role == "interviewer" {
@@ -347,12 +388,10 @@ func (r *Relay) runText(conn *websocket.Conn, sessionID, system string, sections
 		}
 		history = append(history, llm.Message{Role: role, Text: t.Text})
 	}
-	// A restored unanswered question must remain unanswered. Reconnects never
-	// create another interviewer turn unless a saved candidate answer needs one.
 	first := ""
-	if len(prior) == 0 || prior[len(prior)-1].Role == "candidate" && !requestsWorkingTime(prior[len(prior)-1].Text) {
+	if len(prior) == 0 || prior[len(prior)-1].Role == "candidate" && !candidateWorking {
 		call, done := context.WithTimeout(ctx, 20*time.Second)
-		first, e = NextTurn(call, r.llm, r.reasonModel, system+r.stageContext(sections, wc), history)
+		first, e = NextTurn(call, r.llm, r.reasonModel, system+stageContext(), history)
 		done()
 		if e != nil {
 			_ = wc.writeServerMsg(serverMsg{Type: "error", Code: "provider_unavailable", Text: "The interviewer could not start. No new allowance was used.", Retryable: false})
@@ -375,24 +414,20 @@ func (r *Relay) runText(conn *websocket.Conn, sessionID, system string, sections
 			return e
 		}
 		history = append(history, llm.Message{Role: "model", Text: text})
-		activity.observe(now(), false, false)
+		observation.turn("interviewer", text)
+		observation.interviewer(now(), 0)
+		observation.interviewerDone(false)
 		return wc.writeServerMsg(serverMsg{Type: "say", Role: "interviewer", Text: text})
 	}
 	if first != "" && say(first) != nil {
 		return
 	}
-	type idleCompletion struct {
-		id    uint64
-		reply string
-		err   error
-	}
 	type textEvent struct {
 		message    *clientMsg
-		idle       *idleCompletion
+		review     *observationResult
+		answer     *observationResult
 		readFailed bool
 	}
-	// A single event queue keeps already received input ahead of later provider
-	// results. Optional check-ins must never stop us reading candidate activity.
 	events := make(chan textEvent, 32)
 	go func() {
 		for {
@@ -418,41 +453,94 @@ func (r *Relay) runText(conn *websocket.Conn, sessionID, system string, sections
 			}
 		}
 	}()
-	var nextIdleID, pendingIdleID uint64
-	var idleCancel context.CancelFunc
-	cancelIdle := func() {
-		if idleCancel != nil {
-			idleCancel()
-			idleCancel = nil
+	ticks, stopTicks := r.observationTimer()
+	defer stopTicks()
+	var nextID, pendingID, pendingAnswerID uint64
+	var answerCancel context.CancelFunc
+	cancelAnswer := func() {
+		if answerCancel != nil {
+			answerCancel()
+			answerCancel = nil
 		}
-		pendingIdleID = 0
+		pendingAnswerID = 0
 	}
-	defer cancelIdle()
+	defer cancelAnswer()
+	var reviewCancel context.CancelFunc
+	cancelReview := func() {
+		if reviewCancel != nil {
+			reviewCancel()
+			reviewCancel = nil
+		}
+		pendingID = 0
+	}
+	defer cancelReview()
 	for {
 		var event textEvent
 		select {
 		case <-ctx.Done():
 			return
+		case <-ticks:
+			if i := observation.currentStage(); i < len(sections) {
+				r.persistStage(ctx, sessionID, sections[i])
+			}
+			if pendingID != 0 || pendingAnswerID != 0 || r.llm == nil || r.llm.Stubbed() {
+				continue
+			}
+			_ = stageContext()
+			input, revision := observation.snapshot(sections, int(time.Until(r.deadline()).Seconds()), candidateWorking, now())
+			call, done := context.WithTimeout(ctx, 20*time.Second)
+			reviewCancel = done
+			nextID++
+			pendingID = nextID
+			go func(id uint64) {
+				defer done()
+				decision, err := DecideObservation(call, r.llm, r.reasonModel, system, input)
+				select {
+				case events <- textEvent{review: &observationResult{id: id, revision: revision, decision: decision, err: err}}:
+				case <-ctx.Done():
+				}
+			}(pendingID)
+			continue
 		case event = <-events:
 		}
 		if event.readFailed {
 			return
 		}
-		if result := event.idle; result != nil {
-			if result.id != pendingIdleID {
-				continue
-			} // candidate already resumed
-			cancelIdle()
-			if result.err != nil {
-				// Do not terminate a healthy interview for an optional courtesy.
-				// Provider errors can contain credentials: log no raw error.
-				slog.Warn("optional interview check-in unavailable", "session", sessionID)
-				activity.deferNudge(now())
-				_ = wc.writeServerMsg(serverMsg{Type: "nudge_deferred"})
+		if result := event.answer; result != nil {
+			if result.id != pendingAnswerID {
 				continue
 			}
-			if !strings.Contains(result.reply, textIdleSilence) && say(result.reply) != nil {
+			cancelAnswer()
+			if !observation.matches(result.revision) {
+				continue
+			}
+			if result.err != nil {
+				_ = wc.writeServerMsg(serverMsg{Type: "error", Code: "provider_unavailable", Text: "Your answer is saved. Reconnect to continue with the interviewer.", Retryable: true})
 				return
+			}
+			if say(result.decision.Utterance) != nil {
+				return
+			}
+			continue
+		}
+		if result := event.review; result != nil {
+			if result.id != pendingID {
+				continue
+			}
+			cancelReview()
+			if result.err != nil {
+				slog.Warn("optional interview observation unavailable", "session", sessionID)
+				continue
+			}
+			accepted, speak, _ := observation.accept(result.decision, result.revision, candidateWorking, sections, now())
+			if !accepted {
+				continue
+			}
+			if speak && say(result.decision.Utterance) != nil {
+				return
+			}
+			if observation.commit(result.decision, sections, true) {
+				emitStage()
 			}
 			continue
 		}
@@ -472,64 +560,40 @@ func (r *Relay) runText(conn *websocket.Conn, sessionID, system string, sections
 			if m.EventID != "" {
 				_ = wc.writeServerMsg(serverMsg{Type: "ack", EventID: m.EventID})
 			}
-			cancelIdle()
+			cancelReview()
+			cancelAnswer()
 			history = append(history, llm.Message{Role: "user", Text: m.Text})
+			observation.turn("candidate", m.Text)
+			observation.candidateActivity(now())
 			candidateWorking = requestsWorkingTime(m.Text)
-			activity.observe(now(), true, candidateWorking)
 			if candidateWorking {
-				// Preserve their request in history but do not generate a follow-up.
 				continue
 			}
+			replySystem := system + "\n" + workspace + stageContext()
+			replyHistory := append([]llm.Message(nil), history...)
+			_, revision := observation.snapshot(sections, int(time.Until(r.deadline()).Seconds()), candidateWorking, now())
 			call, done := context.WithTimeout(ctx, 30*time.Second)
-			reply, e := NextTurn(call, r.llm, r.reasonModel, system+"\n"+workspace+r.stageContext(sections, wc), history)
-			done()
-			if e != nil {
-				_ = wc.writeServerMsg(serverMsg{Type: "error", Code: "provider_unavailable", Text: "Your answer is saved. Reconnect to continue with the interviewer.", Retryable: true})
-				return
-			}
-			if say(reply) != nil {
-				return
-			}
-		case "canvas":
-			// Retain only the latest snapshot. Five-second observations must not
-			// expand conversation history or become apparent candidate answers.
-			latest := workspaceObservation(m.Text)
-			if latest != workspace {
-				cancelIdle()
-			}
-			workspace = latest
-		case "workspace_activity":
-			cancelIdle()
-			activity.observe(now(), true, true)
-		case "nudge":
-			// The offline demo does not interpret the semantic idle policy.
-			// Keep it silent rather than advancing its assessment probe bank.
-			if r.llm.Stubbed() {
-				continue
-			}
-			if candidateWorking {
-				continue // an explicit request for the floor outlasts an idle timer
-			}
-			if idleCancel != nil || !activity.allowNudge(now()) {
-				_ = wc.writeServerMsg(serverMsg{Type: "nudge_deferred"})
-				continue
-			}
-			// This is transient context, never a fabricated candidate turn. Use
-			// the configured interviewer language and permit genuine silence.
-			idleHistory := append(append([]llm.Message{}, history...), llm.Message{Role: "user", Text: idleCheckInstruction})
-			idleSystem := system + "\n" + workspace + r.stageContext(sections, wc) + "\n" + textIdleInstruction
-			call, done := context.WithTimeout(ctx, 30*time.Second)
-			idleCancel = done
-			nextIdleID++
-			pendingIdleID = nextIdleID
+			answerCancel = done
+			nextID++
+			pendingAnswerID = nextID
 			go func(id uint64) {
 				defer done()
-				reply, err := NextTurn(call, r.llm, r.reasonModel, idleSystem, idleHistory)
+				reply, err := NextTurn(call, r.llm, r.reasonModel, replySystem, replyHistory)
 				select {
-				case events <- textEvent{idle: &idleCompletion{id: id, reply: reply, err: err}}:
+				case events <- textEvent{answer: &observationResult{id: id, revision: revision, decision: ObservationDecision{Utterance: reply}, err: err}}:
 				case <-ctx.Done():
 				}
-			}(pendingIdleID)
+			}(pendingAnswerID)
+		case "canvas":
+			workspace = workspaceObservation(m.Text)
+			if observation.setWorkspace(m.Text, now()) {
+				cancelAnswer()
+			}
+		case "workspace_activity":
+			cancelAnswer()
+			observation.candidateActivity(now())
+		case "nudge":
+			// Legacy clients cannot create extra model calls. The server owns review cadence.
 		case "end":
 			_ = wc.writeServerMsg(serverMsg{Type: "saved"})
 			return
@@ -540,6 +604,10 @@ func (r *Relay) runText(conn *websocket.Conn, sessionID, system string, sections
 // ---- Gemini Live (real audio) ----
 
 func (r *Relay) runGemini(conn *websocket.Conn, sessionID string, q corpus.Question, system, voice string, sections []Section, durationMin int) {
+	now := time.Now
+	if r.activityClock != nil {
+		now = r.activityClock
+	}
 	ctx, cancel := context.WithDeadline(r.parentContext(), r.deadline())
 	defer cancel()
 
@@ -696,10 +764,10 @@ func (r *Relay) runGemini(conn *websocket.Conn, sessionID string, q corpus.Quest
 	// so the UI shows one growing message, not one entry per token.
 	var transcriptMu sync.Mutex
 	var interviewerSpeaking, discardInterruptedOutput, candidateWorking atomic.Bool
-	activity := newConversationActivity(sections, time.Now())
+	observation := newObservationState(prior, r.observationWorkspace, restoredStage(sections, activeStageIndex(time.Duration(durationMin)*time.Minute, sections, time.Since(start)), r.attempt.Phase), now())
 	if len(prior) > 0 && prior[len(prior)-1].Role == "candidate" && requestsWorkingTime(prior[len(prior)-1].Text) {
 		candidateWorking.Store(true)
-		activity.observe(time.Now(), true, true)
+		observation.candidateActivity(now())
 	}
 	var curRole, curText string
 	flushLocked := func() {
@@ -707,6 +775,7 @@ func (r *Relay) runGemini(conn *websocket.Conn, sessionID string, q corpus.Quest
 			return
 		}
 		persist(curRole, curText, time.Since(start).Milliseconds())
+		observation.turn(curRole, curText)
 		_ = wc.writeServerMsg(serverMsg{Type: "transcript", Role: curRole, Text: curText, Streaming: false})
 		curRole, curText = "", ""
 	}
@@ -729,6 +798,7 @@ func (r *Relay) runGemini(conn *websocket.Conn, sessionID string, q corpus.Quest
 		}
 		curRole = role
 		curText += chunk
+		observation.partial(role, curText)
 		// GO-13: a failed write means the client is gone — tear down instead of
 		// swallowing the error and looping.
 		if err := wc.writeServerMsg(serverMsg{Type: "transcript", Role: role, Text: curText, Streaming: true}); err != nil {
@@ -776,6 +846,7 @@ func (r *Relay) runGemini(conn *websocket.Conn, sessionID string, q corpus.Quest
 				continue
 			}
 			if sc.Interrupted {
+				observation.interviewerDone(true)
 				flush()
 				interviewerSpeaking.Store(false)
 				discardInterruptedOutput.Store(false)
@@ -784,7 +855,12 @@ func (r *Relay) runGemini(conn *websocket.Conn, sessionID string, q corpus.Quest
 			if sc.InputTranscription != nil && strings.TrimSpace(sc.InputTranscription.Text) != "" {
 				candidateText += sc.InputTranscription.Text
 				candidateWorking.Store(requestsWorkingTime(candidateText))
-				activity.observe(time.Now(), true, candidateWorking.Load())
+				observation.candidateActivity(now())
+				if candidateWorking.Load() {
+					observation.interviewerDone(true)
+				} else {
+					observation.expectResponse(now())
+				}
 				accumulate("candidate", sc.InputTranscription.Text)
 			}
 			if sc.InputTranscription != nil && sc.InputTranscription.Finished {
@@ -797,10 +873,11 @@ func (r *Relay) runGemini(conn *websocket.Conn, sessionID string, q corpus.Quest
 				withheldWorkingReply = true
 			}
 			if sc.ModelTurn != nil && !discardInterruptedOutput.Load() && !candidateWorking.Load() {
-				activity.observe(time.Now(), false, false)
+				observation.interviewer(now(), 0)
 				interviewerSpeaking.Store(true)
 				for _, p := range sc.ModelTurn.Parts {
 					if p.InlineData != nil && len(p.InlineData.Data) > 0 {
+						observation.interviewer(now(), len(p.InlineData.Data))
 						if err := wc.writeBinary(p.InlineData.Data); err != nil {
 							stop()
 							return
@@ -809,11 +886,12 @@ func (r *Relay) runGemini(conn *websocket.Conn, sessionID string, q corpus.Quest
 				}
 			}
 			if sc.OutputTranscription != nil && !discardInterruptedOutput.Load() && !candidateWorking.Load() {
-				activity.observe(time.Now(), false, false)
+				observation.interviewer(now(), 0)
 				interviewerSpeaking.Store(true)
 				accumulate("interviewer", sc.OutputTranscription.Text)
 			}
 			if sc.TurnComplete || sc.WaitingForInput {
+				observation.interviewerDone(false)
 				candidateText = ""
 				if withheldWorkingReply {
 					withheldWorkingReply = false
@@ -830,13 +908,17 @@ func (r *Relay) runGemini(conn *websocket.Conn, sessionID string, q corpus.Quest
 	// Establish the current stage BEFORE any turn-complete kickoff, including on
 	// reconnect. Otherwise the model can begin speaking with stale intro context.
 	sched := SectionSchedule(time.Duration(durationMin)*time.Minute, sections)
-	stage := activeStageIndex(time.Duration(durationMin)*time.Minute, sections, time.Since(start))
+	stage := observation.currentStage()
 	emitStage := func(i int) bool {
 		sec := sections[i]
 		if up.content(genai.LiveClientContentInput{Turns: []*genai.Content{genai.NewContentFromText(activeStageInstruction(sec, time.Until(r.deadline())), genai.RoleUser)}, TurnComplete: genai.Ptr(false)}) != nil {
 			return false
 		}
-		return wc.writeServerMsg(serverMsg{Type: "section", Index: i, Total: len(sections), Title: sec.Title, Kind: sec.Kind}) == nil
+		if wc.writeServerMsg(serverMsg{Type: "section", Index: i, Total: len(sections), Title: sec.Title, Kind: sec.Kind}) != nil {
+			return false
+		}
+		r.persistStage(ctx, sessionID, sec)
+		return true
 	}
 	if len(sections) > 0 && !emitStage(stage) {
 		stop()
@@ -847,6 +929,7 @@ func (r *Relay) runGemini(conn *websocket.Conn, sessionID string, q corpus.Quest
 	// conversation so far and tell the interviewer to CONTINUE, never restart or
 	// re-greet. Otherwise it's a fresh start.
 	if len(prior) == 0 {
+		observation.expectResponse(now())
 		_ = up.content(genai.LiveClientContentInput{
 			Turns:        []*genai.Content{genai.NewContentFromText(openingInstruction, genai.RoleUser)},
 			TurnComplete: genai.Ptr(true),
@@ -858,13 +941,47 @@ func (r *Relay) runGemini(conn *websocket.Conn, sessionID string, q corpus.Quest
 			TurnComplete: genai.Ptr(false),
 		})
 		if prior[len(prior)-1].Role == "candidate" && !candidateWorking.Load() {
+			observation.expectResponse(now())
 			_ = up.content(genai.LiveClientContentInput{Turns: []*genai.Content{genai.NewContentFromText(resumeInstruction, genai.RoleUser)}, TurnComplete: genai.Ptr(true)})
 		}
 
 	}
 
-	// Subsequent timing cues steer at a natural pause without forcing a reply or
-	// resetting covered evidence. The initial stage was established before kickoff.
+	// One browser event queue preserves received input ahead of later review
+	// results while a separate worker performs semantic observation.
+	type voiceEvent struct {
+		mt         int
+		data       []byte
+		review     *observationResult
+		stage      *int
+		readFailed bool
+	}
+	events := make(chan voiceEvent, 32)
+	go func() {
+		for {
+			mt, data, err := conn.ReadMessage()
+			if err != nil {
+				select {
+				case events <- voiceEvent{readFailed: true}:
+				case <-ctx.Done():
+				}
+				return
+			}
+			select {
+			case events <- voiceEvent{mt: mt, data: data}:
+			case <-ctx.Done():
+				return
+			}
+			if mt == websocket.TextMessage {
+				var control struct {
+					Type string `json:"type"`
+				}
+				if json.Unmarshal(data, &control) == nil && control.Type == "end" {
+					return
+				}
+			}
+		}
+	}()
 	go func() {
 		for i, at := range sched {
 			if i+1 <= stage {
@@ -877,21 +994,102 @@ func (r *Relay) runGemini(conn *websocket.Conn, sessionID string, q corpus.Quest
 				return
 			case <-timer.C:
 			}
-			if !emitStage(i + 1) {
+			next := i + 1
+			select {
+			case events <- voiceEvent{stage: &next}:
+			case <-ctx.Done():
 				return
 			}
 		}
 	}()
-
-	// Browser → Gemini: audio (binary) + control (JSON).
+	ticks, stopTicks := r.observationTimer()
+	defer stopTicks()
+	var nextReviewID, pendingReviewID uint64
+	var reviewCancel context.CancelFunc
+	defer func() {
+		if reviewCancel != nil {
+			reviewCancel()
+		}
+	}()
 readLoop:
 	for {
-		mt, data, err := conn.ReadMessage()
-		if err != nil {
+		var event voiceEvent
+		select {
+		case <-ctx.Done():
+			break readLoop
+		case <-ticks:
+			if i := observation.currentStage(); i < len(sections) {
+				r.persistStage(ctx, sessionID, sections[i])
+			}
+			if observation.responseStalled(now()) {
+				_ = wc.writeServerMsg(serverMsg{Type: "error", Code: "provider_unavailable", Text: "The interviewer stopped responding. Reconnect to continue with your saved work.", Retryable: true})
+				break readLoop
+			}
+			if pendingReviewID != 0 || r.llm == nil || r.llm.Stubbed() {
+				continue
+			}
+			input, revision := observation.snapshot(sections, int(time.Until(r.deadline()).Seconds()), candidateWorking.Load(), now())
+			call, done := context.WithTimeout(ctx, 20*time.Second)
+			reviewCancel = done
+			nextReviewID++
+			pendingReviewID = nextReviewID
+			go func(id uint64) {
+				defer done()
+				decision, err := DecideObservation(call, r.llm, r.reasonModel, system, input)
+				select {
+				case events <- voiceEvent{review: &observationResult{id: id, revision: revision, decision: decision, err: err}}:
+				case <-ctx.Done():
+				}
+			}(pendingReviewID)
+			continue
+		case event = <-events:
+		}
+		if event.readFailed {
 			break
 		}
+		if event.stage != nil {
+			if observation.timedStage(*event.stage) && !emitStage(*event.stage) {
+				break
+			}
+			continue
+		}
+		if result := event.review; result != nil {
+			if result.id != pendingReviewID {
+				continue
+			}
+			if reviewCancel != nil {
+				reviewCancel()
+				reviewCancel = nil
+			}
+			pendingReviewID = 0
+			if result.err != nil {
+				slog.Warn("optional interview observation unavailable", "session", sessionID)
+				continue
+			}
+			accepted, speak, _ := observation.accept(result.decision, result.revision, candidateWorking.Load(), sections, now())
+			if !accepted {
+				continue
+			}
+			if !speak {
+				observation.commit(result.decision, sections, true)
+				if result.decision.Notes != "" {
+					_ = up.content(genai.LiveClientContentInput{Turns: []*genai.Content{genai.NewContentFromText("[PRIVATE OBSERVATION NOTES, not candidate speech. Remain silent; use these only as provisional evidence, and prefer the actual conversation if they conflict. No new question has been asked. Notes: "+result.decision.Notes+"]", genai.RoleUser)}, TurnComplete: genai.Ptr(false)})
+				}
+				continue
+			}
+			directive := "[PRIVATE DIRECTOR DECISION: " + result.decision.Action + ". The latest workspace and conversation were reviewed at a useful pause. Deliver only the following single grounded turn naturally, with no extra question or spoken analysis. This is an interviewer instruction, never a candidate answer. If the candidate resumes before delivery, preserve their floor instead. Turn: " + result.decision.Utterance + "]"
+			observation.expectResponse(now())
+			if up.content(genai.LiveClientContentInput{Turns: []*genai.Content{genai.NewContentFromText(directive, genai.RoleUser)}, TurnComplete: genai.Ptr(true)}) == nil {
+				if observation.commit(result.decision, sections, false) && !emitStage(observation.currentStage()) {
+					break
+				}
+			}
+			continue
+		}
+		mt, data := event.mt, event.data
 		switch mt {
 		case websocket.BinaryMessage:
+			observation.microphone(data, now())
 			_ = up.audio(genai.LiveRealtimeInput{
 				Audio: &genai.Blob{Data: data, MIMEType: "audio/pcm;rate=16000"},
 			})
@@ -902,6 +1100,7 @@ readLoop:
 			}
 			switch m.Type {
 			case "canvas":
+				observation.setWorkspace(m.Text, now())
 				// Initial/replayed snapshots are context, not evidence of editing.
 				// workspace_activity reports actual edits separately.
 				// Feed the drawing in as CONTEXT ONLY (turnComplete=false) so the
@@ -912,7 +1111,7 @@ readLoop:
 					TurnComplete: genai.Ptr(false),
 				})
 			case "workspace_activity":
-				activity.observe(time.Now(), true, true)
+				observation.candidateActivity(now())
 				// The next snapshot supplies content; activity alone never starts a turn.
 			case "user_text":
 				// A typed answer IS a completed candidate turn — PERSIST it (Gemini
@@ -948,26 +1147,19 @@ readLoop:
 				if strings.TrimSpace(m.Text) == "" || len(m.Text) > 24000 || len(m.EventID) > 128 {
 					continue
 				}
+				observation.turn("candidate", m.Text)
+				observation.interviewerDone(true)
 				working := requestsWorkingTime(m.Text)
 				candidateWorking.Store(working)
-				activity.observe(time.Now(), true, working)
+				observation.candidateActivity(now())
 				if working {
 					_ = up.content(genai.LiveClientContentInput{Turns: []*genai.Content{genai.NewContentFromText(m.Text, genai.RoleUser)}, TurnComplete: genai.Ptr(false)})
 					continue
 				}
+				observation.expectResponse(now())
 				_ = up.audio(genai.LiveRealtimeInput{Text: m.Text})
 			case "nudge":
-				if candidateWorking.Load() {
-					continue
-				}
-				if interviewerSpeaking.Load() || !activity.allowNudge(time.Now()) {
-					_ = wc.writeServerMsg(serverMsg{Type: "nudge_deferred"})
-					continue
-				}
-				_ = up.content(genai.LiveClientContentInput{
-					Turns:        []*genai.Content{genai.NewContentFromText(idleCheckInstruction, genai.RoleUser)},
-					TurnComplete: genai.Ptr(true),
-				})
+				// Legacy clients cannot create duplicate courtesy/review calls.
 			case "time":
 				// Periodic time-remaining update as CONTEXT only (no forced reply).
 				_ = up.content(genai.LiveClientContentInput{

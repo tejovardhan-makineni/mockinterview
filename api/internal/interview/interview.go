@@ -297,8 +297,10 @@ func (s *Service) Create(w http.ResponseWriter, r *http.Request) {
 		switch {
 		case errors.Is(err, store.ErrInterviewFeedbackRequired):
 			feedbackRequired(w)
+		case errors.Is(err, store.ErrGlobalQuota):
+			httpx.WriteJSON(w, 429, map[string]string{"code": "daily_capacity_reached", "detail": "Today's free interview places are full. They refresh at midnight UTC. You can continue with your own API key.", "resets_at": store.UTCDayStart(time.Now()).AddDate(0, 0, 1).Format(time.RFC3339)})
 		case errors.Is(err, store.ErrQuota):
-			httpx.WriteProblem(w, 429, "Your interview allowance is used. Check the next available time, use your own key when eligible, or run locally.")
+			httpx.WriteJSON(w, 429, map[string]string{"code": "free_interview_used", "detail": "You've used your one free interview. Add your own API key to keep practicing."})
 		case errors.Is(err, store.ErrSessionConflict):
 			httpx.WriteProblem(w, 409, "Resume or finish your existing interview before starting another.")
 		default:

@@ -30,12 +30,14 @@ type BtnProps = ButtonHTMLAttributes<HTMLButtonElement> & {
   children: ReactNode;
   href?: string;
   variant?: "primary" | "ghost" | "danger";
+  size?: "sm" | "md";
 };
 export function Button({
   children,
   href,
   type = "button",
   variant = "primary",
+  size = "md",
   disabled,
   className = "",
   ...rest
@@ -47,7 +49,8 @@ export function Button({
         ? "text-[var(--color-bad)] border-[var(--color-bad)] bg-transparent"
         : "border-[var(--color-line)] bg-[var(--color-panel)] text-[var(--color-ink)]";
   const cls =
-    "inline-flex min-h-11 items-center justify-center gap-2 rounded-lg border px-4 py-2.5 text-sm font-semibold transition hover:brightness-95 disabled:opacity-50 " +
+    "mi-button inline-flex items-center justify-center gap-2 rounded-lg border text-sm font-semibold transition disabled:opacity-50 " +
+    (size === "sm" ? "mi-button-sm px-3 py-1.5 " : "min-h-11 px-4 py-2.5 ") +
     colors +
     " " +
     className;
@@ -57,6 +60,9 @@ export function Button({
         href={href}
         className={cls}
         title={rest.title}
+        aria-label={rest["aria-label"]}
+        aria-describedby={rest["aria-describedby"]}
+        tabIndex={disabled ? -1 : undefined}
         aria-disabled={disabled || undefined}
         onClick={(e) => {
           if (disabled) e.preventDefault();
@@ -105,7 +111,7 @@ export function Field({
   const id = control?.props.id ?? generated;
   const hintId = generated + "-hint";
   return (
-    <div className="block text-sm">
+    <div className="min-w-0 text-sm">
       <label htmlFor={id} className="mb-2 block font-medium">
         {label}
       </label>

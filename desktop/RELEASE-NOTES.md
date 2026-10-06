@@ -1,7 +1,7 @@
-Desktop preview for macOS (Apple Silicon and Intel), Windows x64, and Linux x64.
+Desktop beta for macOS (Apple Silicon and Intel), Windows x64, and Linux x64.
 
 - The same interview workspace, profession catalog, custom practice and reports.
-- Your own AI provider key is required. Desktop includes no free interviews; the website offers one free interview per day.
+- Your own AI provider key is required. Desktop includes no free interviews; the website offers standard accounts one free interview in total, within a shared limit of 200 funded interviews per UTC day.
 - Interviews and results are saved locally. Usage analytics and interview-result sharing are separate, optional choices.
 - Source, support and community links are available in the app’s Help menu.
 

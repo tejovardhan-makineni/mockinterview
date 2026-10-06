@@ -16,6 +16,7 @@
     "metadata",
     "replication"
   ],
+  "candidate_brief": "Design an object storage service where clients store and retrieve blobs using bucket and key names.",
   "prompt": "Design an S3-like object storage system: clients PUT and GET arbitrary blobs (bytes to terabytes) under bucket/key names, with very high durability and availability. Cover how you store the bytes, track metadata, and achieve durability cost-effectively.",
   "blurb": "The durable-blob-at-scale problem — separating metadata from data, chunking large objects, and replication vs erasure coding for eleven-nines durability.",
   "rubric": [

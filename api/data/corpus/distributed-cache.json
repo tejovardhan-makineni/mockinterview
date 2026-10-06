@@ -16,6 +16,7 @@
     "hot-keys",
     "invalidation"
   ],
+  "candidate_brief": "Design a shared in-memory cache that multiple application servers can use to store and retrieve data.",
   "prompt": "Design a distributed in-memory cache like Memcached or Redis that many application servers use to speed up reads. It should spread data across many nodes, handle node failures gracefully, evict under memory pressure, deal with hot keys, and keep cached data reasonably consistent with the source of truth.",
   "blurb": "Consistent hashing, eviction policies, replication, hot keys, and cache invalidation.",
   "rubric": [

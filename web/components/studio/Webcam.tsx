@@ -1,10 +1,15 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
+
+export type CameraStatus = "checking" | "verified" | "unavailable";
+
 export function Webcam({
   onReady,
+  onStatus,
   compact = false,
 }: {
   onReady?: (video: HTMLVideoElement) => void;
+  onStatus?: (status: CameraStatus) => void;
   compact?: boolean;
 }) {
   const ref = useRef<HTMLVideoElement>(null);
@@ -12,6 +17,22 @@ export function Webcam({
   useEffect(() => {
     let cancelled = false;
     let stream: MediaStream | undefined;
+    const release = () => {
+      stream?.getTracks().forEach((track) => {
+        track.onended = null;
+        track.stop();
+      });
+      stream = undefined;
+    };
+    const unavailable = () => {
+      release();
+      if (ref.current) ref.current.srcObject = null;
+      if (!cancelled) {
+        setError("Camera unavailable. The interview continues without it.");
+        onStatus?.("unavailable");
+      }
+    };
+    onStatus?.("checking");
     (async () => {
       try {
         stream = await navigator.mediaDevices.getUserMedia({
@@ -19,35 +40,42 @@ export function Webcam({
           audio: false,
         });
         if (cancelled) {
-          stream.getTracks().forEach((t) => t.stop());
+          release();
           return;
         }
+        const track = stream.getVideoTracks()[0];
+        if (!track || track.readyState !== "live")
+          throw new Error("No live camera track");
+        track.onended = unavailable;
         if (ref.current) {
           ref.current.srcObject = stream;
           await ref.current.play();
-          if (!cancelled) onReady?.(ref.current);
+          if (!cancelled && stream && track.readyState === "live") {
+            onStatus?.("verified");
+            onReady?.(ref.current);
+          }
         }
       } catch {
-        stream?.getTracks().forEach((track) => track.stop());
-        stream = undefined;
-        if (ref.current) ref.current.srcObject = null;
-        if (!cancelled)
-          setError("Camera unavailable. The interview continues without it.");
+        unavailable();
       }
     })();
     return () => {
       cancelled = true;
-      stream?.getTracks().forEach((t) => t.stop());
+      release();
     };
-  }, [onReady]);
+  }, [onReady, onStatus]);
   return (
     <div className="overflow-hidden rounded-xl border border-[var(--color-line)] bg-[var(--color-panel-2)]">
       <p className={compact ? "px-2 py-1 text-[10px]" : "px-3 py-2 text-xs"}>
         {compact ? "You · private" : "Your self-view · visible only to you"}
       </p>
       {error ? (
-        <p role="status" className="p-4 text-xs">
-          {error}
+        <p
+          role="status"
+          title={error}
+          className={compact ? "p-2 text-[10px]" : "p-4 text-xs"}
+        >
+          {compact ? "Camera unavailable" : error}
         </p>
       ) : (
         <video

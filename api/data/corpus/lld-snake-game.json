@@ -16,6 +16,7 @@
     "state-machine",
     "machine-coding"
   ],
+  "candidate_brief": "Design the classic Snake game on a grid. The player controls movement; eating food grows the snake, and hitting a wall or the snake’s own body ends the game.",
   "prompt": "Design the classic Snake game. A snake moves on a grid in a direction the player controls; it grows when it eats food and the game ends when it hits a wall or itself. Model the classes, the game loop, and — importantly — the data structures that make each move O(1) rather than scanning the whole snake. Sketch the class diagram.",
   "blurb": "Deceptively simple OOD where the data structures matter — an O(1) move using a deque plus a position set for self-collision.",
   "rubric": [
@@ -28,13 +29,13 @@
     {
       "key": "core_entities",
       "label": "Core entities",
-      "description": "Identifies Game, Board/Grid, Snake, Food, Cell/Point, Direction, and a game-loop/engine.",
+      "description": "Assess whether the chosen decomposition expresses the required behavior and contracts. Names, class counts and representations below are examples; equivalent alternatives are valid: Identifies Game, Board/Grid, Snake, Food, Cell/Point, Direction, and a game-loop/engine.",
       "weight": 1.0
     },
     {
       "key": "class_design",
       "label": "Class design",
-      "description": "Snake owns its body and movement, Board owns dimensions and food, Game orchestrates ticks; no god class with a raw 2D array holding everything.",
+      "description": "Assess whether the chosen decomposition expresses the required behavior and contracts. Names, class counts and representations below are examples; equivalent alternatives are valid: Snake owns its body and movement, Board owns dimensions and food, Game orchestrates ticks; no god class with a raw 2D array holding everything.",
       "weight": 1.1
     },
     {
@@ -58,7 +59,7 @@
     {
       "key": "api_methods",
       "label": "API methods",
-      "description": "move(direction)/tick(), changeDirection, spawnFood, isGameOver, getScore; clean signatures.",
+      "description": "Assess whether the chosen decomposition expresses the required behavior and contracts. Names, class counts and representations below are examples; equivalent alternatives are valid: move(direction)/tick(), changeDirection, spawnFood, isGameOver, getScore; clean signatures.",
       "weight": 0.9
     },
     {

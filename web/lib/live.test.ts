@@ -35,11 +35,38 @@ const sources: {
   onended: (() => void) | null;
 }[] = [];
 class Audio {
+  static instances: Audio[] = [];
+  static initialState = "running";
+  static allowResume = true;
   currentTime = 0;
-  state = "running";
+  state = Audio.initialState;
+  onstatechange: (() => void) | null = null;
   destination = {};
-  resume = vi.fn(async () => {});
+  resume = vi.fn(async () => {
+    if (Audio.allowResume) {
+      this.state = "running";
+      this.onstatechange?.();
+    }
+  });
   close = vi.fn(async () => {});
+  processor = {
+    connect: vi.fn(),
+    disconnect: vi.fn(),
+    onaudioprocess: null as
+      | ((event: {
+          inputBuffer: { getChannelData: () => Float32Array };
+        }) => void)
+      | null,
+  };
+  constructor() {
+    Audio.instances.push(this);
+  }
+  createMediaStreamSource() {
+    return { connect: vi.fn(), disconnect: vi.fn() };
+  }
+  createScriptProcessor() {
+    return this.processor;
+  }
   createAnalyser() {
     return { fftSize: 512, connect: vi.fn(), getFloatTimeDomainData: vi.fn() };
   }
@@ -64,6 +91,9 @@ beforeEach(() => {
   vi.useFakeTimers();
   Socket.instances = [];
   sources.length = 0;
+  Audio.instances = [];
+  Audio.initialState = "running";
+  Audio.allowResume = true;
   sessionStorage.clear();
   vi.stubGlobal("WebSocket", Socket);
   vi.stubGlobal("AudioContext", Audio);
@@ -75,6 +105,132 @@ beforeEach(() => {
   Object.defineProperty(navigator, "mediaDevices", {
     configurable: true,
     value: { getUserMedia: vi.fn() },
+  });
+});
+
+describe("truthful room device health", () => {
+  function microphone() {
+    const track = Object.assign(new EventTarget(), {
+      readyState: "live",
+      muted: false,
+      stop: vi.fn(),
+    });
+    const stream = {
+      getTracks: () => [track],
+      getAudioTracks: () => [track],
+    } as unknown as MediaStream;
+    vi.mocked(navigator.mediaDevices.getUserMedia).mockResolvedValue(stream);
+    return track;
+  }
+
+  it("initializes sound automatically and asks for recovery only while playback is suspended", async () => {
+    Audio.initialState = "suspended";
+    Audio.allowResume = false;
+    await start("voice");
+    expect(live.playbackState()).toBe("blocked");
+    expect(Audio.instances).toHaveLength(1);
+    Audio.allowResume = true;
+    document.dispatchEvent(new Event("pointerdown"));
+    await Promise.resolve();
+    expect(live.playbackState()).toBe("ready");
+    const context = Audio.instances[0];
+    context.state = "suspended";
+    context.onstatechange?.();
+    expect(live.playbackState()).toBe("blocked");
+    live.end();
+    const resumes = context.resume.mock.calls.length;
+    document.dispatchEvent(new Event("keydown"));
+    expect(context.resume).toHaveBeenCalledTimes(resumes);
+  });
+
+  it("reports capture, real input, muted input, and disconnected devices separately", async () => {
+    const track = microphone();
+    const socket = await start("voice");
+    const level = vi.fn();
+    live.on("micLevel", level);
+    socket.message({ type: "ready", mode: "voice" });
+    expect(live.microphoneState()).toBe("starting");
+    await Promise.resolve();
+    expect(live.microphoneState()).toBe("live");
+    const capture = Audio.instances[1];
+    capture.processor.onaudioprocess?.({
+      inputBuffer: { getChannelData: () => new Float32Array([0.1, -0.1]) },
+    });
+    expect(level).toHaveBeenLastCalledWith(expect.closeTo(0.4));
+    track.muted = true;
+    track.dispatchEvent(new Event("mute"));
+    expect(live.microphoneState()).toBe("interrupted");
+    expect(level).toHaveBeenLastCalledWith(0);
+    track.muted = false;
+    track.dispatchEvent(new Event("unmute"));
+    expect(live.microphoneState()).toBe("live");
+    track.readyState = "ended";
+    track.dispatchEvent(new Event("ended"));
+    expect(live.microphoneState()).toBe("unavailable");
+    expect(capture.close).toHaveBeenCalledOnce();
+    live.setMuted(true);
+    expect(live.microphoneState()).toBe("muted");
+  });
+
+  it("clears stale microphone health when the connection drops", async () => {
+    const track = microphone();
+    const socket = await start("voice");
+    socket.message({ type: "ready", mode: "voice" });
+    await Promise.resolve();
+    expect(live.microphoneState()).toBe("live");
+    socket.close();
+    expect(live.microphoneState()).toBe("off");
+    expect(track.stop).toHaveBeenCalledOnce();
+    expect(live.connectionState()).toBe("reconnecting");
+  });
+
+  it("recovers a suspended microphone without interrupting healthy speaker playback", async () => {
+    microphone();
+    const socket = await start("voice");
+    socket.message({ type: "ready", mode: "voice" });
+    await Promise.resolve();
+    const capture = Audio.instances[1];
+    capture.state = "suspended";
+    capture.onstatechange?.();
+    capture.resume.mockRejectedValueOnce(
+      new Error("Capture still interrupted"),
+    );
+    await live.enableAudio();
+    expect(live.microphoneState()).toBe("interrupted");
+    expect(live.playbackState()).toBe("ready");
+    await live.enableAudio();
+    expect(live.microphoneState()).toBe("live");
+    expect(Audio.instances).toHaveLength(2);
+  });
+
+  it("preserves a microphone mute chosen while connecting", async () => {
+    const socket = await start("voice");
+    live.setMuted(true);
+    socket.message({ type: "ready", mode: "voice" });
+    expect(live.microphoneState()).toBe("muted");
+    expect(navigator.mediaDevices.getUserMedia).not.toHaveBeenCalled();
+  });
+
+  it("surfaces denied microphone permission without claiming that it is live", async () => {
+    vi.mocked(navigator.mediaDevices.getUserMedia).mockRejectedValue(
+      new DOMException("Denied", "NotAllowedError"),
+    );
+    const socket = await start("voice");
+    socket.message({ type: "ready", mode: "voice" });
+    await Promise.resolve();
+    expect(live.microphoneState()).toBe("unavailable");
+    live.submitText("I can continue by typing.");
+    expect(sentMessages("user_text")).toHaveLength(1);
+  });
+
+  it("does not initialize voice hardware or an audio prompt for text interviews", async () => {
+    const socket = await start("text");
+    socket.message({ type: "ready", mode: "text" });
+    document.dispatchEvent(new Event("pointerdown"));
+    expect(live.microphoneState()).toBe("off");
+    expect(live.playbackState()).toBe("idle");
+    expect(Audio.instances).toHaveLength(0);
+    expect(navigator.mediaDevices.getUserMedia).not.toHaveBeenCalled();
   });
 });
 afterEach(() => {
@@ -175,6 +331,15 @@ describe("live transport lifecycle", () => {
     }
     expect(live.connectionState()).toBe("failed");
     expect(Socket.instances).toHaveLength(6);
+  });
+  it("does not send control messages after the socket starts closing", async () => {
+    const socket = await start();
+    socket.message({ type: "ready", mode: "text" });
+    socket.send.mockClear();
+    socket.readyState = 2;
+    live.sendTime("One minute remaining");
+    live.end();
+    expect(socket.send).not.toHaveBeenCalled();
   });
 });
 
@@ -282,6 +447,49 @@ describe("silence nudge budget", () => {
 });
 
 describe("workspace observation and candidate thinking time", () => {
+  it("flushes current work before speech onset and again after a pause without sending every audio block", async () => {
+    const track = Object.assign(new EventTarget(), {
+      readyState: "live",
+      muted: false,
+      stop: vi.fn(),
+    });
+    vi.mocked(navigator.mediaDevices.getUserMedia).mockResolvedValue({
+      getTracks: () => [track],
+      getAudioTracks: () => [track],
+    } as unknown as MediaStream);
+    const socket = await start("voice");
+    socket.message({ type: "ready", mode: "voice" });
+    await Promise.resolve();
+    const capture = Audio.instances[1];
+    const audioBlock = (level: number, length = 2048) =>
+      capture.processor.onaudioprocess?.({
+        inputBuffer: {
+          getChannelData: () => new Float32Array(length).fill(level),
+        },
+      });
+    live.sendCanvas("code just edited");
+    audioBlock(0);
+    expect(sentMessages("canvas")).toHaveLength(0);
+    socket.send.mockClear();
+    audioBlock(0.03);
+    expect(JSON.parse(socket.send.mock.calls[0][0])).toEqual({
+      type: "canvas",
+      text: "code just edited",
+    });
+    expect(socket.send.mock.calls[1][0]).toBeInstanceOf(ArrayBuffer);
+    live.sendCanvas("code edited while speaking");
+    audioBlock(0.03);
+    expect(sentMessages("canvas")).toHaveLength(1);
+    audioBlock(0, 6400);
+    audioBlock(0.03);
+    expect(sentMessages("canvas").at(-1)?.text).toBe(
+      "code edited while speaking",
+    );
+    audioBlock(0, 6400);
+    audioBlock(0.03);
+    expect(sentMessages("canvas")).toHaveLength(2);
+  });
+
   it("sends only changed snapshots every five seconds, including erased work", async () => {
     const socket = await start();
     socket.message({ type: "ready", mode: "text" });

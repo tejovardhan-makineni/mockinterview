@@ -16,6 +16,7 @@
     "inorder-traversal",
     "invariants"
   ],
+  "candidate_brief": "Given a binary tree, determine whether it is a valid binary search tree. Every value in a node’s left subtree must be strictly smaller, and every value in its right subtree strictly larger; equal values are not allowed.",
   "prompt": "Given the root of a binary tree, determine whether it is a valid binary search tree (BST). A valid BST requires: every node in a node's LEFT subtree is strictly less than the node, every node in its RIGHT subtree is strictly greater, and both subtrees are themselves valid BSTs. Note the constraint is over the entire subtree, not just the immediate children.",
   "blurb": "The classic invariant trap — checking node-vs-children is wrong; you must bound each node by a (min, max) range or verify a strictly increasing inorder traversal.",
   "rubric": [
@@ -28,25 +29,25 @@
     {
       "key": "approach",
       "label": "Approach",
-      "description": "Reaches either the (min, max) range-passing recursion or the inorder traversal that must be strictly increasing. Can explain why both work and how they encode the global constraint.",
+      "description": "Assess a correct approach and justified efficiency for the disclosed requirements; accept equivalent alternatives. Reference examples, not mandatory algorithms: Reaches either the (min, max) range-passing recursion or the inorder traversal that must be strictly increasing. Can explain why both work and how they encode the global constraint.",
       "weight": 1.3
     },
     {
       "key": "correctness",
       "label": "Correctness",
-      "description": "Range approach: tightens low on right descent and high on left descent, uses open bounds (strict <, >), handles integer-limit values (why null/None bounds beat MIN/MAX sentinels). Inorder: compares each value to the previous and fails on <=.",
+      "description": "Judge actual outputs and invariants of the chosen approach, crediting valid corrections. The following checks apply to the illustrated implementation, not every valid solution: Range approach: tightens low on right descent and high on left descent, uses open bounds (strict <, >), handles integer-limit values (why null/None bounds beat MIN/MAX sentinels). Inorder: compares each value to the previous and fails on <=.",
       "weight": 1.3
     },
     {
       "key": "complexity_analysis",
       "label": "Complexity analysis",
-      "description": "O(n) time (each node visited once). Space O(h) for the recursion/inorder stack — O(log n) balanced, O(n) skewed. Notes Morris traversal achieves O(1) space.",
+      "description": "Verify the time and space analysis of the actual implementation. Preserve disclosed performance requirements; these reference figures do not introduce hidden bounds or mandate an algorithm: O(n) time (each node visited once). Space O(h) for the recursion/inorder stack — O(log n) balanced, O(n) skewed. Notes Morris traversal achieves O(1) space.",
       "weight": 1.0
     },
     {
       "key": "code_quality",
       "label": "Code quality",
-      "description": "Clean recursive helper carrying bounds, or an inorder that early-exits on the first violation rather than building the full list; no repeated subtree traversals.",
+      "description": "Assess readability, appropriate structure and avoidable duplication in the chosen solution. These are illustrative implementation choices, not required forms: Clean recursive helper carrying bounds, or an inorder that early-exits on the first violation rather than building the full list; no repeated subtree traversals.",
       "weight": 1.0
     },
     {
@@ -64,7 +65,7 @@
     {
       "key": "communication",
       "label": "Communication",
-      "description": "Articulates why local checks fail, and why inorder-strictly-increasing is an equivalent characterization of a BST.",
+      "description": "Assess whether the candidate explains the decisions and invariants of their own approach, without requiring an algorithm name or a prescribed order. Reference-specific explanation examples: Articulates why local checks fail, and why inorder-strictly-increasing is an equivalent characterization of a BST.",
       "weight": 0.8
     }
   ],

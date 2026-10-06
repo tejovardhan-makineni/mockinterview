@@ -110,6 +110,9 @@ func firstQuestionFocus(q corpus.Question) string {
 // particular, "one question" must not turn into asking about a problem the
 // voice candidate has not yet heard. Later variants remain in the full brief.
 func firstQuestionSetup(q corpus.Question) string {
+	if brief := strings.TrimSpace(q.CandidateBrief); brief != "" {
+		return brief + " Present only this opening and give the candidate the floor. Keep the private full assignment and later variations for matching clarifications or explicitly introduced follow-ups."
+	}
 	if q.Domain == "custom" {
 		return "Briefly explain the format you selected for the candidate's profession and goal. Treat their free-text level as the target seniority. Do not read the full brief, all planned stages, the rubric, or the whole question list aloud. Introduce only the context needed for the first question."
 	}

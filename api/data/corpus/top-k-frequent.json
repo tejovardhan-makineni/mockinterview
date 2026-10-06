@@ -16,6 +16,7 @@
     "quickselect",
     "counting"
   ],
+  "candidate_brief": "Given an integer array nums and an integer k, return its k most frequent elements in any order. The answer is guaranteed to be unique.",
   "prompt": "Given an integer array nums and an integer k, return the k most frequent elements. You may return the answer in any order. It is guaranteed the answer is unique. Can you design an algorithm that beats the O(n log n) of sorting all elements by frequency?",
   "blurb": "Count then select — a size-k min-heap gives O(n log k), and bucket sort by frequency achieves O(n) by indexing counts into an array of buckets.",
   "rubric": [
@@ -28,25 +29,25 @@
     {
       "key": "approach",
       "label": "Approach",
-      "description": "Builds a frequency map, then selects top k via a size-k min-heap (O(n log k)) or bucket sort by frequency (O(n)). Can articulate the Quickselect-on-unique-elements alternative for O(n) average.",
+      "description": "Assess a correct approach and justified efficiency for the disclosed requirements; accept equivalent alternatives. Reference examples, not mandatory algorithms: Builds a frequency map, then selects top k via a size-k min-heap (O(n log k)) or bucket sort by frequency (O(n)). Can articulate the Quickselect-on-unique-elements alternative for O(n) average.",
       "weight": 1.3
     },
     {
       "key": "correctness",
       "label": "Correctness",
-      "description": "Heap: keeps exactly k by popping the smallest-count when size exceeds k; extracts k elements. Bucket: index = frequency (0..n), place elements in bucket[freq], scan buckets high-to-low collecting until k are gathered. No off-by-one on bucket size (n+1).",
+      "description": "Judge actual outputs and invariants of the chosen approach, crediting valid corrections. The following checks apply to the illustrated implementation, not every valid solution: Heap: keeps exactly k by popping the smallest-count when size exceeds k; extracts k elements. Bucket: index = frequency (0..n), place elements in bucket[freq], scan buckets high-to-low collecting until k are gathered. No off-by-one on bucket size (n+1).",
       "weight": 1.3
     },
     {
       "key": "complexity_analysis",
       "label": "Complexity analysis",
-      "description": "Heap O(n log k) time / O(n + k) space. Bucket sort O(n) time / O(n) space. Quickselect O(n) average. Explains why bucket sort escapes the log factor: frequency is bounded by n, so it can be used as an array index.",
+      "description": "Verify the time and space analysis of the actual implementation. Preserve disclosed performance requirements; these reference figures do not introduce hidden bounds or mandate an algorithm: Heap O(n log k) time / O(n + k) space. Bucket sort O(n) time / O(n) space. Quickselect O(n) average. Explains why bucket sort escapes the log factor: frequency is bounded by n, so it can be used as an array index.",
       "weight": 1.1
     },
     {
       "key": "code_quality",
       "label": "Code quality",
-      "description": "Clean Counter/hash-map build, a single heap or a clean bucket array of lists; collection loop terminates correctly at k without over-collecting.",
+      "description": "Assess readability, appropriate structure and avoidable duplication in the chosen solution. These are illustrative implementation choices, not required forms: Clean Counter/hash-map build, a single heap or a clean bucket array of lists; collection loop terminates correctly at k without over-collecting.",
       "weight": 1.0
     },
     {
@@ -64,7 +65,7 @@
     {
       "key": "communication",
       "label": "Communication",
-      "description": "Explains the count-then-select decomposition and why frequency being bounded by n unlocks the linear bucket-sort trick.",
+      "description": "Assess whether the candidate explains the decisions and invariants of their own approach, without requiring an algorithm name or a prescribed order. Reference-specific explanation examples: Explains the count-then-select decomposition and why frequency being bounded by n unlocks the linear bucket-sort trick.",
       "weight": 0.8
     }
   ],

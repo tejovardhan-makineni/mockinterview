@@ -19,7 +19,9 @@
         "summary": "AI practice for reconciliations, close processes and internal controls."
       },
       "count": 5,
-      "tracks": ["professional"]
+      "tracks": [
+        "professional"
+      ]
     },
     {
       "key": "business_operations",
@@ -39,7 +41,9 @@
         "summary": "AI practice for workflow improvement, analysis and operational decisions."
       },
       "count": 5,
-      "tracks": ["professional"]
+      "tracks": [
+        "professional"
+      ]
     },
     {
       "key": "career_foundations",
@@ -62,7 +66,9 @@
         "summary": "AI practice for first jobs, career changes, recruiter conversations and offers."
       },
       "count": 5,
-      "tracks": ["professional"]
+      "tracks": [
+        "professional"
+      ]
     },
     {
       "key": "civil_engineering",
@@ -81,21 +87,30 @@
         "summary": "AI practice for structures, infrastructure and engineering risk."
       },
       "count": 6,
-      "tracks": ["engineering", "professional"]
+      "tracks": [
+        "engineering",
+        "professional"
+      ]
     },
     {
       "key": "consulting",
       "label": "Consulting",
       "family": "business",
       "family_label": "Business, finance \u0026 operations",
-      "aliases": ["consultant", "case interview", "strategy"],
+      "aliases": [
+        "consultant",
+        "case interview",
+        "strategy"
+      ],
       "agent": {
         "id": "consulting-interviewer",
         "name": "Consulting interviewer",
         "summary": "AI practice for structured cases, analysis and recommendations."
       },
       "count": 6,
-      "tracks": ["professional"]
+      "tracks": [
+        "professional"
+      ]
     },
     {
       "key": "creative_communications",
@@ -118,7 +133,9 @@
         "summary": "AI practice for writing, briefs, portfolio choices and stakeholder feedback."
       },
       "count": 5,
-      "tracks": ["professional"]
+      "tracks": [
+        "professional"
+      ]
     },
     {
       "key": "customer_support",
@@ -138,7 +155,9 @@
         "summary": "AI practice for difficult conversations, case triage and customer follow-through."
       },
       "count": 6,
-      "tracks": ["professional"]
+      "tracks": [
+        "professional"
+      ]
     },
     {
       "key": "cybersecurity",
@@ -158,7 +177,9 @@
         "summary": "AI practice for incident response, threat assessment and security judgment."
       },
       "count": 5,
-      "tracks": ["professional"]
+      "tracks": [
+        "professional"
+      ]
     },
     {
       "key": "data_science",
@@ -179,7 +200,10 @@
         "summary": "AI practice for analysis, experimentation, modeling and data decisions."
       },
       "count": 7,
-      "tracks": ["engineering", "professional"]
+      "tracks": [
+        "engineering",
+        "professional"
+      ]
     },
     {
       "key": "education",
@@ -200,7 +224,9 @@
         "summary": "AI practice for instruction, classroom judgment and learner support."
       },
       "count": 6,
-      "tracks": ["professional"]
+      "tracks": [
+        "professional"
+      ]
     },
     {
       "key": "electrical_engineering",
@@ -219,7 +245,10 @@
         "summary": "AI practice for circuits, power, signals and verification."
       },
       "count": 6,
-      "tracks": ["engineering", "professional"]
+      "tracks": [
+        "engineering",
+        "professional"
+      ]
     },
     {
       "key": "finance",
@@ -238,7 +267,9 @@
         "summary": "AI practice for financial analysis, valuation and decision making."
       },
       "count": 5,
-      "tracks": ["professional"]
+      "tracks": [
+        "professional"
+      ]
     },
     {
       "key": "human_resources",
@@ -258,7 +289,9 @@
         "summary": "AI practice for employee conversations, hiring operations and fair process."
       },
       "count": 6,
-      "tracks": ["professional"]
+      "tracks": [
+        "professional"
+      ]
     },
     {
       "key": "it_support",
@@ -278,35 +311,53 @@
         "summary": "AI practice for troubleshooting, service desks and user communication."
       },
       "count": 5,
-      "tracks": ["professional"]
+      "tracks": [
+        "professional"
+      ]
     },
     {
       "key": "law",
       "label": "Law",
       "family": "education_public",
       "family_label": "Education, research \u0026 public service",
-      "aliases": ["lawyer", "attorney", "legal", "paralegal", "solicitor"],
+      "aliases": [
+        "lawyer",
+        "attorney",
+        "legal",
+        "paralegal",
+        "solicitor"
+      ],
       "agent": {
         "id": "law-interviewer",
         "name": "Law interviewer",
         "summary": "AI practice for issue spotting, legal analysis and client communication."
       },
       "count": 6,
-      "tracks": ["professional"]
+      "tracks": [
+        "professional"
+      ]
     },
     {
       "key": "marketing",
       "label": "Marketing",
       "family": "customer_creative",
       "family_label": "Customer, sales \u0026 creative",
-      "aliases": ["digital marketing", "growth", "brand", "SEO", "campaigns"],
+      "aliases": [
+        "digital marketing",
+        "growth",
+        "brand",
+        "SEO",
+        "campaigns"
+      ],
       "agent": {
         "id": "marketing-interviewer",
         "name": "Marketing interviewer",
         "summary": "AI practice for audiences, campaigns, measurement and marketing judgment."
       },
       "count": 5,
-      "tracks": ["professional"]
+      "tracks": [
+        "professional"
+      ]
     },
     {
       "key": "mechanical_engineering",
@@ -325,49 +376,74 @@
         "summary": "AI practice for mechanics, thermal systems and practical design tradeoffs."
       },
       "count": 7,
-      "tracks": ["engineering", "professional"]
+      "tracks": [
+        "engineering",
+        "professional"
+      ]
     },
     {
       "key": "medicine",
       "label": "Medicine",
       "family": "healthcare",
       "family_label": "Healthcare \u0026 care",
-      "aliases": ["doctor", "physician", "medical student", "residency", "MMI"],
+      "aliases": [
+        "doctor",
+        "physician",
+        "medical student",
+        "residency",
+        "MMI"
+      ],
       "agent": {
         "id": "medicine-interviewer",
         "name": "Medicine interviewer",
         "summary": "AI practice for clinical reasoning, ethical stations and patient communication."
       },
       "count": 6,
-      "tracks": ["professional"]
+      "tracks": [
+        "professional"
+      ]
     },
     {
       "key": "nursing",
       "label": "Nursing",
       "family": "healthcare",
       "family_label": "Healthcare \u0026 care",
-      "aliases": ["nurse", "RN", "LPN", "patient care", "charge nurse"],
+      "aliases": [
+        "nurse",
+        "RN",
+        "LPN",
+        "patient care",
+        "charge nurse"
+      ],
       "agent": {
         "id": "nursing-interviewer",
         "name": "Nursing interviewer",
         "summary": "AI practice for prioritization, patient safety, delegation and handoffs."
       },
       "count": 5,
-      "tracks": ["professional"]
+      "tracks": [
+        "professional"
+      ]
     },
     {
       "key": "product_management",
       "label": "Product Management",
       "family": "business",
       "family_label": "Business, finance \u0026 operations",
-      "aliases": ["product manager", "PM", "product owner"],
+      "aliases": [
+        "product manager",
+        "PM",
+        "product owner"
+      ],
       "agent": {
         "id": "product-management-interviewer",
         "name": "Product Management interviewer",
         "summary": "AI practice for product decisions, prioritization and stakeholder tradeoffs."
       },
       "count": 5,
-      "tracks": ["professional"]
+      "tracks": [
+        "professional"
+      ]
     },
     {
       "key": "project_management",
@@ -387,7 +463,9 @@
         "summary": "AI practice for delivery planning, dependencies and stakeholder decisions."
       },
       "count": 5,
-      "tracks": ["professional"]
+      "tracks": [
+        "professional"
+      ]
     },
     {
       "key": "public_service",
@@ -408,21 +486,31 @@
         "summary": "AI practice for public-facing decisions, service delivery and accountability."
       },
       "count": 6,
-      "tracks": ["professional"]
+      "tracks": [
+        "professional"
+      ]
     },
     {
       "key": "quality_assurance",
       "label": "Quality Assurance",
       "family": "technology",
       "family_label": "Technology \u0026 data",
-      "aliases": ["QA", "tester", "test engineer", "SDET", "quality engineer"],
+      "aliases": [
+        "QA",
+        "tester",
+        "test engineer",
+        "SDET",
+        "quality engineer"
+      ],
       "agent": {
         "id": "quality-assurance-interviewer",
         "name": "Quality Assurance interviewer",
         "summary": "AI practice for test strategy, defect analysis and release decisions."
       },
       "count": 5,
-      "tracks": ["professional"]
+      "tracks": [
+        "professional"
+      ]
     },
     {
       "key": "research",
@@ -443,7 +531,9 @@
         "summary": "AI practice for study design, evidence, research integrity and communication."
       },
       "count": 5,
-      "tracks": ["professional"]
+      "tracks": [
+        "professional"
+      ]
     },
     {
       "key": "retail_hospitality",
@@ -466,7 +556,9 @@
         "summary": "AI practice for guest service, shift priorities and frontline teamwork."
       },
       "count": 6,
-      "tracks": ["professional"]
+      "tracks": [
+        "professional"
+      ]
     },
     {
       "key": "sales",
@@ -486,7 +578,9 @@
         "summary": "AI practice for discovery, objections, negotiation and account judgment."
       },
       "count": 6,
-      "tracks": ["professional"]
+      "tracks": [
+        "professional"
+      ]
     },
     {
       "key": "skilled_trades",
@@ -508,7 +602,9 @@
         "summary": "AI practice for apprenticeships, safe diagnostics and worksite communication."
       },
       "count": 6,
-      "tracks": ["professional"]
+      "tracks": [
+        "professional"
+      ]
     },
     {
       "key": "social_work",
@@ -529,7 +625,9 @@
         "summary": "AI practice for safeguarding, boundaries, care coordination and case judgment."
       },
       "count": 5,
-      "tracks": ["professional"]
+      "tracks": [
+        "professional"
+      ]
     },
     {
       "key": "software_engineering",
@@ -552,7 +650,10 @@
         "summary": "AI practice for code, architecture, debugging and engineering judgment."
       },
       "count": 8,
-      "tracks": ["engineering", "professional"]
+      "tracks": [
+        "engineering",
+        "professional"
+      ]
     },
     {
       "key": "supply_chain",
@@ -573,7 +674,9 @@
         "summary": "AI practice for inventory, logistics, supplier risk and service tradeoffs."
       },
       "count": 5,
-      "tracks": ["professional"]
+      "tracks": [
+        "professional"
+      ]
     },
     {
       "key": "ux_design",
@@ -594,7 +697,9 @@
         "summary": "AI practice for portfolios, research, critique and accessible product design."
       },
       "count": 5,
-      "tracks": ["professional"]
+      "tracks": [
+        "professional"
+      ]
     }
   ],
   "questions": [
@@ -614,12 +719,21 @@
       "title": "Design a URL Shortener (TinyURL)",
       "track": "engineering",
       "domain": "system_design",
-      "areas": ["software_engineering"],
+      "areas": [
+        "software_engineering"
+      ],
       "modality": "system_design",
       "difficulty": "mid",
-      "tags": ["hashing", "kv-store", "caching", "read-heavy", "cdn"],
-      "prompt": "Design a service that converts long URLs into short links and redirects users from a short link to the original URL. Assume it must serve a large, read-heavy global audience.",
-      "blurb": "The classic read-heavy KV design — key generation, collisions, cache, CDN, and analytics."
+      "tags": [
+        "hashing",
+        "kv-store",
+        "caching",
+        "read-heavy",
+        "cdn"
+      ],
+      "prompt": "Design a service that creates short links from long URLs and redirects each short link to its original URL.",
+      "blurb": "The classic read-heavy KV design — key generation, collisions, cache, CDN, and analytics.",
+      "candidate_brief": "Design a service that creates short links from long URLs and redirects each short link to its original URL."
     },
     {
       "schema_version": 0,
@@ -637,7 +751,10 @@
       "title": "Design a Retrieval-Augmented Generation (RAG) Service",
       "track": "engineering",
       "domain": "ml_system_design",
-      "areas": ["software_engineering", "data_science"],
+      "areas": [
+        "software_engineering",
+        "data_science"
+      ],
       "modality": "system_design",
       "difficulty": "senior",
       "tags": [
@@ -649,8 +766,9 @@
         "hallucination",
         "eval"
       ],
-      "prompt": "Design a retrieval-augmented generation service that answers user questions over a company's private documents (wikis, PDFs, tickets, code). It must ground answers in the corpus with citations, stay fresh as documents change, and control hallucination. Assume a large enterprise corpus and interactive latency.",
-      "blurb": "The end-to-end RAG design — ingestion and chunking, embeddings, vector index, retrieval plus reranking, grounded generation, eval, and hallucination control."
+      "prompt": "Design a service that answers employee questions using a company’s private documents and cites the supporting sources.",
+      "blurb": "The end-to-end RAG design — ingestion and chunking, embeddings, vector index, retrieval plus reranking, grounded generation, eval, and hallucination control.",
+      "candidate_brief": "Design a service that answers employee questions using a company’s private documents and cites the supporting sources."
     },
     {
       "schema_version": 0,
@@ -668,12 +786,22 @@
       "title": "Design and Implement an LRU Cache",
       "track": "engineering",
       "domain": "coding",
-      "areas": ["software_engineering", "data_science"],
+      "areas": [
+        "software_engineering",
+        "data_science"
+      ],
       "modality": "coding",
       "difficulty": "mid",
-      "tags": ["hashmap", "linked-list", "design", "cache", "o1"],
-      "prompt": "Design a data structure for a Least Recently Used (LRU) cache. It supports get(key) and put(key, value). get returns the value if the key exists, else -1, and marks the key as most-recently used. put inserts or updates the value; if the cache exceeds its fixed capacity, it evicts the least-recently-used key. Both operations must run in O(1) average time.",
-      "blurb": "The classic O(1) cache design — a hash map for lookup plus a doubly linked list for recency ordering."
+      "tags": [
+        "hashmap",
+        "linked-list",
+        "design",
+        "cache",
+        "o1"
+      ],
+      "prompt": "Implement a fixed-capacity LRU cache with get(key) and put(key, value), each in O(1) average time. get returns -1 for a missing key. Reading, inserting, or updating a key makes it most recently used; exceeding capacity evicts the least recently used key.",
+      "blurb": "The classic O(1) cache design — a hash map for lookup plus a doubly linked list for recency ordering.",
+      "candidate_brief": "Implement a fixed-capacity LRU cache with get(key) and put(key, value), each in O(1) average time. get returns -1 for a missing key. Reading, inserting, or updating a key makes it most recently used; exceeding capacity evicts the least recently used key."
     },
     {
       "schema_version": 0,
@@ -691,7 +819,9 @@
       "title": "Size a Steam Power Cycle (Rankine)",
       "track": "engineering",
       "domain": "thermodynamics",
-      "areas": ["mechanical_engineering"],
+      "areas": [
+        "mechanical_engineering"
+      ],
       "modality": "conversational",
       "difficulty": "senior",
       "tags": [
@@ -721,7 +851,9 @@
       "title": "Analyze a Loaded Cantilever Beam",
       "track": "engineering",
       "domain": "mechanics",
-      "areas": ["mechanical_engineering"],
+      "areas": [
+        "mechanical_engineering"
+      ],
       "modality": "conversational",
       "difficulty": "mid",
       "tags": [
@@ -751,7 +883,9 @@
       "title": "Analyze an Op-Amp Amplifier",
       "track": "engineering",
       "domain": "circuits",
-      "areas": ["electrical_engineering"],
+      "areas": [
+        "electrical_engineering"
+      ],
       "modality": "conversational",
       "difficulty": "mid",
       "tags": [
@@ -781,7 +915,9 @@
       "title": "Trace a Building's Gravity Load Path",
       "track": "engineering",
       "domain": "structural",
-      "areas": ["civil_engineering"],
+      "areas": [
+        "civil_engineering"
+      ],
       "modality": "conversational",
       "difficulty": "mid",
       "tags": [
@@ -872,7 +1008,9 @@
       "title": "Clinical Reasoning: Acute Chest Pain",
       "track": "professional",
       "domain": "clinical_reasoning",
-      "areas": ["medicine"],
+      "areas": [
+        "medicine"
+      ],
       "modality": "conversational",
       "difficulty": "mid",
       "tags": [
@@ -901,7 +1039,9 @@
       "title": "Issue-Spotting: Contract Formation (Offer, Acceptance, Consideration)",
       "track": "professional",
       "domain": "issue_spotting",
-      "areas": ["law"],
+      "areas": [
+        "law"
+      ],
       "modality": "written",
       "difficulty": "mid",
       "tags": [
@@ -931,7 +1071,9 @@
       "title": "Market Entry: Should the Client Enter a New Market?",
       "track": "professional",
       "domain": "case",
-      "areas": ["consulting"],
+      "areas": [
+        "consulting"
+      ],
       "modality": "conversational",
       "difficulty": "senior",
       "tags": [
@@ -960,7 +1102,9 @@
       "title": "Teaching Scenario: Classroom Management \u0026 Differentiated Instruction",
       "track": "professional",
       "domain": "classroom_management",
-      "areas": ["education"],
+      "areas": [
+        "education"
+      ],
       "modality": "conversational",
       "difficulty": "entry",
       "tags": [
@@ -990,7 +1134,9 @@
       "title": "HR Scenario: An Employee-Relations Difficult Conversation",
       "track": "professional",
       "domain": "employee_relations",
-      "areas": ["human_resources"],
+      "areas": [
+        "human_resources"
+      ],
       "modality": "conversational",
       "difficulty": "mid",
       "tags": [
@@ -1020,7 +1166,9 @@
       "title": "Sales Roleplay: Discovery, Objection Handling, and Advancing the Deal",
       "track": "professional",
       "domain": "sales_roleplay",
-      "areas": ["sales"],
+      "areas": [
+        "sales"
+      ],
       "modality": "conversational",
       "difficulty": "mid",
       "tags": [
@@ -1305,7 +1453,9 @@
       "title": "Maintenance Apprentice: Respond to an Unsafe Work Request",
       "track": "professional",
       "domain": "maintenance_safety",
-      "areas": ["skilled_trades"],
+      "areas": [
+        "skilled_trades"
+      ],
       "modality": "conversational",
       "difficulty": "entry",
       "tags": [
@@ -1335,7 +1485,9 @@
       "title": "Retail Associate: Handle a Return Outside the Standard Window",
       "track": "professional",
       "domain": "retail_service",
-      "areas": ["retail_hospitality"],
+      "areas": [
+        "retail_hospitality"
+      ],
       "modality": "conversational",
       "difficulty": "entry",
       "tags": [
@@ -1365,7 +1517,9 @@
       "title": "Customer Support: Recover a Missed Delivery Promise",
       "track": "professional",
       "domain": "customer_service",
-      "areas": ["customer_support"],
+      "areas": [
+        "customer_support"
+      ],
       "modality": "conversational",
       "difficulty": "entry",
       "tags": [
@@ -1395,7 +1549,9 @@
       "title": "Public Service Adviser: Help an Applicant Complete a Form",
       "track": "professional",
       "domain": "public_service_delivery",
-      "areas": ["public_service"],
+      "areas": [
+        "public_service"
+      ],
       "modality": "conversational",
       "difficulty": "entry",
       "tags": [

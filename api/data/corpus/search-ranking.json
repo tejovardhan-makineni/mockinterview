@@ -17,6 +17,7 @@
     "feature-store",
     "ml-serving"
   ],
+  "candidate_brief": "Design a search service that finds and orders documents by their relevance to a user’s query.",
   "prompt": "Design the ranking system behind a large-scale search product. Given a user query, it must retrieve candidate documents and rank them so the most relevant appear first, using an ML ranking model with query, document, and user/context features. Assume high query volume, tight latency, and continuous online evaluation.",
   "blurb": "Multi-stage retrieval + learning-to-rank: candidate generation, ranking features, training from click logs, and online eval without feedback loops.",
   "rubric": [

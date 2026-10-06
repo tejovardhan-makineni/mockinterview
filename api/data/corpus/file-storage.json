@@ -16,6 +16,7 @@
     "metadata",
     "blob-storage"
   ],
+  "candidate_brief": "Design a service that stores users’ files and keeps them synchronized across their devices.",
   "prompt": "Design a file storage and sync service like Dropbox or Google Drive. Users store files that sync across their devices; edits on one device propagate to others. Cover chunking, deduplication, efficient sync of changed bytes, conflict resolution when two devices edit offline, and the metadata layer. Assume many users with large files and multiple devices each.",
   "blurb": "Content-defined chunking, block dedup, delta sync, and the offline-edit conflict problem — the metadata plane is the real system.",
   "rubric": [

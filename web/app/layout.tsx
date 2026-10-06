@@ -1,9 +1,10 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { LanguageProvider } from "@/lib/i18n";
+import { HeaderSessionProvider } from "@/components/HeaderSession";
 
 export const metadata: Metadata = {
-  title: "MockInterview — Open source interview practice",
+  title: "MockInterview Beta — Open source interview practice",
   description:
     "Practice interviews for your role, review evidence-based feedback, and contribute new formats to an open-source platform.",
 };
@@ -30,7 +31,9 @@ export default function RootLayout({
       </head>
       <body>
         <LanguageProvider>
-          <div style={{ position: "relative", zIndex: 1 }}>{children}</div>
+          <HeaderSessionProvider>
+            <div style={{ position: "relative", zIndex: 1 }}>{children}</div>
+          </HeaderSessionProvider>
         </LanguageProvider>
       </body>
     </html>

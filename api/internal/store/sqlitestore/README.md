@@ -48,7 +48,10 @@ ordinary API JSON serialization.
   telemetry after the existing 30-day retention period. It never ages out
   interview transcripts, saved workspaces or final reports. Deleting a user
   cascades through all owned records. The short-lived pseudonymous usage ledger
-  follows the hosted contract and expires separately after seven days.
+  follows the hosted contract and expires separately after seven days. A minimal
+  HMAC identity and first-claim timestamp persist separately to enforce the
+  hosted one-time free allowance after history or account deletion. Desktop
+  personal-key practice neither consumes this allowance nor uses the hosted cap.
 
 ## Files, credentials and backup
 

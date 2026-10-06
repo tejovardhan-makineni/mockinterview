@@ -18,12 +18,13 @@ export default function Downloads() {
   return (
     <ProjectPage>
       <ProjectHeading
-        eyebrow="Desktop app"
+        eyebrow="Desktop beta"
         title="Your practice. On your computer."
       >
         The same interview room, custom questions and feedback, with history
         saved locally. Bring your own AI key; desktop downloads do not include
-        free interviews.
+        free interviews. This project is still in beta on web, macOS, Ubuntu and
+        Windows.
       </ProjectHeading>
       <div className={styles.cardGrid}>
         {(
@@ -44,7 +45,7 @@ export default function Downloads() {
             },
             {
               platform: "linux",
-              name: "Linux",
+              name: "Ubuntu / Linux",
               pending: "Release verification pending",
               detail:
                 "Linux packages are built. Downloads open when native runtime checks and published file hashes are verified.",
@@ -160,9 +161,9 @@ export default function Downloads() {
         </div>
       </section>
       <p className={styles.fine}>
-        Prefer your browser? The hosted app includes one free interview every 24
-        hours for standard accounts. Personal keys and approved beta access have
-        separate limits.
+        Prefer your browser? Each account gets one free interview. The project
+        funds up to 200 interviews per UTC day, including approved tester
+        sessions. Personal-key practice has no product interview limit.
       </p>
     </ProjectPage>
   );

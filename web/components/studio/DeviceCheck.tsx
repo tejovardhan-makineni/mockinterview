@@ -1,11 +1,12 @@
 "use client";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui";
-import { Webcam } from "./Webcam";
+import { Webcam, type CameraStatus } from "./Webcam";
+import { preferredSpeakerVoice } from "@/lib/speakerVoice";
 
 const RECORDING_SECONDS = 5;
 const SPEAKER_SAMPLE =
-  "Welcome to your practice interview. You should hear this sentence clearly in both ears. Take a moment to adjust your speaker or headphone volume before we begin.";
+  "Hi there. Welcome to your practice interview. Take a breath, and make yourself comfortable. If you can hear me clearly, your speakers are ready.";
 
 type CheckPhase = "idle" | "permission" | "recording" | "playback";
 
@@ -30,6 +31,9 @@ export function DeviceCheck({
   const [phase, setPhase] = useState<CheckPhase>("idle");
   const [recordingUrl, setRecordingUrl] = useState("");
   const [speakerPlaying, setSpeakerPlaying] = useState(false);
+  const [speakerHeard, setSpeakerHeard] = useState(false);
+  const [speakerAttempted, setSpeakerAttempted] = useState(false);
+  const [cameraStatus, setCameraStatus] = useState<CameraStatus>("checking");
   const [speakerMessage, setSpeakerMessage] = useState("");
   const meter = useRef<HTMLMeterElement>(null);
   const stream = useRef<MediaStream | null>(null);
@@ -41,6 +45,7 @@ export function DeviceCheck({
   const raf = useRef(0);
   const generation = useRef(0);
   const speakerContext = useRef<AudioContext | null>(null);
+  const speakerGeneration = useRef(0);
   const speakerUtterance = useRef<SpeechSynthesisUtterance | null>(null);
 
   const releaseCapture = useCallback(() => {
@@ -73,6 +78,7 @@ export function DeviceCheck({
   }, [releaseCapture]);
 
   const stopSpeaker = useCallback(() => {
+    speakerGeneration.current++;
     if (speakerUtterance.current) {
       speakerUtterance.current.onend = null;
       speakerUtterance.current.onerror = null;
@@ -81,6 +87,12 @@ export function DeviceCheck({
     }
     void speakerContext.current?.close().catch(() => {});
     speakerContext.current = null;
+  }, []);
+
+  useEffect(() => {
+    // Some browsers load their installed voices asynchronously. Request the
+    // list now so a natural voice is ready when the user presses play.
+    window.speechSynthesis?.getVoices?.();
   }, []);
 
   useEffect(() => {
@@ -182,7 +194,7 @@ export function DeviceCheck({
         releaseCapture();
         setPhase("idle");
         setMessage(
-          "Microphone connected and ready. This browser does not support recording playback; try a current browser to hear your microphone test.",
+          "Microphone access checked. This browser does not support recording playback; try a current browser to hear your microphone test.",
         );
         return;
       }
@@ -198,7 +210,7 @@ export function DeviceCheck({
         releaseCapture();
         setPhase("idle");
         setMessage(
-          "Microphone connected, but the recording failed. Check your microphone again to try playback.",
+          "Microphone access checked, but the recording failed. Check your microphone again to try playback.",
         );
       };
       capture.onstop = () => {
@@ -242,246 +254,429 @@ export function DeviceCheck({
     }
   }
 
+  function finishSpeaker() {
+    setSpeakerPlaying(false);
+    setSpeakerMessage(
+      "Select “I heard it” if the sound was clear, or play it again.",
+    );
+  }
+
+  async function playChime() {
+    const own = speakerGeneration.current;
+    try {
+      const ctx = new AudioContext();
+      speakerContext.current = ctx;
+      if (ctx.state === "suspended") await ctx.resume();
+      if (speakerContext.current !== ctx) return;
+      const oscillator = ctx.createOscillator();
+      const gain = ctx.createGain();
+      oscillator.type = "sine";
+      oscillator.connect(gain);
+      gain.connect(ctx.destination);
+      const at = ctx.currentTime;
+      gain.gain.setValueAtTime(0, at);
+      [392, 494, 587].forEach((frequency, index) => {
+        const start = at + index * 0.6;
+        oscillator.frequency.setValueAtTime(frequency, start);
+        gain.gain.linearRampToValueAtTime(0.08, start + 0.04);
+        gain.gain.exponentialRampToValueAtTime(0.001, start + 0.5);
+      });
+      oscillator.start();
+      oscillator.stop(at + 1.8);
+      setSpeakerMessage(
+        "Listen for three soft notes, then confirm you heard them.",
+      );
+      oscillator.onended = () => {
+        if (speakerContext.current !== ctx) return;
+        speakerContext.current = null;
+        void ctx.close().catch(() => {});
+        finishSpeaker();
+      };
+    } catch {
+      if (own !== speakerGeneration.current) return;
+      stopSpeaker();
+      setSpeakerPlaying(false);
+      setSpeakerMessage(
+        "Audio could not play. Check your output device and volume, then retry.",
+      );
+    }
+  }
+
   function speakerTest() {
     stopSpeaker();
     player.current?.pause();
     setSpeakerPlaying(true);
+    setSpeakerAttempted(true);
+    setSpeakerHeard(false);
     setSpeakerMessage(
-      "Playing a longer speaker sample. Adjust your volume until it sounds comfortable.",
+      "Listen to the sample. Adjust your volume until it feels comfortable.",
     );
     try {
       if (
         "speechSynthesis" in window &&
         typeof SpeechSynthesisUtterance !== "undefined"
       ) {
+        const voice = preferredSpeakerVoice(
+          window.speechSynthesis.getVoices?.() ?? [],
+        );
+        // A brief musical sample is clearer than a robotic system fallback.
+        if (!voice) {
+          void playChime();
+          return;
+        }
         const utterance = new SpeechSynthesisUtterance(SPEAKER_SAMPLE);
-        utterance.lang = "en-US";
-        utterance.rate = 0.95;
+        utterance.voice = voice;
+        utterance.lang = voice.lang;
+        utterance.rate = 1;
         speakerUtterance.current = utterance;
         utterance.onend = () => {
+          if (speakerUtterance.current !== utterance) return;
           speakerUtterance.current = null;
-          setSpeakerPlaying(false);
-          setSpeakerMessage(
-            "Speaker sample finished. You can play it again to adjust the volume.",
-          );
+          finishSpeaker();
         };
         utterance.onerror = () => {
+          if (speakerUtterance.current !== utterance) return;
           speakerUtterance.current = null;
-          setSpeakerPlaying(false);
-          setSpeakerMessage(
-            "The speaker sample could not play. Check your output device and try again.",
-          );
+          void playChime();
         };
         window.speechSynthesis.speak(utterance);
         return;
       }
-      // Keep a multi-second fallback for browsers without speech synthesis.
-      const ctx = new AudioContext();
-      speakerContext.current = ctx;
-      const oscillator = ctx.createOscillator();
-      const gain = ctx.createGain();
-      gain.gain.value = 0.06;
-      [330, 440, 523, 440, 330, 392].forEach((frequency, index) =>
-        oscillator.frequency.setValueAtTime(
-          frequency,
-          ctx.currentTime + index * 0.75,
-        ),
-      );
-      oscillator.connect(gain);
-      gain.connect(ctx.destination);
-      void ctx.resume();
-      oscillator.start();
-      oscillator.stop(ctx.currentTime + 4.5);
-      oscillator.onended = () => {
-        void ctx.close().catch(() => {});
-        if (speakerContext.current !== ctx) return;
-        speakerContext.current = null;
-        setSpeakerPlaying(false);
-        setSpeakerMessage(
-          "Speaker sample finished. You can play it again to adjust the volume.",
-        );
-      };
+      void playChime();
     } catch {
       stopSpeaker();
-      setSpeakerPlaying(false);
-      setSpeakerMessage(
-        "The speaker sample could not play. Check your output device and try again.",
-      );
+      void playChime();
     }
   }
 
+  const micStatus = !mic
+    ? phase === "permission"
+      ? "Allow access"
+      : "Needs check"
+    : phase === "recording"
+      ? inputDetected
+        ? "Verified · sound detected"
+        : "Connected · quiet"
+      : inputDetected
+        ? "Verified · microphone test"
+        : "Permission checked · no sound detected";
+
   return (
-    <div className="space-y-4">
+    <div className="overflow-hidden rounded-xl border border-[var(--color-line)]">
       {mode === "text" ? (
-        <div className="notice">
-          <strong>Text is ready.</strong>
-          <p className="mt-1 text-sm">
-            Read your interviewer’s questions and type your answers. No
-            microphone is needed.
-          </p>
+        <div className="flex min-w-0 flex-wrap items-center justify-between gap-3 p-3 sm:p-4">
+          <div>
+            <p className="text-sm font-semibold">Text conversation</p>
+            <p className="mt-1 text-xs text-[var(--color-muted)]">
+              Read questions and type your answers. No microphone needed.
+            </p>
+          </div>
+          <CheckStatus good>Ready</CheckStatus>
         </div>
       ) : (
         <>
-          <div className="flex flex-wrap items-center gap-3">
-            <Button
-              variant="ghost"
-              onClick={() => void check()}
-              disabled={phase !== "idle"}
-            >
-              {phase === "permission"
-                ? "Waiting for permission…"
-                : phase === "recording"
-                  ? "Recording your voice…"
-                  : phase === "playback"
-                    ? "Playing your recording…"
-                    : mic
-                      ? "Check microphone again"
-                      : "Check microphone"}
-            </Button>
-            {phase === "recording" && (
-              <Button
-                variant="ghost"
-                onClick={() => {
-                  if (recorder.current?.state === "recording")
-                    recorder.current.stop();
-                }}
-              >
-                Stop & play back
-              </Button>
-            )}
-            {phase !== "idle" && (
-              <Button
-                variant="ghost"
-                onClick={() => {
-                  stopCheck();
-                  setRecordingUrl("");
-                  setPhase("idle");
-                  setMic(false);
-                  setInputDetected(false);
-                  setMessage(
-                    "Microphone check cancelled. You can check again or choose text.",
-                  );
-                }}
-              >
-                Cancel check
-              </Button>
-            )}
-            <meter
-              ref={meter}
-              min={0}
-              max={1}
-              value={0}
-              aria-label="Microphone input level"
-              className="h-5 w-32"
-            />
-          </div>
-          {message && (
-            <p role="status" className="text-sm text-[var(--color-muted)]">
-              {message}
-            </p>
-          )}
-          {phase === "recording" && inputDetected && (
-            <p className="text-xs text-[var(--color-muted)]">
-              Microphone is working — input detected.
-            </p>
-          )}
-          {recordingUrl && (
-            <div className="space-y-2">
-              <audio
-                ref={player}
-                src={recordingUrl}
-                controls
-                aria-label="Your microphone test recording"
-                className="w-full"
-                onPlay={() => setPhase("playback")}
-                onPause={() => setPhase("idle")}
-                onEnded={() => {
-                  setPhase("idle");
-                  setMessage(
-                    "Microphone check complete. Replay your recording or start your interview.",
-                  );
-                }}
-              />
-              <p className="text-xs text-[var(--color-muted)]">
-                This test recording stays in your browser and is discarded when
-                you leave.
-              </p>
+          <section aria-label="Microphone check" className="p-3 sm:p-4">
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <div className="flex min-w-0 flex-wrap items-center gap-2">
+                <DeviceIcon kind="microphone" />
+                <h3 className="text-sm font-semibold">Microphone</h3>
+                <span className="text-xs text-[var(--color-muted)]">
+                  Required
+                </span>
+              </div>
+              <CheckStatus good={mic && inputDetected}>{micStatus}</CheckStatus>
             </div>
-          )}
-          {devices.length > 0 && (
-            <label className="block text-sm">
-              Microphone
-              <select
-                value={device}
-                onChange={(event) => {
-                  setDevice(event.target.value);
-                  onDevice(event.target.value);
-                  void check(event.target.value);
-                }}
-                className="field-select mt-2"
-              >
-                <option value="">System default</option>
-                {devices.map((item) => (
-                  <option key={item.deviceId} value={item.deviceId}>
-                    {item.label || "Microphone"}
-                  </option>
-                ))}
-              </select>
-            </label>
-          )}
-          <div className="flex flex-wrap items-center gap-3">
-            <Button
-              variant="ghost"
-              onClick={speakerTest}
-              disabled={
-                speakerPlaying ||
-                phase === "permission" ||
-                phase === "recording"
-              }
-            >
-              Play speaker test
-            </Button>
-            {speakerPlaying && (
-              <Button
-                variant="ghost"
-                onClick={() => {
-                  stopSpeaker();
-                  setSpeakerPlaying(false);
-                  setSpeakerMessage("Speaker test stopped.");
-                }}
-              >
-                Stop speaker test
-              </Button>
-            )}
-          </div>
-          {speakerMessage && (
-            <p role="status" className="text-sm text-[var(--color-muted)]">
-              {speakerMessage}
+            <p className="mt-2 text-xs text-[var(--color-muted)]">
+              {mic
+                ? phase === "recording"
+                  ? inputDetected
+                    ? "Your microphone is working. Permission and sound are verified."
+                    : "Permission is verified. Speak a few words to check your input level."
+                  : inputDetected
+                    ? "Your microphone test passed. We’ll reconnect it when your interview starts."
+                    : "Permission is checked, but this test detected no sound. Check your mute switch and test again."
+                : "Allow microphone access and say a few words. We’ll play them back to you."}
             </p>
-          )}
+            <div className="mt-3 flex flex-wrap items-center gap-2">
+              <Button
+                size="sm"
+                variant="ghost"
+                onClick={() => void check()}
+                disabled={phase !== "idle"}
+              >
+                {phase === "permission"
+                  ? "Waiting for permission…"
+                  : phase === "recording"
+                    ? "Recording…"
+                    : phase === "playback"
+                      ? "Playing back…"
+                      : mic
+                        ? "Check microphone again"
+                        : "Check microphone"}
+              </Button>
+              {phase === "recording" && (
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  onClick={() => {
+                    if (recorder.current?.state === "recording")
+                      recorder.current.stop();
+                  }}
+                >
+                  Stop & play back
+                </Button>
+              )}
+              {phase !== "idle" && (
+                <button
+                  type="button"
+                  className="px-2 text-xs text-[var(--color-muted)] underline underline-offset-4"
+                  onClick={() => {
+                    stopCheck();
+                    setRecordingUrl("");
+                    setPhase("idle");
+                    setMic(false);
+                    setInputDetected(false);
+                    setMessage(
+                      "Microphone check cancelled. You can check again or choose text.",
+                    );
+                  }}
+                >
+                  Cancel check
+                </button>
+              )}
+              <meter
+                ref={meter}
+                min={0}
+                max={1}
+                value={0}
+                aria-label="Microphone input level"
+                className="ml-auto h-3 w-24 shrink-0"
+              />
+            </div>
+            {message && (
+              <p
+                role="status"
+                className="mt-2 text-xs text-[var(--color-muted)]"
+              >
+                {message}
+              </p>
+            )}
+            {recordingUrl && (
+              <div className="mt-3 space-y-1">
+                <audio
+                  ref={player}
+                  src={recordingUrl}
+                  controls
+                  aria-label="Your microphone test recording"
+                  className="h-9 w-full min-w-0 max-w-full"
+                  onPlay={() => setPhase("playback")}
+                  onPause={() => setPhase("idle")}
+                  onEnded={() => {
+                    setPhase("idle");
+                    setMessage(
+                      "Microphone check complete. Replay your recording or start your interview.",
+                    );
+                  }}
+                />
+                <p className="text-[11px] text-[var(--color-muted)]">
+                  Test recording stays on this device and is discarded when you
+                  leave.
+                </p>
+              </div>
+            )}
+            {devices.length > 1 && (
+              <label className="mt-3 block text-xs text-[var(--color-muted)]">
+                Input device
+                <select
+                  value={device}
+                  onChange={(event) => {
+                    setDevice(event.target.value);
+                    onDevice(event.target.value);
+                    void check(event.target.value);
+                  }}
+                  className="field-select mt-1 text-xs"
+                >
+                  <option value="">System default</option>
+                  {devices.map((item) => (
+                    <option key={item.deviceId} value={item.deviceId}>
+                      {item.label || "Microphone"}
+                    </option>
+                  ))}
+                </select>
+              </label>
+            )}
+          </section>
+          <section
+            aria-label="Speaker check"
+            className="border-t border-[var(--color-line)] p-3 sm:p-4"
+          >
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <div className="flex min-w-0 flex-wrap items-center gap-2">
+                <DeviceIcon kind="speaker" />
+                <h3 className="text-sm font-semibold">Speaker</h3>
+                <span className="text-xs text-[var(--color-muted)]">
+                  Optional check
+                </span>
+              </div>
+              <CheckStatus good={speakerHeard}>
+                {speakerHeard
+                  ? "Verified by you"
+                  : speakerPlaying
+                    ? "Playing sample"
+                    : "Not checked"}
+              </CheckStatus>
+            </div>
+            <div className="mt-3 flex flex-wrap items-center gap-2">
+              <Button
+                size="sm"
+                variant="ghost"
+                onClick={
+                  speakerPlaying
+                    ? () => {
+                        stopSpeaker();
+                        setSpeakerPlaying(false);
+                        setSpeakerMessage(
+                          "Speaker test stopped. You can replay it any time.",
+                        );
+                      }
+                    : speakerTest
+                }
+                disabled={phase === "permission" || phase === "recording"}
+              >
+                {speakerPlaying ? "Stop speaker test" : "Play speaker test"}
+              </Button>
+              {speakerAttempted && !speakerHeard && (
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  onClick={() => {
+                    stopSpeaker();
+                    setSpeakerPlaying(false);
+                    setSpeakerHeard(true);
+                    setSpeakerMessage(
+                      "Speaker confirmed. You’re ready to hear your interviewer.",
+                    );
+                  }}
+                >
+                  I heard it
+                </Button>
+              )}
+              {!speakerAttempted && (
+                <span className="text-xs text-[var(--color-muted)]">
+                  A short sample to check your volume.
+                </span>
+              )}
+            </div>
+            {speakerMessage && (
+              <p
+                role="status"
+                className="mt-2 text-xs text-[var(--color-muted)]"
+              >
+                {speakerMessage}
+              </p>
+            )}
+          </section>
         </>
       )}
       {onCamera && (
-        <div className="space-y-3 border-t border-[var(--color-line)] pt-4">
-          <label className="flex items-center gap-3 text-sm">
+        <section
+          aria-label="Camera check"
+          className="border-t border-[var(--color-line)] p-3 sm:p-4"
+        >
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <div className="flex min-w-0 flex-wrap items-center gap-2">
+              <DeviceIcon kind="camera" />
+              <h3 className="text-sm font-semibold">Camera</h3>
+              <span className="text-xs text-[var(--color-muted)]">
+                Optional
+              </span>
+            </div>
+            <CheckStatus good={camera && cameraStatus === "verified"}>
+              {!camera
+                ? "Off"
+                : cameraStatus === "verified"
+                  ? "Verified · preview ready"
+                  : cameraStatus === "unavailable"
+                    ? "Unavailable · optional"
+                    : "Checking access…"}
+            </CheckStatus>
+          </div>
+          <label className="mt-3 flex items-start gap-2 text-xs">
             <input
               type="checkbox"
               checked={camera}
-              onChange={(event) => onCamera(event.target.checked)}
+              onChange={(event) => {
+                setCameraStatus("checking");
+                onCamera(event.target.checked);
+              }}
               className="h-4 w-4 shrink-0"
             />
-            Start with camera self-view on
+            Show my private camera preview
           </label>
-          <p className="text-xs text-[var(--color-muted)]">
-            Your camera preview is visible only to you.
+          <p className="mt-1 text-xs text-[var(--color-muted)]">
+            Only you see it. Camera access never blocks your interview.
           </p>
           {camera && (
-            <div className="max-w-64">
-              <Webcam />
+            <div className="mt-3 max-w-48">
+              <Webcam compact onStatus={setCameraStatus} />
             </div>
           )}
-        </div>
+        </section>
       )}
     </div>
+  );
+}
+
+function CheckStatus({
+  good = false,
+  children,
+}: {
+  good?: boolean;
+  children: React.ReactNode;
+}) {
+  return (
+    <span
+      role="status"
+      className={
+        "inline-flex min-w-0 max-w-full items-start gap-1.5 text-xs font-medium " +
+        (good ? "text-[var(--color-good)]" : "text-[var(--color-muted)]")
+      }
+    >
+      <span className="shrink-0" aria-hidden="true">
+        {good ? "✓" : "○"}
+      </span>
+      <span className="min-w-0">{children}</span>
+    </span>
+  );
+}
+
+function DeviceIcon({ kind }: { kind: "microphone" | "speaker" | "camera" }) {
+  return (
+    <svg
+      aria-hidden="true"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.6"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className="h-4 w-4 shrink-0 text-[var(--color-muted)]"
+    >
+      {kind === "microphone" ? (
+        <>
+          <rect x="9" y="3" width="6" height="12" rx="3" />
+          <path d="M6 11v1a6 6 0 0012 0v-1M12 18v3M9 21h6" />
+        </>
+      ) : kind === "speaker" ? (
+        <>
+          <path d="M11 5L6 9H3v6h3l5 4V5zM15 8a6 6 0 010 8M18 5a10 10 0 010 14" />
+        </>
+      ) : (
+        <>
+          <rect x="3" y="6" width="12" height="12" rx="2" />
+          <path d="M15 10l6-3v10l-6-3" />
+        </>
+      )}
+    </svg>
   );
 }

@@ -58,6 +58,7 @@ type Mem struct {
 	testers           map[string]store.Tester
 	interviewFeedback map[string]store.InterviewFeedback
 	runtimeUsage      []usageRec
+	freeClaims        map[string]bool
 	authActions       map[string]authAction
 	mu                sync.Mutex
 	seq               int64
@@ -74,13 +75,14 @@ type Mem struct {
 // New returns an empty in-memory store.
 func New() *Mem {
 	return &Mem{
-		users:    map[string]store.User{},
-		byEmail:  map[string]string{},
-		settings: map[string]json.RawMessage{},
-		configs:  map[string]store.InterviewConfig{},
-		resumes:  map[string][]store.Resume{},
-		sessions: map[string]*sessionRec{},
-		reports:  map[string]*reportRec{},
+		users:      map[string]store.User{},
+		freeClaims: map[string]bool{},
+		byEmail:    map[string]string{},
+		settings:   map[string]json.RawMessage{},
+		configs:    map[string]store.InterviewConfig{},
+		resumes:    map[string][]store.Resume{},
+		sessions:   map[string]*sessionRec{},
+		reports:    map[string]*reportRec{},
 	}
 }
 

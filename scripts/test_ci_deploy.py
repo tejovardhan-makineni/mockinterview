@@ -61,14 +61,30 @@ elif name == "gcloud":
     if args[:4] == ["artifacts", "docker", "images", "describe"]:
         finish("image-digest", "sha256:" + "b" * 64)
     if args[:3] == ["run", "services", "describe"]:
-        finish("service-read", {"status": {"traffic": [
-            {"revisionName": "previous-a", "percent": 60},
-            {"revisionName": "previous-b", "percent": 40},
-            {"revisionName": "candidate", "percent": 0, "tag": "candidate", "url": "https://candidate.example.test"},
-        ]}})
+        finish("service-read", {
+            "spec": {"template": {"spec": {"containers": [{"env": [
+                *[{"name": key, "value": value} for key, value in state["runtime_env"].items()],
+                {"name": "GEMINI_API_KEY", "valueFrom": {"secretKeyRef": {"name": "existing-gemini-secret", "key": "latest"}}},
+            ]}]}}},
+            "status": {"traffic": [
+                {"revisionName": "previous-a", "percent": 60},
+                {"revisionName": "previous-b", "percent": 40},
+                {"revisionName": "candidate", "percent": 0, "tag": "candidate", "url": "https://candidate.example.test"},
+            ]},
+        })
     if args[:3] == ["run", "services", "update"]:
+        updates = dict(item.split("=", 1) for item in option("--update-env-vars").split(","))
+        expected = {"RELEASE_SHA": sha, "GEMINI_MODEL_REASON": "gemini-3.8-flash", "GEMINI_MODEL_LIVE": "gemini-3.8-live", "GEMINI_MODEL_TTS": "gemini-3.8-flash-tts", "HOSTED_DAILY_START_LIMIT": "200"}
+        if state["runtime_env"].get("LLM_PROVIDER", "gemini").lower() in ("", "gemini"):
+            expected["LLM_MODEL"] = "gemini-3.8-flash"
+        assert updates == expected, "Candidate must upgrade only the beta model and allowance configuration"
+        assert not any(flag in args for flag in ("--set-env-vars", "--clear-env-vars", "--remove-env-vars", "--set-secrets", "--clear-secrets", "--update-secrets", "--remove-secrets")), "Existing environment and secret references must be preserved"
+        state["runtime_env"].update(updates)
         assert "--no-traffic" in args
         assert option("--image").endswith("@sha256:" + "b" * 64), "Candidate must use an immutable digest"
+        assert option("--min-instances") == "0", "Candidate tags must not retain idle minimum instances"
+        assert option("--max") == option("--max-instances") == os.environ.get("MAX_INSTANCES", "1"), "Serving and tagged revisions need scaling ceilings"
+        assert "--min" not in args and "--cpu-throttling" not in args, "Preserve the existing service worker minimum and CPU allocation"
         finish("api-candidate")
     if args[:3] == ["run", "services", "update-traffic"]:
         traffic = option("--to-revisions")
@@ -108,7 +124,7 @@ raise AssertionError("Unexpected command: " + repr((name, args)))
 
 
 class CIDeployTest(unittest.TestCase):
-    def run_deployment(self, *failures):
+    def run_deployment(self, *failures, max_instances=None, reasoning_provider="gemini", reasoning_model="gemini-2.5-flash"):
         with tempfile.TemporaryDirectory(prefix="mockinterview-ci-deploy-") as tmp:
             folder = Path(tmp)
             fake_bin = folder / "bin"
@@ -121,6 +137,12 @@ class CIDeployTest(unittest.TestCase):
                 (fake_bin / name).symlink_to(fake)
             (folder / "state.json").write_text(json.dumps({
                 "traffic": PREVIOUS_TRAFFIC, "web": "previous-web", "gates": 0,
+                "runtime_env": {
+                    "LLM_PROVIDER": reasoning_provider, "LLM_MODEL": reasoning_model,
+                    "GEMINI_MODEL_REASON": "gemini-2.5-flash", "GEMINI_MODEL_LIVE": "gemini-2.5-flash-native-audio-preview-12-2025",
+                    "GEMINI_MODEL_TTS": "gemini-2.5-flash-preview-tts", "HOSTED_DAILY_START_LIMIT": "50",
+                    "CORS_ALLOW": "https://mockinterview.live,https://custom.example.test", "MAIL_FROM": "Existing sender <mail@example.test>",
+                },
             }))
             node = shutil.which("node")
             self.assertIsNotNone(node, "Node must be installed to write release receipts")
@@ -135,6 +157,8 @@ class CIDeployTest(unittest.TestCase):
                 "RELEASE_SHA": "a" * 40, "RELEASE_VERSION": "1.2.3",
                 "GITHUB_RUN_ID": "12345", "GITHUB_RUN_ATTEMPT": "2",
             }
+            if max_instances is not None:
+                environment["MAX_INSTANCES"] = str(max_instances)
             result = subprocess.run(
                 ["bash", str(ROOT / "deploy/ci-deploy.sh")], cwd=folder,
                 env=environment, capture_output=True, text=True, timeout=20,
@@ -166,6 +190,29 @@ class CIDeployTest(unittest.TestCase):
                 self.assertEqual(state["traffic"], PREVIOUS_TRAFFIC)
                 self.assertEqual(state["web"], "previous-web")
                 self.assertIsNone(receipt)
+
+    def test_existing_model_and_allowance_overrides_upgrade_without_replacing_other_configuration(self):
+        result, _, state, _ = self.run_deployment()
+        self.assertEqual(result.returncode, 0, result.stderr)
+        env = state["runtime_env"]
+        self.assertEqual(env["LLM_PROVIDER"], "gemini")
+        self.assertEqual(env["LLM_MODEL"], "gemini-3.8-flash")
+        self.assertEqual(env["GEMINI_MODEL_LIVE"], "gemini-3.8-live")
+        self.assertEqual(env["GEMINI_MODEL_TTS"], "gemini-3.8-flash-tts")
+        self.assertEqual(env["HOSTED_DAILY_START_LIMIT"], "200")
+        self.assertEqual(env["CORS_ALLOW"], "https://mockinterview.live,https://custom.example.test")
+        self.assertEqual(env["MAIL_FROM"], "Existing sender <mail@example.test>")
+
+    def test_non_gemini_reasoning_provider_keeps_its_selected_model(self):
+        result, _, state, _ = self.run_deployment(reasoning_provider="openai", reasoning_model="custom-text-model")
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(state["runtime_env"]["LLM_PROVIDER"], "openai")
+        self.assertEqual(state["runtime_env"]["LLM_MODEL"], "custom-text-model")
+        self.assertEqual(state["runtime_env"]["GEMINI_MODEL_LIVE"], "gemini-3.8-live")
+
+    def test_configured_scaling_ceiling_applies_to_service_and_candidate(self):
+        result, _, _, _ = self.run_deployment(max_instances=2)
+        self.assertEqual(result.returncode, 0, result.stderr)
 
     def test_partial_api_promotion_failure_restores_original_traffic_split(self):
         result, events, state, receipt = self.run_deployment("api-promote")

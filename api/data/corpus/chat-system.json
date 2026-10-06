@@ -16,6 +16,7 @@
     "presence",
     "ordering"
   ],
+  "candidate_brief": "Design a messaging service for one-to-one and group conversations.",
   "prompt": "Design a real-time messaging system that supports 1:1 and group chats, like WhatsApp or Messenger. It should handle persistent connections, deliver messages with low latency, work when recipients are offline, and show delivery/read receipts and presence.",
   "blurb": "Persistent connections at scale — the connection layer, message ordering, fanout, offline delivery, and receipts.",
   "rubric": [

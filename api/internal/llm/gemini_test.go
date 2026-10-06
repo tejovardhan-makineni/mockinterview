@@ -16,7 +16,7 @@ import (
 func TestGeminiPersonalModelsUseCompatibleThinkingControls(t *testing.T) {
 	flash := geminiGenerationConfig("gemini-2.5-flash", 32, PurposeGeneric)
 	if flash.ThinkingConfig == nil || flash.ThinkingConfig.ThinkingBudget == nil || *flash.ThinkingConfig.ThinkingBudget != 0 || flash.MaxOutputTokens != 32 {
-		t.Fatal("free Flash should retain the low-latency non-thinking config")
+		t.Fatal("legacy 2.5 Flash should retain the low-latency non-thinking config")
 	}
 	pro := geminiGenerationConfig("models/gemini-2.5-pro", 32, PurposeGeneric)
 	if pro.ThinkingConfig == nil || pro.ThinkingConfig.ThinkingBudget == nil || *pro.ThinkingConfig.ThinkingBudget < 128 || pro.MaxOutputTokens <= *pro.ThinkingConfig.ThinkingBudget {
@@ -144,5 +144,21 @@ func TestGeminiGenerateSendsPurposeScopedThinkingSettings(t *testing.T) {
 				t.Fatalf("SDK request did not preserve purpose settings: %+v", cfg)
 			}
 		})
+	}
+}
+
+func TestCurrentFlashDefaultAndThinkingControls(t *testing.T) {
+	client, err := NewGemini(context.Background(), "synthetic-key", "")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if client.Info().Model != "gemini-3.8-flash" {
+		t.Fatal(client.Info())
+	}
+	for _, purpose := range []Purpose{PurposeDirector, PurposeScore, PurposeGeneric} {
+		cfg := geminiGenerationConfig(client.Info().Model, 200, purpose)
+		if cfg.ThinkingConfig == nil || cfg.ThinkingConfig.ThinkingBudget != nil || cfg.ThinkingConfig.ThinkingLevel != genai.ThinkingLevelLow || cfg.MaxOutputTokens < 2048 {
+			t.Fatalf("unsupported current Flash config: %+v", cfg)
+		}
 	}
 }

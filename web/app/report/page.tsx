@@ -14,7 +14,7 @@ import { errorMessage } from "@/lib/http";
 import { AppShell } from "@/components/AppShell";
 import { Button, Panel, ErrorNotice } from "@/components/ui";
 import { PersonalKeyRecovery } from "@/components/PersonalKeyRecovery";
-import { InterviewCheckIn } from "@/components/InterviewCheckIn";
+import { InterviewFeedbackDialog } from "@/components/InterviewFeedbackDialog";
 import {
   IconClock,
   IconFeedback,
@@ -28,7 +28,6 @@ const pretty = (value: string) =>
   value.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
 function ReportView({ sid }: { sid: string }) {
   const router = useRouter();
-  const [checkInEligible, setCheckInEligible] = useState(false);
   const [report, setReport] = useState<Report | null>(null);
   const [processing, setProcessing] = useState<ProcessingReport | null>(null);
   const [session, setSession] = useState<Session | null>(null);
@@ -127,9 +126,18 @@ function ReportView({ sid }: { sid: string }) {
   return (
     <AppShell active="results" feedbackSessionId={session?.id}>
       <div className={styles.report}>
-        <a href="/results" className={styles.backLink}>
-          ← Your history
-        </a>
+        <div className="no-print flex flex-wrap items-center justify-between gap-3">
+          <a href="/results" className={styles.backLink}>
+            ← Your history
+          </a>
+          {session && (
+            <InterviewFeedbackDialog
+              key={sid}
+              sessionId={sid}
+              reportAvailable={!!report}
+            />
+          )}
+        </div>
         {error && (
           <div className="my-5">
             <ErrorNotice
@@ -172,18 +180,16 @@ function ReportView({ sid }: { sid: string }) {
                   />
                 </div>
               )}
-            {processing?.status === "feedback_failed" && (
-              <Button
-                className="mt-5"
-                disabled={busy}
-                onClick={() => void retryScoring()}
-              >
-                {busy ? "Retrying…" : "Retry feedback"}
+            <div className={styles.preparingActions}>
+              {processing?.status === "feedback_failed" && (
+                <Button disabled={busy} onClick={() => void retryScoring()}>
+                  {busy ? "Retrying…" : "Retry feedback"}
+                </Button>
+              )}
+              <Button href="/results" variant="ghost">
+                Back to history
               </Button>
-            )}
-            <Button href="/results" variant="ghost" className="ml-3 mt-5">
-              Back to history
-            </Button>
+            </div>
           </Panel>
         ) : (
           <>
@@ -474,7 +480,12 @@ function ReportView({ sid }: { sid: string }) {
                         </span>
                       </span>
                     </summary>
-                    <div className={styles.transcript}>
+                    <div
+                      className={styles.transcript}
+                      role="region"
+                      aria-label="Saved interview transcript"
+                      tabIndex={0}
+                    >
                       {turns.length ? (
                         turns.map((turn, i) => (
                           <div
@@ -507,7 +518,11 @@ function ReportView({ sid }: { sid: string }) {
                         <IconResume /> Saved work & interview settings
                       </span>
                     </summary>
-                    <pre className={styles.savedWork}>
+                    <pre
+                      className={styles.savedWork}
+                      tabIndex={0}
+                      aria-label="Saved interview workspace"
+                    >
                       {session?.workspace?.content ||
                         report.workspace ||
                         "No workspace content was added."}
@@ -581,11 +596,6 @@ function ReportView({ sid }: { sid: string }) {
                     Choose your next practice →
                   </Button>
                 </div>
-                {checkInEligible && (
-                  <a href="#interview-check-in" className={styles.checkInLink}>
-                    Review your interview check-in ↓
-                  </a>
-                )}
               </aside>
             </div>
             <p className={styles.disclaimer}>
@@ -594,14 +604,6 @@ function ReportView({ sid }: { sid: string }) {
               contribute to these scores.
             </p>
           </>
-        )}
-        {session && (
-          <InterviewCheckIn
-            key={sid}
-            sessionId={sid}
-            reportAvailable={!!report}
-            onEligibilityChange={setCheckInEligible}
-          />
         )}
       </div>
     </AppShell>

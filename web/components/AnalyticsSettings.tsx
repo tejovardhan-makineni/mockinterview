@@ -42,7 +42,7 @@ export function AnalyticsSettings({
   const [message, setMessage] = useState("");
   const [busy, setBusy] = useState(false);
   return (
-    <div className="space-y-3">
+    <div className="min-w-0 space-y-3">
       <label className="flex items-start gap-3 text-sm">
         <input
           type="checkbox"
@@ -77,7 +77,7 @@ export function AnalyticsSettings({
             );
           }}
         />
-        <span>
+        <span className="min-w-0">
           <strong>Share analytics</strong>
           <br />
           <span className="text-[var(--color-muted)]">
@@ -119,7 +119,7 @@ export function AnalyticsSettings({
               }
             }}
           />
-          <span>
+          <span className="min-w-0">
             <strong>Include interview results</strong>
             <br />
             <span className="text-[var(--color-muted)]">
@@ -165,6 +165,7 @@ export function AnalyticsSettings({
             />
           </Field>
           <Button
+            className="w-full sm:w-auto"
             disabled={busy || !email || !password}
             variant="ghost"
             onClick={async () => {
@@ -191,6 +192,7 @@ export function AnalyticsSettings({
       {!compact && REMOTE_ANALYTICS_BASE && connected && (
         <Button
           variant="ghost"
+          className="w-full sm:w-auto"
           onClick={() => {
             disconnectAnalytics();
             setMessage("Sharing account disconnected.");
@@ -210,6 +212,7 @@ export function AnalyticsSettings({
           </p>
           <Button
             variant="ghost"
+            className="w-full sm:w-auto"
             disabled={busy || !userId}
             onClick={async () => {
               setBusy(true);

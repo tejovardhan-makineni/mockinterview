@@ -16,6 +16,7 @@
     "redlock",
     "coordination"
   ],
+  "candidate_brief": "Design a service that lets processes on different machines acquire and release mutually exclusive locks.",
   "prompt": "Design a distributed locking / coordination service that lets processes across many machines acquire mutual-exclusion locks (and elect leaders) safely. Cover how a lock is acquired and released, what happens when the holder crashes or is partitioned, and how you prevent two processes from ever believing they hold the same lock.",
   "blurb": "The mutual-exclusion-across-machines problem — leases with expiry, fencing tokens against stale holders, and the Redlock-vs-consensus safety debate.",
   "rubric": [

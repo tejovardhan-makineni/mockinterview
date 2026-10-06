@@ -15,6 +15,7 @@
     "sliding-window",
     "distributed"
   ],
+  "candidate_brief": "Design a distributed service that limits how many requests a client can make to an API.",
   "prompt": "Design a distributed rate limiter that caps how many requests a client can make to an API — for example 1000 requests per minute per API key — enforced consistently across a fleet of API servers behind a load balancer.",
   "blurb": "Token bucket vs sliding window, Redis-backed counters, cross-node consistency, and fail-open vs fail-closed.",
   "rubric": [

@@ -16,6 +16,7 @@
     "concurrency",
     "machine-coding"
   ],
+  "candidate_brief": "Design the object model and control behavior for a building with several elevators serving passenger requests.",
   "prompt": "Design the control system for a building with multiple elevators. Passengers press up/down buttons on each floor and floor buttons inside each car. Model the classes, the elevator state machine, and the dispatch/scheduling logic that decides which car serves a call. Sketch the class diagram and walk through what happens when two hall calls arrive at once.",
   "blurb": "The hard OOD scheduling problem — a per-car state machine plus a pluggable dispatcher that stops two cars from chasing the same call.",
   "rubric": [
@@ -28,13 +29,13 @@
     {
       "key": "core_entities",
       "label": "Core entities",
-      "description": "Identifies ElevatorSystem/Controller, ElevatorCar, Request (HallCall vs CarCall), Button/Panel, Floor, and Dispatcher/Scheduler.",
+      "description": "Assess whether the chosen decomposition expresses the required behavior and contracts. Names, class counts and representations below are examples; equivalent alternatives are valid: Identifies ElevatorSystem/Controller, ElevatorCar, Request (HallCall vs CarCall), Button/Panel, Floor, and Dispatcher/Scheduler.",
       "weight": 1.1
     },
     {
       "key": "class_design",
       "label": "Class design",
-      "description": "Each car owns its direction, current floor, and pending-stops structure; controller separated from car; buttons modeled as request sources, not logic holders.",
+      "description": "Assess whether the chosen decomposition expresses the required behavior and contracts. Names, class counts and representations below are examples; equivalent alternatives are valid: Each car owns its direction, current floor, and pending-stops structure; controller separated from car; buttons modeled as request sources, not logic holders.",
       "weight": 1.1
     },
     {
@@ -51,20 +52,20 @@
     },
     {
       "key": "design_patterns",
-      "label": "Design patterns",
-      "description": "Strategy for dispatch, State for the car, Observer/command for button events; each justified.",
+      "label": "Abstraction choices",
+      "description": "Assess coherent car states, request handling and dispatch-policy boundaries. State, Strategy or event-driven mechanisms are possible examples, not required names or class structures.",
       "weight": 1.0
     },
     {
       "key": "relationships",
       "label": "Relationships",
-      "description": "Controller aggregates cars; car composes a request queue; correct multiplicities and ownership.",
+      "description": "Assess whether the chosen decomposition expresses the required behavior and contracts. Names, class counts and representations below are examples; equivalent alternatives are valid: Controller aggregates cars; car composes a request queue; correct multiplicities and ownership.",
       "weight": 0.9
     },
     {
       "key": "api_methods",
       "label": "API methods",
-      "description": "requestElevator(floor, direction), selectFloor(car, floor), step/tick, and car status queries; sensible signatures.",
+      "description": "Assess whether the chosen decomposition expresses the required behavior and contracts. Names, class counts and representations below are examples; equivalent alternatives are valid: requestElevator(floor, direction), selectFloor(car, floor), step/tick, and car status queries; sensible signatures.",
       "weight": 0.9
     },
     {

@@ -57,32 +57,45 @@ type Question struct {
 	Modality              string              `json:"modality"`
 	Difficulty            string              `json:"difficulty"`
 	Tags                  []string            `json:"tags"`
-	Prompt                string              `json:"prompt"`
-	Blurb                 string              `json:"blurb"`
-	Rubric                []RubricDim         `json:"rubric"`
-	Reference             json.RawMessage     `json:"reference"`         // modality-specific ideal-answer material (server-only)
-	InterviewerNotes      string              `json:"interviewer_notes"` // guidance for the director
+	// CandidateBrief is an authored opening; Prompt retains the full private assignment.
+	CandidateBrief   string          `json:"candidate_brief,omitempty"`
+	Prompt           string          `json:"prompt"`
+	Blurb            string          `json:"blurb"`
+	Rubric           []RubricDim     `json:"rubric"`
+	Reference        json.RawMessage `json:"reference"`         // modality-specific ideal-answer material (server-only)
+	InterviewerNotes string          `json:"interviewer_notes"` // guidance for the director
 }
 
 // Summary is the client-safe projection (no reference, no rubric internals).
 type Summary struct {
-	SchemaVersion int              `json:"schema_version"`
-	Revision      int              `json:"revision"`
-	FormatID      string           `json:"format_id"`
-	FormatName    string           `json:"format_name"`
-	Agent         InterviewerAgent `json:"agent"`
-	ReviewStatus  string           `json:"review_status"`
-	Minutes       int              `json:"minutes"`
-	ID            string           `json:"id"`
-	Title         string           `json:"title"`
-	Track         string           `json:"track"`
-	Domain        string           `json:"domain"`
-	Areas         []string         `json:"areas"`
-	Modality      string           `json:"modality"`
-	Difficulty    string           `json:"difficulty"`
-	Tags          []string         `json:"tags"`
-	Prompt        string           `json:"prompt"`
-	Blurb         string           `json:"blurb"`
+	SchemaVersion  int              `json:"schema_version"`
+	Revision       int              `json:"revision"`
+	FormatID       string           `json:"format_id"`
+	FormatName     string           `json:"format_name"`
+	Agent          InterviewerAgent `json:"agent"`
+	ReviewStatus   string           `json:"review_status"`
+	Minutes        int              `json:"minutes"`
+	ID             string           `json:"id"`
+	Title          string           `json:"title"`
+	Track          string           `json:"track"`
+	Domain         string           `json:"domain"`
+	Areas          []string         `json:"areas"`
+	Modality       string           `json:"modality"`
+	Difficulty     string           `json:"difficulty"`
+	Tags           []string         `json:"tags"`
+	CandidateBrief string           `json:"candidate_brief,omitempty"`
+	Prompt         string           `json:"prompt"`
+	Blurb          string           `json:"blurb"`
+}
+
+// PublicBrief is the complete candidate-visible task statement. An authored
+// opening replaces private requirements and later variants; legacy/nontechnical
+// material stays intact so case facts and supplied artifacts are not truncated.
+func (q Question) PublicBrief() string {
+	if strings.TrimSpace(q.CandidateBrief) != "" {
+		return q.CandidateBrief
+	}
+	return q.Prompt
 }
 
 func (q Question) Summary() Summary {
@@ -91,7 +104,7 @@ func (q Question) Summary() Summary {
 		SchemaVersion: q.SchemaVersion, Revision: q.Revision, FormatID: q.FormatID, ReviewStatus: q.ReviewStatus, Minutes: q.Minutes,
 		FormatName: FormatName(q), Agent: InterviewerFor(q).Agent(),
 		ID: q.ID, Title: q.Title, Track: q.Track, Domain: q.Domain, Areas: q.Areas, Modality: q.Modality,
-		Difficulty: q.Difficulty, Tags: q.Tags, Prompt: q.Prompt, Blurb: q.Blurb,
+		Difficulty: q.Difficulty, Tags: q.Tags, Prompt: q.PublicBrief(), CandidateBrief: q.CandidateBrief, Blurb: q.Blurb,
 	}
 }
 
@@ -151,6 +164,9 @@ func Validate(q Question) error {
 	}
 	if !validDifficulty[q.Difficulty] {
 		return fmt.Errorf("%s: invalid difficulty %q", q.ID, q.Difficulty)
+	}
+	if q.CandidateBrief != "" && (strings.TrimSpace(q.CandidateBrief) == "" || len(q.CandidateBrief) > 2000) {
+		return fmt.Errorf("%s: candidate_brief must be meaningful and at most 2000 bytes", q.ID)
 	}
 	if strings.TrimSpace(q.Prompt) == "" {
 		return fmt.Errorf("%s: prompt required", q.ID)

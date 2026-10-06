@@ -17,6 +17,7 @@
     "websockets",
     "consistency"
   ],
+  "candidate_brief": "Design a shared document editor where several people can edit the same document at the same time.",
   "prompt": "Design a Google-Docs-style real-time collaborative editor: many users edit the same document simultaneously, everyone sees each other's changes within a fraction of a second, edits never get lost, and everyone converges to the same final document. Cover the concurrency-control model, the sync protocol, and presence.",
   "blurb": "The convergence problem — Operational Transformation vs CRDTs, ordering concurrent edits so everyone ends up identical, plus presence, cursors, and offline.",
   "rubric": [

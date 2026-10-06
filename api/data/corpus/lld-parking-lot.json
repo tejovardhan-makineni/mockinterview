@@ -16,6 +16,7 @@
     "state-machine",
     "machine-coding"
   ],
+  "candidate_brief": "Design the object model for a multi-level parking lot that admits vehicles, assigns suitable spaces, and charges for parking.",
   "prompt": "Design the object model for a multi-level parking lot. It parks different vehicle types (motorcycle, car, bus/truck) into appropriately sized spots, issues a ticket on entry, and charges a fee on exit based on how long the vehicle stayed. Walk me through your classes, their relationships, and the key APIs. Sketch the class diagram on the whiteboard.",
   "blurb": "The canonical OOD warm-up — vehicle/spot hierarchies, spot allocation, ticketing, and pluggable pricing without a wall of if/else.",
   "rubric": [
@@ -28,37 +29,37 @@
     {
       "key": "core_entities",
       "label": "Core entities",
-      "description": "Identifies the right nouns: ParkingLot, Level, ParkingSpot, Vehicle, Ticket, Payment, and the entry/exit gates or terminals.",
+      "description": "Assess whether the chosen decomposition expresses the required behavior and contracts. Names, class counts and representations below are examples; equivalent alternatives are valid: Identifies the right nouns: ParkingLot, Level, ParkingSpot, Vehicle, Ticket, Payment, and the entry/exit gates or terminals.",
       "weight": 1.1
     },
     {
       "key": "class_design",
       "label": "Class design",
-      "description": "Clean fields/methods per class, Vehicle and ParkingSpot modeled as hierarchies or by size enum, encapsulated state (spot occupied/free) rather than public mutable data.",
+      "description": "Assess whether the chosen decomposition expresses the required behavior and contracts. Names, class counts and representations below are examples; equivalent alternatives are valid: Clean fields/methods per class, Vehicle and ParkingSpot modeled as hierarchies or by size enum, encapsulated state (spot occupied/free) rather than public mutable data.",
       "weight": 1.2
     },
     {
       "key": "relationships",
       "label": "Relationships",
-      "description": "Correct composition/aggregation: ParkingLot composes Levels, Level aggregates ParkingSpots, Ticket references Vehicle + Spot; multiplicities are explicit.",
+      "description": "Assess whether the chosen decomposition expresses the required behavior and contracts. Names, class counts and representations below are examples; equivalent alternatives are valid: Correct composition/aggregation: ParkingLot composes Levels, Level aggregates ParkingSpots, Ticket references Vehicle + Spot; multiplicities are explicit.",
       "weight": 1.1
     },
     {
       "key": "design_patterns",
-      "label": "Design patterns",
-      "description": "Strategy for pricing, Factory for spot/vehicle creation, optional Singleton for the lot; each justified, not name-dropped.",
+      "label": "Abstraction choices",
+      "description": "Assess separation of pricing, suitable-space allocation, admission and payment, with justified change boundaries. Strategy and Factory are possible examples; neither named patterns nor a Singleton are required.",
       "weight": 1.0
     },
     {
       "key": "solid_principles",
-      "label": "SOLID principles",
-      "description": "Open/closed for new vehicle types and pricing rules; single-responsibility separation of allocation, ticketing, and payment.",
+      "label": "Separation and maintainability",
+      "description": "Assess whether responsibilities are cohesive and likely changes remain manageable within the disclosed scope; do not require an acronym, inheritance or a named pattern. These are example change boundaries, not a prescribed implementation: Open/closed for new vehicle types and pricing rules; single-responsibility separation of allocation, ticketing, and payment.",
       "weight": 1.0
     },
     {
       "key": "api_methods",
       "label": "API methods",
-      "description": "Coherent public surface: parkVehicle, unpark/exit, computeFee, findSpot, availability; sensible return types and error signaling.",
+      "description": "Assess whether the chosen decomposition expresses the required behavior and contracts. Names, class counts and representations below are examples; equivalent alternatives are valid: Coherent public surface: parkVehicle, unpark/exit, computeFee, findSpot, availability; sensible return types and error signaling.",
       "weight": 1.0
     },
     {

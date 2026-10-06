@@ -97,9 +97,9 @@ export function ProfileMenu({
         }}
       >
         <IconProfile className="h-4 w-4" />
-        Profile
+        <span className="sr-only sm:not-sr-only">Profile</span>
         <IconChevronDown
-          className={`h-3.5 w-3.5 ${open ? "rotate-180" : ""}`}
+          className={`hidden h-3.5 w-3.5 sm:block ${open ? "rotate-180" : ""}`}
         />
       </button>
       {open && (
@@ -108,7 +108,7 @@ export function ProfileMenu({
           role="menu"
           aria-labelledby={`${id}-trigger`}
           onKeyDown={handleMenuKey}
-          className="absolute right-0 z-50 mt-2 w-52 rounded-xl border border-[var(--color-line)] bg-[var(--color-panel)] p-1.5 shadow-lg"
+          className="absolute right-0 z-50 mt-2 max-h-[calc(100dvh-88px)] w-52 max-w-[calc(100vw-32px)] overflow-y-auto overscroll-contain rounded-xl border border-[var(--color-line)] bg-[var(--color-panel)] p-1.5 shadow-lg"
         >
           <Link
             role="menuitem"

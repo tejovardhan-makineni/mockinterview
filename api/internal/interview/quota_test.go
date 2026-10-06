@@ -88,7 +88,7 @@ func TestHostedAllowanceAppliesToAdminsAndLocalRemainsUnlimited(t *testing.T) {
 				if _, err := repo.AcquireLive(ctx, first.ID, "test-connection"); err != nil {
 					t.Fatal(err)
 				}
-				active, err := repo.ActivateLive(ctx, first.ID, "test-connection")
+				_, err = repo.ActivateLive(ctx, first.ID, "test-connection")
 				if err != nil {
 					t.Fatal(err)
 				}
@@ -129,8 +129,8 @@ func TestHostedAllowanceAppliesToAdminsAndLocalRemainsUnlimited(t *testing.T) {
 					t.Fatalf("unexpected allowance: %+v", usage)
 				}
 				if hosted {
-					if usage.NextStartAt == nil || usage.NextFundedAt == nil || usage.NextStartAt.Sub(*active.StartedAt) != 24*time.Hour || usage.NextFundedAt.Sub(*active.StartedAt) != 24*time.Hour {
-						t.Fatalf("hosted quota windows were not enforced: %+v", usage)
+					if usage.NextStartAt != nil || usage.NextFundedAt != nil || !usage.FreeInterviewUsed || usage.GlobalDailyLimit != 200 {
+						t.Fatalf("hosted lifetime allowance was not enforced: %+v", usage)
 					}
 					request("POST", "/sessions", body, 429)
 				} else {

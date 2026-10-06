@@ -16,6 +16,7 @@
     "circuit-breaker",
     "reverse-proxy"
   ],
+  "candidate_brief": "Design an API gateway that receives client requests and routes them to backend services.",
   "prompt": "Design an API gateway that sits in front of hundreds of backend microservices: it terminates client requests, authenticates them, routes to the right service, enforces rate limits and quotas, and protects backends with timeouts and circuit breaking. Cover the request lifecycle, the control plane, and how it stays fast and reliable.",
   "blurb": "The front-door problem — routing, authn/z, rate limiting, and circuit breaking in the hot path, with a dynamic control plane and no added latency.",
   "rubric": [

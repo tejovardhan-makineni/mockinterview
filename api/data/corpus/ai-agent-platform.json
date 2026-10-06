@@ -18,6 +18,7 @@
     "tracing",
     "guardrails"
   ],
+  "candidate_brief": "Design a platform where teams can run AI agents that use tools to complete multi-step tasks.",
   "prompt": "Design a platform that runs LLM agents which call tools (including MCP servers) to accomplish multi-step tasks for many tenants. It must orchestrate the agent loop, sandbox tool execution safely, manage agent memory/context, trace and debug runs, enforce guardrails and permissions, and control cost and latency across long-running agent runs.",
   "blurb": "The agent runtime — orchestration loop, sandboxed tools/MCP, memory, tracing, guardrails, and cost/latency control at scale.",
   "rubric": [

@@ -16,6 +16,7 @@
     "eta",
     "traffic"
   ],
+  "candidate_brief": "Design the backend for a maps service that displays maps and finds routes between locations.",
   "prompt": "Design the routing and maps backend behind a service like Google Maps: render the map, and compute the fastest route between two points on a continent-scale road network with live traffic, returning a route and ETA in well under a second. Cover map tile serving, the routing engine, and how traffic and ETAs stay fresh.",
   "blurb": "The continent-scale shortest-path problem — why plain Dijkstra can't answer in time, graph preprocessing (contraction hierarchies), tiled map rendering, and traffic-aware ETAs.",
   "rubric": [

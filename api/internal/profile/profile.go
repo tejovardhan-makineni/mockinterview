@@ -98,7 +98,7 @@ func (s *Service) PreviewVoice(w http.ResponseWriter, r *http.Request) {
 	}
 
 	d := persona.PreviewDelivery(voice, face, personality, intensity)
-	wav, err := tts.Synthesize(r.Context(), geminiKey, s.ttsModel, persona.GeminiVoiceName(voice), d.TTSPrompt())
+	wav, err := tts.Synthesize(r.Context(), geminiKey, s.ttsModel, persona.GeminiVoiceName(voice), d.Line, d.Style)
 	if err != nil {
 		httpx.WriteProblem(w, http.StatusServiceUnavailable, "voice preview unavailable")
 		return

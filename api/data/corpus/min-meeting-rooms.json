@@ -16,6 +16,7 @@
     "sweep-line",
     "greedy"
   ],
+  "candidate_brief": "Given meeting intervals [start, end], return the minimum number of rooms needed without overlapping meetings in a room. A meeting can start when another ends in the same room.",
   "prompt": "Given an array of meeting time intervals where intervals[i] = [start_i, end_i], return the minimum number of conference rooms required so that no two meetings sharing a room overlap. A meeting that starts exactly when another ends does NOT conflict (touching endpoints can share a room).",
   "blurb": "The maximum-overlap problem — a min-heap of end times reuses rooms as meetings finish, or split start/end events into a sweep line and track the running peak.",
   "rubric": [
@@ -28,25 +29,25 @@
     {
       "key": "approach",
       "label": "Approach",
-      "description": "Reaches the min-heap of end times (sort by start, reuse a room when the earliest-ending meeting has finished) OR the sweep-line with separate sorted start/end arrays tracking a running counter. Recognizes counting overlaps, not pairwise checks.",
+      "description": "Assess a correct approach and justified efficiency for the disclosed requirements; accept equivalent alternatives. Reference examples, not mandatory algorithms: Reaches the min-heap of end times (sort by start, reuse a room when the earliest-ending meeting has finished) OR the sweep-line with separate sorted start/end arrays tracking a running counter. Recognizes counting overlaps, not pairwise checks.",
       "weight": 1.3
     },
     {
       "key": "correctness",
       "label": "Correctness",
-      "description": "Heap: sort by start; for each meeting, if the min end <= current start, pop (reuse) before pushing; heap size is the answer. Sweep: two-pointer over sorted starts/ends, increment on start, decrement when start >= end, track peak. Handles the touching case with the right inequality.",
+      "description": "Judge actual outputs and invariants of the chosen approach, crediting valid corrections. The following checks apply to the illustrated implementation, not every valid solution: Heap: sort by start; for each meeting, if the min end <= current start, pop (reuse) before pushing; heap size is the answer. Sweep: two-pointer over sorted starts/ends, increment on start, decrement when start >= end, track peak. Handles the touching case with the right inequality.",
       "weight": 1.3
     },
     {
       "key": "complexity_analysis",
       "label": "Complexity analysis",
-      "description": "O(n log n) — dominated by sorting (and heap ops are log n). O(n) space for the heap / event arrays. Contrasts with the O(n^2) pairwise-overlap counting.",
+      "description": "Verify the time and space analysis of the actual implementation. Preserve disclosed performance requirements; these reference figures do not introduce hidden bounds or mandate an algorithm: O(n log n) — dominated by sorting (and heap ops are log n). O(n) space for the heap / event arrays. Contrasts with the O(n^2) pairwise-overlap counting.",
       "weight": 1.0
     },
     {
       "key": "code_quality",
       "label": "Code quality",
-      "description": "Clean sort + single heap, or clean two-pointer sweep; the reuse condition and peak tracking are readable and not buried in special cases.",
+      "description": "Assess readability, appropriate structure and avoidable duplication in the chosen solution. These are illustrative implementation choices, not required forms: Clean sort + single heap, or clean two-pointer sweep; the reuse condition and peak tracking are readable and not buried in special cases.",
       "weight": 1.0
     },
     {
@@ -64,7 +65,7 @@
     {
       "key": "communication",
       "label": "Communication",
-      "description": "Explains the max-overlap reframing and why sorting by start plus a min-heap on ends correctly models room reuse.",
+      "description": "Assess whether the candidate explains the decisions and invariants of their own approach, without requiring an algorithm name or a prescribed order. Reference-specific explanation examples: Explains the max-overlap reframing and why sorting by start plus a min-heap on ends correctly models room reuse.",
       "weight": 0.8
     }
   ],
