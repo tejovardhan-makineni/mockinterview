@@ -9,7 +9,7 @@ export default function Privacy() {
         <p className="eyebrow">Your practice is personal</p>
         <h1 className="page-title mt-3">Privacy & your data</h1>
         <p className="mt-5">
-          Effective October 4, 2026 · notice version 2026-10-04.1
+          Effective October 4, 2026 · notice version 2026-10-05.1
         </p>
         <p>
           This notice describes the hosted mockinterview.live service,
@@ -307,15 +307,17 @@ export default function Privacy() {
         </p>
         <p>
           Verification links expire after 24 hours and reset links after 30
-          minutes. Temporary credentials expire after three hours. A minimal,
-          pseudonymous eligibility record may remain after account/interview
-          deletion until hourly cleanup following seven days from the attempt’s
-          start to enforce hosted limits: it contains a keyed email hash,
-          attempt ID, funding type and start time, without email text, resume or
-          transcript. Hourly maintenance removes expired
-          action/credential/eligibility records and raw legacy camera-analysis
-          samples older than 30 days. Historical aggregate reports remain with
-          their interview until deletion.
+          minutes. Temporary credentials expire after three hours. To enforce
+          the one-time free interview allowance, we retain a minimal claim
+          marker containing a keyed email hash and the time the allowance was
+          used, including after account or interview deletion. This marker has
+          no automatic expiry and contains no email text, resume, transcript or
+          interview ID. A separate detailed eligibility record (keyed email
+          hash, attempt ID, funding type and start time) is removed by hourly
+          cleanup seven days after the attempt started. Hourly maintenance also
+          removes expired action and credential records and raw legacy
+          camera-analysis samples older than 30 days. Historical aggregate
+          reports remain with their interview until deletion.
         </p>
         <p>
           Configured ordinary Google Cloud logs retain 30 days, while required

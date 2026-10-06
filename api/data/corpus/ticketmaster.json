@@ -16,6 +16,7 @@
     "payments",
     "high-contention"
   ],
+  "candidate_brief": "Design a service where people browse events and buy tickets for specific seats without selling the same seat twice.",
   "prompt": "Design a ticket booking system like Ticketmaster. Users browse events, select seats, and purchase tickets. The hard part is high-contention flash sales: when a popular event goes on sale, hundreds of thousands of users compete for the same limited seats in seconds. Ensure no seat is ever double-sold, hold seats during checkout, and integrate payment. Cover seat inventory, locking, the sale surge, and the booking lifecycle.",
   "blurb": "The double-booking problem under a flash-sale thundering herd — seat holds, atomic reservation, and a queue that protects the datastore.",
   "rubric": [

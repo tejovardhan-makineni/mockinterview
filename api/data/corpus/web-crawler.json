@@ -16,6 +16,7 @@
     "bloom-filter",
     "dns"
   ],
+  "candidate_brief": "Design a crawler that fetches and stores web pages for a search engine.",
   "prompt": "Design a web crawler that fetches and stores billions of web pages for a search index. It must be polite to hosts, avoid re-crawling duplicate content, handle the scale and messiness of the open web, and keep making progress despite failures.",
   "blurb": "The URL frontier, politeness, dedup with bloom filters, DNS, and petabyte-scale storage.",
   "rubric": [

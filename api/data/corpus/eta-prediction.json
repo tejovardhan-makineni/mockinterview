@@ -17,6 +17,7 @@
     "streaming",
     "drift"
   ],
+  "candidate_brief": "Design a system that predicts the arrival time for a ride or delivery from an origin to a destination.",
   "prompt": "Design a system that predicts estimated time of arrival for rides or deliveries. Given an origin, destination, and current conditions, it must return an accurate ETA within tight latency, using spatiotemporal features (traffic, road network, historical patterns) and a model that stays accurate as conditions change through the day.",
   "blurb": "Spatiotemporal ML at scale: routing + traffic features, low-latency regression serving, real-time conditions, and drift across time-of-day/weather.",
   "rubric": [

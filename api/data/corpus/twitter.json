@@ -16,6 +16,7 @@
     "feed-ranking",
     "read-heavy"
   ],
+  "candidate_brief": "Design a social network where people post short messages, follow accounts, and read a home timeline.",
   "prompt": "Design the backend for a social network like Twitter/X. Users can post short messages, follow other users, and see a home timeline of posts from people they follow. Also support trending topics. Assume hundreds of millions of daily active users and celebrity accounts with tens of millions of followers.",
   "blurb": "The canonical fanout problem — push vs pull timelines, the celebrity hot-key, and a hybrid that survives both.",
   "rubric": [

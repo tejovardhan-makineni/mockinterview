@@ -18,6 +18,7 @@
     "monitoring",
     "mlops"
   ],
+  "candidate_brief": "Design a system that makes machine-learning predictions from incoming events, such as fraud or abuse assessments.",
   "prompt": "Design a real-time ML system for a use case like fraud detection or abuse scoring: compute streaming features from live events, serve a model with low latency on each event, log predictions and outcomes to build training data, and detect drift while safely rolling out new models via shadow and canary. Cover the online serving path, the feedback/training-data loop, and monitoring.",
   "blurb": "The closed-loop real-time ML system — streaming features, low-latency serving, drift detection, and shadow/canary rollout.",
   "rubric": [

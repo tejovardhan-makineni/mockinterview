@@ -1,10 +1,10 @@
 # Tester access
 
-Approved testers can start hosted interviews without the daily start cooldown or
-daily platform-funded allowance. Their post-interview product check-in is
-optional, and the shared 30-request/hour ancillary AI allowance does not apply
+Approved testers can start hosted interviews beyond the one-time free allowance,
+within the shared budget of 200 platform-funded interviews per UTC day. Their
+post-interview product check-in is optional, and the shared 30-request/hour ancillary AI allowance does not apply
 (for example, resume AI and provider connection checks). The setup page shows
-**Tester access · unlimited interviews** after the
+**Tester access · unlimited interviews within daily project capacity.** after the
 account's email is verified and the entitlement is loaded.
 
 The registry stores normalized email addresses independently of user accounts,
@@ -20,13 +20,13 @@ resume or finish it before starting another. Provider availability and interview
 duration settings still apply.
 
 Authentication throttles and other security checks remain active. Tester starts
-are recorded in the account's usage history and excluded from the standard
-platform-funded budget used to limit ordinary hosted practice.
+are recorded in the account's usage history and count toward the shared
+platform-funded daily budget, including active reservations.
 
 Removing an email ends its tester entitlement for subsequent requests and restores
 the standard hosted allowance and required check-in rules. Removal does not delete
-the account, existing interviews or saved responses. Recent tester starts count
-toward that account's standard cooldowns after access is removed.
+the account, existing interviews or saved responses. Previous funded starts count
+as use of that account's one-time free allowance after access is removed.
 
 ## Apply and review in the app
 

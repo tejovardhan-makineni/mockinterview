@@ -17,6 +17,7 @@
     "delivery-semantics",
     "log"
   ],
+  "candidate_brief": "Design a durable messaging service where producers publish messages and consumers read them.",
   "prompt": "Design a distributed, durable, high-throughput message queue / streaming platform like Apache Kafka. Producers publish messages to topics; consumers read them, possibly in groups for parallelism. Cover partitioning, ordering guarantees, consumer groups and offset management, replication and durability, delivery semantics (at-least-once / at-most-once / exactly-once), and retention. Assume very high throughput and strong durability requirements.",
   "blurb": "The append-only partitioned log — ordering vs parallelism, consumer-group rebalancing, replication with ISR, and honest delivery semantics.",
   "rubric": [

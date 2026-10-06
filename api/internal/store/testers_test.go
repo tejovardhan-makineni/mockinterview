@@ -95,7 +95,7 @@ func TestPostgresTestersVerifiedAllowlistAndUnlimitedPractice(t *testing.T) {
 		t.Fatal("unlisted alias got access", err)
 	}
 	r := reserveFor(u.ID, "tester-identity", "platform")
-	r.GlobalDailyLimit = 1
+	r.GlobalDailyLimit = 4
 	r.Session.FeedbackVersion = InterviewFeedbackVersion
 	for range 3 {
 		a, err := s.ReserveSession(ctx, r)
@@ -125,28 +125,15 @@ func TestPostgresTestersVerifiedAllowlistAndUnlimitedPractice(t *testing.T) {
 	if err != nil || !usage.TesterUnlimited || usage.LocalUnlimited || !usage.FundedAvailable || usage.NextStartAt != nil || usage.NextFundedAt != nil {
 		t.Fatalf("tester usage %+v %v", usage, err)
 	}
-	// Tester starts do not exhaust the ordinary global budget.
+	// Tester starts consume the same global budget. One ordinary reservation
+	// fills the fourth place and further tester starts must wait for tomorrow.
 	ordinary := reserveFor(alias.ID, "ordinary", "platform")
-	ordinary.GlobalDailyLimit = 1
+	ordinary.GlobalDailyLimit = 4
 	if _, err := s.ReserveSession(ctx, ordinary); err != nil {
-		t.Fatal("testers exhausted regular global budget", err)
-	}
-	// Tester can reserve and activate even while ordinary reservations fill it.
-	a, err := s.ReserveSession(ctx, r)
-	if err != nil {
-		t.Fatal("global cap blocked tester", err)
-	}
-	if _, err := s.AcquireLive(ctx, a.ID, "test"); err != nil {
 		t.Fatal(err)
 	}
-	if _, err := s.ActivateLive(ctx, a.ID, "test"); err != nil {
-		t.Fatal("global cap blocked tester activation", err)
-	}
-	if err := s.UpdateSessionStatus(ctx, a.ID, "complete"); err != nil {
-		t.Fatal(err)
-	}
-	if err := s.ReleaseLive(ctx, a.ID, "test"); err != nil {
-		t.Fatal(err)
+	if _, err := s.ReserveSession(ctx, r); !errors.Is(err, ErrGlobalQuota) {
+		t.Fatal("tester bypassed global capacity", err)
 	}
 	if err := s.RemoveTester(ctx, " TESTER@example.com "); err != nil {
 		t.Fatal(err)
@@ -155,10 +142,10 @@ func TestPostgresTestersVerifiedAllowlistAndUnlimitedPractice(t *testing.T) {
 		t.Fatal("idempotent removal", err)
 	}
 	usage, err = s.Usage(ctx, u.ID, r.Identity, false)
-	if err != nil || usage.TesterUnlimited || usage.FundedAvailable || usage.NextStartAt == nil || usage.NextFundedAt == nil {
+	if err != nil || usage.TesterUnlimited || usage.FundedAvailable || usage.NextStartAt != nil || usage.NextFundedAt != nil || !usage.FreeInterviewUsed {
 		t.Fatalf("removal did not restore quota %+v %v", usage, err)
 	}
-	if pending, err := s.PendingInterviewFeedback(ctx, u.ID); err != nil || len(pending) != 4 {
+	if pending, err := s.PendingInterviewFeedback(ctx, u.ID); err != nil || len(pending) != 3 {
 		t.Fatal("removal did not restore required feedback", len(pending), err)
 	}
 	if _, err := s.ReserveSession(ctx, r); !errors.Is(err, ErrInterviewFeedbackRequired) {
@@ -170,70 +157,55 @@ func TestPostgresTestersVerifiedAllowlistAndUnlimitedPractice(t *testing.T) {
 }
 
 func TestPostgresTesterRemovalRechecksReservedActivation(t *testing.T) {
-	for _, gate := range []string{"personal", "global"} {
-		t.Run(gate, func(t *testing.T) {
-			s := postgresRuntime(t)
-			ctx := context.Background()
-			u, err := s.CreateUser(ctx, "tester@example.com", "unused")
-			if err != nil {
-				t.Fatal(err)
-			}
-			if _, err := s.Pool.Exec(ctx, `UPDATE users SET email_verified=true WHERE id=$1`, u.ID); err != nil {
-				t.Fatal(err)
-			}
-			if _, err := s.AddTester(ctx, u.Email); err != nil {
-				t.Fatal(err)
-			}
-			r := reserveFor(u.ID, "identity", "platform")
-			r.GlobalDailyLimit = 1
-			if gate == "personal" {
-				a, err := s.ReserveSession(ctx, r)
-				if err != nil {
-					t.Fatal(err)
-				}
-				if _, err := s.AcquireLive(ctx, a.ID, "first"); err != nil {
-					t.Fatal(err)
-				}
-				if _, err := s.ActivateLive(ctx, a.ID, "first"); err != nil {
-					t.Fatal(err)
-				}
-				if err := s.UpdateSessionStatus(ctx, a.ID, "complete"); err != nil {
-					t.Fatal(err)
-				}
-				if err := s.ReleaseLive(ctx, a.ID, "first"); err != nil {
-					t.Fatal(err)
-				}
-				if err := s.DeleteSession(ctx, a.ID); err != nil {
-					t.Fatal(err)
-				}
-			} else {
-				other, err := s.CreateUser(ctx, "regular@example.com", "unused")
-				if err != nil {
-					t.Fatal(err)
-				}
-				otherR := reserveFor(other.ID, "regular", "platform")
-				otherR.GlobalDailyLimit = 1
-				if _, err := s.ReserveSession(ctx, otherR); err != nil {
-					t.Fatal(err)
-				}
-			}
-			a, err := s.ReserveSession(ctx, r)
-			if err != nil {
-				t.Fatal(err)
-			}
-			if _, err := s.AcquireLive(ctx, a.ID, "reserved"); err != nil {
-				t.Fatal(err)
-			}
-			if err := s.RemoveTester(ctx, u.Email); err != nil {
-				t.Fatal(err)
-			}
-			if _, err := s.ActivateLive(ctx, a.ID, "reserved"); !errors.Is(err, ErrQuota) {
-				t.Fatal("reserved tester retained stale bypass after removal", err)
-			}
-			var exempt bool
-			if err := s.Pool.QueryRow(ctx, `SELECT quota_exempt FROM sessions WHERE id=$1`, a.ID).Scan(&exempt); err != nil || exempt {
-				t.Fatal("tester persisted local bypass", err)
-			}
-		})
+	s := postgresRuntime(t)
+	ctx := context.Background()
+	u, err := s.CreateUser(ctx, "tester@example.com", "unused")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := s.Pool.Exec(ctx, `UPDATE users SET email_verified=true WHERE id=$1`, u.ID); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := s.AddTester(ctx, u.Email); err != nil {
+		t.Fatal(err)
+	}
+	r := reserveFor(u.ID, "identity", "platform")
+	r.GlobalDailyLimit = 200
+	a, err := s.ReserveSession(ctx, r)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := s.AcquireLive(ctx, a.ID, "first"); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := s.ActivateLive(ctx, a.ID, "first"); err != nil {
+		t.Fatal(err)
+	}
+	if err := s.UpdateSessionStatus(ctx, a.ID, "complete"); err != nil {
+		t.Fatal(err)
+	}
+	if err := s.ReleaseLive(ctx, a.ID, "first"); err != nil {
+		t.Fatal(err)
+	}
+	if err := s.DeleteSession(ctx, a.ID); err != nil {
+		t.Fatal(err)
+	}
+
+	a, err = s.ReserveSession(ctx, r)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := s.AcquireLive(ctx, a.ID, "reserved"); err != nil {
+		t.Fatal(err)
+	}
+	if err := s.RemoveTester(ctx, u.Email); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := s.ActivateLive(ctx, a.ID, "reserved"); !errors.Is(err, ErrQuota) {
+		t.Fatal("reserved tester retained stale bypass after removal", err)
+	}
+	var exempt bool
+	if err := s.Pool.QueryRow(ctx, `SELECT quota_exempt FROM sessions WHERE id=$1`, a.ID).Scan(&exempt); err != nil || exempt {
+		t.Fatal("tester persisted local bypass", err)
 	}
 }

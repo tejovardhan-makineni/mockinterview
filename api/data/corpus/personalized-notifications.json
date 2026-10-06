@@ -17,6 +17,7 @@
     "ml-serving",
     "feature-store"
   ],
+  "candidate_brief": "Design a system that chooses which notifications to send to each user and when to send them.",
   "prompt": "Design a system that decides which push/email notifications to send to each user, when to send them, and how often. It should use ML to predict engagement propensity, optimize send time, and avoid over-notifying users. Assume a large consumer app with many notification types competing for attention.",
   "blurb": "ML notification targeting: propensity scoring, send-time optimization, and fatigue/frequency capping without tanking long-term engagement.",
   "rubric": [

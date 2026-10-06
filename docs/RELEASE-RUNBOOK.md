@@ -8,7 +8,7 @@ The hosted application uses Cloud Run, PostgreSQL and Firebase Hosting. Keep pro
 2. Run `deploy/push-secrets.sh`. This creates a dedicated runtime service account, grants Cloud SQL connection permission and grants access at each app secret. It does not remove permissions from shared service accounts or replace another application's database.
 3. Use a separate staging service, database, database user and secret prefix. Never point destructive tests at production. Bind database users to their own database and verify a restore into the staging database before launch.
 4. Configure uptime checks for `/ready` on the API and `/` on the web domain. Configure alert notification channels and verify actual delivery. `/health` is process liveness; `/ready` checks the database and model configuration, not a paid provider request.
-5. Keep Cloud Run CPU allocated outside requests: the portable scoring/retention worker runs within the API process. Production uses one minimum instance. A stopped worker leaves durable scoring jobs to be reclaimed after the lease expires.
+5. Keep Cloud Run CPU allocated outside requests: the portable scoring/retention worker runs within the API process. Production uses one **service-level** minimum instance (`MIN_INSTANCES=1`); staging uses zero. Each new revision has minimum zero. `MAX_INSTANCES` defaults to one and caps both the service and each revision. A stopped worker leaves durable scoring jobs to be reclaimed after the lease expires.
 6. Grant administration to the **verified project owner account**: from `api/`, `go run ./cmd/admin -grant-owner`. Use operator credentials and the intended database. The stored role, verified email and exact owner identity are all required. This revokes old login sessions.
 
 Use `/health` and `/ready` for probes and external checks. Cloud Run reserves
@@ -109,22 +109,81 @@ Existing WebSockets can remain attached to their original revision during a traf
 
 ## Ongoing operation
 
-Review failed interview starts, input/persistence failures, feedback jobs, provider errors and latency. Keep application diagnostics free of request bodies, action links, keys and provider output; verify infrastructure access-log fields separately, including query strings. The hourly maintenance worker removes expired email actions and personal keys, the expired seven-day eligibility ledger, and raw legacy behavioral telemetry older than thirty days. Completed interview history remains until the user deletes it or the account. Automated backups age out under the database's configured backup policy; manual backups need a separate retention decision. Do not claim immediate deletion from backups. See the actual retention inventory in [privacy operations](PRIVACY-OPERATIONS.md).
+Review failed interview starts, input/persistence failures, feedback jobs, provider errors and latency. Keep application diagnostics free of request bodies, action links, keys and provider output; verify infrastructure access-log fields separately, including query strings. The hourly maintenance worker removes expired email actions and personal keys, the expired seven-day usage ledger, and raw legacy behavioral telemetry older than thirty days. A minimal HMAC identity and first-claim timestamp remain separately to enforce the one-time free allowance after account or history deletion. Completed interview history remains until the user deletes it or the account. Automated backups age out under the database's configured backup policy; manual backups need a separate retention decision. Do not claim immediate deletion from backups. See the actual retention inventory in [privacy operations](PRIVACY-OPERATIONS.md).
 
-The global platform-funded daily start limit complements the per-user daily funded allowance; validated personal-key sessions and approved testers have no daily interview count limit. Cloud billing alerts provide notifications; they do not cap usage. Personal-key requests must remain on that user's selected provider, including scoring, and must not silently fall back to platform billing.
+The global platform-funded limit is at most 200 starts per UTC day, including approved testers. Standard hosted identities get one funded interview in total; approved testers retain repeated practice within the shared cap. Validated personal-key sessions do not consume either funded allowance. Cloud billing alerts provide notifications; they do not cap usage. Personal-key requests must remain on that user's selected provider, including scoring, and must not silently fall back to platform billing.
+
+Keep minimum instances at service level. A tagged revision with its own minimum
+can keep a separate billable instance running even at zero percent traffic. The
+deploy scripts use revision minimum zero; CI preserves the existing service
+minimum and CPU allocation and sets both maximums from `MAX_INSTANCES` (default
+one). Increasing this ceiling requires reviewing the monthly cost allowance.
+Existing revision settings are immutable: deploying a new revision does not
+remove old tagged revisions' minimums. After confirming that a tag is no longer
+used by an active release or preview, remove that tag while retaining the
+revision for rollback. Changing tags does not change the main service's traffic
+percentages. Preserve any candidate URL still used by staging or preview clients.
+[Cloud Run minimum instances](https://docs.cloud.google.com/run/docs/configuring/min-instances).
+
+The service maximum excludes tagged revisions with no traffic percentage, so
+each candidate also needs its own maximum. Instance limits can be briefly
+exceeded during scaling or rollout; these settings reduce resource costs but
+are not a combined dollar cap for Cloud Run, SQL, Hosting and Gemini.
+[Cloud Run maximum instances](https://docs.cloud.google.com/run/docs/configuring/max-instances).
+
+### Live cost controls verified October 4, 2026 (Pacific)
+
+The combined Google spending target is **$200/month**, across both projects on
+the same billing account. The controls below are conservative safeguards, not a
+guaranteed all-service invoice ceiling.
+
+| Control | Saved setting |
+| --- | --- |
+| Account-wide monthly budget, all projects and services | $200, before credits; actual-spend alerts at $100, $150, $170 and $200; forecast alert at $170 |
+| StoryBytes Cloud Run enforced monthly spend cap | $80; covers production and staging in `storybytes-495010` |
+| Default Gemini Project monthly API cap | $40 in `gen-lang-client-0958826978`, which contains the app's named API keys |
+| StoryBytes monthly Gemini API cap | $10 in `storybytes-495010` |
+| Production Cloud Run service scaling | Minimum 1, maximum 1; always-allocated CPU retained |
+| Staging Cloud Run service scaling | Minimum 0, maximum 1 |
+| Cloud SQL automatic storage growth | Maximum 20 GB; current disk remains 10 GB, `db-g1-small`, backups retained |
+
+The $80 + $40 + $10 caps leave $70 of the target for SQL, Hosting, storage,
+builds, secrets, logging, taxes and delayed usage. This is an allowance, not an
+enforced $70 cap on those services. The account budget only alerts. Google spend
+caps may overshoot while reporting/enforcement catches up, in-flight requests
+can finish, and persistent compute/storage charges can continue. Cloud SQL can
+override its storage-growth limit for critical maintenance; exhausting the
+limit can interrupt database availability. No project billing shutdown was
+configured. See [spend cap limitations](https://docs.cloud.google.com/billing/docs/how-to/budgets-spend-caps)
+and [Cloud SQL storage settings](https://docs.cloud.google.com/sql/docs/postgres/instance-settings).
+
+Obsolete production revision tags were removed (including the tag on the
+current production revision); main traffic remains on `mockinterview-api-00059-dew`.
+Staging keeps its serving `candidate` tag on `mockinterview-api-staging-00016-qox`;
+other staging tags were removed. The underlying revisions were retained for
+rollback. Both `/ready` endpoints returned healthy after the changes.
+
+Review [the account budgets](https://console.cloud.google.com/billing/018C4E-829C3D-84E5B5/budgets)
+and [AI Studio project caps](https://aistudio.google.com/spend).
+Cloud Billing caps can require manual lifting after enforcement; do not lift
+them in the same month without reviewing the combined allowance. AI Studio
+project caps reset monthly. On the verification date, AI Studio also displayed
+a prepay-migration notice for October 12; no credits or automatic reload were
+purchased or enabled during this cost-control change.
 
 
 ## Open source participation update
 
-The current source adds MIT licensing, a Docker-free temporary demo, daily funded
+The current source adds MIT licensing, a Docker-free temporary demo, one-time funded
 access, unlimited validated personal-key starts, custom interviews, beta
 applications, private template requests and consented analytics. Follow the
 [feature deployment checklist](OPEN-SOURCE-DESIGN.md#owner-bootstrap-and-deployment)
-in addition to this runbook. Migrations `0013_runtime_metrics.sql` and `0014_community.sql` are additive. Do not
+in addition to this runbook. Migrations `0013_runtime_metrics.sql`, `0014_community.sql` and `0015_lifetime_free_interview.sql` are additive. The lifetime-claim migration recovers retained usage and surviving started sessions; erased historical records cannot be reconstructed. Do not
 promote a source change until its staged API and web artifacts are verified.
 
-Verify Gemini 2.5 Flash access in the actual deployment project with the optional
-billable provider check; availability is not guaranteed for a new provider project.
+Verify Gemini 3.8 Flash, Gemini 3.8 Live and Gemini 3.8 Flash TTS access in the
+actual deployment project with optional billable provider checks; model access is
+not guaranteed for a particular project.
 If it is unavailable, choose a model explicitly and update the displayed default
 before release. Production must reject LOCAL_MEMORY and stub mode. Provision the
 verified owner through the operator CLI; never seed a shared administrator password.

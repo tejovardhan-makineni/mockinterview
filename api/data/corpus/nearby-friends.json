@@ -16,6 +16,7 @@
     "pubsub",
     "real-time"
   ],
+  "candidate_brief": "Design a feature that lets consenting users see which friends are nearby as their locations change.",
   "prompt": "Design a 'Nearby Friends' feature: users who opt in continuously share their location, and each user sees which of their friends are within a configurable radius (say 5 km), updated in near real time. Cover how you ingest high-frequency location updates and how you answer proximity queries at scale.",
   "blurb": "The canonical geospatial fan-out problem — indexing moving points with geohash/quadtree, ingesting a firehose of location pings, and pushing proximity changes to friends in real time.",
   "rubric": [

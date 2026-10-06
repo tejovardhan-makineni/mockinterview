@@ -36,11 +36,11 @@ export function ResumeDoc({ parsed, text, marks, expand = false }: { parsed?: Re
   // let the page scroll — never clip the bottom behind an inner scrollbar. With no
   // analysis the right column is just a short prompt, so we cap the doc height and
   // let it scroll internally to avoid a lopsided, over-tall left column.
-  const box = expand ? "px-7 py-7" : "mi-doc-scroll max-h-[72vh] overflow-auto px-7 py-7";
+  const box = expand ? "px-4 py-5 sm:px-7 sm:py-7" : "mi-doc-scroll max-h-[72vh] overflow-auto px-4 py-5 sm:px-7 sm:py-7";
   if (!hasStructure(parsed)) {
     // Fallback: highlighted raw text, still readable.
     return (
-      <div className={`${expand ? "px-6 py-6" : "mi-doc-scroll max-h-[72vh] overflow-auto px-6 py-6"} [overflow-wrap:anywhere]`}>
+      <div className={`${expand ? "px-4 py-5 sm:px-6 sm:py-6" : "mi-doc-scroll max-h-[72vh] overflow-auto px-4 py-5 sm:px-6 sm:py-6"} [overflow-wrap:anywhere]`}>
         <pre className="whitespace-pre-wrap font-sans text-[13.5px] leading-relaxed text-[var(--color-ink)]">{hl(text ?? "", marks)}</pre>
       </div>
     );

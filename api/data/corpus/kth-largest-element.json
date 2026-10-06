@@ -16,6 +16,7 @@
     "selection",
     "divide-and-conquer"
   ],
+  "candidate_brief": "Given an integer array nums and an integer k, return its kth largest element. Count duplicate values separately; this is not the kth distinct value.",
   "prompt": "Given an integer array nums and an integer k, return the kth LARGEST element in the array. Note this is the kth largest in sorted order, not the kth distinct element — duplicates count. Can you do better than sorting the whole array?",
   "blurb": "The selection problem — a size-k min-heap gives O(n log k), and Quickselect gives O(n) average by partitioning around a pivot without fully sorting.",
   "rubric": [
@@ -28,25 +29,25 @@
     {
       "key": "approach",
       "label": "Approach",
-      "description": "Reaches at least the size-k min-heap (O(n log k)); ideally proposes Quickselect (O(n) average) and explains the partition-and-recurse-one-side insight versus quicksort recursing both sides.",
+      "description": "Assess a correct approach and justified efficiency for the disclosed requirements; accept equivalent alternatives. Reference examples, not mandatory algorithms: Reaches at least the size-k min-heap (O(n log k)); ideally proposes Quickselect (O(n) average) and explains the partition-and-recurse-one-side insight versus quicksort recursing both sides.",
       "weight": 1.3
     },
     {
       "key": "correctness",
       "label": "Correctness",
-      "description": "Heap: keeps exactly k largest by popping when size exceeds k; the root is the answer. Quickselect: maps kth largest to the (n-k)th index in ascending order (or partitions descending), recurses only the side containing the target index, and terminates when pivot lands on it.",
+      "description": "Judge actual outputs and invariants of the chosen approach, crediting valid corrections. The following checks apply to the illustrated implementation, not every valid solution: Heap: keeps exactly k largest by popping when size exceeds k; the root is the answer. Quickselect: maps kth largest to the (n-k)th index in ascending order (or partitions descending), recurses only the side containing the target index, and terminates when pivot lands on it.",
       "weight": 1.3
     },
     {
       "key": "complexity_analysis",
       "label": "Complexity analysis",
-      "description": "Heap O(n log k) time / O(k) space. Quickselect O(n) average (n + n/2 + n/4 ... = 2n) but O(n^2) worst case; random/median-of-medians pivot mitigates. Full sort O(n log n)/O(1).",
+      "description": "Verify the time and space analysis of the actual implementation. Preserve disclosed performance requirements; these reference figures do not introduce hidden bounds or mandate an algorithm: Heap O(n log k) time / O(k) space. Quickselect O(n) average (n + n/2 + n/4 ... = 2n) but O(n^2) worst case; random/median-of-medians pivot mitigates. Full sort O(n log n)/O(1).",
       "weight": 1.1
     },
     {
       "key": "code_quality",
       "label": "Code quality",
-      "description": "Clean partition routine (Lomuto or Hoare), in-place swaps, correct index arithmetic for the target rank, no off-by-one in the heap size check.",
+      "description": "Assess readability, appropriate structure and avoidable duplication in the chosen solution. These are illustrative implementation choices, not required forms: Clean partition routine (Lomuto or Hoare), in-place swaps, correct index arithmetic for the target rank, no off-by-one in the heap size check.",
       "weight": 1.0
     },
     {
@@ -64,7 +65,7 @@
     {
       "key": "communication",
       "label": "Communication",
-      "description": "Explains the average-case linear recurrence for Quickselect and the O(log k) heap tradeoff, and when a heap is preferable (streaming / k << n / worst-case guarantee).",
+      "description": "Assess whether the candidate explains the decisions and invariants of their own approach, without requiring an algorithm name or a prescribed order. Reference-specific explanation examples: Explains the average-case linear recurrence for Quickselect and the O(log k) heap tradeoff, and when a heap is preferable (streaming / k << n / worst-case guarantee).",
       "weight": 0.8
     }
   ],

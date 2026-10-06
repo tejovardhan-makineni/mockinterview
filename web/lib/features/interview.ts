@@ -38,6 +38,10 @@ export interface SessionOptions {
 }
 export interface Usage {
   funded_available: boolean;
+  free_interview_used?: boolean;
+  global_daily_limit?: number;
+  global_daily_remaining?: number;
+  global_reset_at?: string;
   next_funded_at?: string;
   next_start_at?: string;
   active_session_id?: string;
@@ -78,7 +82,7 @@ export interface Session {
   started_at?: string;
   deadline_at?: string;
   workspace?: WorkspaceSnapshot;
-  phase: Phase;
+  phase: Phase | `section:${string}`;
   config: Omit<InterviewConfig, "target_level"> & { target_level?: string };
   pack_id?: string; // set when this session is a pack round
   pack_round_id?: string;

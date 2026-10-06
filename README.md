@@ -62,8 +62,9 @@ feedback and reports as the website. It bundles the local Go service and SQLite:
 no terminal, Docker, PostgreSQL installation or online account is needed to
 practice. **Desktop interviews always require your own AI provider key.** There
 are no free desktop interviews. The hosted website still provides one funded
-interview every rolling 24 hours for standard accounts; personal-key practice and
-approved tester access retain their separate rules.
+interview per standard account, with up to 200 funded interviews per UTC day
+across the project; personal-key practice and approved tester access retain
+their separate rules.
 
 Published packages and their current availability are listed on the
 [Downloads page](https://mockinterview.live/downloads/) and
@@ -140,14 +141,17 @@ Two alternatives after copying `.env.example`:
 
 ## Hosted usage and continued practice
 
-The standard free allowance is **one funded interview every rolling 24 hours**,
-using Gemini 2.5 Flash for text and feedback. The project must have access to that
+The standard free allowance is **one funded interview per account**,
+using Gemini 3.8 Flash for text and feedback. The project funds at most **200
+interviews per UTC calendar day**, including approved tester starts. The free
+allowance does not renew daily. The project must have access to that
 provider model; deployment validation checks this rather than silently replacing
 it. **Validated personal-key interviews have no daily start limit**. Your model
 provider's charges and rate limits still apply. Resume and report retries do not
 consume another start; only one active interview per account is allowed.
 
-Approved beta testers get unlimited starts and agree to provide useful feedback.
+Approved beta testers may start additional funded interviews within the shared
+200-per-day capacity and agree to provide useful feedback.
 Apply through `/beta`; the owner reviews applications in `/admin`. Feedback and
 analytics consent are separate. Tester access does not grant administrator
 access. See [tester operations](docs/TESTER-ACCESS.md).
@@ -156,6 +160,13 @@ Describe a custom interview in your own words: profession, goal, seniority/level
 questions and preferred structure. The interviewer uses this context to guide
 practice when no existing template fits. Request a future template through
 `/requests`; requests are private administrator notes.
+
+During an interview, the AI privately reviews the in-app workspace and conversation
+about every 30 seconds. It can keep waiting, answer a clarification, ask one
+question grounded in the candidate's work, or move forward once it has enough
+evidence. Technical tasks start with a concise brief; later requirements are
+introduced through clarification and discussion. The cadence is for observation,
+not a question every 30 seconds. See the [behavior and level guidance](docs/ADAPTIVE-INTERVIEWER.md).
 
 Hosted accounts verify their email before starting or using hosted resume AI.
 Existing accounts can still read history and export data before verification;
@@ -175,7 +186,7 @@ identity document is collected by this acknowledgment flow.
 
 API clients can read `GET /api/v1/legal-policy` for `terms_version`,
 `privacy_version`, `minimum_age` and `required`. The current document versions are
-`2026-10-04.1`. Hosted registration includes `adult_confirmed: true` and both exact
+`2026-10-05.1`. Hosted registration includes `adult_confirmed: true` and both exact
 version strings alongside email/password; existing users submit the same three
 fields to authenticated `POST /api/v1/auth/policies`. That endpoint returns the
 user directly, including `policies_required`, `adult_confirmed`, accepted versions,

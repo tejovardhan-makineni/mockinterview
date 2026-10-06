@@ -19,6 +19,7 @@
     "rate-limiting",
     "cost"
   ],
+  "candidate_brief": "Design a gateway that lets multiple teams and customers send requests to large language models and receive responses.",
   "prompt": "Design an inference gateway that serves large language models to many internal teams and external customers. It must multiplex requests across a GPU fleet with continuous batching and KV-cache management, route between models with fallback, stream tokens, enforce per-tenant rate limits and quotas, and keep GPU cost under control. Assume bursty, heterogeneous traffic and strict latency SLOs.",
   "blurb": "The GPU-serving control plane — continuous batching, KV cache, autoscaling, routing/fallback, streaming, rate limits, and cost.",
   "rubric": [

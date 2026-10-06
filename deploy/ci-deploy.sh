@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # Runs only after exact-main CI, security and desktop checks pass. Credentials
-# arrive via Workload Identity Federation; existing runtime config is preserved.
+# arrive via Workload Identity Federation. Preserve runtime secrets, identity,
+# service minimum and CPU allocation; enforce the deployment's scaling ceiling.
 set -Eeuo pipefail
 for name in GCP_PROJECT GCP_REGION GCP_API_SERVICE GCP_IMAGE_REPOSITORY FIREBASE_PROJECT FIREBASE_SITE WEB_API_BASE WEB_PUBLIC_URL RELEASE_SHA RELEASE_VERSION GITHUB_RUN_ID; do
   [[ -n "${!name:-}" ]] || { echo "Missing deployment configuration: $name" >&2; exit 1; }
@@ -16,7 +17,21 @@ FIREBASE=("$FIREBASE_CLI")
 CHANNEL="ci-${GITHUB_RUN_ID}"
 BACKUP="rollback-${GITHUB_RUN_ID}"
 IMAGE="$GCP_REGION-docker.pkg.dev/$GCP_PROJECT/$GCP_IMAGE_REPOSITORY/api:$RELEASE_SHA"
-PREVIOUS_TRAFFIC=$(gcloud run services describe "$GCP_API_SERVICE" --project "$GCP_PROJECT" --region "$GCP_REGION" --format=json | python3 -c 'import json,sys; print(",".join(x["revisionName"]+"="+str(x["percent"]) for x in json.load(sys.stdin)["status"]["traffic"] if x.get("percent",0)>0))')
+SERVICE_CONFIG_JSON=$(gcloud run services describe "$GCP_API_SERVICE" --project "$GCP_PROJECT" --region "$GCP_REGION" --format=json)
+PREVIOUS_TRAFFIC=$(printf '%s' "$SERVICE_CONFIG_JSON" | python3 -c 'import json,sys; print(",".join(x["revisionName"]+"="+str(x["percent"]) for x in json.load(sys.stdin)["status"]["traffic"] if x.get("percent",0)>0))')
+# Cloud Run retains explicit env overrides across image updates. Apply the beta
+# model/cap upgrade to the candidate revision while preserving other settings
+# and secrets. A separately configured reasoning provider keeps its model.
+RUNTIME_ENV_UPDATES=$(printf '%s' "$SERVICE_CONFIG_JSON" | python3 -c '
+import json,os,sys
+service=json.load(sys.stdin)
+current={item["name"]:item.get("value", "") for item in service["spec"]["template"]["spec"]["containers"][0].get("env", [])}
+updates={"RELEASE_SHA":os.environ["RELEASE_SHA"], "GEMINI_MODEL_REASON":"gemini-3.8-flash", "GEMINI_MODEL_LIVE":"gemini-3.8-live", "GEMINI_MODEL_TTS":"gemini-3.8-flash-tts", "HOSTED_DAILY_START_LIMIT":"200"}
+if current.get("LLM_PROVIDER", "gemini").lower() in ("", "gemini"):
+    updates["LLM_MODEL"]="gemini-3.8-flash"
+print(",".join(key+"="+value for key,value in updates.items()))
+')
+unset SERVICE_CONFIG_JSON
 [[ -n "$PREVIOUS_TRAFFIC" ]]
 API_PROMOTED=false
 WEB_PROMOTED=false
@@ -35,8 +50,11 @@ docker push "$IMAGE"
 DIGEST=$(gcloud artifacts docker images describe "$IMAGE" --project "$GCP_PROJECT" --format='value(image_summary.digest)')
 [[ "$DIGEST" =~ ^sha256:[a-f0-9]{64}$ ]]
 REVISION="$GCP_API_SERVICE-gh$GITHUB_RUN_ID-a${GITHUB_RUN_ATTEMPT:-1}"
+# Avoid a warm instance for every candidate tag while preserving the service's
+# existing worker minimum. Tagged candidates need their own maximum as well.
 gcloud run services update "$GCP_API_SERVICE" --project "$GCP_PROJECT" --region "$GCP_REGION" \
-  --image "${IMAGE%:*}@$DIGEST" --update-env-vars "RELEASE_SHA=$RELEASE_SHA" \
+  --image "${IMAGE%:*}@$DIGEST" --update-env-vars "$RUNTIME_ENV_UPDATES" \
+  --min-instances 0 --max "${MAX_INSTANCES:-1}" --max-instances "${MAX_INSTANCES:-1}" \
   --revision-suffix "gh$GITHUB_RUN_ID-a${GITHUB_RUN_ATTEMPT:-1}" --no-traffic --tag candidate --quiet
 CANDIDATE=$(gcloud run services describe "$GCP_API_SERVICE" --project "$GCP_PROJECT" --region "$GCP_REGION" --format=json | python3 -c 'import json,sys; print(next(x["url"] for x in json.load(sys.stdin)["status"]["traffic"] if x.get("tag")=="candidate"))')
 curl --fail --silent --show-error --retry 5 --retry-all-errors --max-time 15 "$CANDIDATE/ready" | python3 -c 'import json,os,sys; r=json.load(sys.stdin); assert r["ready"] and not r["llm_stub"] and r["release"]==os.environ["RELEASE_SHA"]'

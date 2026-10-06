@@ -42,8 +42,8 @@ with tempfile.TemporaryDirectory(prefix='mockinterview-provider-') as temporary:
         env = dict(os.environ)
         env.update(APP_ENV='development', LOCAL_UNLIMITED='true', PORT=str(args.port), DATABASE_URL=admin+'&search_path='+schema,
                    DB_MAX_CONNS='5', JWT_SECRET=secrets.token_hex(32), SESSION_ENCRYPTION_KEY=base64.b64encode(secrets.token_bytes(32)).decode(),
-                   LLM_PROVIDER='gemini', GEMINI_API_KEY=key, LLM_MODEL='gemini-2.5-flash', GEMINI_MODEL_REASON='gemini-2.5-flash',
-                   GEMINI_MODEL_LIVE='gemini-2.5-flash-native-audio-preview-12-2025', USE_STUB_LLM='false',
+                   LLM_PROVIDER='gemini', GEMINI_API_KEY=key, LLM_MODEL='gemini-3.8-flash', GEMINI_MODEL_REASON='gemini-3.8-flash',
+                   GEMINI_MODEL_LIVE='gemini-3.8-live', USE_STUB_LLM='false',
                    PUBLIC_URL='http://localhost:3000', CORS_ALLOW='http://localhost:3000', MODE='api',
                    CORPUS_DIR=str(root/'api/data/corpus'), PACKS_DIR=str(root/'api/data/packs'), RELEASE_SHA='synthetic-provider-check')
         for name in ['OPENAI_API_KEY', 'DEEPSEEK_API_KEY', 'XAI_API_KEY', 'META_API_KEY', 'ANTHROPIC_API_KEY', 'LLM_BASE_URL', 'RESEND_API_KEY', 'SMTP_ADDRESS', 'SMTP_USERNAME', 'SMTP_PASSWORD', 'MAIL_FROM']:

@@ -101,10 +101,12 @@ export default function Docs() {
           <article className={styles.card}>
             <h3 className="!mt-0">Hosted or personal</h3>
             <p>
-              The free hosted interview uses Gemini 2.5 Flash for text and
-              feedback. Personal-key setup supports Gemini, OpenAI, Anthropic,
-              DeepSeek, xAI and Meta. Available models depend on your provider
-              account; validate your selection before starting.
+              The free hosted interview uses Gemini 3.8 Flash for text and
+              feedback. Each account gets one free interview; the project funds
+              up to 200 interviews per UTC day. Personal-key setup supports
+              Gemini, OpenAI, Anthropic, DeepSeek, xAI and Meta. Available
+              models depend on your provider account; validate your selection
+              before starting.
             </p>
             <p className="mt-3">
               Your key is sent securely to the API, encrypted for the active

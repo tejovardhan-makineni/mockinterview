@@ -28,9 +28,9 @@ export default function GetStarted() {
           <span className={styles.cardNumber}>01 / In your browser</span>
           <h3>Just bring yourself.</h3>
           <p>
-            Sign up, verify your email, and choose an interview. One funded
-            interview every 24 hours, using Gemini 2.5 Flash. A short check-in
-            helps us improve your next one.
+            Sign up, verify your email, and choose an interview. Your first
+            interview is free, using Gemini 3.8 Flash. The beta supports 200
+            funded interviews per day across the project (UTC).
           </p>
           <div className={styles.actions}>
             <Button href="/interviews">Find an interview →</Button>
@@ -44,8 +44,9 @@ export default function GetStarted() {
           <h3>Your key. More practice.</h3>
           <p>
             Choose a supported provider and model in interview setup, paste your
-            key, and validate it before starting. Personal keys remove the daily
-            interview limit; your provider’s charges and limits apply.
+            key, and validate it before starting. Personal keys let you keep
+            practicing after your free interview; your provider’s charges and
+            limits apply.
           </p>
           <Link href="/docs#models" className={styles.textLink}>
             Models and voice explained →

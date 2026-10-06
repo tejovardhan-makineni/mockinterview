@@ -17,12 +17,12 @@ func (m *Mem) globalStarts(exclude string) int {
 	n := 0
 	now := time.Now()
 	for _, v := range m.runtimeUsage {
-		if v.funding == "platform" && !v.testerExempt && v.at.After(now.Add(-24*time.Hour)) {
+		if v.funding == "platform" && !v.at.Before(store.UTCDayStart(now)) {
 			n++
 		}
 	}
 	for id, v := range m.sessions {
-		if id != exclude && v.sess.Funding == "platform" && (v.sess.Status == "reserved" || v.sess.Status == "preparing") && v.sess.ReservedUntil != nil && v.sess.ReservedUntil.After(now) && !m.isTester(v.sess.UserID) {
+		if id != exclude && v.sess.Funding == "platform" && (v.sess.Status == "reserved" || v.sess.Status == "preparing" || v.sess.Status == "created") && v.sess.ReservedUntil != nil && v.sess.ReservedUntil.After(now) {
 			n++
 		}
 	}
@@ -33,19 +33,8 @@ func (m *Mem) usage(uid, identity string, unlimited bool) store.Usage {
 	u := store.Usage{FundedAvailable: true, LocalUnlimited: unlimited, TesterUnlimited: m.isTester(uid)}
 	unlimited = unlimited || u.TesterUnlimited
 	now := time.Now()
-	for _, v := range m.runtimeUsage {
-		if unlimited || v.identity != identity || v.funding != "platform" {
-			continue
-		}
-		d := v.at.Add(24 * time.Hour)
-		if d.After(now) && (u.NextStartAt == nil || d.After(*u.NextStartAt)) {
-			u.NextStartAt = &d
-		}
-		if d.After(now) && (u.NextFundedAt == nil || d.After(*u.NextFundedAt)) {
-			u.NextFundedAt = &d
-		}
-	}
-	u.FundedAvailable = unlimited || (u.NextStartAt == nil && u.NextFundedAt == nil)
+	u.FreeInterviewUsed = !unlimited && m.freeClaims[identity]
+	u.FundedAvailable = !u.FreeInterviewUsed
 	for _, v := range m.sessions {
 		if (v.sess.Status == "preparing" || v.sess.Status == "reserved" || v.sess.Status == "created") && v.sess.ReservedUntil != nil && !v.sess.ReservedUntil.After(now) {
 			v.sess.Status = "expired"
@@ -61,10 +50,14 @@ func (m *Mem) usage(uid, identity string, unlimited bool) store.Usage {
 	}
 	return u
 }
-func (m *Mem) Usage(_ context.Context, uid, identity string, unlimited bool) (store.Usage, error) {
+func (m *Mem) Usage(_ context.Context, uid, identity string, unlimited bool, limits ...int) (store.Usage, error) {
 	m.mu.Lock()
 	defer m.mu.Unlock()
-	return m.usage(uid, identity, unlimited), nil
+	u := m.usage(uid, identity, unlimited)
+	if !unlimited && len(limits) > 0 && limits[0] > 0 {
+		store.ApplyGlobalUsage(&u, limits[0], m.globalStarts(u.ActiveSessionID), time.Now())
+	}
+	return u, nil
 }
 func (m *Mem) ReserveSession(_ context.Context, r store.Reservation) (store.Session, error) {
 	m.mu.Lock()
@@ -76,12 +69,12 @@ func (m *Mem) ReserveSession(_ context.Context, r store.Reservation) (store.Sess
 	if u.ActiveSessionID != "" {
 		return store.Session{}, store.ErrSessionConflict
 	}
-	if !r.Unlimited && !u.TesterUnlimited && r.Session.Funding == "platform" && u.NextFundedAt != nil {
+	if !r.Unlimited && !u.TesterUnlimited && r.Session.Funding == "platform" && !u.FundedAvailable {
 		return store.Session{}, store.ErrQuota
 	}
-	if !u.TesterUnlimited && r.Session.Funding == "platform" && r.GlobalDailyLimit > 0 {
+	if r.Session.Funding == "platform" && r.GlobalDailyLimit > 0 {
 		if m.globalStarts("") >= r.GlobalDailyLimit {
-			return store.Session{}, store.ErrQuota
+			return store.Session{}, store.ErrGlobalQuota
 		}
 	}
 	a := r.Session
@@ -157,19 +150,22 @@ func (m *Mem) ActivateLive(_ context.Context, id, owner string) (store.Session, 
 	}
 	if v.sess.StartedAt == nil {
 		usage := m.usage(v.sess.UserID, v.sess.UsageIdentity, v.localUnlimited)
-		if !usage.TesterUnlimited && v.sess.Funding == "platform" && v.globalDailyLimit > 0 && m.globalStarts(id) >= v.globalDailyLimit {
-			return store.Session{}, store.ErrQuota
+		if v.sess.Funding == "platform" && v.globalDailyLimit > 0 && m.globalStarts(id) >= v.globalDailyLimit {
+			return store.Session{}, store.ErrGlobalQuota
 		}
 		if len(m.pendingSurvey(v.sess.UserID)) > 0 {
 			return store.Session{}, store.ErrInterviewFeedbackRequired
 		}
-		if !v.localUnlimited && !usage.TesterUnlimited && v.sess.Funding == "platform" && usage.NextFundedAt != nil {
+		if !v.localUnlimited && !usage.TesterUnlimited && v.sess.Funding == "platform" && !usage.FundedAvailable {
 			return store.Session{}, store.ErrQuota
 		}
 		now := time.Now().UTC()
 		until := now.Add(time.Duration(v.sess.DurationMinutes) * time.Minute)
 		v.sess.StartedAt = &now
 		v.sess.DeadlineAt = &until
+		if v.sess.Funding == "platform" && !v.localUnlimited {
+			m.freeClaims[v.sess.UsageIdentity] = true
+		}
 		m.runtimeUsage = append(m.runtimeUsage, usageRec{id: id, identity: v.sess.UsageIdentity, funding: v.sess.Funding, at: now, testerExempt: usage.TesterUnlimited})
 	}
 	v.sess.Status = "active"

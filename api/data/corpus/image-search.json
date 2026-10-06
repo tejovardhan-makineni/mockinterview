@@ -17,6 +17,7 @@
     "reranking",
     "ml-serving"
   ],
+  "candidate_brief": "Design a service that lets users search an image catalog using a query image or text.",
   "prompt": "Design a visual search system: given a query image (or text), return visually similar images from a very large catalog. It must embed content, index embeddings for approximate nearest-neighbor retrieval, and rank results, all at low latency and high recall. Assume billions of images and continuous ingestion.",
   "blurb": "Embedding-based retrieval at billion scale: encoders, ANN indexes, reranking, and keeping embeddings/index fresh as the catalog and model change.",
   "rubric": [

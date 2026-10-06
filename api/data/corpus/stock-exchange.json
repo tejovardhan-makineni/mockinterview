@@ -16,6 +16,7 @@
     "sequencer",
     "fairness"
   ],
+  "candidate_brief": "Design an exchange that accepts buy and sell orders and matches them using price-time priority.",
   "prompt": "Design a stock exchange matching engine: clients submit limit and market orders for a set of instruments, the engine matches buyers and sellers by price-time priority, and it publishes fills and market data. Optimize for very low, predictable latency and strict fairness, and cover how you stay correct and recoverable.",
   "blurb": "The low-latency deterministic-core problem — a single-threaded order book with price-time priority, a sequencer for fairness, and event-sourced recovery.",
   "rubric": [

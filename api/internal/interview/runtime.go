@@ -29,6 +29,8 @@ type Options struct {
 func (s *Service) SetOptions(o Options) {
 	if !o.Hosted {
 		o.GlobalDailyLimit = 0
+	} else if o.GlobalDailyLimit <= 0 || o.GlobalDailyLimit > 200 {
+		o.GlobalDailyLimit = 200
 	}
 	s.options = o
 }
@@ -205,7 +207,7 @@ func (s *Service) Usage(w http.ResponseWriter, r *http.Request) {
 		httpx.WriteProblem(w, 401, "account unavailable")
 		return
 	}
-	usage, e := s.store.Usage(r.Context(), uid, llm.UsageIdentity(s.options.EncryptionKey, u.Email), !s.options.Hosted)
+	usage, e := s.store.Usage(r.Context(), uid, llm.UsageIdentity(s.options.EncryptionKey, u.Email), !s.options.Hosted, s.options.GlobalDailyLimit)
 	if e != nil {
 		httpx.WriteProblem(w, 503, "Allowance temporarily unavailable")
 		return

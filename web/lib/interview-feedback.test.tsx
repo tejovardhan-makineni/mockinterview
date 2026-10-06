@@ -190,6 +190,36 @@ async function typeComment(text: string) {
   });
 }
 describe("required interview check-in", () => {
+  it("keeps a check-in collapsed while the report is still processing", async () => {
+    await act(async () =>
+      root.render(<InterviewCheckIn sessionId="one" compact />),
+    );
+    expect(document.querySelector<HTMLDetailsElement>("details")!.open).toBe(
+      false,
+    );
+    await act(async () =>
+      root.render(<InterviewCheckIn sessionId="one" compact reportAvailable />),
+    );
+    expect(document.querySelector<HTMLDetailsElement>("details")!.open).toBe(
+      false,
+    );
+  });
+  it("keeps the report check-in compact and makes the full form discoverable", async () => {
+    await act(async () =>
+      root.render(<InterviewCheckIn sessionId="one" reportAvailable />),
+    );
+    const details = document.querySelector<HTMLDetailsElement>("details")!;
+    expect(details.open).toBe(false);
+    expect(details.querySelector("summary")?.textContent).toContain(
+      "6 quick questions",
+    );
+    expect(details.querySelector("summary")?.textContent).toContain(
+      "Required before your next interview",
+    );
+    await act(async () => details.querySelector("summary")!.click());
+    expect(details.open).toBe(true);
+    expect(submit().disabled).toBe(true);
+  });
   it("blocks incomplete responses, accepts all unable, and requires no sharing or comment", async () => {
     await act(async () => root.render(<InterviewCheckIn sessionId="one" />));
     expect(submit().disabled).toBe(true);
@@ -233,6 +263,9 @@ describe("required interview check-in", () => {
       ),
     );
     expect(api.getInterviewFeedback).toHaveBeenCalledOnce();
+    expect(document.querySelector<HTMLDetailsElement>("details")!.open).toBe(
+      true,
+    );
     expect(document.querySelectorAll("input:checked")).toHaveLength(6);
     await send();
     expect(document.body.textContent).toContain("Your unsaved answers remain");

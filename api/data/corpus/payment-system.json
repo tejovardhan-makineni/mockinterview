@@ -17,6 +17,7 @@
     "consistency",
     "pci"
   ],
+  "candidate_brief": "Design a service that moves money between accounts, charges customers, and pays merchants while keeping an accurate record of balances and transfers.",
   "prompt": "Design a payment system with an internal ledger — the kind that moves money between accounts, charges customers, pays out to merchants, and must be auditable and correct to the cent. Cover idempotency, double-entry accounting, exactly-once semantics against external processors, reconciliation, and the consistency/compliance requirements. Assume high volume and zero tolerance for lost or duplicated money.",
   "blurb": "Money must never be lost, created, or double-counted — double-entry ledger, idempotency, exactly-once against flaky PSPs, and reconciliation.",
   "rubric": [

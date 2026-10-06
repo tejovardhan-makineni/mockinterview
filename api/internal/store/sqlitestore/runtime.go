@@ -18,17 +18,11 @@ func readUsage(ctx context.Context, q querier, uid, identity string, unlimited b
 	}
 	u.TesterUnlimited = tester
 	if !unlimited && !tester {
-		var last sql.NullInt64
-		e = q.QueryRowContext(ctx, `SELECT max(activated_at) FROM interview_usage WHERE identity=? AND funding='platform' AND activated_at>?`, identity, nowMillis()-int64(24*time.Hour/time.Millisecond)).Scan(&last)
-		if e != nil {
+		var claimed bool
+		if e = q.QueryRowContext(ctx, `SELECT EXISTS(SELECT 1 FROM free_interview_claims WHERE identity=?)`, identity).Scan(&claimed); e != nil {
 			return u, e
 		}
-		if last.Valid {
-			next := time.UnixMilli(last.Int64).UTC().Add(24 * time.Hour)
-			u.NextFundedAt = &next
-			u.NextStartAt = &next
-			u.FundedAvailable = false
-		}
+		u.FreeInterviewUsed, u.FundedAvailable = claimed, !claimed
 	}
 	documents, e := readSessions(ctx, q, `ORDER BY created_at DESC,id DESC`)
 	if e != nil {
@@ -63,38 +57,50 @@ func readUsage(ctx context.Context, q querier, uid, identity string, unlimited b
 	}
 	return u, nil
 }
-func (s *Store) Usage(ctx context.Context, uid, identity string, unlimited bool) (u store.Usage, err error) {
-	err = s.write(ctx, func(tx *sql.Tx) error { var e error; u, e = readUsage(ctx, tx, uid, identity, unlimited); return e })
+func (s *Store) Usage(ctx context.Context, uid, identity string, unlimited bool, limits ...int) (u store.Usage, err error) {
+	err = s.write(ctx, func(tx *sql.Tx) error {
+		var e error
+		u, e = readUsage(ctx, tx, uid, identity, unlimited)
+		if e != nil || unlimited || len(limits) == 0 || limits[0] <= 0 {
+			return e
+		}
+		n, e := globalStarts(ctx, tx, u.ActiveSessionID)
+		if e == nil {
+			store.ApplyGlobalUsage(&u, limits[0], n, time.Now())
+		}
+		return e
+	})
 	return
 }
 func checkGlobal(ctx context.Context, q querier, limit int, exclude string) error {
 	if limit <= 0 {
 		return nil
 	}
-	var count int
-	if e := q.QueryRowContext(ctx, `SELECT count(*) FROM interview_usage WHERE funding='platform' AND tester_exempt=0 AND activated_at>?`, nowMillis()-int64(24*time.Hour/time.Millisecond)).Scan(&count); e != nil {
-		return e
-	}
-	docs, e := readSessions(ctx, q, `WHERE status IN ('reserved','preparing')`)
+	count, e := globalStarts(ctx, q, exclude)
 	if e != nil {
 		return e
+	}
+	if count >= limit {
+		return store.ErrGlobalQuota
+	}
+	return nil
+}
+func globalStarts(ctx context.Context, q querier, exclude string) (int, error) {
+	var count int
+	if e := q.QueryRowContext(ctx, `SELECT count(*) FROM interview_usage WHERE funding='platform' AND activated_at>=?`, store.UTCDayStart(time.Now()).UnixMilli()).Scan(&count); e != nil {
+		return 0, e
+	}
+	docs, e := readSessions(ctx, q, `WHERE status IN ('reserved','preparing','created')`)
+	if e != nil {
+		return 0, e
 	}
 	for _, d := range docs {
 		a := d.Session
 		if a.ID != exclude && a.Funding == "platform" && a.ReservedUntil != nil && a.ReservedUntil.After(time.Now()) {
-			tester, e := isTester(ctx, q, a.UserID)
-			if e != nil {
-				return e
-			}
-			if !tester {
-				count++
-			}
+			count++
 		}
 	}
-	if count >= limit {
-		return store.ErrQuota
-	}
-	return nil
+	return count, nil
 }
 func (s *Store) ReserveSession(ctx context.Context, r store.Reservation) (a store.Session, err error) {
 	err = s.write(ctx, func(tx *sql.Tx) error {
@@ -111,8 +117,8 @@ func (s *Store) ReserveSession(ctx context.Context, r store.Reservation) (a stor
 		if usage.ActiveSessionID != "" {
 			return store.ErrSessionConflict
 		}
-		if r.Session.Funding == "platform" && !usage.TesterUnlimited {
-			if !r.Unlimited && usage.NextFundedAt != nil {
+		if r.Session.Funding == "platform" {
+			if !r.Unlimited && !usage.TesterUnlimited && !usage.FundedAvailable {
 				return store.ErrQuota
 			}
 			if e = checkGlobal(ctx, tx, r.GlobalDailyLimit, ""); e != nil {
@@ -229,8 +235,8 @@ func (s *Store) ActivateLive(ctx context.Context, id, owner string) (a store.Ses
 			if usage.PendingFeedback {
 				return store.ErrInterviewFeedbackRequired
 			}
-			if a.Funding == "platform" && !usage.TesterUnlimited {
-				if !d.QuotaExempt && usage.NextFundedAt != nil {
+			if a.Funding == "platform" {
+				if !d.QuotaExempt && !usage.TesterUnlimited && !usage.FundedAvailable {
 					return store.ErrQuota
 				}
 				if e = checkGlobal(ctx, tx, d.GlobalDailyLimit, id); e != nil {
@@ -243,6 +249,11 @@ func (s *Store) ActivateLive(ctx context.Context, id, owner string) (a store.Ses
 			until := now.Add(time.Duration(a.DurationMinutes) * time.Minute)
 			a.StartedAt = &now
 			a.DeadlineAt = &until
+			if a.Funding == "platform" && !d.QuotaExempt {
+				if _, e = tx.ExecContext(ctx, `INSERT INTO free_interview_claims(identity,claimed_at) VALUES(?,?) ON CONFLICT DO NOTHING`, a.UsageIdentity, now.UnixMilli()); e != nil {
+					return e
+				}
+			}
 			if _, e = tx.ExecContext(ctx, `INSERT INTO interview_usage(session_id,identity,funding,activated_at,tester_exempt) VALUES(?,?,?,?,?) ON CONFLICT(session_id) DO NOTHING`, id, a.UsageIdentity, a.Funding, now.UnixMilli(), usage.TesterUnlimited); e != nil {
 				return e
 			}

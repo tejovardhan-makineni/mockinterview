@@ -61,8 +61,9 @@ export default function BetaPage() {
         <h1 className="page-title mt-3">Join the beta</h1>
         <p className="mt-4 text-[var(--color-muted)]">
           Help make interview practice work for more people. Approved beta
-          testers get unlimited interviews with the community model in exchange
-          for regular, honest feedback.
+          testers can practice beyond the one-time free allowance in exchange
+          for regular, honest feedback. All funded interviews share the
+          project’s capacity of 200 per UTC day.
         </p>
         <Panel className="mt-8 p-6 sm:p-8">
           {error && (
@@ -74,8 +75,8 @@ export default function BetaPage() {
             <>
               <h2 className="text-xl font-semibold">You’re a beta tester</h2>
               <p className="mt-3 text-sm">
-                Your unlimited access is active. After each interview, tell us
-                what helped and what needs work.
+                Your tester access is active, within the shared daily capacity.
+                After each interview, tell us what helped and what needs work.
               </p>
               <Button href="/interviews" className="mt-5">
                 Start practicing
@@ -88,8 +89,7 @@ export default function BetaPage() {
               </h2>
               <p className="mt-3 text-sm">
                 Your commitment is saved. Check this page for approval; until
-                then, you can keep using your daily community interview or your
-                own API key.
+                then, you can use your one free interview or your own API key.
               </p>
               <Button href="/interviews" variant="ghost" className="mt-5">
                 Keep practicing

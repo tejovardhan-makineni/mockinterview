@@ -14,6 +14,7 @@ vi.mock("./api", () => ({
 }));
 vi.mock("next/navigation", () => ({
   useRouter: () => ({ replace: vi.fn() }),
+  usePathname: () => window.location.pathname,
 }));
 
 let root: Root;

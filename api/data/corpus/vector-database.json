@@ -18,6 +18,7 @@
     "recall",
     "embeddings"
   ],
+  "candidate_brief": "Design a database that stores vectors and finds similar vectors, with the ability to filter results by metadata.",
   "prompt": "Design a vector database that stores billions of embeddings and serves approximate nearest-neighbor search with metadata filtering. It must offer tunable recall/latency, support inserts/updates/deletes without full rebuilds, scale across shards, and back workloads like semantic search and RAG retrieval.",
   "blurb": "The ANN engine — HNSW vs IVF, sharding and replication, filtered search, the recall/latency/memory tradeoff, and live updates.",
   "rubric": [

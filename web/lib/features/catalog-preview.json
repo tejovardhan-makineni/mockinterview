@@ -1051,7 +1051,8 @@
         "streaming",
         "data-quality"
       ],
-      "prompt": "Design an experimentation platform that lets teams run A/B tests and feature rollouts across a large product. It must assign users to variants deterministically, expose assignments at low latency, compute experiment metrics, and run a statistics engine that reports significance and guardrails. Assume thousands of concurrent experiments and a very large user base.",
+      "candidate_brief": "Design a platform that lets product teams run A/B experiments and evaluate their results.",
+      "prompt": "Design a platform that lets product teams run A/B experiments and evaluate their results.",
       "blurb": "The platform behind trustworthy A/B tests: deterministic assignment, a metrics pipeline, and a stats engine that resists peeking and interference."
     },
     {
@@ -1182,7 +1183,8 @@
         "analytics",
         "lambda-architecture"
       ],
-      "prompt": "Design a real-time ad click aggregation and analytics pipeline. Ad clicks arrive at massive volume; advertisers need near-real-time dashboards of clicks, impressions and spend per campaign and time period, plus accurate totals for billing.",
+      "candidate_brief": "Design a service that collects advertising click events and makes campaign activity available to advertisers.",
+      "prompt": "Design a service that collects advertising click events and makes campaign activity available to advertisers.",
       "blurb": "A streaming aggregation firehose where the dashboard can be approximate but billing must be exact — windowing, dedup, and the hot-campaign skew."
     },
     {
@@ -1304,7 +1306,8 @@
         "tracing",
         "guardrails"
       ],
-      "prompt": "Design a platform that runs LLM agents which call tools (including MCP servers) to accomplish multi-step tasks for many tenants. It must orchestrate the agent loop, sandbox tool execution safely, manage agent memory/context, trace and debug runs, enforce guardrails and permissions, and control cost and latency across long-running agent runs.",
+      "candidate_brief": "Design a platform where teams can run AI agents that use tools to complete multi-step tasks.",
+      "prompt": "Design a platform where teams can run AI agents that use tools to complete multi-step tasks.",
       "blurb": "The agent runtime — orchestration loop, sandboxed tools/MCP, memory, tracing, guardrails, and cost/latency control at scale."
     },
     {
@@ -1455,7 +1458,8 @@
         "circuit-breaker",
         "reverse-proxy"
       ],
-      "prompt": "Design an API gateway that sits in front of hundreds of backend microservices: it terminates client requests, authenticates them, routes to the right service, enforces rate limits and quotas, and protects backends with timeouts and circuit breaking. Cover the request lifecycle, the control plane, and how it stays fast and reliable.",
+      "candidate_brief": "Design an API gateway that receives client requests and routes them to backend services.",
+      "prompt": "Design an API gateway that receives client requests and routes them to backend services.",
       "blurb": "The front-door problem — routing, authn/z, rate limiting, and circuit breaking in the hot path, with a dynamic control plane and no added latency."
     },
     {
@@ -3477,7 +3481,8 @@
         "presence",
         "ordering"
       ],
-      "prompt": "Design a real-time messaging system that supports 1:1 and group chats, like WhatsApp or Messenger. It should handle persistent connections, deliver messages with low latency, work when recipients are offline, and show delivery/read receipts and presence.",
+      "candidate_brief": "Design a messaging service for one-to-one and group conversations.",
+      "prompt": "Design a messaging service for one-to-one and group conversations.",
       "blurb": "Persistent connections at scale — the connection layer, message ordering, fanout, offline delivery, and receipts."
     },
     {
@@ -3701,7 +3706,8 @@
         "greedy-trap",
         "combinatorics"
       ],
-      "prompt": "Given an array of coin denominations coins and an integer amount, return the fewest number of coins needed to make up that amount, assuming an unlimited supply of each coin. If the amount cannot be made, return -1. As a follow-up: return the NUMBER OF DISTINCT COMBINATIONS of coins that sum to the amount (order does not matter — [1,2] and [2,1] are the same combination).",
+      "candidate_brief": "Given coin denominations and a target amount, return the fewest coins needed to make that amount. Each denomination has an unlimited supply. Return -1 if the amount cannot be made.",
+      "prompt": "Given coin denominations and a target amount, return the fewest coins needed to make that amount. Each denomination has an unlimited supply. Return -1 if the amount cannot be made.",
       "blurb": "The unbounded-knapsack DP twins — min-coins is a shortest-path over amounts, count-ways is a combination count where loop order kills double-counting."
     },
     {
@@ -3735,7 +3741,8 @@
         "websockets",
         "consistency"
       ],
-      "prompt": "Design a Google-Docs-style real-time collaborative editor: many users edit the same document simultaneously, everyone sees each other's changes within a fraction of a second, edits never get lost, and everyone converges to the same final document. Cover the concurrency-control model, the sync protocol, and presence.",
+      "candidate_brief": "Design a shared document editor where several people can edit the same document at the same time.",
+      "prompt": "Design a shared document editor where several people can edit the same document at the same time.",
       "blurb": "The convergence problem — Operational Transformation vs CRDTs, ordering concurrent edits so everyone ends up identical, plus presence, cursors, and offline."
     },
     {
@@ -3897,7 +3904,8 @@
         "drift",
         "trust-and-safety"
       ],
-      "prompt": "Design a content moderation system for a large user-generated-content platform. It must screen text, images, and video across many policy categories (violence, hate, sexual content, spam, self-harm), combine automated ML with human reviewers, and give users an appeals process. Assume very high upload volume and strict latency needs for the publish path.",
+      "candidate_brief": "Design a service that helps a user-generated-content platform identify and handle content that violates its policies.",
+      "prompt": "Design a service that helps a user-generated-content platform identify and handle content that violates its policies.",
       "blurb": "Multimodal T\u0026S at scale: policy classifiers, human-in-the-loop routing, appeals, and keeping models aligned with shifting policy."
     },
     {
@@ -3930,7 +3938,8 @@
         "dfs",
         "cycle-detection"
       ],
-      "prompt": "There are numCourses labeled 0..numCourses-1. You're given prerequisites where prerequisites[i] = [a, b] means you must take course b before course a. First: return whether you can finish all courses (i.e., is it possible to complete every course given the prerequisites?). Follow-up: return a valid ordering of courses to take; return an empty array if it's impossible.",
+      "candidate_brief": "There are numCourses labeled 0 through numCourses - 1. Each prerequisite [a, b] means course b must be taken before course a. Return whether it is possible to finish every course.",
+      "prompt": "There are numCourses labeled 0 through numCourses - 1. Each prerequisite [a, b] means course b must be taken before course a. Return whether it is possible to finish every course.",
       "blurb": "A dependency graph where 'can you finish?' is exactly 'is this graph a DAG?' — topological sort via Kahn's BFS or DFS cycle detection."
     },
     {
@@ -4341,7 +4350,8 @@
         "strings",
         "prefix-search"
       ],
-      "prompt": "Design an autocomplete system. You're given historical sentences and their usage counts. Implement input(c): the user types characters one at a time; each call returns the top 3 historical sentences that start with the prefix typed so far, ordered by descending frequency, ties broken by ASCII (lexicographic) order. A special character '#' ends the current sentence, saving it (or incrementing its count) and resetting the prefix. Return fewer than 3 if fewer match.",
+      "candidate_brief": "Implement input(c) for an autocomplete system initialized with historical sentences and their counts. Return up to three sentences matching the prefix typed so far, ranked by descending frequency, then ASCII lexicographic order. The character # saves the current sentence, increments its count, resets the prefix, and returns no suggestions.",
+      "prompt": "Implement input(c) for an autocomplete system initialized with historical sentences and their counts. Return up to three sentences matching the prefix typed so far, ranked by descending frequency, then ASCII lexicographic order. The character # saves the current sentence, increments its count, resets the prefix, and returns no suggestions.",
       "blurb": "A trie over sentences with frequency-aware top-k retrieval per prefix — plus how you'd scale the ranking beyond a single machine."
     },
     {
@@ -4438,7 +4448,8 @@
         "hot-keys",
         "invalidation"
       ],
-      "prompt": "Design a distributed in-memory cache like Memcached or Redis that many application servers use to speed up reads. It should spread data across many nodes, handle node failures gracefully, evict under memory pressure, deal with hot keys, and keep cached data reasonably consistent with the source of truth.",
+      "candidate_brief": "Design a shared in-memory cache that multiple application servers can use to store and retrieve data.",
+      "prompt": "Design a shared in-memory cache that multiple application servers can use to store and retrieve data.",
       "blurb": "Consistent hashing, eviction policies, replication, hot keys, and cache invalidation."
     },
     {
@@ -4471,7 +4482,8 @@
         "redlock",
         "coordination"
       ],
-      "prompt": "Design a distributed locking / coordination service that lets processes across many machines acquire mutual-exclusion locks (and elect leaders) safely. Cover how a lock is acquired and released, what happens when the holder crashes or is partitioned, and how you prevent two processes from ever believing they hold the same lock.",
+      "candidate_brief": "Design a service that lets processes on different machines acquire and release mutually exclusive locks.",
+      "prompt": "Design a service that lets processes on different machines acquire and release mutually exclusive locks.",
       "blurb": "The mutual-exclusion-across-machines problem — leases with expiry, fencing tokens against stale holders, and the Redlock-vs-consensus safety debate."
     },
     {
@@ -4505,7 +4517,8 @@
         "queues",
         "leader-election"
       ],
-      "prompt": "Design a distributed job scheduler: users register one-off and recurring (cron-style) jobs that must fire at or near their scheduled time and run to completion exactly the intended number of times, across a fleet of workers. Cover how you store schedules, trigger them on time, and execute them reliably.",
+      "candidate_brief": "Design a service where users schedule one-off and recurring jobs to run on a fleet of workers.",
+      "prompt": "Design a service where users schedule one-off and recurring jobs to run on a fleet of workers.",
       "blurb": "The scheduling-at-scale problem — time-based indexing (time-wheel/bucketed queues), dedup so a job fires once, and at-least-once execution with idempotent workers."
     },
     {
@@ -4767,7 +4780,8 @@
         "streaming",
         "drift"
       ],
-      "prompt": "Design a system that predicts estimated time of arrival for rides or deliveries. Given an origin, destination, and current conditions, it must return an accurate ETA within tight latency, using spatiotemporal features (traffic, road network, historical patterns) and a model that stays accurate as conditions change through the day.",
+      "candidate_brief": "Design a system that predicts the arrival time for a ride or delivery from an origin to a destination.",
+      "prompt": "Design a system that predicts the arrival time for a ride or delivery from an origin to a destination.",
       "blurb": "Spatiotemporal ML at scale: routing + traffic features, low-latency regression serving, real-time conditions, and drift across time-of-day/weather."
     },
     {
@@ -4961,7 +4975,8 @@
         "freshness",
         "mlops"
       ],
-      "prompt": "Design a feature store that serves ML features for both model training and low-latency online inference. It must guarantee consistency between offline training features and online serving features, provide point-in-time-correct training data, materialize features from batch and streaming sources, and meet a strict online read latency budget.",
+      "candidate_brief": "Design a service that makes machine-learning features available for model training and online predictions.",
+      "prompt": "Design a service that makes machine-learning features available for model training and online predictions.",
       "blurb": "The MLOps backbone — online/offline consistency, point-in-time correctness, materialization, freshness, and low-latency serving."
     },
     {
@@ -4994,7 +5009,8 @@
         "metadata",
         "blob-storage"
       ],
-      "prompt": "Design a file storage and sync service like Dropbox or Google Drive. Users store files that sync across their devices; edits on one device propagate to others. Cover chunking, deduplication, efficient sync of changed bytes, conflict resolution when two devices edit offline, and the metadata layer. Assume many users with large files and multiple devices each.",
+      "candidate_brief": "Design a service that stores users’ files and keeps them synchronized across their devices.",
+      "prompt": "Design a service that stores users’ files and keeps them synchronized across their devices.",
       "blurb": "Content-defined chunking, block dedup, delta sync, and the offline-edit conflict problem — the metadata plane is the real system."
     },
     {
@@ -5191,7 +5207,8 @@
         "drift",
         "imbalanced-data"
       ],
-      "prompt": "Design a system that scores card/payment transactions for fraud in real time. Each authorization must be approved or declined within tight latency budgets, features must be computed from both historical and just-happened events, and the model must adapt as fraud patterns shift. Assume a large global payments provider.",
+      "candidate_brief": "Design a system that assesses incoming payment transactions for fraud so they can be approved or declined.",
+      "prompt": "Design a system that assesses incoming payment transactions for fraud so they can be approved or declined.",
       "blurb": "Real-time ML scoring under a hard latency budget: online/offline features, training-serving parity, feedback loops, and concept drift."
     },
     {
@@ -5224,7 +5241,8 @@
         "eta",
         "traffic"
       ],
-      "prompt": "Design the routing and maps backend behind a service like Google Maps: render the map, and compute the fastest route between two points on a continent-scale road network with live traffic, returning a route and ETA in well under a second. Cover map tile serving, the routing engine, and how traffic and ETAs stay fresh.",
+      "candidate_brief": "Design the backend for a maps service that displays maps and finds routes between locations.",
+      "prompt": "Design the backend for a maps service that displays maps and finds routes between locations.",
       "blurb": "The continent-scale shortest-path problem — why plain Dijkstra can't answer in time, graph preprocessing (contraction hierarchies), tiled map rendering, and traffic-aware ETAs."
     },
     {
@@ -5483,7 +5501,8 @@
         "reranking",
         "ml-serving"
       ],
-      "prompt": "Design a visual search system: given a query image (or text), return visually similar images from a very large catalog. It must embed content, index embeddings for approximate nearest-neighbor retrieval, and rank results, all at low latency and high recall. Assume billions of images and continuous ingestion.",
+      "candidate_brief": "Design a service that lets users search an image catalog using a query image or text.",
+      "prompt": "Design a service that lets users search an image catalog using a query image or text.",
       "blurb": "Embedding-based retrieval at billion scale: encoders, ANN indexes, reranking, and keeping embeddings/index fresh as the catalog and model change."
     },
     {
@@ -5643,7 +5662,8 @@
         "hinted-handoff",
         "consistency"
       ],
-      "prompt": "Design a highly available, horizontally scalable distributed key-value store in the style of Amazon Dynamo — one that stays writable during partitions and node failures. Cover partitioning, replication, how reads and writes stay consistent enough, membership, and failure handling.",
+      "candidate_brief": "Design a distributed store that lets applications write and retrieve values by key.",
+      "prompt": "Design a distributed store that lets applications write and retrieve values by key.",
       "blurb": "The Dynamo playbook: partitioning, quorums, vector clocks, gossip, hinted handoff, and tunable consistency."
     },
     {
@@ -5676,7 +5696,8 @@
         "selection",
         "divide-and-conquer"
       ],
-      "prompt": "Given an integer array nums and an integer k, return the kth LARGEST element in the array. Note this is the kth largest in sorted order, not the kth distinct element — duplicates count. Can you do better than sorting the whole array?",
+      "candidate_brief": "Given an integer array nums and an integer k, return its kth largest element. Count duplicate values separately; this is not the kth distinct value.",
+      "prompt": "Given an integer array nums and an integer k, return its kth largest element. Count duplicate values separately; this is not the kth distinct value.",
       "blurb": "The selection problem — a size-k min-heap gives O(n log k), and Quickselect gives O(n) average by partitioning around a pivot without fully sorting."
     },
     {
@@ -5972,7 +5993,8 @@
         "caching",
         "sharding"
       ],
-      "prompt": "Design a real-time leaderboard for a popular game: players earn points, and you must show the top N players globally plus a given player's rank and the players immediately around them. Updates and reads are both high-volume and should feel instant.",
+      "candidate_brief": "Design a game leaderboard that shows the highest-scoring players and a player’s rank relative to others.",
+      "prompt": "Design a game leaderboard that shows the highest-scoring players and a player’s rank relative to others.",
       "blurb": "The ranking-at-scale problem — sorted sets, top-N vs 'my rank', ties, and why an ordinary indexed SQL count-query falls over."
     },
     {
@@ -6038,7 +6060,8 @@
         "transaction",
         "machine-coding"
       ],
-      "prompt": "Design an ATM. A customer inserts a card, authenticates with a PIN, then withdraws or deposits cash, checks balance, and takes their card back. Model the classes and, importantly, the ATM's state machine (card inserted, authenticated, transaction, dispensing). Show how cash is dispensed from the machine's bill denominations. Sketch the class diagram.",
+      "candidate_brief": "Design the object model for an ATM where a customer authenticates with a card and PIN and performs banking transactions.",
+      "prompt": "Design the object model for an ATM where a customer authenticates with a card and PIN and performs banking transactions.",
       "blurb": "The State-pattern classic with a twist — model the ATM flow as states and solve cash dispensing across bill denominations."
     },
     {
@@ -6071,7 +6094,8 @@
         "state-machine",
         "game"
       ],
-      "prompt": "Design the object model for a two-player chess game. Model the board, the pieces with their distinct movement rules, move validation (including special moves like castling, en passant, and promotion), check/checkmate/stalemate detection, and the overall game state. Design the core classes and key methods. Focus on the object design, not a chess AI. Sketch the class diagram.",
+      "candidate_brief": "Design the object model for a two-player chess game using standard chess rules. Focus on the game’s objects and behavior, not a chess-playing AI.",
+      "prompt": "Design the object model for a two-player chess game using standard chess rules. Focus on the game’s objects and behavior, not a chess-playing AI.",
       "blurb": "Per-piece movement via Strategy/polymorphism, special-move rules, and check/checkmate detection with a clean game state machine."
     },
     {
@@ -6104,7 +6128,8 @@
         "template-method",
         "machine-coding"
       ],
-      "prompt": "Design a deck of cards that you can shuffle and deal from, then show how you would build a generic card game (say Blackjack) on top of it. Model the classes — Card, Deck, Player, Game — their relationships, and the key methods. Sketch the class diagram.",
+      "candidate_brief": "Design a deck of playing cards that can be shuffled and dealt, and show how a card game such as Blackjack would use it.",
+      "prompt": "Design a deck of playing cards that can be shuffled and dealt, and show how a card game such as Blackjack would use it.",
       "blurb": "The OOD fundamentals check — clean Card/Deck modeling, a correct shuffle, and a game layered on top without hard-coding one game's rules."
     },
     {
@@ -6137,7 +6162,8 @@
         "concurrency",
         "machine-coding"
       ],
-      "prompt": "Design the control system for a building with multiple elevators. Passengers press up/down buttons on each floor and floor buttons inside each car. Model the classes, the elevator state machine, and the dispatch/scheduling logic that decides which car serves a call. Sketch the class diagram and walk through what happens when two hall calls arrive at once.",
+      "candidate_brief": "Design the object model and control behavior for a building with several elevators serving passenger requests.",
+      "prompt": "Design the object model and control behavior for a building with several elevators serving passenger requests.",
       "blurb": "The hard OOD scheduling problem — a per-car state machine plus a pluggable dispatcher that stops two cars from chasing the same call."
     },
     {
@@ -6170,7 +6196,8 @@
         "cart",
         "order-lifecycle"
       ],
-      "prompt": "Design the object model for a food delivery platform like DoorDash or Uber Eats. Customers browse restaurants and menus, build a cart, place an order, and the order flows from placed → confirmed → preparing → picked up → delivered. Design the core classes, the cart and order model, the order state machine, and pricing/promotions. Focus on class design and APIs rather than the distributed backend. Sketch the class diagram.",
+      "candidate_brief": "Design the object model for a service where customers order restaurant food for delivery. Focus on classes and APIs rather than distributed infrastructure.",
+      "prompt": "Design the object model for a service where customers order restaurant food for delivery. Focus on classes and APIs rather than distributed infrastructure.",
       "blurb": "Restaurant/menu modeling, a cart-to-order flow, an order state machine spanning three actors, and pluggable pricing/promos."
     },
     {
@@ -6203,7 +6230,8 @@
         "state-machine",
         "strategy-pattern"
       ],
-      "prompt": "Design the object model for a hotel reservation system. Users search for available rooms for a date range, book a room, pay, and can cancel. The system must never double-book a room for overlapping dates. Design the core classes, the availability/booking model, the reservation lifecycle, and pricing. Focus on class design and APIs rather than the distributed backend. Sketch the class diagram.",
+      "candidate_brief": "Design the object model for a hotel reservation system where guests find and book rooms for a date range. A room cannot be booked for overlapping stays.",
+      "prompt": "Design the object model for a hotel reservation system where guests find and book rooms for a date range. A room cannot be booked for overlapping stays.",
       "blurb": "Availability over date ranges without double-booking, a reservation state machine, and pluggable pricing."
     },
     {
@@ -6237,7 +6265,8 @@
         "cache",
         "concurrency"
       ],
-      "prompt": "Design the object model for an in-memory key-value store / cache (like a simplified Redis or Guava Cache). It supports get and put, per-entry TTL expiration, a bounded capacity with a pluggable eviction policy (LRU, LFU, FIFO), and must be thread-safe. Design the core classes, the eviction-policy abstraction, the TTL mechanism, and the concurrency approach. Sketch the class diagram.",
+      "candidate_brief": "Design an in-memory key-value cache with get and put operations, bounded capacity, and expiration times for entries.",
+      "prompt": "Design an in-memory key-value cache with get and put operations, bounded capacity, and expiration times for entries.",
       "blurb": "Bounded cache with pluggable eviction (LRU/LFU/FIFO) via Strategy, TTL expiry, and a real thread-safety story."
     },
     {
@@ -6270,7 +6299,8 @@
         "strategy-pattern",
         "machine-coding"
       ],
-      "prompt": "Design a library management system. Members search a catalog and borrow physical books; each book has multiple copies; loans have due dates and late fines; a member can place a hold on a copy that is currently checked out and be notified when one frees up. Model the classes, relationships, the copy/loan lifecycle, and the key APIs. Sketch the class diagram.",
+      "candidate_brief": "Design the object model for a library where members search the catalog and borrow physical copies of books.",
+      "prompt": "Design the object model for a library where members search the catalog and borrow physical copies of books.",
       "blurb": "A CRUD-shaped OOD with real depth — the Book vs BookCopy distinction, a loan/hold state machine, fines, and notifications."
     },
     {
@@ -6303,7 +6333,8 @@
         "appenders",
         "levels"
       ],
-      "prompt": "Design the object model for a logging framework like Log4j or SLF4J. Application code logs messages at levels (DEBUG/INFO/WARN/ERROR). Messages are filtered by a configured level, formatted, and written to one or more destinations (console, file, network). Design the core classes, the level filtering, the appender/sink abstraction, the formatter abstraction, and how loggers form a hierarchy. Sketch the class diagram.",
+      "candidate_brief": "Design a reusable logging library that application code can use to send messages at different severity levels to configured destinations.",
+      "prompt": "Design a reusable logging library that application code can use to send messages at different severity levels to configured destinations.",
       "blurb": "Level filtering, pluggable appenders and formatters, and a hierarchical logger tree — the canonical Chain-of-Responsibility OOD."
     },
     {
@@ -6336,7 +6367,8 @@
         "templates",
         "retry"
       ],
-      "prompt": "Design the object model for a reusable notification service used across a company. It sends notifications over multiple channels (email, SMS, push, in-app), renders content from templates, respects user preferences and opt-outs, and retries transient failures. Design the core classes, the channel and template abstractions, the preference model, and the retry mechanism. Focus on class design and APIs. Sketch the class diagram.",
+      "candidate_brief": "Design the classes and APIs of a reusable service that sends notifications through channels such as email, SMS, and push.",
+      "prompt": "Design the classes and APIs of a reusable service that sends notifications through channels such as email, SMS, and push.",
       "blurb": "Multi-channel dispatch via Strategy, templated content, preference/opt-out gating, and a retry-with-backoff mechanism."
     },
     {
@@ -6369,7 +6401,8 @@
         "state-machine",
         "machine-coding"
       ],
-      "prompt": "Design the object model for a multi-level parking lot. It parks different vehicle types (motorcycle, car, bus/truck) into appropriately sized spots, issues a ticket on entry, and charges a fee on exit based on how long the vehicle stayed. Walk me through your classes, their relationships, and the key APIs. Sketch the class diagram on the whiteboard.",
+      "candidate_brief": "Design the object model for a multi-level parking lot that admits vehicles, assigns suitable spaces, and charges for parking.",
+      "prompt": "Design the object model for a multi-level parking lot that admits vehicles, assigns suitable spaces, and charges for parking.",
       "blurb": "The canonical OOD warm-up — vehicle/spot hierarchies, spot allocation, ticketing, and pluggable pricing without a wall of if/else."
     },
     {
@@ -6402,7 +6435,8 @@
         "matching",
         "pricing"
       ],
-      "prompt": "Design the object model for a ride-hailing service like Uber. Riders request trips, the system matches them to nearby available drivers, the trip goes through a lifecycle (requested → matched → started → completed), and fares are computed. Design the core classes, the trip state machine, the matching abstraction, and the pricing abstraction. Focus on the class design and APIs rather than the geo-distributed infrastructure. Sketch the class diagram.",
+      "candidate_brief": "Design the object model for a ride-hailing service where riders request trips and drivers fulfill them. Focus on classes and APIs rather than distributed infrastructure.",
+      "prompt": "Design the object model for a ride-hailing service where riders request trips and drivers fulfill them. Focus on classes and APIs rather than distributed infrastructure.",
       "blurb": "Trip lifecycle as a state machine, pluggable matching and surge pricing strategies, and driver/rider domain modeling."
     },
     {
@@ -6435,7 +6469,8 @@
         "state-machine",
         "machine-coding"
       ],
-      "prompt": "Design the classic Snake game. A snake moves on a grid in a direction the player controls; it grows when it eats food and the game ends when it hits a wall or itself. Model the classes, the game loop, and — importantly — the data structures that make each move O(1) rather than scanning the whole snake. Sketch the class diagram.",
+      "candidate_brief": "Design the classic Snake game on a grid. The player controls movement; eating food grows the snake, and hitting a wall or the snake’s own body ends the game.",
+      "prompt": "Design the classic Snake game on a grid. The player controls movement; eating food grows the snake, and hitting a wall or the snake’s own body ends the game.",
       "blurb": "Deceptively simple OOD where the data structures matter — an O(1) move using a deque plus a position set for self-collision."
     },
     {
@@ -6468,7 +6503,8 @@
         "graph",
         "domain-model"
       ],
-      "prompt": "Design the object model for an expense-sharing application like Splitwise. Users create groups, add expenses that are split among members (equally, by exact amounts, or by percentage), and the app tracks who owes whom. Design the core classes, their relationships, and the key methods. Focus on the class design and APIs, not the distributed backend. Sketch the class diagram.",
+      "candidate_brief": "Design the object model for an expense-sharing application where groups record shared expenses and track who owes whom.",
+      "prompt": "Design the object model for an expense-sharing application where groups record shared expenses and track who owes whom.",
       "blurb": "Classic money-domain OOD — pluggable split strategies, balance sheets, and a settle-up debt-simplification graph."
     },
     {
@@ -6501,7 +6537,8 @@
         "win-detection",
         "machine-coding"
       ],
-      "prompt": "Design Tic-Tac-Toe, then generalize it toward an N x N board (Connect-style) game. Model the Board, Player, Move, and Game classes, the turn/state flow, and the win-detection logic. Make the win check efficient rather than scanning the whole board every move. Sketch the class diagram.",
+      "candidate_brief": "Design the object model and game behavior for a two-player Tic-Tac-Toe game.",
+      "prompt": "Design the object model and game behavior for a two-player Tic-Tac-Toe game.",
       "blurb": "A small board game done cleanly — legal-move validation, an efficient incremental win check, and a design that generalizes to N x N."
     },
     {
@@ -6534,7 +6571,8 @@
         "payment",
         "machine-coding"
       ],
-      "prompt": "Design a vending machine. A customer selects a product, inserts money (coins/notes or card), the machine dispenses the item and returns change. Model the classes and, importantly, the machine's state machine — what the machine does when idle, when money is being inserted, when dispensing, and when a selection is sold out. Sketch the class diagram.",
+      "candidate_brief": "Design the object model for a vending machine where customers choose a product, pay for it, and receive the item and any change.",
+      "prompt": "Design the object model for a vending machine where customers choose a product, pay for it, and receive the item and any change.",
       "blurb": "The textbook State-pattern problem — model the machine as an explicit state machine over selection, payment, dispensing, and change."
     },
     {
@@ -6570,7 +6608,8 @@
         "rate-limiting",
         "cost"
       ],
-      "prompt": "Design an inference gateway that serves large language models to many internal teams and external customers. It must multiplex requests across a GPU fleet with continuous batching and KV-cache management, route between models with fallback, stream tokens, enforce per-tenant rate limits and quotas, and keep GPU cost under control. Assume bursty, heterogeneous traffic and strict latency SLOs.",
+      "candidate_brief": "Design a gateway that lets multiple teams and customers send requests to large language models and receive responses.",
+      "prompt": "Design a gateway that lets multiple teams and customers send requests to large language models and receive responses.",
       "blurb": "The GPU-serving control plane — continuous batching, KV cache, autoscaling, routing/fallback, streaming, rate limits, and cost."
     },
     {
@@ -6602,7 +6641,8 @@
         "strings",
         "two-pointer"
       ],
-      "prompt": "Given a string s, find the length of the longest substring that contains no repeating characters. A substring is a contiguous run of characters (not a subsequence). Return just the length.",
+      "candidate_brief": "Given a string s, return the length of its longest contiguous substring with no repeated characters.",
+      "prompt": "Given a string s, return the length of its longest contiguous substring with no repeated characters.",
       "blurb": "The canonical variable-size sliding window — grow the right edge, and jump the left edge past the last occurrence of any repeat."
     },
     {
@@ -6635,7 +6675,8 @@
         "cache",
         "o1"
       ],
-      "prompt": "Design a data structure for a Least Recently Used (LRU) cache. It supports get(key) and put(key, value). get returns the value if the key exists, else -1, and marks the key as most-recently used. put inserts or updates the value; if the cache exceeds its fixed capacity, it evicts the least-recently-used key. Both operations must run in O(1) average time.",
+      "candidate_brief": "Implement a fixed-capacity LRU cache with get(key) and put(key, value), each in O(1) average time. get returns -1 for a missing key. Reading, inserting, or updating a key makes it most recently used; exceeding capacity evicts the least recently used key.",
+      "prompt": "Implement a fixed-capacity LRU cache with get(key) and put(key, value), each in O(1) average time. get returns -1 for a missing key. Reading, inserting, or updating a key makes it most recently used; exceeding capacity evicts the least recently used key.",
       "blurb": "The classic O(1) cache design — a hash map for lookup plus a doubly linked list for recency ordering."
     },
     {
@@ -7023,7 +7064,8 @@
         "streaming",
         "invariant"
       ],
-      "prompt": "Design a data structure that supports two operations on a stream of integers: addNum(num) inserts an integer into the data structure, and findMedian() returns the median of all elements added so far. The median is the middle value of the sorted elements; if the count is even, it's the average of the two middle values. Optimize for many interleaved addNum and findMedian calls.",
+      "candidate_brief": "Implement addNum(num) and findMedian() for a stream of integers. findMedian returns the middle value in sorted order, or the average of the two middle values when the count is even.",
+      "prompt": "Implement addNum(num) and findMedian() for a stream of integers. findMedian returns the middle value in sorted order, or the average of the two middle values when the count is even.",
       "blurb": "The two-heaps classic — a max-heap for the lower half and a min-heap for the upper half, kept balanced so the median is at the tops."
     },
     {
@@ -7118,7 +7160,8 @@
         "greedy",
         "arrays"
       ],
-      "prompt": "Given an array of intervals where intervals[i] = [start_i, end_i], merge all overlapping intervals and return an array of the non-overlapping intervals that cover all the intervals in the input. As a follow-up: given an already-sorted, non-overlapping set of intervals, insert a new interval and merge as needed.",
+      "candidate_brief": "Given intervals [start, end], merge all overlapping intervals and return non-overlapping intervals covering the same ranges.",
+      "prompt": "Given intervals [start, end], merge all overlapping intervals and return non-overlapping intervals covering the same ranges.",
       "blurb": "Sort by start, then sweep once and coalesce — the canonical interval-merging pattern with an insert-interval twist."
     },
     {
@@ -7152,7 +7195,8 @@
         "delivery-semantics",
         "log"
       ],
-      "prompt": "Design a distributed, durable, high-throughput message queue / streaming platform like Apache Kafka. Producers publish messages to topics; consumers read them, possibly in groups for parallelism. Cover partitioning, ordering guarantees, consumer groups and offset management, replication and durability, delivery semantics (at-least-once / at-most-once / exactly-once), and retention. Assume very high throughput and strong durability requirements.",
+      "candidate_brief": "Design a durable messaging service where producers publish messages and consumers read them.",
+      "prompt": "Design a durable messaging service where producers publish messages and consumers read them.",
       "blurb": "The append-only partitioned log — ordering vs parallelism, consumer-group rebalancing, replication with ISR, and honest delivery semantics."
     },
     {
@@ -7185,7 +7229,8 @@
         "sweep-line",
         "greedy"
       ],
-      "prompt": "Given an array of meeting time intervals where intervals[i] = [start_i, end_i], return the minimum number of conference rooms required so that no two meetings sharing a room overlap. A meeting that starts exactly when another ends does NOT conflict (touching endpoints can share a room).",
+      "candidate_brief": "Given meeting intervals [start, end], return the minimum number of rooms needed without overlapping meetings in a room. A meeting can start when another ends in the same room.",
+      "prompt": "Given meeting intervals [start, end], return the minimum number of rooms needed without overlapping meetings in a room. A meeting can start when another ends in the same room.",
       "blurb": "The maximum-overlap problem — a min-heap of end times reuses rooms as meetings finish, or split start/end events into a sweep line and track the running peak."
     },
     {
@@ -7314,7 +7359,8 @@
         "pubsub",
         "real-time"
       ],
-      "prompt": "Design a 'Nearby Friends' feature: users who opt in continuously share their location, and each user sees which of their friends are within a configurable radius (say 5 km), updated in near real time. Cover how you ingest high-frequency location updates and how you answer proximity queries at scale.",
+      "candidate_brief": "Design a feature that lets consenting users see which friends are nearby as their locations change.",
+      "prompt": "Design a feature that lets consenting users see which friends are nearby as their locations change.",
       "blurb": "The canonical geospatial fan-out problem — indexing moving points with geohash/quadtree, ingesting a firehose of location pings, and pushing proximity changes to friends in real time."
     },
     {
@@ -7443,7 +7489,8 @@
         "read-heavy",
         "celebrity-problem"
       ],
-      "prompt": "Design the home feed for a social network — the ranked list of posts a user sees from accounts they follow. It should load fast, stay reasonably fresh, and work for both normal users and celebrities with tens of millions of followers.",
+      "candidate_brief": "Design a social network’s home feed, showing posts from accounts a user follows.",
+      "prompt": "Design a social network’s home feed, showing posts from accounts a user follows.",
       "blurb": "Fanout-on-write vs read, the celebrity problem, ranking, and timeline caching."
     },
     {
@@ -7476,7 +7523,8 @@
         "idempotency",
         "providers"
       ],
-      "prompt": "Design a notification system that lets services send messages to users across multiple channels — mobile push, SMS, and email. It must fan out reliably, deduplicate, respect user preferences and rate limits, retry failures, and fall back when a provider is down.",
+      "candidate_brief": "Design a service that lets applications send users notifications through push, SMS, and email.",
+      "prompt": "Design a service that lets applications send users notifications through push, SMS, and email.",
       "blurb": "Multi-channel delivery: fanout, dedup, retries, provider fallback, and rate limiting."
     },
     {
@@ -7509,7 +7557,8 @@
         "union-find",
         "connected-components"
       ],
-      "prompt": "Given an m x n 2D grid of '1's (land) and '0's (water), count the number of islands. An island is a maximal group of land cells connected 4-directionally (up, down, left, right). Cells connected only diagonally are NOT part of the same island. The grid's borders are all surrounded by water.",
+      "candidate_brief": "Given a grid of 1s (land) and 0s (water), count its islands. Land connects only up, down, left, or right, not diagonally. The grid is surrounded by water.",
+      "prompt": "Given a grid of 1s (land) and 0s (water), count its islands. Land connects only up, down, left, or right, not diagonally. The grid is surrounded by water.",
       "blurb": "Counting connected components on a grid — flood-fill each unvisited land cell with DFS/BFS, or union adjacent land with union-find."
     },
     {
@@ -7705,7 +7754,8 @@
         "metadata",
         "replication"
       ],
-      "prompt": "Design an S3-like object storage system: clients PUT and GET arbitrary blobs (bytes to terabytes) under bucket/key names, with very high durability and availability. Cover how you store the bytes, track metadata, and achieve durability cost-effectively.",
+      "candidate_brief": "Design an object storage service where clients store and retrieve blobs using bucket and key names.",
+      "prompt": "Design an object storage service where clients store and retrieve blobs using bucket and key names.",
       "blurb": "The durable-blob-at-scale problem — separating metadata from data, chunking large objects, and replication vs erasure coding for eleven-nines durability."
     },
     {
@@ -7869,7 +7919,8 @@
         "consistency",
         "pci"
       ],
-      "prompt": "Design a payment system with an internal ledger — the kind that moves money between accounts, charges customers, pays out to merchants, and must be auditable and correct to the cent. Cover idempotency, double-entry accounting, exactly-once semantics against external processors, reconciliation, and the consistency/compliance requirements. Assume high volume and zero tolerance for lost or duplicated money.",
+      "candidate_brief": "Design a service that moves money between accounts, charges customers, and pays merchants while keeping an accurate record of balances and transfers.",
+      "prompt": "Design a service that moves money between accounts, charges customers, and pays merchants while keeping an accurate record of balances and transfers.",
       "blurb": "Money must never be lost, created, or double-counted — double-entry ledger, idempotency, exactly-once against flaky PSPs, and reconciliation."
     },
     {
@@ -7903,7 +7954,8 @@
         "ml-serving",
         "feature-store"
       ],
-      "prompt": "Design a system that decides which push/email notifications to send to each user, when to send them, and how often. It should use ML to predict engagement propensity, optimize send time, and avoid over-notifying users. Assume a large consumer app with many notification types competing for attention.",
+      "candidate_brief": "Design a system that chooses which notifications to send to each user and when to send them.",
+      "prompt": "Design a system that chooses which notifications to send to each user and when to send them.",
       "blurb": "ML notification targeting: propensity scoring, send-time optimization, and fatigue/frequency capping without tanking long-term engagement."
     },
     {
@@ -8541,7 +8593,8 @@
         "hallucination",
         "eval"
       ],
-      "prompt": "Design a retrieval-augmented generation service that answers user questions over a company's private documents (wikis, PDFs, tickets, code). It must ground answers in the corpus with citations, stay fresh as documents change, and control hallucination. Assume a large enterprise corpus and interactive latency.",
+      "candidate_brief": "Design a service that answers employee questions using a company’s private documents and cites the supporting sources.",
+      "prompt": "Design a service that answers employee questions using a company’s private documents and cites the supporting sources.",
       "blurb": "The end-to-end RAG design — ingestion and chunking, embeddings, vector index, retrieval plus reranking, grounded generation, eval, and hallucination control."
     },
     {
@@ -8573,7 +8626,8 @@
         "sliding-window",
         "distributed"
       ],
-      "prompt": "Design a distributed rate limiter that caps how many requests a client can make to an API — for example 1000 requests per minute per API key — enforced consistently across a fleet of API servers behind a load balancer.",
+      "candidate_brief": "Design a distributed service that limits how many requests a client can make to an API.",
+      "prompt": "Design a distributed service that limits how many requests a client can make to an API.",
       "blurb": "Token bucket vs sliding window, Redis-backed counters, cross-node consistency, and fail-open vs fail-closed."
     },
     {
@@ -8606,7 +8660,8 @@
         "oop",
         "time"
       ],
-      "prompt": "Implement a rate limiter class using the token-bucket algorithm. The bucket holds up to `capacity` tokens and refills at `refillRate` tokens per second. A method allow() (optionally allow(n) requesting n tokens) returns true and consumes tokens if enough are available, else returns false. Refilling is continuous over time, not in discrete ticks. Follow-up: make it thread-safe for concurrent callers, and support per-client limits.",
+      "candidate_brief": "Implement a token-bucket rate limiter with a capacity and a refill rate in tokens per second. allow() consumes one available token and returns true, or returns false if none is available. Refill continuously with elapsed time, up to capacity.",
+      "prompt": "Implement a token-bucket rate limiter with a capacity and a refill rate in tokens per second. allow() consumes one available token and returns true, or returns false if none is available. Refill continuously with elapsed time, up to capacity.",
       "blurb": "Token bucket done right — lazy time-based refill computed on demand, then a thread-safety and per-client extension."
     },
     {
@@ -8674,7 +8729,8 @@
         "monitoring",
         "mlops"
       ],
-      "prompt": "Design a real-time ML system for a use case like fraud detection or abuse scoring: compute streaming features from live events, serve a model with low latency on each event, log predictions and outcomes to build training data, and detect drift while safely rolling out new models via shadow and canary. Cover the online serving path, the feedback/training-data loop, and monitoring.",
+      "candidate_brief": "Design a system that makes machine-learning predictions from incoming events, such as fraud or abuse assessments.",
+      "prompt": "Design a system that makes machine-learning predictions from incoming events, such as fraud or abuse assessments.",
       "blurb": "The closed-loop real-time ML system — streaming features, low-latency serving, drift detection, and shadow/canary rollout."
     },
     {
@@ -8708,7 +8764,8 @@
         "feature-pipeline",
         "feedback-loop"
       ],
-      "prompt": "Design a recommendation system that picks personalized items (feed posts, videos, or products) for hundreds of millions of users from a catalog of tens of millions of items. Cover candidate generation, ranking, the feature pipeline, embeddings, the online/offline split, and how you handle feedback loops and freshness.",
+      "candidate_brief": "Design a service that recommends relevant items from a catalog to individual users.",
+      "prompt": "Design a service that recommends relevant items from a catalog to individual users.",
       "blurb": "The two-stage recsys — candidate generation and ranking, feature/embedding pipelines, online serving, and the feedback loop."
     },
     {
@@ -8903,7 +8960,8 @@
         "state-machine",
         "surge"
       ],
-      "prompt": "Design the backend for a ride-sharing service like Uber or Lyft. Riders request rides, the system matches them to nearby drivers, tracks the trip in real time, computes ETAs and fares, and applies surge pricing when demand is high. Assume a large metro deployment with millions of drivers streaming location updates.",
+      "candidate_brief": "Design the backend for a service that connects riders with drivers and manages their trips.",
+      "prompt": "Design the backend for a service that connects riders with drivers and manages their trips.",
       "blurb": "Geospatial indexing under a firehose of GPS updates, low-latency matching, and a trip state machine that must not double-charge."
     },
     {
@@ -9035,7 +9093,8 @@
         "feature-store",
         "ml-serving"
       ],
-      "prompt": "Design the ranking system behind a large-scale search product. Given a user query, it must retrieve candidate documents and rank them so the most relevant appear first, using an ML ranking model with query, document, and user/context features. Assume high query volume, tight latency, and continuous online evaluation.",
+      "candidate_brief": "Design a search service that finds and orders documents by their relevance to a user’s query.",
+      "prompt": "Design a search service that finds and orders documents by their relevance to a user’s query.",
       "blurb": "Multi-stage retrieval + learning-to-rank: candidate generation, ranking features, training from click logs, and online eval without feedback loops."
     },
     {
@@ -9133,7 +9192,8 @@
         "design",
         "encoding"
       ],
-      "prompt": "Design an algorithm to serialize a binary tree to a string and deserialize that string back into the exact same tree structure. Serialization is the process of converting the in-memory tree to a string (or byte stream) so it can be stored or transmitted; deserialization reconstructs the original tree from that string. The tree is a general binary tree — values may repeat and are not ordered. You define the format; serialize(deserialize(t)) must reproduce t.",
+      "candidate_brief": "Design serialize and deserialize operations that convert a general binary tree to a string and reconstruct the same structure and values. Values may repeat and are not ordered. You choose the format.",
+      "prompt": "Design serialize and deserialize operations that convert a general binary tree to a string and reconstruct the same structure and values. Values may repeat and are not ordered. You choose the format.",
       "blurb": "You own the wire format — the crux is encoding null children so structure is unambiguous, then reconstructing in the same traversal order."
     },
     {
@@ -9392,7 +9452,8 @@
         "sequencer",
         "fairness"
       ],
-      "prompt": "Design a stock exchange matching engine: clients submit limit and market orders for a set of instruments, the engine matches buyers and sellers by price-time priority, and it publishes fills and market data. Optimize for very low, predictable latency and strict fairness, and cover how you stay correct and recoverable.",
+      "candidate_brief": "Design an exchange that accepts buy and sell orders and matches them using price-time priority.",
+      "prompt": "Design an exchange that accepts buy and sell orders and matches them using price-time priority.",
       "blurb": "The low-latency deterministic-core problem — a single-threaded order book with price-time priority, a sequencer for fairness, and event-sourced recovery."
     },
     {
@@ -9621,7 +9682,8 @@
         "payments",
         "high-contention"
       ],
-      "prompt": "Design a ticket booking system like Ticketmaster. Users browse events, select seats, and purchase tickets. The hard part is high-contention flash sales: when a popular event goes on sale, hundreds of thousands of users compete for the same limited seats in seconds. Ensure no seat is ever double-sold, hold seats during checkout, and integrate payment. Cover seat inventory, locking, the sale surge, and the booking lifecycle.",
+      "candidate_brief": "Design a service where people browse events and buy tickets for specific seats without selling the same seat twice.",
+      "prompt": "Design a service where people browse events and buy tickets for specific seats without selling the same seat twice.",
       "blurb": "The double-booking problem under a flash-sale thundering herd — seat holds, atomic reservation, and a queue that protects the datastore."
     },
     {
@@ -9654,7 +9716,8 @@
         "quickselect",
         "counting"
       ],
-      "prompt": "Given an integer array nums and an integer k, return the k most frequent elements. You may return the answer in any order. It is guaranteed the answer is unique. Can you design an algorithm that beats the O(n log n) of sorting all elements by frequency?",
+      "candidate_brief": "Given an integer array nums and an integer k, return its k most frequent elements in any order. The answer is guaranteed to be unique.",
+      "prompt": "Given an integer array nums and an integer k, return its k most frequent elements in any order. The answer is guaranteed to be unique.",
       "blurb": "Count then select — a size-k min-heap gives O(n log k), and bucket sort by frequency achieves O(n) by indexing counts into an array of buckets."
     },
     {
@@ -9784,7 +9847,8 @@
         "feed-ranking",
         "read-heavy"
       ],
-      "prompt": "Design the backend for a social network like Twitter/X. Users can post short messages, follow other users, and see a home timeline of posts from people they follow. Also support trending topics. Assume hundreds of millions of daily active users and celebrity accounts with tens of millions of followers.",
+      "candidate_brief": "Design a social network where people post short messages, follow accounts, and read a home timeline.",
+      "prompt": "Design a social network where people post short messages, follow accounts, and read a home timeline.",
       "blurb": "The canonical fanout problem — push vs pull timelines, the celebrity hot-key, and a hybrid that survives both."
     },
     {
@@ -9816,7 +9880,8 @@
         "arrays",
         "sorting"
       ],
-      "prompt": "Given an array of integers nums and an integer target, return the indices of the two numbers that add up to target. You may assume exactly one solution exists and you may not use the same element twice. As a follow-up: given an array nums, return all unique triplets [a, b, c] such that a + b + c == 0 (3-Sum), with no duplicate triplets in the result.",
+      "candidate_brief": "Given an integer array nums and a target, return the indices of two numbers that sum to the target. Exactly one solution exists, and the same element cannot be used twice.",
+      "prompt": "Given an integer array nums and a target, return the indices of two numbers that sum to the target. Exactly one solution exists, and the same element cannot be used twice.",
       "blurb": "The gateway hashing problem — a one-pass hash map for Two Sum, generalized to the sort + two-pointer sweep of 3-Sum."
     },
     {
@@ -9849,7 +9914,8 @@
         "ranking",
         "sharding"
       ],
-      "prompt": "Design the search autocomplete system that suggests completions as a user types — like the dropdown under a search box. For each keystroke it should return the top few most relevant suggestions for the current prefix, extremely fast, at web scale.",
+      "candidate_brief": "Design a search autocomplete service that suggests relevant completions as a user types a prefix.",
+      "prompt": "Design a search autocomplete service that suggests relevant completions as a user types a prefix.",
       "blurb": "Trie-based top-k over prefixes: precomputation, sharding, ranking, and single-digit-millisecond latency."
     },
     {
@@ -9881,7 +9947,8 @@
         "read-heavy",
         "cdn"
       ],
-      "prompt": "Design a service that converts long URLs into short links and redirects users from a short link to the original URL. Assume it must serve a large, read-heavy global audience.",
+      "candidate_brief": "Design a service that creates short links from long URLs and redirects each short link to its original URL.",
+      "prompt": "Design a service that creates short links from long URLs and redirects each short link to its original URL.",
       "blurb": "The classic read-heavy KV design — key generation, collisions, cache, CDN, and analytics."
     },
     {
@@ -10042,7 +10109,8 @@
         "inorder-traversal",
         "invariants"
       ],
-      "prompt": "Given the root of a binary tree, determine whether it is a valid binary search tree (BST). A valid BST requires: every node in a node's LEFT subtree is strictly less than the node, every node in its RIGHT subtree is strictly greater, and both subtrees are themselves valid BSTs. Note the constraint is over the entire subtree, not just the immediate children.",
+      "candidate_brief": "Given a binary tree, determine whether it is a valid binary search tree. Every value in a node’s left subtree must be strictly smaller, and every value in its right subtree strictly larger; equal values are not allowed.",
+      "prompt": "Given a binary tree, determine whether it is a valid binary search tree. Every value in a node’s left subtree must be strictly smaller, and every value in its right subtree strictly larger; equal values are not allowed.",
       "blurb": "The classic invariant trap — checking node-vs-children is wrong; you must bound each node by a (min, max) range or verify a strictly increasing inorder traversal."
     },
     {
@@ -10077,7 +10145,8 @@
         "recall",
         "embeddings"
       ],
-      "prompt": "Design a vector database that stores billions of embeddings and serves approximate nearest-neighbor search with metadata filtering. It must offer tunable recall/latency, support inserts/updates/deletes without full rebuilds, scale across shards, and back workloads like semantic search and RAG retrieval.",
+      "candidate_brief": "Design a database that stores vectors and finds similar vectors, with the ability to filter results by metadata.",
+      "prompt": "Design a database that stores vectors and finds similar vectors, with the ability to filter results by metadata.",
       "blurb": "The ANN engine — HNSW vs IVF, sharding and replication, filtered search, the recall/latency/memory tradeoff, and live updates."
     },
     {
@@ -10197,7 +10266,8 @@
         "pipeline",
         "recommendations"
       ],
-      "prompt": "Design a video streaming platform like YouTube or Netflix. Creators upload videos; the system transcodes them into multiple resolutions, distributes them globally, and streams them to viewers with adaptive bitrate. Also cover metadata, view counts, and a basic recommendations feed. Assume global scale with a very large catalog and heavy read traffic.",
+      "candidate_brief": "Design a platform where creators upload videos and viewers find and watch them.",
+      "prompt": "Design a platform where creators upload videos and viewers find and watch them.",
       "blurb": "An upload+transcoding pipeline feeding a CDN, adaptive-bitrate delivery, and the read-heavy metadata plane around it."
     },
     {
@@ -10294,7 +10364,8 @@
         "bloom-filter",
         "dns"
       ],
-      "prompt": "Design a web crawler that fetches and stores billions of web pages for a search index. It must be polite to hosts, avoid re-crawling duplicate content, handle the scale and messiness of the open web, and keep making progress despite failures.",
+      "candidate_brief": "Design a crawler that fetches and stores web pages for a search engine.",
+      "prompt": "Design a crawler that fetches and stores web pages for a search engine.",
       "blurb": "The URL frontier, politeness, dedup with bloom filters, DNS, and petabyte-scale storage."
     },
     {
@@ -10327,7 +10398,8 @@
         "memoization",
         "segmentation"
       ],
-      "prompt": "Given a string s and a dictionary of words wordDict, return true if s can be segmented into a space-separated sequence of one or more dictionary words. The same dictionary word may be reused any number of times. As a follow-up, discuss how a trie changes the approach, and how you would return ALL valid segmentations (Word Break II) without exponential blowup on adversarial inputs.",
+      "candidate_brief": "Given a string s and a dictionary wordDict, return whether s can be segmented into one or more dictionary words. Dictionary words may be reused.",
+      "prompt": "Given a string s and a dictionary wordDict, return whether s can be segmented into one or more dictionary words. Dictionary words may be reused.",
       "blurb": "String segmentation as DP — dp[i] is true if a prefix boundary is reachable; a trie speeds prefix checks and Word Break II adds memoized backtracking with a critical pruning insight."
     },
     {
@@ -10360,7 +10432,8 @@
         "strings",
         "hashset"
       ],
-      "prompt": "Given two words beginWord and endWord, and a dictionary wordList, return the length of the shortest transformation sequence from beginWord to endWord such that: each step changes exactly one letter, and every intermediate word must exist in wordList. Return 0 if no such sequence exists. The sequence length counts the number of words in the path (including begin and end). All words are the same length and lowercase.",
+      "candidate_brief": "Given beginWord, endWord, and wordList, return the length of the shortest sequence changing one letter at a time. Each word after beginWord, including endWord, must be in wordList. Count both endpoints; return 0 if no sequence exists. All words are lowercase and the same length.",
+      "prompt": "Given beginWord, endWord, and wordList, return the length of the shortest sequence changing one letter at a time. Each word after beginWord, including endWord, must be in wordList. Count both endpoints; return 0 if no sequence exists. All words are lowercase and the same length.",
       "blurb": "An implicit unweighted graph where edges are one-letter edits — BFS gives the shortest path, and neighbor generation is the real design decision."
     },
     {

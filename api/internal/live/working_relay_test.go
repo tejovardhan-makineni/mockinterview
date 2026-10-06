@@ -199,19 +199,8 @@ func testNativeWorkingRequest(t *testing.T, boundary string, section Section, wo
 			resumed = true
 		}
 	}
+	// Legacy nudges are ignored; only the server schedules semantic reviews.
 	_ = client.WriteJSON(clientMsg{Type: "nudge"})
-	for {
-		var msg serverMsg
-		if err = client.ReadJSON(&msg); err != nil {
-			t.Fatal(err)
-		}
-		if msg.Type == "nudge_deferred" {
-			break
-		}
-		if msg.Role == "interviewer" || msg.Type == "error" {
-			t.Fatalf("premature nudge generated output instead of a retry signal: %+v", msg)
-		}
-	}
 	_ = client.WriteJSON(clientMsg{Type: "end"})
 	select {
 	case <-done:

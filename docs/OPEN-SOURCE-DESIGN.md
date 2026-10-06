@@ -90,21 +90,25 @@ practice does not execute code or introduce unavailable external tools.
 
 | Funding/access | Interview allowance |
 |---|---|
-| Standard hosted, project-funded | One activated start per rolling 24 hours; global funded budget still applies |
+| Standard hosted, project-funded | One activated start in total; shared maximum 200 funded starts per UTC day |
 | Validated personal API key | No daily interview count limit; provider charges and limits apply |
-| Approved beta tester | Unlimited starts; feedback commitment recorded in application |
+| Approved beta tester | Repeated funded practice within the shared 200-per-UTC-day cap; feedback commitment recorded in application |
 | Local development | Unlimited practice; provider charges still apply when real keys are used |
 
 Email verification, current policies, one active session, duration limits and
 security throttles still apply where appropriate. Reservations or failed provider
 readiness do not spend an interview start. Resumes and report retries keep the
-same attempt. A funded text/feedback default of Gemini 2.5 Flash is intentional;
-native voice uses its separately configured Gemini audio model. Personal provider
+same attempt. Funded text/feedback defaults to Gemini 3.8 Flash; native voice
+uses Gemini 3.8 Live and previews use Gemini 3.8 Flash TTS. Personal provider
 keys are validated before use and the model choice is retained for feedback.
 
 ## Database schema
 
-Migrations `0013_runtime_metrics.sql` and `0014_community.sql` are additive.
+Migrations `0013_runtime_metrics.sql`, `0014_community.sql` and
+`0015_lifetime_free_interview.sql` are additive. The lifetime migration retains a
+minimal HMAC identity and first-claim timestamp independently of account/history
+deletion or seven-day usage cleanup. It backfills retained usage and surviving
+started sessions; previously erased history cannot be reconstructed.
 The first adds a nonnegative `sessions.runtime_error_count`, backfilled from
 persisted interview/scoring failure events. The second adds participation tables.
 Existing sessions, reports, usage and feedback remain the source of truth for
@@ -231,8 +235,8 @@ Before hosting, follow [the release runbook](RELEASE-RUNBOOK.md):
 - Apply migrations to an isolated restored database before staging. Verify the
   new constraints, export/deletion, approval transaction and idempotent upload.
 - Confirm the exact provider models are accessible to the intended project.
-  Gemini 2.5 Flash access may be limited for new provider projects; run the
-  documented billable connectivity check with the deployment credentials. If
+  Verify Gemini 3.8 Flash, Gemini 3.8 Live and Gemini 3.8 Flash TTS access with
+  the documented optional billable connectivity checks before promotion. If
   unavailable, make an explicit operator model decision and update UI/docs;
   do not silently claim or substitute a different free model.
 - Configure CORS with the real app origins. Central analytics from self-hosted web

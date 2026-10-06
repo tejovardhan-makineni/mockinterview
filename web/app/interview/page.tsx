@@ -10,8 +10,11 @@ import {
   type Caption,
   type ConnState,
   type SectionInfo,
+  type MicState,
+  type AudioState,
 } from "@/lib/live";
 import { WorkspaceSaver, readWorkspaceDraft } from "@/lib/workspaceSave";
+import { describeWorkspace } from "@/lib/workspaceObservation";
 import {
   Avatar3D,
   interviewerName,
@@ -20,6 +23,9 @@ import {
 import { PersonalKeyRecovery } from "@/components/PersonalKeyRecovery";
 import { Workspace } from "@/components/studio/Workspace";
 import { Webcam } from "@/components/studio/Webcam";
+import { LiveHUD } from "@/components/studio/LiveHUD";
+import { BetaBadge } from "@/components/BetaBadge";
+import { IconMic, IconMicOff } from "@/components/icons";
 import { FeedbackWidget } from "@/components/FeedbackWidget";
 import { Button, Panel, ErrorNotice } from "@/components/ui";
 function Room() {
@@ -45,7 +51,9 @@ function Room() {
   const [remaining, setRemaining] = useState<number | null>(null);
   const [aiState, setAiState] = useState("Ready");
   const [draftNotice, setDraftNotice] = useState("");
-  const [micLevel, setMicLevel] = useState(0);
+  const [microphone, setMicrophone] = useState<MicState>("off");
+  const [audio, setAudio] = useState<AudioState>("idle");
+  const micLevel = useRef(0);
   const live = useRef<LiveSession | null>(null);
   const saver = useRef<WorkspaceSaver | null>(null);
   const drive = useRef<AvatarDrive>({
@@ -54,6 +62,10 @@ function Room() {
     mood: "listening",
   });
   const transcript = useRef<HTMLDivElement>(null);
+  const roomHeader = useRef<HTMLElement>(null);
+  const roomIntro = useRef<HTMLDivElement>(null);
+  const roomGrid = useRef<HTMLDivElement>(null);
+  const roomControls = useRef<HTMLElement>(null);
   const stick = useRef(true);
   const finishRef = useRef<() => Promise<void>>(async () => {});
   const lastSnapshot = useRef("");
@@ -117,10 +129,12 @@ function Room() {
         setInitial(restored);
         lastSnapshot.current = JSON.stringify(restored);
         setSession(s);
+        setEffectiveMode(s.mode ?? "voice");
         setCamera(sessionStorage.getItem("mi_camera_" + sid) === "1");
         setQuestion(q);
         setMuted(s.mode === "text");
-        if (s.mode === "text") setTab("conversation");
+        if (s.mode === "text" || s.modality === "conversational")
+          setTab("conversation");
         setCaptions(
           prior.map((turn) => ({
             role: turn.role,
@@ -158,7 +172,7 @@ function Room() {
           modality: s.modality,
         });
         live.current = ls;
-        ls.sendCanvas(restored.content);
+        ls.sendCanvas(describeWorkspace(restored));
         ls.on("caption", (caption) => {
           setCaptions((prev) => {
             const last = prev[prev.length - 1];
@@ -207,10 +221,15 @@ function Room() {
             drive.current.mood = on ? "speaking" : "listening";
             setAiState(on ? "Speaking" : "Listening");
           })
-          .on("userSpeaking", () => {
-            if (!drive.current.speaking) setAiState("Listening");
+          .on("userSpeaking", (on) => {
+            if (!drive.current.speaking)
+              setAiState(on ? "Listening" : "Thinking");
           })
-          .on("micLevel", setMicLevel)
+          .on("micLevel", (value) => {
+            micLevel.current = value;
+          })
+          .on("microphone", setMicrophone)
+          .on("audio", setAudio)
           .on("amplitude", (v) => {
             drive.current.amplitude = v;
           })
@@ -245,13 +264,46 @@ function Room() {
     const timer = setInterval(tick, 1000);
     return () => clearInterval(timer);
   }, [session?.deadline_at]);
+  useEffect(() => {
+    const grid = roomGrid.current;
+    if (!grid) return;
+    const sizeRoom = () => {
+      const top = grid.getBoundingClientRect().top + window.scrollY;
+      const controls =
+        roomControls.current?.getBoundingClientRect().height ?? 72;
+      const viewport = Math.min(
+        window.innerHeight,
+        window.visualViewport?.height ?? window.innerHeight,
+      );
+      // Reserve room for notices, wrapped headers, and the actual control bar.
+      // On short screens the document can scroll instead of clipping the composer.
+      grid.style.setProperty(
+        "--room-panel-height",
+        `${Math.max(360, Math.min(800, viewport - top - controls - 24))}px`,
+      );
+    };
+    sizeRoom();
+    const observer = new ResizeObserver(sizeRoom);
+    [roomHeader.current, roomIntro.current, roomControls.current].forEach(
+      (element) => {
+        if (element) observer.observe(element);
+      },
+    );
+    window.addEventListener("resize", sizeRoom);
+    window.visualViewport?.addEventListener("resize", sizeRoom);
+    return () => {
+      observer.disconnect();
+      window.removeEventListener("resize", sizeRoom);
+      window.visualViewport?.removeEventListener("resize", sizeRoom);
+    };
+  }, [session?.id]);
   const change = useCallback((snapshot: WorkspaceSnapshot) => {
     const serialized = JSON.stringify(snapshot);
     if (serialized === lastSnapshot.current) return;
     lastSnapshot.current = serialized;
     saver.current?.update(snapshot);
     live.current?.noteWorkspaceActivity();
-    live.current?.sendCanvas(snapshot.content);
+    live.current?.sendCanvas(describeWorkspace(snapshot));
   }, []);
   async function finish() {
     if (ending) return;
@@ -264,9 +316,9 @@ function Room() {
       }
       await saver.current?.flush();
       await live.current?.drain();
+      await api.finishSession(sid);
       live.current?.end();
       setCamera(false);
-      await api.finishSession(sid);
       router.push("/report?s=" + sid);
     } catch (e) {
       setError(errorMessage(e));
@@ -279,6 +331,10 @@ function Room() {
   if (!session || !initial)
     return (
       <main className="page-width">
+        <div className="mb-6 flex items-center gap-2">
+          <h1 className="text-lg font-semibold">Your practice room</h1>
+          <BetaBadge />
+        </div>
         {error ? (
           <ErrorNotice
             message={error}
@@ -299,34 +355,227 @@ function Room() {
         ":" +
         String(Math.floor(remaining / 1000) % 60).padStart(2, "0")
       : session.duration_minutes + " min";
+  const workspacePanel = (
+    <section
+      id="room-work"
+      tabIndex={-1}
+      className={tab !== "workspace" ? "hidden lg:block" : ""}
+    >
+      <Panel className="room-work-panel overflow-hidden">
+        <details
+          open
+          className="room-brief border-b border-[var(--color-line)] bg-[var(--color-panel-2)] px-4 py-3 sm:px-5 sm:py-4"
+        >
+          <summary className="text-sm font-semibold">
+            {question?.candidate_brief ? "Opening brief" : "Interview brief"}
+          </summary>
+          <p className="mt-3 max-h-40 overflow-auto whitespace-pre-wrap text-sm">
+            {question?.prompt}
+          </p>
+        </details>
+        <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[var(--color-line)] px-4 py-2 text-xs sm:px-5">
+          <span>
+            {session.modality === "conversational"
+              ? "Your notes"
+              : section
+                ? section.title
+                : "Your workspace"}
+            <span className="ml-2 text-[var(--color-muted)]">
+              Shared with your interviewer
+            </span>
+          </span>
+          <span role="status">
+            {saving === "saved"
+              ? "All changes saved"
+              : saving === "saving"
+                ? "Saving…"
+                : "Changes waiting to save"}
+          </span>
+          {saving === "unsaved" && (
+            <button
+              className="underline"
+              onClick={() => {
+                void saver.current
+                  ?.flush()
+                  .catch((e) => setError(errorMessage(e)));
+              }}
+            >
+              Retry save
+            </button>
+          )}
+        </div>
+        <div
+          className={
+            "room-workspace" +
+            (session.modality === "conversational"
+              ? " room-workspace-notes"
+              : session.modality === "system_design"
+                ? " room-workspace-canvas"
+                : "")
+          }
+        >
+          <Workspace
+            modality={session.modality}
+            initial={initial}
+            onChange={change}
+          />
+        </div>
+      </Panel>
+    </section>
+  );
+  const conversationPanel = (
+    <aside
+      id="room-conversation"
+      tabIndex={-1}
+      className={
+        "room-conversation " + (tab !== "conversation" ? "hidden lg:block" : "")
+      }
+    >
+      <Panel className="room-conversation-panel overflow-hidden">
+        <div className="flex shrink-0 items-center justify-between gap-2 border-b border-[var(--color-line)] px-3 py-3 sm:px-4">
+          <div className="flex min-w-0 items-center gap-2">
+            <div className="h-10 w-10 shrink-0 overflow-hidden rounded-full bg-[var(--color-panel-2)] sm:h-12 sm:w-12">
+              <Avatar3D faceId={session.config.face_id} drive={drive} />
+            </div>
+            <div className="min-w-0">
+              <h2 className="font-semibold">
+                {interviewerName(session.config.face_id)}
+              </h2>
+              <p
+                className="mt-0.5 text-xs text-[var(--color-muted)]"
+                role="status"
+              >
+                AI interviewer · {connected ? aiState : status}
+              </p>
+            </div>
+          </div>
+          {camera && (
+            <div className="w-20 shrink-0 sm:w-24">
+              <Webcam compact />
+            </div>
+          )}
+        </div>
+        <h2 className="sr-only">Conversation</h2>
+        <div
+          ref={transcript}
+          role="log"
+          aria-label="Interview transcript"
+          aria-live="polite"
+          aria-relevant="additions text"
+          onScroll={(e) => {
+            const el = e.currentTarget;
+            stick.current =
+              el.scrollHeight - el.scrollTop - el.clientHeight < 60;
+          }}
+          className="room-transcript space-y-5 overflow-auto px-4 py-4 sm:px-5"
+        >
+          {!captions.length && (
+            <p className="text-sm text-[var(--color-muted)]">
+              Your interviewer will begin when the connection is ready.
+            </p>
+          )}
+          {captions.map((caption, i) => (
+            <div key={caption.id ?? i}>
+              <p className="text-[10px] font-semibold uppercase tracking-wide text-[var(--color-muted)]">
+                {caption.role === "candidate"
+                  ? "You"
+                  : caption.role === "system"
+                    ? "Connection"
+                    : interviewerName(session.config.face_id)}
+                {caption.delivery === "pending" ? " · waiting to send" : ""}
+              </p>
+              <p className="mt-1 whitespace-pre-wrap text-sm">{caption.text}</p>
+            </div>
+          ))}
+        </div>
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            if (typed.trim()) {
+              live.current?.submitText(typed);
+              setTyped("");
+              stick.current = true;
+            }
+          }}
+          className="room-composer shrink-0 space-y-2 border-t border-[var(--color-line)] p-3 sm:p-4"
+        >
+          <label
+            htmlFor="typed-answer"
+            className="text-xs text-[var(--color-muted)]"
+          >
+            Type an answer or correction
+          </label>
+          <textarea
+            id="typed-answer"
+            rows={2}
+            className="field-select resize-y text-sm"
+            placeholder="Add an answer or clarify what you said…"
+            value={typed}
+            onChange={(e) => {
+              setTyped(e.target.value);
+              live.current?.noteWorkspaceActivity();
+            }}
+          />
+          <div className="flex justify-end">
+            <Button
+              type="submit"
+              variant="ghost"
+              disabled={!typed.trim() || ending}
+            >
+              {connected ? "Send answer" : "Queue answer"}
+            </Button>
+          </div>
+        </form>
+      </Panel>
+    </aside>
+  );
   return (
     <>
-      <a href="#room-work" className="skip-link">
-        Skip to workspace
+      <a
+        href={
+          session.modality === "conversational"
+            ? "#room-conversation"
+            : "#room-work"
+        }
+        className="skip-link"
+        onClick={(event) => {
+          event.preventDefault();
+          const target =
+            session.modality === "conversational"
+              ? "conversation"
+              : "workspace";
+          setTab(target);
+          // Reveal the target on mobile before moving keyboard focus into it.
+          requestAnimationFrame(() => {
+            document
+              .getElementById(
+                target === "workspace" ? "room-work" : "room-conversation",
+              )
+              ?.focus();
+          });
+        }}
+      >
+        {session.modality === "conversational"
+          ? "Skip to conversation"
+          : "Skip to workspace"}
       </a>
-      <header className="border-b border-[var(--color-line)] bg-[var(--color-panel)]">
-        <div className="mx-auto flex max-w-[1400px] flex-wrap items-center justify-between gap-3 px-6 py-4">
-          <div>
-            <p className="eyebrow">Your practice room</p>
-            <h1 className="mt-1 text-lg font-semibold">{question?.title}</h1>
+      <header
+        ref={roomHeader}
+        className="border-b border-[var(--color-line)] bg-[var(--color-panel)]"
+      >
+        <div className="room-heading mx-auto flex max-w-[1400px] flex-wrap items-center justify-between gap-3 px-4 py-3 sm:px-6 sm:py-4">
+          <div className="min-w-0">
+            <div className="flex items-center gap-2">
+              <p className="eyebrow">Your practice room</p>
+              <BetaBadge />
+            </div>
+            <h1 className="mt-1 text-base font-semibold sm:text-lg">
+              {question?.title}
+            </h1>
           </div>
           <div className="flex items-center gap-4 text-xs">
             <span
-              role="status"
-              className={
-                connected
-                  ? "text-[var(--color-good)]"
-                  : "text-[var(--color-warn)]"
-              }
-            >
-              {connected
-                ? "Interviewer ready"
-                : conn === "failed"
-                  ? "Connection needs attention"
-                  : "Connecting…"}
-            </span>
-            <span
-              className="shrink-0 whitespace-nowrap font-mono"
+              className="shrink-0 whitespace-nowrap rounded-md bg-[var(--color-panel-2)] px-3 py-2 font-mono"
               aria-label="Remaining time"
             >
               {time}
@@ -347,313 +596,142 @@ function Room() {
         </div>
       </header>
       <main className="mx-auto max-w-[1400px] px-4 py-5 sm:px-6">
-        {error && (
-          <div className="mb-4">
-            <ErrorNotice message={error} />
-          </div>
-        )}
-        {session.funding === "byok" && conn === "failed" && (
-          <div className="mb-4">
-            <PersonalKeyRecovery
-              sessionId={sid}
-              provider={session.provider}
-              onSaved={() => {
-                setError("");
-                live.current?.reconnect();
-              }}
-            />
-          </div>
-        )}
-        {modeNotice && (
-          <p className="notice mb-4" role="status">
-            {modeNotice}
-          </p>
-        )}
-        {draftNotice && (
-          <p className="notice mb-4" role="status">
-            {draftNotice}
-          </p>
-        )}
-        <div
-          className={
-            "mb-4 flex gap-2 lg:hidden " +
-            (camera ? "min-h-[92px] flex-col items-start pr-28" : "")
-          }
-          aria-label="Room panels"
-        >
-          {["workspace", "conversation"].map((value) => (
-            <Button
-              key={value}
-              variant={tab === value ? "primary" : "ghost"}
-              aria-pressed={tab === value}
-              onClick={() => setTab(value)}
-            >
-              {value === "workspace" ? "Brief & workspace" : "Conversation"}
-            </Button>
-          ))}
-        </div>
-        <div className="room-grid relative">
-          {camera && (
-            <div className="absolute -top-[108px] right-0 z-20 w-24 lg:right-4 lg:top-4 lg:w-[122px]">
-              <Webcam compact />
+        <div ref={roomIntro}>
+          <LiveHUD
+            micRef={micLevel}
+            microphone={microphone}
+            audio={audio}
+            conn={conn}
+            mode={effectiveMode}
+            section={section}
+            onReconnect={() => {
+              setError("");
+              live.current?.reconnect();
+            }}
+            onRetryMicrophone={() => {
+              if (microphone === "interrupted") {
+                void live.current?.enableAudio().catch(() => {});
+              } else {
+                live.current?.setMuted(true);
+                live.current?.setMuted(false);
+                setMuted(false);
+              }
+            }}
+            onResumeAudio={() => {
+              void live.current?.enableAudio().catch(() => {});
+            }}
+          />
+          {error && (
+            <div className="mb-4">
+              <ErrorNotice message={error} />
             </div>
           )}
-          <section
-            id="room-work"
-            className={tab !== "workspace" ? "hidden lg:block" : ""}
-          >
-            <Panel className="overflow-hidden">
-              <details
-                open
-                className="border-b border-[var(--color-line)] bg-[var(--color-panel-2)] px-5 py-4"
-              >
-                <summary className="text-sm font-semibold">
-                  Interview brief
-                </summary>
-                <p className="mt-3 max-h-40 overflow-auto whitespace-pre-wrap text-sm">
-                  {question?.prompt}
-                </p>
-              </details>
-              <div className="flex items-center justify-between border-b border-[var(--color-line)] px-5 py-2 text-xs">
-                <span>{section ? section.title : "Your workspace"}</span>
-                <span role="status">
-                  {saving === "saved"
-                    ? "All changes saved"
-                    : saving === "saving"
-                      ? "Saving…"
-                      : "Changes waiting to save"}
-                </span>
-                {saving === "unsaved" && (
-                  <button
-                    className="underline"
-                    onClick={() => {
-                      void saver.current
-                        ?.flush()
-                        .catch((e) => setError(errorMessage(e)));
-                    }}
-                  >
-                    Retry save
-                  </button>
-                )}
-              </div>
-              <div className="room-workspace">
-                {session.modality === "conversational" ? (
-                  <div className="flex h-full flex-col items-center justify-center gap-6 p-6">
-                    <div className="h-64 w-64 max-w-full sm:h-80 sm:w-80">
-                      <Avatar3D faceId={session.config.face_id} drive={drive} />
-                    </div>
-                    <div className="text-center">
-                      <h2 className="text-xl font-medium">
-                        {interviewerName(session.config.face_id)}
-                      </h2>
-                      <p className="mt-1 text-sm text-[var(--color-muted)]">
-                        {connected ? aiState : status} · AI interviewer
-                      </p>
-                    </div>
-                    <details className="w-full rounded-lg border border-[var(--color-line)]">
-                      <summary className="px-4 py-3 text-sm">
-                        Optional interview notes
-                      </summary>
-                      <div className="h-44">
-                        <Workspace
-                          modality={session.modality}
-                          initial={initial}
-                          onChange={change}
-                        />
-                      </div>
-                    </details>
-                  </div>
-                ) : (
-                  <Workspace
-                    modality={session.modality}
-                    initial={initial}
-                    onChange={change}
-                  />
-                )}
-              </div>
-            </Panel>
-          </section>
-          <aside
-            className={
-              "space-y-4 " + (tab !== "conversation" ? "hidden lg:block" : "")
-            }
-          >
-            <Panel className="p-4">
-              <div
-                className={
-                  camera
-                    ? "lg:grid lg:grid-cols-2 lg:items-center lg:gap-3"
-                    : ""
-                }
-              >
-                <div
-                  className={
-                    (camera
-                      ? "mx-auto h-28 w-28 lg:w-full "
-                      : "mx-auto h-40 w-40 ") +
-                    (session.modality === "conversational" && !camera
-                      ? "lg:hidden"
-                      : "")
-                  }
-                >
-                  <Avatar3D faceId={session.config.face_id} drive={drive} />
-                </div>
-                {camera && (
-                  <div className="hidden lg:block" aria-hidden="true" />
-                )}
-              </div>
-              <div className="mt-3 flex items-center justify-between">
-                <h2 className="font-semibold">
-                  {interviewerName(session.config.face_id)}
-                </h2>
-                <span className="text-xs text-[var(--color-muted)]">
-                  AI interviewer
-                </span>
-              </div>
-              <p className="mt-1 text-xs" aria-live="polite">
-                {connected ? aiState : status}
-              </p>
-            </Panel>
-            <Panel className="overflow-hidden">
-              <h2 className="border-b border-[var(--color-line)] px-4 py-3 text-sm font-semibold">
-                Conversation
-              </h2>
-              <div
-                ref={transcript}
-                role="log"
-                aria-label="Interview transcript"
-                aria-live="polite"
-                aria-relevant="additions text"
-                onScroll={(e) => {
-                  const el = e.currentTarget;
-                  stick.current =
-                    el.scrollHeight - el.scrollTop - el.clientHeight < 60;
+          {session.funding === "byok" && conn === "failed" && (
+            <div className="mb-4">
+              <PersonalKeyRecovery
+                sessionId={sid}
+                provider={session.provider}
+                onSaved={() => {
+                  setError("");
+                  live.current?.reconnect();
                 }}
-                className="max-h-[35dvh] min-h-40 space-y-4 overflow-auto px-4 py-4"
+              />
+            </div>
+          )}
+          {modeNotice && (
+            <p className="notice mb-4" role="status">
+              {modeNotice}
+            </p>
+          )}
+          {draftNotice && (
+            <p className="notice mb-4" role="status">
+              {draftNotice}
+            </p>
+          )}
+          <div
+            className="mb-4 grid grid-cols-2 gap-2 lg:hidden"
+            aria-label="Room panels"
+          >
+            {["workspace", "conversation"].map((value) => (
+              <Button
+                key={value}
+                variant={tab === value ? "primary" : "ghost"}
+                className="min-w-0 !px-2"
+                aria-pressed={tab === value}
+                onClick={() => setTab(value)}
               >
-                {!captions.length && (
-                  <p className="text-sm text-[var(--color-muted)]">
-                    Your interviewer will begin when the connection is ready.
-                  </p>
-                )}
-                {captions.map((caption, i) => (
-                  <div key={caption.id ?? i}>
-                    <p className="text-[10px] font-semibold uppercase tracking-wide text-[var(--color-muted)]">
-                      {caption.role === "candidate"
-                        ? "You"
-                        : caption.role === "system"
-                          ? "Connection"
-                          : interviewerName(session.config.face_id)}
-                      {caption.delivery === "pending"
-                        ? " · waiting to send"
-                        : ""}
-                    </p>
-                    <p className="mt-1 whitespace-pre-wrap text-sm">
-                      {caption.text}
-                    </p>
-                  </div>
-                ))}
-              </div>
-              <form
-                onSubmit={(e) => {
-                  e.preventDefault();
-                  if (typed.trim()) {
-                    live.current?.submitText(typed);
-                    setTyped("");
-                    stick.current = true;
-                  }
-                }}
-                className="space-y-2 border-t border-[var(--color-line)] p-3"
-              >
-                <label
-                  htmlFor="typed-answer"
-                  className="text-xs text-[var(--color-muted)]"
-                >
-                  Type an answer or correction
-                </label>
-                <textarea
-                  id="typed-answer"
-                  rows={3}
-                  className="field-select resize-y text-sm"
-                  value={typed}
-                  onChange={(e) => {
-                    setTyped(e.target.value);
-                    live.current?.noteWorkspaceActivity();
-                  }}
-                />
-                <Button
-                  type="submit"
-                  className="w-full"
-                  variant="ghost"
-                  disabled={!typed.trim() || ending}
-                >
-                  {connected ? "Send answer" : "Queue answer"}
-                </Button>
-              </form>
-            </Panel>
-          </aside>
+                {value === "workspace"
+                  ? session.modality === "conversational"
+                    ? "Brief & notes"
+                    : "Brief & workspace"
+                  : "Conversation"}
+              </Button>
+            ))}
+          </div>
+        </div>
+        <div
+          ref={roomGrid}
+          className={
+            "room-grid" +
+            (session.modality === "conversational"
+              ? " room-grid-conversational"
+              : "")
+          }
+        >
+          {session.modality === "conversational" ? (
+            <>
+              {conversationPanel}
+              {workspacePanel}
+            </>
+          ) : (
+            <>
+              {workspacePanel}
+              {conversationPanel}
+            </>
+          )}
         </div>
       </main>
-      <footer className="room-controls">
-        <div className="mx-auto flex max-w-[1350px] flex-wrap items-center justify-between gap-3">
-          <div className="flex flex-wrap items-center gap-2">
+      <footer ref={roomControls} className="room-controls">
+        <div className="room-control-actions mx-auto flex max-w-[1350px] items-center justify-between gap-2">
+          <div className="room-device-actions flex min-w-0 items-center gap-2">
             {effectiveMode === "voice" && (
-              <>
-                <Button
-                  variant="ghost"
-                  aria-pressed={!muted}
-                  onClick={() => {
-                    live.current?.setMuted(!muted);
-                    setMuted(!muted);
-                  }}
-                >
-                  {muted ? "Unmute microphone" : "Mute microphone"}
-                </Button>
-                <meter
-                  value={micLevel}
-                  min={0}
-                  max={1}
-                  aria-label="Local microphone input level"
-                  className="w-16"
-                />
-                <Button
-                  variant="ghost"
-                  onClick={() => {
-                    void live.current
-                      ?.enableAudio()
-                      .catch((e) => setError(errorMessage(e)));
-                  }}
-                >
-                  Enable audio
-                </Button>
-              </>
+              <Button
+                variant="ghost"
+                aria-label={muted ? "Unmute microphone" : "Mute microphone"}
+                aria-pressed={muted}
+                disabled={ending}
+                onClick={() => {
+                  live.current?.setMuted(!muted);
+                  setMuted(!muted);
+                }}
+              >
+                {muted ? (
+                  <IconMicOff className="h-4 w-4" />
+                ) : (
+                  <IconMic className="h-4 w-4" />
+                )}
+                {muted ? "Unmute" : "Mute"}
+              </Button>
             )}
             <Button
               variant="ghost"
               aria-pressed={camera}
+              aria-label={camera ? "Hide self-view" : "Show self-view"}
+              disabled={ending}
               onClick={() => {
                 sessionStorage.setItem("mi_camera_" + sid, camera ? "0" : "1");
                 setCamera(!camera);
+                if (!camera) setTab("conversation");
               }}
             >
-              {camera ? "Camera off" : "Camera self-view"}
+              <span className="sm:hidden">Self-view</span>
+              <span className="hidden sm:inline">
+                {camera ? "Hide self-view" : "Show self-view"}
+              </span>
             </Button>
-            {!connected && (
-              <Button
-                variant="ghost"
-                onClick={() => {
-                  setError("");
-                  live.current?.reconnect();
-                }}
-              >
-                Retry connection
-              </Button>
-            )}
           </div>
           <Button onClick={() => void finish()} disabled={ending}>
-            {ending
-              ? "Saving & preparing feedback…"
-              : "Finish & see feedback →"}
+            {ending ? "Saving & preparing feedback…" : "Finish interview"}
           </Button>
         </div>
       </footer>
@@ -662,7 +740,16 @@ function Room() {
 }
 export default function InterviewPage() {
   return (
-    <Suspense fallback={<p className="p-10">Opening room…</p>}>
+    <Suspense
+      fallback={
+        <main className="page-width">
+          <div className="flex items-center gap-2">
+            <p role="status">Opening room…</p>
+            <BetaBadge />
+          </div>
+        </main>
+      }
+    >
       <Room />
     </Suspense>
   );

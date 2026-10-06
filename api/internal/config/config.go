@@ -89,10 +89,14 @@ func Load() (*Config, error) {
 		return nil, fmt.Errorf("DB_MAX_CONNS must be a valid 32-bit integer")
 	}
 
+	hostedLimit, err := strconv.Atoi(env("HOSTED_DAILY_START_LIMIT", "200"))
+	if err != nil || hostedLimit < 1 || hostedLimit > 200 {
+		return nil, fmt.Errorf("HOSTED_DAILY_START_LIMIT must be between 1 and 200")
+	}
 	c := &Config{
 		Environment:           environment,
 		Hosted:                !envBool("LOCAL_UNLIMITED", !production),
-		HostedDailyStartLimit: envInt("HOSTED_DAILY_START_LIMIT", 50),
+		HostedDailyStartLimit: hostedLimit,
 		SessionEncryptionKey:  env("SESSION_ENCRYPTION_KEY", ""),
 		PublicURL:             env("PUBLIC_URL", "http://localhost:3000"),
 		ResendAPIKey:          env("RESEND_API_KEY", ""),
@@ -114,9 +118,9 @@ func Load() (*Config, error) {
 		JWTSecret:             env("JWT_SECRET", "dev-insecure-change-me"),
 		JWTTTL:                time.Duration(envInt("JWT_TTL_HOURS", 168)) * time.Hour,
 		GeminiAPIKey:          env("GEMINI_API_KEY", ""),
-		ModelReason:           env("GEMINI_MODEL_REASON", "gemini-2.5-flash"),
-		ModelLive:             env("GEMINI_MODEL_LIVE", "gemini-2.5-flash-native-audio-preview-12-2025"),
-		ModelTTS:              env("GEMINI_MODEL_TTS", "gemini-2.5-flash-preview-tts"),
+		ModelReason:           env("GEMINI_MODEL_REASON", "gemini-3.8-flash"),
+		ModelLive:             env("GEMINI_MODEL_LIVE", "gemini-3.8-live"),
+		ModelTTS:              env("GEMINI_MODEL_TTS", "gemini-3.8-flash-tts"),
 		LLMProvider:           strings.ToLower(env("LLM_PROVIDER", "gemini")),
 		LLMModel:              env("LLM_MODEL", ""),
 		LLMBaseURL:            env("LLM_BASE_URL", ""),

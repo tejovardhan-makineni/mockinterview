@@ -16,6 +16,7 @@
     "template-method",
     "machine-coding"
   ],
+  "candidate_brief": "Design a deck of playing cards that can be shuffled and dealt, and show how a card game such as Blackjack would use it.",
   "prompt": "Design a deck of cards that you can shuffle and deal from, then show how you would build a generic card game (say Blackjack) on top of it. Model the classes — Card, Deck, Player, Game — their relationships, and the key methods. Sketch the class diagram.",
   "blurb": "The OOD fundamentals check — clean Card/Deck modeling, a correct shuffle, and a game layered on top without hard-coding one game's rules.",
   "rubric": [
@@ -28,31 +29,31 @@
     {
       "key": "core_entities",
       "label": "Core entities",
-      "description": "Identifies Card, Suit/Rank (enums), Deck, Hand, Player, and a Game abstraction.",
+      "description": "Assess whether the chosen decomposition expresses the required behavior and contracts. Names, class counts and representations below are examples; equivalent alternatives are valid: Identifies Card, Suit/Rank (enums), Deck, Hand, Player, and a Game abstraction.",
       "weight": 1.1
     },
     {
       "key": "class_design",
       "label": "Class design",
-      "description": "Card immutable with Suit+Rank enums (not magic ints/strings), Deck owns the list and deal/shuffle, Hand separate from Player.",
+      "description": "Assess whether the chosen decomposition expresses the required behavior and contracts. Names, class counts and representations below are examples; equivalent alternatives are valid: Card immutable with Suit+Rank enums (not magic ints/strings), Deck owns the list and deal/shuffle, Hand separate from Player.",
       "weight": 1.2
     },
     {
       "key": "relationships",
       "label": "Relationships",
-      "description": "Deck composes Cards, Player has-a Hand, Game aggregates Players and a Deck; correct ownership/multiplicity.",
+      "description": "Assess whether the chosen decomposition expresses the required behavior and contracts. Names, class counts and representations below are examples; equivalent alternatives are valid: Deck composes Cards, Player has-a Hand, Game aggregates Players and a Deck; correct ownership/multiplicity.",
       "weight": 1.0
     },
     {
       "key": "api_methods",
       "label": "API methods",
-      "description": "shuffle(), deal(n)/dealCard(), Hand.add/value; sensible return types and empty-deck handling.",
+      "description": "Assess whether the chosen decomposition expresses the required behavior and contracts. Names, class counts and representations below are examples; equivalent alternatives are valid: shuffle(), deal(n)/dealCard(), Hand.add/value; sensible return types and empty-deck handling.",
       "weight": 1.0
     },
     {
       "key": "design_patterns",
-      "label": "Design patterns",
-      "description": "Strategy or Template Method to make the Game generic; Factory for deck construction; each justified, not forced.",
+      "label": "Abstraction choices",
+      "description": "Assess separation of deck construction, card behavior and game-specific rules. Strategy, Template Method or Factory are possible examples, not required structures or terminology.",
       "weight": 1.0
     },
     {
@@ -63,8 +64,8 @@
     },
     {
       "key": "solid_principles",
-      "label": "SOLID principles",
-      "description": "Single-responsibility (Deck deals, Game rules, Hand scores) and open/closed for new games/scoring.",
+      "label": "Separation and maintainability",
+      "description": "Assess whether responsibilities are cohesive and likely changes remain manageable within the disclosed scope; do not require an acronym, inheritance or a named pattern. These are example change boundaries, not a prescribed implementation: Single-responsibility (Deck deals, Game rules, Hand scores) and open/closed for new games/scoring.",
       "weight": 0.9
     },
     {

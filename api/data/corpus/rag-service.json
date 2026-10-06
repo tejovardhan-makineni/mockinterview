@@ -18,6 +18,7 @@
     "hallucination",
     "eval"
   ],
+  "candidate_brief": "Design a service that answers employee questions using a company’s private documents and cites the supporting sources.",
   "prompt": "Design a retrieval-augmented generation service that answers user questions over a company's private documents (wikis, PDFs, tickets, code). It must ground answers in the corpus with citations, stay fresh as documents change, and control hallucination. Assume a large enterprise corpus and interactive latency.",
   "blurb": "The end-to-end RAG design — ingestion and chunking, embeddings, vector index, retrieval plus reranking, grounded generation, eval, and hallucination control.",
   "rubric": [

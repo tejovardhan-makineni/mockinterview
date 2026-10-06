@@ -17,6 +17,7 @@
     "strings",
     "prefix-search"
   ],
+  "candidate_brief": "Implement input(c) for an autocomplete system initialized with historical sentences and their counts. Return up to three sentences matching the prefix typed so far, ranked by descending frequency, then ASCII lexicographic order. The character # saves the current sentence, increments its count, resets the prefix, and returns no suggestions.",
   "prompt": "Design an autocomplete system. You're given historical sentences and their usage counts. Implement input(c): the user types characters one at a time; each call returns the top 3 historical sentences that start with the prefix typed so far, ordered by descending frequency, ties broken by ASCII (lexicographic) order. A special character '#' ends the current sentence, saving it (or incrementing its count) and resetting the prefix. Return fewer than 3 if fewer match.",
   "blurb": "A trie over sentences with frequency-aware top-k retrieval per prefix — plus how you'd scale the ranking beyond a single machine.",
   "rubric": [
@@ -29,25 +30,25 @@
     {
       "key": "approach",
       "label": "Approach",
-      "description": "Chooses a trie keyed by characters with frequency stored at sentence-terminal nodes; retrieves candidates under the current prefix and selects top-3.",
+      "description": "Assess a correct approach and justified efficiency for the disclosed requirements; accept equivalent alternatives. Reference examples, not mandatory algorithms: Chooses a trie keyed by characters with frequency stored at sentence-terminal nodes; retrieves candidates under the current prefix and selects top-3.",
       "weight": 1.3
     },
     {
       "key": "correctness",
       "label": "Correctness",
-      "description": "Maintains the growing prefix across input calls; on '#' inserts/increments and resets; correct tie-break (higher freq first, then smaller string); once a prefix has no matches, all further chars in that sentence also have none.",
+      "description": "Judge actual outputs and invariants of the chosen approach, crediting valid corrections. The following checks apply to the illustrated implementation, not every valid solution: Maintains the growing prefix across input calls; on '#' inserts/increments and resets; correct tie-break (higher freq first, then smaller string); once a prefix has no matches, all further chars in that sentence also have none.",
       "weight": 1.3
     },
     {
       "key": "complexity_analysis",
       "label": "Complexity analysis",
-      "description": "Insert O(L); per-keystroke retrieval O(p + m log 3) where p=prefix len, m=matches under prefix; discusses the cost of collecting all matches vs caching top-k at nodes.",
+      "description": "Verify the time and space analysis of the actual implementation. Preserve disclosed performance requirements; these reference figures do not introduce hidden bounds or mandate an algorithm: Insert O(L); per-keystroke retrieval O(p + m log 3) where p=prefix len, m=matches under prefix; discusses the cost of collecting all matches vs caching top-k at nodes.",
       "weight": 1.2
     },
     {
       "key": "code_quality",
       "label": "Code quality",
-      "description": "Clean TrieNode (children map, sentence->count at terminals or a counts map), a prefix pointer advanced per keystroke, a heap/partial-sort for top-k.",
+      "description": "Assess readability, appropriate structure and avoidable duplication in the chosen solution. These are illustrative implementation choices, not required forms: Clean TrieNode (children map, sentence->count at terminals or a counts map), a prefix pointer advanced per keystroke, a heap/partial-sort for top-k.",
       "weight": 1.0
     },
     {
@@ -65,7 +66,7 @@
     {
       "key": "communication",
       "label": "Communication",
-      "description": "States the ranking contract and the trie design before coding, and reasons about the retrieval-vs-precompute tradeoff.",
+      "description": "Assess whether the candidate explains the decisions and invariants of their own approach, without requiring an algorithm name or a prescribed order. Reference-specific explanation examples: States the ranking contract and the trie design before coding, and reasons about the retrieval-vs-precompute tradeoff.",
       "weight": 0.9
     }
   ],

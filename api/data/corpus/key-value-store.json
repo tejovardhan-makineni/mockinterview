@@ -16,6 +16,7 @@
     "hinted-handoff",
     "consistency"
   ],
+  "candidate_brief": "Design a distributed store that lets applications write and retrieve values by key.",
   "prompt": "Design a highly available, horizontally scalable distributed key-value store in the style of Amazon Dynamo — one that stays writable during partitions and node failures. Cover partitioning, replication, how reads and writes stay consistent enough, membership, and failure handling.",
   "blurb": "The Dynamo playbook: partitioning, quorums, vector clocks, gossip, hinted handoff, and tunable consistency.",
   "rubric": [

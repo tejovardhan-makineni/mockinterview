@@ -2,277 +2,123 @@ package live
 
 import (
 	"context"
+	"encoding/json"
 	"net/http"
 	"net/http/httptest"
 	"strings"
-	"sync"
 	"sync/atomic"
 	"testing"
 	"time"
 
 	"github.com/gorilla/websocket"
+	"github.com/tejo/mockinterview-api/internal/corpus"
 	"github.com/tejo/mockinterview-api/internal/llm"
 	"github.com/tejo/mockinterview-api/internal/store"
 	"github.com/tejo/mockinterview-api/internal/store/memstore"
 )
 
-type idleCapture struct {
-	mu        sync.Mutex
-	requests  chan llm.GenerateRequest
-	responses []string
+type reviewReply struct {
+	decision ObservationDecision
+	err      error
+}
+type capturedReview struct {
+	ctx   context.Context
+	input ObservationInput
+	reply chan reviewReply
+}
+type reviewCapture struct {
+	calls        chan capturedReview
+	ignoreCancel bool
 }
 
-func (c *idleCapture) Generate(_ context.Context, req llm.GenerateRequest) (string, error) {
-	c.mu.Lock()
-	defer c.mu.Unlock()
-	c.requests <- req
-	if len(c.responses) == 0 {
-		return "Unexpected extra response", nil
-	}
-	response := c.responses[0]
-	c.responses = c.responses[1:]
-	return response, nil
-}
-func (*idleCapture) Stubbed() bool  { return false }
-func (*idleCapture) Info() llm.Info { return llm.Info{Provider: "test"} }
-
-func TestTextIdleCheckAcrossInterviewTypes(t *testing.T) {
-	for _, tc := range []struct {
-		name    string
-		section Section
-		quiet   time.Duration
-	}{
-		{"behavioral", Section{Kind: "behavioral"}, 45 * time.Second},
-		{"clinical discussion", Section{Kind: "clinical"}, 45 * time.Second},
-		{"written response", Section{Kind: "core", CandidateLed: true}, time.Minute},
-		{"case calculation", Section{Kind: "case"}, 45 * time.Second},
-		{"custom practical work", Section{Kind: "core"}, 45 * time.Second},
-		{"coding", Section{Kind: "coding"}, time.Minute},
-		{"system design", Section{Kind: "design"}, time.Minute},
-	} {
-		t.Run(tc.name, func(t *testing.T) {
-			ctx := context.Background()
-			memory := memstore.New()
-			user, err := memory.CreateUser(ctx, "idle@example.test", "unused")
-			if err != nil {
-				t.Fatal(err)
-			}
-			sess, err := memory.ReserveSession(ctx, store.Reservation{Session: store.Session{UserID: user.ID, Mode: "text", DurationMinutes: 30, Funding: "platform"}, Identity: "idle", Unlimited: true})
-			if err != nil {
-				t.Fatal(err)
-			}
-			owner := store.NewID()
-			sess, err = memory.AcquireLive(ctx, sess.ID, owner)
-			if err != nil {
-				t.Fatal(err)
-			}
-			if err = memory.AddTurn(ctx, sess.ID, "interviewer", "Describe your approach.", 0, nil); err != nil {
-				t.Fatal(err)
-			}
-			base := time.Now()
-			var seconds atomic.Int64
-			capture := &idleCapture{requests: make(chan llm.GenerateRequest, 8), responses: []string{"¿Quieres más tiempo?", "```" + textIdleSilence + "```", "Entendido.", "¿Necesitas un momento?"}}
-			done := make(chan struct{})
-			server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
-				defer close(done)
-				conn, err := (&websocket.Upgrader{}).Upgrade(w, req, nil)
-				if err != nil {
-					t.Error(err)
-					return
-				}
-				relay := &Relay{store: memory, attempt: sess, owner: owner, llm: capture, activityClock: func() time.Time { return base.Add(time.Duration(seconds.Load()) * time.Second) }}
-				relay.runText(conn, sess.ID, "Run this interview in Spanish.\n"+conversationPolicy, []Section{tc.section})
-			}))
-			defer server.Close()
-			client, _, err := websocket.DefaultDialer.Dial("ws"+strings.TrimPrefix(server.URL, "http"), nil)
-			if err != nil {
-				t.Fatal(err)
-			}
-			defer client.Close()
-			_ = client.SetReadDeadline(time.Now().Add(5 * time.Second))
-			send := func(msg clientMsg) {
-				t.Helper()
-				if err := client.WriteJSON(msg); err != nil {
-					t.Fatal(err)
-				}
-			}
-			read := func(kind string) serverMsg {
-				t.Helper()
-				for {
-					var msg serverMsg
-					if err := client.ReadJSON(&msg); err != nil {
-						t.Fatal(err)
-					}
-					if msg.Type == kind {
-						return msg
-					}
-					if msg.Type == "say" || msg.Type == "error" {
-						t.Fatalf("unexpected response while waiting for %s: %+v", kind, msg)
-					}
-				}
-			}
-			request := func() llm.GenerateRequest {
-				t.Helper()
-				select {
-				case req := <-capture.requests:
-					return req
-				case <-time.After(time.Second):
-					t.Fatal("missing provider request")
-					return llm.GenerateRequest{}
-				}
-			}
-			read("ready")
-			seconds.Store(int64(tc.quiet/time.Second) - 1)
-			send(clientMsg{Type: "nudge"})
-			read("nudge_deferred")
-			seconds.Store(int64(tc.quiet / time.Second))
-			send(clientMsg{Type: "nudge"})
-			if got := read("say").Text; got != "¿Quieres más tiempo?" {
-				t.Fatalf("check-in was not provider-localized: %q", got)
-			}
-			req := request()
-			if !strings.Contains(req.System, "Run this interview in Spanish.") || !strings.Contains(req.System, textIdleInstruction) || req.Messages[len(req.Messages)-1].Text != idleCheckInstruction {
-				t.Fatal("idle decision lost language, silence contract or neutral scope")
-			}
-			seconds.Store(600)
-			send(clientMsg{Type: "nudge"})
-			read("nudge_deferred") // cannot rearm itself
-			send(clientMsg{Type: "canvas", Text: "old response draft"})
-			send(clientMsg{Type: "workspace_activity"})
-			send(clientMsg{Type: "canvas", Text: "revised written calculation and notes"})
-			send(clientMsg{Type: "nudge"})
-			read("nudge_deferred") // activity processed at 600
-			seconds.Store(659)
-			send(clientMsg{Type: "nudge"})
-			read("nudge_deferred")
-			seconds.Store(660)
-			send(clientMsg{Type: "nudge"})
-			req = request()
-			if !strings.Contains(req.System, "revised written calculation and notes") || strings.Contains(req.System, "old response draft") {
-				t.Fatal("check-in did not inspect latest workspace")
-			}
-			send(clientMsg{Type: "nudge"})
-			read("nudge_deferred") // [[WAIT]] produced no caption
-			send(clientMsg{Type: "user_text", Text: "Let me review the case.", EventID: "working"})
-			read("ack")
-			seconds.Store(1200)
-			send(clientMsg{Type: "nudge"}) // explicit floorhold survives silence
-			send(clientMsg{Type: "user_text", Text: "My completed explanation is ready.", EventID: "completed"})
-			read("ack")
-			if got := read("say").Text; got != "Entendido." {
-				t.Fatalf("working request elicited an extra response: %q", got)
-			}
-			req = request()
-			if req.Messages[len(req.Messages)-1].Text != "My completed explanation is ready." {
-				t.Fatal("explicit floorhold was lost")
-			}
-			for _, msg := range req.Messages {
-				if msg.Text == idleCheckInstruction || strings.Contains(msg.Text, textIdleSilence) {
-					t.Fatal("transient idle instruction or silence marker leaked into conversation history")
-				}
-			}
-			seconds.Store(1200 + int64(tc.quiet/time.Second))
-			send(clientMsg{Type: "nudge"})
-			if got := read("say").Text; got != "¿Necesitas un momento?" {
-				t.Fatalf("candidate response did not rearm check-in: %q", got)
-			}
-			request()
-			send(clientMsg{Type: "end"})
-			read("saved")
-			select {
-			case <-done:
-			case <-time.After(time.Second):
-				t.Fatal("relay did not close")
-			}
-			select {
-			case <-capture.requests:
-				t.Fatal("unexpected extra provider call")
-			default:
-			}
-			turns, err := memory.Transcript(ctx, sess.ID)
-			if err != nil {
-				t.Fatal(err)
-			}
-			if len(turns) != 6 {
-				t.Fatalf("idle marker/context affected saved conversation: %+v", turns)
-			}
-			for _, turn := range turns {
-				if turn.Text == textIdleSilence || turn.Text == idleCheckInstruction {
-					t.Fatal("transport-only idle context persisted")
-				}
-			}
-		})
-	}
-}
-
-// The first optional request deliberately ignores cancellation until released,
-// emulating a delayed provider response that must never become a stale prompt.
-type delayedIdleCapture struct {
-	started   chan context.Context
-	release   chan struct{}
-	returned  chan struct{}
-	idleCalls atomic.Int64
-	failFirst bool
-}
-
-func (c *delayedIdleCapture) Generate(ctx context.Context, req llm.GenerateRequest) (string, error) {
-	if !strings.Contains(req.System, textIdleInstruction) {
+func (c *reviewCapture) Generate(ctx context.Context, req llm.GenerateRequest) (string, error) {
+	if req.JSONSchema == nil {
 		return "Your completed response was heard.", nil
 	}
-	if c.idleCalls.Add(1) > 1 {
-		return "Would you like a moment?", nil
+	var input ObservationInput
+	if err := json.Unmarshal([]byte(req.Messages[0].Text), &input); err != nil {
+		return "", err
 	}
-	c.started <- ctx
-	<-c.release
-	defer close(c.returned)
-	if c.failFirst {
-		return "", context.DeadlineExceeded
+	call := capturedReview{ctx: ctx, input: input, reply: make(chan reviewReply, 1)}
+	c.calls <- call
+	var result reviewReply
+	if c.ignoreCancel {
+		result = <-call.reply
+	} else {
+		select {
+		case result = <-call.reply:
+		case <-ctx.Done():
+			return "", ctx.Err()
+		}
 	}
-	return "STALE OPTIONAL CHECK-IN", nil
+	if result.err != nil {
+		return "", result.err
+	}
+	data, err := json.Marshal(result.decision)
+	return string(data), err
 }
-func (*delayedIdleCapture) Stubbed() bool  { return false }
-func (*delayedIdleCapture) Info() llm.Info { return llm.Info{Provider: "test"} }
+func (*reviewCapture) Stubbed() bool  { return false }
+func (*reviewCapture) Info() llm.Info { return llm.Info{Provider: "test"} }
 
-type textIdleHarness struct {
+type observationHarness struct {
 	t         *testing.T
 	client    *websocket.Conn
 	seconds   atomic.Int64
+	ticks     chan time.Time
 	memory    *memstore.Mem
 	sessionID string
 	done      chan struct{}
 }
 
-func newTextIdleHarness(t *testing.T, ai llm.Client) *textIdleHarness {
+func newObservationHarness(t *testing.T, ai llm.Client, kind string) *observationHarness {
+	return newObservationHarnessMode(t, ai, kind, false)
+}
+func newObservationHarnessMode(t *testing.T, ai llm.Client, kind string, native bool) *observationHarness {
 	t.Helper()
 	ctx := context.Background()
 	memory := memstore.New()
-	user, err := memory.CreateUser(ctx, "delayed-idle@example.test", "unused")
+	user, err := memory.CreateUser(ctx, "observer@example.test", "unused")
 	if err != nil {
 		t.Fatal(err)
 	}
-	sess, err := memory.ReserveSession(ctx, store.Reservation{Session: store.Session{UserID: user.ID, Mode: "text", DurationMinutes: 30, Funding: "platform"}, Identity: "delayed-idle", Unlimited: true})
+	sess, err := memory.ReserveSession(ctx, store.Reservation{Session: store.Session{UserID: user.ID, Mode: "text", DurationMinutes: 30, Funding: "platform"}, Identity: "observer", Unlimited: true})
 	if err != nil {
 		t.Fatal(err)
 	}
-	owner := store.NewID()
-	sess, err = memory.AcquireLive(ctx, sess.ID, owner)
-	if err != nil {
+	if err = memory.AddTurn(ctx, sess.ID, "candidate", "Prior answer", 0, json.RawMessage(`{"event_id":"barrier"}`)); err != nil {
 		t.Fatal(err)
 	}
 	if err = memory.AddTurn(ctx, sess.ID, "interviewer", "Describe your approach.", 0, nil); err != nil {
 		t.Fatal(err)
 	}
-	h := &textIdleHarness{t: t, memory: memory, sessionID: sess.ID, done: make(chan struct{})}
+	return resumeObservationHarness(t, ai, kind, native, memory, sess.ID)
+}
+func resumeObservationHarness(t *testing.T, ai llm.Client, kind string, native bool, memory *memstore.Mem, sessionID string) *observationHarness {
+	t.Helper()
+	owner := store.NewID()
+	sess, err := memory.AcquireLive(context.Background(), sessionID, owner)
+	if err != nil {
+		t.Fatal(err)
+	}
+	h := &observationHarness{t: t, memory: memory, sessionID: sess.ID, done: make(chan struct{}), ticks: make(chan time.Time, 8)}
 	base := time.Now()
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
 		defer close(h.done)
+		defer memory.ReleaseLive(context.Background(), sess.ID, owner)
 		conn, err := (&websocket.Upgrader{}).Upgrade(w, req, nil)
 		if err != nil {
 			t.Error(err)
 			return
 		}
-		relay := &Relay{store: memory, attempt: sess, owner: owner, llm: ai, activityClock: func() time.Time { return base.Add(time.Duration(h.seconds.Load()) * time.Second) }}
-		relay.runText(conn, sess.ID, conversationPolicy, []Section{{Kind: "behavioral"}})
+		relay := &Relay{store: memory, attempt: sess, owner: owner, llm: ai, observationTicks: h.ticks, activityClock: func() time.Time { return base.Add(time.Duration(h.seconds.Load()) * time.Second) }}
+		sections := []Section{{ID: "work", Kind: kind, Title: "Working"}, {ID: "review", Kind: "core", Title: "Discussion"}, {ID: "wrap", Kind: "wrap", Title: "Wrap"}}
+		if native {
+			relay.apiKey = "synthetic-key"
+			relay.liveModel = "synthetic-live-model"
+			relay.runGemini(conn, sess.ID, corpus.Question{}, conversationPolicy, "aoede", sections, 30)
+		} else {
+			relay.runText(conn, sess.ID, conversationPolicy, sections)
+		}
 	}))
 	t.Cleanup(server.Close)
 	h.client, _, err = websocket.DefaultDialer.Dial("ws"+strings.TrimPrefix(server.URL, "http"), nil)
@@ -284,164 +130,243 @@ func newTextIdleHarness(t *testing.T, ai llm.Client) *textIdleHarness {
 	h.read("ready")
 	return h
 }
-func (h *textIdleHarness) send(message clientMsg) {
+func (h *observationHarness) send(m clientMsg) {
 	h.t.Helper()
-	if err := h.client.WriteJSON(message); err != nil {
-		h.t.Fatal(err)
+	if e := h.client.WriteJSON(m); e != nil {
+		h.t.Fatal(e)
 	}
 }
-func (h *textIdleHarness) read(kind string) serverMsg {
+func (h *observationHarness) read(kind string) serverMsg {
 	h.t.Helper()
 	for {
-		var msg serverMsg
-		if err := h.client.ReadJSON(&msg); err != nil {
-			h.t.Fatal(err)
+		var m serverMsg
+		if e := h.client.ReadJSON(&m); e != nil {
+			h.t.Fatal(e)
 		}
-		if msg.Type == kind {
-			return msg
+		if m.Type == kind {
+			return m
 		}
-		if msg.Type == "say" || msg.Type == "error" {
-			h.t.Fatalf("unexpected output while waiting for %s: %+v", kind, msg)
+		if m.Type == "say" || m.Type == "error" {
+			h.t.Fatalf("unexpected %s while waiting for %s: %+v", m.Type, kind, m)
 		}
 	}
 }
-func (h *textIdleHarness) finish() []store.Turn {
+func (h *observationHarness) barrier() {
+	h.send(clientMsg{Type: "user_text", Text: "Prior answer", EventID: "barrier"})
+	h.read("ack")
+}
+func (h *observationHarness) review(c *reviewCapture, second int64) capturedReview {
+	h.t.Helper()
+	h.seconds.Store(second)
+	deadline := time.NewTimer(time.Second)
+	defer deadline.Stop()
+	tick := time.NewTicker(5 * time.Millisecond)
+	defer tick.Stop()
+	h.ticks <- time.Now()
+	for {
+		select {
+		case call := <-c.calls:
+			return call
+		case <-tick.C:
+			select {
+			case h.ticks <- time.Now():
+			default:
+			}
+		case <-deadline.C:
+			h.t.Fatal("server review did not start")
+			return capturedReview{}
+		}
+	}
+}
+func (h *observationHarness) finish() []store.Turn {
 	h.t.Helper()
 	h.send(clientMsg{Type: "end"})
 	h.read("saved")
+	_ = h.client.WriteControl(websocket.CloseMessage, websocket.FormatCloseMessage(websocket.CloseNormalClosure, ""), time.Now().Add(time.Second))
 	select {
 	case <-h.done:
 	case <-time.After(time.Second):
-		h.t.Fatal("text relay did not close")
+		h.t.Fatal("relay did not close")
 	}
-	turns, err := h.memory.Transcript(context.Background(), h.sessionID)
-	if err != nil {
-		h.t.Fatal(err)
+	turns, e := h.memory.Transcript(context.Background(), h.sessionID)
+	if e != nil {
+		h.t.Fatal(e)
 	}
 	return turns
 }
-
-func TestTextOptionalCheckInFailureKeepsInterviewOpenAndDefersRetry(t *testing.T) {
-	provider := &delayedIdleCapture{started: make(chan context.Context, 1), release: make(chan struct{}), returned: make(chan struct{}), failFirst: true}
-	h := newTextIdleHarness(t, provider)
-	h.seconds.Store(45)
-	h.send(clientMsg{Type: "nudge"})
-	select {
-	case <-provider.started:
-	case <-time.After(time.Second):
-		t.Fatal("check-in did not start")
-	}
-	close(provider.release)
-	h.read("nudge_deferred") // no terminal error or disconnect
-	h.seconds.Store(89)
-	h.send(clientMsg{Type: "nudge"})
-	h.read("nudge_deferred")
-	if provider.idleCalls.Load() != 1 {
-		t.Fatal("failed optional call retried before quiet interval")
-	}
-	h.seconds.Store(90)
-	h.send(clientMsg{Type: "nudge"})
-	if got := h.read("say").Text; got != "Would you like a moment?" {
-		t.Fatal(got)
-	}
-	h.send(clientMsg{Type: "user_text", Text: "Here is my completed answer.", EventID: "answer"})
-	h.read("ack")
-	if got := h.read("say").Text; got != "Your completed response was heard." {
-		t.Fatal(got)
-	}
-	turns := h.finish()
-	if len(turns) != 4 {
-		t.Fatalf("failure produced a persisted turn: %+v", turns)
-	}
+func probe(text string) ObservationDecision {
+	return ObservationDecision{Action: "probe", Utterance: text, Evidence: "The latest implementation accesses its first item before testing length.", Notes: "Current question concerns input validation; no new probe has been delivered yet."}
 }
 
-func TestTextOptionalCheckInCannotInterruptResumedCandidate(t *testing.T) {
-	for _, activity := range []string{"workspace edit", "candidate answer"} {
-		t.Run(activity, func(t *testing.T) {
-			provider := &delayedIdleCapture{started: make(chan context.Context, 1), release: make(chan struct{}), returned: make(chan struct{})}
-			h := newTextIdleHarness(t, provider)
-			h.seconds.Store(45)
+func TestPeriodicTextReconnectKeepsDeliveredEarlyStage(t *testing.T) {
+	c := &reviewCapture{calls: make(chan capturedReview, 8)}
+	h := newObservationHarness(t, c, "coding")
+	call := h.review(c, 30)
+	call.reply <- reviewReply{decision: ObservationDecision{Action: "advance", Utterance: "Let's discuss your design choice.", Evidence: "The candidate demonstrated the implementation."}}
+	h.read("say")
+	h.read("section")
+	h.finish()
+	session, err := h.memory.GetSession(context.Background(), h.sessionID)
+	if err != nil || session.Phase != "section:review" {
+		t.Fatalf("successful advancement not persisted: %+v %v", session, err)
+	}
+	resumed := resumeObservationHarness(t, c, "coding", false, h.memory, h.sessionID)
+	call = resumed.review(c, 30)
+	if call.input.Stage.ID != "review" || call.input.NextStage == nil || call.input.NextStage.ID != "wrap" {
+		t.Fatalf("reconnect reopened an already completed stage: %+v", call.input)
+	}
+	call.reply <- reviewReply{decision: ObservationDecision{Action: "wait"}}
+	resumed.finish()
+}
+
+func TestPeriodicTextObservationInspectsLatestWorkAndAdvances(t *testing.T) {
+	for _, kind := range []string{"coding", "design", "lld"} {
+		t.Run(kind, func(t *testing.T) {
+			c := &reviewCapture{calls: make(chan capturedReview, 8)}
+			h := newObservationHarness(t, c, kind)
+			h.send(clientMsg{Type: "canvas", Text: "old draft"})
+			h.send(clientMsg{Type: "canvas", Text: "latest code and diagram"})
 			h.send(clientMsg{Type: "nudge"})
-			var call context.Context
-			select {
-			case call = <-provider.started:
-			case <-time.After(time.Second):
-				t.Fatal("check-in did not start")
+			h.barrier()
+			call := h.review(c, 30)
+			if call.input.Workspace != "latest code and diagram" || len(call.input.History) != 2 || call.input.Stage.ID != "work" {
+				t.Fatalf("wrong observation: %+v", call.input)
 			}
-			if activity == "workspace edit" {
-				h.send(clientMsg{Type: "workspace_activity"})
-				h.send(clientMsg{Type: "canvas", Text: "The candidate resumed drafting their response."})
-				h.send(clientMsg{Type: "nudge"})
-				h.read("nudge_deferred")
-			}
-			h.send(clientMsg{Type: "user_text", Text: "Here is my completed response.", EventID: "resumed"})
-			h.read("ack")
-			if got := h.read("say").Text; got != "Your completed response was heard." {
+			call.reply <- reviewReply{decision: probe("Trace your current implementation for an empty input.")}
+			if got := h.read("say").Text; got != "Trace your current implementation for an empty input." {
 				t.Fatal(got)
 			}
-			// Both edit processing and the actual answer completed while the
-			// optional provider request was still blocked.
-			select {
-			case <-call.Done():
-			case <-time.After(time.Second):
-				t.Fatal("candidate activity did not cancel the optional call")
+			call = h.review(c, 60)
+			call.reply <- reviewReply{decision: ObservationDecision{Action: "advance", Utterance: "Let's discuss one important design choice.", Evidence: "The candidate supplied a coherent implementation and validation plan.", Notes: "Implementation is covered; discussion is next."}}
+			h.read("say")
+			if stage := h.read("section"); stage.Index != 1 || stage.Title != "Discussion" {
+				t.Fatalf("semantic advance not applied: %+v", stage)
 			}
-			close(provider.release)
-			select {
-			case <-provider.returned:
-			case <-time.After(time.Second):
-				t.Fatal("delayed provider did not return")
+			call = h.review(c, 90)
+			if call.input.Stage.ID != "review" || call.input.NextStage == nil || call.input.NextStage.ID != "wrap" {
+				t.Fatalf("stage regressed: %+v", call.input)
 			}
-			h.send(clientMsg{Type: "nudge"})
-			h.read("nudge_deferred")
+			call.reply <- reviewReply{decision: ObservationDecision{Action: "wait", Notes: "Let the candidate answer the current question."}}
 			turns := h.finish()
-			if len(turns) != 3 {
-				t.Fatalf("stale check-in became a spoken turn: %+v", turns)
-			}
-			for _, turn := range turns {
-				if strings.Contains(turn.Text, "STALE") {
-					t.Fatal("stale optional check-in persisted")
-				}
+			if len(turns) != 4 {
+				t.Fatalf("observation context entered transcript: %+v", turns)
 			}
 		})
 	}
 }
 
-func TestTextOfflineStubDoesNotTurnSilenceIntoAnAssessmentQuestion(t *testing.T) {
-	// Exercise the real deterministic demo. Its normal director responses are
-	// assessment questions, so an idle request must not advance that sequence.
-	h := newTextIdleHarness(t, llm.NewStub())
-	h.seconds.Store(45)
-	h.send(clientMsg{Type: "nudge"})
-	if err := h.client.SetReadDeadline(time.Now().Add(100 * time.Millisecond)); err != nil {
-		t.Fatal(err)
+func TestPeriodicTextReviewContinuesWhileEditingAndHonorsExplicitFloor(t *testing.T) {
+	c := &reviewCapture{calls: make(chan capturedReview, 8)}
+	h := newObservationHarness(t, c, "coding")
+	h.seconds.Store(30)
+	h.send(clientMsg{Type: "workspace_activity"})
+	h.send(clientMsg{Type: "canvas", Text: "unfinished work"})
+	h.barrier()
+	call := h.review(c, 30)
+	if call.input.QuietSeconds != 0 || call.input.CandidateWorking {
+		t.Fatalf("editing became explicit floor hold: %+v", call.input)
 	}
-	for {
-		var msg serverMsg
-		err := h.client.ReadJSON(&msg)
-		if err != nil {
-			if timeout, ok := err.(interface{ Timeout() bool }); !ok || !timeout.Timeout() {
-				t.Fatalf("expected silent open connection, got %v", err)
-			}
-			break
-		}
-		if msg.Type == "say" || msg.Type == "error" {
-			t.Fatalf("offline silence became an assessment turn: %+v", msg)
-		}
+	call.reply <- reviewReply{decision: ObservationDecision{Action: "wait", Notes: "Draft is incomplete; no question has been asked."}}
+	h.send(clientMsg{Type: "user_text", Text: "Let me code the solution.", EventID: "working"})
+	h.read("ack")
+	call = h.review(c, 60)
+	if !call.input.CandidateWorking {
+		t.Fatal("explicit floor hold lost")
 	}
-	// A websocket read timeout makes that reader unusable. Close explicitly,
-	// then check storage after the relay has released all interview work.
-	_ = h.client.Close()
+	call.reply <- reviewReply{decision: probe("This should never be delivered.")}
+	turns := h.finish()
+	if len(turns) != 3 {
+		t.Fatalf("working candidate interrupted: %+v", turns)
+	}
+}
+
+func TestPeriodicTextReviewFailureIsSilentAndNextTickRetries(t *testing.T) {
+	c := &reviewCapture{calls: make(chan capturedReview, 8)}
+	h := newObservationHarness(t, c, "coding")
+	call := h.review(c, 30)
+	call.reply <- reviewReply{err: context.DeadlineExceeded}
+	call = h.review(c, 60)
+	call.reply <- reviewReply{decision: probe("What happens for an empty input?")}
+	h.read("say")
+	if turns := h.finish(); len(turns) != 3 {
+		t.Fatalf("failed observation persisted: %+v", turns)
+	}
+}
+
+func TestPeriodicTextReviewNeverDeliversAStaleTurn(t *testing.T) {
+	c := &reviewCapture{calls: make(chan capturedReview, 8), ignoreCancel: true}
+	h := newObservationHarness(t, c, "coding")
+	call := h.review(c, 30)
+	h.send(clientMsg{Type: "canvas", Text: "corrected implementation"})
+	h.send(clientMsg{Type: "user_text", Text: "My corrected solution handles empty input.", EventID: "answer"})
+	h.read("ack")
+	h.read("say")
 	select {
-	case <-h.done:
+	case <-call.ctx.Done():
 	case <-time.After(time.Second):
-		t.Fatal("offline relay did not close")
+		t.Fatal("optional review did not cancel for submitted answer")
 	}
-	turns, err := h.memory.Transcript(context.Background(), h.sessionID)
-	if err != nil {
-		t.Fatal(err)
+	call.reply <- reviewReply{decision: probe("STALE QUESTION")}
+	turns := h.finish()
+	for _, turn := range turns {
+		if strings.Contains(turn.Text, "STALE") {
+			t.Fatal("stale question persisted")
+		}
 	}
-	if len(turns) != 1 || turns[0].Text != "Describe your approach." {
-		t.Fatalf("offline idle request created a saved turn: %+v", turns)
+}
+
+func TestOfflineDemoAndLegacyNudgesStaySilent(t *testing.T) {
+	h := newObservationHarness(t, llm.NewStub(), "coding")
+	h.seconds.Store(30)
+	h.ticks <- time.Now()
+	h.send(clientMsg{Type: "nudge"})
+	h.barrier()
+	if turns := h.finish(); len(turns) != 2 {
+		t.Fatalf("offline timer invented a question: %+v", turns)
+	}
+}
+
+type delayedAnswerCapture struct {
+	reviewCapture
+	started chan context.Context
+	release chan struct{}
+}
+
+func (c *delayedAnswerCapture) Generate(ctx context.Context, req llm.GenerateRequest) (string, error) {
+	if req.JSONSchema != nil {
+		return c.reviewCapture.Generate(ctx, req)
+	}
+	c.started <- ctx
+	<-c.release
+	return "STALE BUG PROBE", nil
+}
+func TestNormalTextReplyCannotProbeCodeCorrectedDuringGeneration(t *testing.T) {
+	c := &delayedAnswerCapture{reviewCapture: reviewCapture{calls: make(chan capturedReview, 4)}, started: make(chan context.Context, 1), release: make(chan struct{})}
+	h := newObservationHarness(t, c, "coding")
+	h.send(clientMsg{Type: "user_text", Text: "My implementation is done.", EventID: "done"})
+	h.read("ack")
+	var call context.Context
+	select {
+	case call = <-c.started:
+	case <-time.After(time.Second):
+		t.Fatal("normal answer generation did not start")
+	}
+	h.send(clientMsg{Type: "canvas", Text: "Corrected implementation and complete helper."})
+	h.barrier()
+	select {
+	case <-call.Done():
+	case <-time.After(time.Second):
+		t.Fatal("edit did not cancel obsolete direct reply")
+	}
+	close(c.release)
+	review := h.review(&c.reviewCapture, 30)
+	if review.input.Workspace != "Corrected implementation and complete helper." {
+		t.Fatal("fresh review lost corrections")
+	}
+	review.reply <- reviewReply{decision: ObservationDecision{Action: "wait"}}
+	for _, turn := range h.finish() {
+		if strings.Contains(turn.Text, "STALE") {
+			t.Fatal("stale ordinary reply entered transcript")
+		}
 	}
 }

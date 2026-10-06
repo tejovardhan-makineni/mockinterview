@@ -17,6 +17,7 @@
     "queues",
     "leader-election"
   ],
+  "candidate_brief": "Design a service where users schedule one-off and recurring jobs to run on a fleet of workers.",
   "prompt": "Design a distributed job scheduler: users register one-off and recurring (cron-style) jobs that must fire at or near their scheduled time and run to completion exactly the intended number of times, across a fleet of workers. Cover how you store schedules, trigger them on time, and execute them reliably.",
   "blurb": "The scheduling-at-scale problem — time-based indexing (time-wheel/bucketed queues), dedup so a job fires once, and at-least-once execution with idempotent workers.",
   "rubric": [

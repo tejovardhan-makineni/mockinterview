@@ -1,6 +1,6 @@
 .ring {
   display: grid;
-  width: 180px;
+  width: var(--score-ring-size, 180px);
   max-width: 100%;
   aspect-ratio: 1;
   flex-shrink: 0;
@@ -34,7 +34,7 @@
   justify-content: center;
 }
 .label strong {
-  font-size: 3.4rem;
+  font-size: var(--score-value-size, 3.4rem);
   line-height: 1.1;
   font-weight: 650;
   letter-spacing: -0.06em;

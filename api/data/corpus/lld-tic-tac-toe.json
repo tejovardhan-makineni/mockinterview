@@ -16,6 +16,7 @@
     "win-detection",
     "machine-coding"
   ],
+  "candidate_brief": "Design the object model and game behavior for a two-player Tic-Tac-Toe game.",
   "prompt": "Design Tic-Tac-Toe, then generalize it toward an N x N board (Connect-style) game. Model the Board, Player, Move, and Game classes, the turn/state flow, and the win-detection logic. Make the win check efficient rather than scanning the whole board every move. Sketch the class diagram.",
   "blurb": "A small board game done cleanly — legal-move validation, an efficient incremental win check, and a design that generalizes to N x N.",
   "rubric": [
@@ -28,13 +29,13 @@
     {
       "key": "core_entities",
       "label": "Core entities",
-      "description": "Identifies Board, Cell, Player, Piece/Symbol, Move, and Game/GameController.",
+      "description": "Assess whether the chosen decomposition expresses the required behavior and contracts. Names, class counts and representations below are examples; equivalent alternatives are valid: Identifies Board, Cell, Player, Piece/Symbol, Move, and Game/GameController.",
       "weight": 1.0
     },
     {
       "key": "class_design",
       "label": "Class design",
-      "description": "Board owns the grid and validation, Player holds a symbol, Move is a value object; no god-class Game holding raw arrays.",
+      "description": "Assess whether the chosen decomposition expresses the required behavior and contracts. Names, class counts and representations below are examples; equivalent alternatives are valid: Board owns the grid and validation, Player holds a symbol, Move is a value object; no god-class Game holding raw arrays.",
       "weight": 1.1
     },
     {
@@ -52,13 +53,13 @@
     {
       "key": "relationships",
       "label": "Relationships",
-      "description": "Game aggregates Players and composes a Board; Board composes Cells; correct ownership/multiplicity.",
+      "description": "Assess whether the chosen decomposition expresses the required behavior and contracts. Names, class counts and representations below are examples; equivalent alternatives are valid: Game aggregates Players and composes a Board; Board composes Cells; correct ownership/multiplicity.",
       "weight": 0.9
     },
     {
       "key": "api_methods",
       "label": "API methods",
-      "description": "makeMove(player, row, col), isValidMove, currentPlayer, getStatus/getWinner; clean signatures.",
+      "description": "Assess whether the chosen decomposition expresses the required behavior and contracts. Names, class counts and representations below are examples; equivalent alternatives are valid: makeMove(player, row, col), isValidMove, currentPlayer, getStatus/getWinner; clean signatures.",
       "weight": 1.0
     },
     {

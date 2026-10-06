@@ -16,6 +16,7 @@
     "pipeline",
     "recommendations"
   ],
+  "candidate_brief": "Design a platform where creators upload videos and viewers find and watch them.",
   "prompt": "Design a video streaming platform like YouTube or Netflix. Creators upload videos; the system transcodes them into multiple resolutions, distributes them globally, and streams them to viewers with adaptive bitrate. Also cover metadata, view counts, and a basic recommendations feed. Assume global scale with a very large catalog and heavy read traffic.",
   "blurb": "An upload+transcoding pipeline feeding a CDN, adaptive-bitrate delivery, and the read-heavy metadata plane around it.",
   "rubric": [

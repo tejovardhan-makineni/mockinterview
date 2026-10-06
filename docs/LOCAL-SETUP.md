@@ -17,8 +17,9 @@ platform does not mean its signed installer has been published.
 
 **All desktop AI practice requires your own provider key. No free interviews are
 included.** The website provides standard verified accounts one platform-funded
-interview every rolling 24 hours; approved beta testers and personal keys retain
-their separate access rules. Cloud models require internet, and provider charges
+interview in total, with a shared maximum of 200 funded interviews per UTC day.
+Approved beta testers can practice repeatedly within that shared cap; personal
+keys retain their separate access rules. Cloud models require internet, and provider charges
 and rate limits apply. Gemini supports native voice; other configured providers
 support text interviews. A connection check can make a small billable request.
 
@@ -157,7 +158,8 @@ your computer, not a public hosted deployment.
 
 Set `GEMINI_API_KEY` in `.env` for Gemini, or choose another `LLM_PROVIDER` and
 set its corresponding key. The current default text/feedback model is
-`gemini-2.5-flash`. Provider model access changes; verify that your own project has
+`gemini-3.8-flash`; native voice uses `gemini-3.8-live` and voice previews use
+`gemini-3.8-flash-tts`. Provider model access changes; verify that your own project has
 access before relying on that model. Run `make check-llm` (or `cd api` then
 `go run ./cmd/mockinterview -check-llm`) for an **optional billable** connectivity
 check. It checks every provider key present, so remove unrelated keys first.

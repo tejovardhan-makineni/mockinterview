@@ -360,7 +360,7 @@ function createWindow(appSession) {
     minHeight: 600,
     show: false,
     backgroundColor: "#faf9f6",
-    title: "Mock Interview",
+    title: "Mock Interview · Beta",
     webPreferences: {
       session: appSession,
       preload: path.join(here, "preload.cjs"),

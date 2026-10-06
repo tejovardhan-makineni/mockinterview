@@ -113,9 +113,10 @@ sequenceDiagram
   C->>A: Retrieve report or retry failed feedback
 ```
 
-Hosted admission allows one platform-funded start per rolling 24 hours. Validated
-personal-key sessions and approved testers have no daily interview count limit. A
-separate global budget limits ordinary platform-funded starts. Reservations and failures before
+Hosted admission allows each standard identity one platform-funded start in
+total. A shared budget caps all platform-funded starts, including approved tester
+practice, at 200 per UTC day. Approved testers retain repeated access within this
+cap; validated personal-key sessions do not consume either funded allowance. Reservations and failures before
 provider readiness do not consume an allowance. Resuming or retrying a report
 does not create another start. Local unlimited mode disables hosted admission
 limits; provider charges still apply.
@@ -133,8 +134,18 @@ workers cannot overwrite a later attempt. Production must allocate CPU outside
 requests and keep a minimum instance for these in-process workers.
 
 The director uses authored facts and conditional probes, format stages, target
-level, challenge and simulation/coaching settings. Code and SQL workspaces provide
-text for review; they do not execute code. Scoring accepts known rubric dimensions
+level, challenge and simulation/coaching settings. A private server review runs
+roughly every 30 seconds using current work, conversation and evidence notes. Its
+structured decision can wait, answer, clarify, probe, advance or wrap; delivery
+requires fresh evidence and a safe pause. Work changes invalidate pending replies.
+Technical scenarios expose an authored `candidate_brief` while retaining full
+assignments privately. Code and SQL workspaces provide text for review; they do
+not execute code. Whiteboard observations describe geometry and connections,
+with explicit incomplete markers rather than pretending omitted work is absent.
+See [adaptive interviewer behavior](ADAPTIVE-INTERVIEWER.md) for the level
+calibration, disclosure rules and evaluation boundaries.
+
+Scoring accepts known rubric dimensions
 and exact candidate-evidence quotations, with an explicit 512 KiB evidence limit.
 These safeguards do not establish practitioner calibration or hiring validity;
 content and feedback remain community previews.
@@ -176,8 +187,10 @@ historical compatibility; the current UI does not collect camera-derived signals
 Account export includes saved user records and excludes credentials, auth actions,
 private interviewer references and internal usage/lease fields. Deletion removes
 account-linked records. The independent usage ledger contains an HMAC of verified
-email; retention of recent starts prevents account deletion from resetting hosted
-eligibility. The current allowance window is 24 hours. Database backups follow their separate retention policy.
+email and recent starts for the shared daily cap. A separate minimal lifetime
+claim stores that HMAC and its first-claim timestamp, surviving history/account
+deletion and daily-ledger cleanup so deletion does not renew the free interview.
+Database backups follow their separate retention policy.
 
 Maintenance runs on startup and hourly. It removes expired auth actions and
 personal keys, credentials for completed/abandoned/failed sessions, usage entries

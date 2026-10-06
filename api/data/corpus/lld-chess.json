@@ -16,6 +16,7 @@
     "state-machine",
     "game"
   ],
+  "candidate_brief": "Design the object model for a two-player chess game using standard chess rules. Focus on the game’s objects and behavior, not a chess-playing AI.",
   "prompt": "Design the object model for a two-player chess game. Model the board, the pieces with their distinct movement rules, move validation (including special moves like castling, en passant, and promotion), check/checkmate/stalemate detection, and the overall game state. Design the core classes and key methods. Focus on the object design, not a chess AI. Sketch the class diagram.",
   "blurb": "Per-piece movement via Strategy/polymorphism, special-move rules, and check/checkmate detection with a clean game state machine.",
   "rubric": [
@@ -28,37 +29,37 @@
     {
       "key": "core_entities",
       "label": "Core entities",
-      "description": "Board, Cell/Square, Piece (+ subtypes), Move, Player, Game, MoveValidator — cleanly separated, no god class.",
+      "description": "Assess whether the chosen decomposition expresses the required behavior and contracts. Names, class counts and representations below are examples; equivalent alternatives are valid: Board, Cell/Square, Piece (+ subtypes), Move, Player, Game, MoveValidator — cleanly separated, no god class.",
       "weight": 1.1
     },
     {
       "key": "class_design",
       "label": "Class design & responsibilities",
-      "description": "Piece movement is polymorphic/Strategy, not a switch on type; Board holds state; Game orchestrates turns and end conditions.",
+      "description": "Assess whether the chosen decomposition expresses the required behavior and contracts. Names, class counts and representations below are examples; equivalent alternatives are valid: Piece movement is polymorphic/Strategy, not a switch on type; Board holds state; Game orchestrates turns and end conditions.",
       "weight": 1.3
     },
     {
       "key": "relationships",
       "label": "Relationships & cardinality",
-      "description": "Board composes 64 Cells; Cell holds 0..1 Piece; Piece has a color/owner; Game has two Players and a Board and move history.",
+      "description": "Assess whether the chosen decomposition expresses the required behavior and contracts. Names, class counts and representations below are examples; equivalent alternatives are valid: Board composes 64 Cells; Cell holds 0..1 Piece; Piece has a color/owner; Game has two Players and a Board and move history.",
       "weight": 1.0
     },
     {
       "key": "design_patterns",
-      "label": "Design patterns",
-      "description": "Strategy/polymorphism for movement, Factory for piece creation/promotion, State for game phase, Command/Memento for move + undo, Singleton for board optional.",
+      "label": "Abstraction choices",
+      "description": "Assess clear separation of movement rules, game state, move validation and any disclosed undo behavior. Polymorphism, tables, functions or named patterns are acceptable when their correctness and tradeoffs are explained; no pattern checklist is required.",
       "weight": 1.2
     },
     {
       "key": "solid_principles",
-      "label": "SOLID / OCP",
-      "description": "Adding a variant piece or rule requires new classes, not editing existing pieces; validation composed, not a monolith.",
+      "label": "Separation and maintainability",
+      "description": "Assess whether responsibilities are cohesive and likely changes remain manageable within the disclosed scope; do not require an acronym, inheritance or a named pattern. These are example change boundaries, not a prescribed implementation: Adding a variant piece or rule requires new classes, not editing existing pieces; validation composed, not a monolith.",
       "weight": 1.2
     },
     {
       "key": "api_methods",
       "label": "API / method design",
-      "description": "getValidMoves(piece), makeMove(move), isCheck/isCheckmate/isStalemate, promote, undo — clear signatures.",
+      "description": "Assess whether the chosen decomposition expresses the required behavior and contracts. Names, class counts and representations below are examples; equivalent alternatives are valid: getValidMoves(piece), makeMove(move), isCheck/isCheckmate/isStalemate, promote, undo — clear signatures.",
       "weight": 1.0
     },
     {

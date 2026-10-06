@@ -9,7 +9,7 @@ export default function Terms() {
         <p className="eyebrow">Before you practice</p>
         <h1 className="page-title mt-3">Using mockinterview</h1>
         <p className="mt-5">
-          Effective October 4, 2026 · terms version 2026-10-04.1
+          Effective October 4, 2026 · terms version 2026-10-05.1
         </p>
         <p>
           These terms cover the hosted mockinterview.live service provided by
@@ -65,15 +65,17 @@ export default function Terms() {
         </p>
         <h2>Hosted access and model costs</h2>
         <p>
-          Standard access includes one free Gemini 2.5 Flash interview per
-          rolling 24 hours. Validated personal model keys have no product
-          interview allowance. Approved testers are exempt from these allowances
-          while tester access is enabled; one active interview per account still
-          applies. Availability also depends on service capacity. Setup shows
-          eligibility and next-start times. Reconnecting or retrying a report
-          stays with the original attempt. Deletion does not reset the
-          allowance. You can run the open-source project locally for more
-          practice, subject to provider costs and terms.
+          Standard access includes one free Gemini 3.8 Flash interview per
+          account, with no daily renewal. The project funds at most 200
+          interviews per UTC calendar day, including tester interviews. Approved
+          testers can start more than one funded interview while tester access
+          is enabled, within this shared daily capacity. Validated personal
+          model keys have no product interview allowance. One active interview
+          per account still applies. Setup shows eligibility and shared
+          capacity. Reconnecting or retrying a report stays with the original
+          attempt. Deletion does not reset the allowance. You can run the
+          open-source project locally for more practice, subject to provider
+          costs and terms.
         </p>
         <p>
           Use only personal model keys you are authorized to use and check their

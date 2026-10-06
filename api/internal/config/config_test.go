@@ -12,7 +12,7 @@ func productionEnv(t *testing.T) {
 		"LOCAL_MEMORY": "false", "APP_ENV": "production", "MODE": "api", "LOCAL_UNLIMITED": "false", "USE_STUB_LLM": "false",
 		"JWT_SECRET": strings.Repeat("j", 40), "SESSION_ENCRYPTION_KEY": base64.StdEncoding.EncodeToString([]byte(strings.Repeat("k", 32))),
 		"GEMINI_API_KEY": "configured-test-only", "LLM_PROVIDER": "gemini", "PUBLIC_URL": "https://practice.example.com",
-		"CORS_ALLOW": "https://practice.example.com", "RESEND_API_KEY": "configured-test-only", "MAIL_FROM": "Practice <noreply@example.com>", "DB_MAX_CONNS": "3",
+		"CORS_ALLOW": "https://practice.example.com", "RESEND_API_KEY": "configured-test-only", "MAIL_FROM": "Practice <noreply@example.com>", "DB_MAX_CONNS": "3", "HOSTED_DAILY_START_LIMIT": "200",
 	} {
 		t.Setenv(k, v)
 	}
@@ -64,5 +64,30 @@ func TestDBMaxConnsCannotWrapOrDefaultInvalidValues(t *testing.T) {
 				t.Fatalf("invalid parsed pool size: %d", c.DBMaxConns)
 			}
 		})
+	}
+}
+
+func TestHostedDailyLimitCannotBeDisabledOrExceedBetaBudget(t *testing.T) {
+	for _, value := range []string{"0", "-1", "201", "999999999999999999999", "invalid"} {
+		t.Run(value, func(t *testing.T) {
+			productionEnv(t)
+			t.Setenv("HOSTED_DAILY_START_LIMIT", value)
+			if _, err := Load(); err == nil {
+				t.Fatalf("accepted unsafe hosted cap %q", value)
+			}
+		})
+	}
+}
+func TestCurrentGeminiDefaults(t *testing.T) {
+	productionEnv(t)
+	for _, key := range []string{"GEMINI_MODEL_REASON", "GEMINI_MODEL_LIVE", "GEMINI_MODEL_TTS", "LLM_MODEL"} {
+		t.Setenv(key, "")
+	}
+	c, err := Load()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if c.LLMModel != "gemini-3.8-flash" || c.ModelLive != "gemini-3.8-live" || c.ModelTTS != "gemini-3.8-flash-tts" || c.HostedDailyStartLimit != 200 {
+		t.Fatalf("stale defaults: %+v", c)
 	}
 }

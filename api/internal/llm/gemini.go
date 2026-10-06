@@ -30,7 +30,7 @@ func NewGemini(ctx context.Context, apiKey, defaultModel string) (*Gemini, error
 		return nil, fmt.Errorf("gemini client: %w", err)
 	}
 	if defaultModel == "" {
-		defaultModel = "gemini-2.5-flash"
+		defaultModel = "gemini-3.8-flash"
 	}
 	return &Gemini{client: c, defaultModel: defaultModel}, nil
 }

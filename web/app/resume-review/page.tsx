@@ -487,7 +487,7 @@ export default function ResumePage() {
         <div className="mt-6 flex flex-col gap-4 lg:flex-row">
           {/* LEFT — rendered resume */}
           <Panel className="overflow-hidden lg:flex-[1.35]">
-            <div className="flex items-center justify-between border-b border-[var(--color-line)] px-4 py-2 text-xs text-[var(--color-faint)]">
+            <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[var(--color-line)] px-4 py-2 text-xs text-[var(--color-faint)]">
               <span className="truncate">{resume.filename}</span>
               {tab === "review" && review ? (
                 <span
@@ -1044,7 +1044,7 @@ function JdModal({
         aria-modal="true"
         aria-labelledby="jd-title"
         onMouseDown={(e) => e.stopPropagation()}
-        className="mi-panel relative flex max-h-[85vh] w-full max-w-2xl flex-col rounded-2xl border border-[var(--color-line)] bg-[var(--color-panel)] p-6"
+        className="mi-panel relative max-h-[calc(100dvh-32px)] w-full max-w-2xl overflow-y-auto rounded-2xl border border-[var(--color-line)] bg-[var(--color-panel)] p-4 sm:p-6"
       >
         <h2 id="jd-title" className="text-lg font-bold">
           {t("Paste the job description")}
@@ -1063,9 +1063,9 @@ function JdModal({
           value={text}
           onChange={(e) => setText(e.target.value)}
           placeholder={t("Paste the full job description here…")}
-          className="mt-4 h-64 w-full flex-1 resize-none overflow-auto rounded-xl border border-[var(--color-line)] bg-[var(--color-studio)] p-3.5 text-sm text-[var(--color-ink)] outline-none placeholder:text-[var(--color-faint)] focus:border-[var(--color-accent)]"
+          className="mt-4 min-h-24 h-[min(16rem,40dvh)] w-full shrink-0 resize-none overflow-auto rounded-xl border border-[var(--color-line)] bg-[var(--color-studio)] p-3.5 text-sm text-[var(--color-ink)] outline-none placeholder:text-[var(--color-faint)] focus:border-[var(--color-accent)]"
         />
-        <div className="mt-4 flex items-center justify-end gap-2">
+        <div className="mt-4 flex flex-wrap items-center justify-end gap-2">
           <Button variant="ghost" onClick={onClose}>
             {t("Cancel")}
           </Button>

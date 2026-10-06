@@ -16,7 +16,7 @@ export function DesktopModelSettings() {
   const [message, setMessage] = useState("");
   return (
     <form
-      className="space-y-4"
+      className="min-w-0 space-y-4"
       onSubmit={async (e) => {
         e.preventDefault();
         setBusy(true);
@@ -96,11 +96,13 @@ export function DesktopModelSettings() {
             onChange={(e) => setPaid(e.target.checked)}
             className="mt-1"
           />
-          This Gemini key belongs to a project with paid billing enabled.
-          Connection validation does not verify billing.
+          <span className="min-w-0">
+            This Gemini key belongs to a project with paid billing enabled.
+            Connection validation does not verify billing.
+          </span>
         </label>
       )}
-      <div className="flex flex-wrap gap-3">
+      <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
         <Button
           variant="ghost"
           type="submit"

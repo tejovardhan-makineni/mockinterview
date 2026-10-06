@@ -35,11 +35,17 @@ export type SectionInfo = {
 export type ConnState =
   "connecting" | "connected" | "reconnecting" | "failed" | "closed";
 
+export type MicState =
+  "off" | "starting" | "live" | "muted" | "interrupted" | "unavailable";
+export type AudioState = "idle" | "ready" | "blocked" | "unavailable";
+
 type Events = {
   caption: (c: Caption) => void;
   speaking: (on: boolean) => void; // the INTERVIEWER is speaking (drives avatar)
   userSpeaking: (on: boolean) => void; // the CANDIDATE is speaking (drives speaking-ratio)
   micLevel: (v: number) => void; // 0..1 live mic input level (drives the "listening" meter)
+  microphone: (state: MicState) => void;
+  audio: (state: AudioState) => void;
   amplitude: (v: number) => void; // 0..1, drives the procedural avatar mouth
   viseme: (v: { level: number; bright: number }) => void; // openness + vowel color for glTF visemes
   mode: (m: "voice" | "text" | "local") => void;
@@ -94,6 +100,10 @@ export class LiveSession {
   private aiSpeaking = false;
   private questionTags: string[];
   private audioCtx?: AudioContext;
+  private micCtx?: AudioContext;
+  private micState: MicState = "off";
+  private audioState: AudioState = "idle";
+  private removeAudioGestures?: () => void;
   private playHead = 0;
   // Reconnect state.
   private minutes = 30;
@@ -208,7 +218,11 @@ export class LiveSession {
 
   // Tell the interviewer how much time is left (context only — no forced reply).
   sendTime(text: string) {
-    if (this.mode !== "local") {
+    if (
+      !this.stopped &&
+      this.mode !== "local" &&
+      this.ws?.readyState === WebSocket.OPEN
+    ) {
       try {
         this.ws?.send(JSON.stringify({ type: "time", text }));
       } catch {
@@ -224,6 +238,22 @@ export class LiveSession {
   connectionState() {
     return this.connState;
   }
+  microphoneState() {
+    return this.micState;
+  }
+  playbackState() {
+    return this.audioState;
+  }
+  private setMicrophone(state: MicState) {
+    if (this.micState === state) return;
+    this.micState = state;
+    this.emit("microphone", state);
+  }
+  private setAudio(state: AudioState) {
+    if (this.audioState === state) return;
+    this.audioState = state;
+    this.emit("audio", state);
+  }
   // Last announced section (or undefined before the first "section" message) —
   // lets a late subscriber read current progress without waiting for the next event.
   currentSectionInfo() {
@@ -232,6 +262,19 @@ export class LiveSession {
 
   async start(minutes = 30) {
     this.minutes = minutes;
+    // Resume in the user gesture itself. Browsers may suspend audio after
+    // navigation even when the speaker test in setup already succeeded.
+    const resume = () => {
+      if (this.options.mode === "voice" && !this.stopped)
+        void this.enableAudio().catch(() => {});
+    };
+    document.addEventListener("pointerdown", resume);
+    document.addEventListener("keydown", resume);
+    this.removeAudioGestures = () => {
+      document.removeEventListener("pointerdown", resume);
+      document.removeEventListener("keydown", resume);
+    };
+    if (this.options.mode === "voice") void this.enableAudio().catch(() => {});
     for (const [id, text] of this.outbox)
       this.pushCaption({ role: "candidate", text, id, delivery: "pending" });
     this.startNudgeWatch();
@@ -284,6 +327,7 @@ export class LiveSession {
     // Tear down the live audio path; it's rebuilt on the "ready" message.
     this.micStop?.();
     this.micStop = undefined;
+    this.setMicrophone(this.muted ? "muted" : "off");
     if (this.attempts >= MAX_RECONNECT_ATTEMPTS) {
       this.setConn("failed");
       return;
@@ -310,6 +354,7 @@ export class LiveSession {
     this.microphoneRequest++;
     this.micStop?.();
     this.micStop = undefined; // rebuilt on the fresh socket's "ready"
+    this.setMicrophone(this.muted ? "muted" : "off");
     this.detachWs(); // don't let the old socket's onclose trigger another retry
     this.connect();
   }
@@ -367,9 +412,15 @@ export class LiveSession {
         this.sentWorkspace = undefined;
         this.flushWorkspace();
         this.options.mode = this.mode;
-        if (this.mode === "text") this.setMuted(true);
+        if (this.mode === "text") {
+          this.setMuted(true);
+          this.setAudio("idle");
+        } else void this.enableAudio().catch(() => {});
         this.emit("mode", this.mode);
-        if (this.mode === "voice" && !this.muted) void this.startMic();
+        if (this.mode === "voice") {
+          if (this.muted) this.setMicrophone("muted");
+          else void this.startMic();
+        }
         for (const [id, text] of this.outbox) this.sendPending(id, text);
         break;
       case "ack": {
@@ -392,6 +443,7 @@ export class LiveSession {
           this.microphoneRequest++;
           this.micStop?.();
           this.micStop = undefined;
+          this.setMicrophone(this.muted ? "muted" : "off");
           this.cancelSpeech();
           this.detachWs();
           this.setConn("failed");
@@ -671,6 +723,7 @@ export class LiveSession {
     return this.muted;
   }
   setMuted(muted: boolean) {
+    if (!muted && this.micStop && !this.muted) return;
     this.muted = muted;
     this.microphoneRequest++;
     if (muted) {
@@ -683,17 +736,58 @@ export class LiveSession {
       } catch {}
       this.recog = undefined;
       this.emit("micLevel", 0);
+      this.setMicrophone(this.mode === "text" ? "off" : "muted");
     } else if (this.ready) {
       if (this.mode === "voice") void this.startMic();
       else this.beginListening();
     }
   }
   async enableAudio() {
-    if (!this.audioCtx) {
-      this.audioCtx = new AudioContext({ sampleRate: 24000 });
-      this.playHead = this.audioCtx.currentTime;
+    if (this.stopped) return;
+    try {
+      const ctx = this.playbackContext();
+      // Start both resume calls synchronously, while browser activation is valid.
+      const playback =
+        ctx.state === "running" ? Promise.resolve() : ctx.resume();
+      const captureContext = this.micCtx;
+      const capture =
+        captureContext && captureContext.state !== "running"
+          ? captureContext.resume().catch(() => {
+              if (
+                !this.stopped &&
+                !this.muted &&
+                this.micCtx === captureContext
+              )
+                this.setMicrophone("interrupted");
+            })
+          : Promise.resolve();
+      this.updatePlaybackState();
+      await Promise.all([playback, capture]);
+      this.updatePlaybackState();
+    } catch (error) {
+      if (!this.stopped && this.options.mode !== "text")
+        this.setAudio(
+          this.audioCtx?.state === "running"
+            ? "ready"
+            : this.audioCtx
+              ? "blocked"
+              : "unavailable",
+        );
+      throw error;
     }
-    await this.audioCtx.resume();
+  }
+  private playbackContext() {
+    if (!this.audioCtx || this.audioCtx.state === "closed") {
+      this.audioCtx = new AudioContext({ sampleRate: 24000 });
+      this.audioAnalyser = undefined;
+      this.playHead = this.audioCtx.currentTime;
+      this.audioCtx.onstatechange = () => this.updatePlaybackState();
+    }
+    return this.audioCtx;
+  }
+  private updatePlaybackState() {
+    if (this.stopped || this.options.mode === "text") return;
+    this.setAudio(this.audioCtx?.state === "running" ? "ready" : "blocked");
   }
 
   // Allow the UI to submit typed answers too.
@@ -813,6 +907,7 @@ export class LiveSession {
   private async startMic() {
     if (this.micStop || this.stopped || this.muted) return;
     const request = ++this.microphoneRequest;
+    this.setMicrophone("starting");
     let acquired: MediaStream | undefined;
     let context: AudioContext | undefined;
     try {
@@ -834,11 +929,50 @@ export class LiveSession {
       }
       const ctx = new AudioContext({ sampleRate: 16000 });
       context = ctx;
+      this.micCtx = ctx;
+      const track = stream.getAudioTracks()[0];
+      if (!track || track.readyState !== "live")
+        throw new Error("No live microphone track");
+      let speechActive = false;
+      let quietSamples = 0;
+      const updateState = () => {
+        if (this.stopped || this.muted || request !== this.microphoneRequest)
+          return;
+        this.setMicrophone(
+          track?.readyState === "ended"
+            ? "unavailable"
+            : track?.muted || ctx.state !== "running"
+              ? "interrupted"
+              : "live",
+        );
+        if (this.micState !== "live") {
+          this.emit("micLevel", 0);
+          speechActive = false;
+          quietSamples = 0;
+        }
+      };
+      const ended = () => {
+        this.micStop?.();
+        this.micStop = undefined;
+        if (!this.stopped && !this.muted) this.setMicrophone("unavailable");
+      };
+      track?.addEventListener("ended", ended);
+      track?.addEventListener("mute", updateState);
+      track?.addEventListener("unmute", updateState);
+      ctx.onstatechange = updateState;
       const src = ctx.createMediaStreamSource(stream);
       const proc = ctx.createScriptProcessor(2048, 1, 1);
       src.connect(proc);
       proc.connect(ctx.destination);
       proc.onaudioprocess = (e) => {
+        if (this.stopped || this.muted || request !== this.microphoneRequest)
+          return;
+        updateState();
+        if (this.micState !== "live") {
+          speechActive = false;
+          quietSamples = 0;
+          return;
+        }
         const f32 = e.inputBuffer.getChannelData(0);
         const pcm = new Int16Array(f32.length);
         let sum = 0;
@@ -847,8 +981,19 @@ export class LiveSession {
           pcm[i] = s < 0 ? s * 0x8000 : s * 0x7fff;
           sum += s * s;
         }
-        // Live input level so the UI can prove the mic is being heard.
-        this.emit("micLevel", Math.min(1, Math.sqrt(sum / f32.length) * 4));
+        // Local input level; connection state separately confirms transport.
+        const rms = f32.length ? Math.sqrt(sum / f32.length) : 0;
+        this.emit("micLevel", Math.min(1, rms * 4));
+        // Send the current work before the first voiced audio block. This is
+        // only a freshness cue; server transcription still decides what was said.
+        if (rms >= 0.008) {
+          if (!speechActive) this.flushWorkspace();
+          speechActive = true;
+          quietSamples = 0;
+        } else {
+          quietSamples += f32.length;
+          if (quietSamples >= 16000 * 0.4) speechActive = false;
+        }
         if (this.ready && this.ws?.readyState === WebSocket.OPEN) {
           try {
             this.ws.send(pcm.buffer);
@@ -858,34 +1003,43 @@ export class LiveSession {
         }
       };
       this.micStop = () => {
+        ctx.onstatechange = null;
+        track?.removeEventListener("ended", ended);
+        track?.removeEventListener("mute", updateState);
+        track?.removeEventListener("unmute", updateState);
         proc.disconnect();
         src.disconnect();
         stream.getTracks().forEach((t) => t.stop());
         void ctx.close().catch(() => {});
+        if (this.micCtx === ctx) this.micCtx = undefined;
         this.emit("micLevel", 0);
       };
+      updateState();
+      if (ctx.state !== "running")
+        void ctx.resume().then(updateState).catch(updateState);
     } catch {
       acquired?.getTracks().forEach((track) => track.stop());
+      if (context) context.onstatechange = null;
       void context?.close().catch(() => {});
-      this.emit(
-        "error",
-        "The microphone is unavailable. Check permission or continue with typed answers.",
-      );
+      if (this.micCtx === context) this.micCtx = undefined;
+      if (!this.stopped && !this.muted && request === this.microphoneRequest)
+        this.setMicrophone("unavailable");
     }
   }
 
   private playPcm(bytes: Uint8Array) {
     if (this.stopped) return;
-    if (!this.audioCtx) {
-      this.audioCtx = new AudioContext({ sampleRate: 24000 });
-      this.playHead = this.audioCtx.currentTime;
-      void this.audioCtx
-        .resume()
-        .catch(() =>
-          this.emit("status", "Select Enable audio to hear your interviewer."),
-        );
+    let ctx: AudioContext;
+    try {
+      const hadContext = !!this.audioCtx;
+      ctx = this.playbackContext();
+      if (!hadContext && ctx.state !== "running")
+        void this.enableAudio().catch(() => {});
+      this.updatePlaybackState();
+    } catch {
+      this.setAudio("unavailable");
+      return;
     }
-    const ctx = this.audioCtx;
     if (!this.audioAnalyser) {
       this.audioAnalyser = ctx.createAnalyser();
       this.audioAnalyser.fftSize = 512;
@@ -989,6 +1143,8 @@ export class LiveSession {
 
   end() {
     this.stopped = true;
+    this.removeAudioGestures?.();
+    this.removeAudioGestures = undefined;
     this.ready = false;
     this.microphoneRequest++;
     for (const timer of this.delayedTimers) clearTimeout(timer);
@@ -1013,13 +1169,20 @@ export class LiveSession {
     if (this.workspaceTimer) clearInterval(this.workspaceTimer);
     if (this.ampTimer) clearInterval(this.ampTimer);
     this.micStop?.();
+    this.micStop = undefined;
+    this.setMicrophone("off");
     this.meterStop?.();
     this.meterStop = undefined;
-    this.audioCtx?.close().catch(() => {});
+    if (this.audioCtx) {
+      this.audioCtx.onstatechange = null;
+      this.audioCtx.close().catch(() => {});
+    }
+    this.setAudio("idle");
     this.audioCtx = undefined; // free the playback context
     this.cancelSpeech();
     try {
-      this.ws?.send(JSON.stringify({ type: "end" }));
+      if (this.ws?.readyState === WebSocket.OPEN)
+        this.ws.send(JSON.stringify({ type: "end" }));
     } catch {
       /* ignore */
     }

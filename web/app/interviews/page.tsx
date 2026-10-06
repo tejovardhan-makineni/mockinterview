@@ -131,23 +131,23 @@ export default function Catalog() {
           <p className="eyebrow">Your next interview</p>
           <h1 className="page-title mt-3">What would you like to practice?</h1>
           <p className="mt-3 max-w-3xl text-[var(--color-muted)]">
-            Explore career families, find your profession, and practice with a
-            specialist AI interviewer. Prepare for your first job, a career
-            change, or your next step.{" "}
-            {!IS_DESKTOP && "Hosted practice is for adults 18 and older."}
+            Find a scenario for your role, or create your own. You’ll choose
+            your format and check your devices before starting.
           </p>
         </div>
         <div className="flex flex-wrap gap-3">
           <Button href="/setup?custom=1">Create a custom interview</Button>
-          <Button href="/requests" variant="ghost">
-            Request a template
-          </Button>
           <Button href="/packs" variant="ghost">
             Practice paths
           </Button>
         </div>
       </div>
-      <Panel className="mt-8 p-5 sm:p-6">
+      <p className="mt-4 text-xs text-[var(--color-muted)]">
+        {IS_DESKTOP
+          ? "Desktop beta · your AI key, your local history."
+          : "Beta · one free interview per account · 200 funded interviews available across the project each day (UTC). For adults 18+."}
+      </p>
+      <Panel className="mt-6 p-4 sm:p-5">
         <Field label="Search interviews">
           <input
             id="catalog-search"

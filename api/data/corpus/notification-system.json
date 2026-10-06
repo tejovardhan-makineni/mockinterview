@@ -16,6 +16,7 @@
     "idempotency",
     "providers"
   ],
+  "candidate_brief": "Design a service that lets applications send users notifications through push, SMS, and email.",
   "prompt": "Design a notification system that lets services send messages to users across multiple channels — mobile push, SMS, and email. It must fan out reliably, deduplicate, respect user preferences and rate limits, retry failures, and fall back when a provider is down.",
   "blurb": "Multi-channel delivery: fanout, dedup, retries, provider fallback, and rate limiting.",
   "rubric": [

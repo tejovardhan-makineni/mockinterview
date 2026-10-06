@@ -341,20 +341,21 @@
     padding-top: 30px;
   }
   .cardGrid {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
   .runPanel {
     gap: 25px;
     padding: 27px;
   }
   .communityLinks {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 @media (max-width: 700px) {
   .hero,
   .runPanel,
-  .docsGrid {
+  .docsGrid,
+  .cardGrid {
     grid-template-columns: 1fr;
   }
   .hero {
@@ -389,4 +390,31 @@
 
 .runPanel > div {
   min-width: 0;
+}
+
+@media (max-width: 480px) {
+  .card,
+  .callout,
+  .runPanel,
+  .setupBody {
+    padding: 18px;
+  }
+  .pageHeading {
+    padding: 16px 0 28px;
+  }
+  .pageHeading h1 {
+    font-size: clamp(1.9rem, 8vw, 2.3rem);
+  }
+  .communityLinks {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .tabs {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    padding: 10px;
+  }
+  .tabs button {
+    min-height: 44px;
+    padding-inline: 8px;
+  }
 }

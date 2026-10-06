@@ -202,7 +202,7 @@ func TestDirectorProviderEvaluation(t *testing.T) {
 			t.Run(example.ID+"/"+mode, func(t *testing.T) {
 				ctx, cancel := context.WithTimeout(context.Background(), 45*time.Second)
 				defer cancel()
-				s := sample{conversationExample: example, Mode: mode, Model: "gemini-2.5-flash", PromptSHA256: hex.EncodeToString(promptDigest[:])}
+				s := sample{conversationExample: example, Mode: mode, Model: "gemini-3.8-flash", PromptSHA256: hex.EncodeToString(promptDigest[:])}
 				started := time.Now()
 				if mode == "text" {
 					client, err := llm.NewGemini(ctx, key, s.Model)
@@ -214,7 +214,7 @@ func TestDirectorProviderEvaluation(t *testing.T) {
 						t.Fatal("text generation failed (provider error omitted to protect credentials)")
 					}
 				} else {
-					s.Model = "gemini-2.5-flash-native-audio-preview-12-2025"
+					s.Model = "gemini-3.8-live"
 					session, err := connectGemini(ctx, key, s.Model, &genai.LiveConnectConfig{
 						ResponseModalities:       []genai.Modality{genai.ModalityAudio},
 						SystemInstruction:        genai.NewContentFromText(system, genai.RoleUser),

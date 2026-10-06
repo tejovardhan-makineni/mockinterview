@@ -36,7 +36,7 @@ func TestTesterAccessRemovalAndAccountPrivacy(t *testing.T) {
 			t.Fatal("unverified user saw pre-added invitation")
 		}
 		if verified {
-			r := store.Reservation{Session: store.Session{UserID: u.ID, QuestionID: "q", Funding: "platform", DurationMinutes: 15}, Identity: "tester", GlobalDailyLimit: 1}
+			r := store.Reservation{Session: store.Session{UserID: u.ID, QuestionID: "q", Funding: "platform", DurationMinutes: 15}, Identity: "tester", GlobalDailyLimit: 200}
 			first, err := m.ReserveSession(ctx, r)
 			if err != nil {
 				t.Fatal(err)

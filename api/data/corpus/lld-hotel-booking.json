@@ -16,6 +16,7 @@
     "state-machine",
     "strategy-pattern"
   ],
+  "candidate_brief": "Design the object model for a hotel reservation system where guests find and book rooms for a date range. A room cannot be booked for overlapping stays.",
   "prompt": "Design the object model for a hotel reservation system. Users search for available rooms for a date range, book a room, pay, and can cancel. The system must never double-book a room for overlapping dates. Design the core classes, the availability/booking model, the reservation lifecycle, and pricing. Focus on class design and APIs rather than the distributed backend. Sketch the class diagram.",
   "blurb": "Availability over date ranges without double-booking, a reservation state machine, and pluggable pricing.",
   "rubric": [
@@ -28,37 +29,37 @@
     {
       "key": "core_entities",
       "label": "Core entities",
-      "description": "Hotel, Room, RoomType, Reservation, Guest, DateRange, Payment, Inventory/Availability — cleanly separated.",
+      "description": "Assess whether the chosen decomposition expresses the required behavior and contracts. Names, class counts and representations below are examples; equivalent alternatives are valid: Hotel, Room, RoomType, Reservation, Guest, DateRange, Payment, Inventory/Availability — cleanly separated.",
       "weight": 1.1
     },
     {
       "key": "class_design",
       "label": "Class design & responsibilities",
-      "description": "Availability is its own concept over a DateRange; Room vs RoomType distinction; Reservation owns its lifecycle.",
+      "description": "Assess whether the chosen decomposition expresses the required behavior and contracts. Names, class counts and representations below are examples; equivalent alternatives are valid: Availability is its own concept over a DateRange; Room vs RoomType distinction; Reservation owns its lifecycle.",
       "weight": 1.2
     },
     {
       "key": "relationships",
       "label": "Relationships & cardinality",
-      "description": "Hotel 1..* Room; RoomType groups Rooms; Reservation references a Room/RoomType + DateRange + Guest. Composition vs association reasoned.",
+      "description": "Assess whether the chosen decomposition expresses the required behavior and contracts. Names, class counts and representations below are examples; equivalent alternatives are valid: Hotel 1..* Room; RoomType groups Rooms; Reservation references a Room/RoomType + DateRange + Guest. Composition vs association reasoned.",
       "weight": 1.0
     },
     {
       "key": "design_patterns",
-      "label": "Design patterns",
-      "description": "State for reservation lifecycle, Strategy for pricing (seasonal/dynamic), Repository for storage, optionally Observer for confirmations.",
+      "label": "Abstraction choices",
+      "description": "Assess clear reservation transitions and separation of availability, pricing and persistence. State, Strategy or Repository are examples; equivalent simpler abstractions are valid and notifications matter only if in scope.",
       "weight": 1.1
     },
     {
       "key": "solid_principles",
-      "label": "SOLID / OCP",
-      "description": "New pricing rule or room type plugs in without editing Reservation; availability logic isolated.",
+      "label": "Separation and maintainability",
+      "description": "Assess whether responsibilities are cohesive and likely changes remain manageable within the disclosed scope; do not require an acronym, inheritance or a named pattern. These are example change boundaries, not a prescribed implementation: New pricing rule or room type plugs in without editing Reservation; availability logic isolated.",
       "weight": 1.0
     },
     {
       "key": "api_methods",
       "label": "API / method design",
-      "description": "searchRooms(dateRange, type), book, confirm, cancel, checkIn/Out, isAvailable — clear signatures.",
+      "description": "Assess whether the chosen decomposition expresses the required behavior and contracts. Names, class counts and representations below are examples; equivalent alternatives are valid: searchRooms(dateRange, type), book, confirm, cancel, checkIn/Out, isAvailable — clear signatures.",
       "weight": 1.0
     },
     {

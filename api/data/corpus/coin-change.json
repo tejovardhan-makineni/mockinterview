@@ -15,6 +15,7 @@
     "greedy-trap",
     "combinatorics"
   ],
+  "candidate_brief": "Given coin denominations and a target amount, return the fewest coins needed to make that amount. Each denomination has an unlimited supply. Return -1 if the amount cannot be made.",
   "prompt": "Given an array of coin denominations coins and an integer amount, return the fewest number of coins needed to make up that amount, assuming an unlimited supply of each coin. If the amount cannot be made, return -1. As a follow-up: return the NUMBER OF DISTINCT COMBINATIONS of coins that sum to the amount (order does not matter — [1,2] and [2,1] are the same combination).",
   "blurb": "The unbounded-knapsack DP twins — min-coins is a shortest-path over amounts, count-ways is a combination count where loop order kills double-counting.",
   "rubric": [
@@ -27,25 +28,25 @@
     {
       "key": "approach",
       "label": "Approach",
-      "description": "Min-coins: dp[a] = min over coins c of dp[a-c] + 1, a 1D bottom-up table. Count-ways: dp[a] += dp[a-c] with coins as the OUTER loop so each combination is counted once. Explains why greedy fails.",
+      "description": "Assess a correct approach and justified efficiency for the disclosed requirements; accept equivalent alternatives. Reference examples, not mandatory algorithms: Min-coins: dp[a] = min over coins c of dp[a-c] + 1, a 1D bottom-up table. Count-ways: dp[a] += dp[a-c] with coins as the OUTER loop so each combination is counted once. Explains why greedy fails.",
       "weight": 1.3
     },
     {
       "key": "correctness",
       "label": "Correctness",
-      "description": "Initializes dp[0] correctly (0 coins / 1 way), guards a-c >= 0, uses a sentinel (amount+1 or infinity) for unreachable min states and converts it to -1 at the end. Gets the loop nesting right for count-ways.",
+      "description": "Judge actual outputs and invariants of the chosen approach, crediting valid corrections. The following checks apply to the illustrated implementation, not every valid solution: Initializes dp[0] correctly (0 coins / 1 way), guards a-c >= 0, uses a sentinel (amount+1 or infinity) for unreachable min states and converts it to -1 at the end. Gets the loop nesting right for count-ways.",
       "weight": 1.3
     },
     {
       "key": "complexity_analysis",
       "label": "Complexity analysis",
-      "description": "O(amount * number_of_coins) time and O(amount) space for both variants. Contrasts with the exponential naive recursion.",
+      "description": "Verify the time and space analysis of the actual implementation. Preserve disclosed performance requirements; these reference figures do not introduce hidden bounds or mandate an algorithm: O(amount * number_of_coins) time and O(amount) space for both variants. Contrasts with the exponential naive recursion.",
       "weight": 1.0
     },
     {
       "key": "code_quality",
       "label": "Code quality",
-      "description": "A single clean 1D array, sentinel handled once, no redundant recomputation; the count-ways loop order is deliberate and commented.",
+      "description": "Assess readability, appropriate structure and avoidable duplication in the chosen solution. These are illustrative implementation choices, not required forms: A single clean 1D array, sentinel handled once, no redundant recomputation; the count-ways loop order is deliberate and commented.",
       "weight": 1.0
     },
     {
@@ -63,7 +64,7 @@
     {
       "key": "communication",
       "label": "Communication",
-      "description": "Explains the recurrence in words, why the sentinel is needed, and why swapping the loop order changes combinations into permutations.",
+      "description": "Assess whether the candidate explains the decisions and invariants of their own approach, without requiring an algorithm name or a prescribed order. Reference-specific explanation examples: Explains the recurrence in words, why the sentinel is needed, and why swapping the loop order changes combinations into permutations.",
       "weight": 0.8
     }
   ],

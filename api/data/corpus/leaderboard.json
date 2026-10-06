@@ -16,6 +16,7 @@
     "caching",
     "sharding"
   ],
+  "candidate_brief": "Design a game leaderboard that shows the highest-scoring players and a player’s rank relative to others.",
   "prompt": "Design a real-time leaderboard for a popular game: players earn points, and you must show the top N players globally plus a given player's rank and the players immediately around them. Updates and reads are both high-volume and should feel instant.",
   "blurb": "The ranking-at-scale problem — sorted sets, top-N vs 'my rank', ties, and why an ordinary indexed SQL count-query falls over.",
   "rubric": [

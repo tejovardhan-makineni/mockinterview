@@ -1,6 +1,6 @@
 # Mockinterview improvement plan
 
-> **Historical proposal.** Implementation has since progressed beyond this plan. Its future-tense tasks and baseline counts are preserved as design context. Read [implementation validation](RELEASE-VALIDATION-2026-09-09.md) and the [release runbook](RELEASE-RUNBOOK.md) for current evidence and release work. Current source decisions (MIT, daily funded access and unlimited personal keys) are recorded in [the open source design](OPEN-SOURCE-DESIGN.md); older license and allowance references below are historical.
+> **Historical proposal.** Implementation has since progressed beyond this plan. Its future-tense tasks and baseline counts are preserved as design context. Read [implementation validation](RELEASE-VALIDATION-2026-09-09.md) and the [release runbook](RELEASE-RUNBOOK.md) for current evidence and release work. Current source decisions (MIT, one-time funded access with shared daily capacity, and personal-key practice) are recorded in [the open source design](OPEN-SOURCE-DESIGN.md); older license and allowance references below are historical.
 
 Prepared 2026-09-09. Status: proposal based on repository review, Obsidian context, local checks, browser inspection, and read-only deployment verification. Implementation and deployment are future work.
 

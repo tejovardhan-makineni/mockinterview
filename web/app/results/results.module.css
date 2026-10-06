@@ -1,4 +1,6 @@
 .history {
+  min-width: 0;
+  overflow-wrap: anywhere;
   --journal-violet: #6550b9;
   --journal-violet-soft: #f0ebfc;
   --journal-teal: #267668;
@@ -56,6 +58,7 @@
 }
 
 .heroCopy {
+  min-width: 0;
   position: relative;
   z-index: 1;
 }
@@ -80,6 +83,7 @@
   font-size: 15px;
 }
 .primaryButton {
+  max-width: 100%;
   color: var(--journal-paper);
   background: var(--journal-violet);
   border-color: var(--journal-violet);
@@ -260,7 +264,8 @@
   box-shadow: 0 9px 28px rgb(52 39 76 / 9%);
 }
 .sessionMain {
-  display: flex;
+  display: grid;
+  grid-template-columns: 62px minmax(0, 1fr) auto;
   align-items: center;
   gap: 20px;
 }
@@ -384,6 +389,9 @@
   text-underline-offset: 3px;
 }
 .deleteButton {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
   padding: 8px 0;
   font-size: 12px;
   color: var(--color-muted);
@@ -458,8 +466,8 @@
     padding: 19px 19px 6px;
   }
   .sessionMain {
+    grid-template-columns: 50px minmax(0, 1fr);
     gap: 14px;
-    flex-wrap: wrap;
   }
   .modalityIcon {
     width: 50px;
@@ -470,11 +478,9 @@
     width: 26px;
     height: 26px;
   }
-  .sessionCopy {
-    flex-basis: calc(100% - 70px);
-  }
   .reviewButton {
-    margin-left: 64px;
+    grid-column: 2;
+    justify-self: start;
   }
 }
 
@@ -508,10 +514,33 @@
   .sessionCopy h3 {
     font-size: 16px;
   }
+  .reviewButton {
+    grid-column: 1 / -1;
+    justify-self: stretch;
+  }
   .sessionFooter {
     justify-content: space-between;
   }
   .sessionFooter > :only-child {
     margin-left: auto;
+  }
+}
+
+@media (max-height: 480px) {
+  .hero {
+    grid-template-columns: minmax(0, 1fr);
+    padding: 20px 24px;
+    gap: 0;
+  }
+  .journalArt {
+    display: none;
+  }
+  .title {
+    margin-top: 8px;
+    font-size: clamp(1.5rem, 4vw, 2rem);
+  }
+  .heroDescription {
+    margin: 12px 0 16px;
+    max-width: 52ch;
   }
 }

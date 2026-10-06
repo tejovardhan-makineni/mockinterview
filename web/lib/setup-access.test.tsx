@@ -4,6 +4,7 @@ import { createRoot, type Root } from "react-dom/client";
 import SetupPage from "../app/setup/page";
 import { api } from "./api";
 import { DEFAULT_CONFIG } from "./features/profile";
+import { ApiError } from "./http";
 
 const desktopMode = vi.hoisted(() => ({ enabled: false }));
 vi.mock("./desktop", () => ({
@@ -153,6 +154,30 @@ function field(label: string) {
   return document.getElementById(el.htmlFor) as HTMLInputElement;
 }
 describe("hosted tester setup access", () => {
+  it("brings each setup stage into view and preserves choices when returning to options", async () => {
+    await act(async () => root.render(<SetupPage />));
+    const heading = document.querySelector("h1")!;
+    const scrollIntoView = vi.fn();
+    Object.defineProperty(heading, "scrollIntoView", { value: scrollIntoView });
+    expect(document.activeElement).not.toBe(heading);
+    await change(field("Target level"), "staff");
+    await change(field("Time available"), "45");
+    await act(async () => {
+      button("Check devices").focus();
+      button("Check devices").click();
+    });
+    expect(document.activeElement).toBe(heading);
+    expect(heading.textContent).toBe("Check your devices");
+    expect(scrollIntoView).toHaveBeenLastCalledWith({ block: "start" });
+    await act(async () => button("Back to options").click());
+    expect(document.activeElement).toBe(heading);
+    expect(heading.textContent).toBe("Set up your interview");
+    expect(scrollIntoView).toHaveBeenCalledTimes(2);
+    expect(field("Target level").value).toBe("staff");
+    expect(field("Time available").value).toBe("45");
+  });
+
+
   it("keeps a manager pack's exact scope, independent of saved IC preferences", async () => {
     route.query = "pack=manager-path&round=leadership";
     const scenario = await api.getQuestion("access-scenario");
@@ -386,7 +411,7 @@ describe("hosted tester setup access", () => {
   it("starts a verified tester despite daily and funded cooldowns", async () => {
     await act(async () => root.render(<SetupPage />));
     expect(document.body.textContent).toContain(
-      "Tester access · unlimited interviews.",
+      "Tester access · unlimited interviews within daily project capacity.",
     );
     expect(document.body.textContent).not.toContain("Next available:");
     await checkDevices();
@@ -413,7 +438,10 @@ describe("hosted tester setup access", () => {
     await act(async () => root.render(<SetupPage />));
     await checkDevices();
     await acknowledgeVoice();
-    expect(document.body.textContent).toContain("Next available:");
+    expect(document.body.textContent).toContain(
+      "Your free interview has been used.",
+    );
+    expect(document.body.textContent).not.toContain("Next available:");
     expect(button("Start interview").disabled).toBe(true);
     expect(api.createSession).not.toHaveBeenCalled();
   });
@@ -446,5 +474,135 @@ describe("hosted tester setup access", () => {
       expect.stringMatching(/^\/consent\?next=%2Fsetup/),
     );
     expect(api.createSession).not.toHaveBeenCalled();
+  });
+  it("explains each voice prerequisite beside the disabled start button", async () => {
+    await act(async () => root.render(<SetupPage />));
+    await act(async () => button("Check devices").click());
+    const status = () =>
+      document.querySelector("#interview-start-status")!.textContent;
+    expect(button("Start interview").getAttribute("aria-describedby")).toBe(
+      "interview-start-status",
+    );
+    expect(status()).toContain("Check your microphone");
+    expect(status()).toContain("voice privacy checkbox");
+    await act(async () => button("Complete device check").click());
+    expect(status()).not.toContain("Check your microphone");
+    expect(button("Start interview").disabled).toBe(true);
+    await acknowledgeVoice();
+    expect(status()).toContain("Ready to start");
+    expect(button("Start interview").disabled).toBe(false);
+  });
+
+  it.each([false, true])(
+    "enforces project capacity for hosted accounts (tester=%s)",
+    async (tester) => {
+      vi.mocked(api.getUsage).mockResolvedValue({
+        funded_available: true,
+        tester_unlimited: tester,
+        global_daily_limit: 200,
+        global_daily_remaining: 0,
+        global_reset_at: "2027-01-01T00:00:00Z",
+      });
+      await act(async () => root.render(<SetupPage />));
+      await checkDevices();
+      await acknowledgeVoice();
+      expect(button("Start interview").disabled).toBe(true);
+      expect(
+        document.querySelector("#interview-start-status")!.textContent,
+      ).toContain("Today’s free interview capacity is full.");
+      expect(document.body.textContent).toContain(
+        "200 free interviews across the project",
+      );
+      expect(api.createSession).not.toHaveBeenCalled();
+    },
+  );
+
+  it("allows a validated personal key after project-funded capacity is full", async () => {
+    vi.mocked(api.getUsage).mockResolvedValue({
+      funded_available: true,
+      global_daily_limit: 200,
+      global_daily_remaining: 0,
+    });
+    await act(async () => root.render(<SetupPage />));
+    await change(field("Practice access"), "byok");
+    await change(field("Provider"), "openai");
+    await change(field("API key"), "synthetic-personal-key");
+    await act(async () => button("Check model connection").click());
+    await checkDevices();
+    expect(button("Start interview").disabled).toBe(false);
+  });
+  it("refreshes the visible allowance if the last place is taken before starting", async () => {
+    await act(async () => root.render(<SetupPage />));
+    await checkDevices();
+    await acknowledgeVoice();
+    vi.mocked(api.createSession).mockRejectedValueOnce(
+      new ApiError("Daily capacity reached", 429, "daily_capacity_reached"),
+    );
+    vi.mocked(api.getUsage).mockResolvedValue({
+      funded_available: true,
+      global_daily_limit: 200,
+      global_daily_remaining: 0,
+    });
+    await act(async () => button("Start interview").click());
+    expect(button("Start interview").disabled).toBe(true);
+    expect(
+      document.querySelector("#interview-start-status")!.textContent,
+    ).toContain("capacity is full");
+  });
+  it.each([0, 200])(
+    "does not imply tomorrow restores a lifetime claim when project places remaining=%s",
+    async (remaining) => {
+      vi.mocked(api.getUsage).mockResolvedValue({
+        funded_available: false,
+        free_interview_used: true,
+        global_daily_limit: 200,
+        global_daily_remaining: remaining,
+        global_reset_at: new Date(Date.now() + 86400000).toISOString(),
+      });
+      await act(async () => root.render(<SetupPage />));
+      await checkDevices();
+      await acknowledgeVoice();
+      expect(button("Start interview").disabled).toBe(true);
+      expect(
+        document.querySelector("#interview-start-status")!.textContent,
+      ).toContain("Your free interview has been used");
+      expect(document.body.textContent).not.toContain("Available again");
+      expect(document.body.textContent).not.toContain(
+        "Your one free interview is available",
+      );
+    },
+  );
+  it("ignores a successful model check after its API key has been edited", async () => {
+    let complete!: (value: {
+      valid: boolean;
+      provider: string;
+      model: string;
+    }) => void;
+    vi.mocked(api.validateProvider).mockImplementationOnce(
+      () =>
+        new Promise((resolve) => {
+          complete = resolve;
+        }),
+    );
+    await act(async () => root.render(<SetupPage />));
+    await change(field("Practice access"), "byok");
+    await change(field("Provider"), "openai");
+    await change(field("API key"), "original-key");
+    await checkDevices();
+    await act(async () => button("Check model connection").click());
+    await change(field("API key"), "replacement-key");
+    await act(async () =>
+      complete({
+        valid: true,
+        provider: "openai",
+        model: "previous-key-model",
+      }),
+    );
+    expect(button("Start interview").disabled).toBe(true);
+    expect(field("Model ID").value).toBe("");
+    expect(document.body.textContent).not.toContain(
+      "Key and reasoning model verified",
+    );
+    expect(button("Check model connection").disabled).toBe(false);
   });
 });

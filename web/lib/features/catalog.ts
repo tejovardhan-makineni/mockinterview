@@ -26,6 +26,8 @@ export interface QuestionSummary {
   difficulty: InterviewLevel;
   role_track?: RoleTrack;
   tags: string[];
+  // Both fields contain only the public opening when an authored brief exists.
+  candidate_brief?: string;
   prompt: string;
   blurb: string;
 }

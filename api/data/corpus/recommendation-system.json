@@ -17,6 +17,7 @@
     "feature-pipeline",
     "feedback-loop"
   ],
+  "candidate_brief": "Design a service that recommends relevant items from a catalog to individual users.",
   "prompt": "Design a recommendation system that picks personalized items (feed posts, videos, or products) for hundreds of millions of users from a catalog of tens of millions of items. Cover candidate generation, ranking, the feature pipeline, embeddings, the online/offline split, and how you handle feedback loops and freshness.",
   "blurb": "The two-stage recsys — candidate generation and ranking, feature/embedding pipelines, online serving, and the feedback loop.",
   "rubric": [

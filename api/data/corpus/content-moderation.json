@@ -17,6 +17,7 @@
     "drift",
     "trust-and-safety"
   ],
+  "candidate_brief": "Design a service that helps a user-generated-content platform identify and handle content that violates its policies.",
   "prompt": "Design a content moderation system for a large user-generated-content platform. It must screen text, images, and video across many policy categories (violence, hate, sexual content, spam, self-harm), combine automated ML with human reviewers, and give users an appeals process. Assume very high upload volume and strict latency needs for the publish path.",
   "blurb": "Multimodal T&S at scale: policy classifiers, human-in-the-loop routing, appeals, and keeping models aligned with shifting policy.",
   "rubric": [

@@ -17,6 +17,7 @@
     "freshness",
     "mlops"
   ],
+  "candidate_brief": "Design a service that makes machine-learning features available for model training and online predictions.",
   "prompt": "Design a feature store that serves ML features for both model training and low-latency online inference. It must guarantee consistency between offline training features and online serving features, provide point-in-time-correct training data, materialize features from batch and streaming sources, and meet a strict online read latency budget.",
   "blurb": "The MLOps backbone — online/offline consistency, point-in-time correctness, materialization, freshness, and low-latency serving.",
   "rubric": [

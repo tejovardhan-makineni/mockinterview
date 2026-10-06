@@ -13,7 +13,7 @@ export default function Home() {
       <section className={styles.hero}>
         <div>
           <span className={styles.badge}>
-            <span className={styles.dot} /> Open source · MIT licensed
+            <span className={styles.dot} /> Public beta · Open source
           </span>
           <h1>
             Better interviews.
@@ -33,6 +33,11 @@ export default function Home() {
               {IS_DESKTOP ? "Connect your model" : "Get the desktop app"}
             </Button>
           </div>
+          <p className={styles.fine}>
+            {IS_DESKTOP
+              ? "Desktop beta for macOS, Ubuntu and Windows. Bring your own AI key."
+              : "Your first interview is free. 200 funded interviews per day across the project. Still in beta, and improving with you."}
+          </p>
           <CommunityIcons className="mt-5" />
         </div>
         <InterviewShowcase />
@@ -136,7 +141,8 @@ export default function Home() {
         </div>
         {!IS_DESKTOP && (
           <p className={styles.fine}>
-            Approved beta testers get unlimited interviews and agree to share
+            Approved beta testers can practice beyond the one-time free
+            allowance, within the project’s daily capacity, and agree to share
             feedback.
           </p>
         )}

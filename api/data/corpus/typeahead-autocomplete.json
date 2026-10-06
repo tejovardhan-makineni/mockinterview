@@ -16,6 +16,7 @@
     "ranking",
     "sharding"
   ],
+  "candidate_brief": "Design a search autocomplete service that suggests relevant completions as a user types a prefix.",
   "prompt": "Design the search autocomplete system that suggests completions as a user types — like the dropdown under a search box. For each keystroke it should return the top few most relevant suggestions for the current prefix, extremely fast, at web scale.",
   "blurb": "Trie-based top-k over prefixes: precomputation, sharding, ranking, and single-digit-millisecond latency.",
   "rubric": [

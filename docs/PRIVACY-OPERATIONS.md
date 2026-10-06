@@ -39,7 +39,7 @@ Maintain a provider register covering legal entity, service, controller/processo
 
 - **Session:** use the owner-scoped deletion operation. A leased/ending/scoring session can return a conflict; resolve activity safely instead of bypassing persistence safeguards. Structured product check-ins are removed with their interview. Separate general feedback can retain account-linked comments/context after session deletion and must be considered in a broader erasure request.
 - **Resume:** a new upload replaces the previous upload, but older standalone review results can remain. The deployed explicit resume-delete operation removes uploads and standalone reviews, including detached reviews. Deleting a resume does not rewrite interview transcripts, saved session context or reports that already used it.
-- **Account:** account deletion cascades linked application records. Verify related data and credential removal using scoped counts, not transcript dumps. The rolling quota ledger survives temporarily; review any exceptional erasure request against its documented anti-abuse purpose.
+- **Account:** account deletion cascades linked application records. Verify related data and credential removal using scoped counts, not transcript dumps. The seven-day usage ledger survives temporarily, while a minimal HMAC identity and first-claim timestamp persist to enforce the one-time allowance; review any exceptional erasure request against its documented anti-abuse purpose.
 - **Browser:** logout/deletion clears private application caches on the current origin. It cannot wipe other devices, alternate hostnames, previously downloaded exports or user copies. Explain how to clear those locally if requested.
 - **Providers/backups:** determine whether additional vendor deletion is available/required. Record a minimal suppression/deletion record where justified so restoration cannot silently revive deleted data. Before a restore serves traffic, replay applicable deletions and restrictions, test them, and remove temporary restored copies. Do not keep a second unrestricted archive of deleted interviews as a “deletion log.”
 
@@ -47,7 +47,7 @@ Use the [release runbook](RELEASE-RUNBOOK.md) for isolated restore and rollback 
 
 ## Retention inventory
 
-The following combines source behavior with read-only production configuration checks on **10 September 2026**. Expiry prevents use where enforced; physical deletion can occur at the next hourly maintenance pass. A configured period is not evidence that every historical copy is absent.
+The following combines current source behavior with read-only production configuration checks on **10 September 2026**. The lifetime allowance marker is an October 5 source change and requires deployment. Expiry prevents use where enforced; physical deletion can occur at the next hourly maintenance pass. A configured period is not evidence that every historical copy is absent.
 
 | Data | Verified behavior or open decision |
 | --- | --- |
@@ -57,7 +57,8 @@ The following combines source behavior with read-only production configuration c
 | General/support feedback | Account-linked; separate from the session lifecycle. Optional diagnostic/transcript flags do not make it anonymous. |
 | Verification/reset actions | One-use tokens stored hashed; verification validity 24 hours, reset 30 minutes; expired rows cleaned periodically. Never log action links. |
 | BYOK credentials | Encrypted server-side session credentials expire after three hours and are removed following terminal processing/maintenance. Do not claim this controls vendor logs. |
-| Usage ledger | Purpose-specific HMAC of normalized email plus activation/funding; retained for seven days with hourly cleanup; current funded allowance is a rolling 24-hour window. Pseudonymous, not anonymous; survives account deletion for that limited purpose. |
+| Usage ledger | Purpose-specific HMAC of normalized email plus activation/funding; retained for seven days with hourly cleanup to enforce the shared daily budget. Pseudonymous, not anonymous; survives account deletion for that limited purpose. |
+| One-time free allowance claim | HMAC of normalized email and first-claim timestamp only, with no transcript or account/session foreign key. Persists after account/history deletion and usage-ledger cleanup so deletion does not renew the free interview. Migration backfills surviving records; older erased history cannot be recovered. Review exceptional erasure requests through the private support process. |
 | Legacy behavior | Raw behavior samples/events have a 30-day purge; aggregates can remain with reports. New ingestion closure does not itself delete all historical data. |
 | Cloud Logging | `_Default` retention verified at 30 days; `_Required` is locked at 400 days. Content differs by bucket; do not claim all logs disappear after 30 days or assume every request URL excludes a query string. |
 | Cloud SQL | `us-west1`; automated backups enabled with retention of **seven backups by count**, not a guaranteed seven-day period. Transaction-log retention is seven days. |

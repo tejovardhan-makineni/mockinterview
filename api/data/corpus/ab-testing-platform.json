@@ -17,6 +17,7 @@
     "streaming",
     "data-quality"
   ],
+  "candidate_brief": "Design a platform that lets product teams run A/B experiments and evaluate their results.",
   "prompt": "Design an experimentation platform that lets teams run A/B tests and feature rollouts across a large product. It must assign users to variants deterministically, expose assignments at low latency, compute experiment metrics, and run a statistics engine that reports significance and guardrails. Assume thousands of concurrent experiments and a very large user base.",
   "blurb": "The platform behind trustworthy A/B tests: deterministic assignment, a metrics pipeline, and a stats engine that resists peeking and interference.",
   "rubric": [

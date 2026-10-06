@@ -17,6 +17,7 @@
     "drift",
     "imbalanced-data"
   ],
+  "candidate_brief": "Design a system that assesses incoming payment transactions for fraud so they can be approved or declined.",
   "prompt": "Design a system that scores card/payment transactions for fraud in real time. Each authorization must be approved or declined within tight latency budgets, features must be computed from both historical and just-happened events, and the model must adapt as fraud patterns shift. Assume a large global payments provider.",
   "blurb": "Real-time ML scoring under a hard latency budget: online/offline features, training-serving parity, feedback loops, and concept drift.",
   "rubric": [

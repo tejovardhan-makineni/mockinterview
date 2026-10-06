@@ -16,6 +16,7 @@
     "transaction",
     "machine-coding"
   ],
+  "candidate_brief": "Design the object model for an ATM where a customer authenticates with a card and PIN and performs banking transactions.",
   "prompt": "Design an ATM. A customer inserts a card, authenticates with a PIN, then withdraws or deposits cash, checks balance, and takes their card back. Model the classes and, importantly, the ATM's state machine (card inserted, authenticated, transaction, dispensing). Show how cash is dispensed from the machine's bill denominations. Sketch the class diagram.",
   "blurb": "The State-pattern classic with a twist — model the ATM flow as states and solve cash dispensing across bill denominations.",
   "rubric": [
@@ -28,7 +29,7 @@
     {
       "key": "core_entities",
       "label": "Core entities",
-      "description": "Identifies ATM, Card, Account, the State hierarchy, Transaction types, CashDispenser, and a BankService boundary.",
+      "description": "Assess whether the chosen decomposition expresses the required behavior and contracts. Names, class counts and representations below are examples; equivalent alternatives are valid: Identifies ATM, Card, Account, the State hierarchy, Transaction types, CashDispenser, and a BankService boundary.",
       "weight": 1.0
     },
     {
@@ -40,7 +41,7 @@
     {
       "key": "class_design",
       "label": "Class design",
-      "description": "State as objects, CashDispenser separated, Transaction modeled polymorphically, no god ATM class with a mega-switch.",
+      "description": "Assess whether the chosen decomposition expresses the required behavior and contracts. Names, class counts and representations below are examples; equivalent alternatives are valid: State as objects, CashDispenser separated, Transaction modeled polymorphically, no god ATM class with a mega-switch.",
       "weight": 1.1
     },
     {
@@ -51,14 +52,14 @@
     },
     {
       "key": "design_patterns",
-      "label": "Design patterns",
-      "description": "State for the flow, Chain-of-Responsibility for denomination dispensing, Strategy/polymorphism for transaction types; each justified.",
+      "label": "Abstraction choices",
+      "description": "Assess coherent transaction flow, denomination dispensing and separation of transaction types. State, Chain of Responsibility or Strategy are examples; direct algorithms and simpler equivalent designs are valid.",
       "weight": 1.0
     },
     {
       "key": "api_methods",
       "label": "API methods",
-      "description": "insertCard, enterPin, selectTransaction, withdraw, deposit, ejectCard; routed through the current state.",
+      "description": "Assess whether the chosen decomposition expresses the required behavior and contracts. Names, class counts and representations below are examples; equivalent alternatives are valid: insertCard, enterPin, selectTransaction, withdraw, deposit, ejectCard; routed through the current state.",
       "weight": 0.9
     },
     {

@@ -16,6 +16,7 @@
     "strategy-pattern",
     "machine-coding"
   ],
+  "candidate_brief": "Design the object model for a library where members search the catalog and borrow physical copies of books.",
   "prompt": "Design a library management system. Members search a catalog and borrow physical books; each book has multiple copies; loans have due dates and late fines; a member can place a hold on a copy that is currently checked out and be notified when one frees up. Model the classes, relationships, the copy/loan lifecycle, and the key APIs. Sketch the class diagram.",
   "blurb": "A CRUD-shaped OOD with real depth — the Book vs BookCopy distinction, a loan/hold state machine, fines, and notifications.",
   "rubric": [
@@ -28,19 +29,19 @@
     {
       "key": "core_entities",
       "label": "Core entities",
-      "description": "Distinguishes Book (title/metadata) from BookCopy (physical item); identifies Member, Loan, Hold/Reservation, Catalog, Fine.",
+      "description": "Assess whether the chosen decomposition expresses the required behavior and contracts. Names, class counts and representations below are examples; equivalent alternatives are valid: Distinguishes Book (title/metadata) from BookCopy (physical item); identifies Member, Loan, Hold/Reservation, Catalog, Fine.",
       "weight": 1.2
     },
     {
       "key": "class_design",
       "label": "Class design",
-      "description": "Book vs BookCopy modeled correctly, Loan links member+copy+dates, Account/Member holds limits and fines; no conflation of title and item.",
+      "description": "Assess whether the chosen decomposition expresses the required behavior and contracts. Names, class counts and representations below are examples; equivalent alternatives are valid: Book vs BookCopy modeled correctly, Loan links member+copy+dates, Account/Member holds limits and fines; no conflation of title and item.",
       "weight": 1.1
     },
     {
       "key": "relationships",
       "label": "Relationships",
-      "description": "Book has-many BookCopy; Member has-many Loan; Hold references a Book/BookCopy and a Member; correct multiplicities.",
+      "description": "Assess whether the chosen decomposition expresses the required behavior and contracts. Names, class counts and representations below are examples; equivalent alternatives are valid: Book has-many BookCopy; Member has-many Loan; Hold references a Book/BookCopy and a Member; correct multiplicities.",
       "weight": 1.1
     },
     {
@@ -51,14 +52,14 @@
     },
     {
       "key": "design_patterns",
-      "label": "Design patterns",
-      "description": "Observer for hold notifications, Strategy for fine calculation, Factory/Repository for catalog access; each justified.",
+      "label": "Abstraction choices",
+      "description": "Assess clear boundaries for circulation, reservations, fines and catalog access. Observer, Strategy, Factory or Repository are possible examples; grade the actual responsibilities and behavior rather than pattern names.",
       "weight": 1.0
     },
     {
       "key": "api_methods",
       "label": "API methods",
-      "description": "search, checkout, returnBook, placeHold, cancelHold, renew, payFine; sensible signatures and error cases.",
+      "description": "Assess whether the chosen decomposition expresses the required behavior and contracts. Names, class counts and representations below are examples; equivalent alternatives are valid: search, checkout, returnBook, placeHold, cancelHold, renew, payFine; sensible signatures and error cases.",
       "weight": 1.0
     },
     {

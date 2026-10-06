@@ -2,7 +2,7 @@
 
 Mock Interview Desktop packages the existing web interface and Go interview engine in Electron. Users install and open it; they do not need Node, Go, Docker, PostgreSQL or a terminal.
 
-Desktop requires a personal AI provider key for every interview. It does not use the project's hosted/free AI allowance. The website remains separate and offers one free interview per day, subject to the hosted account policy. Personal provider charges and network access still apply in the desktop app.
+Desktop requires a personal AI provider key for every interview. It does not use the project's hosted/free AI allowance. The website remains separate and offers standard accounts one free interview in total, within a shared cap of 200 funded interviews per UTC day. Personal provider charges and network access still apply in the desktop app.
 
 ## Distribution
 
@@ -17,7 +17,7 @@ Targets:
 | Windows x64         | `.exe` installer                  |
 | Linux x64           | `.AppImage`, Debian/Ubuntu `.deb` |
 
-This first desktop version is a preview. A completed CI artifact is not automatically a public download. Before publishing, verify signing, notarization and the manual platform checklist below. Linux requires a normal graphical desktop with an unlocked GNOME Keyring or KWallet. The app refuses Electron's insecure plaintext fallback. Do not advise users to disable sandboxing or operating-system protections.
+The desktop app is in beta. A completed CI artifact is not automatically a public download. Before publishing, verify signing, notarization and the manual platform checklist below. Linux requires a normal graphical desktop with an unlocked GNOME Keyring or KWallet. The app refuses Electron's insecure plaintext fallback. Do not advise users to disable sandboxing or operating-system protections.
 
 ## Local data and privacy
 

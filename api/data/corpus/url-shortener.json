@@ -15,6 +15,7 @@
     "read-heavy",
     "cdn"
   ],
+  "candidate_brief": "Design a service that creates short links from long URLs and redirects each short link to its original URL.",
   "prompt": "Design a service that converts long URLs into short links and redirects users from a short link to the original URL. Assume it must serve a large, read-heavy global audience.",
   "blurb": "The classic read-heavy KV design — key generation, collisions, cache, CDN, and analytics.",
   "rubric": [

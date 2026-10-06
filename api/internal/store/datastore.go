@@ -49,6 +49,7 @@ type Datastore interface {
 	SessionsForPack(ctx context.Context, userID, packID string) ([]SessionSummary, error)
 	GetSession(ctx context.Context, id string) (Session, error)
 	UpdateSessionStatus(ctx context.Context, id, status string) error
+	UpdateSessionPhase(ctx context.Context, id, phase string) error
 	AddTurn(ctx context.Context, sessionID, role, text string, tsMs int64, meta json.RawMessage) error
 	Transcript(ctx context.Context, sessionID string) ([]Turn, error)
 	AddWorkspaceSnapshot(ctx context.Context, sessionID string, tsMs int64, kind, content string) error

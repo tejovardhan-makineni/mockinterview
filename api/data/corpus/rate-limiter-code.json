@@ -16,6 +16,7 @@
     "oop",
     "time"
   ],
+  "candidate_brief": "Implement a token-bucket rate limiter with a capacity and a refill rate in tokens per second. allow() consumes one available token and returns true, or returns false if none is available. Refill continuously with elapsed time, up to capacity.",
   "prompt": "Implement a rate limiter class using the token-bucket algorithm. The bucket holds up to `capacity` tokens and refills at `refillRate` tokens per second. A method allow() (optionally allow(n) requesting n tokens) returns true and consumes tokens if enough are available, else returns false. Refilling is continuous over time, not in discrete ticks. Follow-up: make it thread-safe for concurrent callers, and support per-client limits.",
   "blurb": "Token bucket done right — lazy time-based refill computed on demand, then a thread-safety and per-client extension.",
   "rubric": [
@@ -28,25 +29,25 @@
     {
       "key": "approach",
       "label": "Approach",
-      "description": "Uses lazy refill: store tokens + lastRefillTimestamp, and on each allow() compute elapsed*refillRate to add tokens (capped at capacity) rather than a background thread ticking.",
+      "description": "Assess a correct approach and justified efficiency for the disclosed requirements; accept equivalent alternatives. Reference examples, not mandatory algorithms: Uses lazy refill: store tokens + lastRefillTimestamp, and on each allow() compute elapsed*refillRate to add tokens (capped at capacity) rather than a background thread ticking.",
       "weight": 1.3
     },
     {
       "key": "correctness",
       "label": "Correctness",
-      "description": "Refill capped at capacity; fractional tokens accumulated correctly; consume only if tokens >= requested; monotonic clock used; no negative balances.",
+      "description": "Judge actual outputs and invariants of the chosen approach, crediting valid corrections. The following checks apply to the illustrated implementation, not every valid solution: Refill capped at capacity; fractional tokens accumulated correctly; consume only if tokens >= requested; monotonic clock used; no negative balances.",
       "weight": 1.3
     },
     {
       "key": "complexity_analysis",
       "label": "Complexity analysis",
-      "description": "O(1) time and O(1) space per allow() (per bucket); per-client is O(number of clients) space. No busy-waiting or background timer needed.",
+      "description": "Verify the time and space analysis of the actual implementation. Preserve disclosed performance requirements; these reference figures do not introduce hidden bounds or mandate an algorithm: O(1) time and O(1) space per allow() (per bucket); per-client is O(number of clients) space. No busy-waiting or background timer needed.",
       "weight": 0.9
     },
     {
       "key": "code_quality",
       "label": "Code quality",
-      "description": "Clean class with a private refill() helper, sensible fields, monotonic time source injectable for testing.",
+      "description": "Assess readability, appropriate structure and avoidable duplication in the chosen solution. These are illustrative implementation choices, not required forms: Clean class with a private refill() helper, sensible fields, monotonic time source injectable for testing.",
       "weight": 1.1
     },
     {
@@ -64,7 +65,7 @@
     {
       "key": "communication",
       "label": "Communication",
-      "description": "Explains lazy refill vs background timer and the burst-vs-smoothness tradeoff; states the concurrency plan before coding the lock.",
+      "description": "Assess whether the candidate explains the decisions and invariants of their own approach, without requiring an algorithm name or a prescribed order. Reference-specific explanation examples: Explains lazy refill vs background timer and the burst-vs-smoothness tradeoff; states the concurrency plan before coding the lock.",
       "weight": 0.8
     }
   ],
