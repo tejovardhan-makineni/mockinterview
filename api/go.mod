@@ -12,7 +12,7 @@ require (
 	github.com/jackc/pgx/v5 v5.11.0
 	github.com/ledongthuc/pdf v0.0.0-20250511090121-5959a4027728
 	golang.org/x/crypto v0.57.0
-	google.golang.org/genai v1.71.0
+	google.golang.org/genai v1.72.0
 	modernc.org/sqlite v1.60.1
 )
 
